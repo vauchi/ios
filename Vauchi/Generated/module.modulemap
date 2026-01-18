@@ -1,0 +1,4 @@
+module vauchi_mobileFFI {
+    header "vauchi_mobileFFI.h"
+    export *
+}
