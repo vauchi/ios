@@ -493,6 +493,24 @@ fileprivate struct FfiConverterString: FfiConverter {
     }
 }
 
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterData: FfiConverterRustBuffer {
+    typealias SwiftType = Data
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Data {
+        let len: Int32 = try readInt(&buf)
+        return Data(try readBytes(&buf, count: Int(len)))
+    }
+
+    public static func write(_ value: Data, into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        writeBytes(&buf, value)
+    }
+}
+
 
 
 
@@ -504,9 +522,21 @@ fileprivate struct FfiConverterString: FfiConverter {
 public protocol VauchiMobileProtocol : AnyObject {
     
     /**
+     * Add a contact to a label.
+     */
+    func addContactToLabel(labelId: String, contactId: String) throws 
+    
+    /**
      * Add field to own card.
      */
     func addField(fieldType: MobileFieldType, label: String, value: String) throws 
+    
+    /**
+     * Add a voucher to the current recovery claim.
+     *
+     * Returns the updated progress.
+     */
+    func addRecoveryVoucher(voucherB64: String) throws  -> MobileRecoveryProgress
     
     /**
      * Complete exchange with scanned QR data.
@@ -524,9 +554,41 @@ public protocol VauchiMobileProtocol : AnyObject {
     func createIdentity(displayName: String) throws 
     
     /**
+     * Create a new visibility label.
+     */
+    func createLabel(name: String) throws  -> MobileVisibilityLabel
+    
+    /**
+     * Create a recovery claim for a lost identity.
+     *
+     * The old_pk_hex is the hex-encoded public key of the lost identity.
+     * This starts the recovery process by creating a claim that contacts
+     * can vouch for.
+     */
+    func createRecoveryClaim(oldPkHex: String) throws  -> MobileRecoveryClaim
+    
+    /**
+     * Create a voucher for someone's recovery claim.
+     *
+     * This vouches that you trust the person claiming to own the old identity
+     * is the same person as the new identity.
+     */
+    func createRecoveryVoucher(claimB64: String) throws  -> MobileRecoveryVoucher
+    
+    /**
+     * Delete a label.
+     */
+    func deleteLabel(labelId: String) throws 
+    
+    /**
      * Export encrypted backup.
      */
     func exportBackup(password: String) throws  -> String
+    
+    /**
+     * Export the current storage key bytes for migration to secure storage.
+     */
+    func exportStorageKey()  -> Data
     
     /**
      * Generate exchange QR data.
@@ -544,6 +606,16 @@ public protocol VauchiMobileProtocol : AnyObject {
     func getDisplayName() throws  -> String
     
     /**
+     * Get a label by ID with full details.
+     */
+    func getLabel(labelId: String) throws  -> MobileVisibilityLabelDetail
+    
+    /**
+     * Get all labels that contain a contact.
+     */
+    func getLabelsForContact(contactId: String) throws  -> [MobileVisibilityLabel]
+    
+    /**
      * Get own contact card.
      */
     func getOwnCard() throws  -> MobileContactCard
@@ -559,13 +631,31 @@ public protocol VauchiMobileProtocol : AnyObject {
     func getPublicId() throws  -> String
     
     /**
+     * Get the completed recovery proof as base64.
+     *
+     * Returns None if recovery is not complete.
+     */
+    func getRecoveryProof() throws  -> String?
+    
+    /**
+     * Get the current recovery progress.
+     *
+     * Returns None if no recovery is in progress.
+     */
+    func getRecoveryStatus() throws  -> MobileRecoveryProgress?
+    
+    /**
+     * Get suggested default labels.
+     */
+    func getSuggestedLabels()  -> [String]
+    
+    /**
      * Get sync status.
      */
     func getSyncStatus()  -> MobileSyncStatus
     
     /**
      * Check if identity exists.
-     * This checks both in-memory cache and persistent storage.
      */
     func hasIdentity()  -> Bool
     
@@ -580,6 +670,11 @@ public protocol VauchiMobileProtocol : AnyObject {
     func importBackup(backupData: String, password: String) throws 
     
     /**
+     * Check if certificate pinning is enabled.
+     */
+    func isCertificatePinningEnabled()  -> Bool
+    
+    /**
      * Check if field is visible to contact.
      */
     func isFieldVisibleToContact(contactId: String, fieldLabel: String) throws  -> Bool
@@ -590,9 +685,21 @@ public protocol VauchiMobileProtocol : AnyObject {
     func listContacts() throws  -> [MobileContact]
     
     /**
+     * List all visibility labels.
+     */
+    func listLabels() throws  -> [MobileVisibilityLabel]
+    
+    /**
      * List available social networks.
      */
     func listSocialNetworks()  -> [MobileSocialNetwork]
+    
+    /**
+     * Parse a recovery claim from base64.
+     *
+     * Used to inspect a claim before vouching for it.
+     */
+    func parseRecoveryClaim(claimB64: String) throws  -> MobileRecoveryClaim
     
     /**
      * Get pending update count.
@@ -605,9 +712,24 @@ public protocol VauchiMobileProtocol : AnyObject {
     func removeContact(id: String) throws  -> Bool
     
     /**
+     * Remove a per-contact override for field visibility.
+     */
+    func removeContactFieldOverride(contactId: String, fieldLabel: String) throws 
+    
+    /**
+     * Remove a contact from a label.
+     */
+    func removeContactFromLabel(labelId: String, contactId: String) throws 
+    
+    /**
      * Remove field from card.
      */
     func removeField(label: String) throws  -> Bool
+    
+    /**
+     * Rename a label.
+     */
+    func renameLabel(labelId: String, newName: String) throws 
     
     /**
      * Search contacts.
@@ -620,9 +742,29 @@ public protocol VauchiMobileProtocol : AnyObject {
     func searchSocialNetworks(query: String)  -> [MobileSocialNetwork]
     
     /**
+     * Set a per-contact override for field visibility.
+     *
+     * Per-contact overrides take precedence over label-based visibility.
+     */
+    func setContactFieldOverride(contactId: String, fieldLabel: String, isVisible: Bool) throws 
+    
+    /**
      * Set display name.
      */
     func setDisplayName(name: String) throws 
+    
+    /**
+     * Set whether a field is visible to contacts in a label.
+     */
+    func setLabelFieldVisibility(labelId: String, fieldLabel: String, isVisible: Bool) throws 
+    
+    /**
+     * Set the pinned certificate for relay TLS connections.
+     *
+     * The certificate should be in PEM format. Once set, only connections
+     * to relay servers presenting this exact certificate will be allowed.
+     */
+    func setPinnedCertificate(certPem: String) 
     
     /**
      * Show field to contact.
@@ -631,9 +773,6 @@ public protocol VauchiMobileProtocol : AnyObject {
     
     /**
      * Sync with relay server.
-     *
-     * Connects to the configured relay, sends pending updates,
-     * and receives incoming updates from contacts.
      */
     func sync() throws  -> MobileSyncResult
     
@@ -646,6 +785,14 @@ public protocol VauchiMobileProtocol : AnyObject {
      * Verify contact fingerprint.
      */
     func verifyContact(id: String) throws 
+    
+    /**
+     * Verify a recovery proof from a contact.
+     *
+     * This checks if the proof is valid and provides a recommendation
+     * on whether to accept the recovered identity.
+     */
+    func verifyRecoveryProof(proofB64: String) throws  -> MobileRecoveryVerification
     
 }
 
@@ -692,7 +839,10 @@ open class VauchiMobile:
         return try! rustCall { uniffi_vauchi_mobile_fn_clone_vauchimobile(self.pointer, $0) }
     }
     /**
-     * Create a new VauchiMobile instance.
+     * Create a new VauchiMobile instance (legacy constructor).
+     *
+     * WARNING: This constructor stores the encryption key in a plaintext file.
+     * Use `new_with_secure_key` instead for production.
      */
 public convenience init(dataDir: String, relayUrl: String)throws  {
     let pointer =
@@ -714,7 +864,36 @@ public convenience init(dataDir: String, relayUrl: String)throws  {
     }
 
     
+    /**
+     * Create a new VauchiMobile instance with a platform-provided secure key.
+     *
+     * This is the recommended constructor. The platform (iOS/Android) should:
+     * 1. Generate a 32-byte key if one doesn't exist in secure storage
+     * 2. Store it in platform-specific secure storage (Keychain/KeyStore)
+     * 3. Pass the key bytes to this constructor
+     */
+public static func newWithSecureKey(dataDir: String, relayUrl: String, storageKeyBytes: Data)throws  -> VauchiMobile {
+    return try  FfiConverterTypeVauchiMobile.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_constructor_vauchimobile_new_with_secure_key(
+        FfiConverterString.lower(dataDir),
+        FfiConverterString.lower(relayUrl),
+        FfiConverterData.lower(storageKeyBytes),$0
+    )
+})
+}
+    
 
+    
+    /**
+     * Add a contact to a label.
+     */
+open func addContactToLabel(labelId: String, contactId: String)throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_add_contact_to_label(self.uniffiClonePointer(),
+        FfiConverterString.lower(labelId),
+        FfiConverterString.lower(contactId),$0
+    )
+}
+}
     
     /**
      * Add field to own card.
@@ -726,6 +905,19 @@ open func addField(fieldType: MobileFieldType, label: String, value: String)thro
         FfiConverterString.lower(value),$0
     )
 }
+}
+    
+    /**
+     * Add a voucher to the current recovery claim.
+     *
+     * Returns the updated progress.
+     */
+open func addRecoveryVoucher(voucherB64: String)throws  -> MobileRecoveryProgress {
+    return try  FfiConverterTypeMobileRecoveryProgress.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_add_recovery_voucher(self.uniffiClonePointer(),
+        FfiConverterString.lower(voucherB64),$0
+    )
+})
 }
     
     /**
@@ -760,12 +952,72 @@ open func createIdentity(displayName: String)throws  {try rustCallWithError(FfiC
 }
     
     /**
+     * Create a new visibility label.
+     */
+open func createLabel(name: String)throws  -> MobileVisibilityLabel {
+    return try  FfiConverterTypeMobileVisibilityLabel.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_create_label(self.uniffiClonePointer(),
+        FfiConverterString.lower(name),$0
+    )
+})
+}
+    
+    /**
+     * Create a recovery claim for a lost identity.
+     *
+     * The old_pk_hex is the hex-encoded public key of the lost identity.
+     * This starts the recovery process by creating a claim that contacts
+     * can vouch for.
+     */
+open func createRecoveryClaim(oldPkHex: String)throws  -> MobileRecoveryClaim {
+    return try  FfiConverterTypeMobileRecoveryClaim.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_create_recovery_claim(self.uniffiClonePointer(),
+        FfiConverterString.lower(oldPkHex),$0
+    )
+})
+}
+    
+    /**
+     * Create a voucher for someone's recovery claim.
+     *
+     * This vouches that you trust the person claiming to own the old identity
+     * is the same person as the new identity.
+     */
+open func createRecoveryVoucher(claimB64: String)throws  -> MobileRecoveryVoucher {
+    return try  FfiConverterTypeMobileRecoveryVoucher.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_create_recovery_voucher(self.uniffiClonePointer(),
+        FfiConverterString.lower(claimB64),$0
+    )
+})
+}
+    
+    /**
+     * Delete a label.
+     */
+open func deleteLabel(labelId: String)throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_delete_label(self.uniffiClonePointer(),
+        FfiConverterString.lower(labelId),$0
+    )
+}
+}
+    
+    /**
      * Export encrypted backup.
      */
 open func exportBackup(password: String)throws  -> String {
     return try  FfiConverterString.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
     uniffi_vauchi_mobile_fn_method_vauchimobile_export_backup(self.uniffiClonePointer(),
         FfiConverterString.lower(password),$0
+    )
+})
+}
+    
+    /**
+     * Export the current storage key bytes for migration to secure storage.
+     */
+open func exportStorageKey() -> Data {
+    return try!  FfiConverterData.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_export_storage_key(self.uniffiClonePointer(),$0
     )
 })
 }
@@ -797,6 +1049,28 @@ open func getContact(id: String)throws  -> MobileContact? {
 open func getDisplayName()throws  -> String {
     return try  FfiConverterString.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
     uniffi_vauchi_mobile_fn_method_vauchimobile_get_display_name(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Get a label by ID with full details.
+     */
+open func getLabel(labelId: String)throws  -> MobileVisibilityLabelDetail {
+    return try  FfiConverterTypeMobileVisibilityLabelDetail.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_label(self.uniffiClonePointer(),
+        FfiConverterString.lower(labelId),$0
+    )
+})
+}
+    
+    /**
+     * Get all labels that contain a contact.
+     */
+open func getLabelsForContact(contactId: String)throws  -> [MobileVisibilityLabel] {
+    return try  FfiConverterSequenceTypeMobileVisibilityLabel.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_labels_for_contact(self.uniffiClonePointer(),
+        FfiConverterString.lower(contactId),$0
     )
 })
 }
@@ -834,6 +1108,40 @@ open func getPublicId()throws  -> String {
 }
     
     /**
+     * Get the completed recovery proof as base64.
+     *
+     * Returns None if recovery is not complete.
+     */
+open func getRecoveryProof()throws  -> String? {
+    return try  FfiConverterOptionString.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_recovery_proof(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Get the current recovery progress.
+     *
+     * Returns None if no recovery is in progress.
+     */
+open func getRecoveryStatus()throws  -> MobileRecoveryProgress? {
+    return try  FfiConverterOptionTypeMobileRecoveryProgress.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_recovery_status(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Get suggested default labels.
+     */
+open func getSuggestedLabels() -> [String] {
+    return try!  FfiConverterSequenceString.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_suggested_labels(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
      * Get sync status.
      */
 open func getSyncStatus() -> MobileSyncStatus {
@@ -845,7 +1153,6 @@ open func getSyncStatus() -> MobileSyncStatus {
     
     /**
      * Check if identity exists.
-     * This checks both in-memory cache and persistent storage.
      */
 open func hasIdentity() -> Bool {
     return try!  FfiConverterBool.lift(try! rustCall() {
@@ -877,6 +1184,16 @@ open func importBackup(backupData: String, password: String)throws  {try rustCal
 }
     
     /**
+     * Check if certificate pinning is enabled.
+     */
+open func isCertificatePinningEnabled() -> Bool {
+    return try!  FfiConverterBool.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_is_certificate_pinning_enabled(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
      * Check if field is visible to contact.
      */
 open func isFieldVisibleToContact(contactId: String, fieldLabel: String)throws  -> Bool {
@@ -899,11 +1216,34 @@ open func listContacts()throws  -> [MobileContact] {
 }
     
     /**
+     * List all visibility labels.
+     */
+open func listLabels()throws  -> [MobileVisibilityLabel] {
+    return try  FfiConverterSequenceTypeMobileVisibilityLabel.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_list_labels(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
      * List available social networks.
      */
 open func listSocialNetworks() -> [MobileSocialNetwork] {
     return try!  FfiConverterSequenceTypeMobileSocialNetwork.lift(try! rustCall() {
     uniffi_vauchi_mobile_fn_method_vauchimobile_list_social_networks(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Parse a recovery claim from base64.
+     *
+     * Used to inspect a claim before vouching for it.
+     */
+open func parseRecoveryClaim(claimB64: String)throws  -> MobileRecoveryClaim {
+    return try  FfiConverterTypeMobileRecoveryClaim.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_parse_recovery_claim(self.uniffiClonePointer(),
+        FfiConverterString.lower(claimB64),$0
     )
 })
 }
@@ -930,6 +1270,28 @@ open func removeContact(id: String)throws  -> Bool {
 }
     
     /**
+     * Remove a per-contact override for field visibility.
+     */
+open func removeContactFieldOverride(contactId: String, fieldLabel: String)throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_remove_contact_field_override(self.uniffiClonePointer(),
+        FfiConverterString.lower(contactId),
+        FfiConverterString.lower(fieldLabel),$0
+    )
+}
+}
+    
+    /**
+     * Remove a contact from a label.
+     */
+open func removeContactFromLabel(labelId: String, contactId: String)throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_remove_contact_from_label(self.uniffiClonePointer(),
+        FfiConverterString.lower(labelId),
+        FfiConverterString.lower(contactId),$0
+    )
+}
+}
+    
+    /**
      * Remove field from card.
      */
 open func removeField(label: String)throws  -> Bool {
@@ -938,6 +1300,17 @@ open func removeField(label: String)throws  -> Bool {
         FfiConverterString.lower(label),$0
     )
 })
+}
+    
+    /**
+     * Rename a label.
+     */
+open func renameLabel(labelId: String, newName: String)throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_rename_label(self.uniffiClonePointer(),
+        FfiConverterString.lower(labelId),
+        FfiConverterString.lower(newName),$0
+    )
+}
 }
     
     /**
@@ -963,11 +1336,50 @@ open func searchSocialNetworks(query: String) -> [MobileSocialNetwork] {
 }
     
     /**
+     * Set a per-contact override for field visibility.
+     *
+     * Per-contact overrides take precedence over label-based visibility.
+     */
+open func setContactFieldOverride(contactId: String, fieldLabel: String, isVisible: Bool)throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_set_contact_field_override(self.uniffiClonePointer(),
+        FfiConverterString.lower(contactId),
+        FfiConverterString.lower(fieldLabel),
+        FfiConverterBool.lower(isVisible),$0
+    )
+}
+}
+    
+    /**
      * Set display name.
      */
 open func setDisplayName(name: String)throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
     uniffi_vauchi_mobile_fn_method_vauchimobile_set_display_name(self.uniffiClonePointer(),
         FfiConverterString.lower(name),$0
+    )
+}
+}
+    
+    /**
+     * Set whether a field is visible to contacts in a label.
+     */
+open func setLabelFieldVisibility(labelId: String, fieldLabel: String, isVisible: Bool)throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_set_label_field_visibility(self.uniffiClonePointer(),
+        FfiConverterString.lower(labelId),
+        FfiConverterString.lower(fieldLabel),
+        FfiConverterBool.lower(isVisible),$0
+    )
+}
+}
+    
+    /**
+     * Set the pinned certificate for relay TLS connections.
+     *
+     * The certificate should be in PEM format. Once set, only connections
+     * to relay servers presenting this exact certificate will be allowed.
+     */
+open func setPinnedCertificate(certPem: String) {try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_set_pinned_certificate(self.uniffiClonePointer(),
+        FfiConverterString.lower(certPem),$0
     )
 }
 }
@@ -985,9 +1397,6 @@ open func showFieldToContact(contactId: String, fieldLabel: String)throws  {try 
     
     /**
      * Sync with relay server.
-     *
-     * Connects to the configured relay, sends pending updates,
-     * and receives incoming updates from contacts.
      */
 open func sync()throws  -> MobileSyncResult {
     return try  FfiConverterTypeMobileSyncResult.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
@@ -1015,6 +1424,20 @@ open func verifyContact(id: String)throws  {try rustCallWithError(FfiConverterTy
         FfiConverterString.lower(id),$0
     )
 }
+}
+    
+    /**
+     * Verify a recovery proof from a contact.
+     *
+     * This checks if the proof is valid and provides a recommendation
+     * on whether to accept the recovered identity.
+     */
+open func verifyRecoveryProof(proofB64: String)throws  -> MobileRecoveryVerification {
+    return try  FfiConverterTypeMobileRecoveryVerification.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_verify_recovery_proof(self.uniffiClonePointer(),
+        FfiConverterString.lower(proofB64),$0
+    )
+})
 }
     
 
@@ -1482,6 +1905,565 @@ public func FfiConverterTypeMobileExchangeResult_lower(_ value: MobileExchangeRe
 
 
 /**
+ * Result of password strength check.
+ */
+public struct MobilePasswordCheck {
+    /**
+     * The strength level
+     */
+    public var strength: MobilePasswordStrength
+    /**
+     * Human-readable description
+     */
+    public var description: String
+    /**
+     * Feedback/suggestions for improvement (empty if strong enough)
+     */
+    public var feedback: String
+    /**
+     * Whether the password is acceptable for backup
+     */
+    public var isAcceptable: Bool
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * The strength level
+         */strength: MobilePasswordStrength, 
+        /**
+         * Human-readable description
+         */description: String, 
+        /**
+         * Feedback/suggestions for improvement (empty if strong enough)
+         */feedback: String, 
+        /**
+         * Whether the password is acceptable for backup
+         */isAcceptable: Bool) {
+        self.strength = strength
+        self.description = description
+        self.feedback = feedback
+        self.isAcceptable = isAcceptable
+    }
+}
+
+
+
+extension MobilePasswordCheck: Equatable, Hashable {
+    public static func ==(lhs: MobilePasswordCheck, rhs: MobilePasswordCheck) -> Bool {
+        if lhs.strength != rhs.strength {
+            return false
+        }
+        if lhs.description != rhs.description {
+            return false
+        }
+        if lhs.feedback != rhs.feedback {
+            return false
+        }
+        if lhs.isAcceptable != rhs.isAcceptable {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(strength)
+        hasher.combine(description)
+        hasher.combine(feedback)
+        hasher.combine(isAcceptable)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobilePasswordCheck: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobilePasswordCheck {
+        return
+            try MobilePasswordCheck(
+                strength: FfiConverterTypeMobilePasswordStrength.read(from: &buf), 
+                description: FfiConverterString.read(from: &buf), 
+                feedback: FfiConverterString.read(from: &buf), 
+                isAcceptable: FfiConverterBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobilePasswordCheck, into buf: inout [UInt8]) {
+        FfiConverterTypeMobilePasswordStrength.write(value.strength, into: &buf)
+        FfiConverterString.write(value.description, into: &buf)
+        FfiConverterString.write(value.feedback, into: &buf)
+        FfiConverterBool.write(value.isAcceptable, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobilePasswordCheck_lift(_ buf: RustBuffer) throws -> MobilePasswordCheck {
+    return try FfiConverterTypeMobilePasswordCheck.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobilePasswordCheck_lower(_ value: MobilePasswordCheck) -> RustBuffer {
+    return FfiConverterTypeMobilePasswordCheck.lower(value)
+}
+
+
+/**
+ * Recovery claim data for mobile.
+ */
+public struct MobileRecoveryClaim {
+    /**
+     * Old identity's public key (hex).
+     */
+    public var oldPublicKey: String
+    /**
+     * New identity's public key (hex).
+     */
+    public var newPublicKey: String
+    /**
+     * Base64-encoded claim data.
+     */
+    public var claimData: String
+    /**
+     * Whether the claim has expired.
+     */
+    public var isExpired: Bool
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Old identity's public key (hex).
+         */oldPublicKey: String, 
+        /**
+         * New identity's public key (hex).
+         */newPublicKey: String, 
+        /**
+         * Base64-encoded claim data.
+         */claimData: String, 
+        /**
+         * Whether the claim has expired.
+         */isExpired: Bool) {
+        self.oldPublicKey = oldPublicKey
+        self.newPublicKey = newPublicKey
+        self.claimData = claimData
+        self.isExpired = isExpired
+    }
+}
+
+
+
+extension MobileRecoveryClaim: Equatable, Hashable {
+    public static func ==(lhs: MobileRecoveryClaim, rhs: MobileRecoveryClaim) -> Bool {
+        if lhs.oldPublicKey != rhs.oldPublicKey {
+            return false
+        }
+        if lhs.newPublicKey != rhs.newPublicKey {
+            return false
+        }
+        if lhs.claimData != rhs.claimData {
+            return false
+        }
+        if lhs.isExpired != rhs.isExpired {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(oldPublicKey)
+        hasher.combine(newPublicKey)
+        hasher.combine(claimData)
+        hasher.combine(isExpired)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileRecoveryClaim: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileRecoveryClaim {
+        return
+            try MobileRecoveryClaim(
+                oldPublicKey: FfiConverterString.read(from: &buf), 
+                newPublicKey: FfiConverterString.read(from: &buf), 
+                claimData: FfiConverterString.read(from: &buf), 
+                isExpired: FfiConverterBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileRecoveryClaim, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.oldPublicKey, into: &buf)
+        FfiConverterString.write(value.newPublicKey, into: &buf)
+        FfiConverterString.write(value.claimData, into: &buf)
+        FfiConverterBool.write(value.isExpired, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileRecoveryClaim_lift(_ buf: RustBuffer) throws -> MobileRecoveryClaim {
+    return try FfiConverterTypeMobileRecoveryClaim.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileRecoveryClaim_lower(_ value: MobileRecoveryClaim) -> RustBuffer {
+    return FfiConverterTypeMobileRecoveryClaim.lower(value)
+}
+
+
+/**
+ * Recovery progress status.
+ */
+public struct MobileRecoveryProgress {
+    /**
+     * Old identity's public key (hex).
+     */
+    public var oldPublicKey: String
+    /**
+     * New identity's public key (hex).
+     */
+    public var newPublicKey: String
+    /**
+     * Number of vouchers collected.
+     */
+    public var vouchersCollected: UInt32
+    /**
+     * Number of vouchers needed (threshold).
+     */
+    public var vouchersNeeded: UInt32
+    /**
+     * Whether recovery is complete.
+     */
+    public var isComplete: Bool
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Old identity's public key (hex).
+         */oldPublicKey: String, 
+        /**
+         * New identity's public key (hex).
+         */newPublicKey: String, 
+        /**
+         * Number of vouchers collected.
+         */vouchersCollected: UInt32, 
+        /**
+         * Number of vouchers needed (threshold).
+         */vouchersNeeded: UInt32, 
+        /**
+         * Whether recovery is complete.
+         */isComplete: Bool) {
+        self.oldPublicKey = oldPublicKey
+        self.newPublicKey = newPublicKey
+        self.vouchersCollected = vouchersCollected
+        self.vouchersNeeded = vouchersNeeded
+        self.isComplete = isComplete
+    }
+}
+
+
+
+extension MobileRecoveryProgress: Equatable, Hashable {
+    public static func ==(lhs: MobileRecoveryProgress, rhs: MobileRecoveryProgress) -> Bool {
+        if lhs.oldPublicKey != rhs.oldPublicKey {
+            return false
+        }
+        if lhs.newPublicKey != rhs.newPublicKey {
+            return false
+        }
+        if lhs.vouchersCollected != rhs.vouchersCollected {
+            return false
+        }
+        if lhs.vouchersNeeded != rhs.vouchersNeeded {
+            return false
+        }
+        if lhs.isComplete != rhs.isComplete {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(oldPublicKey)
+        hasher.combine(newPublicKey)
+        hasher.combine(vouchersCollected)
+        hasher.combine(vouchersNeeded)
+        hasher.combine(isComplete)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileRecoveryProgress: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileRecoveryProgress {
+        return
+            try MobileRecoveryProgress(
+                oldPublicKey: FfiConverterString.read(from: &buf), 
+                newPublicKey: FfiConverterString.read(from: &buf), 
+                vouchersCollected: FfiConverterUInt32.read(from: &buf), 
+                vouchersNeeded: FfiConverterUInt32.read(from: &buf), 
+                isComplete: FfiConverterBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileRecoveryProgress, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.oldPublicKey, into: &buf)
+        FfiConverterString.write(value.newPublicKey, into: &buf)
+        FfiConverterUInt32.write(value.vouchersCollected, into: &buf)
+        FfiConverterUInt32.write(value.vouchersNeeded, into: &buf)
+        FfiConverterBool.write(value.isComplete, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileRecoveryProgress_lift(_ buf: RustBuffer) throws -> MobileRecoveryProgress {
+    return try FfiConverterTypeMobileRecoveryProgress.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileRecoveryProgress_lower(_ value: MobileRecoveryProgress) -> RustBuffer {
+    return FfiConverterTypeMobileRecoveryProgress.lower(value)
+}
+
+
+/**
+ * Recovery verification result.
+ */
+public struct MobileRecoveryVerification {
+    /**
+     * Old identity's public key (hex).
+     */
+    public var oldPublicKey: String
+    /**
+     * New identity's public key (hex).
+     */
+    public var newPublicKey: String
+    /**
+     * Number of vouchers in the proof.
+     */
+    public var voucherCount: UInt32
+    /**
+     * Number of vouchers from known contacts.
+     */
+    public var knownVouchers: UInt32
+    /**
+     * Confidence level: "high", "medium", or "low".
+     */
+    public var confidence: String
+    /**
+     * Recommendation for the user.
+     */
+    public var recommendation: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Old identity's public key (hex).
+         */oldPublicKey: String, 
+        /**
+         * New identity's public key (hex).
+         */newPublicKey: String, 
+        /**
+         * Number of vouchers in the proof.
+         */voucherCount: UInt32, 
+        /**
+         * Number of vouchers from known contacts.
+         */knownVouchers: UInt32, 
+        /**
+         * Confidence level: "high", "medium", or "low".
+         */confidence: String, 
+        /**
+         * Recommendation for the user.
+         */recommendation: String) {
+        self.oldPublicKey = oldPublicKey
+        self.newPublicKey = newPublicKey
+        self.voucherCount = voucherCount
+        self.knownVouchers = knownVouchers
+        self.confidence = confidence
+        self.recommendation = recommendation
+    }
+}
+
+
+
+extension MobileRecoveryVerification: Equatable, Hashable {
+    public static func ==(lhs: MobileRecoveryVerification, rhs: MobileRecoveryVerification) -> Bool {
+        if lhs.oldPublicKey != rhs.oldPublicKey {
+            return false
+        }
+        if lhs.newPublicKey != rhs.newPublicKey {
+            return false
+        }
+        if lhs.voucherCount != rhs.voucherCount {
+            return false
+        }
+        if lhs.knownVouchers != rhs.knownVouchers {
+            return false
+        }
+        if lhs.confidence != rhs.confidence {
+            return false
+        }
+        if lhs.recommendation != rhs.recommendation {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(oldPublicKey)
+        hasher.combine(newPublicKey)
+        hasher.combine(voucherCount)
+        hasher.combine(knownVouchers)
+        hasher.combine(confidence)
+        hasher.combine(recommendation)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileRecoveryVerification: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileRecoveryVerification {
+        return
+            try MobileRecoveryVerification(
+                oldPublicKey: FfiConverterString.read(from: &buf), 
+                newPublicKey: FfiConverterString.read(from: &buf), 
+                voucherCount: FfiConverterUInt32.read(from: &buf), 
+                knownVouchers: FfiConverterUInt32.read(from: &buf), 
+                confidence: FfiConverterString.read(from: &buf), 
+                recommendation: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileRecoveryVerification, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.oldPublicKey, into: &buf)
+        FfiConverterString.write(value.newPublicKey, into: &buf)
+        FfiConverterUInt32.write(value.voucherCount, into: &buf)
+        FfiConverterUInt32.write(value.knownVouchers, into: &buf)
+        FfiConverterString.write(value.confidence, into: &buf)
+        FfiConverterString.write(value.recommendation, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileRecoveryVerification_lift(_ buf: RustBuffer) throws -> MobileRecoveryVerification {
+    return try FfiConverterTypeMobileRecoveryVerification.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileRecoveryVerification_lower(_ value: MobileRecoveryVerification) -> RustBuffer {
+    return FfiConverterTypeMobileRecoveryVerification.lower(value)
+}
+
+
+/**
+ * Recovery voucher data for mobile.
+ */
+public struct MobileRecoveryVoucher {
+    /**
+     * Voucher public key (hex) - identifies who vouched.
+     */
+    public var voucherPublicKey: String
+    /**
+     * Base64-encoded voucher data.
+     */
+    public var voucherData: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Voucher public key (hex) - identifies who vouched.
+         */voucherPublicKey: String, 
+        /**
+         * Base64-encoded voucher data.
+         */voucherData: String) {
+        self.voucherPublicKey = voucherPublicKey
+        self.voucherData = voucherData
+    }
+}
+
+
+
+extension MobileRecoveryVoucher: Equatable, Hashable {
+    public static func ==(lhs: MobileRecoveryVoucher, rhs: MobileRecoveryVoucher) -> Bool {
+        if lhs.voucherPublicKey != rhs.voucherPublicKey {
+            return false
+        }
+        if lhs.voucherData != rhs.voucherData {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(voucherPublicKey)
+        hasher.combine(voucherData)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileRecoveryVoucher: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileRecoveryVoucher {
+        return
+            try MobileRecoveryVoucher(
+                voucherPublicKey: FfiConverterString.read(from: &buf), 
+                voucherData: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileRecoveryVoucher, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.voucherPublicKey, into: &buf)
+        FfiConverterString.write(value.voucherData, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileRecoveryVoucher_lift(_ buf: RustBuffer) throws -> MobileRecoveryVoucher {
+    return try FfiConverterTypeMobileRecoveryVoucher.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileRecoveryVoucher_lower(_ value: MobileRecoveryVoucher) -> RustBuffer {
+    return FfiConverterTypeMobileRecoveryVoucher.lower(value)
+}
+
+
+/**
  * Social network info.
  */
 public struct MobileSocialNetwork {
@@ -1650,6 +2632,262 @@ public func FfiConverterTypeMobileSyncResult_lift(_ buf: RustBuffer) throws -> M
 #endif
 public func FfiConverterTypeMobileSyncResult_lower(_ value: MobileSyncResult) -> RustBuffer {
     return FfiConverterTypeMobileSyncResult.lower(value)
+}
+
+
+/**
+ * Visibility label for organizing contacts.
+ */
+public struct MobileVisibilityLabel {
+    /**
+     * Unique label ID.
+     */
+    public var id: String
+    /**
+     * Human-readable label name.
+     */
+    public var name: String
+    /**
+     * Number of contacts in this label.
+     */
+    public var contactCount: UInt32
+    /**
+     * Number of visible fields for this label.
+     */
+    public var visibleFieldCount: UInt32
+    /**
+     * Timestamp when created.
+     */
+    public var createdAt: UInt64
+    /**
+     * Timestamp when last modified.
+     */
+    public var modifiedAt: UInt64
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Unique label ID.
+         */id: String, 
+        /**
+         * Human-readable label name.
+         */name: String, 
+        /**
+         * Number of contacts in this label.
+         */contactCount: UInt32, 
+        /**
+         * Number of visible fields for this label.
+         */visibleFieldCount: UInt32, 
+        /**
+         * Timestamp when created.
+         */createdAt: UInt64, 
+        /**
+         * Timestamp when last modified.
+         */modifiedAt: UInt64) {
+        self.id = id
+        self.name = name
+        self.contactCount = contactCount
+        self.visibleFieldCount = visibleFieldCount
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
+
+
+extension MobileVisibilityLabel: Equatable, Hashable {
+    public static func ==(lhs: MobileVisibilityLabel, rhs: MobileVisibilityLabel) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.name != rhs.name {
+            return false
+        }
+        if lhs.contactCount != rhs.contactCount {
+            return false
+        }
+        if lhs.visibleFieldCount != rhs.visibleFieldCount {
+            return false
+        }
+        if lhs.createdAt != rhs.createdAt {
+            return false
+        }
+        if lhs.modifiedAt != rhs.modifiedAt {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(name)
+        hasher.combine(contactCount)
+        hasher.combine(visibleFieldCount)
+        hasher.combine(createdAt)
+        hasher.combine(modifiedAt)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileVisibilityLabel: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileVisibilityLabel {
+        return
+            try MobileVisibilityLabel(
+                id: FfiConverterString.read(from: &buf), 
+                name: FfiConverterString.read(from: &buf), 
+                contactCount: FfiConverterUInt32.read(from: &buf), 
+                visibleFieldCount: FfiConverterUInt32.read(from: &buf), 
+                createdAt: FfiConverterUInt64.read(from: &buf), 
+                modifiedAt: FfiConverterUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileVisibilityLabel, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.id, into: &buf)
+        FfiConverterString.write(value.name, into: &buf)
+        FfiConverterUInt32.write(value.contactCount, into: &buf)
+        FfiConverterUInt32.write(value.visibleFieldCount, into: &buf)
+        FfiConverterUInt64.write(value.createdAt, into: &buf)
+        FfiConverterUInt64.write(value.modifiedAt, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileVisibilityLabel_lift(_ buf: RustBuffer) throws -> MobileVisibilityLabel {
+    return try FfiConverterTypeMobileVisibilityLabel.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileVisibilityLabel_lower(_ value: MobileVisibilityLabel) -> RustBuffer {
+    return FfiConverterTypeMobileVisibilityLabel.lower(value)
+}
+
+
+/**
+ * Detailed label info including contacts and visible fields.
+ */
+public struct MobileVisibilityLabelDetail {
+    /**
+     * Basic label info.
+     */
+    public var id: String
+    public var name: String
+    /**
+     * Contact IDs in this label.
+     */
+    public var contactIds: [String]
+    /**
+     * Field IDs visible to contacts in this label.
+     */
+    public var visibleFieldIds: [String]
+    public var createdAt: UInt64
+    public var modifiedAt: UInt64
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Basic label info.
+         */id: String, name: String, 
+        /**
+         * Contact IDs in this label.
+         */contactIds: [String], 
+        /**
+         * Field IDs visible to contacts in this label.
+         */visibleFieldIds: [String], createdAt: UInt64, modifiedAt: UInt64) {
+        self.id = id
+        self.name = name
+        self.contactIds = contactIds
+        self.visibleFieldIds = visibleFieldIds
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
+
+
+extension MobileVisibilityLabelDetail: Equatable, Hashable {
+    public static func ==(lhs: MobileVisibilityLabelDetail, rhs: MobileVisibilityLabelDetail) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.name != rhs.name {
+            return false
+        }
+        if lhs.contactIds != rhs.contactIds {
+            return false
+        }
+        if lhs.visibleFieldIds != rhs.visibleFieldIds {
+            return false
+        }
+        if lhs.createdAt != rhs.createdAt {
+            return false
+        }
+        if lhs.modifiedAt != rhs.modifiedAt {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(name)
+        hasher.combine(contactIds)
+        hasher.combine(visibleFieldIds)
+        hasher.combine(createdAt)
+        hasher.combine(modifiedAt)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileVisibilityLabelDetail: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileVisibilityLabelDetail {
+        return
+            try MobileVisibilityLabelDetail(
+                id: FfiConverterString.read(from: &buf), 
+                name: FfiConverterString.read(from: &buf), 
+                contactIds: FfiConverterSequenceString.read(from: &buf), 
+                visibleFieldIds: FfiConverterSequenceString.read(from: &buf), 
+                createdAt: FfiConverterUInt64.read(from: &buf), 
+                modifiedAt: FfiConverterUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileVisibilityLabelDetail, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.id, into: &buf)
+        FfiConverterString.write(value.name, into: &buf)
+        FfiConverterSequenceString.write(value.contactIds, into: &buf)
+        FfiConverterSequenceString.write(value.visibleFieldIds, into: &buf)
+        FfiConverterUInt64.write(value.createdAt, into: &buf)
+        FfiConverterUInt64.write(value.modifiedAt, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileVisibilityLabelDetail_lift(_ buf: RustBuffer) throws -> MobileVisibilityLabelDetail {
+    return try FfiConverterTypeMobileVisibilityLabelDetail.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileVisibilityLabelDetail_lower(_ value: MobileVisibilityLabelDetail) -> RustBuffer {
+    return FfiConverterTypeMobileVisibilityLabelDetail.lower(value)
 }
 
 
@@ -1912,6 +3150,99 @@ extension MobileFieldType: Equatable, Hashable {}
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 /**
+ * Password strength level for display to users.
+ */
+
+public enum MobilePasswordStrength {
+    
+    /**
+     * Score 0-1: Too weak to use
+     */
+    case tooWeak
+    /**
+     * Score 2: Fair but not recommended
+     */
+    case fair
+    /**
+     * Score 3: Strong enough
+     */
+    case strong
+    /**
+     * Score 4: Very strong
+     */
+    case veryStrong
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobilePasswordStrength: FfiConverterRustBuffer {
+    typealias SwiftType = MobilePasswordStrength
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobilePasswordStrength {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .tooWeak
+        
+        case 2: return .fair
+        
+        case 3: return .strong
+        
+        case 4: return .veryStrong
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: MobilePasswordStrength, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .tooWeak:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .fair:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .strong:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .veryStrong:
+            writeInt(&buf, Int32(4))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobilePasswordStrength_lift(_ buf: RustBuffer) throws -> MobilePasswordStrength {
+    return try FfiConverterTypeMobilePasswordStrength.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobilePasswordStrength_lower(_ value: MobilePasswordStrength) -> RustBuffer {
+    return FfiConverterTypeMobilePasswordStrength.lower(value)
+}
+
+
+
+extension MobilePasswordStrength: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
  * Sync status.
  */
 
@@ -2034,6 +3365,55 @@ fileprivate struct FfiConverterOptionTypeMobileContact: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionTypeMobileRecoveryProgress: FfiConverterRustBuffer {
+    typealias SwiftType = MobileRecoveryProgress?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeMobileRecoveryProgress.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeMobileRecoveryProgress.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceString: FfiConverterRustBuffer {
+    typealias SwiftType = [String]
+
+    public static func write(_ value: [String], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterString.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [String] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [String]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterString.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypeMobileContact: FfiConverterRustBuffer {
     typealias SwiftType = [MobileContact]
 
@@ -2106,6 +3486,56 @@ fileprivate struct FfiConverterSequenceTypeMobileSocialNetwork: FfiConverterRust
     }
 }
 
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeMobileVisibilityLabel: FfiConverterRustBuffer {
+    typealias SwiftType = [MobileVisibilityLabel]
+
+    public static func write(_ value: [MobileVisibilityLabel], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeMobileVisibilityLabel.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [MobileVisibilityLabel] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [MobileVisibilityLabel]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeMobileVisibilityLabel.read(from: &buf))
+        }
+        return seq
+    }
+}
+/**
+ * Check password strength for backup encryption.
+ *
+ * Returns strength level, description, and feedback for improvement.
+ */
+public func checkPasswordStrength(password: String) -> MobilePasswordCheck {
+    return try!  FfiConverterTypeMobilePasswordCheck.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_func_check_password_strength(
+        FfiConverterString.lower(password),$0
+    )
+})
+}
+/**
+ * Generate a new random storage key.
+ *
+ * Use this when setting up a new installation with secure storage.
+ * The returned bytes should be stored in platform secure storage
+ * (iOS Keychain or Android KeyStore).
+ */
+public func generateStorageKey() -> Data {
+    return try!  FfiConverterData.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_func_generate_storage_key($0
+    )
+})
+}
+
 private enum InitializationResult {
     case ok
     case contractVersionMismatch
@@ -2121,91 +3551,166 @@ private var initializationResult: InitializationResult = {
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_add_field() != 63870) {
+    if (uniffi_vauchi_mobile_checksum_func_check_password_strength() != 58506) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_complete_exchange() != 1223) {
+    if (uniffi_vauchi_mobile_checksum_func_generate_storage_key() != 24673) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_contact_count() != 50309) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_add_contact_to_label() != 6394) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_create_identity() != 45061) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_add_field() != 50791) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_export_backup() != 43727) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_add_recovery_voucher() != 24135) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_generate_exchange_qr() != 6386) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_complete_exchange() != 59225) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_contact() != 2017) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_contact_count() != 30960) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_display_name() != 40218) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_create_identity() != 63328) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_own_card() != 12870) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_create_label() != 53912) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_profile_url() != 26882) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_create_recovery_claim() != 34741) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_public_id() != 32830) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_create_recovery_voucher() != 64336) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_sync_status() != 54191) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_delete_label() != 49151) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_has_identity() != 8658) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_export_backup() != 14975) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_hide_field_from_contact() != 16087) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_export_storage_key() != 42895) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_import_backup() != 14171) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_generate_exchange_qr() != 23797) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_is_field_visible_to_contact() != 38489) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_contact() != 17724) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_list_contacts() != 3637) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_display_name() != 22034) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_list_social_networks() != 32928) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_label() != 23616) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_pending_update_count() != 63009) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_labels_for_contact() != 34054) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_remove_contact() != 8075) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_own_card() != 41646) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_remove_field() != 25817) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_profile_url() != 40964) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_search_contacts() != 44205) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_public_id() != 47690) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_search_social_networks() != 62897) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_recovery_proof() != 53462) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_set_display_name() != 13638) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_recovery_status() != 18084) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_show_field_to_contact() != 15396) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_suggested_labels() != 35491) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_sync() != 35543) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_sync_status() != 18804) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_update_field() != 47840) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_has_identity() != 17028) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_verify_contact() != 63186) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_hide_field_from_contact() != 26050) {
         return InitializationResult.apiChecksumMismatch
     }
-    if (uniffi_vauchi_mobile_checksum_constructor_vauchimobile_new() != 8085) {
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_import_backup() != 16228) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_is_certificate_pinning_enabled() != 31532) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_is_field_visible_to_contact() != 31866) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_list_contacts() != 21454) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_list_labels() != 31739) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_list_social_networks() != 64160) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_parse_recovery_claim() != 19311) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_pending_update_count() != 109) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_remove_contact() != 60263) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_remove_contact_field_override() != 62988) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_remove_contact_from_label() != 34319) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_remove_field() != 48211) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_rename_label() != 5503) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_search_contacts() != 63776) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_search_social_networks() != 27909) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_set_contact_field_override() != 24591) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_set_display_name() != 21017) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_set_label_field_visibility() != 63370) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_set_pinned_certificate() != 2029) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_show_field_to_contact() != 3699) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_sync() != 44616) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_update_field() != 13386) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_verify_contact() != 57061) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_verify_recovery_proof() != 55854) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_constructor_vauchimobile_new() != 54148) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_constructor_vauchimobile_new_with_secure_key() != 16278) {
         return InitializationResult.apiChecksumMismatch
     }
 

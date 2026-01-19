@@ -357,7 +357,7 @@ struct EditFieldSheet: View {
 
         Task {
             do {
-                try await viewModel.updateField(id: field.id, newValue: trimmedValue)
+                try await viewModel.updateField(label: field.label, newValue: trimmedValue)
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription

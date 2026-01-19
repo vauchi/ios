@@ -131,11 +131,15 @@ class VauchiViewModel: ObservableObject {
 
     private func initializeRepository() {
         do {
+            print("VauchiViewModel: initializing repository...")
             repository = try VauchiRepository(
                 relayUrl: SettingsService.shared.relayUrl
             )
+            print("VauchiViewModel: repository initialized successfully")
         } catch {
-            errorMessage = "Failed to initialize: \(error.localizedDescription)"
+            let msg = "Failed to initialize: \(error.localizedDescription) (\(String(describing: error)))"
+            print("VauchiViewModel: \(msg)")
+            errorMessage = msg
         }
     }
 
@@ -162,6 +166,12 @@ class VauchiViewModel: ObservableObject {
     // MARK: - State Management
 
     func loadState() {
+        // Don't clear error if repository failed to initialize
+        if repository == nil && errorMessage != nil {
+            isLoading = false
+            return
+        }
+
         isLoading = true
         errorMessage = nil
 

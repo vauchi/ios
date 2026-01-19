@@ -8,8 +8,10 @@ struct VauchiApp: App {
     @StateObject private var viewModel = VauchiViewModel()
 
     init() {
+        print("VauchiApp: init starting")
         // Register background tasks
         BackgroundSyncService.shared.registerBackgroundTasks()
+        print("VauchiApp: background tasks registered")
 
         // Set up the sync handler
         BackgroundSyncService.shared.setSyncHandler {

@@ -8,7 +8,28 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if viewModel.isLoading {
+            if let error = viewModel.errorMessage {
+                // Show error state prominently for debugging
+                VStack(spacing: 16) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 50))
+                        .foregroundColor(.red)
+                    Text("Initialization Error")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    Text(error)
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    Button("Retry") {
+                        viewModel.errorMessage = nil
+                        viewModel.loadState()
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .padding()
+            } else if viewModel.isLoading {
                 LoadingView()
             } else if !viewModel.hasIdentity {
                 SetupView()
@@ -17,6 +38,7 @@ struct ContentView: View {
             }
         }
         .onAppear {
+            print("ContentView: onAppear, isLoading=\(viewModel.isLoading), hasIdentity=\(viewModel.hasIdentity), errorMessage=\(String(describing: viewModel.errorMessage))")
             viewModel.loadState()
         }
     }

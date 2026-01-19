@@ -244,14 +244,14 @@ class VauchiRepository {
 
     /// Get or create storage key from Keychain
     /// Handles migration from legacy file-based key storage
-    private static func getOrCreateStorageKey(dataDir: String) throws -> [UInt8] {
+    private static func getOrCreateStorageKey(dataDir: String) throws -> Data {
         let keychain = KeychainService.shared
         let legacyKeyPath = (dataDir as NSString).appendingPathComponent("storage.key")
 
         // Try to load from Keychain first
         if let keyData = try? keychain.loadStorageKey() {
             if keyData.count == storageKeyLength {
-                return Array(keyData)
+                return keyData
             }
         }
 
@@ -266,21 +266,20 @@ class VauchiRepository {
                 // Securely delete old file
                 try FileManager.default.removeItem(atPath: legacyKeyPath)
 
-                return Array(legacyKeyData)
+                return legacyKeyData
             }
         }
 
         // Generate new key and store in Keychain
-        let newKeyBytes = generateStorageKey()
-        let newKeyData = Data(newKeyBytes)
+        let newKeyData = generateStorageKey()
         try keychain.saveStorageKey(newKeyData)
 
-        return newKeyBytes
+        return newKeyData
     }
 
     /// Export current storage key (for backup purposes only)
     /// WARNING: Handle the returned data with extreme care
-    func exportStorageKey() -> [UInt8] {
+    func exportStorageKey() -> Data {
         return vauchi.exportStorageKey()
     }
 

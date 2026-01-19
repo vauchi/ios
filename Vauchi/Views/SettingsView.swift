@@ -134,16 +134,57 @@ struct SettingsView: View {
                     }
                 }
 
+                // Help & Support section
+                Section("Help & Support") {
+                    Link(destination: URL(string: "https://vauchi.app/user-guide")!) {
+                        HStack {
+                            Label("User Guide", systemImage: "book")
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    Link(destination: URL(string: "https://vauchi.app/faq")!) {
+                        HStack {
+                            Label("FAQ", systemImage: "questionmark.circle")
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    Link(destination: URL(string: "https://github.com/anthropics/vauchi/issues")!) {
+                        HStack {
+                            Label("Report Issue", systemImage: "exclamationmark.bubble")
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    Link(destination: URL(string: "https://vauchi.app/privacy")!) {
+                        HStack {
+                            Label("Privacy Policy", systemImage: "hand.raised")
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
                 // About section
                 Section("About") {
                     HStack {
                         Text("Version")
                         Spacer()
-                        Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0")
+                        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+                        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+                        Text("\(version) (build \(build))")
                             .foregroundColor(.secondary)
                     }
 
-                    Link(destination: URL(string: "https://github.com/vauchi")!) {
+                    Link(destination: URL(string: "https://github.com/anthropics/vauchi")!) {
                         HStack {
                             Label("GitHub", systemImage: "link")
                             Spacer()
@@ -217,7 +258,7 @@ struct SettingsView: View {
 
         Task {
             do {
-                try await viewModel.updateDisplayName(name: trimmed)
+                try await viewModel.setDisplayName(trimmed)
             } catch {
                 // Error handling - the view model will update on success
                 print("Failed to update display name: \(error)")
