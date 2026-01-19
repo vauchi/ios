@@ -155,6 +155,14 @@ rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim
 | [vauchi/docs](https://gitlab.com/vauchi/docs) | Documentation |
 | [vauchi/dev-tools](https://gitlab.com/vauchi/dev-tools) | Build scripts and workspace tools |
 
+## ⚠️ Mandatory Development Rules
+
+**TDD**: Red→Green→Refactor. Test FIRST or delete code and restart.
+
+**Structure**: `src/` = production code only. `tests/` = tests only. Siblings, not nested.
+
+See [CLAUDE.md](../CLAUDE.md) for additional mandatory rules.
+
 ## Contributing
 
 1. Check [vauchi/docs](https://gitlab.com/vauchi/docs) for architecture decisions
