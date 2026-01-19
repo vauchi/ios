@@ -13,6 +13,8 @@ struct SettingsView: View {
     @State private var editingRelayUrl = ""
     @State private var showRelayEdit = false
     @State private var showInvalidUrlAlert = false
+    @State private var showEditNameAlert = false
+    @State private var editingDisplayName = ""
 
     var body: some View {
         NavigationView {
@@ -24,6 +26,14 @@ struct SettingsView: View {
                         Spacer()
                         Text(viewModel.identity?.displayName ?? "Unknown")
                             .foregroundColor(.secondary)
+                        Text("Edit")
+                            .font(.caption)
+                            .foregroundColor(.cyan)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        editingDisplayName = viewModel.identity?.displayName ?? ""
+                        showEditNameAlert = true
                     }
 
                     HStack {
@@ -174,6 +184,16 @@ struct SettingsView: View {
             } message: {
                 Text("Please enter a valid secure WebSocket URL starting with wss://. Unencrypted connections (ws://) are not allowed for security.")
             }
+            .alert("Edit Display Name", isPresented: $showEditNameAlert) {
+                TextField("Display Name", text: $editingDisplayName)
+                    .autocapitalization(.words)
+                Button("Cancel", role: .cancel) { }
+                Button("Save") {
+                    saveDisplayName()
+                }
+            } message: {
+                Text("Enter your new display name. This is how contacts will see you.")
+            }
             .onAppear {
                 relayUrl = SettingsService.shared.relayUrl
             }
@@ -187,6 +207,21 @@ struct SettingsView: View {
             relayUrl = trimmed
         } else {
             showInvalidUrlAlert = true
+        }
+    }
+
+    private func saveDisplayName() {
+        let trimmed = editingDisplayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        guard trimmed != viewModel.identity?.displayName else { return }
+
+        Task {
+            do {
+                try await viewModel.updateDisplayName(name: trimmed)
+            } catch {
+                // Error handling - the view model will update on success
+                print("Failed to update display name: \(error)")
+            }
         }
     }
 }

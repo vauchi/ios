@@ -6,6 +6,7 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @State private var showAddField = false
+    @State private var editingField: FieldInfo?
 
     var body: some View {
         NavigationView {
@@ -47,9 +48,11 @@ struct HomeView: View {
 
                         if let fields = viewModel.card?.fields, !fields.isEmpty {
                             ForEach(fields) { field in
-                                FieldRow(field: field, onDelete: {
-                                    deleteField(field)
-                                })
+                                FieldRow(
+                                    field: field,
+                                    onEdit: { editingField = field },
+                                    onDelete: { deleteField(field) }
+                                )
                             }
                         } else {
                             Text("No fields yet. Add your first field!")
@@ -102,6 +105,9 @@ struct HomeView: View {
             .sheet(isPresented: $showAddField) {
                 AddFieldSheet()
             }
+            .sheet(item: $editingField) { field in
+                EditFieldSheet(field: field)
+            }
             .refreshable {
                 await viewModel.sync()
             }
@@ -147,6 +153,7 @@ struct SyncStatusIndicator: View {
 
 struct FieldRow: View {
     let field: FieldInfo
+    let onEdit: () -> Void
     let onDelete: () -> Void
 
     @State private var showDeleteAlert = false
@@ -177,6 +184,12 @@ struct FieldRow: View {
             }
 
             Spacer()
+
+            Button(action: onEdit) {
+                Image(systemName: "pencil")
+                    .foregroundColor(.cyan)
+                    .font(.caption)
+            }
 
             Button(action: { showDeleteAlert = true }) {
                 Image(systemName: "trash")
@@ -265,6 +278,86 @@ struct AddFieldSheet: View {
         Task {
             do {
                 try await viewModel.addField(type: fieldType, label: label, value: value)
+                dismiss()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
+}
+
+struct EditFieldSheet: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.dismiss) var dismiss
+
+    let field: FieldInfo
+    @State private var newValue: String = ""
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    HStack {
+                        Text("Type")
+                        Spacer()
+                        Text(field.fieldType.capitalized)
+                            .foregroundColor(.secondary)
+                    }
+
+                    HStack {
+                        Text("Label")
+                        Spacer()
+                        Text(field.label)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Section("Value") {
+                    TextField("Value", text: $newValue)
+                        .autocapitalization(.none)
+                }
+
+                if let error = errorMessage {
+                    Section {
+                        Text(error)
+                            .foregroundColor(.red)
+                    }
+                }
+            }
+            .navigationTitle("Edit Field")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { saveField() }
+                        .disabled(newValue.trimmingCharacters(in: .whitespaces).isEmpty || isLoading)
+                }
+            }
+            .onAppear {
+                newValue = field.value
+            }
+        }
+    }
+
+    private func saveField() {
+        let trimmedValue = newValue.trimmingCharacters(in: .whitespaces)
+        guard !trimmedValue.isEmpty else { return }
+        guard trimmedValue != field.value else {
+            dismiss()
+            return
+        }
+
+        isLoading = true
+        errorMessage = nil
+
+        Task {
+            do {
+                try await viewModel.updateField(id: field.id, newValue: trimmedValue)
                 dismiss()
             } catch {
                 errorMessage = error.localizedDescription
