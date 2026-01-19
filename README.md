@@ -146,6 +146,22 @@ xcodebuild -runFirstLaunch
 rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim
 ```
 
+## Related Repositories
+
+| Repository | Description |
+|------------|-------------|
+| [vauchi/code](https://gitlab.com/vauchi/code) | Core Rust library (source of UniFFI bindings) |
+| [vauchi/android](https://gitlab.com/vauchi/android) | Android app (Kotlin/Compose) |
+| [vauchi/docs](https://gitlab.com/vauchi/docs) | Documentation |
+| [vauchi/dev-tools](https://gitlab.com/vauchi/dev-tools) | Build scripts and workspace tools |
+
+## Contributing
+
+1. Check [vauchi/docs](https://gitlab.com/vauchi/docs) for architecture decisions
+2. Follow Apple's Human Interface Guidelines
+3. Write tests for new features
+4. Core library changes go to [vauchi/code](https://gitlab.com/vauchi/code)
+
 ## License
 
 MIT
