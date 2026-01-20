@@ -19,54 +19,16 @@ enum ContactActions {
         case copy
     }
 
-    // MARK: - Dangerous Schemes (Security)
+    // MARK: - Security
+    // URL safety validation is now handled by vauchi-core via UniFFI:
+    // - isSafeUrl(url:) - validates full URL strings
+    // - isAllowedScheme(scheme:) - checks if scheme is in allowlist
+    // - isBlockedScheme(scheme:) - checks if scheme is in blocklist
 
-    /// URL schemes that should be blocked for security reasons
-    private static let dangerousSchemes: Set<String> = [
-        "javascript",
-        "vbscript",
-        "data",
-        "file"
-    ]
-
-    /// Safe URL schemes that are allowed
-    private static let safeSchemes: Set<String> = [
-        "http",
-        "https",
-        "tel",
-        "mailto",
-        "sms",
-        "maps",
-        "facetime",
-        "facetime-audio"
-    ]
-
-    // MARK: - Social Network Templates
-
-    /// URL templates for social networks
-    private static let socialTemplates: [String: String] = [
-        "github": "https://github.com/{username}",
-        "twitter": "https://twitter.com/{username}",
-        "x": "https://x.com/{username}",
-        "linkedin": "https://linkedin.com/in/{username}",
-        "instagram": "https://instagram.com/{username}",
-        "facebook": "https://facebook.com/{username}",
-        "youtube": "https://youtube.com/@{username}",
-        "tiktok": "https://tiktok.com/@{username}",
-        "mastodon": "https://mastodon.social/@{username}",
-        "bluesky": "https://bsky.app/profile/{username}",
-        "reddit": "https://reddit.com/u/{username}",
-        "twitch": "https://twitch.tv/{username}",
-        "discord": "https://discord.com/users/{username}",
-        "telegram": "https://t.me/{username}",
-        "signal": "https://signal.me/#p/{username}",
-        "whatsapp": "https://wa.me/{username}",
-        "snapchat": "https://snapchat.com/add/{username}",
-        "pinterest": "https://pinterest.com/{username}",
-        "medium": "https://medium.com/@{username}",
-        "substack": "https://{username}.substack.com",
-        "hackernews": "https://news.ycombinator.com/user?id={username}"
-    ]
+    // MARK: - Social Network URLs
+    // Social network URL generation is now handled by vauchi-core via UniFFI.
+    // Use VauchiRepository.getProfileUrl(networkId:username:) to generate profile URLs.
+    // The core maintains a comprehensive registry of 40+ social networks.
 
     // MARK: - Field Type Detection
 
@@ -165,47 +127,28 @@ enum ContactActions {
         return URL(string: "sms:\(cleaned)")
     }
 
-    /// Build a social network profile URL
-    static func buildSocialUrl(network: String, username: String) -> URL? {
-        let networkLower = network.lowercased()
-        guard let template = socialTemplates[networkLower] else {
-            return nil
+    /// Build a social network profile URL using vauchi-core registry
+    /// Note: Prefer using VauchiRepository.getProfileUrl(networkId:username:) directly
+    static func buildSocialUrl(network: String, username: String, repository: VauchiRepository? = nil) -> URL? {
+        // Use core's social network registry which has 40+ networks
+        if let repo = repository,
+           let urlString = repo.getProfileUrl(networkId: network, username: username) {
+            return URL(string: urlString)
         }
-        let urlString = template.replacingOccurrences(of: "{username}", with: username)
-        return URL(string: urlString)
+        return nil
     }
 
-    // MARK: - Security
+    // MARK: - Security Validation
 
-    /// Check if a URL is safe to open
+    /// Check if a URL is safe to open using vauchi-core validation
     static func isSafeUrl(_ urlString: String) -> Bool {
-        guard let url = URL(string: urlString),
-              let scheme = url.scheme?.lowercased() else {
-            return false
-        }
-
-        // Block dangerous schemes
-        if dangerousSchemes.contains(scheme) {
-            return false
-        }
-
-        // Allow known safe schemes
-        return safeSchemes.contains(scheme)
+        // Use core's URL safety validation (handles blocklist + allowlist)
+        return vauchi_mobile.isSafeUrl(url: urlString)
     }
 
-    /// Check if a URL is safe to open
+    /// Check if a URL is safe to open using vauchi-core validation
     static func isSafeUrl(_ url: URL) -> Bool {
-        guard let scheme = url.scheme?.lowercased() else {
-            return false
-        }
-
-        // Block dangerous schemes
-        if dangerousSchemes.contains(scheme) {
-            return false
-        }
-
-        // Allow known safe schemes
-        return safeSchemes.contains(scheme)
+        return isSafeUrl(url.absoluteString)
     }
 
     // MARK: - Available Actions
