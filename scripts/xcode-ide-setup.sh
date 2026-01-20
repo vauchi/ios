@@ -5,7 +5,7 @@
 # This script sets up Xcode and iOS development environment for new developers.
 # Run this after installing Xcode from the App Store or developer.apple.com.
 #
-# Usage: ./scripts/setup-xcode.sh
+# Usage: ./scripts/xcode-ide-setup.sh
 #
 
 set -e

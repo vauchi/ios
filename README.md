@@ -13,7 +13,7 @@ Native iOS app for Vauchi - privacy-focused contact card exchange.
 Run the setup script to configure Xcode:
 
 ```bash
-./scripts/setup-xcode.sh
+./scripts/xcode-ide-setup.sh
 ```
 
 This script will:
