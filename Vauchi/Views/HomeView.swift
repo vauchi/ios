@@ -21,9 +21,8 @@ struct HomeView: View {
 
                             if let publicId = viewModel.identity?.publicId {
                                 Text("ID: \(String(publicId.prefix(16)))...")
-                                    .font(.caption)
+                                    .font(.system(.caption, design: .monospaced))
                                     .foregroundColor(.secondary)
-                                    .fontDesign(.monospaced)
                             }
                         }
 

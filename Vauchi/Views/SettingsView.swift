@@ -41,9 +41,8 @@ struct SettingsView: View {
                         Spacer()
                         if let publicId = viewModel.identity?.publicId {
                             Text(String(publicId.prefix(16)) + "...")
-                                .font(.caption)
+                                .font(.system(.caption, design: .monospaced))
                                 .foregroundColor(.secondary)
-                                .fontDesign(.monospaced)
                         } else {
                             Text("Unknown")
                                 .foregroundColor(.secondary)

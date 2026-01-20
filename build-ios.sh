@@ -3,7 +3,8 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+WORKSPACE_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$WORKSPACE_ROOT/code"
 MOBILE_CRATE="$PROJECT_ROOT/vauchi-mobile"
 IOS_DIR="$SCRIPT_DIR"
 GENERATED_DIR="$IOS_DIR/Vauchi/Generated"
@@ -66,28 +67,38 @@ check_prerequisites() {
     fi
 }
 
+# Build mode (release or debug)
+BUILD_MODE="${BUILD_MODE:-release}"
+if [[ "$BUILD_MODE" == "debug" ]]; then
+    CARGO_FLAG=""
+    BUILD_DIR="debug"
+else
+    CARGO_FLAG="--release"
+    BUILD_DIR="release"
+fi
+
 # Build for iOS device (arm64)
 build_device() {
-    echo_step "Building for iOS device (aarch64-apple-ios)..."
-    cargo build -p vauchi-mobile --target aarch64-apple-ios --release
+    echo_step "Building for iOS device (aarch64-apple-ios) [$BUILD_MODE]..."
+    cargo build -p vauchi-mobile --target aarch64-apple-ios $CARGO_FLAG
 }
 
 # Build for iOS simulator (arm64 + x86_64)
 build_simulator() {
-    echo_step "Building for iOS simulator (aarch64-apple-ios-sim)..."
-    cargo build -p vauchi-mobile --target aarch64-apple-ios-sim --release
+    echo_step "Building for iOS simulator (aarch64-apple-ios-sim) [$BUILD_MODE]..."
+    cargo build -p vauchi-mobile --target aarch64-apple-ios-sim $CARGO_FLAG
 
-    echo_step "Building for iOS simulator (x86_64-apple-ios)..."
-    cargo build -p vauchi-mobile --target x86_64-apple-ios --release
+    echo_step "Building for iOS simulator (x86_64-apple-ios) [$BUILD_MODE]..."
+    cargo build -p vauchi-mobile --target x86_64-apple-ios $CARGO_FLAG
 }
 
 # Create fat library for simulator (combines arm64 and x86_64)
 create_simulator_fat_lib() {
     echo_step "Creating fat library for simulator..."
 
-    local SIM_ARM64="$PROJECT_ROOT/target/aarch64-apple-ios-sim/release/libvauchi_mobile.a"
-    local SIM_X64="$PROJECT_ROOT/target/x86_64-apple-ios/release/libvauchi_mobile.a"
-    local FAT_LIB="$PROJECT_ROOT/target/ios-simulator/release/libvauchi_mobile.a"
+    local SIM_ARM64="$PROJECT_ROOT/target/aarch64-apple-ios-sim/$BUILD_DIR/libvauchi_mobile.a"
+    local SIM_X64="$PROJECT_ROOT/target/x86_64-apple-ios/$BUILD_DIR/libvauchi_mobile.a"
+    local FAT_LIB="$PROJECT_ROOT/target/ios-simulator/$BUILD_DIR/libvauchi_mobile.a"
 
     mkdir -p "$(dirname "$FAT_LIB")"
     lipo -create "$SIM_ARM64" "$SIM_X64" -output "$FAT_LIB"
@@ -99,12 +110,12 @@ generate_bindings() {
 
     mkdir -p "$GENERATED_DIR"
 
-    # Build the uniffi-bindgen binary
+    # Build the uniffi-bindgen binary (always use release for the tool itself)
     cargo build -p vauchi-mobile --bin uniffi-bindgen --release
 
     # Generate Swift bindings from the device library
     "$PROJECT_ROOT/target/release/uniffi-bindgen" generate \
-        --library "$PROJECT_ROOT/target/aarch64-apple-ios/release/libvauchi_mobile.a" \
+        --library "$PROJECT_ROOT/target/aarch64-apple-ios/$BUILD_DIR/libvauchi_mobile.a" \
         --language swift \
         --out-dir "$GENERATED_DIR"
 
@@ -117,8 +128,8 @@ create_xcframework() {
 
     local XCFRAMEWORK_DIR="$IOS_DIR/Frameworks"
     local XCFRAMEWORK_PATH="$XCFRAMEWORK_DIR/VauchiMobile.xcframework"
-    local DEVICE_LIB="$PROJECT_ROOT/target/aarch64-apple-ios/release/libvauchi_mobile.a"
-    local SIM_FAT_LIB="$PROJECT_ROOT/target/ios-simulator/release/libvauchi_mobile.a"
+    local DEVICE_LIB="$PROJECT_ROOT/target/aarch64-apple-ios/$BUILD_DIR/libvauchi_mobile.a"
+    local SIM_FAT_LIB="$PROJECT_ROOT/target/ios-simulator/$BUILD_DIR/libvauchi_mobile.a"
 
     # Remove old framework if exists
     rm -rf "$XCFRAMEWORK_PATH"
@@ -192,13 +203,19 @@ main() {
     esac
 
     echo ""
-    echo_step "Build complete!"
+    echo_step "Build complete! [$BUILD_MODE]"
     echo ""
     echo "Next steps:"
     echo "  1. Add VauchiMobile.xcframework to your Xcode project"
     echo "  2. Add Generated/vauchi_mobile.swift to your project"
     echo "  3. Set 'Library Search Paths' to include the framework"
     echo "  4. Import 'vauchi_mobile' in your Swift code"
+    echo ""
+    echo "Usage:"
+    echo "  BUILD_MODE=release $0 [target]   # Release build (size-optimized)"
+    echo "  BUILD_MODE=debug $0 [target]     # Debug build (fast compile)"
+    echo ""
+    echo "Targets: device, simulator, bindings, xcframework, all"
 }
 
 main "$@"

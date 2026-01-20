@@ -43,9 +43,8 @@ struct ContactDetailView: View {
                     }
 
                     Text("ID: \(String(contact.id.prefix(16)))...")
-                        .font(.caption)
+                        .font(.system(.caption, design: .monospaced))
                         .foregroundColor(.secondary)
-                        .fontDesign(.monospaced)
 
                     if let addedAt = contact.addedAt {
                         Text("Added \(addedAt, style: .relative) ago")

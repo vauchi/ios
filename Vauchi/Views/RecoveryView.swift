@@ -217,8 +217,7 @@ struct CreateClaimSheet: View {
                             .multilineTextAlignment(.center)
 
                         Text(String(claim.prefix(60)) + "...")
-                            .font(.caption)
-                            .fontDesign(.monospaced)
+                            .font(.system(.caption, design: .monospaced))
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(8)
@@ -241,10 +240,9 @@ struct CreateClaimSheet: View {
                         Text("Enter your OLD public key from your backup or previous device:")
                             .foregroundColor(.secondary)
 
-                        TextField("Old Public Key (hex)", text: $oldPublicKey, axis: .vertical)
+                        TextField("Old Public Key (hex)", text: $oldPublicKey)
                             .textFieldStyle(.roundedBorder)
-                            .fontDesign(.monospaced)
-                            .lineLimit(2...4)
+                            .font(.system(.body, design: .monospaced))
                             .autocapitalization(.none)
                             .disabled(isCreating)
 
@@ -334,8 +332,7 @@ struct CreateVoucherSheet: View {
                             .foregroundColor(.secondary)
 
                         Text(String(voucher.prefix(60)) + "...")
-                            .font(.caption)
-                            .fontDesign(.monospaced)
+                            .font(.system(.caption, design: .monospaced))
                             .padding()
                             .background(Color(.systemGray6))
                             .cornerRadius(8)
@@ -363,15 +360,13 @@ struct CreateVoucherSheet: View {
                                 Text("Old ID:")
                                 Spacer()
                                 Text(String(claim.oldPublicKey.prefix(16)) + "...")
-                                    .font(.caption)
-                                    .fontDesign(.monospaced)
+                                    .font(.system(.caption, design: .monospaced))
                             }
                             HStack {
                                 Text("New ID:")
                                 Spacer()
                                 Text(String(claim.newPublicKey.prefix(16)) + "...")
-                                    .font(.caption)
-                                    .fontDesign(.monospaced)
+                                    .font(.system(.caption, design: .monospaced))
                             }
                         }
                         .padding()
@@ -430,10 +425,9 @@ struct CreateVoucherSheet: View {
                         Text("Paste the recovery claim data from your contact:")
                             .foregroundColor(.secondary)
 
-                        TextField("Claim Data (base64)", text: $claimData, axis: .vertical)
+                        TextField("Claim Data (base64)", text: $claimData)
                             .textFieldStyle(.roundedBorder)
-                            .fontDesign(.monospaced)
-                            .lineLimit(3...6)
+                            .font(.system(.body, design: .monospaced))
                             .autocapitalization(.none)
                             .disabled(isParsing)
 
