@@ -116,6 +116,13 @@ class VauchiViewModel: ObservableObject {
         showAlert = true
     }
 
+    // MARK: - Proximity Verification
+    
+    @Published var proximitySupported = false
+    @Published var proximityCapability = "none"
+    
+    private var proximityVerifier: MobileProximityVerifier?
+    
     // MARK: - Private Properties
 
     private var repository: VauchiRepository?
@@ -127,6 +134,34 @@ class VauchiViewModel: ObservableObject {
         lastSyncTime = SettingsService.shared.lastSyncTime
         initializeRepository()
         setupNetworkMonitoring()
+        setupProximityVerification()
+    }
+    
+    private func setupProximityVerification() {
+        let audioHandler = AudioProximityService.shared
+        proximityVerifier = MobileProximityVerifier.new(handler: audioHandler)
+        proximitySupported = proximityVerifier?.isSupported() ?? false
+        proximityCapability = proximityVerifier?.getCapability() ?? "none"
+        print("VauchiViewModel: Proximity verification - supported: \(proximitySupported), capability: \(proximityCapability)")
+    }
+    
+    /// Emit a proximity challenge (for QR displayer)
+    func emitProximityChallenge(_ challenge: Data) -> Bool {
+        guard let verifier = proximityVerifier else { return false }
+        let result = verifier.emitChallenge(challenge: Array(challenge))
+        return result.success
+    }
+    
+    /// Listen for proximity response (for QR scanner)
+    func listenForProximityResponse(timeoutMs: UInt64 = 5000) -> Data? {
+        guard let verifier = proximityVerifier else { return nil }
+        let response = verifier.listenForResponse(timeoutMs: timeoutMs)
+        return response.isEmpty ? nil : Data(response)
+    }
+    
+    /// Stop any ongoing proximity verification
+    func stopProximityVerification() {
+        proximityVerifier?.stop()
     }
 
     private func initializeRepository() {

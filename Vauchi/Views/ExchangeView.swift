@@ -13,6 +13,7 @@ struct ExchangeView: View {
     @State private var hasError = false
     @State private var timeRemaining: TimeInterval = 0
     @State private var timer: Timer?
+    @State private var isEmittingAudio = false
 
     var body: some View {
         NavigationView {
@@ -71,6 +72,18 @@ struct ExchangeView: View {
                                 }
                                 .buttonStyle(.bordered)
                                 .disabled(timeRemaining > 240) // Only allow refresh when < 4 min left
+                                
+                                // Proximity verification status
+                                if viewModel.proximitySupported {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: isEmittingAudio ? "waveform" : "waveform.circle")
+                                            .foregroundColor(isEmittingAudio ? .green : .blue)
+                                        Text(isEmittingAudio ? "Emitting audio..." : "Ultrasonic ready")
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.top, 4)
+                                }
                             }
                         }
                     }
@@ -108,7 +121,10 @@ struct ExchangeView: View {
             }
             .navigationTitle("Exchange")
             .onAppear { loadExchangeData() }
-            .onDisappear { stopTimer() }
+            .onDisappear { 
+                stopTimer()
+                viewModel.stopProximityVerification()
+            }
             .sheet(isPresented: $showScanner) {
                 QRScannerView()
             }
