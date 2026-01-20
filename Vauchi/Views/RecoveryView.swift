@@ -37,6 +37,8 @@ struct RecoveryView: View {
 struct RecoverIdentityTab: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @State private var showClaimSheet = false
+    @State private var showAddVoucherSheet = false
+    @State private var showStatusSheet = false
 
     var body: some View {
         ScrollView {
@@ -97,20 +99,46 @@ struct RecoverIdentityTab: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
 
-                // Action button
-                Button(action: { showClaimSheet = true }) {
-                    Text("Start Recovery Process")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.cyan)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                // Action buttons
+                VStack(spacing: 12) {
+                    Button(action: { showClaimSheet = true }) {
+                        Text("Start Recovery Process")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.cyan)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+
+                    Button(action: { showAddVoucherSheet = true }) {
+                        Text("Add Received Voucher")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+
+                    Button(action: { showStatusSheet = true }) {
+                        Text("Check Recovery Status")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(.systemGray5))
+                            .foregroundColor(.primary)
+                            .cornerRadius(10)
+                    }
                 }
             }
             .padding()
         }
         .sheet(isPresented: $showClaimSheet) {
             CreateClaimSheet()
+        }
+        .sheet(isPresented: $showAddVoucherSheet) {
+            AddVoucherSheet()
+        }
+        .sheet(isPresented: $showStatusSheet) {
+            RecoveryStatusSheet()
         }
     }
 }
@@ -512,6 +540,266 @@ struct CreateVoucherSheet: View {
                 errorMessage = error.localizedDescription
             }
             isCreatingVoucher = false
+        }
+    }
+}
+
+// MARK: - Add Voucher Sheet
+
+struct AddVoucherSheet: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.dismiss) var dismiss
+    @State private var voucherData = ""
+    @State private var isAdding = false
+    @State private var progress: VauchiRepository.RecoveryProgressInfo?
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                if let progress = progress {
+                    // Success state
+                    VStack(spacing: 16) {
+                        Image(systemName: progress.isComplete ? "checkmark.circle.fill" : "plus.circle.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(progress.isComplete ? .green : .blue)
+
+                        Text(progress.isComplete ? "Recovery Complete!" : "Voucher Added!")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+
+                        VStack(spacing: 8) {
+                            HStack {
+                                Text("Vouchers collected:")
+                                Spacer()
+                                Text("\(progress.vouchersCollected) / \(progress.vouchersNeeded)")
+                                    .fontWeight(.semibold)
+                            }
+
+                            ProgressView(value: Double(progress.vouchersCollected), total: Double(progress.vouchersNeeded))
+                                .tint(progress.isComplete ? .green : .cyan)
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
+
+                        if progress.isComplete {
+                            Text("Your identity has been recovered! Your contacts will now trust your new identity.")
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+
+                            Button(action: {
+                                Task {
+                                    if let proof = try? await viewModel.getRecoveryProof() {
+                                        UIPasteboard.general.string = proof
+                                    }
+                                }
+                            }) {
+                                Label("Copy Recovery Proof", systemImage: "doc.on.doc")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.green)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                        } else {
+                            Text("Collect \(progress.vouchersNeeded - progress.vouchersCollected) more voucher(s) from trusted contacts.")
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .padding()
+                } else {
+                    // Input state
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Paste the voucher data you received from a trusted contact:")
+                            .foregroundColor(.secondary)
+
+                        TextField("Voucher Data (base64)", text: $voucherData)
+                            .textFieldStyle(.roundedBorder)
+                            .font(.system(.body, design: .monospaced))
+                            .autocapitalization(.none)
+                            .disabled(isAdding)
+
+                        if let error = errorMessage {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+
+                        Button(action: addVoucher) {
+                            HStack {
+                                if isAdding {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                } else {
+                                    Text("Add Voucher")
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(voucherData.count >= 20 && !isAdding ? Color.blue : Color.gray)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+                        .disabled(voucherData.count < 20 || isAdding)
+                    }
+                    .padding()
+                }
+
+                Spacer()
+            }
+            .navigationTitle(progress != nil ? "Voucher Added" : "Add Voucher")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(progress != nil ? "Done" : "Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    private func addVoucher() {
+        isAdding = true
+        errorMessage = nil
+
+        Task {
+            do {
+                progress = try await viewModel.addRecoveryVoucher(voucherB64: voucherData.trimmingCharacters(in: .whitespacesAndNewlines))
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isAdding = false
+        }
+    }
+}
+
+// MARK: - Recovery Status Sheet
+
+struct RecoveryStatusSheet: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.dismiss) var dismiss
+    @State private var isLoading = true
+    @State private var status: VauchiRepository.RecoveryProgressInfo?
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                if isLoading {
+                    ProgressView("Loading status...")
+                } else if let status = status {
+                    VStack(spacing: 16) {
+                        Image(systemName: status.isComplete ? "checkmark.shield.fill" : "shield.lefthalf.filled")
+                            .font(.system(size: 60))
+                            .foregroundColor(status.isComplete ? .green : .cyan)
+
+                        Text(status.isComplete ? "Recovery Complete" : "Recovery In Progress")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("Old Identity:")
+                                Spacer()
+                                Text(String(status.oldPublicKey.prefix(12)) + "...")
+                                    .font(.system(.caption, design: .monospaced))
+                            }
+                            HStack {
+                                Text("New Identity:")
+                                Spacer()
+                                Text(String(status.newPublicKey.prefix(12)) + "...")
+                                    .font(.system(.caption, design: .monospaced))
+                            }
+                            Divider()
+                            HStack {
+                                Text("Vouchers:")
+                                Spacer()
+                                Text("\(status.vouchersCollected) / \(status.vouchersNeeded)")
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(status.isComplete ? .green : .primary)
+                            }
+
+                            ProgressView(value: Double(status.vouchersCollected), total: Double(status.vouchersNeeded))
+                                .tint(status.isComplete ? .green : .cyan)
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(12)
+
+                        if status.isComplete {
+                            Button(action: copyProof) {
+                                Label("Copy Recovery Proof", systemImage: "doc.on.doc")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.green)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+
+                            Text("Share this proof with your contacts to restore your relationships.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        } else {
+                            Text("You need \(status.vouchersNeeded - status.vouchersCollected) more voucher(s). Meet with trusted contacts in person to collect them.")
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .padding()
+                } else {
+                    VStack(spacing: 16) {
+                        Image(systemName: "questionmark.circle")
+                            .font(.system(size: 60))
+                            .foregroundColor(.secondary)
+
+                        Text("No Active Recovery")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+
+                        Text("You don't have an active recovery claim. Start a new recovery process if you need to recover a lost identity.")
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding()
+                }
+
+                Spacer()
+            }
+            .navigationTitle("Recovery Status")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+            .onAppear {
+                loadStatus()
+            }
+        }
+    }
+
+    private func loadStatus() {
+        Task {
+            do {
+                status = try await viewModel.getRecoveryStatus()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
+
+    private func copyProof() {
+        Task {
+            if let proof = try? await viewModel.getRecoveryProof() {
+                UIPasteboard.general.string = proof
+            }
         }
     }
 }
