@@ -20,10 +20,14 @@ enum ContactActions {
     }
 
     // MARK: - Security
-    // URL safety validation is now handled by vauchi-core via UniFFI:
-    // - isSafeUrl(url:) - validates full URL strings
-    // - isAllowedScheme(scheme:) - checks if scheme is in allowlist
-    // - isBlockedScheme(scheme:) - checks if scheme is in blocklist
+    // URL safety validation: mirrors vauchi-core's is_safe_url()
+    // Uses scheme allowlist/blocklist to prevent dangerous URIs
+
+    /// Allowed URI schemes (security whitelist)
+    private static let allowedSchemes = ["tel", "mailto", "sms", "https", "http", "geo", "maps"]
+
+    /// Blocked URI schemes (explicit blocklist for dangerous schemes)
+    private static let blockedSchemes = ["javascript", "vbscript", "data", "file", "ftp", "blob"]
 
     // MARK: - Social Network URLs
     // Social network URL generation is now handled by vauchi-core via UniFFI.
@@ -140,10 +144,21 @@ enum ContactActions {
 
     // MARK: - Security Validation
 
-    /// Check if a URL is safe to open using vauchi-core validation
+    /// Check if a URL is safe to open
+    /// Mirrors vauchi-core's is_safe_url() implementation
     static func isSafeUrl(_ urlString: String) -> Bool {
-        // Use core's URL safety validation (handles blocklist + allowlist)
-        return vauchi_mobile.isSafeUrl(url: urlString)
+        let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+
+        // Extract scheme
+        guard let colonIndex = trimmed.firstIndex(of: ":") else { return false }
+        let scheme = String(trimmed[..<colonIndex]).lowercased()
+
+        // Check blocklist first (explicit deny)
+        if blockedSchemes.contains(scheme) { return false }
+
+        // Must be in allowlist
+        return allowedSchemes.contains(scheme)
     }
 
     /// Check if a URL is safe to open using vauchi-core validation

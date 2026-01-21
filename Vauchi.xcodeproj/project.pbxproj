@@ -28,6 +28,7 @@
 		AABB1234567890ABCDEF0002 /* ContactActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB1234567890ABCDEF0012 /* ContactActions.swift */; };
 		AABB1234567890ABCDEF0003 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB1234567890ABCDEF0013 /* NetworkMonitor.swift */; };
 		AABB1234567890ABCDEF0004 /* RecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB1234567890ABCDEF0014 /* RecoveryView.swift */; };
+		AABB1234567890ABCDEF0005 /* AudioProximityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB1234567890ABCDEF0015 /* AudioProximityService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +49,7 @@
 		AABB1234567890ABCDEF0012 /* ContactActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactActions.swift; sourceTree = "<group>"; };
 		AABB1234567890ABCDEF0013 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		AABB1234567890ABCDEF0014 /* RecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryView.swift; sourceTree = "<group>"; };
+		AABB1234567890ABCDEF0015 /* AudioProximityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProximityService.swift; sourceTree = "<group>"; };
 		B1C3D4E5F6A7890123456780 /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
 		C2D4E5F6A7B890123456780A /* vauchi_mobile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = vauchi_mobile.swift; sourceTree = "<group>"; };
 		D3E5F6A7B8C9012345678900 /* VauchiMobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = VauchiMobile.xcframework; sourceTree = "<group>"; };
@@ -113,6 +115,7 @@
 		64AD26C52124584A992CE018 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				AABB1234567890ABCDEF0015 /* AudioProximityService.swift */,
 				AABB1234567890ABCDEF0011 /* BackgroundSyncService.swift */,
 				AABB1234567890ABCDEF0012 /* ContactActions.swift */,
 				8A58DEC2115A9B6E3E705022 /* KeychainService.swift */,
