@@ -314,4 +314,170 @@ final class VauchiRepositoryTests: XCTestCase {
 
         XCTAssertEqual(url, "https://github.com/octocat")
     }
+
+    // MARK: - Recovery Tests
+    // Based on: features/contact_recovery.feature
+
+    /// Scenario: Create new identity after device loss
+    /// Alice can initiate recovery claiming "pk_old"
+    func testCreateRecoveryClaim() throws {
+        let repo = try VauchiRepository(dataDir: tempDir.path)
+        try repo.createIdentity(displayName: "Alice")
+
+        // Simulate old public key (64 hex chars = 32 bytes Ed25519 key)
+        let oldPkHex = String(repeating: "a", count: 64)
+
+        let claim = try repo.createRecoveryClaim(oldPkHex: oldPkHex)
+
+        XCTAssertEqual(claim.oldPublicKey, oldPkHex)
+        XCTAssertEqual(claim.newPublicKey, try repo.getPublicId())
+        XCTAssertFalse(claim.claimData.isEmpty, "Claim data should not be empty")
+        XCTAssertFalse(claim.isExpired, "Fresh claim should not be expired")
+    }
+
+    /// Scenario: Generate recovery claim QR code
+    /// The QR code contains old_pk, new_pk, and timestamp
+    func testRecoveryClaimContainsRequiredFields() throws {
+        let repo = try VauchiRepository(dataDir: tempDir.path)
+        try repo.createIdentity(displayName: "Alice")
+
+        let oldPkHex = String(repeating: "b", count: 64)
+        let claim = try repo.createRecoveryClaim(oldPkHex: oldPkHex)
+
+        // Claim data should be base64 encoded
+        XCTAssertNotNil(Data(base64Encoded: claim.claimData), "Claim should be valid base64")
+        XCTAssertEqual(claim.oldPublicKey.count, 64, "Old public key should be 64 hex chars")
+        XCTAssertEqual(claim.newPublicKey.count, 64, "New public key should be 64 hex chars")
+    }
+
+    /// Scenario: Parse recovery claim from base64
+    func testParseRecoveryClaim() throws {
+        let repo = try VauchiRepository(dataDir: tempDir.path)
+        try repo.createIdentity(displayName: "Alice")
+
+        let oldPkHex = String(repeating: "c", count: 64)
+        let claim = try repo.createRecoveryClaim(oldPkHex: oldPkHex)
+
+        // Parse the claim back
+        let parsed = try repo.parseRecoveryClaim(claimB64: claim.claimData)
+
+        XCTAssertEqual(parsed.oldPublicKey, oldPkHex)
+        XCTAssertEqual(parsed.newPublicKey, claim.newPublicKey)
+    }
+
+    /// Scenario: Get recovery status when no active recovery
+    func testNoActiveRecoveryStatus() throws {
+        let repo = try VauchiRepository(dataDir: tempDir.path)
+        try repo.createIdentity(displayName: "Alice")
+
+        let status = try repo.getRecoveryStatus()
+
+        XCTAssertNil(status, "Should have no active recovery initially")
+    }
+
+    /// Scenario: Get recovery status after creating claim
+    func testRecoveryStatusAfterClaimCreation() throws {
+        let repo = try VauchiRepository(dataDir: tempDir.path)
+        try repo.createIdentity(displayName: "Alice")
+
+        let oldPkHex = String(repeating: "d", count: 64)
+        _ = try repo.createRecoveryClaim(oldPkHex: oldPkHex)
+
+        let status = try repo.getRecoveryStatus()
+
+        XCTAssertNotNil(status, "Should have active recovery after claim creation")
+        XCTAssertEqual(status?.oldPublicKey, oldPkHex)
+        XCTAssertEqual(status?.vouchersCollected, 0)
+        XCTAssertGreaterThan(status?.vouchersNeeded ?? 0, 0, "Should need at least 1 voucher")
+        XCTAssertFalse(status?.isComplete ?? true)
+    }
+
+    /// Scenario: Default recovery threshold
+    /// The default recovery threshold should be 3 vouchers
+    func testDefaultRecoveryThreshold() throws {
+        let repo = try VauchiRepository(dataDir: tempDir.path)
+        try repo.createIdentity(displayName: "Alice")
+
+        let oldPkHex = String(repeating: "e", count: 64)
+        _ = try repo.createRecoveryClaim(oldPkHex: oldPkHex)
+
+        let status = try repo.getRecoveryStatus()
+
+        XCTAssertEqual(status?.vouchersNeeded, 3, "Default threshold should be 3 vouchers")
+    }
+
+    /// Scenario: Get recovery proof when incomplete
+    func testNoRecoveryProofWhenIncomplete() throws {
+        let repo = try VauchiRepository(dataDir: tempDir.path)
+        try repo.createIdentity(displayName: "Alice")
+
+        let oldPkHex = String(repeating: "f", count: 64)
+        _ = try repo.createRecoveryClaim(oldPkHex: oldPkHex)
+
+        let proof = try repo.getRecoveryProof()
+
+        XCTAssertNil(proof, "Should not have proof when recovery incomplete")
+    }
+
+    /// Scenario: Create voucher for someone's recovery claim
+    /// Tests the full flow: Alice creates claim, Bob creates voucher
+    func testCreateVoucherForClaim() throws {
+        // Alice creates a claim on her new device
+        let aliceDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: aliceDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: aliceDir) }
+
+        let aliceRepo = try VauchiRepository(dataDir: aliceDir.path)
+        try aliceRepo.createIdentity(displayName: "Alice")
+
+        let oldPkHex = String(repeating: "1", count: 64)
+        let claim = try aliceRepo.createRecoveryClaim(oldPkHex: oldPkHex)
+
+        // Bob has Alice as a contact (simulated by having an identity)
+        let bobDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: bobDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: bobDir) }
+
+        let bobRepo = try VauchiRepository(dataDir: bobDir.path)
+        try bobRepo.createIdentity(displayName: "Bob")
+
+        // Bob creates a voucher for Alice's claim
+        let voucher = try bobRepo.createRecoveryVoucher(claimB64: claim.claimData)
+
+        XCTAssertFalse(voucher.voucherData.isEmpty, "Voucher data should not be empty")
+        XCTAssertEqual(voucher.voucherPublicKey, try bobRepo.getPublicId(), "Voucher should be from Bob")
+    }
+
+    /// Scenario: Parse claim and verify details before vouching
+    func testParseClaimBeforeVouching() throws {
+        // Alice creates a claim
+        let aliceDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: aliceDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: aliceDir) }
+
+        let aliceRepo = try VauchiRepository(dataDir: aliceDir.path)
+        try aliceRepo.createIdentity(displayName: "Alice")
+
+        let oldPkHex = String(repeating: "2", count: 64)
+        let claim = try aliceRepo.createRecoveryClaim(oldPkHex: oldPkHex)
+
+        // Bob parses the claim to verify details
+        let bobDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: bobDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: bobDir) }
+
+        let bobRepo = try VauchiRepository(dataDir: bobDir.path)
+        try bobRepo.createIdentity(displayName: "Bob")
+
+        let parsedClaim = try bobRepo.parseRecoveryClaim(claimB64: claim.claimData)
+
+        // Bob can see the old and new public keys
+        XCTAssertEqual(parsedClaim.oldPublicKey, oldPkHex)
+        XCTAssertEqual(parsedClaim.newPublicKey, try aliceRepo.getPublicId())
+        XCTAssertFalse(parsedClaim.isExpired)
+    }
 }
