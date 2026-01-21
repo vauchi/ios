@@ -251,6 +251,99 @@ typedef void (*UniffiForeignFutureCompleteVoid)(uint64_t, UniffiForeignFutureStr
     );
 
 #endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER_METHOD0
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER_METHOD0
+typedef void (*UniffiCallbackInterfacePlatformAudioHandlerMethod0)(uint64_t, RustBuffer* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER_METHOD1
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER_METHOD1
+typedef void (*UniffiCallbackInterfacePlatformAudioHandlerMethod1)(uint64_t, RustBuffer, uint32_t, RustBuffer* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER_METHOD2
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER_METHOD2
+typedef void (*UniffiCallbackInterfacePlatformAudioHandlerMethod2)(uint64_t, uint64_t, uint32_t, RustBuffer* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER_METHOD3
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER_METHOD3
+typedef void (*UniffiCallbackInterfacePlatformAudioHandlerMethod3)(uint64_t, int8_t* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER_METHOD4
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER_METHOD4
+typedef void (*UniffiCallbackInterfacePlatformAudioHandlerMethod4)(uint64_t, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER
+#define UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_PLATFORM_AUDIO_HANDLER
+typedef struct UniffiVTableCallbackInterfacePlatformAudioHandler {
+    UniffiCallbackInterfacePlatformAudioHandlerMethod0 _Nonnull checkCapability;
+    UniffiCallbackInterfacePlatformAudioHandlerMethod1 _Nonnull emitSignal;
+    UniffiCallbackInterfacePlatformAudioHandlerMethod2 _Nonnull receiveSignal;
+    UniffiCallbackInterfacePlatformAudioHandlerMethod3 _Nonnull isActive;
+    UniffiCallbackInterfacePlatformAudioHandlerMethod4 _Nonnull stop;
+    UniffiCallbackInterfaceFree _Nonnull uniffiFree;
+} UniffiVTableCallbackInterfacePlatformAudioHandler;
+
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_CLONE_MOBILEPROXIMITYVERIFIER
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_CLONE_MOBILEPROXIMITYVERIFIER
+void*_Nonnull uniffi_vauchi_mobile_fn_clone_mobileproximityverifier(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FREE_MOBILEPROXIMITYVERIFIER
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FREE_MOBILEPROXIMITYVERIFIER
+void uniffi_vauchi_mobile_fn_free_mobileproximityverifier(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_CONSTRUCTOR_MOBILEPROXIMITYVERIFIER_NEW
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_CONSTRUCTOR_MOBILEPROXIMITYVERIFIER_NEW
+void*_Nonnull uniffi_vauchi_mobile_fn_constructor_mobileproximityverifier_new(uint64_t handler, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_CONSTRUCTOR_MOBILEPROXIMITYVERIFIER_WITHOUT_HANDLER
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_CONSTRUCTOR_MOBILEPROXIMITYVERIFIER_WITHOUT_HANDLER
+void*_Nonnull uniffi_vauchi_mobile_fn_constructor_mobileproximityverifier_without_handler(RustCallStatus *_Nonnull out_status
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_METHOD_MOBILEPROXIMITYVERIFIER_EMIT_CHALLENGE
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_METHOD_MOBILEPROXIMITYVERIFIER_EMIT_CHALLENGE
+RustBuffer uniffi_vauchi_mobile_fn_method_mobileproximityverifier_emit_challenge(void*_Nonnull ptr, RustBuffer challenge, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_METHOD_MOBILEPROXIMITYVERIFIER_GET_CAPABILITY
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_METHOD_MOBILEPROXIMITYVERIFIER_GET_CAPABILITY
+RustBuffer uniffi_vauchi_mobile_fn_method_mobileproximityverifier_get_capability(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_METHOD_MOBILEPROXIMITYVERIFIER_IS_SUPPORTED
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_METHOD_MOBILEPROXIMITYVERIFIER_IS_SUPPORTED
+int8_t uniffi_vauchi_mobile_fn_method_mobileproximityverifier_is_supported(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_METHOD_MOBILEPROXIMITYVERIFIER_LISTEN_FOR_RESPONSE
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_METHOD_MOBILEPROXIMITYVERIFIER_LISTEN_FOR_RESPONSE
+RustBuffer uniffi_vauchi_mobile_fn_method_mobileproximityverifier_listen_for_response(void*_Nonnull ptr, uint64_t timeout_ms, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_METHOD_MOBILEPROXIMITYVERIFIER_STOP
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_METHOD_MOBILEPROXIMITYVERIFIER_STOP
+void uniffi_vauchi_mobile_fn_method_mobileproximityverifier_stop(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_CLONE_VAUCHIMOBILE
 #define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_CLONE_VAUCHIMOBILE
 void*_Nonnull uniffi_vauchi_mobile_fn_clone_vauchimobile(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
@@ -521,6 +614,11 @@ void uniffi_vauchi_mobile_fn_method_vauchimobile_verify_contact(void*_Nonnull pt
 RustBuffer uniffi_vauchi_mobile_fn_method_vauchimobile_verify_recovery_proof(void*_Nonnull ptr, RustBuffer proof_b64, RustCallStatus *_Nonnull out_status
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_INIT_CALLBACK_VTABLE_PLATFORMAUDIOHANDLER
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_INIT_CALLBACK_VTABLE_PLATFORMAUDIOHANDLER
+void uniffi_vauchi_mobile_fn_init_callback_vtable_platformaudiohandler(UniffiVTableCallbackInterfacePlatformAudioHandler* _Nonnull vtable
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FUNC_CHECK_PASSWORD_STRENGTH
 #define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FUNC_CHECK_PASSWORD_STRENGTH
 RustBuffer uniffi_vauchi_mobile_fn_func_check_password_strength(RustBuffer password, RustCallStatus *_Nonnull out_status
@@ -530,6 +628,21 @@ RustBuffer uniffi_vauchi_mobile_fn_func_check_password_strength(RustBuffer passw
 #define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FUNC_GENERATE_STORAGE_KEY
 RustBuffer uniffi_vauchi_mobile_fn_func_generate_storage_key(RustCallStatus *_Nonnull out_status
     
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FUNC_IS_ALLOWED_SCHEME
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FUNC_IS_ALLOWED_SCHEME
+int8_t uniffi_vauchi_mobile_fn_func_is_allowed_scheme(RustBuffer scheme, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FUNC_IS_BLOCKED_SCHEME
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FUNC_IS_BLOCKED_SCHEME
+int8_t uniffi_vauchi_mobile_fn_func_is_blocked_scheme(RustBuffer scheme, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FUNC_IS_SAFE_URL
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_FN_FUNC_IS_SAFE_URL
+int8_t uniffi_vauchi_mobile_fn_func_is_safe_url(RustBuffer url, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_FFI_VAUCHI_MOBILE_RUSTBUFFER_ALLOC
@@ -821,6 +934,54 @@ uint16_t uniffi_vauchi_mobile_checksum_func_check_password_strength(void
 #ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_FUNC_GENERATE_STORAGE_KEY
 #define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_FUNC_GENERATE_STORAGE_KEY
 uint16_t uniffi_vauchi_mobile_checksum_func_generate_storage_key(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_FUNC_IS_ALLOWED_SCHEME
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_FUNC_IS_ALLOWED_SCHEME
+uint16_t uniffi_vauchi_mobile_checksum_func_is_allowed_scheme(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_FUNC_IS_BLOCKED_SCHEME
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_FUNC_IS_BLOCKED_SCHEME
+uint16_t uniffi_vauchi_mobile_checksum_func_is_blocked_scheme(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_FUNC_IS_SAFE_URL
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_FUNC_IS_SAFE_URL
+uint16_t uniffi_vauchi_mobile_checksum_func_is_safe_url(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_MOBILEPROXIMITYVERIFIER_EMIT_CHALLENGE
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_MOBILEPROXIMITYVERIFIER_EMIT_CHALLENGE
+uint16_t uniffi_vauchi_mobile_checksum_method_mobileproximityverifier_emit_challenge(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_MOBILEPROXIMITYVERIFIER_GET_CAPABILITY
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_MOBILEPROXIMITYVERIFIER_GET_CAPABILITY
+uint16_t uniffi_vauchi_mobile_checksum_method_mobileproximityverifier_get_capability(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_MOBILEPROXIMITYVERIFIER_IS_SUPPORTED
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_MOBILEPROXIMITYVERIFIER_IS_SUPPORTED
+uint16_t uniffi_vauchi_mobile_checksum_method_mobileproximityverifier_is_supported(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_MOBILEPROXIMITYVERIFIER_LISTEN_FOR_RESPONSE
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_MOBILEPROXIMITYVERIFIER_LISTEN_FOR_RESPONSE
+uint16_t uniffi_vauchi_mobile_checksum_method_mobileproximityverifier_listen_for_response(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_MOBILEPROXIMITYVERIFIER_STOP
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_MOBILEPROXIMITYVERIFIER_STOP
+uint16_t uniffi_vauchi_mobile_checksum_method_mobileproximityverifier_stop(void
     
 );
 #endif
@@ -1124,6 +1285,18 @@ uint16_t uniffi_vauchi_mobile_checksum_method_vauchimobile_verify_recovery_proof
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_CONSTRUCTOR_MOBILEPROXIMITYVERIFIER_NEW
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_CONSTRUCTOR_MOBILEPROXIMITYVERIFIER_NEW
+uint16_t uniffi_vauchi_mobile_checksum_constructor_mobileproximityverifier_new(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_CONSTRUCTOR_MOBILEPROXIMITYVERIFIER_WITHOUT_HANDLER
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_CONSTRUCTOR_MOBILEPROXIMITYVERIFIER_WITHOUT_HANDLER
+uint16_t uniffi_vauchi_mobile_checksum_constructor_mobileproximityverifier_without_handler(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_CONSTRUCTOR_VAUCHIMOBILE_NEW
 #define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_CONSTRUCTOR_VAUCHIMOBILE_NEW
 uint16_t uniffi_vauchi_mobile_checksum_constructor_vauchimobile_new(void
@@ -1133,6 +1306,36 @@ uint16_t uniffi_vauchi_mobile_checksum_constructor_vauchimobile_new(void
 #ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_CONSTRUCTOR_VAUCHIMOBILE_NEW_WITH_SECURE_KEY
 #define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_CONSTRUCTOR_VAUCHIMOBILE_NEW_WITH_SECURE_KEY
 uint16_t uniffi_vauchi_mobile_checksum_constructor_vauchimobile_new_with_secure_key(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_PLATFORMAUDIOHANDLER_CHECK_CAPABILITY
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_PLATFORMAUDIOHANDLER_CHECK_CAPABILITY
+uint16_t uniffi_vauchi_mobile_checksum_method_platformaudiohandler_check_capability(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_PLATFORMAUDIOHANDLER_EMIT_SIGNAL
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_PLATFORMAUDIOHANDLER_EMIT_SIGNAL
+uint16_t uniffi_vauchi_mobile_checksum_method_platformaudiohandler_emit_signal(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_PLATFORMAUDIOHANDLER_RECEIVE_SIGNAL
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_PLATFORMAUDIOHANDLER_RECEIVE_SIGNAL
+uint16_t uniffi_vauchi_mobile_checksum_method_platformaudiohandler_receive_signal(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_PLATFORMAUDIOHANDLER_IS_ACTIVE
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_PLATFORMAUDIOHANDLER_IS_ACTIVE
+uint16_t uniffi_vauchi_mobile_checksum_method_platformaudiohandler_is_active(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_PLATFORMAUDIOHANDLER_STOP
+#define UNIFFI_FFIDEF_UNIFFI_VAUCHI_MOBILE_CHECKSUM_METHOD_PLATFORMAUDIOHANDLER_STOP
+uint16_t uniffi_vauchi_mobile_checksum_method_platformaudiohandler_stop(void
     
 );
 #endif

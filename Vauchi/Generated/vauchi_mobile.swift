@@ -431,6 +431,22 @@ fileprivate struct FfiConverterUInt64: FfiConverterPrimitive {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterFloat: FfiConverterPrimitive {
+    typealias FfiType = Float
+    typealias SwiftType = Float
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Float {
+        return try lift(readFloat(&buf))
+    }
+
+    public static func write(_ value: Float, into buf: inout [UInt8]) {
+        writeFloat(&buf, lower(value))
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterBool : FfiConverter {
     typealias FfiType = Int8
     typealias SwiftType = Bool
@@ -509,6 +525,234 @@ fileprivate struct FfiConverterData: FfiConverterRustBuffer {
         writeInt(&buf, len)
         writeBytes(&buf, value)
     }
+}
+
+
+
+
+/**
+ * Mobile-friendly proximity verification API.
+ */
+public protocol MobileProximityVerifierProtocol : AnyObject {
+    
+    /**
+     * Emit a proximity challenge.
+     *
+     * The challenge should be 16 bytes from the QR code.
+     */
+    func emitChallenge(challenge: Data)  -> MobileProximityResult
+    
+    /**
+     * Get device capability.
+     *
+     * Returns: "full", "emit_only", "receive_only", or "none"
+     */
+    func getCapability()  -> String
+    
+    /**
+     * Check if proximity verification is supported.
+     */
+    func isSupported()  -> Bool
+    
+    /**
+     * Listen for a proximity response.
+     *
+     * Returns the received challenge bytes, or empty on timeout.
+     */
+    func listenForResponse(timeoutMs: UInt64)  -> Data
+    
+    /**
+     * Stop any ongoing audio operation.
+     */
+    func stop() 
+    
+}
+
+/**
+ * Mobile-friendly proximity verification API.
+ */
+open class MobileProximityVerifier:
+    MobileProximityVerifierProtocol {
+    fileprivate let pointer: UnsafeMutableRawPointer!
+
+    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public struct NoPointer {
+        public init() {}
+    }
+
+    // TODO: We'd like this to be `private` but for Swifty reasons,
+    // we can't implement `FfiConverter` without making this `required` and we can't
+    // make it `required` without making it `public`.
+    required public init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
+        self.pointer = pointer
+    }
+
+    // This constructor can be used to instantiate a fake object.
+    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    //
+    // - Warning:
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public init(noPointer: NoPointer) {
+        self.pointer = nil
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
+        return try! rustCall { uniffi_vauchi_mobile_fn_clone_mobileproximityverifier(self.pointer, $0) }
+    }
+    /**
+     * Create a new proximity verifier with a platform audio handler.
+     */
+public convenience init(handler: PlatformAudioHandler) {
+    let pointer =
+        try! rustCall() {
+    uniffi_vauchi_mobile_fn_constructor_mobileproximityverifier_new(
+        FfiConverterCallbackInterfacePlatformAudioHandler.lower(handler),$0
+    )
+}
+    self.init(unsafeFromRawPointer: pointer)
+}
+
+    deinit {
+        guard let pointer = pointer else {
+            return
+        }
+
+        try! rustCall { uniffi_vauchi_mobile_fn_free_mobileproximityverifier(pointer, $0) }
+    }
+
+    
+    /**
+     * Create a proximity verifier without an audio handler.
+     *
+     * Will report as unsupported until a handler is provided.
+     */
+public static func withoutHandler() -> MobileProximityVerifier {
+    return try!  FfiConverterTypeMobileProximityVerifier.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_constructor_mobileproximityverifier_without_handler($0
+    )
+})
+}
+    
+
+    
+    /**
+     * Emit a proximity challenge.
+     *
+     * The challenge should be 16 bytes from the QR code.
+     */
+open func emitChallenge(challenge: Data) -> MobileProximityResult {
+    return try!  FfiConverterTypeMobileProximityResult.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_mobileproximityverifier_emit_challenge(self.uniffiClonePointer(),
+        FfiConverterData.lower(challenge),$0
+    )
+})
+}
+    
+    /**
+     * Get device capability.
+     *
+     * Returns: "full", "emit_only", "receive_only", or "none"
+     */
+open func getCapability() -> String {
+    return try!  FfiConverterString.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_mobileproximityverifier_get_capability(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Check if proximity verification is supported.
+     */
+open func isSupported() -> Bool {
+    return try!  FfiConverterBool.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_mobileproximityverifier_is_supported(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Listen for a proximity response.
+     *
+     * Returns the received challenge bytes, or empty on timeout.
+     */
+open func listenForResponse(timeoutMs: UInt64) -> Data {
+    return try!  FfiConverterData.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_mobileproximityverifier_listen_for_response(self.uniffiClonePointer(),
+        FfiConverterUInt64.lower(timeoutMs),$0
+    )
+})
+}
+    
+    /**
+     * Stop any ongoing audio operation.
+     */
+open func stop() {try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_mobileproximityverifier_stop(self.uniffiClonePointer(),$0
+    )
+}
+}
+    
+
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileProximityVerifier: FfiConverter {
+
+    typealias FfiType = UnsafeMutableRawPointer
+    typealias SwiftType = MobileProximityVerifier
+
+    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> MobileProximityVerifier {
+        return MobileProximityVerifier(unsafeFromRawPointer: pointer)
+    }
+
+    public static func lower(_ value: MobileProximityVerifier) -> UnsafeMutableRawPointer {
+        return value.uniffiClonePointer()
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileProximityVerifier {
+        let v: UInt64 = try readInt(&buf)
+        // The Rust code won't compile if a pointer won't fit in a UInt64.
+        // We have to go via `UInt` because that's the thing that's the size of a pointer.
+        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
+        if (ptr == nil) {
+            throw UniffiInternalError.unexpectedNullPointer
+        }
+        return try lift(ptr!)
+    }
+
+    public static func write(_ value: MobileProximityVerifier, into buf: inout [UInt8]) {
+        // This fiddling is because `Int` is the thing that's the same size as a pointer.
+        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
+        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+    }
+}
+
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileProximityVerifier_lift(_ pointer: UnsafeMutableRawPointer) throws -> MobileProximityVerifier {
+    return try FfiConverterTypeMobileProximityVerifier.lift(pointer)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileProximityVerifier_lower(_ value: MobileProximityVerifier) -> UnsafeMutableRawPointer {
+    return FfiConverterTypeMobileProximityVerifier.lower(value)
 }
 
 
@@ -1743,6 +1987,442 @@ public func FfiConverterTypeMobileContactField_lower(_ value: MobileContactField
 
 
 /**
+ * Device info for display.
+ */
+public struct MobileDeviceInfo {
+    /**
+     * Device index (0 = primary device).
+     */
+    public var deviceIndex: UInt32
+    /**
+     * Device name.
+     */
+    public var deviceName: String
+    /**
+     * Whether this is the current device.
+     */
+    public var isCurrent: Bool
+    /**
+     * Whether the device is active (not revoked).
+     */
+    public var isActive: Bool
+    /**
+     * Public key prefix (hex, first 16 chars).
+     */
+    public var publicKeyPrefix: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Device index (0 = primary device).
+         */deviceIndex: UInt32, 
+        /**
+         * Device name.
+         */deviceName: String, 
+        /**
+         * Whether this is the current device.
+         */isCurrent: Bool, 
+        /**
+         * Whether the device is active (not revoked).
+         */isActive: Bool, 
+        /**
+         * Public key prefix (hex, first 16 chars).
+         */publicKeyPrefix: String) {
+        self.deviceIndex = deviceIndex
+        self.deviceName = deviceName
+        self.isCurrent = isCurrent
+        self.isActive = isActive
+        self.publicKeyPrefix = publicKeyPrefix
+    }
+}
+
+
+
+extension MobileDeviceInfo: Equatable, Hashable {
+    public static func ==(lhs: MobileDeviceInfo, rhs: MobileDeviceInfo) -> Bool {
+        if lhs.deviceIndex != rhs.deviceIndex {
+            return false
+        }
+        if lhs.deviceName != rhs.deviceName {
+            return false
+        }
+        if lhs.isCurrent != rhs.isCurrent {
+            return false
+        }
+        if lhs.isActive != rhs.isActive {
+            return false
+        }
+        if lhs.publicKeyPrefix != rhs.publicKeyPrefix {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(deviceIndex)
+        hasher.combine(deviceName)
+        hasher.combine(isCurrent)
+        hasher.combine(isActive)
+        hasher.combine(publicKeyPrefix)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDeviceInfo: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDeviceInfo {
+        return
+            try MobileDeviceInfo(
+                deviceIndex: FfiConverterUInt32.read(from: &buf), 
+                deviceName: FfiConverterString.read(from: &buf), 
+                isCurrent: FfiConverterBool.read(from: &buf), 
+                isActive: FfiConverterBool.read(from: &buf), 
+                publicKeyPrefix: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileDeviceInfo, into buf: inout [UInt8]) {
+        FfiConverterUInt32.write(value.deviceIndex, into: &buf)
+        FfiConverterString.write(value.deviceName, into: &buf)
+        FfiConverterBool.write(value.isCurrent, into: &buf)
+        FfiConverterBool.write(value.isActive, into: &buf)
+        FfiConverterString.write(value.publicKeyPrefix, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceInfo_lift(_ buf: RustBuffer) throws -> MobileDeviceInfo {
+    return try FfiConverterTypeMobileDeviceInfo.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceInfo_lower(_ value: MobileDeviceInfo) -> RustBuffer {
+    return FfiConverterTypeMobileDeviceInfo.lower(value)
+}
+
+
+/**
+ * Device link QR data for display on existing device.
+ */
+public struct MobileDeviceLinkData {
+    /**
+     * QR code content (base64-encoded link data).
+     */
+    public var qrData: String
+    /**
+     * Identity public key (hex).
+     */
+    public var identityPublicKey: String
+    /**
+     * Unix timestamp when QR was generated.
+     */
+    public var timestamp: UInt64
+    /**
+     * Unix timestamp when QR expires.
+     */
+    public var expiresAt: UInt64
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * QR code content (base64-encoded link data).
+         */qrData: String, 
+        /**
+         * Identity public key (hex).
+         */identityPublicKey: String, 
+        /**
+         * Unix timestamp when QR was generated.
+         */timestamp: UInt64, 
+        /**
+         * Unix timestamp when QR expires.
+         */expiresAt: UInt64) {
+        self.qrData = qrData
+        self.identityPublicKey = identityPublicKey
+        self.timestamp = timestamp
+        self.expiresAt = expiresAt
+    }
+}
+
+
+
+extension MobileDeviceLinkData: Equatable, Hashable {
+    public static func ==(lhs: MobileDeviceLinkData, rhs: MobileDeviceLinkData) -> Bool {
+        if lhs.qrData != rhs.qrData {
+            return false
+        }
+        if lhs.identityPublicKey != rhs.identityPublicKey {
+            return false
+        }
+        if lhs.timestamp != rhs.timestamp {
+            return false
+        }
+        if lhs.expiresAt != rhs.expiresAt {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(qrData)
+        hasher.combine(identityPublicKey)
+        hasher.combine(timestamp)
+        hasher.combine(expiresAt)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDeviceLinkData: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDeviceLinkData {
+        return
+            try MobileDeviceLinkData(
+                qrData: FfiConverterString.read(from: &buf), 
+                identityPublicKey: FfiConverterString.read(from: &buf), 
+                timestamp: FfiConverterUInt64.read(from: &buf), 
+                expiresAt: FfiConverterUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileDeviceLinkData, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.qrData, into: &buf)
+        FfiConverterString.write(value.identityPublicKey, into: &buf)
+        FfiConverterUInt64.write(value.timestamp, into: &buf)
+        FfiConverterUInt64.write(value.expiresAt, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceLinkData_lift(_ buf: RustBuffer) throws -> MobileDeviceLinkData {
+    return try FfiConverterTypeMobileDeviceLinkData.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceLinkData_lower(_ value: MobileDeviceLinkData) -> RustBuffer {
+    return FfiConverterTypeMobileDeviceLinkData.lower(value)
+}
+
+
+/**
+ * Device link info parsed from QR code.
+ */
+public struct MobileDeviceLinkInfo {
+    /**
+     * Identity public key (hex).
+     */
+    public var identityPublicKey: String
+    /**
+     * Unix timestamp when QR was generated.
+     */
+    public var timestamp: UInt64
+    /**
+     * Whether the QR code has expired.
+     */
+    public var isExpired: Bool
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Identity public key (hex).
+         */identityPublicKey: String, 
+        /**
+         * Unix timestamp when QR was generated.
+         */timestamp: UInt64, 
+        /**
+         * Whether the QR code has expired.
+         */isExpired: Bool) {
+        self.identityPublicKey = identityPublicKey
+        self.timestamp = timestamp
+        self.isExpired = isExpired
+    }
+}
+
+
+
+extension MobileDeviceLinkInfo: Equatable, Hashable {
+    public static func ==(lhs: MobileDeviceLinkInfo, rhs: MobileDeviceLinkInfo) -> Bool {
+        if lhs.identityPublicKey != rhs.identityPublicKey {
+            return false
+        }
+        if lhs.timestamp != rhs.timestamp {
+            return false
+        }
+        if lhs.isExpired != rhs.isExpired {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(identityPublicKey)
+        hasher.combine(timestamp)
+        hasher.combine(isExpired)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDeviceLinkInfo: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDeviceLinkInfo {
+        return
+            try MobileDeviceLinkInfo(
+                identityPublicKey: FfiConverterString.read(from: &buf), 
+                timestamp: FfiConverterUInt64.read(from: &buf), 
+                isExpired: FfiConverterBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileDeviceLinkInfo, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.identityPublicKey, into: &buf)
+        FfiConverterUInt64.write(value.timestamp, into: &buf)
+        FfiConverterBool.write(value.isExpired, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceLinkInfo_lift(_ buf: RustBuffer) throws -> MobileDeviceLinkInfo {
+    return try FfiConverterTypeMobileDeviceLinkInfo.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceLinkInfo_lower(_ value: MobileDeviceLinkInfo) -> RustBuffer {
+    return FfiConverterTypeMobileDeviceLinkInfo.lower(value)
+}
+
+
+/**
+ * Result of completing device link (for existing device).
+ */
+public struct MobileDeviceLinkResult {
+    /**
+     * Whether linking was successful.
+     */
+    public var success: Bool
+    /**
+     * New device's name.
+     */
+    public var deviceName: String
+    /**
+     * New device's index.
+     */
+    public var deviceIndex: UInt32
+    /**
+     * Error message if failed.
+     */
+    public var errorMessage: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Whether linking was successful.
+         */success: Bool, 
+        /**
+         * New device's name.
+         */deviceName: String, 
+        /**
+         * New device's index.
+         */deviceIndex: UInt32, 
+        /**
+         * Error message if failed.
+         */errorMessage: String?) {
+        self.success = success
+        self.deviceName = deviceName
+        self.deviceIndex = deviceIndex
+        self.errorMessage = errorMessage
+    }
+}
+
+
+
+extension MobileDeviceLinkResult: Equatable, Hashable {
+    public static func ==(lhs: MobileDeviceLinkResult, rhs: MobileDeviceLinkResult) -> Bool {
+        if lhs.success != rhs.success {
+            return false
+        }
+        if lhs.deviceName != rhs.deviceName {
+            return false
+        }
+        if lhs.deviceIndex != rhs.deviceIndex {
+            return false
+        }
+        if lhs.errorMessage != rhs.errorMessage {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(success)
+        hasher.combine(deviceName)
+        hasher.combine(deviceIndex)
+        hasher.combine(errorMessage)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDeviceLinkResult: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDeviceLinkResult {
+        return
+            try MobileDeviceLinkResult(
+                success: FfiConverterBool.read(from: &buf), 
+                deviceName: FfiConverterString.read(from: &buf), 
+                deviceIndex: FfiConverterUInt32.read(from: &buf), 
+                errorMessage: FfiConverterOptionString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileDeviceLinkResult, into buf: inout [UInt8]) {
+        FfiConverterBool.write(value.success, into: &buf)
+        FfiConverterString.write(value.deviceName, into: &buf)
+        FfiConverterUInt32.write(value.deviceIndex, into: &buf)
+        FfiConverterOptionString.write(value.errorMessage, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceLinkResult_lift(_ buf: RustBuffer) throws -> MobileDeviceLinkResult {
+    return try FfiConverterTypeMobileDeviceLinkResult.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceLinkResult_lower(_ value: MobileDeviceLinkResult) -> RustBuffer {
+    return FfiConverterTypeMobileDeviceLinkResult.lower(value)
+}
+
+
+/**
  * Exchange QR data.
  */
 public struct MobileExchangeData {
@@ -2010,6 +2690,87 @@ public func FfiConverterTypeMobilePasswordCheck_lift(_ buf: RustBuffer) throws -
 #endif
 public func FfiConverterTypeMobilePasswordCheck_lower(_ value: MobilePasswordCheck) -> RustBuffer {
     return FfiConverterTypeMobilePasswordCheck.lower(value)
+}
+
+
+/**
+ * Result of proximity verification.
+ */
+public struct MobileProximityResult {
+    /**
+     * Whether verification succeeded
+     */
+    public var success: Bool
+    /**
+     * Error message if failed
+     */
+    public var error: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Whether verification succeeded
+         */success: Bool, 
+        /**
+         * Error message if failed
+         */error: String) {
+        self.success = success
+        self.error = error
+    }
+}
+
+
+
+extension MobileProximityResult: Equatable, Hashable {
+    public static func ==(lhs: MobileProximityResult, rhs: MobileProximityResult) -> Bool {
+        if lhs.success != rhs.success {
+            return false
+        }
+        if lhs.error != rhs.error {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(success)
+        hasher.combine(error)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileProximityResult: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileProximityResult {
+        return
+            try MobileProximityResult(
+                success: FfiConverterBool.read(from: &buf), 
+                error: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileProximityResult, into buf: inout [UInt8]) {
+        FfiConverterBool.write(value.success, into: &buf)
+        FfiConverterString.write(value.error, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileProximityResult_lift(_ buf: RustBuffer) throws -> MobileProximityResult {
+    return try FfiConverterTypeMobileProximityResult.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileProximityResult_lower(_ value: MobileProximityResult) -> RustBuffer {
+    return FfiConverterTypeMobileProximityResult.lower(value)
 }
 
 
@@ -3314,6 +4075,246 @@ extension MobileSyncStatus: Equatable, Hashable {}
 
 
 
+
+
+
+/**
+ * Callback interface for platform-specific audio operations.
+ *
+ * Implement this trait in Swift (iOS) or Kotlin (Android) to provide
+ * native audio functionality for ultrasonic proximity verification.
+ */
+public protocol PlatformAudioHandler : AnyObject {
+    
+    /**
+     * Check if the device supports ultrasonic audio.
+     *
+     * Returns: "full", "emit_only", "receive_only", or "none"
+     */
+    func checkCapability()  -> String
+    
+    /**
+     * Emit an ultrasonic signal encoding the given data.
+     *
+     * The data is already FSK-encoded samples at the configured sample rate.
+     * Platform should play these samples through the speaker.
+     *
+     * Returns empty string on success, error message on failure.
+     */
+    func emitSignal(samples: [Float], sampleRate: UInt32)  -> String
+    
+    /**
+     * Record audio and return samples.
+     *
+     * Record for up to `timeout_ms` milliseconds at the given sample rate.
+     * Return the recorded samples as f32 values normalized to [-1.0, 1.0].
+     *
+     * Returns recorded samples, or empty vec on timeout/error.
+     */
+    func receiveSignal(timeoutMs: UInt64, sampleRate: UInt32)  -> [Float]
+    
+    /**
+     * Check if audio is currently active.
+     */
+    func isActive()  -> Bool
+    
+    /**
+     * Stop any ongoing audio operation.
+     */
+    func stop() 
+    
+}
+
+// Magic number for the Rust proxy to call using the same mechanism as every other method,
+// to free the callback once it's dropped by Rust.
+private let IDX_CALLBACK_FREE: Int32 = 0
+// Callback return codes
+private let UNIFFI_CALLBACK_SUCCESS: Int32 = 0
+private let UNIFFI_CALLBACK_ERROR: Int32 = 1
+private let UNIFFI_CALLBACK_UNEXPECTED_ERROR: Int32 = 2
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+fileprivate struct UniffiCallbackInterfacePlatformAudioHandler {
+
+    // Create the VTable using a series of closures.
+    // Swift automatically converts these into C callback functions.
+    static var vtable: UniffiVTableCallbackInterfacePlatformAudioHandler = UniffiVTableCallbackInterfacePlatformAudioHandler(
+        checkCapability: { (
+            uniffiHandle: UInt64,
+            uniffiOutReturn: UnsafeMutablePointer<RustBuffer>,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> String in
+                guard let uniffiObj = try? FfiConverterCallbackInterfacePlatformAudioHandler.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.checkCapability(
+                )
+            }
+
+            
+            let writeReturn = { uniffiOutReturn.pointee = FfiConverterString.lower($0) }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        emitSignal: { (
+            uniffiHandle: UInt64,
+            samples: RustBuffer,
+            sampleRate: UInt32,
+            uniffiOutReturn: UnsafeMutablePointer<RustBuffer>,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> String in
+                guard let uniffiObj = try? FfiConverterCallbackInterfacePlatformAudioHandler.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.emitSignal(
+                     samples: try FfiConverterSequenceFloat.lift(samples),
+                     sampleRate: try FfiConverterUInt32.lift(sampleRate)
+                )
+            }
+
+            
+            let writeReturn = { uniffiOutReturn.pointee = FfiConverterString.lower($0) }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        receiveSignal: { (
+            uniffiHandle: UInt64,
+            timeoutMs: UInt64,
+            sampleRate: UInt32,
+            uniffiOutReturn: UnsafeMutablePointer<RustBuffer>,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> [Float] in
+                guard let uniffiObj = try? FfiConverterCallbackInterfacePlatformAudioHandler.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.receiveSignal(
+                     timeoutMs: try FfiConverterUInt64.lift(timeoutMs),
+                     sampleRate: try FfiConverterUInt32.lift(sampleRate)
+                )
+            }
+
+            
+            let writeReturn = { uniffiOutReturn.pointee = FfiConverterSequenceFloat.lower($0) }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        isActive: { (
+            uniffiHandle: UInt64,
+            uniffiOutReturn: UnsafeMutablePointer<Int8>,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> Bool in
+                guard let uniffiObj = try? FfiConverterCallbackInterfacePlatformAudioHandler.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.isActive(
+                )
+            }
+
+            
+            let writeReturn = { uniffiOutReturn.pointee = FfiConverterBool.lower($0) }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        stop: { (
+            uniffiHandle: UInt64,
+            uniffiOutReturn: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws -> () in
+                guard let uniffiObj = try? FfiConverterCallbackInterfacePlatformAudioHandler.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return uniffiObj.stop(
+                )
+            }
+
+            
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        uniffiFree: { (uniffiHandle: UInt64) -> () in
+            let result = try? FfiConverterCallbackInterfacePlatformAudioHandler.handleMap.remove(handle: uniffiHandle)
+            if result == nil {
+                print("Uniffi callback interface PlatformAudioHandler: handle missing in uniffiFree")
+            }
+        }
+    )
+}
+
+private func uniffiCallbackInitPlatformAudioHandler() {
+    uniffi_vauchi_mobile_fn_init_callback_vtable_platformaudiohandler(&UniffiCallbackInterfacePlatformAudioHandler.vtable)
+}
+
+// FfiConverter protocol for callback interfaces
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterCallbackInterfacePlatformAudioHandler {
+    fileprivate static var handleMap = UniffiHandleMap<PlatformAudioHandler>()
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+extension FfiConverterCallbackInterfacePlatformAudioHandler : FfiConverter {
+    typealias SwiftType = PlatformAudioHandler
+    typealias FfiType = UInt64
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lift(_ handle: UInt64) throws -> SwiftType {
+        try handleMap.get(handle: handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        let handle: UInt64 = try readInt(&buf)
+        return try lift(handle)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func lower(_ v: SwiftType) -> UInt64 {
+        return handleMap.insert(obj: v)
+    }
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+    public static func write(_ v: SwiftType, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(v))
+    }
+}
+
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
@@ -3383,6 +4384,31 @@ fileprivate struct FfiConverterOptionTypeMobileRecoveryProgress: FfiConverterRus
         case 1: return try FfiConverterTypeMobileRecoveryProgress.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceFloat: FfiConverterRustBuffer {
+    typealias SwiftType = [Float]
+
+    public static func write(_ value: [Float], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterFloat.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [Float] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [Float]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterFloat.read(from: &buf))
+        }
+        return seq
     }
 }
 
@@ -3535,6 +4561,45 @@ public func generateStorageKey() -> Data {
     )
 })
 }
+/**
+ * Check if a URL scheme is in the allowed list.
+ *
+ * Allowed schemes: tel, mailto, sms, https, http, geo.
+ */
+public func isAllowedScheme(scheme: String) -> Bool {
+    return try!  FfiConverterBool.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_func_is_allowed_scheme(
+        FfiConverterString.lower(scheme),$0
+    )
+})
+}
+/**
+ * Check if a URL scheme is explicitly blocked.
+ *
+ * Blocked schemes: javascript, vbscript, data, file, ftp, blob.
+ */
+public func isBlockedScheme(scheme: String) -> Bool {
+    return try!  FfiConverterBool.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_func_is_blocked_scheme(
+        FfiConverterString.lower(scheme),$0
+    )
+})
+}
+/**
+ * Check if a URL is safe to open in an external application.
+ *
+ * Returns `true` for allowed schemes: http, https, tel, mailto, sms, geo.
+ * Returns `false` for blocked schemes (javascript, data, file, etc.) or unknown schemes.
+ *
+ * Use this to validate URLs before opening them to prevent security issues.
+ */
+public func isSafeUrl(url: String) -> Bool {
+    return try!  FfiConverterBool.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_func_is_safe_url(
+        FfiConverterString.lower(url),$0
+    )
+})
+}
 
 private enum InitializationResult {
     case ok
@@ -3555,6 +4620,30 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_func_generate_storage_key() != 24673) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_func_is_allowed_scheme() != 10327) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_func_is_blocked_scheme() != 1634) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_func_is_safe_url() != 43299) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_mobileproximityverifier_emit_challenge() != 35393) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_mobileproximityverifier_get_capability() != 11037) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_mobileproximityverifier_is_supported() != 55487) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_mobileproximityverifier_listen_for_response() != 13338) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_mobileproximityverifier_stop() != 48109) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_add_contact_to_label() != 6394) {
@@ -3707,13 +4796,35 @@ private var initializationResult: InitializationResult = {
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_verify_recovery_proof() != 55854) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_constructor_mobileproximityverifier_new() != 33177) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_constructor_mobileproximityverifier_without_handler() != 27250) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_constructor_vauchimobile_new() != 54148) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_constructor_vauchimobile_new_with_secure_key() != 16278) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_platformaudiohandler_check_capability() != 34713) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_platformaudiohandler_emit_signal() != 23893) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_platformaudiohandler_receive_signal() != 19346) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_platformaudiohandler_is_active() != 3765) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_platformaudiohandler_stop() != 15316) {
+        return InitializationResult.apiChecksumMismatch
+    }
 
+    uniffiCallbackInitPlatformAudioHandler()
     return InitializationResult.ok
 }()
 
