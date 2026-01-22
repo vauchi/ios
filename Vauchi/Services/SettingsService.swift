@@ -10,6 +10,9 @@ private enum SettingsKey: String {
     case autoSyncEnabled = "vauchi.autoSyncEnabled"
     case syncOnLaunch = "vauchi.syncOnLaunch"
     case notificationsEnabled = "vauchi.notificationsEnabled"
+    case hasCompletedOnboarding = "vauchi.hasCompletedOnboarding"
+    case onboardingStep = "vauchi.onboardingStep"
+    case hasDismissedDemoContact = "vauchi.hasDismissedDemoContact"
 }
 
 /// Service for managing persistent app settings
@@ -88,6 +91,27 @@ final class SettingsService {
         set { defaults.set(newValue, forKey: SettingsKey.notificationsEnabled.rawValue) }
     }
 
+    // MARK: - Onboarding Settings
+
+    /// Whether the user has completed the onboarding flow
+    var hasCompletedOnboarding: Bool {
+        get { defaults.bool(forKey: SettingsKey.hasCompletedOnboarding.rawValue) }
+        set { defaults.set(newValue, forKey: SettingsKey.hasCompletedOnboarding.rawValue) }
+    }
+
+    /// Current onboarding step (for resume functionality)
+    /// 0 = welcome, 1 = identity, 2 = card wizard, 3 = preview, 4 = security, 5 = complete
+    var onboardingStep: Int {
+        get { defaults.integer(forKey: SettingsKey.onboardingStep.rawValue) }
+        set { defaults.set(newValue, forKey: SettingsKey.onboardingStep.rawValue) }
+    }
+
+    /// Whether the user has dismissed the demo contact
+    var hasDismissedDemoContact: Bool {
+        get { defaults.bool(forKey: SettingsKey.hasDismissedDemoContact.rawValue) }
+        set { defaults.set(newValue, forKey: SettingsKey.hasDismissedDemoContact.rawValue) }
+    }
+
     // MARK: - Reset
 
     /// Resets all settings to defaults
@@ -97,9 +121,18 @@ final class SettingsService {
             SettingsKey.lastSyncTime,
             SettingsKey.autoSyncEnabled,
             SettingsKey.syncOnLaunch,
-            SettingsKey.notificationsEnabled
+            SettingsKey.notificationsEnabled,
+            SettingsKey.hasCompletedOnboarding,
+            SettingsKey.onboardingStep,
+            SettingsKey.hasDismissedDemoContact
         ] {
             defaults.removeObject(forKey: key.rawValue)
         }
+    }
+
+    /// Reset onboarding state (for replay from settings)
+    func resetOnboarding() {
+        defaults.removeObject(forKey: SettingsKey.hasCompletedOnboarding.rawValue)
+        defaults.removeObject(forKey: SettingsKey.onboardingStep.rawValue)
     }
 }
