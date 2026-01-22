@@ -113,6 +113,7 @@ struct ContactsView: View {
 }
 
 struct ContactRow: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
     let contact: ContactInfo
 
     var body: some View {
@@ -143,6 +144,12 @@ struct ContactRow: View {
                     Text(contact.verified ? "Verified" : "Not verified")
                         .font(.caption)
                         .foregroundColor(.secondary)
+
+                    // Delivery status indicator
+                    if let status = viewModel.getLatestDeliveryStatusForContact(contactId: contact.id) {
+                        Spacer()
+                        DeliveryStatusIndicator(status: status)
+                    }
                 }
             }
 

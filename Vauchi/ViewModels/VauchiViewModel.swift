@@ -558,6 +558,23 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
+    /// Get the latest delivery status for a contact
+    func getLatestDeliveryStatusForContact(contactId: String) -> VauchiDeliveryStatus? {
+        // Check cached delivery records first
+        if let latestRecord = deliveryRecords.first(where: { $0.recipientId == contactId }) {
+            return latestRecord.status
+        }
+        return nil
+    }
+
+    /// Check if a contact has any pending deliveries
+    func hasPendingDeliveryForContact(contactId: String) -> Bool {
+        return deliveryRecords.contains { record in
+            record.recipientId == contactId &&
+            (record.status == .queued || record.status == .sent || record.status == .stored)
+        }
+    }
+
     // MARK: - Backup
 
     func exportBackup(password: String) async throws -> String {

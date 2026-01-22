@@ -122,6 +122,21 @@ struct SettingsView: View {
                     Text("Back up your identity to restore it on another device or after reinstalling.")
                 }
 
+                // Sync section - Delivery Status
+                Section("Message Delivery") {
+                    NavigationLink(destination: DeliveryStatusView()) {
+                        HStack {
+                            Label("Delivery Status", systemImage: "paperplane.circle")
+                            Spacer()
+                            if viewModel.failedDeliveryCount > 0 {
+                                Text("\(viewModel.failedDeliveryCount) failed")
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+                }
+
                 // Security section
                 Section("Security") {
                     NavigationLink(destination: LinkedDevicesView()) {
