@@ -38,11 +38,15 @@ struct HomeView: View {
                         HStack {
                             Text("Your Card")
                                 .font(.headline)
+                                .accessibilityAddTraits(.isHeader)
                             Spacer()
                             Button(action: { showAddField = true }) {
                                 Image(systemName: "plus.circle")
                                     .foregroundColor(.cyan)
                             }
+                            .accessibilityIdentifier("card.field.add")
+                            .accessibilityLabel("Add field")
+                            .accessibilityHint("Add a new field to your contact card")
                         }
 
                         if let fields = viewModel.card?.fields, !fields.isEmpty {
@@ -60,6 +64,8 @@ struct HomeView: View {
                                 .frame(maxWidth: .infinity)
                                 .background(Color(.systemGray6))
                                 .cornerRadius(10)
+                                .accessibilityIdentifier("card.empty")
+                                .accessibilityHint("Use the add button above to create your first field")
                         }
                     }
                     .padding()
@@ -133,19 +139,32 @@ struct SyncStatusIndicator: View {
     let syncState: SyncState
 
     var body: some View {
+        Group {
+            switch syncState {
+            case .idle:
+                Image(systemName: "checkmark.circle")
+                    .foregroundColor(.green)
+            case .syncing:
+                ProgressView()
+                    .scaleEffect(0.8)
+            case .success:
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+            case .error:
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+            }
+        }
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityIdentifier("settings.sync.status")
+    }
+
+    private var accessibilityLabel: String {
         switch syncState {
-        case .idle:
-            Image(systemName: "checkmark.circle")
-                .foregroundColor(.green)
-        case .syncing:
-            ProgressView()
-                .scaleEffect(0.8)
-        case .success:
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.green)
-        case .error:
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.orange)
+        case .idle: return "Sync ready"
+        case .syncing: return "Syncing in progress"
+        case .success: return "Sync completed successfully"
+        case .error: return "Sync error occurred"
         }
     }
 }
@@ -173,6 +192,7 @@ struct FieldRow: View {
             Image(systemName: icon(for: field.fieldType))
                 .foregroundColor(.cyan)
                 .frame(width: 24)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(field.label)
@@ -181,6 +201,8 @@ struct FieldRow: View {
                 Text(field.value)
                     .font(.body)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(field.fieldType.capitalized) field: \(field.label), \(field.value)")
 
             Spacer()
 
@@ -189,16 +211,23 @@ struct FieldRow: View {
                     .foregroundColor(.cyan)
                     .font(.caption)
             }
+            .accessibilityIdentifier("card.field.edit")
+            .accessibilityLabel("Edit \(field.label)")
+            .accessibilityHint("Opens editor to change the value")
 
             Button(action: { showDeleteAlert = true }) {
                 Image(systemName: "trash")
                     .foregroundColor(.red)
                     .font(.caption)
             }
+            .accessibilityIdentifier("card.field.remove")
+            .accessibilityLabel("Delete \(field.label)")
+            .accessibilityHint("Removes this field from your card")
         }
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(8)
+        .accessibilityIdentifier("card.field.row")
         .alert("Delete Field", isPresented: $showDeleteAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {

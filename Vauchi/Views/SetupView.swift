@@ -18,14 +18,19 @@ struct SetupView: View {
                 Image(systemName: "person.crop.rectangle.stack")
                     .font(.system(size: 60))
                     .foregroundColor(.cyan)
+                    .accessibilityHidden(true)
 
                 Text("Welcome to Vauchi")
                     .font(.title)
                     .fontWeight(.bold)
+                    .accessibilityIdentifier("setup.welcome.title")
+                    .accessibilityAddTraits(.isHeader)
 
                 Text("Privacy-focused contact card exchange")
                     .foregroundColor(.secondary)
+                    .accessibilityIdentifier("setup.welcome.description")
             }
+            .accessibilityElement(children: .combine)
 
             Spacer()
 
@@ -33,16 +38,22 @@ struct SetupView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Your Display Name")
                     .font(.headline)
+                    .accessibilityHidden(true) // Label is associated with text field
 
                 TextField("Enter your name", text: $name)
                     .textFieldStyle(.roundedBorder)
                     .autocapitalization(.words)
                     .disabled(isLoading)
+                    .accessibilityIdentifier("setup.name.field")
+                    .accessibilityLabel("Display name")
+                    .accessibilityHint("Enter the name others will see when you exchange cards")
 
                 if let error = errorMessage {
                     Text(error)
                         .foregroundColor(.red)
                         .font(.caption)
+                        .accessibilityIdentifier("error.message")
+                        .accessibilityLabel("Error: \(error)")
                 }
 
                 Button(action: createIdentity) {
@@ -50,6 +61,7 @@ struct SetupView: View {
                         if isLoading {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .accessibilityIdentifier("loading.indicator")
                         }
                         Text(isLoading ? "Creating..." : "Get Started")
                     }
@@ -60,6 +72,9 @@ struct SetupView: View {
                     .cornerRadius(10)
                 }
                 .disabled(name.isEmpty || isLoading)
+                .accessibilityIdentifier("setup.create.button")
+                .accessibilityLabel(isLoading ? "Creating identity" : "Get Started")
+                .accessibilityHint(name.isEmpty ? "Enter your name first" : "Creates your identity and contact card")
             }
             .padding(.horizontal, 32)
 

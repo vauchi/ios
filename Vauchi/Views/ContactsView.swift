@@ -128,6 +128,7 @@ struct ContactRow: View {
                     .font(.headline)
                     .foregroundColor(.white)
             }
+            .accessibilityHidden(true)
 
             // Info
             VStack(alignment: .leading, spacing: 2) {
@@ -140,6 +141,7 @@ struct ContactRow: View {
                         Image(systemName: "checkmark.seal.fill")
                             .foregroundColor(.green)
                             .font(.caption)
+                            .accessibilityIdentifier("contacts.verified")
                     }
                     Text(contact.verified ? "Verified" : "Not verified")
                         .font(.caption)
@@ -163,6 +165,10 @@ struct ContactRow: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityIdentifier("contacts.row")
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(contact.displayName), \(contact.verified ? "verified" : "not verified")")
+        .accessibilityHint("Double tap to view contact details")
     }
 }
 
@@ -172,10 +178,12 @@ struct EmptyContactsView: View {
             Image(systemName: "person.2.slash")
                 .font(.system(size: 60))
                 .foregroundColor(.secondary)
+                .accessibilityHidden(true)
 
             Text("No contacts yet")
                 .font(.title2)
                 .fontWeight(.medium)
+                .accessibilityAddTraits(.isHeader)
 
             Text("Exchange with someone to add them as a contact")
                 .foregroundColor(.secondary)
@@ -189,7 +197,10 @@ struct EmptyContactsView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
+            .accessibilityLabel("Start Exchange")
+            .accessibilityHint("Opens the QR code exchange screen to add your first contact")
         }
+        .accessibilityIdentifier("contacts.empty")
     }
 }
 

@@ -23,11 +23,13 @@ struct ExchangeView: View {
                     VStack(spacing: 16) {
                         Text("Your QR Code")
                             .font(.headline)
+                            .accessibilityAddTraits(.isHeader)
 
                         Text("Have someone scan this to add you as a contact")
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
+                            .accessibilityIdentifier("exchange.instructions")
 
                         if isLoading {
                             ProgressView()
@@ -55,6 +57,9 @@ struct ExchangeView: View {
                                     .padding()
                                     .background(Color.white)
                                     .cornerRadius(12)
+                                    .accessibilityIdentifier("exchange.qrcode")
+                                    .accessibilityLabel("Your contact exchange QR code")
+                                    .accessibilityHint("Show this to someone to let them scan and add you as a contact")
 
                                 // Expiration timer
                                 HStack(spacing: 4) {
@@ -97,6 +102,7 @@ struct ExchangeView: View {
                     VStack(spacing: 16) {
                         Text("Scan a Code")
                             .font(.headline)
+                            .accessibilityAddTraits(.isHeader)
 
                         Text("Scan someone else's QR code to add them")
                             .font(.caption)
@@ -110,6 +116,9 @@ struct ExchangeView: View {
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
                         }
+                        .accessibilityIdentifier("exchange.scan.button")
+                        .accessibilityLabel("Scan QR code")
+                        .accessibilityHint("Opens the camera to scan someone else's QR code and add them as a contact")
                     }
                     .padding()
                     .frame(maxWidth: .infinity)
