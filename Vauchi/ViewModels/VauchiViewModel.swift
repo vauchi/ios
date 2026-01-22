@@ -97,6 +97,11 @@ class VauchiViewModel: ObservableObject {
     // Network state
     @Published var isOnline = false
 
+    // Delivery status
+    @Published var deliveryRecords: [VauchiDeliveryRecord] = []
+    @Published var retryEntries: [VauchiRetryEntry] = []
+    @Published var failedDeliveryCount: Int = 0
+
     // User-facing alerts
     @Published var showAlert = false
     @Published var alertTitle = ""
@@ -491,6 +496,65 @@ class VauchiViewModel: ObservableObject {
             pendingUpdates = Int(try repository.pendingUpdateCount())
         } catch {
             pendingUpdates = 0
+        }
+    }
+
+    // MARK: - Delivery Status
+
+    func loadDeliveryRecords() async {
+        guard let repository = repository else { return }
+
+        do {
+            deliveryRecords = try repository.getAllDeliveryRecords()
+            failedDeliveryCount = deliveryRecords.filter { $0.isFailed }.count
+        } catch {
+            deliveryRecords = []
+            failedDeliveryCount = 0
+        }
+    }
+
+    func loadRetryEntries() async {
+        guard let repository = repository else { return }
+
+        do {
+            retryEntries = try repository.getRetryEntries()
+        } catch {
+            retryEntries = []
+        }
+    }
+
+    func getDeliveryRecordsForContact(contactId: String) async -> [VauchiDeliveryRecord] {
+        guard let repository = repository else { return [] }
+
+        do {
+            return try repository.getDeliveryRecordsForContact(contactId: contactId)
+        } catch {
+            return []
+        }
+    }
+
+    func getDeliverySummary(messageId: String) async -> VauchiDeliverySummary? {
+        guard let repository = repository else { return nil }
+
+        do {
+            return try repository.getDeliverySummary(messageId: messageId)
+        } catch {
+            return nil
+        }
+    }
+
+    func retryDelivery(messageId: String) async -> Bool {
+        guard let repository = repository else { return false }
+
+        do {
+            let success = try repository.retryDelivery(messageId: messageId)
+            if success {
+                await loadDeliveryRecords()
+                await loadRetryEntries()
+            }
+            return success
+        } catch {
+            return false
         }
     }
 

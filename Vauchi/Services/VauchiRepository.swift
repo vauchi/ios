@@ -193,6 +193,132 @@ struct VauchiSocialNetwork: Identifiable {
     let urlTemplate: String
 }
 
+// MARK: - Delivery Status Types
+
+/// Delivery status for tracking message delivery
+enum VauchiDeliveryStatus: Equatable {
+    case queued
+    case sent
+    case stored
+    case delivered
+    case expired
+    case failed(reason: String)
+
+    var displayName: String {
+        switch self {
+        case .queued: return "Queued"
+        case .sent: return "Sent"
+        case .stored: return "Stored"
+        case .delivered: return "Delivered"
+        case .expired: return "Expired"
+        case .failed: return "Failed"
+        }
+    }
+
+    var iconName: String {
+        switch self {
+        case .queued: return "clock"
+        case .sent: return "arrow.up.circle"
+        case .stored: return "checkmark.circle"
+        case .delivered: return "checkmark.circle.fill"
+        case .expired: return "exclamationmark.triangle"
+        case .failed: return "xmark.circle"
+        }
+    }
+
+    var color: String {
+        switch self {
+        case .queued: return "gray"
+        case .sent: return "blue"
+        case .stored: return "cyan"
+        case .delivered: return "green"
+        case .expired: return "orange"
+        case .failed: return "red"
+        }
+    }
+
+    /// Convert from MobileDeliveryStatus
+    static func from(_ mobile: MobileDeliveryStatus) -> VauchiDeliveryStatus {
+        switch mobile {
+        case .queued: return .queued
+        case .sent: return .sent
+        case .stored: return .stored
+        case .delivered: return .delivered
+        case .expired: return .expired
+        case .failed: return .failed(reason: "")
+        }
+    }
+}
+
+/// Delivery record for tracking outbound message status
+struct VauchiDeliveryRecord: Identifiable {
+    let id: String
+    let messageId: String
+    let recipientId: String
+    let status: VauchiDeliveryStatus
+    let createdAt: Date
+    let updatedAt: Date
+    let expiresAt: Date?
+
+    init(messageId: String, recipientId: String, status: VauchiDeliveryStatus,
+         createdAt: Date, updatedAt: Date, expiresAt: Date?) {
+        self.id = messageId
+        self.messageId = messageId
+        self.recipientId = recipientId
+        self.status = status
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.expiresAt = expiresAt
+    }
+
+    var isExpired: Bool {
+        guard let expiresAt = expiresAt else { return false }
+        return Date() > expiresAt
+    }
+
+    var isFailed: Bool {
+        if case .failed = status { return true }
+        return false
+    }
+}
+
+/// Retry entry for failed deliveries
+struct VauchiRetryEntry: Identifiable {
+    let id: String
+    let messageId: String
+    let recipientId: String
+    let attempt: UInt32
+    let nextRetry: Date
+    let createdAt: Date
+    let maxAttempts: UInt32
+
+    var isMaxExceeded: Bool {
+        attempt >= maxAttempts
+    }
+}
+
+/// Summary of delivery status across all devices
+struct VauchiDeliverySummary {
+    let messageId: String
+    let totalDevices: UInt32
+    let deliveredDevices: UInt32
+    let pendingDevices: UInt32
+    let failedDevices: UInt32
+
+    var isFullyDelivered: Bool {
+        deliveredDevices == totalDevices && totalDevices > 0
+    }
+
+    var progressPercent: UInt32 {
+        guard totalDevices > 0 else { return 0 }
+        return (deliveredDevices * 100) / totalDevices
+    }
+
+    var displayText: String {
+        "Delivered to \(deliveredDevices) of \(totalDevices) devices"
+    }
+}
+
 /// Repository class wrapping VauchiMobile UniFFI bindings
 class VauchiRepository {
     // MARK: - Properties
@@ -701,5 +827,103 @@ class VauchiRepository {
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
+    }
+
+    // MARK: - Delivery Status Operations
+
+    /// Get all delivery records
+    func getAllDeliveryRecords() throws -> [VauchiDeliveryRecord] {
+        do {
+            return try vauchi.getAllDeliveryRecords().map(convertDeliveryRecord)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get delivery records for a specific contact
+    func getDeliveryRecordsForContact(contactId: String) throws -> [VauchiDeliveryRecord] {
+        do {
+            return try vauchi.getDeliveryRecordsForContact(recipientId: contactId).map(convertDeliveryRecord)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get delivery summary for a message (multi-device)
+    func getDeliverySummary(messageId: String) throws -> VauchiDeliverySummary {
+        do {
+            let summary = try vauchi.getDeliverySummary(messageId: messageId)
+            return VauchiDeliverySummary(
+                messageId: summary.messageId,
+                totalDevices: summary.totalDevices,
+                deliveredDevices: summary.deliveredDevices,
+                pendingDevices: summary.pendingDevices,
+                failedDevices: summary.failedDevices
+            )
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get all retry entries
+    func getRetryEntries() throws -> [VauchiRetryEntry] {
+        do {
+            return try vauchi.getDueRetries().map(convertRetryEntry)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Retry a failed delivery
+    func retryDelivery(messageId: String) throws -> Bool {
+        do {
+            return try vauchi.manualRetry(messageId: messageId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get count of failed deliveries
+    func failedDeliveryCount() throws -> UInt32 {
+        do {
+            return try vauchi.countFailedDeliveries()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    // MARK: - Delivery Type Conversion
+
+    private func convertDeliveryRecord(_ record: MobileDeliveryRecord) -> VauchiDeliveryRecord {
+        let status: VauchiDeliveryStatus
+        switch record.status {
+        case .queued: status = .queued
+        case .sent: status = .sent
+        case .stored: status = .stored
+        case .delivered: status = .delivered
+        case .expired: status = .expired
+        case .failed: status = .failed(reason: record.errorReason ?? "Unknown error")
+        }
+
+        return VauchiDeliveryRecord(
+            messageId: record.messageId,
+            recipientId: record.recipientId,
+            status: status,
+            createdAt: Date(timeIntervalSince1970: TimeInterval(record.createdAt)),
+            updatedAt: Date(timeIntervalSince1970: TimeInterval(record.updatedAt)),
+            expiresAt: record.expiresAt.map { Date(timeIntervalSince1970: TimeInterval($0)) }
+        )
+    }
+
+    private func convertRetryEntry(_ entry: MobileRetryEntry) -> VauchiRetryEntry {
+        VauchiRetryEntry(
+            id: entry.messageId,
+            messageId: entry.messageId,
+            recipientId: entry.recipientId,
+            attempt: entry.attempt,
+            nextRetry: Date(timeIntervalSince1970: TimeInterval(entry.nextRetry)),
+            createdAt: Date(timeIntervalSince1970: TimeInterval(entry.createdAt)),
+            maxAttempts: entry.maxAttempts
+        )
     }
 }
