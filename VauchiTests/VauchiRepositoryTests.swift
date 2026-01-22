@@ -480,4 +480,127 @@ final class VauchiRepositoryTests: XCTestCase {
         XCTAssertEqual(parsedClaim.newPublicKey, try aliceRepo.getPublicId())
         XCTAssertFalse(parsedClaim.isExpired)
     }
+
+    /// Scenario: Add voucher to recovery claim and check progress
+    /// Tests: features/account_recovery.feature - "collect vouchers"
+    func testAddRecoveryVoucher() throws {
+        // Alice creates a claim on her new device
+        let aliceDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: aliceDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: aliceDir) }
+
+        let aliceRepo = try VauchiRepository(dataDir: aliceDir.path)
+        try aliceRepo.createIdentity(displayName: "Alice")
+
+        let oldPkHex = String(repeating: "3", count: 64)
+        let claim = try aliceRepo.createRecoveryClaim(oldPkHex: oldPkHex)
+
+        // Initial status: 0 vouchers collected
+        let initialStatus = try aliceRepo.getRecoveryStatus()
+        XCTAssertNotNil(initialStatus)
+        XCTAssertEqual(initialStatus?.vouchersCollected, 0)
+
+        // Bob vouches for Alice
+        let bobDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: bobDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: bobDir) }
+
+        let bobRepo = try VauchiRepository(dataDir: bobDir.path)
+        try bobRepo.createIdentity(displayName: "Bob")
+
+        let voucher = try bobRepo.createRecoveryVoucher(claimB64: claim.claimData)
+
+        // Alice adds Bob's voucher
+        let progress = try aliceRepo.addRecoveryVoucher(voucherB64: voucher.voucherData)
+
+        XCTAssertEqual(progress.vouchersCollected, 1, "Should have 1 voucher after Bob vouches")
+        XCTAssertEqual(progress.oldPublicKey, oldPkHex)
+        XCTAssertFalse(progress.isComplete, "Should not be complete with only 1 voucher")
+
+        // Verify status reflects the voucher
+        let updatedStatus = try aliceRepo.getRecoveryStatus()
+        XCTAssertEqual(updatedStatus?.vouchersCollected, 1)
+    }
+
+    // MARK: - Contact Exchange Tests (Full Flow)
+    // Based on: features/contact_exchange.feature
+
+    /// Scenario: Complete contact exchange between two users
+    /// Tests the full QR exchange flow between Alice and Bob
+    func testCompleteContactExchange() throws {
+        // Create Alice's repository
+        let aliceDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: aliceDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: aliceDir) }
+
+        let aliceRepo = try VauchiRepository(dataDir: aliceDir.path)
+        try aliceRepo.createIdentity(displayName: "Alice")
+        try aliceRepo.addField(type: .email, label: "Work", value: "alice@company.com")
+
+        // Create Bob's repository
+        let bobDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: bobDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: bobDir) }
+
+        let bobRepo = try VauchiRepository(dataDir: bobDir.path)
+        try bobRepo.createIdentity(displayName: "Bob")
+        try bobRepo.addField(type: .phone, label: "Mobile", value: "+1234567890")
+
+        // Alice generates QR code
+        let aliceExchange = try aliceRepo.generateExchangeQr()
+        XCTAssertFalse(aliceExchange.qrData.isEmpty)
+
+        // Bob scans Alice's QR and completes exchange
+        let bobResult = try bobRepo.completeExchange(qrData: aliceExchange.qrData)
+        XCTAssertTrue(bobResult.success, "Bob's exchange should succeed: \(bobResult.errorMessage ?? "no error")")
+        XCTAssertEqual(bobResult.contactName, "Alice")
+
+        // Bob now has Alice as a contact
+        let bobContacts = try bobRepo.listContacts()
+        XCTAssertEqual(bobContacts.count, 1)
+        XCTAssertEqual(bobContacts[0].displayName, "Alice")
+
+        // Bob generates QR for Alice
+        let bobExchange = try bobRepo.generateExchangeQr()
+
+        // Alice scans Bob's QR and completes exchange
+        let aliceResult = try aliceRepo.completeExchange(qrData: bobExchange.qrData)
+        XCTAssertTrue(aliceResult.success, "Alice's exchange should succeed: \(aliceResult.errorMessage ?? "no error")")
+        XCTAssertEqual(aliceResult.contactName, "Bob")
+
+        // Alice now has Bob as a contact
+        let aliceContacts = try aliceRepo.listContacts()
+        XCTAssertEqual(aliceContacts.count, 1)
+        XCTAssertEqual(aliceContacts[0].displayName, "Bob")
+    }
+
+    /// Scenario: Exchange with expired QR code fails gracefully
+    func testExchangeWithInvalidQrFails() throws {
+        let repo = try VauchiRepository(dataDir: tempDir.path)
+        try repo.createIdentity(displayName: "Alice")
+
+        // Try to complete exchange with invalid QR data
+        XCTAssertThrowsError(try repo.completeExchange(qrData: "invalid_qr_data")) { error in
+            // Should throw an error for invalid QR
+            XCTAssertTrue(error is VauchiRepositoryError)
+        }
+    }
+
+    /// Scenario: Cannot exchange with self
+    func testCannotExchangeWithSelf() throws {
+        let repo = try VauchiRepository(dataDir: tempDir.path)
+        try repo.createIdentity(displayName: "Alice")
+
+        let exchange = try repo.generateExchangeQr()
+
+        // Try to complete exchange with own QR
+        let result = try repo.completeExchange(qrData: exchange.qrData)
+
+        // Exchange with self should fail
+        XCTAssertFalse(result.success, "Should not be able to exchange with self")
+    }
 }
