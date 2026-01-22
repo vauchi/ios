@@ -16,6 +16,11 @@ struct SettingsView: View {
     @State private var showEditNameAlert = false
     @State private var editingDisplayName = ""
 
+    // Accessibility settings
+    @State private var reduceMotion = SettingsService.shared.reduceMotion
+    @State private var highContrast = SettingsService.shared.highContrast
+    @State private var largeTouchTargets = SettingsService.shared.largeTouchTargets
+
     var body: some View {
         NavigationView {
             List {
@@ -148,6 +153,55 @@ struct SettingsView: View {
                     }
                 }
 
+                // Accessibility section
+                Section {
+                    Toggle(isOn: $reduceMotion) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Reduce Motion")
+                            Text("Minimize animations and transitions")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: reduceMotion) { newValue in
+                        SettingsService.shared.reduceMotion = newValue
+                    }
+                    .accessibilityIdentifier("settings.accessibility.reduceMotion")
+                    .accessibilityHint("Supplements the system Reduce Motion setting")
+
+                    Toggle(isOn: $highContrast) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("High Contrast")
+                            Text("Increase color contrast for better visibility")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: highContrast) { newValue in
+                        SettingsService.shared.highContrast = newValue
+                    }
+                    .accessibilityIdentifier("settings.accessibility.highContrast")
+                    .accessibilityHint("Supplements the system Increase Contrast setting")
+
+                    Toggle(isOn: $largeTouchTargets) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Large Touch Targets")
+                            Text("Increase button and control sizes")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .onChange(of: largeTouchTargets) { newValue in
+                        SettingsService.shared.largeTouchTargets = newValue
+                    }
+                    .accessibilityIdentifier("settings.accessibility.largeTouchTargets")
+                    .accessibilityHint("Makes buttons and controls larger for easier tapping")
+                } header: {
+                    Text("Accessibility")
+                } footer: {
+                    Text("These settings supplement system accessibility features. You can also configure accessibility in iOS Settings.")
+                }
+
                 // Help & Support section
                 Section("Help & Support") {
                     Link(destination: URL(string: "https://vauchi.app/user-guide")!) {
@@ -251,6 +305,9 @@ struct SettingsView: View {
             }
             .onAppear {
                 relayUrl = SettingsService.shared.relayUrl
+                reduceMotion = SettingsService.shared.reduceMotion
+                highContrast = SettingsService.shared.highContrast
+                largeTouchTargets = SettingsService.shared.largeTouchTargets
             }
         }
     }

@@ -13,6 +13,11 @@ private enum SettingsKey: String {
     case hasCompletedOnboarding = "vauchi.hasCompletedOnboarding"
     case onboardingStep = "vauchi.onboardingStep"
     case hasDismissedDemoContact = "vauchi.hasDismissedDemoContact"
+
+    // Accessibility settings
+    case reduceMotion = "vauchi.accessibility.reduceMotion"
+    case highContrast = "vauchi.accessibility.highContrast"
+    case largeTouchTargets = "vauchi.accessibility.largeTouchTargets"
 }
 
 /// Service for managing persistent app settings
@@ -112,6 +117,41 @@ final class SettingsService {
         set { defaults.set(newValue, forKey: SettingsKey.hasDismissedDemoContact.rawValue) }
     }
 
+    // MARK: - Accessibility Settings
+
+    /// Whether to reduce motion/animations (supplements system setting)
+    var reduceMotion: Bool {
+        get { defaults.bool(forKey: SettingsKey.reduceMotion.rawValue) }
+        set { defaults.set(newValue, forKey: SettingsKey.reduceMotion.rawValue) }
+    }
+
+    /// Whether to use high contrast mode (supplements system setting)
+    var highContrast: Bool {
+        get { defaults.bool(forKey: SettingsKey.highContrast.rawValue) }
+        set { defaults.set(newValue, forKey: SettingsKey.highContrast.rawValue) }
+    }
+
+    /// Whether to use larger touch targets (56pt instead of 44pt minimum)
+    var largeTouchTargets: Bool {
+        get { defaults.bool(forKey: SettingsKey.largeTouchTargets.rawValue) }
+        set { defaults.set(newValue, forKey: SettingsKey.largeTouchTargets.rawValue) }
+    }
+
+    /// Combined check for reduce motion (system or app setting)
+    var shouldReduceMotion: Bool {
+        reduceMotion || UIAccessibility.isReduceMotionEnabled
+    }
+
+    /// Combined check for high contrast (system or app setting)
+    var shouldUseHighContrast: Bool {
+        highContrast || UIAccessibility.isDarkerSystemColorsEnabled
+    }
+
+    /// Minimum touch target size based on settings
+    var minimumTouchTargetSize: CGFloat {
+        largeTouchTargets ? 56 : 44
+    }
+
     // MARK: - Reset
 
     /// Resets all settings to defaults
@@ -124,7 +164,10 @@ final class SettingsService {
             SettingsKey.notificationsEnabled,
             SettingsKey.hasCompletedOnboarding,
             SettingsKey.onboardingStep,
-            SettingsKey.hasDismissedDemoContact
+            SettingsKey.hasDismissedDemoContact,
+            SettingsKey.reduceMotion,
+            SettingsKey.highContrast,
+            SettingsKey.largeTouchTargets
         ] {
             defaults.removeObject(forKey: key.rawValue)
         }
