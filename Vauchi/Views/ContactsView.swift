@@ -173,8 +173,19 @@ struct ContactRow: View {
 }
 
 struct EmptyContactsView: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+
     var body: some View {
         VStack(spacing: 20) {
+            // Show demo contact if available
+            if let demo = viewModel.demoContact {
+                DemoContactCard(demo: demo)
+                    .padding(.horizontal)
+
+                Divider()
+                    .padding(.vertical)
+            }
+
             Image(systemName: "person.2.slash")
                 .font(.system(size: 60))
                 .foregroundColor(.secondary)
@@ -201,6 +212,95 @@ struct EmptyContactsView: View {
             .accessibilityHint("Opens the QR code exchange screen to add your first contact")
         }
         .accessibilityIdentifier("contacts.empty")
+    }
+}
+
+// MARK: - Demo Contact Card
+// Based on: features/demo_contact.feature
+
+struct DemoContactCard: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    let demo: VauchiDemoContact
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            HStack {
+                ZStack {
+                    Circle()
+                        .fill(Color.purple.opacity(0.2))
+                        .frame(width: 44, height: 44)
+
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundColor(.purple)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 4) {
+                        Text(demo.displayName)
+                            .font(.headline)
+
+                        Text("Demo")
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.purple)
+                            .cornerRadius(4)
+                    }
+
+                    Text(demo.tipCategory)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                // Dismiss button
+                Button(action: {
+                    Task {
+                        try? await viewModel.dismissDemoContact()
+                    }
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss demo contact")
+            }
+
+            // Tip content
+            VStack(alignment: .leading, spacing: 8) {
+                Text(demo.tipTitle)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+
+                Text(demo.tipContent)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(8)
+
+            // Info text
+            HStack {
+                Image(systemName: "info.circle")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Text("This is a demo contact showing how Vauchi updates work")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .accessibilityIdentifier("contacts.demo")
     }
 }
 

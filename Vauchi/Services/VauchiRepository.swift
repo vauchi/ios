@@ -24,9 +24,9 @@
 // tryTriggerAhaMoment(), tryTriggerAhaMomentWithContext(), ahaMomentSeenCount(),
 // ahaMomentsTotalCount(), resetAhaMoments(). No onboarding engagement tracking.
 //
-// TODO(core-gap): Demo contact - vauchi-mobile exposes initDemoContactIfNeeded(),
-// getDemoContact(), getDemoContactState(), isDemoUpdateAvailable(), triggerDemoUpdate(),
-// dismissDemoContact(), autoRemoveDemoContact(), restoreDemoContact(). Not integrated.
+// DONE: Demo contact - implemented initDemoContactIfNeeded(), getDemoContact(),
+// getDemoContactState(), isDemoUpdateAvailable(), triggerDemoUpdate(),
+// dismissDemoContact(), autoRemoveDemoContact(), restoreDemoContact().
 //
 // TODO(core-gap): Device linking UI - Tests exist (DeviceLinkingTests) but feature
 // not exposed in main app. vauchi-mobile has device linking protocol support.
@@ -958,5 +958,148 @@ class VauchiRepository {
             createdAt: Date(timeIntervalSince1970: TimeInterval(entry.createdAt)),
             maxAttempts: entry.maxAttempts
         )
+    }
+
+    // MARK: - Demo Contact Operations
+    // Based on: features/demo_contact.feature
+
+    /// Initialize demo contact if user has no real contacts.
+    /// Call this after onboarding completes.
+    ///
+    /// - Returns: The demo contact if created, nil if user has contacts or demo was dismissed
+    func initDemoContactIfNeeded() throws -> VauchiDemoContact? {
+        do {
+            guard let mobile = try vauchi.initDemoContactIfNeeded() else {
+                return nil
+            }
+            return VauchiDemoContact(from: mobile)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get the current demo contact if active.
+    ///
+    /// - Returns: The demo contact if active, nil otherwise
+    func getDemoContact() throws -> VauchiDemoContact? {
+        do {
+            guard let mobile = try vauchi.getDemoContact() else {
+                return nil
+            }
+            return VauchiDemoContact(from: mobile)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get the demo contact state.
+    ///
+    /// - Returns: Current state of the demo contact
+    func getDemoContactState() -> VauchiDemoContactState {
+        let mobile = vauchi.getDemoContactState()
+        return VauchiDemoContactState(from: mobile)
+    }
+
+    /// Check if a demo update is available.
+    ///
+    /// - Returns: True if an update is due (based on 2-hour interval)
+    func isDemoUpdateAvailable() -> Bool {
+        return vauchi.isDemoUpdateAvailable()
+    }
+
+    /// Trigger a demo update and get the new content.
+    ///
+    /// - Returns: Updated demo contact with new tip, nil if demo not active
+    func triggerDemoUpdate() throws -> VauchiDemoContact? {
+        do {
+            guard let mobile = try vauchi.triggerDemoUpdate() else {
+                return nil
+            }
+            return VauchiDemoContact(from: mobile)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Dismiss the demo contact manually.
+    func dismissDemoContact() throws {
+        do {
+            try vauchi.dismissDemoContact()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Auto-remove demo contact after first real exchange.
+    /// Call this after a successful contact exchange.
+    ///
+    /// - Returns: True if demo was removed, false if it wasn't active
+    func autoRemoveDemoContact() throws -> Bool {
+        do {
+            return try vauchi.autoRemoveDemoContact()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Restore the demo contact from Settings.
+    ///
+    /// - Returns: The restored demo contact
+    func restoreDemoContact() throws -> VauchiDemoContact? {
+        do {
+            guard let mobile = try vauchi.restoreDemoContact() else {
+                return nil
+            }
+            return VauchiDemoContact(from: mobile)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+}
+
+// MARK: - Demo Contact Types
+
+/// Demo contact for solo users demonstrating update flow
+/// Based on: features/demo_contact.feature
+struct VauchiDemoContact {
+    /// Contact ID (always "demo-vauchi-tips")
+    let id: String
+    /// Display name (always "Vauchi Tips")
+    let displayName: String
+    /// Flag indicating this is a demo contact
+    let isDemo: Bool
+    /// Current tip title
+    let tipTitle: String
+    /// Current tip content
+    let tipContent: String
+    /// Tip category (e.g., "GettingStarted", "Privacy", "Updates")
+    let tipCategory: String
+
+    init(from mobile: MobileDemoContact) {
+        self.id = mobile.id
+        self.displayName = mobile.displayName
+        self.isDemo = mobile.isDemo
+        self.tipTitle = mobile.tipTitle
+        self.tipContent = mobile.tipContent
+        self.tipCategory = mobile.tipCategory
+    }
+}
+
+/// State of the demo contact
+struct VauchiDemoContactState {
+    /// Whether the demo contact is currently active
+    let isActive: Bool
+    /// Whether it was manually dismissed by the user
+    let wasDismissed: Bool
+    /// Whether it was auto-removed after first real exchange
+    let autoRemoved: Bool
+    /// Number of updates that have been shown
+    let updateCount: UInt32
+
+    init(from mobile: MobileDemoContactState) {
+        self.isActive = mobile.isActive
+        self.wasDismissed = mobile.wasDismissed
+        self.autoRemoved = mobile.autoRemoved
+        self.updateCount = mobile.updateCount
     }
 }

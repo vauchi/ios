@@ -102,6 +102,10 @@ class VauchiViewModel: ObservableObject {
     @Published var retryEntries: [VauchiRetryEntry] = []
     @Published var failedDeliveryCount: Int = 0
 
+    // Demo contact (for users with no contacts)
+    @Published var demoContact: VauchiDemoContact?
+    @Published var demoContactState: VauchiDemoContactState?
+
     // User-facing alerts
     @Published var showAlert = false
     @Published var alertTitle = ""
@@ -226,6 +230,7 @@ class VauchiViewModel: ObservableObject {
                 await loadCard()
                 await loadContacts()
                 await loadPendingUpdates()
+                await loadDemoContact()
             }
 
             isLoading = false
@@ -245,6 +250,9 @@ class VauchiViewModel: ObservableObject {
         // Load the created identity and card
         await loadIdentity()
         await loadCard()
+
+        // Initialize demo contact for new users with no contacts
+        await initDemoContactIfNeeded()
     }
 
     private func loadIdentity() async {
@@ -423,6 +431,89 @@ class VauchiViewModel: ObservableObject {
         await loadContacts()
     }
 
+    // MARK: - Demo Contact
+    // Based on: features/demo_contact.feature
+
+    /// Initialize demo contact if user has no real contacts.
+    /// Call this after onboarding completes.
+    func initDemoContactIfNeeded() async {
+        guard let repository = repository else { return }
+
+        do {
+            demoContact = try repository.initDemoContactIfNeeded()
+            demoContactState = repository.getDemoContactState()
+        } catch {
+            print("VauchiViewModel: Failed to init demo contact: \(error)")
+        }
+    }
+
+    /// Load the current demo contact state
+    func loadDemoContact() async {
+        guard let repository = repository else { return }
+
+        do {
+            demoContact = try repository.getDemoContact()
+            demoContactState = repository.getDemoContactState()
+        } catch {
+            demoContact = nil
+            demoContactState = repository.getDemoContactState()
+        }
+    }
+
+    /// Dismiss the demo contact manually
+    func dismissDemoContact() async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.dismissDemoContact()
+        demoContact = nil
+        demoContactState = repository.getDemoContactState()
+    }
+
+    /// Auto-remove demo contact after first real exchange
+    func autoRemoveDemoContact() async {
+        guard let repository = repository else { return }
+
+        do {
+            let removed = try repository.autoRemoveDemoContact()
+            if removed {
+                demoContact = nil
+                demoContactState = repository.getDemoContactState()
+            }
+        } catch {
+            print("VauchiViewModel: Failed to auto-remove demo contact: \(error)")
+        }
+    }
+
+    /// Restore the demo contact from Settings
+    func restoreDemoContact() async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        demoContact = try repository.restoreDemoContact()
+        demoContactState = repository.getDemoContactState()
+    }
+
+    /// Trigger a demo update
+    func triggerDemoUpdate() async {
+        guard let repository = repository else { return }
+
+        do {
+            demoContact = try repository.triggerDemoUpdate()
+            demoContactState = repository.getDemoContactState()
+        } catch {
+            print("VauchiViewModel: Failed to trigger demo update: \(error)")
+        }
+    }
+
+    /// Check if demo update is available
+    func isDemoUpdateAvailable() -> Bool {
+        guard let repository = repository else { return false }
+        return repository.isDemoUpdateAvailable()
+    }
+
     // MARK: - Exchange
 
     func generateQRData() throws -> String {
@@ -454,6 +545,11 @@ class VauchiViewModel: ObservableObject {
 
         let result = try repository.completeExchange(qrData: qrData)
         await loadContacts()
+
+        // Auto-remove demo contact after first real exchange
+        if result.success {
+            await autoRemoveDemoContact()
+        }
 
         return ExchangeResultInfo(
             contactId: result.contactId,

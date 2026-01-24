@@ -204,6 +204,24 @@ struct SettingsView: View {
 
                 // Help & Support section
                 Section("Help & Support") {
+                    // Demo contact restore option
+                    if let state = viewModel.demoContactState, !state.isActive {
+                        Button(action: {
+                            Task {
+                                try? await viewModel.restoreDemoContact()
+                            }
+                        }) {
+                            HStack {
+                                Label("Show Demo Contact", systemImage: "lightbulb")
+                                Spacer()
+                                Text("Learn how updates work")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .accessibilityIdentifier("settings.help.restoreDemo")
+                    }
+
                     Link(destination: URL(string: "https://vauchi.app/user-guide")!) {
                         HStack {
                             Label("User Guide", systemImage: "book")

@@ -783,6 +783,56 @@ public protocol VauchiMobileProtocol : AnyObject {
     func addRecoveryVoucher(voucherB64: String) throws  -> MobileRecoveryProgress
     
     /**
+     * Get the count of seen aha moments.
+     */
+    func ahaMomentsSeenCount()  -> UInt32
+    
+    /**
+     * Get the total count of aha moments.
+     */
+    func ahaMomentsTotalCount()  -> UInt32
+    
+    /**
+     * Apply available content updates.
+     *
+     * Downloads and caches any available updates. After applying,
+     * the new content will be used for subsequent operations.
+     *
+     * Note: Returns Disabled if the `content-updates` feature is not enabled.
+     */
+    func applyContentUpdates()  -> MobileApplyResult
+    
+    /**
+     * Auto-remove demo contact after first real exchange.
+     * Call this after a successful contact exchange.
+     */
+    func autoRemoveDemoContact() throws  -> Bool
+    
+    /**
+     * Calculate the backoff time for a given retry attempt.
+     *
+     * Returns seconds until next retry: 2^attempt, max 3600 (1 hour).
+     */
+    func calculateRetryBackoff(attempt: UInt32)  -> UInt64
+    
+    /**
+     * Check for available content updates.
+     *
+     * This is a blocking call that checks the remote server for updates.
+     * Returns the update status indicating what updates are available.
+     *
+     * Note: Returns Disabled if the `content-updates` feature is not enabled.
+     */
+    func checkContentUpdates()  -> MobileUpdateStatus
+    
+    /**
+     * Clear all pending updates for a contact.
+     *
+     * Returns the number of cleared updates.
+     */
+    func clearPendingUpdatesForContact(contactId: String) throws  -> UInt32
+    
+    /**
      * Complete exchange with scanned QR data.
      */
     func completeExchange(qrData: String) throws  -> MobileExchangeResult
@@ -791,6 +841,11 @@ public protocol VauchiMobileProtocol : AnyObject {
      * Get contact count.
      */
     func contactCount() throws  -> UInt32
+    
+    /**
+     * Count failed deliveries.
+     */
+    func countFailedDeliveries() throws  -> UInt32
     
     /**
      * Create a new identity.
@@ -825,6 +880,16 @@ public protocol VauchiMobileProtocol : AnyObject {
     func deleteLabel(labelId: String) throws 
     
     /**
+     * Delete a retry entry (after successful delivery or max attempts).
+     */
+    func deleteRetry(messageId: String) throws  -> Bool
+    
+    /**
+     * Dismiss the demo contact.
+     */
+    func dismissDemoContact() throws 
+    
+    /**
      * Export encrypted backup.
      */
     func exportBackup(password: String) throws  -> String
@@ -840,14 +905,72 @@ public protocol VauchiMobileProtocol : AnyObject {
     func generateExchangeQr() throws  -> MobileExchangeData
     
     /**
+     * Get all delivery records.
+     */
+    func getAllDeliveryRecords() throws  -> [MobileDeliveryRecord]
+    
+    /**
      * Get single contact by ID.
      */
     func getContact(id: String) throws  -> MobileContact?
     
     /**
+     * Get delivery count by status.
+     */
+    func getDeliveryCountByStatus(status: MobileDeliveryStatus) throws  -> UInt32
+    
+    /**
+     * Get delivery record for a message.
+     */
+    func getDeliveryRecord(messageId: String) throws  -> MobileDeliveryRecord?
+    
+    /**
+     * Get all delivery records for a recipient.
+     */
+    func getDeliveryRecordsForContact(recipientId: String) throws  -> [MobileDeliveryRecord]
+    
+    /**
+     * Get delivery summary for a message (X of Y devices delivered).
+     */
+    func getDeliverySummary(messageId: String) throws  -> MobileDeliverySummary
+    
+    /**
+     * Get the current demo contact if active.
+     */
+    func getDemoContact() throws  -> MobileDemoContact?
+    
+    /**
+     * Get the demo contact state.
+     */
+    func getDemoContactState()  -> MobileDemoContactState
+    
+    /**
+     * Get all device delivery records for a message.
+     */
+    func getDeviceDeliveries(messageId: String) throws  -> [MobileDeviceDeliveryRecord]
+    
+    /**
      * Get display name.
      */
     func getDisplayName() throws  -> String
+    
+    /**
+     * Get all retry entries that are due for retry.
+     */
+    func getDueRetries() throws  -> [MobileRetryEntry]
+    
+    /**
+     * Get the validation count for a field (quick check without full status).
+     */
+    func getFieldValidationCount(contactId: String, fieldId: String) throws  -> UInt32
+    
+    /**
+     * Get validation status for a contact's field.
+     *
+     * Returns aggregated validation information including count, trust level,
+     * and whether you have validated this field.
+     */
+    func getFieldValidationStatus(contactId: String, fieldId: String, fieldValue: String) throws  -> MobileValidationStatus
     
     /**
      * Get a label by ID with full details.
@@ -860,9 +983,24 @@ public protocol VauchiMobileProtocol : AnyObject {
     func getLabelsForContact(contactId: String) throws  -> [MobileVisibilityLabel]
     
     /**
+     * Get remaining capacity in the offline queue.
+     */
+    func getOfflineQueueCapacity() throws  -> UInt32
+    
+    /**
      * Get own contact card.
      */
     func getOwnCard() throws  -> MobileContactCard
+    
+    /**
+     * Get all pending (non-terminal) deliveries.
+     */
+    func getPendingDeliveries() throws  -> [MobileDeliveryRecord]
+    
+    /**
+     * Get all pending device deliveries.
+     */
+    func getPendingDeviceDeliveries() throws  -> [MobileDeviceDeliveryRecord]
     
     /**
      * Get profile URL for a social field.
@@ -889,6 +1027,16 @@ public protocol VauchiMobileProtocol : AnyObject {
     func getRecoveryStatus() throws  -> MobileRecoveryProgress?
     
     /**
+     * Get all retry entries for a contact.
+     */
+    func getRetriesForContact(contactId: String) throws  -> [MobileRetryEntry]
+    
+    /**
+     * Get the total count of retry entries.
+     */
+    func getRetryCount() throws  -> UInt32
+    
+    /**
      * Get suggested default labels.
      */
     func getSuggestedLabels()  -> [String]
@@ -899,9 +1047,24 @@ public protocol VauchiMobileProtocol : AnyObject {
     func getSyncStatus()  -> MobileSyncStatus
     
     /**
+     * Get total count of all pending updates across all contacts.
+     */
+    func getTotalPendingCount() throws  -> UInt32
+    
+    /**
      * Check if identity exists.
      */
     func hasIdentity()  -> Bool
+    
+    /**
+     * Check if an aha moment has been seen.
+     */
+    func hasSeenAhaMoment(momentType: MobileAhaMomentType)  -> Bool
+    
+    /**
+     * Check if you have validated a specific field.
+     */
+    func hasValidatedField(contactId: String, fieldId: String) throws  -> Bool
     
     /**
      * Hide field from contact.
@@ -914,14 +1077,39 @@ public protocol VauchiMobileProtocol : AnyObject {
     func importBackup(backupData: String, password: String) throws 
     
     /**
+     * Initialize the demo contact if user has no real contacts.
+     * Call this after onboarding completes.
+     */
+    func initDemoContactIfNeeded() throws  -> MobileDemoContact?
+    
+    /**
      * Check if certificate pinning is enabled.
      */
     func isCertificatePinningEnabled()  -> Bool
     
     /**
+     * Check if remote content updates are supported.
+     *
+     * Returns true if the content-updates feature is enabled at compile time.
+     */
+    func isContentUpdatesSupported()  -> Bool
+    
+    /**
+     * Check if a demo update is available.
+     */
+    func isDemoUpdateAvailable()  -> Bool
+    
+    /**
      * Check if field is visible to contact.
      */
     func isFieldVisibleToContact(contactId: String, fieldLabel: String) throws  -> Bool
+    
+    /**
+     * Check if the offline queue is full.
+     *
+     * Default max size is 1000 updates.
+     */
+    func isOfflineQueueFull() throws  -> Bool
     
     /**
      * List all contacts.
@@ -934,9 +1122,24 @@ public protocol VauchiMobileProtocol : AnyObject {
     func listLabels() throws  -> [MobileVisibilityLabel]
     
     /**
+     * List all validations you have made.
+     *
+     * Returns a list of all fields you have validated, sorted by
+     * validation timestamp (most recent first).
+     */
+    func listMyValidations() throws  -> [MobileFieldValidation]
+    
+    /**
      * List available social networks.
      */
     func listSocialNetworks()  -> [MobileSocialNetwork]
+    
+    /**
+     * Manually retry a failed delivery.
+     *
+     * Returns true if the retry entry was found and rescheduled.
+     */
+    func manualRetry(messageId: String) throws  -> Bool
     
     /**
      * Parse a recovery claim from base64.
@@ -949,6 +1152,14 @@ public protocol VauchiMobileProtocol : AnyObject {
      * Get pending update count.
      */
     func pendingUpdateCount() throws  -> UInt32
+    
+    /**
+     * Reload social networks from content cache.
+     *
+     * Call this after applying content updates to refresh the
+     * list of social networks available in the app.
+     */
+    func reloadSocialNetworks()  -> [MobileSocialNetwork]
     
     /**
      * Remove contact.
@@ -974,6 +1185,23 @@ public protocol VauchiMobileProtocol : AnyObject {
      * Rename a label.
      */
     func renameLabel(labelId: String, newName: String) throws 
+    
+    /**
+     * Reset all aha moments (for testing/debugging).
+     */
+    func resetAhaMoments() throws 
+    
+    /**
+     * Restore the demo contact from Settings.
+     */
+    func restoreDemoContact() throws  -> MobileDemoContact?
+    
+    /**
+     * Revoke your validation of a contact's field.
+     *
+     * Returns true if a validation was revoked, false if you hadn't validated.
+     */
+    func revokeFieldValidation(contactId: String, fieldId: String) throws  -> Bool
     
     /**
      * Search contacts.
@@ -1021,9 +1249,33 @@ public protocol VauchiMobileProtocol : AnyObject {
     func sync() throws  -> MobileSyncResult
     
     /**
+     * Trigger a demo update and get the new content.
+     */
+    func triggerDemoUpdate() throws  -> MobileDemoContact?
+    
+    /**
+     * Try to trigger an aha moment. Returns the moment if not yet seen, None otherwise.
+     */
+    func tryTriggerAhaMoment(momentType: MobileAhaMomentType) throws  -> MobileAhaMoment?
+    
+    /**
+     * Try to trigger an aha moment with context (e.g., contact name).
+     */
+    func tryTriggerAhaMomentWithContext(momentType: MobileAhaMomentType, context: String) throws  -> MobileAhaMoment?
+    
+    /**
      * Update field value.
      */
     func updateField(label: String, newValue: String) throws 
+    
+    /**
+     * Validate a contact's field.
+     *
+     * Creates a cryptographically signed validation record attesting
+     * that you believe this field value belongs to this contact.
+     * Returns the created validation.
+     */
+    func validateField(contactId: String, fieldId: String, fieldValue: String) throws  -> MobileFieldValidation
     
     /**
      * Verify contact fingerprint.
@@ -1165,6 +1417,93 @@ open func addRecoveryVoucher(voucherB64: String)throws  -> MobileRecoveryProgres
 }
     
     /**
+     * Get the count of seen aha moments.
+     */
+open func ahaMomentsSeenCount() -> UInt32 {
+    return try!  FfiConverterUInt32.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_aha_moments_seen_count(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Get the total count of aha moments.
+     */
+open func ahaMomentsTotalCount() -> UInt32 {
+    return try!  FfiConverterUInt32.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_aha_moments_total_count(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Apply available content updates.
+     *
+     * Downloads and caches any available updates. After applying,
+     * the new content will be used for subsequent operations.
+     *
+     * Note: Returns Disabled if the `content-updates` feature is not enabled.
+     */
+open func applyContentUpdates() -> MobileApplyResult {
+    return try!  FfiConverterTypeMobileApplyResult.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_apply_content_updates(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Auto-remove demo contact after first real exchange.
+     * Call this after a successful contact exchange.
+     */
+open func autoRemoveDemoContact()throws  -> Bool {
+    return try  FfiConverterBool.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_auto_remove_demo_contact(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Calculate the backoff time for a given retry attempt.
+     *
+     * Returns seconds until next retry: 2^attempt, max 3600 (1 hour).
+     */
+open func calculateRetryBackoff(attempt: UInt32) -> UInt64 {
+    return try!  FfiConverterUInt64.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_calculate_retry_backoff(self.uniffiClonePointer(),
+        FfiConverterUInt32.lower(attempt),$0
+    )
+})
+}
+    
+    /**
+     * Check for available content updates.
+     *
+     * This is a blocking call that checks the remote server for updates.
+     * Returns the update status indicating what updates are available.
+     *
+     * Note: Returns Disabled if the `content-updates` feature is not enabled.
+     */
+open func checkContentUpdates() -> MobileUpdateStatus {
+    return try!  FfiConverterTypeMobileUpdateStatus.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_check_content_updates(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Clear all pending updates for a contact.
+     *
+     * Returns the number of cleared updates.
+     */
+open func clearPendingUpdatesForContact(contactId: String)throws  -> UInt32 {
+    return try  FfiConverterUInt32.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_clear_pending_updates_for_contact(self.uniffiClonePointer(),
+        FfiConverterString.lower(contactId),$0
+    )
+})
+}
+    
+    /**
      * Complete exchange with scanned QR data.
      */
 open func completeExchange(qrData: String)throws  -> MobileExchangeResult {
@@ -1181,6 +1520,16 @@ open func completeExchange(qrData: String)throws  -> MobileExchangeResult {
 open func contactCount()throws  -> UInt32 {
     return try  FfiConverterUInt32.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
     uniffi_vauchi_mobile_fn_method_vauchimobile_contact_count(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Count failed deliveries.
+     */
+open func countFailedDeliveries()throws  -> UInt32 {
+    return try  FfiConverterUInt32.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_count_failed_deliveries(self.uniffiClonePointer(),$0
     )
 })
 }
@@ -1246,6 +1595,26 @@ open func deleteLabel(labelId: String)throws  {try rustCallWithError(FfiConverte
 }
     
     /**
+     * Delete a retry entry (after successful delivery or max attempts).
+     */
+open func deleteRetry(messageId: String)throws  -> Bool {
+    return try  FfiConverterBool.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_delete_retry(self.uniffiClonePointer(),
+        FfiConverterString.lower(messageId),$0
+    )
+})
+}
+    
+    /**
+     * Dismiss the demo contact.
+     */
+open func dismissDemoContact()throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_dismiss_demo_contact(self.uniffiClonePointer(),$0
+    )
+}
+}
+    
+    /**
      * Export encrypted backup.
      */
 open func exportBackup(password: String)throws  -> String {
@@ -1277,6 +1646,16 @@ open func generateExchangeQr()throws  -> MobileExchangeData {
 }
     
     /**
+     * Get all delivery records.
+     */
+open func getAllDeliveryRecords()throws  -> [MobileDeliveryRecord] {
+    return try  FfiConverterSequenceTypeMobileDeliveryRecord.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_all_delivery_records(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
      * Get single contact by ID.
      */
 open func getContact(id: String)throws  -> MobileContact? {
@@ -1288,11 +1667,124 @@ open func getContact(id: String)throws  -> MobileContact? {
 }
     
     /**
+     * Get delivery count by status.
+     */
+open func getDeliveryCountByStatus(status: MobileDeliveryStatus)throws  -> UInt32 {
+    return try  FfiConverterUInt32.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_delivery_count_by_status(self.uniffiClonePointer(),
+        FfiConverterTypeMobileDeliveryStatus.lower(status),$0
+    )
+})
+}
+    
+    /**
+     * Get delivery record for a message.
+     */
+open func getDeliveryRecord(messageId: String)throws  -> MobileDeliveryRecord? {
+    return try  FfiConverterOptionTypeMobileDeliveryRecord.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_delivery_record(self.uniffiClonePointer(),
+        FfiConverterString.lower(messageId),$0
+    )
+})
+}
+    
+    /**
+     * Get all delivery records for a recipient.
+     */
+open func getDeliveryRecordsForContact(recipientId: String)throws  -> [MobileDeliveryRecord] {
+    return try  FfiConverterSequenceTypeMobileDeliveryRecord.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_delivery_records_for_contact(self.uniffiClonePointer(),
+        FfiConverterString.lower(recipientId),$0
+    )
+})
+}
+    
+    /**
+     * Get delivery summary for a message (X of Y devices delivered).
+     */
+open func getDeliverySummary(messageId: String)throws  -> MobileDeliverySummary {
+    return try  FfiConverterTypeMobileDeliverySummary.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_delivery_summary(self.uniffiClonePointer(),
+        FfiConverterString.lower(messageId),$0
+    )
+})
+}
+    
+    /**
+     * Get the current demo contact if active.
+     */
+open func getDemoContact()throws  -> MobileDemoContact? {
+    return try  FfiConverterOptionTypeMobileDemoContact.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_demo_contact(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Get the demo contact state.
+     */
+open func getDemoContactState() -> MobileDemoContactState {
+    return try!  FfiConverterTypeMobileDemoContactState.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_demo_contact_state(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Get all device delivery records for a message.
+     */
+open func getDeviceDeliveries(messageId: String)throws  -> [MobileDeviceDeliveryRecord] {
+    return try  FfiConverterSequenceTypeMobileDeviceDeliveryRecord.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_device_deliveries(self.uniffiClonePointer(),
+        FfiConverterString.lower(messageId),$0
+    )
+})
+}
+    
+    /**
      * Get display name.
      */
 open func getDisplayName()throws  -> String {
     return try  FfiConverterString.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
     uniffi_vauchi_mobile_fn_method_vauchimobile_get_display_name(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Get all retry entries that are due for retry.
+     */
+open func getDueRetries()throws  -> [MobileRetryEntry] {
+    return try  FfiConverterSequenceTypeMobileRetryEntry.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_due_retries(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Get the validation count for a field (quick check without full status).
+     */
+open func getFieldValidationCount(contactId: String, fieldId: String)throws  -> UInt32 {
+    return try  FfiConverterUInt32.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_field_validation_count(self.uniffiClonePointer(),
+        FfiConverterString.lower(contactId),
+        FfiConverterString.lower(fieldId),$0
+    )
+})
+}
+    
+    /**
+     * Get validation status for a contact's field.
+     *
+     * Returns aggregated validation information including count, trust level,
+     * and whether you have validated this field.
+     */
+open func getFieldValidationStatus(contactId: String, fieldId: String, fieldValue: String)throws  -> MobileValidationStatus {
+    return try  FfiConverterTypeMobileValidationStatus.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_field_validation_status(self.uniffiClonePointer(),
+        FfiConverterString.lower(contactId),
+        FfiConverterString.lower(fieldId),
+        FfiConverterString.lower(fieldValue),$0
     )
 })
 }
@@ -1320,11 +1812,41 @@ open func getLabelsForContact(contactId: String)throws  -> [MobileVisibilityLabe
 }
     
     /**
+     * Get remaining capacity in the offline queue.
+     */
+open func getOfflineQueueCapacity()throws  -> UInt32 {
+    return try  FfiConverterUInt32.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_offline_queue_capacity(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
      * Get own contact card.
      */
 open func getOwnCard()throws  -> MobileContactCard {
     return try  FfiConverterTypeMobileContactCard.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
     uniffi_vauchi_mobile_fn_method_vauchimobile_get_own_card(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Get all pending (non-terminal) deliveries.
+     */
+open func getPendingDeliveries()throws  -> [MobileDeliveryRecord] {
+    return try  FfiConverterSequenceTypeMobileDeliveryRecord.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_pending_deliveries(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Get all pending device deliveries.
+     */
+open func getPendingDeviceDeliveries()throws  -> [MobileDeviceDeliveryRecord] {
+    return try  FfiConverterSequenceTypeMobileDeviceDeliveryRecord.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_pending_device_deliveries(self.uniffiClonePointer(),$0
     )
 })
 }
@@ -1376,6 +1898,27 @@ open func getRecoveryStatus()throws  -> MobileRecoveryProgress? {
 }
     
     /**
+     * Get all retry entries for a contact.
+     */
+open func getRetriesForContact(contactId: String)throws  -> [MobileRetryEntry] {
+    return try  FfiConverterSequenceTypeMobileRetryEntry.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_retries_for_contact(self.uniffiClonePointer(),
+        FfiConverterString.lower(contactId),$0
+    )
+})
+}
+    
+    /**
+     * Get the total count of retry entries.
+     */
+open func getRetryCount()throws  -> UInt32 {
+    return try  FfiConverterUInt32.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_retry_count(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
      * Get suggested default labels.
      */
 open func getSuggestedLabels() -> [String] {
@@ -1396,11 +1939,44 @@ open func getSyncStatus() -> MobileSyncStatus {
 }
     
     /**
+     * Get total count of all pending updates across all contacts.
+     */
+open func getTotalPendingCount()throws  -> UInt32 {
+    return try  FfiConverterUInt32.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_get_total_pending_count(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
      * Check if identity exists.
      */
 open func hasIdentity() -> Bool {
     return try!  FfiConverterBool.lift(try! rustCall() {
     uniffi_vauchi_mobile_fn_method_vauchimobile_has_identity(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Check if an aha moment has been seen.
+     */
+open func hasSeenAhaMoment(momentType: MobileAhaMomentType) -> Bool {
+    return try!  FfiConverterBool.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_has_seen_aha_moment(self.uniffiClonePointer(),
+        FfiConverterTypeMobileAhaMomentType.lower(momentType),$0
+    )
+})
+}
+    
+    /**
+     * Check if you have validated a specific field.
+     */
+open func hasValidatedField(contactId: String, fieldId: String)throws  -> Bool {
+    return try  FfiConverterBool.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_has_validated_field(self.uniffiClonePointer(),
+        FfiConverterString.lower(contactId),
+        FfiConverterString.lower(fieldId),$0
     )
 })
 }
@@ -1428,11 +2004,44 @@ open func importBackup(backupData: String, password: String)throws  {try rustCal
 }
     
     /**
+     * Initialize the demo contact if user has no real contacts.
+     * Call this after onboarding completes.
+     */
+open func initDemoContactIfNeeded()throws  -> MobileDemoContact? {
+    return try  FfiConverterOptionTypeMobileDemoContact.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_init_demo_contact_if_needed(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
      * Check if certificate pinning is enabled.
      */
 open func isCertificatePinningEnabled() -> Bool {
     return try!  FfiConverterBool.lift(try! rustCall() {
     uniffi_vauchi_mobile_fn_method_vauchimobile_is_certificate_pinning_enabled(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Check if remote content updates are supported.
+     *
+     * Returns true if the content-updates feature is enabled at compile time.
+     */
+open func isContentUpdatesSupported() -> Bool {
+    return try!  FfiConverterBool.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_is_content_updates_supported(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Check if a demo update is available.
+     */
+open func isDemoUpdateAvailable() -> Bool {
+    return try!  FfiConverterBool.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_is_demo_update_available(self.uniffiClonePointer(),$0
     )
 })
 }
@@ -1445,6 +2054,18 @@ open func isFieldVisibleToContact(contactId: String, fieldLabel: String)throws  
     uniffi_vauchi_mobile_fn_method_vauchimobile_is_field_visible_to_contact(self.uniffiClonePointer(),
         FfiConverterString.lower(contactId),
         FfiConverterString.lower(fieldLabel),$0
+    )
+})
+}
+    
+    /**
+     * Check if the offline queue is full.
+     *
+     * Default max size is 1000 updates.
+     */
+open func isOfflineQueueFull()throws  -> Bool {
+    return try  FfiConverterBool.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_is_offline_queue_full(self.uniffiClonePointer(),$0
     )
 })
 }
@@ -1470,11 +2091,37 @@ open func listLabels()throws  -> [MobileVisibilityLabel] {
 }
     
     /**
+     * List all validations you have made.
+     *
+     * Returns a list of all fields you have validated, sorted by
+     * validation timestamp (most recent first).
+     */
+open func listMyValidations()throws  -> [MobileFieldValidation] {
+    return try  FfiConverterSequenceTypeMobileFieldValidation.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_list_my_validations(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
      * List available social networks.
      */
 open func listSocialNetworks() -> [MobileSocialNetwork] {
     return try!  FfiConverterSequenceTypeMobileSocialNetwork.lift(try! rustCall() {
     uniffi_vauchi_mobile_fn_method_vauchimobile_list_social_networks(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Manually retry a failed delivery.
+     *
+     * Returns true if the retry entry was found and rescheduled.
+     */
+open func manualRetry(messageId: String)throws  -> Bool {
+    return try  FfiConverterBool.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_manual_retry(self.uniffiClonePointer(),
+        FfiConverterString.lower(messageId),$0
     )
 })
 }
@@ -1498,6 +2145,19 @@ open func parseRecoveryClaim(claimB64: String)throws  -> MobileRecoveryClaim {
 open func pendingUpdateCount()throws  -> UInt32 {
     return try  FfiConverterUInt32.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
     uniffi_vauchi_mobile_fn_method_vauchimobile_pending_update_count(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Reload social networks from content cache.
+     *
+     * Call this after applying content updates to refresh the
+     * list of social networks available in the app.
+     */
+open func reloadSocialNetworks() -> [MobileSocialNetwork] {
+    return try!  FfiConverterSequenceTypeMobileSocialNetwork.lift(try! rustCall() {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_reload_social_networks(self.uniffiClonePointer(),$0
     )
 })
 }
@@ -1555,6 +2215,39 @@ open func renameLabel(labelId: String, newName: String)throws  {try rustCallWith
         FfiConverterString.lower(newName),$0
     )
 }
+}
+    
+    /**
+     * Reset all aha moments (for testing/debugging).
+     */
+open func resetAhaMoments()throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_reset_aha_moments(self.uniffiClonePointer(),$0
+    )
+}
+}
+    
+    /**
+     * Restore the demo contact from Settings.
+     */
+open func restoreDemoContact()throws  -> MobileDemoContact? {
+    return try  FfiConverterOptionTypeMobileDemoContact.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_restore_demo_contact(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Revoke your validation of a contact's field.
+     *
+     * Returns true if a validation was revoked, false if you hadn't validated.
+     */
+open func revokeFieldValidation(contactId: String, fieldId: String)throws  -> Bool {
+    return try  FfiConverterBool.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_revoke_field_validation(self.uniffiClonePointer(),
+        FfiConverterString.lower(contactId),
+        FfiConverterString.lower(fieldId),$0
+    )
+})
 }
     
     /**
@@ -1650,6 +2343,39 @@ open func sync()throws  -> MobileSyncResult {
 }
     
     /**
+     * Trigger a demo update and get the new content.
+     */
+open func triggerDemoUpdate()throws  -> MobileDemoContact? {
+    return try  FfiConverterOptionTypeMobileDemoContact.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_trigger_demo_update(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+    /**
+     * Try to trigger an aha moment. Returns the moment if not yet seen, None otherwise.
+     */
+open func tryTriggerAhaMoment(momentType: MobileAhaMomentType)throws  -> MobileAhaMoment? {
+    return try  FfiConverterOptionTypeMobileAhaMoment.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_try_trigger_aha_moment(self.uniffiClonePointer(),
+        FfiConverterTypeMobileAhaMomentType.lower(momentType),$0
+    )
+})
+}
+    
+    /**
+     * Try to trigger an aha moment with context (e.g., contact name).
+     */
+open func tryTriggerAhaMomentWithContext(momentType: MobileAhaMomentType, context: String)throws  -> MobileAhaMoment? {
+    return try  FfiConverterOptionTypeMobileAhaMoment.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_try_trigger_aha_moment_with_context(self.uniffiClonePointer(),
+        FfiConverterTypeMobileAhaMomentType.lower(momentType),
+        FfiConverterString.lower(context),$0
+    )
+})
+}
+    
+    /**
      * Update field value.
      */
 open func updateField(label: String, newValue: String)throws  {try rustCallWithError(FfiConverterTypeMobileError.lift) {
@@ -1658,6 +2384,23 @@ open func updateField(label: String, newValue: String)throws  {try rustCallWithE
         FfiConverterString.lower(newValue),$0
     )
 }
+}
+    
+    /**
+     * Validate a contact's field.
+     *
+     * Creates a cryptographically signed validation record attesting
+     * that you believe this field value belongs to this contact.
+     * Returns the created validation.
+     */
+open func validateField(contactId: String, fieldId: String, fieldValue: String)throws  -> MobileFieldValidation {
+    return try  FfiConverterTypeMobileFieldValidation.lift(try rustCallWithError(FfiConverterTypeMobileError.lift) {
+    uniffi_vauchi_mobile_fn_method_vauchimobile_validate_field(self.uniffiClonePointer(),
+        FfiConverterString.lower(contactId),
+        FfiConverterString.lower(fieldId),
+        FfiConverterString.lower(fieldValue),$0
+    )
+})
 }
     
     /**
@@ -1736,6 +2479,196 @@ public func FfiConverterTypeVauchiMobile_lift(_ pointer: UnsafeMutableRawPointer
 #endif
 public func FfiConverterTypeVauchiMobile_lower(_ value: VauchiMobile) -> UnsafeMutableRawPointer {
     return FfiConverterTypeVauchiMobile.lower(value)
+}
+
+
+/**
+ * An aha moment to display to the user.
+ */
+public struct MobileAhaMoment {
+    /**
+     * The type of milestone
+     */
+    public var momentType: MobileAhaMomentType
+    /**
+     * Title to display
+     */
+    public var title: String
+    /**
+     * Message to display
+     */
+    public var message: String
+    /**
+     * Whether to show animation
+     */
+    public var hasAnimation: Bool
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * The type of milestone
+         */momentType: MobileAhaMomentType, 
+        /**
+         * Title to display
+         */title: String, 
+        /**
+         * Message to display
+         */message: String, 
+        /**
+         * Whether to show animation
+         */hasAnimation: Bool) {
+        self.momentType = momentType
+        self.title = title
+        self.message = message
+        self.hasAnimation = hasAnimation
+    }
+}
+
+
+
+extension MobileAhaMoment: Equatable, Hashable {
+    public static func ==(lhs: MobileAhaMoment, rhs: MobileAhaMoment) -> Bool {
+        if lhs.momentType != rhs.momentType {
+            return false
+        }
+        if lhs.title != rhs.title {
+            return false
+        }
+        if lhs.message != rhs.message {
+            return false
+        }
+        if lhs.hasAnimation != rhs.hasAnimation {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(momentType)
+        hasher.combine(title)
+        hasher.combine(message)
+        hasher.combine(hasAnimation)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileAhaMoment: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileAhaMoment {
+        return
+            try MobileAhaMoment(
+                momentType: FfiConverterTypeMobileAhaMomentType.read(from: &buf), 
+                title: FfiConverterString.read(from: &buf), 
+                message: FfiConverterString.read(from: &buf), 
+                hasAnimation: FfiConverterBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileAhaMoment, into buf: inout [UInt8]) {
+        FfiConverterTypeMobileAhaMomentType.write(value.momentType, into: &buf)
+        FfiConverterString.write(value.title, into: &buf)
+        FfiConverterString.write(value.message, into: &buf)
+        FfiConverterBool.write(value.hasAnimation, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileAhaMoment_lift(_ buf: RustBuffer) throws -> MobileAhaMoment {
+    return try FfiConverterTypeMobileAhaMoment.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileAhaMoment_lower(_ value: MobileAhaMoment) -> RustBuffer {
+    return FfiConverterTypeMobileAhaMoment.lower(value)
+}
+
+
+/**
+ * A failed content update.
+ */
+public struct MobileApplyFailure {
+    /**
+     * The content type that failed
+     */
+    public var contentType: MobileContentType
+    /**
+     * The error message
+     */
+    public var error: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * The content type that failed
+         */contentType: MobileContentType, 
+        /**
+         * The error message
+         */error: String) {
+        self.contentType = contentType
+        self.error = error
+    }
+}
+
+
+
+extension MobileApplyFailure: Equatable, Hashable {
+    public static func ==(lhs: MobileApplyFailure, rhs: MobileApplyFailure) -> Bool {
+        if lhs.contentType != rhs.contentType {
+            return false
+        }
+        if lhs.error != rhs.error {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(contentType)
+        hasher.combine(error)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileApplyFailure: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileApplyFailure {
+        return
+            try MobileApplyFailure(
+                contentType: FfiConverterTypeMobileContentType.read(from: &buf), 
+                error: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileApplyFailure, into buf: inout [UInt8]) {
+        FfiConverterTypeMobileContentType.write(value.contentType, into: &buf)
+        FfiConverterString.write(value.error, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileApplyFailure_lift(_ buf: RustBuffer) throws -> MobileApplyFailure {
+    return try FfiConverterTypeMobileApplyFailure.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileApplyFailure_lower(_ value: MobileApplyFailure) -> RustBuffer {
+    return FfiConverterTypeMobileApplyFailure.lower(value)
 }
 
 
@@ -1983,6 +2916,772 @@ public func FfiConverterTypeMobileContactField_lift(_ buf: RustBuffer) throws ->
 #endif
 public func FfiConverterTypeMobileContactField_lower(_ value: MobileContactField) -> RustBuffer {
     return FfiConverterTypeMobileContactField.lower(value)
+}
+
+
+/**
+ * Configuration for content updates.
+ */
+public struct MobileContentConfig {
+    /**
+     * Whether remote updates are enabled
+     */
+    public var remoteUpdatesEnabled: Bool
+    /**
+     * Content server URL
+     */
+    public var contentUrl: String
+    /**
+     * Optional SOCKS5 proxy URL (e.g., for Tor)
+     */
+    public var proxyUrl: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Whether remote updates are enabled
+         */remoteUpdatesEnabled: Bool, 
+        /**
+         * Content server URL
+         */contentUrl: String, 
+        /**
+         * Optional SOCKS5 proxy URL (e.g., for Tor)
+         */proxyUrl: String?) {
+        self.remoteUpdatesEnabled = remoteUpdatesEnabled
+        self.contentUrl = contentUrl
+        self.proxyUrl = proxyUrl
+    }
+}
+
+
+
+extension MobileContentConfig: Equatable, Hashable {
+    public static func ==(lhs: MobileContentConfig, rhs: MobileContentConfig) -> Bool {
+        if lhs.remoteUpdatesEnabled != rhs.remoteUpdatesEnabled {
+            return false
+        }
+        if lhs.contentUrl != rhs.contentUrl {
+            return false
+        }
+        if lhs.proxyUrl != rhs.proxyUrl {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(remoteUpdatesEnabled)
+        hasher.combine(contentUrl)
+        hasher.combine(proxyUrl)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileContentConfig: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileContentConfig {
+        return
+            try MobileContentConfig(
+                remoteUpdatesEnabled: FfiConverterBool.read(from: &buf), 
+                contentUrl: FfiConverterString.read(from: &buf), 
+                proxyUrl: FfiConverterOptionString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileContentConfig, into buf: inout [UInt8]) {
+        FfiConverterBool.write(value.remoteUpdatesEnabled, into: &buf)
+        FfiConverterString.write(value.contentUrl, into: &buf)
+        FfiConverterOptionString.write(value.proxyUrl, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileContentConfig_lift(_ buf: RustBuffer) throws -> MobileContentConfig {
+    return try FfiConverterTypeMobileContentConfig.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileContentConfig_lower(_ value: MobileContentConfig) -> RustBuffer {
+    return FfiConverterTypeMobileContentConfig.lower(value)
+}
+
+
+/**
+ * A record tracking delivery status of an outbound message.
+ */
+public struct MobileDeliveryRecord {
+    /**
+     * Unique message ID.
+     */
+    public var messageId: String
+    /**
+     * Recipient's contact ID.
+     */
+    public var recipientId: String
+    /**
+     * Current delivery status.
+     */
+    public var status: MobileDeliveryStatus
+    /**
+     * Error reason if failed.
+     */
+    public var errorReason: String?
+    /**
+     * When the message was created (Unix timestamp).
+     */
+    public var createdAt: UInt64
+    /**
+     * When the status was last updated (Unix timestamp).
+     */
+    public var updatedAt: UInt64
+    /**
+     * When the message expires (Unix timestamp, optional).
+     */
+    public var expiresAt: UInt64?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Unique message ID.
+         */messageId: String, 
+        /**
+         * Recipient's contact ID.
+         */recipientId: String, 
+        /**
+         * Current delivery status.
+         */status: MobileDeliveryStatus, 
+        /**
+         * Error reason if failed.
+         */errorReason: String?, 
+        /**
+         * When the message was created (Unix timestamp).
+         */createdAt: UInt64, 
+        /**
+         * When the status was last updated (Unix timestamp).
+         */updatedAt: UInt64, 
+        /**
+         * When the message expires (Unix timestamp, optional).
+         */expiresAt: UInt64?) {
+        self.messageId = messageId
+        self.recipientId = recipientId
+        self.status = status
+        self.errorReason = errorReason
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.expiresAt = expiresAt
+    }
+}
+
+
+
+extension MobileDeliveryRecord: Equatable, Hashable {
+    public static func ==(lhs: MobileDeliveryRecord, rhs: MobileDeliveryRecord) -> Bool {
+        if lhs.messageId != rhs.messageId {
+            return false
+        }
+        if lhs.recipientId != rhs.recipientId {
+            return false
+        }
+        if lhs.status != rhs.status {
+            return false
+        }
+        if lhs.errorReason != rhs.errorReason {
+            return false
+        }
+        if lhs.createdAt != rhs.createdAt {
+            return false
+        }
+        if lhs.updatedAt != rhs.updatedAt {
+            return false
+        }
+        if lhs.expiresAt != rhs.expiresAt {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(messageId)
+        hasher.combine(recipientId)
+        hasher.combine(status)
+        hasher.combine(errorReason)
+        hasher.combine(createdAt)
+        hasher.combine(updatedAt)
+        hasher.combine(expiresAt)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDeliveryRecord: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDeliveryRecord {
+        return
+            try MobileDeliveryRecord(
+                messageId: FfiConverterString.read(from: &buf), 
+                recipientId: FfiConverterString.read(from: &buf), 
+                status: FfiConverterTypeMobileDeliveryStatus.read(from: &buf), 
+                errorReason: FfiConverterOptionString.read(from: &buf), 
+                createdAt: FfiConverterUInt64.read(from: &buf), 
+                updatedAt: FfiConverterUInt64.read(from: &buf), 
+                expiresAt: FfiConverterOptionUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileDeliveryRecord, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.messageId, into: &buf)
+        FfiConverterString.write(value.recipientId, into: &buf)
+        FfiConverterTypeMobileDeliveryStatus.write(value.status, into: &buf)
+        FfiConverterOptionString.write(value.errorReason, into: &buf)
+        FfiConverterUInt64.write(value.createdAt, into: &buf)
+        FfiConverterUInt64.write(value.updatedAt, into: &buf)
+        FfiConverterOptionUInt64.write(value.expiresAt, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeliveryRecord_lift(_ buf: RustBuffer) throws -> MobileDeliveryRecord {
+    return try FfiConverterTypeMobileDeliveryRecord.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeliveryRecord_lower(_ value: MobileDeliveryRecord) -> RustBuffer {
+    return FfiConverterTypeMobileDeliveryRecord.lower(value)
+}
+
+
+/**
+ * Summary of delivery status across all devices.
+ */
+public struct MobileDeliverySummary {
+    /**
+     * Message ID.
+     */
+    public var messageId: String
+    /**
+     * Total number of target devices.
+     */
+    public var totalDevices: UInt32
+    /**
+     * Number of devices that received the message.
+     */
+    public var deliveredDevices: UInt32
+    /**
+     * Number of devices still pending.
+     */
+    public var pendingDevices: UInt32
+    /**
+     * Number of devices where delivery failed.
+     */
+    public var failedDevices: UInt32
+    /**
+     * Whether all devices have received the message.
+     */
+    public var isFullyDelivered: Bool
+    /**
+     * Progress as percentage (0-100).
+     */
+    public var progressPercent: UInt32
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Message ID.
+         */messageId: String, 
+        /**
+         * Total number of target devices.
+         */totalDevices: UInt32, 
+        /**
+         * Number of devices that received the message.
+         */deliveredDevices: UInt32, 
+        /**
+         * Number of devices still pending.
+         */pendingDevices: UInt32, 
+        /**
+         * Number of devices where delivery failed.
+         */failedDevices: UInt32, 
+        /**
+         * Whether all devices have received the message.
+         */isFullyDelivered: Bool, 
+        /**
+         * Progress as percentage (0-100).
+         */progressPercent: UInt32) {
+        self.messageId = messageId
+        self.totalDevices = totalDevices
+        self.deliveredDevices = deliveredDevices
+        self.pendingDevices = pendingDevices
+        self.failedDevices = failedDevices
+        self.isFullyDelivered = isFullyDelivered
+        self.progressPercent = progressPercent
+    }
+}
+
+
+
+extension MobileDeliverySummary: Equatable, Hashable {
+    public static func ==(lhs: MobileDeliverySummary, rhs: MobileDeliverySummary) -> Bool {
+        if lhs.messageId != rhs.messageId {
+            return false
+        }
+        if lhs.totalDevices != rhs.totalDevices {
+            return false
+        }
+        if lhs.deliveredDevices != rhs.deliveredDevices {
+            return false
+        }
+        if lhs.pendingDevices != rhs.pendingDevices {
+            return false
+        }
+        if lhs.failedDevices != rhs.failedDevices {
+            return false
+        }
+        if lhs.isFullyDelivered != rhs.isFullyDelivered {
+            return false
+        }
+        if lhs.progressPercent != rhs.progressPercent {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(messageId)
+        hasher.combine(totalDevices)
+        hasher.combine(deliveredDevices)
+        hasher.combine(pendingDevices)
+        hasher.combine(failedDevices)
+        hasher.combine(isFullyDelivered)
+        hasher.combine(progressPercent)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDeliverySummary: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDeliverySummary {
+        return
+            try MobileDeliverySummary(
+                messageId: FfiConverterString.read(from: &buf), 
+                totalDevices: FfiConverterUInt32.read(from: &buf), 
+                deliveredDevices: FfiConverterUInt32.read(from: &buf), 
+                pendingDevices: FfiConverterUInt32.read(from: &buf), 
+                failedDevices: FfiConverterUInt32.read(from: &buf), 
+                isFullyDelivered: FfiConverterBool.read(from: &buf), 
+                progressPercent: FfiConverterUInt32.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileDeliverySummary, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.messageId, into: &buf)
+        FfiConverterUInt32.write(value.totalDevices, into: &buf)
+        FfiConverterUInt32.write(value.deliveredDevices, into: &buf)
+        FfiConverterUInt32.write(value.pendingDevices, into: &buf)
+        FfiConverterUInt32.write(value.failedDevices, into: &buf)
+        FfiConverterBool.write(value.isFullyDelivered, into: &buf)
+        FfiConverterUInt32.write(value.progressPercent, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeliverySummary_lift(_ buf: RustBuffer) throws -> MobileDeliverySummary {
+    return try FfiConverterTypeMobileDeliverySummary.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeliverySummary_lower(_ value: MobileDeliverySummary) -> RustBuffer {
+    return FfiConverterTypeMobileDeliverySummary.lower(value)
+}
+
+
+/**
+ * Demo contact card representation for display.
+ */
+public struct MobileDemoContact {
+    /**
+     * Contact ID
+     */
+    public var id: String
+    /**
+     * Display name
+     */
+    public var displayName: String
+    /**
+     * Flag indicating this is a demo
+     */
+    public var isDemo: Bool
+    /**
+     * Current tip title
+     */
+    public var tipTitle: String
+    /**
+     * Current tip content
+     */
+    public var tipContent: String
+    /**
+     * Tip category
+     */
+    public var tipCategory: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Contact ID
+         */id: String, 
+        /**
+         * Display name
+         */displayName: String, 
+        /**
+         * Flag indicating this is a demo
+         */isDemo: Bool, 
+        /**
+         * Current tip title
+         */tipTitle: String, 
+        /**
+         * Current tip content
+         */tipContent: String, 
+        /**
+         * Tip category
+         */tipCategory: String) {
+        self.id = id
+        self.displayName = displayName
+        self.isDemo = isDemo
+        self.tipTitle = tipTitle
+        self.tipContent = tipContent
+        self.tipCategory = tipCategory
+    }
+}
+
+
+
+extension MobileDemoContact: Equatable, Hashable {
+    public static func ==(lhs: MobileDemoContact, rhs: MobileDemoContact) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.displayName != rhs.displayName {
+            return false
+        }
+        if lhs.isDemo != rhs.isDemo {
+            return false
+        }
+        if lhs.tipTitle != rhs.tipTitle {
+            return false
+        }
+        if lhs.tipContent != rhs.tipContent {
+            return false
+        }
+        if lhs.tipCategory != rhs.tipCategory {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(displayName)
+        hasher.combine(isDemo)
+        hasher.combine(tipTitle)
+        hasher.combine(tipContent)
+        hasher.combine(tipCategory)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDemoContact: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDemoContact {
+        return
+            try MobileDemoContact(
+                id: FfiConverterString.read(from: &buf), 
+                displayName: FfiConverterString.read(from: &buf), 
+                isDemo: FfiConverterBool.read(from: &buf), 
+                tipTitle: FfiConverterString.read(from: &buf), 
+                tipContent: FfiConverterString.read(from: &buf), 
+                tipCategory: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileDemoContact, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.id, into: &buf)
+        FfiConverterString.write(value.displayName, into: &buf)
+        FfiConverterBool.write(value.isDemo, into: &buf)
+        FfiConverterString.write(value.tipTitle, into: &buf)
+        FfiConverterString.write(value.tipContent, into: &buf)
+        FfiConverterString.write(value.tipCategory, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDemoContact_lift(_ buf: RustBuffer) throws -> MobileDemoContact {
+    return try FfiConverterTypeMobileDemoContact.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDemoContact_lower(_ value: MobileDemoContact) -> RustBuffer {
+    return FfiConverterTypeMobileDemoContact.lower(value)
+}
+
+
+/**
+ * Demo contact state for persistence.
+ */
+public struct MobileDemoContactState {
+    /**
+     * Whether the demo contact is active
+     */
+    public var isActive: Bool
+    /**
+     * Whether it was manually dismissed
+     */
+    public var wasDismissed: Bool
+    /**
+     * Whether it was auto-removed after first real exchange
+     */
+    public var autoRemoved: Bool
+    /**
+     * Number of updates sent
+     */
+    public var updateCount: UInt32
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Whether the demo contact is active
+         */isActive: Bool, 
+        /**
+         * Whether it was manually dismissed
+         */wasDismissed: Bool, 
+        /**
+         * Whether it was auto-removed after first real exchange
+         */autoRemoved: Bool, 
+        /**
+         * Number of updates sent
+         */updateCount: UInt32) {
+        self.isActive = isActive
+        self.wasDismissed = wasDismissed
+        self.autoRemoved = autoRemoved
+        self.updateCount = updateCount
+    }
+}
+
+
+
+extension MobileDemoContactState: Equatable, Hashable {
+    public static func ==(lhs: MobileDemoContactState, rhs: MobileDemoContactState) -> Bool {
+        if lhs.isActive != rhs.isActive {
+            return false
+        }
+        if lhs.wasDismissed != rhs.wasDismissed {
+            return false
+        }
+        if lhs.autoRemoved != rhs.autoRemoved {
+            return false
+        }
+        if lhs.updateCount != rhs.updateCount {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(isActive)
+        hasher.combine(wasDismissed)
+        hasher.combine(autoRemoved)
+        hasher.combine(updateCount)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDemoContactState: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDemoContactState {
+        return
+            try MobileDemoContactState(
+                isActive: FfiConverterBool.read(from: &buf), 
+                wasDismissed: FfiConverterBool.read(from: &buf), 
+                autoRemoved: FfiConverterBool.read(from: &buf), 
+                updateCount: FfiConverterUInt32.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileDemoContactState, into buf: inout [UInt8]) {
+        FfiConverterBool.write(value.isActive, into: &buf)
+        FfiConverterBool.write(value.wasDismissed, into: &buf)
+        FfiConverterBool.write(value.autoRemoved, into: &buf)
+        FfiConverterUInt32.write(value.updateCount, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDemoContactState_lift(_ buf: RustBuffer) throws -> MobileDemoContactState {
+    return try FfiConverterTypeMobileDemoContactState.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDemoContactState_lower(_ value: MobileDemoContactState) -> RustBuffer {
+    return FfiConverterTypeMobileDemoContactState.lower(value)
+}
+
+
+/**
+ * Per-device delivery tracking record.
+ */
+public struct MobileDeviceDeliveryRecord {
+    /**
+     * Message ID being tracked.
+     */
+    public var messageId: String
+    /**
+     * Recipient's contact ID.
+     */
+    public var recipientId: String
+    /**
+     * Target device ID.
+     */
+    public var deviceId: String
+    /**
+     * Delivery status for this device.
+     */
+    public var status: MobileDeviceDeliveryStatus
+    /**
+     * When the status was last updated (Unix timestamp).
+     */
+    public var updatedAt: UInt64
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Message ID being tracked.
+         */messageId: String, 
+        /**
+         * Recipient's contact ID.
+         */recipientId: String, 
+        /**
+         * Target device ID.
+         */deviceId: String, 
+        /**
+         * Delivery status for this device.
+         */status: MobileDeviceDeliveryStatus, 
+        /**
+         * When the status was last updated (Unix timestamp).
+         */updatedAt: UInt64) {
+        self.messageId = messageId
+        self.recipientId = recipientId
+        self.deviceId = deviceId
+        self.status = status
+        self.updatedAt = updatedAt
+    }
+}
+
+
+
+extension MobileDeviceDeliveryRecord: Equatable, Hashable {
+    public static func ==(lhs: MobileDeviceDeliveryRecord, rhs: MobileDeviceDeliveryRecord) -> Bool {
+        if lhs.messageId != rhs.messageId {
+            return false
+        }
+        if lhs.recipientId != rhs.recipientId {
+            return false
+        }
+        if lhs.deviceId != rhs.deviceId {
+            return false
+        }
+        if lhs.status != rhs.status {
+            return false
+        }
+        if lhs.updatedAt != rhs.updatedAt {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(messageId)
+        hasher.combine(recipientId)
+        hasher.combine(deviceId)
+        hasher.combine(status)
+        hasher.combine(updatedAt)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDeviceDeliveryRecord: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDeviceDeliveryRecord {
+        return
+            try MobileDeviceDeliveryRecord(
+                messageId: FfiConverterString.read(from: &buf), 
+                recipientId: FfiConverterString.read(from: &buf), 
+                deviceId: FfiConverterString.read(from: &buf), 
+                status: FfiConverterTypeMobileDeviceDeliveryStatus.read(from: &buf), 
+                updatedAt: FfiConverterUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileDeviceDeliveryRecord, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.messageId, into: &buf)
+        FfiConverterString.write(value.recipientId, into: &buf)
+        FfiConverterString.write(value.deviceId, into: &buf)
+        FfiConverterTypeMobileDeviceDeliveryStatus.write(value.status, into: &buf)
+        FfiConverterUInt64.write(value.updatedAt, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceDeliveryRecord_lift(_ buf: RustBuffer) throws -> MobileDeviceDeliveryRecord {
+    return try FfiConverterTypeMobileDeviceDeliveryRecord.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceDeliveryRecord_lower(_ value: MobileDeviceDeliveryRecord) -> RustBuffer {
+    return FfiConverterTypeMobileDeviceDeliveryRecord.lower(value)
 }
 
 
@@ -2581,6 +4280,115 @@ public func FfiConverterTypeMobileExchangeResult_lift(_ buf: RustBuffer) throws 
 #endif
 public func FfiConverterTypeMobileExchangeResult_lower(_ value: MobileExchangeResult) -> RustBuffer {
     return FfiConverterTypeMobileExchangeResult.lower(value)
+}
+
+
+/**
+ * A validation record for a contact's field.
+ */
+public struct MobileFieldValidation {
+    /**
+     * Contact ID that was validated.
+     */
+    public var contactId: String
+    /**
+     * Field name that was validated (e.g., "twitter", "email").
+     */
+    public var fieldName: String
+    /**
+     * Field value at time of validation.
+     */
+    public var fieldValue: String
+    /**
+     * Timestamp when validation was created.
+     */
+    public var validatedAt: UInt64
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Contact ID that was validated.
+         */contactId: String, 
+        /**
+         * Field name that was validated (e.g., "twitter", "email").
+         */fieldName: String, 
+        /**
+         * Field value at time of validation.
+         */fieldValue: String, 
+        /**
+         * Timestamp when validation was created.
+         */validatedAt: UInt64) {
+        self.contactId = contactId
+        self.fieldName = fieldName
+        self.fieldValue = fieldValue
+        self.validatedAt = validatedAt
+    }
+}
+
+
+
+extension MobileFieldValidation: Equatable, Hashable {
+    public static func ==(lhs: MobileFieldValidation, rhs: MobileFieldValidation) -> Bool {
+        if lhs.contactId != rhs.contactId {
+            return false
+        }
+        if lhs.fieldName != rhs.fieldName {
+            return false
+        }
+        if lhs.fieldValue != rhs.fieldValue {
+            return false
+        }
+        if lhs.validatedAt != rhs.validatedAt {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(contactId)
+        hasher.combine(fieldName)
+        hasher.combine(fieldValue)
+        hasher.combine(validatedAt)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileFieldValidation: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileFieldValidation {
+        return
+            try MobileFieldValidation(
+                contactId: FfiConverterString.read(from: &buf), 
+                fieldName: FfiConverterString.read(from: &buf), 
+                fieldValue: FfiConverterString.read(from: &buf), 
+                validatedAt: FfiConverterUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileFieldValidation, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.contactId, into: &buf)
+        FfiConverterString.write(value.fieldName, into: &buf)
+        FfiConverterString.write(value.fieldValue, into: &buf)
+        FfiConverterUInt64.write(value.validatedAt, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileFieldValidation_lift(_ buf: RustBuffer) throws -> MobileFieldValidation {
+    return try FfiConverterTypeMobileFieldValidation.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileFieldValidation_lower(_ value: MobileFieldValidation) -> RustBuffer {
+    return FfiConverterTypeMobileFieldValidation.lower(value)
 }
 
 
@@ -3225,6 +5033,157 @@ public func FfiConverterTypeMobileRecoveryVoucher_lower(_ value: MobileRecoveryV
 
 
 /**
+ * A retry queue entry for failed message deliveries.
+ */
+public struct MobileRetryEntry {
+    /**
+     * Unique message ID.
+     */
+    public var messageId: String
+    /**
+     * Recipient's contact ID.
+     */
+    public var recipientId: String
+    /**
+     * Current retry attempt (0 = first attempt).
+     */
+    public var attempt: UInt32
+    /**
+     * Unix timestamp for next retry.
+     */
+    public var nextRetry: UInt64
+    /**
+     * When the entry was created (Unix timestamp).
+     */
+    public var createdAt: UInt64
+    /**
+     * Maximum number of retry attempts.
+     */
+    public var maxAttempts: UInt32
+    /**
+     * Whether max attempts have been exceeded.
+     */
+    public var isMaxExceeded: Bool
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Unique message ID.
+         */messageId: String, 
+        /**
+         * Recipient's contact ID.
+         */recipientId: String, 
+        /**
+         * Current retry attempt (0 = first attempt).
+         */attempt: UInt32, 
+        /**
+         * Unix timestamp for next retry.
+         */nextRetry: UInt64, 
+        /**
+         * When the entry was created (Unix timestamp).
+         */createdAt: UInt64, 
+        /**
+         * Maximum number of retry attempts.
+         */maxAttempts: UInt32, 
+        /**
+         * Whether max attempts have been exceeded.
+         */isMaxExceeded: Bool) {
+        self.messageId = messageId
+        self.recipientId = recipientId
+        self.attempt = attempt
+        self.nextRetry = nextRetry
+        self.createdAt = createdAt
+        self.maxAttempts = maxAttempts
+        self.isMaxExceeded = isMaxExceeded
+    }
+}
+
+
+
+extension MobileRetryEntry: Equatable, Hashable {
+    public static func ==(lhs: MobileRetryEntry, rhs: MobileRetryEntry) -> Bool {
+        if lhs.messageId != rhs.messageId {
+            return false
+        }
+        if lhs.recipientId != rhs.recipientId {
+            return false
+        }
+        if lhs.attempt != rhs.attempt {
+            return false
+        }
+        if lhs.nextRetry != rhs.nextRetry {
+            return false
+        }
+        if lhs.createdAt != rhs.createdAt {
+            return false
+        }
+        if lhs.maxAttempts != rhs.maxAttempts {
+            return false
+        }
+        if lhs.isMaxExceeded != rhs.isMaxExceeded {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(messageId)
+        hasher.combine(recipientId)
+        hasher.combine(attempt)
+        hasher.combine(nextRetry)
+        hasher.combine(createdAt)
+        hasher.combine(maxAttempts)
+        hasher.combine(isMaxExceeded)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileRetryEntry: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileRetryEntry {
+        return
+            try MobileRetryEntry(
+                messageId: FfiConverterString.read(from: &buf), 
+                recipientId: FfiConverterString.read(from: &buf), 
+                attempt: FfiConverterUInt32.read(from: &buf), 
+                nextRetry: FfiConverterUInt64.read(from: &buf), 
+                createdAt: FfiConverterUInt64.read(from: &buf), 
+                maxAttempts: FfiConverterUInt32.read(from: &buf), 
+                isMaxExceeded: FfiConverterBool.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileRetryEntry, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.messageId, into: &buf)
+        FfiConverterString.write(value.recipientId, into: &buf)
+        FfiConverterUInt32.write(value.attempt, into: &buf)
+        FfiConverterUInt64.write(value.nextRetry, into: &buf)
+        FfiConverterUInt64.write(value.createdAt, into: &buf)
+        FfiConverterUInt32.write(value.maxAttempts, into: &buf)
+        FfiConverterBool.write(value.isMaxExceeded, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileRetryEntry_lift(_ buf: RustBuffer) throws -> MobileRetryEntry {
+    return try FfiConverterTypeMobileRetryEntry.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileRetryEntry_lower(_ value: MobileRetryEntry) -> RustBuffer {
+    return FfiConverterTypeMobileRetryEntry.lower(value)
+}
+
+
+/**
  * Social network info.
  */
 public struct MobileSocialNetwork {
@@ -3393,6 +5352,143 @@ public func FfiConverterTypeMobileSyncResult_lift(_ buf: RustBuffer) throws -> M
 #endif
 public func FfiConverterTypeMobileSyncResult_lower(_ value: MobileSyncResult) -> RustBuffer {
     return FfiConverterTypeMobileSyncResult.lower(value)
+}
+
+
+/**
+ * Validation status for a field.
+ */
+public struct MobileValidationStatus {
+    /**
+     * Total number of validations.
+     */
+    public var count: UInt32
+    /**
+     * Trust level based on count.
+     */
+    public var trustLevel: MobileTrustLevel
+    /**
+     * Trust level label for display.
+     */
+    public var trustLevelLabel: String
+    /**
+     * Color indicator for UI (grey, yellow, light_green, green).
+     */
+    public var color: String
+    /**
+     * Whether the current user has validated this field.
+     */
+    public var validatedByMe: Bool
+    /**
+     * Display text (e.g., "Verified by Bob and 2 others").
+     */
+    public var displayText: String
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        /**
+         * Total number of validations.
+         */count: UInt32, 
+        /**
+         * Trust level based on count.
+         */trustLevel: MobileTrustLevel, 
+        /**
+         * Trust level label for display.
+         */trustLevelLabel: String, 
+        /**
+         * Color indicator for UI (grey, yellow, light_green, green).
+         */color: String, 
+        /**
+         * Whether the current user has validated this field.
+         */validatedByMe: Bool, 
+        /**
+         * Display text (e.g., "Verified by Bob and 2 others").
+         */displayText: String) {
+        self.count = count
+        self.trustLevel = trustLevel
+        self.trustLevelLabel = trustLevelLabel
+        self.color = color
+        self.validatedByMe = validatedByMe
+        self.displayText = displayText
+    }
+}
+
+
+
+extension MobileValidationStatus: Equatable, Hashable {
+    public static func ==(lhs: MobileValidationStatus, rhs: MobileValidationStatus) -> Bool {
+        if lhs.count != rhs.count {
+            return false
+        }
+        if lhs.trustLevel != rhs.trustLevel {
+            return false
+        }
+        if lhs.trustLevelLabel != rhs.trustLevelLabel {
+            return false
+        }
+        if lhs.color != rhs.color {
+            return false
+        }
+        if lhs.validatedByMe != rhs.validatedByMe {
+            return false
+        }
+        if lhs.displayText != rhs.displayText {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(count)
+        hasher.combine(trustLevel)
+        hasher.combine(trustLevelLabel)
+        hasher.combine(color)
+        hasher.combine(validatedByMe)
+        hasher.combine(displayText)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileValidationStatus: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileValidationStatus {
+        return
+            try MobileValidationStatus(
+                count: FfiConverterUInt32.read(from: &buf), 
+                trustLevel: FfiConverterTypeMobileTrustLevel.read(from: &buf), 
+                trustLevelLabel: FfiConverterString.read(from: &buf), 
+                color: FfiConverterString.read(from: &buf), 
+                validatedByMe: FfiConverterBool.read(from: &buf), 
+                displayText: FfiConverterString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: MobileValidationStatus, into buf: inout [UInt8]) {
+        FfiConverterUInt32.write(value.count, into: &buf)
+        FfiConverterTypeMobileTrustLevel.write(value.trustLevel, into: &buf)
+        FfiConverterString.write(value.trustLevelLabel, into: &buf)
+        FfiConverterString.write(value.color, into: &buf)
+        FfiConverterBool.write(value.validatedByMe, into: &buf)
+        FfiConverterString.write(value.displayText, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileValidationStatus_lift(_ buf: RustBuffer) throws -> MobileValidationStatus {
+    return try FfiConverterTypeMobileValidationStatus.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileValidationStatus_lower(_ value: MobileValidationStatus) -> RustBuffer {
+    return FfiConverterTypeMobileValidationStatus.lower(value)
 }
 
 
@@ -3650,6 +5746,514 @@ public func FfiConverterTypeMobileVisibilityLabelDetail_lift(_ buf: RustBuffer) 
 public func FfiConverterTypeMobileVisibilityLabelDetail_lower(_ value: MobileVisibilityLabelDetail) -> RustBuffer {
     return FfiConverterTypeMobileVisibilityLabelDetail.lower(value)
 }
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
+ * Type of aha moment milestone.
+ */
+
+public enum MobileAhaMomentType {
+    
+    /**
+     * Shown when card creation completes
+     */
+    case cardCreationComplete
+    /**
+     * Shown on first edit (before having contacts)
+     */
+    case firstEdit
+    /**
+     * Shown when first contact is added
+     */
+    case firstContactAdded
+    /**
+     * Shown when receiving first update from a contact
+     */
+    case firstUpdateReceived
+    /**
+     * Shown when first outbound update is delivered
+     */
+    case firstOutboundDelivered
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileAhaMomentType: FfiConverterRustBuffer {
+    typealias SwiftType = MobileAhaMomentType
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileAhaMomentType {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .cardCreationComplete
+        
+        case 2: return .firstEdit
+        
+        case 3: return .firstContactAdded
+        
+        case 4: return .firstUpdateReceived
+        
+        case 5: return .firstOutboundDelivered
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: MobileAhaMomentType, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .cardCreationComplete:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .firstEdit:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .firstContactAdded:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .firstUpdateReceived:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .firstOutboundDelivered:
+            writeInt(&buf, Int32(5))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileAhaMomentType_lift(_ buf: RustBuffer) throws -> MobileAhaMomentType {
+    return try FfiConverterTypeMobileAhaMomentType.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileAhaMomentType_lower(_ value: MobileAhaMomentType) -> RustBuffer {
+    return FfiConverterTypeMobileAhaMomentType.lower(value)
+}
+
+
+
+extension MobileAhaMomentType: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
+ * Result of applying content updates.
+ */
+
+public enum MobileApplyResult {
+    
+    /**
+     * No updates were available
+     */
+    case noUpdates
+    /**
+     * Updates were applied (some may have failed)
+     */
+    case applied(
+        /**
+         * Content types that were successfully updated
+         */applied: [MobileContentType], 
+        /**
+         * Content types that failed with error messages
+         */failed: [MobileApplyFailure]
+    )
+    /**
+     * Remote updates are disabled
+     */
+    case disabled
+    /**
+     * Apply failed completely
+     */
+    case error(error: String
+    )
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileApplyResult: FfiConverterRustBuffer {
+    typealias SwiftType = MobileApplyResult
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileApplyResult {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .noUpdates
+        
+        case 2: return .applied(applied: try FfiConverterSequenceTypeMobileContentType.read(from: &buf), failed: try FfiConverterSequenceTypeMobileApplyFailure.read(from: &buf)
+        )
+        
+        case 3: return .disabled
+        
+        case 4: return .error(error: try FfiConverterString.read(from: &buf)
+        )
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: MobileApplyResult, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .noUpdates:
+            writeInt(&buf, Int32(1))
+        
+        
+        case let .applied(applied,failed):
+            writeInt(&buf, Int32(2))
+            FfiConverterSequenceTypeMobileContentType.write(applied, into: &buf)
+            FfiConverterSequenceTypeMobileApplyFailure.write(failed, into: &buf)
+            
+        
+        case .disabled:
+            writeInt(&buf, Int32(3))
+        
+        
+        case let .error(error):
+            writeInt(&buf, Int32(4))
+            FfiConverterString.write(error, into: &buf)
+            
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileApplyResult_lift(_ buf: RustBuffer) throws -> MobileApplyResult {
+    return try FfiConverterTypeMobileApplyResult.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileApplyResult_lower(_ value: MobileApplyResult) -> RustBuffer {
+    return FfiConverterTypeMobileApplyResult.lower(value)
+}
+
+
+
+extension MobileApplyResult: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
+ * Content type for mobile platforms.
+ */
+
+public enum MobileContentType {
+    
+    /**
+     * Social network definitions
+     */
+    case networks
+    /**
+     * Localization strings
+     */
+    case locales
+    /**
+     * UI themes
+     */
+    case themes
+    /**
+     * Help content
+     */
+    case help
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileContentType: FfiConverterRustBuffer {
+    typealias SwiftType = MobileContentType
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileContentType {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .networks
+        
+        case 2: return .locales
+        
+        case 3: return .themes
+        
+        case 4: return .help
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: MobileContentType, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .networks:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .locales:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .themes:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .help:
+            writeInt(&buf, Int32(4))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileContentType_lift(_ buf: RustBuffer) throws -> MobileContentType {
+    return try FfiConverterTypeMobileContentType.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileContentType_lower(_ value: MobileContentType) -> RustBuffer {
+    return FfiConverterTypeMobileContentType.lower(value)
+}
+
+
+
+extension MobileContentType: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
+ * Delivery status for tracking message delivery progression.
+ */
+
+public enum MobileDeliveryStatus {
+    
+    /**
+     * Message queued locally, not yet sent.
+     */
+    case queued
+    /**
+     * Message sent to relay.
+     */
+    case sent
+    /**
+     * Relay confirmed storage.
+     */
+    case stored
+    /**
+     * Recipient confirmed receipt.
+     */
+    case delivered
+    /**
+     * Message expired without delivery.
+     */
+    case expired
+    /**
+     * Delivery failed.
+     */
+    case failed
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDeliveryStatus: FfiConverterRustBuffer {
+    typealias SwiftType = MobileDeliveryStatus
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDeliveryStatus {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .queued
+        
+        case 2: return .sent
+        
+        case 3: return .stored
+        
+        case 4: return .delivered
+        
+        case 5: return .expired
+        
+        case 6: return .failed
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: MobileDeliveryStatus, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .queued:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .sent:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .stored:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .delivered:
+            writeInt(&buf, Int32(4))
+        
+        
+        case .expired:
+            writeInt(&buf, Int32(5))
+        
+        
+        case .failed:
+            writeInt(&buf, Int32(6))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeliveryStatus_lift(_ buf: RustBuffer) throws -> MobileDeliveryStatus {
+    return try FfiConverterTypeMobileDeliveryStatus.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeliveryStatus_lower(_ value: MobileDeliveryStatus) -> RustBuffer {
+    return FfiConverterTypeMobileDeliveryStatus.lower(value)
+}
+
+
+
+extension MobileDeliveryStatus: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
+ * Delivery status for a specific device.
+ */
+
+public enum MobileDeviceDeliveryStatus {
+    
+    /**
+     * Message pending delivery to this device.
+     */
+    case pending
+    /**
+     * Message stored at relay for this device.
+     */
+    case stored
+    /**
+     * Message delivered to this device.
+     */
+    case delivered
+    /**
+     * Delivery to this device failed.
+     */
+    case failed
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileDeviceDeliveryStatus: FfiConverterRustBuffer {
+    typealias SwiftType = MobileDeviceDeliveryStatus
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileDeviceDeliveryStatus {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .pending
+        
+        case 2: return .stored
+        
+        case 3: return .delivered
+        
+        case 4: return .failed
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: MobileDeviceDeliveryStatus, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .pending:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .stored:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .delivered:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .failed:
+            writeInt(&buf, Int32(4))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceDeliveryStatus_lift(_ buf: RustBuffer) throws -> MobileDeviceDeliveryStatus {
+    return try FfiConverterTypeMobileDeviceDeliveryStatus.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileDeviceDeliveryStatus_lower(_ value: MobileDeviceDeliveryStatus) -> RustBuffer {
+    return FfiConverterTypeMobileDeviceDeliveryStatus.lower(value)
+}
+
+
+
+extension MobileDeviceDeliveryStatus: Equatable, Hashable {}
+
+
 
 
 /**
@@ -4075,6 +6679,198 @@ extension MobileSyncStatus: Equatable, Hashable {}
 
 
 
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
+ * Trust level based on validation count.
+ */
+
+public enum MobileTrustLevel {
+    
+    /**
+     * No validations yet.
+     */
+    case unverified
+    /**
+     * 1 validation.
+     */
+    case lowConfidence
+    /**
+     * 2-4 validations.
+     */
+    case partialConfidence
+    /**
+     * 5+ validations.
+     */
+    case highConfidence
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileTrustLevel: FfiConverterRustBuffer {
+    typealias SwiftType = MobileTrustLevel
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileTrustLevel {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .unverified
+        
+        case 2: return .lowConfidence
+        
+        case 3: return .partialConfidence
+        
+        case 4: return .highConfidence
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: MobileTrustLevel, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .unverified:
+            writeInt(&buf, Int32(1))
+        
+        
+        case .lowConfidence:
+            writeInt(&buf, Int32(2))
+        
+        
+        case .partialConfidence:
+            writeInt(&buf, Int32(3))
+        
+        
+        case .highConfidence:
+            writeInt(&buf, Int32(4))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileTrustLevel_lift(_ buf: RustBuffer) throws -> MobileTrustLevel {
+    return try FfiConverterTypeMobileTrustLevel.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileTrustLevel_lower(_ value: MobileTrustLevel) -> RustBuffer {
+    return FfiConverterTypeMobileTrustLevel.lower(value)
+}
+
+
+
+extension MobileTrustLevel: Equatable, Hashable {}
+
+
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+/**
+ * Result of checking for content updates.
+ */
+
+public enum MobileUpdateStatus {
+    
+    /**
+     * Content is up to date
+     */
+    case upToDate
+    /**
+     * Updates are available for the specified content types
+     */
+    case updatesAvailable(types: [MobileContentType]
+    )
+    /**
+     * Update check failed
+     */
+    case checkFailed(error: String
+    )
+    /**
+     * Remote updates are disabled
+     */
+    case disabled
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeMobileUpdateStatus: FfiConverterRustBuffer {
+    typealias SwiftType = MobileUpdateStatus
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> MobileUpdateStatus {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        
+        case 1: return .upToDate
+        
+        case 2: return .updatesAvailable(types: try FfiConverterSequenceTypeMobileContentType.read(from: &buf)
+        )
+        
+        case 3: return .checkFailed(error: try FfiConverterString.read(from: &buf)
+        )
+        
+        case 4: return .disabled
+        
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: MobileUpdateStatus, into buf: inout [UInt8]) {
+        switch value {
+        
+        
+        case .upToDate:
+            writeInt(&buf, Int32(1))
+        
+        
+        case let .updatesAvailable(types):
+            writeInt(&buf, Int32(2))
+            FfiConverterSequenceTypeMobileContentType.write(types, into: &buf)
+            
+        
+        case let .checkFailed(error):
+            writeInt(&buf, Int32(3))
+            FfiConverterString.write(error, into: &buf)
+            
+        
+        case .disabled:
+            writeInt(&buf, Int32(4))
+        
+        }
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileUpdateStatus_lift(_ buf: RustBuffer) throws -> MobileUpdateStatus {
+    return try FfiConverterTypeMobileUpdateStatus.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeMobileUpdateStatus_lower(_ value: MobileUpdateStatus) -> RustBuffer {
+    return FfiConverterTypeMobileUpdateStatus.lower(value)
+}
+
+
+
+extension MobileUpdateStatus: Equatable, Hashable {}
+
+
+
 
 
 
@@ -4318,6 +7114,30 @@ extension FfiConverterCallbackInterfacePlatformAudioHandler : FfiConverter {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionUInt64: FfiConverterRustBuffer {
+    typealias SwiftType = UInt64?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterUInt64.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterUInt64.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterOptionString: FfiConverterRustBuffer {
     typealias SwiftType = String?
 
@@ -4342,6 +7162,30 @@ fileprivate struct FfiConverterOptionString: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterOptionTypeMobileAhaMoment: FfiConverterRustBuffer {
+    typealias SwiftType = MobileAhaMoment?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeMobileAhaMoment.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeMobileAhaMoment.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterOptionTypeMobileContact: FfiConverterRustBuffer {
     typealias SwiftType = MobileContact?
 
@@ -4358,6 +7202,54 @@ fileprivate struct FfiConverterOptionTypeMobileContact: FfiConverterRustBuffer {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterTypeMobileContact.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeMobileDeliveryRecord: FfiConverterRustBuffer {
+    typealias SwiftType = MobileDeliveryRecord?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeMobileDeliveryRecord.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeMobileDeliveryRecord.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterOptionTypeMobileDemoContact: FfiConverterRustBuffer {
+    typealias SwiftType = MobileDemoContact?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterTypeMobileDemoContact.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterTypeMobileDemoContact.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
     }
@@ -4440,6 +7332,31 @@ fileprivate struct FfiConverterSequenceString: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterSequenceTypeMobileApplyFailure: FfiConverterRustBuffer {
+    typealias SwiftType = [MobileApplyFailure]
+
+    public static func write(_ value: [MobileApplyFailure], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeMobileApplyFailure.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [MobileApplyFailure] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [MobileApplyFailure]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeMobileApplyFailure.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypeMobileContact: FfiConverterRustBuffer {
     typealias SwiftType = [MobileContact]
 
@@ -4490,6 +7407,106 @@ fileprivate struct FfiConverterSequenceTypeMobileContactField: FfiConverterRustB
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterSequenceTypeMobileDeliveryRecord: FfiConverterRustBuffer {
+    typealias SwiftType = [MobileDeliveryRecord]
+
+    public static func write(_ value: [MobileDeliveryRecord], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeMobileDeliveryRecord.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [MobileDeliveryRecord] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [MobileDeliveryRecord]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeMobileDeliveryRecord.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeMobileDeviceDeliveryRecord: FfiConverterRustBuffer {
+    typealias SwiftType = [MobileDeviceDeliveryRecord]
+
+    public static func write(_ value: [MobileDeviceDeliveryRecord], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeMobileDeviceDeliveryRecord.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [MobileDeviceDeliveryRecord] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [MobileDeviceDeliveryRecord]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeMobileDeviceDeliveryRecord.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeMobileFieldValidation: FfiConverterRustBuffer {
+    typealias SwiftType = [MobileFieldValidation]
+
+    public static func write(_ value: [MobileFieldValidation], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeMobileFieldValidation.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [MobileFieldValidation] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [MobileFieldValidation]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeMobileFieldValidation.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeMobileRetryEntry: FfiConverterRustBuffer {
+    typealias SwiftType = [MobileRetryEntry]
+
+    public static func write(_ value: [MobileRetryEntry], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeMobileRetryEntry.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [MobileRetryEntry] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [MobileRetryEntry]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeMobileRetryEntry.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypeMobileSocialNetwork: FfiConverterRustBuffer {
     typealias SwiftType = [MobileSocialNetwork]
 
@@ -4532,6 +7549,31 @@ fileprivate struct FfiConverterSequenceTypeMobileVisibilityLabel: FfiConverterRu
         seq.reserveCapacity(Int(len))
         for _ in 0 ..< len {
             seq.append(try FfiConverterTypeMobileVisibilityLabel.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeMobileContentType: FfiConverterRustBuffer {
+    typealias SwiftType = [MobileContentType]
+
+    public static func write(_ value: [MobileContentType], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeMobileContentType.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [MobileContentType] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [MobileContentType]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeMobileContentType.read(from: &buf))
         }
         return seq
     }
@@ -4655,10 +7697,34 @@ private var initializationResult: InitializationResult = {
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_add_recovery_voucher() != 24135) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_aha_moments_seen_count() != 62433) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_aha_moments_total_count() != 39450) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_apply_content_updates() != 9726) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_auto_remove_demo_contact() != 63912) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_calculate_retry_backoff() != 60454) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_check_content_updates() != 7487) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_clear_pending_updates_for_contact() != 25049) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_complete_exchange() != 59225) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_contact_count() != 30960) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_count_failed_deliveries() != 59375) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_create_identity() != 63328) {
@@ -4676,6 +7742,12 @@ private var initializationResult: InitializationResult = {
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_delete_label() != 49151) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_delete_retry() != 45088) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_dismiss_demo_contact() != 52421) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_export_backup() != 14975) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -4685,10 +7757,43 @@ private var initializationResult: InitializationResult = {
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_generate_exchange_qr() != 23797) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_all_delivery_records() != 60693) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_contact() != 17724) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_delivery_count_by_status() != 25864) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_delivery_record() != 7344) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_delivery_records_for_contact() != 47399) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_delivery_summary() != 26032) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_demo_contact() != 57328) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_demo_contact_state() != 10277) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_device_deliveries() != 13834) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_display_name() != 22034) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_due_retries() != 45644) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_field_validation_count() != 23050) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_field_validation_status() != 10695) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_label() != 23616) {
@@ -4697,7 +7802,16 @@ private var initializationResult: InitializationResult = {
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_labels_for_contact() != 34054) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_offline_queue_capacity() != 37318) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_own_card() != 41646) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_pending_deliveries() != 20816) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_pending_device_deliveries() != 59136) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_profile_url() != 40964) {
@@ -4712,13 +7826,28 @@ private var initializationResult: InitializationResult = {
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_recovery_status() != 18084) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_retries_for_contact() != 16947) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_retry_count() != 56457) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_suggested_labels() != 35491) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_sync_status() != 18804) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_get_total_pending_count() != 28547) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_has_identity() != 17028) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_has_seen_aha_moment() != 37304) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_has_validated_field() != 50022) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_hide_field_from_contact() != 26050) {
@@ -4727,10 +7856,22 @@ private var initializationResult: InitializationResult = {
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_import_backup() != 16228) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_init_demo_contact_if_needed() != 24963) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_is_certificate_pinning_enabled() != 31532) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_is_content_updates_supported() != 25945) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_is_demo_update_available() != 17863) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_is_field_visible_to_contact() != 31866) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_is_offline_queue_full() != 65171) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_list_contacts() != 21454) {
@@ -4739,13 +7880,22 @@ private var initializationResult: InitializationResult = {
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_list_labels() != 31739) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_list_my_validations() != 30917) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_list_social_networks() != 64160) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_manual_retry() != 42209) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_parse_recovery_claim() != 19311) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_pending_update_count() != 109) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_reload_social_networks() != 53115) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_remove_contact() != 60263) {
@@ -4761,6 +7911,15 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_rename_label() != 5503) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_reset_aha_moments() != 24810) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_restore_demo_contact() != 31302) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_revoke_field_validation() != 14878) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_search_contacts() != 63776) {
@@ -4787,7 +7946,19 @@ private var initializationResult: InitializationResult = {
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_sync() != 44616) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_trigger_demo_update() != 56863) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_try_trigger_aha_moment() != 32158) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_try_trigger_aha_moment_with_context() != 36865) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_update_field() != 13386) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_vauchi_mobile_checksum_method_vauchimobile_validate_field() != 21676) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_vauchi_mobile_checksum_method_vauchimobile_verify_contact() != 57061) {
