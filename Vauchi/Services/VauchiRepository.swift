@@ -1,5 +1,38 @@
 // VauchiRepository.swift
 // Repository layer wrapping UniFFI bindings for Vauchi iOS
+//
+// TODO(core-gap): Restore feature - OnboardingView has TODO for restore flow.
+// vauchi-mobile exposes importBackup() but UI flow during onboarding not implemented.
+//
+// TODO(core-gap): Proximity verification - 4 TODOs in VauchiViewModel.swift.
+// vauchi-mobile exposes MobileProximityVerifier with emitChallenge(), listenForResponse(),
+// getCapability(), isSupported(). Requires xcframework rebuild with proximity support.
+// AudioProximityService exists but not wired up.
+//
+// TODO(core-gap): Content updates UI - vauchi-mobile exposes isContentUpdatesSupported(),
+// checkContentUpdates(), applyContentUpdates(), reloadSocialNetworks().
+// No UI to trigger or display updates.
+//
+// TODO(core-gap): Field validation UI - vauchi-mobile exposes validateField(),
+// getFieldValidationStatus(), revokeFieldValidation(), listMyValidations(),
+// hasValidatedField(), getFieldValidationCount(). No visual feedback implemented.
+//
+// TODO(core-gap): Password strength indicator - vauchi-mobile exposes checkPasswordStrength()
+// but not shown during backup creation in UI.
+//
+// TODO(core-gap): Aha moments - vauchi-mobile exposes hasSeenAhaMoment(),
+// tryTriggerAhaMoment(), tryTriggerAhaMomentWithContext(), ahaMomentSeenCount(),
+// ahaMomentsTotalCount(), resetAhaMoments(). No onboarding engagement tracking.
+//
+// TODO(core-gap): Demo contact - vauchi-mobile exposes initDemoContactIfNeeded(),
+// getDemoContact(), getDemoContactState(), isDemoUpdateAvailable(), triggerDemoUpdate(),
+// dismissDemoContact(), autoRemoveDemoContact(), restoreDemoContact(). Not integrated.
+//
+// TODO(core-gap): Device linking UI - Tests exist (DeviceLinkingTests) but feature
+// not exposed in main app. vauchi-mobile has device linking protocol support.
+//
+// TODO(core-gap): Certificate pinning UI - vauchi-mobile exposes setPinnedCertificate(),
+// isCertificatePinningEnabled(). Available but not integrated in settings.
 
 import Foundation
 
