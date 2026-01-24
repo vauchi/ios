@@ -1,0 +1,50 @@
+# GitLab CI for vauchi-ios
+#
+# iOS app (SwiftUI)
+#
+# REMEDIATION PLAN (allow_failure jobs):
+# All jobs require a macOS runner with Xcode, which may not be configured.
+# Additionally, the app requires native UniFFI bindings from vauchi-mobile.
+#
+# To fix:
+# 1. Configure a macOS GitLab runner with tag 'macos'
+#    - Install Xcode and command line tools
+#    - Install SwiftLint: brew install swiftlint
+# 2. Build native bindings before Xcode build:
+#    - Run: ./build-ios.sh (builds vauchi-mobile for iOS targets)
+# 3. Or use pre-built XCFramework from vauchi/core CI artifacts
+#
+# Once macOS runner is available and bindings are built, remove `allow_failure: true`
+
+stages:
+  - lint
+  - build
+  - test
+
+.macos-only:
+  tags:
+    - macos
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+lint:swiftlint:
+  extends: .macos-only
+  stage: lint
+  script:
+    - if command -v swiftlint &> /dev/null; then swiftlint lint --strict; else echo "SwiftLint not installed, skipping"; fi
+  allow_failure: true
+
+build:debug:
+  extends: .macos-only
+  stage: build
+  script:
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 15' build
+  allow_failure: true
+
+test:unit:
+  extends: .macos-only
+  stage: test
+  script:
+    - xcodebuild -project Vauchi.xcodeproj -scheme VauchiTests -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 15' test
+  allow_failure: true
