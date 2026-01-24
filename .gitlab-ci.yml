@@ -25,6 +25,7 @@
 include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
 
 stages:
   - lint
@@ -121,16 +122,24 @@ test:unit:
 # Security Stage
 # ============================================================
 
-# Override GitLab templates
-sast:
-  stage: security
+# GitLab security templates configuration
+# Override child analyzer jobs (not parent stubs) to add tags and rules
+
+semgrep-sast:
+  tags: [docker]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
 secret_detection:
-  stage: security
+  tags: [docker]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+license_scanning:
+  tags: [docker]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
