@@ -166,6 +166,18 @@ struct SettingsView: View {
                     NavigationLink(destination: RecoveryView()) {
                         Label("Recovery", systemImage: "person.badge.key")
                     }
+
+                    NavigationLink(destination: CertificatePinningView()) {
+                        HStack {
+                            Label("Certificate Pinning", systemImage: "lock.shield")
+                            Spacer()
+                            if viewModel.isCertificatePinningEnabled() {
+                                Text("Enabled")
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            }
+                        }
+                    }
                 }
 
                 // Content Updates section
@@ -454,6 +466,128 @@ struct LinkedDevicesView: View {
         }
         .navigationTitle("Linked Devices")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct CertificatePinningView: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @State private var certificatePem = ""
+    @State private var showPasteSheet = false
+    @State private var showClearConfirmation = false
+
+    var isPinningEnabled: Bool {
+        viewModel.isCertificatePinningEnabled()
+    }
+
+    var body: some View {
+        List {
+            Section {
+                HStack {
+                    Label("Status", systemImage: isPinningEnabled ? "lock.shield.fill" : "lock.shield")
+                    Spacer()
+                    Text(isPinningEnabled ? "Enabled" : "Disabled")
+                        .foregroundColor(isPinningEnabled ? .green : .secondary)
+                }
+            } header: {
+                Text("Certificate Pinning")
+            } footer: {
+                Text("Certificate pinning ensures the app only connects to relay servers presenting a specific certificate, preventing man-in-the-middle attacks.")
+            }
+
+            Section {
+                Button(action: { showPasteSheet = true }) {
+                    Label("Set Certificate", systemImage: "doc.badge.plus")
+                }
+
+                if isPinningEnabled {
+                    Button(role: .destructive, action: { showClearConfirmation = true }) {
+                        Label("Clear Certificate", systemImage: "trash")
+                    }
+                }
+            } header: {
+                Text("Actions")
+            } footer: {
+                if isPinningEnabled {
+                    Text("Warning: Clearing the certificate will allow connections to any valid relay server.")
+                } else {
+                    Text("Paste a certificate in PEM format to enable pinning. This is typically provided by your organization's IT department.")
+                }
+            }
+        }
+        .navigationTitle("Certificate Pinning")
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showPasteSheet) {
+            SetCertificateSheet(onSet: { certPem in
+                viewModel.setPinnedCertificate(certPem)
+            })
+        }
+        .alert("Clear Certificate?", isPresented: $showClearConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear", role: .destructive) {
+                viewModel.setPinnedCertificate("")
+            }
+        } message: {
+            Text("This will disable certificate pinning and allow connections to any valid relay server.")
+        }
+    }
+}
+
+struct SetCertificateSheet: View {
+    @Environment(\.dismiss) var dismiss
+    let onSet: (String) -> Void
+
+    @State private var certificateText = ""
+    @State private var errorMessage: String?
+
+    var isValidPem: Bool {
+        let trimmed = certificateText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.hasPrefix("-----BEGIN CERTIFICATE-----") &&
+               trimmed.hasSuffix("-----END CERTIFICATE-----")
+    }
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    TextEditor(text: $certificateText)
+                        .font(.system(.caption, design: .monospaced))
+                        .frame(minHeight: 200)
+                } header: {
+                    Text("Certificate (PEM Format)")
+                } footer: {
+                    Text("Paste the certificate provided by your organization. It should begin with '-----BEGIN CERTIFICATE-----'.")
+                }
+
+                if !certificateText.isEmpty && !isValidPem {
+                    Section {
+                        Text("Invalid PEM format. Certificate must begin with '-----BEGIN CERTIFICATE-----' and end with '-----END CERTIFICATE-----'.")
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
+                }
+
+                Section {
+                    Button(action: {
+                        onSet(certificateText.trimmingCharacters(in: .whitespacesAndNewlines))
+                        dismiss()
+                    }) {
+                        HStack {
+                            Spacer()
+                            Text("Set Certificate")
+                            Spacer()
+                        }
+                    }
+                    .disabled(!isValidPem)
+                }
+            }
+            .navigationTitle("Set Certificate")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
     }
 }
 

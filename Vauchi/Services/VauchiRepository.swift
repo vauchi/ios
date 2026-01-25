@@ -30,8 +30,8 @@
 // TODO(core-gap): Device linking UI - Tests exist (DeviceLinkingTests) but feature
 // not exposed in main app. vauchi-mobile has device linking protocol support.
 //
-// TODO(core-gap): Certificate pinning UI - vauchi-mobile exposes setPinnedCertificate(),
-// isCertificatePinningEnabled(). Available but not integrated in settings.
+// DONE: Certificate pinning UI - isCertificatePinningEnabled(), setPinnedCertificate()
+// methods implemented. UI added to Settings under Security section.
 
 import Foundation
 
@@ -998,6 +998,19 @@ class VauchiRepository {
     /// Reset all aha moments (for development/testing)
     func resetAhaMoments() throws {
         try vauchi.resetAhaMoments()
+    }
+
+    // MARK: - Certificate Pinning
+
+    /// Check if certificate pinning is enabled
+    func isCertificatePinningEnabled() -> Bool {
+        return vauchi.isCertificatePinningEnabled()
+    }
+
+    /// Set the pinned certificate for relay TLS connections
+    /// - Parameter certPem: Certificate in PEM format
+    func setPinnedCertificate(_ certPem: String) {
+        vauchi.setPinnedCertificate(certPem: certPem)
     }
 
     // MARK: - Recovery Operations

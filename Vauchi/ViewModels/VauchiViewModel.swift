@@ -925,6 +925,20 @@ class VauchiViewModel: ObservableObject {
         try repository.resetAhaMoments()
     }
 
+    // MARK: - Certificate Pinning
+
+    /// Check if certificate pinning is enabled
+    func isCertificatePinningEnabled() -> Bool {
+        guard let repository = repository else { return false }
+        return repository.isCertificatePinningEnabled()
+    }
+
+    /// Set the pinned certificate for relay TLS connections
+    func setPinnedCertificate(_ certPem: String) {
+        guard let repository = repository else { return }
+        repository.setPinnedCertificate(certPem)
+    }
+
     // MARK: - Recovery
 
     /// Create a recovery claim for a lost identity
