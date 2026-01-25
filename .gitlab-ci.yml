@@ -99,7 +99,7 @@ test:unit:
   extends: .macos-job
   stage: test
   script:
-    - xcodebuild -project Vauchi.xcodeproj -scheme VauchiTests -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 15 Pro' test
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 15 Pro' test
   artifacts:
     reports:
       junit: build/reports/junit.xml
