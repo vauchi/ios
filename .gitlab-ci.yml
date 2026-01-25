@@ -2,24 +2,17 @@
 #
 # iOS app (SwiftUI)
 #
+# Pipeline strategy:
+#   - MR: Full validation (lint, build, test, security)
+#   - Main: No pipeline (validated via MR)
+#
+# Requirements:
+#   - macOS runner with Xcode and SwiftLint
+#   - XCFramework in Frameworks/ (tracked via Git LFS)
+#
 # GitLab Ultimate Features:
 #   - SAST: Static application security testing (Swift)
 #   - Secret Detection: Prevent credential leaks
-#   - Mobile App Security Testing (MAST)
-#
-# REMEDIATION PLAN (allow_failure jobs):
-# All jobs require a macOS runner with Xcode, which may not be configured.
-# Additionally, the app requires native UniFFI bindings from vauchi-mobile.
-#
-# To fix:
-# 1. Configure a macOS GitLab runner with tag 'macos'
-#    - Install Xcode and command line tools
-#    - Install SwiftLint: brew install swiftlint
-# 2. Build native bindings before Xcode build:
-#    - Run: ./build-ios.sh (builds vauchi-mobile for iOS targets)
-# 3. Or use pre-built XCFramework from vauchi/core CI artifacts
-#
-# Once macOS runner is available and bindings are built, remove `allow_failure: true`
 
 # GitLab Ultimate Templates
 include:
@@ -62,14 +55,12 @@ lint:swiftlint:
     reports:
       codequality: swiftlint-report.json
     expire_in: 1 week
-  allow_failure: true
 
 lint:swiftformat:
   extends: .macos-job
   stage: lint
   script:
     - if command -v swiftformat &> /dev/null; then swiftformat --lint .; else echo "SwiftFormat not installed, skipping"; fi
-  allow_failure: true
 
 # ============================================================
 # Build Stage
@@ -85,7 +76,6 @@ build:debug:
     paths:
       - build/Build/Products/Debug-iphonesimulator/
     expire_in: 1 week
-  allow_failure: true
 
 build:release:
   extends: .macos-job
@@ -100,7 +90,6 @@ build:release:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/
-  allow_failure: true
 
 # ============================================================
 # Test Stage
@@ -115,7 +104,6 @@ test:unit:
     reports:
       junit: build/reports/junit.xml
     expire_in: 1 week
-  allow_failure: true
 
 # ============================================================
 # Security Stage
@@ -147,7 +135,6 @@ security:swift-analysis:
     - 'grep -r "NSAllowsArbitraryLoads" . && echo "WARNING: App Transport Security disabled" || true'
     - 'grep -r "allowsBackup.*true" . && echo "WARNING: Backup enabled" || true'
     - 'grep -r "NSCameraUsageDescription\|NSPhotoLibraryUsageDescription\|NSLocationWhenInUseUsageDescription" Info.plist || echo "INFO: No privacy permissions declared"'
-  allow_failure: true
 
 # Dependency check for CocoaPods/SPM
 security:dependencies:
@@ -171,4 +158,3 @@ security:dependencies:
         - "Package.swift"
         - "Package.resolved"
     - if: $CI_COMMIT_BRANCH == "main"
-  allow_failure: true
