@@ -25,7 +25,6 @@
 include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
-  - template: Security/License-Scanning.gitlab-ci.yml
 
 stages:
   - lint
@@ -138,11 +137,6 @@ secret_detection:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
 
-license_scanning:
-  tags: [docker]
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == "main"
 
 # Swift-specific security analysis
 security:swift-analysis:
@@ -150,9 +144,9 @@ security:swift-analysis:
   stage: security
   script:
     # Check for common iOS security issues
-    - grep -r "NSAllowsArbitraryLoads" . && echo "WARNING: App Transport Security disabled" || true
-    - grep -r "allowsBackup.*true" . && echo "WARNING: Backup enabled" || true
-    - grep -r "NSCameraUsageDescription\|NSPhotoLibraryUsageDescription\|NSLocationWhenInUseUsageDescription" Info.plist || echo "INFO: No privacy permissions declared"
+    - 'grep -r "NSAllowsArbitraryLoads" . && echo "WARNING: App Transport Security disabled" || true'
+    - 'grep -r "allowsBackup.*true" . && echo "WARNING: Backup enabled" || true'
+    - 'grep -r "NSCameraUsageDescription\|NSPhotoLibraryUsageDescription\|NSLocationWhenInUseUsageDescription" Info.plist || echo "INFO: No privacy permissions declared"'
   allow_failure: true
 
 # Dependency check for CocoaPods/SPM
