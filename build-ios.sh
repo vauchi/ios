@@ -4,7 +4,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE_ROOT="$(dirname "$SCRIPT_DIR")"
-PROJECT_ROOT="$WORKSPACE_ROOT/code"
+PROJECT_ROOT="$WORKSPACE_ROOT/core"
 MOBILE_CRATE="$PROJECT_ROOT/vauchi-mobile"
 IOS_DIR="$SCRIPT_DIR"
 GENERATED_DIR="$IOS_DIR/Vauchi/Generated"
