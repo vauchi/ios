@@ -4,10 +4,9 @@
 // DONE: Restore feature - RestoreIdentitySheet in OnboardingView.swift allows users
 // to restore from backup during onboarding using importBackup().
 //
-// TODO(core-gap): Proximity verification - 4 TODOs in VauchiViewModel.swift.
-// vauchi-mobile exposes MobileProximityVerifier with emitChallenge(), listenForResponse(),
-// getCapability(), isSupported(). Requires xcframework rebuild with proximity support.
-// AudioProximityService exists but not wired up.
+// DONE: Proximity verification - MobileProximityVerifier enabled in VauchiViewModel.swift
+// with AudioProximityService providing platform audio. Exposes emitProximityChallenge(),
+// listenForProximityResponse(), stopProximityVerification(), proximitySupported, proximityCapability.
 //
 // DONE: Content updates - isContentUpdatesSupported(), checkContentUpdates(),
 // applyContentUpdates(), reloadSocialNetworks() methods implemented.

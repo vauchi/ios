@@ -131,11 +131,11 @@ class VauchiViewModel: ObservableObject {
     }
 
     // MARK: - Proximity Verification
-    // NOTE: MobileProximityVerifier requires bindings regeneration.
-    // Stubbed until xcframework is rebuilt with proximity support.
+    // Uses MobileProximityVerifier with AudioProximityService for ultrasonic verification
 
     @Published var proximitySupported = false
     @Published var proximityCapability = "none"
+    private var proximityVerifier: MobileProximityVerifier?
 
     // Aha moments (progressive onboarding)
     @Published var currentAhaMoment: MobileAhaMoment?
@@ -155,33 +155,45 @@ class VauchiViewModel: ObservableObject {
     }
 
     private func setupProximityVerification() {
-        // TODO: Enable when xcframework is rebuilt with MobileProximityVerifier
-        // let audioHandler = AudioProximityService.shared
-        // proximityVerifier = MobileProximityVerifier(handler: audioHandler)
-        // proximitySupported = proximityVerifier?.isSupported() ?? false
-        // proximityCapability = proximityVerifier?.getCapability() ?? "none"
-        proximitySupported = false
-        proximityCapability = "pending_bindings"
-        print("VauchiViewModel: Proximity verification - stubbed (bindings need regeneration)")
+        let audioHandler = AudioProximityService.shared
+        proximityVerifier = MobileProximityVerifier(handler: audioHandler)
+        proximitySupported = proximityVerifier?.isSupported() ?? false
+        proximityCapability = proximityVerifier?.getCapability() ?? "none"
+        print("VauchiViewModel: Proximity verification enabled - capability: \(proximityCapability)")
     }
 
     /// Emit a proximity challenge (for QR displayer)
     func emitProximityChallenge(_ challenge: Data) -> Bool {
-        // TODO: Enable when xcframework is rebuilt with MobileProximityVerifier
-        print("VauchiViewModel: emitProximityChallenge stubbed")
-        return false
+        guard let verifier = proximityVerifier, proximitySupported else {
+            print("VauchiViewModel: Proximity verification not supported")
+            return false
+        }
+
+        let challengeBytes = [UInt8](challenge)
+        let result = verifier.emitChallenge(challenge: challengeBytes)
+        if !result.success {
+            print("VauchiViewModel: emitProximityChallenge failed: \(result.error)")
+        }
+        return result.success
     }
 
     /// Listen for proximity response (for QR scanner)
     func listenForProximityResponse(timeoutMs: UInt64 = 5000) -> Data? {
-        // TODO: Enable when xcframework is rebuilt with MobileProximityVerifier
-        print("VauchiViewModel: listenForProximityResponse stubbed")
-        return nil
+        guard let verifier = proximityVerifier, proximitySupported else {
+            print("VauchiViewModel: Proximity verification not supported")
+            return nil
+        }
+
+        let response = verifier.listenForResponse(timeoutMs: timeoutMs)
+        if response.isEmpty {
+            return nil
+        }
+        return Data(response)
     }
 
     /// Stop any ongoing proximity verification
     func stopProximityVerification() {
-        // TODO: Enable when xcframework is rebuilt with MobileProximityVerifier
+        proximityVerifier?.stop()
     }
 
     private func initializeRepository() {
