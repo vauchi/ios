@@ -1513,7 +1513,7 @@ struct ContentUpdatesSection: View {
         }
     }
 
-    private func updateTypeName(_ type: MobileUpdateType) -> String {
+    private func updateTypeName(_ type: MobileContentType) -> String {
         switch type {
         case .networks:
             return "Social Networks"
