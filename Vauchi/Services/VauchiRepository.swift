@@ -26,8 +26,8 @@
 // getDemoContactState(), isDemoUpdateAvailable(), triggerDemoUpdate(),
 // dismissDemoContact(), autoRemoveDemoContact(), restoreDemoContact().
 //
-// TODO(core-gap): Device linking UI - Tests exist (DeviceLinkingTests) but feature
-// not exposed in main app. vauchi-mobile has device linking protocol support.
+// DONE: Device linking - getDevices(), generateDeviceLinkQr(), parseDeviceLinkQr(),
+// deviceCount(), unlinkDevice(), isPrimaryDevice() methods implemented.
 //
 // DONE: Certificate pinning UI - isCertificatePinningEnabled(), setPinnedCertificate()
 // methods implemented. UI added to Settings under Security section.
@@ -1010,6 +1010,125 @@ class VauchiRepository {
     /// - Parameter certPem: Certificate in PEM format
     func setPinnedCertificate(_ certPem: String) {
         vauchi.setPinnedCertificate(certPem: certPem)
+    }
+
+    // MARK: - Device Linking Operations
+    // Based on: features/device_linking.feature
+
+    /// Device info for display
+    struct DeviceInfo: Identifiable {
+        let id: String
+        let deviceIndex: UInt32
+        let deviceName: String
+        let isCurrent: Bool
+        let isActive: Bool
+        let publicKeyPrefix: String
+        let createdAt: UInt64
+
+        init(from mobile: MobileDeviceInfo) {
+            self.id = mobile.publicKeyPrefix
+            self.deviceIndex = mobile.deviceIndex
+            self.deviceName = mobile.deviceName
+            self.isCurrent = mobile.isCurrent
+            self.isActive = mobile.isActive
+            self.publicKeyPrefix = mobile.publicKeyPrefix
+            self.createdAt = mobile.createdAt
+        }
+    }
+
+    /// Device link QR data for display on existing device
+    struct DeviceLinkData {
+        let qrData: String
+        let identityPublicKey: String
+        let timestamp: UInt64
+        let expiresAt: UInt64
+
+        var isExpired: Bool {
+            UInt64(Date().timeIntervalSince1970) > expiresAt
+        }
+
+        var timeRemaining: TimeInterval {
+            let now = Date().timeIntervalSince1970
+            return max(0, Double(expiresAt) - now)
+        }
+
+        init(from mobile: MobileDeviceLinkData) {
+            self.qrData = mobile.qrData
+            self.identityPublicKey = mobile.identityPublicKey
+            self.timestamp = mobile.timestamp
+            self.expiresAt = mobile.expiresAt
+        }
+    }
+
+    /// Device link info parsed from QR code
+    struct DeviceLinkInfo {
+        let identityPublicKey: String
+        let timestamp: UInt64
+        let isExpired: Bool
+
+        init(from mobile: MobileDeviceLinkInfo) {
+            self.identityPublicKey = mobile.identityPublicKey
+            self.timestamp = mobile.timestamp
+            self.isExpired = mobile.isExpired
+        }
+    }
+
+    /// Get list of linked devices
+    func getDevices() throws -> [DeviceInfo] {
+        do {
+            return try vauchi.getDevices().map { DeviceInfo(from: $0) }
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Generate a device link QR code for a new device to scan
+    func generateDeviceLinkQr() throws -> DeviceLinkData {
+        do {
+            let data = try vauchi.generateDeviceLinkQr()
+            return DeviceLinkData(from: data)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Parse a device link QR code scanned from another device
+    func parseDeviceLinkQr(qrData: String) throws -> DeviceLinkInfo {
+        do {
+            let info = try vauchi.parseDeviceLinkQr(qrData: qrData)
+            return DeviceLinkInfo(from: info)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get the number of linked devices
+    func deviceCount() throws -> UInt32 {
+        do {
+            return try vauchi.deviceCount()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Unlink a device by its index in the device list
+    /// - Parameter deviceIndex: The index of the device to unlink
+    /// - Returns: True if the device was successfully unlinked
+    func unlinkDevice(deviceIndex: UInt32) throws -> Bool {
+        do {
+            return try vauchi.unlinkDevice(deviceIndex: deviceIndex)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Check if this is the primary (first) device
+    func isPrimaryDevice() throws -> Bool {
+        do {
+            return try vauchi.isPrimaryDevice()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     // MARK: - Recovery Operations
