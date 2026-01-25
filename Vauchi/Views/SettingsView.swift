@@ -186,6 +186,33 @@ struct SettingsView: View {
                     ContentUpdatesSection()
                 }
 
+                // Appearance section
+                Section("Appearance") {
+                    NavigationLink(destination: ThemeSettingsView()) {
+                        HStack {
+                            Label("Theme", systemImage: "paintpalette")
+                            Spacer()
+                            if let theme = ThemeService.shared.currentTheme {
+                                Text(theme.name)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .accessibilityIdentifier("settings.appearance.theme")
+
+                    NavigationLink(destination: LanguageSettingsView()) {
+                        HStack {
+                            Label("Language", systemImage: "globe")
+                            Spacer()
+                            Text(LocalizationService.shared.currentLocaleInfo.name)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .accessibilityIdentifier("settings.appearance.language")
+                }
+
                 // Accessibility section
                 Section {
                     Toggle(isOn: $reduceMotion) {
@@ -281,14 +308,10 @@ struct SettingsView: View {
                         }
                     }
 
-                    Link(destination: URL(string: "https://vauchi.app/faq")!) {
-                        HStack {
-                            Label("FAQ", systemImage: "questionmark.circle")
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .foregroundColor(.secondary)
-                        }
+                    NavigationLink(destination: HelpView()) {
+                        Label("Help & FAQ", systemImage: "questionmark.circle")
                     }
+                    .accessibilityIdentifier("settings.help.faq")
 
                     Link(destination: URL(string: "https://github.com/vauchi/issues")!) {
                         HStack {
