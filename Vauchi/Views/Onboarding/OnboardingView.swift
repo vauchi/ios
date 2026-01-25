@@ -56,6 +56,7 @@ struct OnboardingView: View {
     @StateObject private var onboardingData = OnboardingData()
     @State private var currentStep: OnboardingStep = .welcome
     @State private var isTransitioning = false
+    @State private var showRestoreSheet = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -73,7 +74,7 @@ struct OnboardingView: View {
             Group {
                 switch currentStep {
                 case .welcome:
-                    WelcomeStepView(onContinue: { advanceStep() }, onRestore: { /* TODO: implement restore */ })
+                    WelcomeStepView(onContinue: { advanceStep() }, onRestore: { showRestoreSheet = true })
                 case .createIdentity:
                     CreateIdentityStepView(
                         displayName: $onboardingData.displayName,
@@ -115,6 +116,14 @@ struct OnboardingView: View {
             if savedStep > 0, let step = OnboardingStep(rawValue: savedStep) {
                 currentStep = step
             }
+        }
+        .sheet(isPresented: $showRestoreSheet) {
+            RestoreIdentitySheet(onRestoreComplete: {
+                // Mark onboarding complete and go to ready
+                SettingsService.shared.hasCompletedOnboarding = true
+                SettingsService.shared.onboardingStep = OnboardingStep.ready.rawValue
+                currentStep = .ready
+            })
         }
     }
 
@@ -195,6 +204,102 @@ struct OnboardingProgressView: View {
             }
         }
         .padding(.vertical, 8)
+    }
+}
+
+// MARK: - Restore Identity Sheet
+
+struct RestoreIdentitySheet: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.dismiss) var dismiss
+    @State private var backupData = ""
+    @State private var password = ""
+    @State private var isRestoring = false
+    @State private var errorMessage: String?
+
+    let onRestoreComplete: () -> Void
+
+    var canRestore: Bool {
+        !backupData.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !password.isEmpty
+    }
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    Text("Enter your backup data and password to restore your identity. This will replace any existing identity on this device.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                Section("Backup Data") {
+                    TextEditor(text: $backupData)
+                        .font(.system(.caption, design: .monospaced))
+                        .frame(minHeight: 120)
+                        .accessibilityIdentifier("restore.backupData")
+                }
+
+                Section("Password") {
+                    SecureField("Backup password", text: $password)
+                        .accessibilityIdentifier("restore.password")
+                }
+
+                if let error = errorMessage {
+                    Section {
+                        Text(error)
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
+                }
+
+                Section {
+                    Button(action: restoreBackup) {
+                        HStack {
+                            Spacer()
+                            if isRestoring {
+                                ProgressView()
+                                    .padding(.trailing, 8)
+                            }
+                            Text("Restore Identity")
+                            Spacer()
+                        }
+                    }
+                    .disabled(!canRestore || isRestoring)
+                }
+            }
+            .navigationTitle("Restore Identity")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func restoreBackup() {
+        isRestoring = true
+        errorMessage = nil
+
+        Task {
+            do {
+                try await viewModel.importBackup(
+                    data: backupData.trimmingCharacters(in: .whitespacesAndNewlines),
+                    password: password
+                )
+
+                await MainActor.run {
+                    dismiss()
+                    onRestoreComplete()
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    isRestoring = false
+                }
+            }
+        }
     }
 }
 

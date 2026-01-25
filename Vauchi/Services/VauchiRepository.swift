@@ -1,8 +1,8 @@
 // VauchiRepository.swift
 // Repository layer wrapping UniFFI bindings for Vauchi iOS
 //
-// TODO(core-gap): Restore feature - OnboardingView has TODO for restore flow.
-// vauchi-mobile exposes importBackup() but UI flow during onboarding not implemented.
+// DONE: Restore feature - RestoreIdentitySheet in OnboardingView.swift allows users
+// to restore from backup during onboarding using importBackup().
 //
 // TODO(core-gap): Proximity verification - 4 TODOs in VauchiViewModel.swift.
 // vauchi-mobile exposes MobileProximityVerifier with emitChallenge(), listenForResponse(),
