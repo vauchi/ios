@@ -79,7 +79,12 @@ final class LocalizationService: ObservableObject {
         }
 
         // Use system language
-        let systemLanguage = Locale.current.language.languageCode?.identifier ?? "en"
+        let systemLanguage: String
+        if #available(iOS 16.0, *) {
+            systemLanguage = Locale.current.language.languageCode?.identifier ?? "en"
+        } else {
+            systemLanguage = Locale.current.languageCode ?? "en"
+        }
         if let locale = parseLocaleCode(code: systemLanguage) {
             currentLocale = locale
         } else {
