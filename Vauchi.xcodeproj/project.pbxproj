@@ -43,6 +43,8 @@
 		CCDD1234567890ABCDEF010C /* ReadyStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000C /* ReadyStepView.swift */; };
 		CCDD1234567890ABCDEF010D /* SecurityStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000D /* SecurityStepView.swift */; };
 		CCDD1234567890ABCDEF010E /* WelcomeStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000E /* WelcomeStepView.swift */; };
+		CCDD1234567890ABCDEF010F /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000F /* LocalizationService.swift */; };
+		CCDD1234567890ABCDEF0110 /* ThemeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0010 /* ThemeService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +98,8 @@
 		CCDD1234567890ABCDEF000C /* ReadyStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadyStepView.swift; sourceTree = "<group>"; };
 		CCDD1234567890ABCDEF000D /* SecurityStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityStepView.swift; sourceTree = "<group>"; };
 		CCDD1234567890ABCDEF000E /* WelcomeStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeStepView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF000F /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationService.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0010 /* ThemeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -147,8 +151,10 @@
 				AABB1234567890ABCDEF0011 /* BackgroundSyncService.swift */,
 				AABB1234567890ABCDEF0012 /* ContactActions.swift */,
 				8A58DEC2115A9B6E3E705022 /* KeychainService.swift */,
+				CCDD1234567890ABCDEF000F /* LocalizationService.swift */,
 				AABB1234567890ABCDEF0013 /* NetworkMonitor.swift */,
 				B1C3D4E5F6A7890123456780 /* SettingsService.swift */,
+				CCDD1234567890ABCDEF0010 /* ThemeService.swift */,
 				D42042F91C3CE051D7F017BD /* VauchiRepository.swift */,
 			);
 			path = Services;
@@ -320,6 +326,7 @@
 				20261E17DCF4253A6EDF06F2 /* HomeView.swift in Sources */,
 				A5967D65817ECD58020ED0F7 /* KeychainService.swift in Sources */,
 				CCDD1234567890ABCDEF0107 /* LabelDetailView.swift in Sources */,
+				CCDD1234567890ABCDEF010F /* LocalizationService.swift in Sources */,
 				CCDD1234567890ABCDEF0103 /* LabelsView.swift in Sources */,
 				CCDD1234567890ABCDEF0105 /* LanguageSettingsView.swift in Sources */,
 				AABB1234567890ABCDEF0003 /* NetworkMonitor.swift in Sources */,
@@ -332,6 +339,7 @@
 				B1C3D4E5F6A7890123456789 /* SettingsService.swift in Sources */,
 				952148796E346E3AF8E3143A /* SettingsView.swift in Sources */,
 				6D3102AEE857BBF2E898CF20 /* SetupView.swift in Sources */,
+				CCDD1234567890ABCDEF0110 /* ThemeService.swift in Sources */,
 				CCDD1234567890ABCDEF0104 /* ThemeSettingsView.swift in Sources */,
 				FA77AC618CB4340A1EB104F9 /* VauchiApp.swift in Sources */,
 				A04C52E462072D16FA4A69D6 /* VauchiRepository.swift in Sources */,

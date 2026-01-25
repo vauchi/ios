@@ -27,11 +27,27 @@ struct LabelDetailView: View {
                     onToggleFieldVisibility: toggleFieldVisibility
                 )
             } else {
-                ContentUnavailableView(
-                    "Label Not Found",
-                    systemImage: "tag.slash",
-                    description: Text("This label may have been deleted.")
-                )
+                if #available(iOS 17.0, *) {
+                    ContentUnavailableView(
+                        "Label Not Found",
+                        systemImage: "tag.slash",
+                        description: Text("This label may have been deleted.")
+                    )
+                } else {
+                    VStack(spacing: 16) {
+                        Image(systemName: "tag.slash")
+                            .font(.system(size: 48))
+                            .foregroundColor(.secondary)
+                        Text("Label Not Found")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Text("This label may have been deleted.")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding()
+                }
             }
         }
         .navigationTitle(label.name)
