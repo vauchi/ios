@@ -45,6 +45,7 @@
 		CCDD1234567890ABCDEF010E /* WelcomeStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000E /* WelcomeStepView.swift */; };
 		CCDD1234567890ABCDEF010F /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000F /* LocalizationService.swift */; };
 		CCDD1234567890ABCDEF0110 /* ThemeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0010 /* ThemeService.swift */; };
+		CCDD1234567890ABCDEF0111 /* ContentUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0011 /* ContentUpdateService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -100,6 +101,7 @@
 		CCDD1234567890ABCDEF000E /* WelcomeStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeStepView.swift; sourceTree = "<group>"; };
 		CCDD1234567890ABCDEF000F /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationService.swift; sourceTree = "<group>"; };
 		CCDD1234567890ABCDEF0010 /* ThemeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeService.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0011 /* ContentUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentUpdateService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -150,6 +152,7 @@
 				AABB1234567890ABCDEF0015 /* AudioProximityService.swift */,
 				AABB1234567890ABCDEF0011 /* BackgroundSyncService.swift */,
 				AABB1234567890ABCDEF0012 /* ContactActions.swift */,
+				CCDD1234567890ABCDEF0011 /* ContentUpdateService.swift */,
 				8A58DEC2115A9B6E3E705022 /* KeychainService.swift */,
 				CCDD1234567890ABCDEF000F /* LocalizationService.swift */,
 				AABB1234567890ABCDEF0013 /* NetworkMonitor.swift */,
@@ -318,6 +321,7 @@
 				AABB1234567890ABCDEF0002 /* ContactActions.swift in Sources */,
 				FC8F662C07116C0B65DDF908 /* ContactDetailView.swift in Sources */,
 				51A3E17213F4BC2E2A84830E /* ContactsView.swift in Sources */,
+				CCDD1234567890ABCDEF0111 /* ContentUpdateService.swift in Sources */,
 				3A46C138F298F2BE14940012 /* ContentView.swift in Sources */,
 				CCDD1234567890ABCDEF010A /* CreateIdentityStepView.swift in Sources */,
 				CCDD1234567890ABCDEF0101 /* DeliveryStatusView.swift in Sources */,
