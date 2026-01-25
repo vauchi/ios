@@ -29,6 +29,20 @@
 		AABB1234567890ABCDEF0003 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB1234567890ABCDEF0013 /* NetworkMonitor.swift */; };
 		AABB1234567890ABCDEF0004 /* RecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB1234567890ABCDEF0014 /* RecoveryView.swift */; };
 		AABB1234567890ABCDEF0005 /* AudioProximityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB1234567890ABCDEF0015 /* AudioProximityService.swift */; };
+		CCDD1234567890ABCDEF0101 /* DeliveryStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0001 /* DeliveryStatusView.swift */; };
+		CCDD1234567890ABCDEF0102 /* AhaMomentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0002 /* AhaMomentView.swift */; };
+		CCDD1234567890ABCDEF0103 /* LabelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0003 /* LabelsView.swift */; };
+		CCDD1234567890ABCDEF0104 /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0004 /* ThemeSettingsView.swift */; };
+		CCDD1234567890ABCDEF0105 /* LanguageSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0005 /* LanguageSettingsView.swift */; };
+		CCDD1234567890ABCDEF0106 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0006 /* HelpView.swift */; };
+		CCDD1234567890ABCDEF0107 /* LabelDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0007 /* LabelDetailView.swift */; };
+		CCDD1234567890ABCDEF0108 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0008 /* OnboardingView.swift */; };
+		CCDD1234567890ABCDEF0109 /* AddFieldsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF0009 /* AddFieldsStepView.swift */; };
+		CCDD1234567890ABCDEF010A /* CreateIdentityStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000A /* CreateIdentityStepView.swift */; };
+		CCDD1234567890ABCDEF010B /* PreviewCardStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000B /* PreviewCardStepView.swift */; };
+		CCDD1234567890ABCDEF010C /* ReadyStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000C /* ReadyStepView.swift */; };
+		CCDD1234567890ABCDEF010D /* SecurityStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000D /* SecurityStepView.swift */; };
+		CCDD1234567890ABCDEF010E /* WelcomeStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDD1234567890ABCDEF000E /* WelcomeStepView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +82,20 @@
 		D42042F91C3CE051D7F017BD /* VauchiRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiRepository.swift; sourceTree = "<group>"; };
 		D8D5710C95C733278B9D5D03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		ENTITLEMENTS123456789ABCDEF /* Vauchi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Vauchi.entitlements; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0001 /* DeliveryStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliveryStatusView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0002 /* AhaMomentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AhaMomentView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0003 /* LabelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelsView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0004 /* ThemeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSettingsView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0005 /* LanguageSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSettingsView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0006 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0007 /* LabelDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelDetailView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0008 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF0009 /* AddFieldsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFieldsStepView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF000A /* CreateIdentityStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateIdentityStepView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF000B /* PreviewCardStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewCardStepView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF000C /* ReadyStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadyStepView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF000D /* SecurityStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityStepView.swift; sourceTree = "<group>"; };
+		CCDD1234567890ABCDEF000E /* WelcomeStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeStepView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -155,16 +183,38 @@
 		BDDE20CB61EC0AA5CEFC53CB /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				CCDD1234567890ABCDEF0002 /* AhaMomentView.swift */,
 				AA9228F0DB990571AEEA7FBE /* ContactDetailView.swift */,
 				79A1A00A65E2C0584C625A3B /* ContactsView.swift */,
+				CCDD1234567890ABCDEF0001 /* DeliveryStatusView.swift */,
 				741E471E9C7F537A8F0C4466 /* ExchangeView.swift */,
+				CCDD1234567890ABCDEF0006 /* HelpView.swift */,
 				CE9E88D5D923D025B3E30E1A /* HomeView.swift */,
+				CCDD1234567890ABCDEF0007 /* LabelDetailView.swift */,
+				CCDD1234567890ABCDEF0003 /* LabelsView.swift */,
+				CCDD1234567890ABCDEF0005 /* LanguageSettingsView.swift */,
+				CCDD1234567890ABCDEF00FF /* Onboarding */,
 				24542471F9CAA2933A02209C /* QRScannerView.swift */,
 				AABB1234567890ABCDEF0014 /* RecoveryView.swift */,
 				723ABCF9809B28C928D2B9DF /* SettingsView.swift */,
 				749F27F4F8B0719A27024935 /* SetupView.swift */,
+				CCDD1234567890ABCDEF0004 /* ThemeSettingsView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		CCDD1234567890ABCDEF00FF /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				CCDD1234567890ABCDEF0009 /* AddFieldsStepView.swift */,
+				CCDD1234567890ABCDEF000A /* CreateIdentityStepView.swift */,
+				CCDD1234567890ABCDEF0008 /* OnboardingView.swift */,
+				CCDD1234567890ABCDEF000B /* PreviewCardStepView.swift */,
+				CCDD1234567890ABCDEF000C /* ReadyStepView.swift */,
+				CCDD1234567890ABCDEF000D /* SecurityStepView.swift */,
+				CCDD1234567890ABCDEF000E /* WelcomeStepView.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -255,23 +305,38 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCDD1234567890ABCDEF0109 /* AddFieldsStepView.swift in Sources */,
+				CCDD1234567890ABCDEF0102 /* AhaMomentView.swift in Sources */,
+				AABB1234567890ABCDEF0005 /* AudioProximityService.swift in Sources */,
 				AABB1234567890ABCDEF0001 /* BackgroundSyncService.swift in Sources */,
 				AABB1234567890ABCDEF0002 /* ContactActions.swift in Sources */,
 				FC8F662C07116C0B65DDF908 /* ContactDetailView.swift in Sources */,
 				51A3E17213F4BC2E2A84830E /* ContactsView.swift in Sources */,
 				3A46C138F298F2BE14940012 /* ContentView.swift in Sources */,
+				CCDD1234567890ABCDEF010A /* CreateIdentityStepView.swift in Sources */,
+				CCDD1234567890ABCDEF0101 /* DeliveryStatusView.swift in Sources */,
 				5372C07B297C221498C7E1B4 /* ExchangeView.swift in Sources */,
+				CCDD1234567890ABCDEF0106 /* HelpView.swift in Sources */,
 				20261E17DCF4253A6EDF06F2 /* HomeView.swift in Sources */,
 				A5967D65817ECD58020ED0F7 /* KeychainService.swift in Sources */,
+				CCDD1234567890ABCDEF0107 /* LabelDetailView.swift in Sources */,
+				CCDD1234567890ABCDEF0103 /* LabelsView.swift in Sources */,
+				CCDD1234567890ABCDEF0105 /* LanguageSettingsView.swift in Sources */,
 				AABB1234567890ABCDEF0003 /* NetworkMonitor.swift in Sources */,
+				CCDD1234567890ABCDEF0108 /* OnboardingView.swift in Sources */,
+				CCDD1234567890ABCDEF010B /* PreviewCardStepView.swift in Sources */,
 				002F8EA9CA28095B1CC8AC3E /* QRScannerView.swift in Sources */,
+				CCDD1234567890ABCDEF010C /* ReadyStepView.swift in Sources */,
 				AABB1234567890ABCDEF0004 /* RecoveryView.swift in Sources */,
+				CCDD1234567890ABCDEF010D /* SecurityStepView.swift in Sources */,
 				B1C3D4E5F6A7890123456789 /* SettingsService.swift in Sources */,
 				952148796E346E3AF8E3143A /* SettingsView.swift in Sources */,
 				6D3102AEE857BBF2E898CF20 /* SetupView.swift in Sources */,
+				CCDD1234567890ABCDEF0104 /* ThemeSettingsView.swift in Sources */,
 				FA77AC618CB4340A1EB104F9 /* VauchiApp.swift in Sources */,
 				A04C52E462072D16FA4A69D6 /* VauchiRepository.swift in Sources */,
 				5D630F7D9A2BAF4867C3075A /* VauchiViewModel.swift in Sources */,
+				CCDD1234567890ABCDEF010E /* WelcomeStepView.swift in Sources */,
 				C2D4E5F6A7B890123456789A /* vauchi_mobile.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
