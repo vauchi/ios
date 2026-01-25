@@ -88,10 +88,10 @@ struct LabelDetailView: View {
         }
     }
 
-    private func toggleFieldVisibility(fieldId: String, visible: Bool) {
+    private func toggleFieldVisibility(fieldLabel: String, isVisible: Bool) {
         Task {
             do {
-                try await viewModel.setLabelFieldVisibility(labelId: label.id, fieldId: fieldId, visible: visible)
+                try await viewModel.setLabelFieldVisibility(labelId: label.id, fieldLabel: fieldLabel, isVisible: isVisible)
                 await loadDetail()
             } catch {
                 viewModel.showError("Error", message: "Failed to update field visibility: \(error.localizedDescription)")

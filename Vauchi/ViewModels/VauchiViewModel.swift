@@ -620,12 +620,12 @@ class VauchiViewModel: ObservableObject {
     }
 
     /// Set field visibility for a label
-    func setLabelFieldVisibility(labelId: String, fieldId: String, visible: Bool) async throws {
+    func setLabelFieldVisibility(labelId: String, fieldLabel: String, isVisible: Bool) async throws {
         guard let repository = repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
-        try repository.setLabelFieldVisibility(labelId: labelId, fieldId: fieldId, visible: visible)
+        try repository.setLabelFieldVisibility(labelId: labelId, fieldLabel: fieldLabel, isVisible: isVisible)
         await loadLabels()
     }
 

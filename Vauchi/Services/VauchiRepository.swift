@@ -754,9 +754,9 @@ class VauchiRepository {
     }
 
     /// Set field visibility for a label
-    func setLabelFieldVisibility(labelId: String, fieldId: String, visible: Bool) throws {
+    func setLabelFieldVisibility(labelId: String, fieldLabel: String, isVisible: Bool) throws {
         do {
-            try vauchi.setLabelFieldVisibility(labelId: labelId, fieldId: fieldId, visible: visible)
+            try vauchi.setLabelFieldVisibility(labelId: labelId, fieldLabel: fieldLabel, isVisible: isVisible)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
