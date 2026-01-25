@@ -142,6 +142,21 @@ struct SettingsView: View {
                     }
                 }
 
+                // Privacy section
+                Section("Privacy") {
+                    NavigationLink(destination: LabelsView()) {
+                        HStack {
+                            Label("Visibility Labels", systemImage: "tag")
+                            Spacer()
+                            if !viewModel.visibilityLabels.isEmpty {
+                                Text("\(viewModel.visibilityLabels.count)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+
                 // Security section
                 Section("Security") {
                     NavigationLink(destination: LinkedDevicesView()) {
@@ -151,6 +166,11 @@ struct SettingsView: View {
                     NavigationLink(destination: RecoveryView()) {
                         Label("Recovery", systemImage: "person.badge.key")
                     }
+                }
+
+                // Content Updates section
+                if viewModel.isContentUpdatesSupported() {
+                    ContentUpdatesSection()
                 }
 
                 // Accessibility section
@@ -221,6 +241,23 @@ struct SettingsView: View {
                         }
                         .accessibilityIdentifier("settings.help.restoreDemo")
                     }
+
+                    // Reset tips (aha moments)
+                    Button(action: {
+                        Task {
+                            try? await viewModel.resetAhaMoments()
+                        }
+                    }) {
+                        HStack {
+                            Label("Reset Tips", systemImage: "arrow.counterclockwise")
+                            Spacer()
+                            let progress = viewModel.ahaMomentsProgress()
+                            Text("\(progress.seen)/\(progress.total) seen")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .accessibilityIdentifier("settings.help.resetTips")
 
                     Link(destination: URL(string: "https://vauchi.app/user-guide")!) {
                         HStack {
@@ -430,29 +467,14 @@ struct ExportBackupSheet: View {
     @State private var errorMessage: String?
     @State private var showShareSheet = false
     @State private var isAuthenticated = false
+    @State private var passwordCheck: MobilePasswordCheck?
 
     var passwordsMatch: Bool {
         !password.isEmpty && password == confirmPassword
     }
 
-    var passwordStrength: String {
-        if password.count < 8 {
-            return "Too short (min 8 characters)"
-        } else if password.count < 12 {
-            return "Fair"
-        } else {
-            return "Strong"
-        }
-    }
-
-    var passwordStrengthColor: Color {
-        if password.count < 8 {
-            return .red
-        } else if password.count < 12 {
-            return .orange
-        } else {
-            return .green
-        }
+    var canExport: Bool {
+        passwordsMatch && (passwordCheck?.isAcceptable ?? false)
     }
 
     var body: some View {
@@ -504,15 +526,18 @@ struct ExportBackupSheet: View {
                 Form {
                     Section {
                         SecureField("Password", text: $password)
+                            .onChange(of: password) { newValue in
+                                if !newValue.isEmpty {
+                                    passwordCheck = checkPasswordStrength(password: newValue)
+                                } else {
+                                    passwordCheck = nil
+                                }
+                            }
                         SecureField("Confirm Password", text: $confirmPassword)
 
-                        if !password.isEmpty {
-                            HStack {
-                                Text("Strength:")
-                                Text(passwordStrength)
-                                    .foregroundColor(passwordStrengthColor)
-                            }
-                            .font(.caption)
+                        // Password strength indicator
+                        if !password.isEmpty, let check = passwordCheck {
+                            PasswordStrengthIndicator(check: check)
                         }
 
                         if !password.isEmpty && !confirmPassword.isEmpty && !passwordsMatch {
@@ -545,7 +570,7 @@ struct ExportBackupSheet: View {
                                 Spacer()
                             }
                         }
-                        .disabled(!passwordsMatch || password.count < 8 || isExporting)
+                        .disabled(!canExport || isExporting)
                     }
                 }
                 .navigationTitle("Export Backup")
@@ -864,6 +889,289 @@ struct ImportBackupSheet: View {
                 }
             }
             isImporting = false
+        }
+    }
+}
+
+// MARK: - Content Updates Section
+
+/// Section for checking and applying content updates (social networks, locales, themes)
+struct ContentUpdatesSection: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @State private var updateStatus: MobileUpdateStatus?
+    @State private var isChecking = false
+    @State private var isApplying = false
+    @State private var errorMessage: String?
+    @State private var successMessage: String?
+
+    var body: some View {
+        Section {
+            // Status row
+            HStack {
+                Label("Content Updates", systemImage: "arrow.down.circle")
+                Spacer()
+                if isChecking || isApplying {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                } else if let status = updateStatus {
+                    UpdateStatusBadge(status: status)
+                }
+            }
+
+            // Check for updates button
+            Button(action: checkForUpdates) {
+                HStack {
+                    Text("Check for Updates")
+                    Spacer()
+                    if isChecking {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    }
+                }
+            }
+            .disabled(isChecking || isApplying)
+
+            // Apply updates button (only when updates available)
+            if let status = updateStatus, hasUpdatesAvailable(status) {
+                Button(action: applyUpdates) {
+                    HStack {
+                        Text("Apply Updates")
+                        Spacer()
+                        if isApplying {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "arrow.down.to.line")
+                                .foregroundColor(.cyan)
+                        }
+                    }
+                }
+                .disabled(isChecking || isApplying)
+            }
+
+            // Error message
+            if let error = errorMessage {
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.red)
+            }
+
+            // Success message
+            if let success = successMessage {
+                Text(success)
+                    .font(.caption)
+                    .foregroundColor(.green)
+            }
+        } header: {
+            Text("Content Updates")
+        } footer: {
+            Text("Updates include new social networks, localization improvements, and themes.")
+        }
+    }
+
+    private func hasUpdatesAvailable(_ status: MobileUpdateStatus) -> Bool {
+        switch status {
+        case .updatesAvailable:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func checkForUpdates() {
+        isChecking = true
+        errorMessage = nil
+        successMessage = nil
+
+        Task {
+            do {
+                let status = try await viewModel.checkContentUpdates()
+                await MainActor.run {
+                    updateStatus = status
+                    switch status {
+                    case .upToDate:
+                        successMessage = "Everything is up to date"
+                    case .updatesAvailable(let types):
+                        let typeNames = types.map { updateTypeName($0) }.joined(separator: ", ")
+                        successMessage = "Updates available: \(typeNames)"
+                    case .checkFailed(let error):
+                        errorMessage = "Check failed: \(error)"
+                    case .disabled:
+                        errorMessage = "Content updates are disabled"
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                }
+            }
+            await MainActor.run {
+                isChecking = false
+            }
+        }
+    }
+
+    private func applyUpdates() {
+        isApplying = true
+        errorMessage = nil
+        successMessage = nil
+
+        Task {
+            do {
+                let result = try await viewModel.applyContentUpdates()
+                await MainActor.run {
+                    switch result {
+                    case .noUpdates:
+                        successMessage = "No updates to apply"
+                    case .applied(let applied, let failed):
+                        if failed.isEmpty {
+                            successMessage = "Applied \(applied.count) update(s)"
+                        } else {
+                            successMessage = "Applied \(applied.count), failed \(failed.count)"
+                        }
+                        // Reload social networks after applying updates
+                        Task {
+                            try? await viewModel.reloadSocialNetworks()
+                        }
+                    case .disabled:
+                        errorMessage = "Content updates are disabled"
+                    case .error(let error):
+                        errorMessage = "Apply failed: \(error)"
+                    }
+                    // Reset status after applying
+                    updateStatus = nil
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                }
+            }
+            await MainActor.run {
+                isApplying = false
+            }
+        }
+    }
+
+    private func updateTypeName(_ type: MobileUpdateType) -> String {
+        switch type {
+        case .networks:
+            return "Social Networks"
+        case .locales:
+            return "Languages"
+        case .themes:
+            return "Themes"
+        case .help:
+            return "Help Content"
+        }
+    }
+}
+
+/// Badge showing content update status
+struct UpdateStatusBadge: View {
+    let status: MobileUpdateStatus
+
+    var body: some View {
+        switch status {
+        case .upToDate:
+            HStack(spacing: 4) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                Text("Up to date")
+                    .foregroundColor(.green)
+            }
+            .font(.caption)
+        case .updatesAvailable(let types):
+            HStack(spacing: 4) {
+                Image(systemName: "arrow.down.circle.fill")
+                    .foregroundColor(.cyan)
+                Text("\(types.count) available")
+                    .foregroundColor(.cyan)
+            }
+            .font(.caption)
+        case .checkFailed:
+            HStack(spacing: 4) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundColor(.orange)
+                Text("Error")
+                    .foregroundColor(.orange)
+            }
+            .font(.caption)
+        case .disabled:
+            Text("Disabled")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
+// MARK: - Password Strength Indicator
+
+/// Visual indicator for password strength using the vauchi-mobile checkPasswordStrength API
+struct PasswordStrengthIndicator: View {
+    let check: MobilePasswordCheck
+
+    var strengthColor: Color {
+        switch check.strength {
+        case .tooWeak:
+            return .red
+        case .fair:
+            return .orange
+        case .strong:
+            return .green
+        case .veryStrong:
+            return .green
+        }
+    }
+
+    var filledSegments: Int {
+        switch check.strength {
+        case .tooWeak:
+            return 1
+        case .fair:
+            return 2
+        case .strong:
+            return 3
+        case .veryStrong:
+            return 4
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // Strength bar
+            HStack(spacing: 4) {
+                ForEach(0..<4, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(index < filledSegments ? strengthColor : strengthColor.opacity(0.2))
+                        .frame(height: 4)
+                }
+            }
+
+            // Strength description and status
+            HStack {
+                Text(check.description)
+                    .font(.caption)
+                    .foregroundColor(strengthColor)
+
+                Spacer()
+
+                if check.isAcceptable {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text("OK")
+                            .foregroundColor(.green)
+                    }
+                    .font(.caption)
+                }
+            }
+
+            // Feedback for weak passwords
+            if !check.feedback.isEmpty {
+                Text(check.feedback)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
         }
     }
 }

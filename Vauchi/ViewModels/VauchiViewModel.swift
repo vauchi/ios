@@ -106,6 +106,11 @@ class VauchiViewModel: ObservableObject {
     @Published var demoContact: VauchiDemoContact?
     @Published var demoContactState: VauchiDemoContactState?
 
+    // Visibility labels (for organizing contacts)
+    // Based on: features/visibility_labels.feature
+    @Published var visibilityLabels: [VauchiVisibilityLabel] = []
+    @Published var suggestedLabels: [String] = []
+
     // User-facing alerts
     @Published var showAlert = false
     @Published var alertTitle = ""
@@ -131,6 +136,9 @@ class VauchiViewModel: ObservableObject {
 
     @Published var proximitySupported = false
     @Published var proximityCapability = "none"
+
+    // Aha moments (progressive onboarding)
+    @Published var currentAhaMoment: MobileAhaMoment?
 
     // MARK: - Private Properties
 
@@ -514,6 +522,101 @@ class VauchiViewModel: ObservableObject {
         return repository.isDemoUpdateAvailable()
     }
 
+    // MARK: - Visibility Labels
+    // Based on: features/visibility_labels.feature
+
+    /// Load all visibility labels
+    func loadLabels() async {
+        guard let repository = repository else { return }
+
+        do {
+            visibilityLabels = try repository.listLabels()
+            suggestedLabels = repository.getSuggestedLabels()
+        } catch {
+            print("VauchiViewModel: Failed to load labels: \(error)")
+            visibilityLabels = []
+        }
+    }
+
+    /// Create a new visibility label
+    func createLabel(name: String) async throws -> VauchiVisibilityLabel {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        let label = try repository.createLabel(name: name)
+        await loadLabels()
+        return label
+    }
+
+    /// Get label details
+    func getLabel(id: String) throws -> VauchiVisibilityLabelDetail {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        return try repository.getLabel(id: id)
+    }
+
+    /// Rename a visibility label
+    func renameLabel(id: String, newName: String) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.renameLabel(id: id, newName: newName)
+        await loadLabels()
+    }
+
+    /// Delete a visibility label
+    func deleteLabel(id: String) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.deleteLabel(id: id)
+        await loadLabels()
+    }
+
+    /// Add contact to a label
+    func addContactToLabel(labelId: String, contactId: String) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.addContactToLabel(labelId: labelId, contactId: contactId)
+        await loadLabels()
+    }
+
+    /// Remove contact from a label
+    func removeContactFromLabel(labelId: String, contactId: String) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.removeContactFromLabel(labelId: labelId, contactId: contactId)
+        await loadLabels()
+    }
+
+    /// Get all labels for a contact
+    func getLabelsForContact(contactId: String) throws -> [VauchiVisibilityLabel] {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        return try repository.getLabelsForContact(contactId: contactId)
+    }
+
+    /// Set field visibility for a label
+    func setLabelFieldVisibility(labelId: String, fieldId: String, visible: Bool) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.setLabelFieldVisibility(labelId: labelId, fieldId: fieldId, visible: visible)
+        await loadLabels()
+    }
+
     // MARK: - Exchange
 
     func generateQRData() throws -> String {
@@ -733,6 +836,93 @@ class VauchiViewModel: ObservableObject {
         guard let repository = repository else { return nil }
 
         return repository.getProfileUrl(networkId: networkId, username: username)
+    }
+
+    // MARK: - Content Updates
+
+    /// Check if content updates feature is supported
+    func isContentUpdatesSupported() -> Bool {
+        guard let repository = repository else { return false }
+        return repository.isContentUpdatesSupported()
+    }
+
+    /// Check for available content updates
+    func checkContentUpdates() async throws -> MobileUpdateStatus {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        return try repository.checkContentUpdates()
+    }
+
+    /// Apply available content updates
+    func applyContentUpdates() async throws -> MobileApplyResult {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        return try repository.applyContentUpdates()
+    }
+
+    /// Reload social networks after content updates
+    func reloadSocialNetworks() async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        try repository.reloadSocialNetworks()
+    }
+
+    // MARK: - Aha Moments (Progressive Onboarding)
+
+    /// Try to trigger an aha moment and display it
+    func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) {
+        guard let repository = repository else { return }
+        do {
+            if let moment = try repository.tryTriggerAhaMoment(momentType) {
+                DispatchQueue.main.async {
+                    self.currentAhaMoment = moment
+                }
+            }
+        } catch {
+            // Silently fail - aha moments are non-critical
+        }
+    }
+
+    /// Try to trigger an aha moment with context
+    func tryTriggerAhaMomentWithContext(_ momentType: MobileAhaMomentType, context: String) {
+        guard let repository = repository else { return }
+        do {
+            if let moment = try repository.tryTriggerAhaMomentWithContext(momentType, context: context) {
+                DispatchQueue.main.async {
+                    self.currentAhaMoment = moment
+                }
+            }
+        } catch {
+            // Silently fail - aha moments are non-critical
+        }
+    }
+
+    /// Dismiss the current aha moment
+    func dismissAhaMoment() {
+        currentAhaMoment = nil
+    }
+
+    /// Check if user has seen a specific aha moment
+    func hasSeenAhaMoment(_ momentType: MobileAhaMomentType) -> Bool {
+        guard let repository = repository else { return true }
+        return repository.hasSeenAhaMoment(momentType)
+    }
+
+    /// Get aha moments progress (seen/total)
+    func ahaMomentsProgress() -> (seen: Int, total: Int) {
+        guard let repository = repository else { return (0, 0) }
+        return (Int(repository.ahaMomentsSeenCount()), Int(repository.ahaMomentsTotalCount()))
+    }
+
+    /// Reset aha moments (for Settings)
+    func resetAhaMoments() async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        try repository.resetAhaMoments()
     }
 
     // MARK: - Recovery

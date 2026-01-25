@@ -9,20 +9,19 @@
 // getCapability(), isSupported(). Requires xcframework rebuild with proximity support.
 // AudioProximityService exists but not wired up.
 //
-// TODO(core-gap): Content updates UI - vauchi-mobile exposes isContentUpdatesSupported(),
-// checkContentUpdates(), applyContentUpdates(), reloadSocialNetworks().
-// No UI to trigger or display updates.
+// DONE: Content updates - isContentUpdatesSupported(), checkContentUpdates(),
+// applyContentUpdates(), reloadSocialNetworks() methods implemented.
 //
-// TODO(core-gap): Field validation UI - vauchi-mobile exposes validateField(),
-// getFieldValidationStatus(), revokeFieldValidation(), listMyValidations(),
-// hasValidatedField(), getFieldValidationCount(). No visual feedback implemented.
+// DONE: Field validation - validateField(), getFieldValidationStatus(),
+// revokeFieldValidation(), listMyValidations(), hasValidatedField(),
+// getFieldValidationCount() methods implemented.
 //
-// TODO(core-gap): Password strength indicator - vauchi-mobile exposes checkPasswordStrength()
-// but not shown during backup creation in UI.
+// DONE: Password strength indicator - checkPasswordStrength() integrated in ExportBackupSheet
+// with PasswordStrengthIndicator component showing real-time visual feedback.
 //
-// TODO(core-gap): Aha moments - vauchi-mobile exposes hasSeenAhaMoment(),
-// tryTriggerAhaMoment(), tryTriggerAhaMomentWithContext(), ahaMomentSeenCount(),
-// ahaMomentsTotalCount(), resetAhaMoments(). No onboarding engagement tracking.
+// DONE: Aha moments - hasSeenAhaMoment(), tryTriggerAhaMoment(),
+// tryTriggerAhaMomentWithContext(), ahaMomentsSeenCount(), ahaMomentsTotalCount(),
+// resetAhaMoments() methods implemented for progressive onboarding hints.
 //
 // DONE: Demo contact - implemented initDemoContactIfNeeded(), getDemoContact(),
 // getDemoContactState(), isDemoUpdateAvailable(), triggerDemoUpdate(),
@@ -217,6 +216,47 @@ struct VauchiExchangeResult {
     let contactName: String
     let success: Bool
     let errorMessage: String?
+}
+
+// MARK: - Visibility Label Types
+// Based on: features/visibility_labels.feature
+
+/// Visibility label for organizing contacts
+struct VauchiVisibilityLabel: Identifiable {
+    let id: String
+    let name: String
+    let contactCount: UInt32
+    let visibleFieldCount: UInt32
+    let createdAt: UInt64
+    let modifiedAt: UInt64
+
+    init(from mobile: MobileVisibilityLabel) {
+        self.id = mobile.id
+        self.name = mobile.name
+        self.contactCount = mobile.contactCount
+        self.visibleFieldCount = mobile.visibleFieldCount
+        self.createdAt = mobile.createdAt
+        self.modifiedAt = mobile.modifiedAt
+    }
+}
+
+/// Detailed visibility label including contacts and fields
+struct VauchiVisibilityLabelDetail: Identifiable {
+    let id: String
+    let name: String
+    let contactIds: [String]
+    let visibleFieldIds: [String]
+    let createdAt: UInt64
+    let modifiedAt: UInt64
+
+    init(from mobile: MobileVisibilityLabelDetail) {
+        self.id = mobile.id
+        self.name = mobile.name
+        self.contactIds = mobile.contactIds
+        self.visibleFieldIds = mobile.visibleFieldIds
+        self.createdAt = mobile.createdAt
+        self.modifiedAt = mobile.modifiedAt
+    }
 }
 
 /// Social network info
@@ -637,6 +677,154 @@ class VauchiRepository {
         }
     }
 
+    // MARK: - Visibility Labels Operations
+    // Based on: features/visibility_labels.feature
+
+    /// List all visibility labels
+    func listLabels() throws -> [VauchiVisibilityLabel] {
+        do {
+            return try vauchi.listLabels().map { VauchiVisibilityLabel(from: $0) }
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Create a new visibility label
+    func createLabel(name: String) throws -> VauchiVisibilityLabel {
+        do {
+            let label = try vauchi.createLabel(name: name)
+            return VauchiVisibilityLabel(from: label)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get label details by ID
+    func getLabel(id: String) throws -> VauchiVisibilityLabelDetail {
+        do {
+            let detail = try vauchi.getLabel(labelId: id)
+            return VauchiVisibilityLabelDetail(from: detail)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Rename a visibility label
+    func renameLabel(id: String, newName: String) throws {
+        do {
+            try vauchi.renameLabel(labelId: id, newName: newName)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Delete a visibility label
+    func deleteLabel(id: String) throws {
+        do {
+            try vauchi.deleteLabel(labelId: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Add contact to a label
+    func addContactToLabel(labelId: String, contactId: String) throws {
+        do {
+            try vauchi.addContactToLabel(labelId: labelId, contactId: contactId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Remove contact from a label
+    func removeContactFromLabel(labelId: String, contactId: String) throws {
+        do {
+            try vauchi.removeContactFromLabel(labelId: labelId, contactId: contactId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get all labels for a contact
+    func getLabelsForContact(contactId: String) throws -> [VauchiVisibilityLabel] {
+        do {
+            return try vauchi.getLabelsForContact(contactId: contactId).map { VauchiVisibilityLabel(from: $0) }
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Set field visibility for a label
+    func setLabelFieldVisibility(labelId: String, fieldId: String, visible: Bool) throws {
+        do {
+            try vauchi.setLabelFieldVisibility(labelId: labelId, fieldId: fieldId, visible: visible)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get suggested label names
+    func getSuggestedLabels() -> [String] {
+        return vauchi.getSuggestedLabels()
+    }
+
+    // MARK: - Field Validation Operations
+    // Based on: features/field_validation.feature
+
+    /// Validate a contact's field
+    func validateField(contactId: String, fieldId: String, fieldValue: String) throws -> MobileFieldValidation {
+        do {
+            return try vauchi.validateField(contactId: contactId, fieldId: fieldId, fieldValue: fieldValue)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get validation status for a contact's field
+    func getFieldValidationStatus(contactId: String, fieldId: String, fieldValue: String) throws -> MobileValidationStatus {
+        do {
+            return try vauchi.getFieldValidationStatus(contactId: contactId, fieldId: fieldId, fieldValue: fieldValue)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Revoke your validation of a contact's field
+    func revokeFieldValidation(contactId: String, fieldId: String) throws -> Bool {
+        do {
+            return try vauchi.revokeFieldValidation(contactId: contactId, fieldId: fieldId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// List all validations you have made
+    func listMyValidations() throws -> [MobileFieldValidation] {
+        do {
+            return try vauchi.listMyValidations()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Check if you have validated a specific field
+    func hasValidatedField(contactId: String, fieldId: String) throws -> Bool {
+        do {
+            return try vauchi.hasValidatedField(contactId: contactId, fieldId: fieldId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get the validation count for a field
+    func getFieldValidationCount(contactId: String, fieldId: String) throws -> UInt32 {
+        do {
+            return try vauchi.getFieldValidationCount(contactId: contactId, fieldId: fieldId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     // MARK: - Exchange Operations
 
     /// Generate QR data for exchange
@@ -749,6 +937,67 @@ class VauchiRepository {
     /// Get profile URL for social network
     func getProfileUrl(networkId: String, username: String) -> String? {
         return vauchi.getProfileUrl(networkId: networkId, username: username)
+    }
+
+    // MARK: - Content Updates
+    // Based on: features/content_updates.feature
+
+    /// Check if content updates feature is supported
+    func isContentUpdatesSupported() -> Bool {
+        return vauchi.isContentUpdatesSupported()
+    }
+
+    /// Check for available content updates
+    func checkContentUpdates() -> MobileUpdateStatus {
+        return vauchi.checkContentUpdates()
+    }
+
+    /// Apply available content updates
+    func applyContentUpdates() -> MobileApplyResult {
+        return vauchi.applyContentUpdates()
+    }
+
+    /// Reload social networks after content updates
+    func reloadSocialNetworks() -> [VauchiSocialNetwork] {
+        return vauchi.reloadSocialNetworks().map { sn in
+            VauchiSocialNetwork(
+                id: sn.id,
+                displayName: sn.displayName,
+                urlTemplate: sn.urlTemplate
+            )
+        }
+    }
+
+    // MARK: - Aha Moments (Progressive Onboarding)
+
+    /// Check if user has seen a specific aha moment
+    func hasSeenAhaMoment(_ momentType: MobileAhaMomentType) -> Bool {
+        return vauchi.hasSeenAhaMoment(momentType: momentType)
+    }
+
+    /// Try to trigger an aha moment (returns nil if already seen)
+    func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) throws -> MobileAhaMoment? {
+        return try vauchi.tryTriggerAhaMoment(momentType: momentType)
+    }
+
+    /// Try to trigger an aha moment with context (returns nil if already seen)
+    func tryTriggerAhaMomentWithContext(_ momentType: MobileAhaMomentType, context: String) throws -> MobileAhaMoment? {
+        return try vauchi.tryTriggerAhaMomentWithContext(momentType: momentType, context: context)
+    }
+
+    /// Get count of seen aha moments
+    func ahaMomentsSeenCount() -> UInt32 {
+        return vauchi.ahaMomentsSeenCount()
+    }
+
+    /// Get total count of aha moments
+    func ahaMomentsTotalCount() -> UInt32 {
+        return vauchi.ahaMomentsTotalCount()
+    }
+
+    /// Reset all aha moments (for development/testing)
+    func resetAhaMoments() throws {
+        try vauchi.resetAhaMoments()
     }
 
     // MARK: - Recovery Operations
