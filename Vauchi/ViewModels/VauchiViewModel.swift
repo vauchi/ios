@@ -169,8 +169,7 @@ class VauchiViewModel: ObservableObject {
             return false
         }
 
-        let challengeBytes = [UInt8](challenge)
-        let result = verifier.emitChallenge(challenge: challengeBytes)
+        let result = verifier.emitChallenge(challenge: challenge)
         if !result.success {
             print("VauchiViewModel: emitProximityChallenge failed: \(result.error)")
         }
