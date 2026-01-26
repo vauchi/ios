@@ -90,11 +90,10 @@ final class VauchiViewModelTests: XCTestCase {
     // Based on: features/contact_exchange.feature
 
     /// Scenario: Generate QR data for exchange
-    func testGenerateQrData() throws {
+    func testGenerateQrData() async throws {
         let viewModel = VauchiViewModel()
-        // Note: This test will need to be updated when real bindings are connected
+        try await viewModel.createIdentity(name: "Alice")
 
-        // For now, test placeholder behavior
         let qrData = try viewModel.generateQRData()
 
         XCTAssertTrue(qrData.hasPrefix("wb://"), "QR data should start with wb://")

@@ -259,7 +259,7 @@ final class VauchiRepositoryTests: XCTestCase {
             let repo = try VauchiRepository(dataDir: tempDir.path)
             try repo.createIdentity(displayName: "Alice")
             try repo.addField(type: .email, label: "Work", value: "alice@company.com")
-            backupData = try repo.exportBackup(password: "password123")
+            backupData = try repo.exportBackup(password: "correct-horse-battery-staple")
         }
 
         // Create new repository and import backup
@@ -269,7 +269,7 @@ final class VauchiRepositoryTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: newDir) }
 
         let repo2 = try VauchiRepository(dataDir: newDir.path)
-        try repo2.importBackup(data: backupData, password: "password123")
+        try repo2.importBackup(data: backupData, password: "correct-horse-battery-staple")
 
         XCTAssertTrue(repo2.hasIdentity())
         XCTAssertEqual(try repo2.getDisplayName(), "Alice")
@@ -529,7 +529,13 @@ final class VauchiRepositoryTests: XCTestCase {
 
     /// Scenario: Complete contact exchange between two users
     /// Tests the full QR exchange flow between Alice and Bob
+    /// Note: Requires a running relay server
     func testCompleteContactExchange() throws {
+        try XCTSkipIf(
+            ProcessInfo.processInfo.environment["CI"] != nil,
+            "Integration test: requires running relay server"
+        )
+
         // Create Alice's repository
         let aliceDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
@@ -591,7 +597,13 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     /// Scenario: Cannot exchange with self
+    /// Note: Requires a running relay server
     func testCannotExchangeWithSelf() throws {
+        try XCTSkipIf(
+            ProcessInfo.processInfo.environment["CI"] != nil,
+            "Integration test: requires running relay server"
+        )
+
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
