@@ -531,10 +531,9 @@ final class VauchiRepositoryTests: XCTestCase {
     /// Tests the full QR exchange flow between Alice and Bob
     /// Note: Requires a running relay server
     func testCompleteContactExchange() throws {
-        try XCTSkipIf(
-            ProcessInfo.processInfo.environment["CI"] != nil,
-            "Integration test: requires running relay server"
-        )
+        #if targetEnvironment(simulator)
+        throw XCTSkip("Integration test: requires running relay server (skipped in simulator)")
+        #endif
 
         // Create Alice's repository
         let aliceDir = FileManager.default.temporaryDirectory
@@ -599,10 +598,9 @@ final class VauchiRepositoryTests: XCTestCase {
     /// Scenario: Cannot exchange with self
     /// Note: Requires a running relay server
     func testCannotExchangeWithSelf() throws {
-        try XCTSkipIf(
-            ProcessInfo.processInfo.environment["CI"] != nil,
-            "Integration test: requires running relay server"
-        )
+        #if targetEnvironment(simulator)
+        throw XCTSkip("Integration test: requires running relay server (skipped in simulator)")
+        #endif
 
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
