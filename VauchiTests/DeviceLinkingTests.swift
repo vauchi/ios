@@ -44,7 +44,7 @@ final class DeviceLinkingTests: XCTestCase {
     func testCurrentDeviceIdentified() throws {
         let devices = try repo.getDevices()
 
-        let currentDevice = devices.first { $0.isCurrentDevice }
+        let currentDevice = devices.first { $0.isCurrent }
         XCTAssertNotNil(currentDevice, "Should identify current device")
     }
 
@@ -70,7 +70,7 @@ final class DeviceLinkingTests: XCTestCase {
 
     /// Scenario: Generate device link QR code
     func testGenerateDeviceLinkQR() throws {
-        let linkData = try repo.generateDeviceLinkQR()
+        let linkData = try repo.generateDeviceLinkQr()
 
         XCTAssertFalse(linkData.qrData.isEmpty, "QR data should not be empty")
         XCTAssertFalse(linkData.identityPublicKey.isEmpty, "Identity public key should be included")
@@ -79,14 +79,13 @@ final class DeviceLinkingTests: XCTestCase {
 
     /// Scenario: Device link QR contains expiry
     func testDeviceLinkQRExpiry() throws {
-        let linkData = try repo.generateDeviceLinkQR()
+        let linkData = try repo.generateDeviceLinkQr()
 
         let now = UInt64(Date().timeIntervalSince1970)
         let expiryDuration = linkData.expiresAt - linkData.timestamp
 
-        // Should expire within reasonable time (1 hour to 24 hours)
-        XCTAssertGreaterThan(expiryDuration, 60 * 60, "Should expire after at least 1 hour")
-        XCTAssertLessThan(expiryDuration, 24 * 60 * 60, "Should expire within 24 hours")
+        // Should expire within 10 minutes (600 seconds) as per core implementation
+        XCTAssertEqual(expiryDuration, 600, "Should expire in 10 minutes")
 
         // Expiry should be in the future
         XCTAssertGreaterThan(linkData.expiresAt, now, "Expiry should be in the future")
@@ -94,8 +93,8 @@ final class DeviceLinkingTests: XCTestCase {
 
     /// Scenario: Multiple link QRs can be generated
     func testMultipleDeviceLinkQRs() throws {
-        let qr1 = try repo.generateDeviceLinkQR()
-        let qr2 = try repo.generateDeviceLinkQR()
+        let qr1 = try repo.generateDeviceLinkQr()
+        let qr2 = try repo.generateDeviceLinkQr()
 
         // Same identity key
         XCTAssertEqual(qr1.identityPublicKey, qr2.identityPublicKey)
@@ -112,10 +111,10 @@ final class DeviceLinkingTests: XCTestCase {
     /// Scenario: Parse valid device link QR
     func testParseDeviceLinkQR() throws {
         // Generate QR on "existing" device
-        let linkData = try repo.generateDeviceLinkQR()
+        let linkData = try repo.generateDeviceLinkQr()
 
         // Parse it (simulating scan on new device)
-        let linkInfo = try repo.parseDeviceLinkQR(qrData: linkData.qrData)
+        let linkInfo = try repo.parseDeviceLinkQr(qrData: linkData.qrData)
 
         XCTAssertEqual(linkInfo.identityPublicKey, linkData.identityPublicKey)
         XCTAssertFalse(linkInfo.isExpired, "Freshly generated QR should not be expired")
@@ -125,14 +124,14 @@ final class DeviceLinkingTests: XCTestCase {
     func testParseInvalidDeviceLinkQR() throws {
         let invalidData = "not-valid-device-link-qr"
 
-        XCTAssertThrowsError(try repo.parseDeviceLinkQR(qrData: invalidData)) { error in
+        XCTAssertThrowsError(try repo.parseDeviceLinkQr(qrData: invalidData)) { error in
             XCTAssertNotNil(error)
         }
     }
 
     /// Scenario: Parse empty device link QR returns error
     func testParseEmptyDeviceLinkQR() throws {
-        XCTAssertThrowsError(try repo.parseDeviceLinkQR(qrData: ""))
+        XCTAssertThrowsError(try repo.parseDeviceLinkQr(qrData: ""))
     }
 
     // MARK: - Device Limits Tests
@@ -152,7 +151,7 @@ final class DeviceLinkingTests: XCTestCase {
     /// Scenario: Cannot unlink current device
     func testCannotUnlinkCurrentDevice() throws {
         let devices = try repo.getDevices()
-        guard let currentDevice = devices.first(where: { $0.isCurrentDevice }) else {
+        guard let currentDevice = devices.first(where: { $0.isCurrent }) else {
             XCTFail("Should have current device")
             return
         }

@@ -169,8 +169,7 @@ class VauchiViewModel: ObservableObject {
             return false
         }
 
-        let challengeBytes = [UInt8](challenge)
-        let result = verifier.emitChallenge(challenge: challengeBytes)
+        let result = verifier.emitChallenge(challenge: challenge)
         if !result.success {
             print("VauchiViewModel: emitProximityChallenge failed: \(result.error)")
         }
@@ -620,12 +619,12 @@ class VauchiViewModel: ObservableObject {
     }
 
     /// Set field visibility for a label
-    func setLabelFieldVisibility(labelId: String, fieldId: String, visible: Bool) async throws {
+    func setLabelFieldVisibility(labelId: String, fieldLabel: String, isVisible: Bool) async throws {
         guard let repository = repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
-        try repository.setLabelFieldVisibility(labelId: labelId, fieldId: fieldId, visible: visible)
+        try repository.setLabelFieldVisibility(labelId: labelId, fieldLabel: fieldLabel, isVisible: isVisible)
         await loadLabels()
     }
 
@@ -1005,5 +1004,55 @@ class VauchiViewModel: ObservableObject {
         }
 
         return try repository.getRecoveryProof()
+    }
+
+    // MARK: - Device Management
+
+    /// Get list of linked devices
+    func getDevices() async throws -> [VauchiRepository.DeviceInfo] {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        return try repository.getDevices()
+    }
+
+    /// Generate QR code data for linking a new device
+    func generateDeviceLinkQr() async throws -> VauchiRepository.DeviceLinkData {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        return try repository.generateDeviceLinkQr()
+    }
+
+    /// Parse device link QR code data
+    func parseDeviceLinkQr(qrData: String) async throws -> VauchiRepository.DeviceLinkInfo {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        return try repository.parseDeviceLinkQr(qrData: qrData)
+    }
+
+    /// Get the number of linked devices
+    func deviceCount() async throws -> UInt32 {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        return try repository.deviceCount()
+    }
+
+    /// Unlink a device by index
+    func unlinkDevice(deviceIndex: UInt32) async throws -> Bool {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        return try repository.unlinkDevice(deviceIndex: deviceIndex)
+    }
+
+    /// Check if this is the primary device
+    func isPrimaryDevice() async throws -> Bool {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        return try repository.isPrimaryDevice()
     }
 }

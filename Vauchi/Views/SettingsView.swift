@@ -4,6 +4,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import LocalAuthentication
+import CoreImage.CIFilterBuiltins
 
 struct SettingsView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
@@ -185,6 +186,33 @@ struct SettingsView: View {
                     ContentUpdatesSection()
                 }
 
+                // Appearance section
+                Section("Appearance") {
+                    NavigationLink(destination: ThemeSettingsView()) {
+                        HStack {
+                            Label("Theme", systemImage: "paintpalette")
+                            Spacer()
+                            if let theme = ThemeService.shared.currentTheme {
+                                Text(theme.name)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .accessibilityIdentifier("settings.appearance.theme")
+
+                    NavigationLink(destination: LanguageSettingsView()) {
+                        HStack {
+                            Label("Language", systemImage: "globe")
+                            Spacer()
+                            Text(LocalizationService.shared.currentLocaleInfo.name)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .accessibilityIdentifier("settings.appearance.language")
+                }
+
                 // Accessibility section
                 Section {
                     Toggle(isOn: $reduceMotion) {
@@ -280,14 +308,10 @@ struct SettingsView: View {
                         }
                     }
 
-                    Link(destination: URL(string: "https://vauchi.app/faq")!) {
-                        HStack {
-                            Label("FAQ", systemImage: "questionmark.circle")
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .foregroundColor(.secondary)
-                        }
+                    NavigationLink(destination: HelpView()) {
+                        Label("Help & FAQ", systemImage: "questionmark.circle")
                     }
+                    .accessibilityIdentifier("settings.help.faq")
 
                     Link(destination: URL(string: "https://github.com/vauchi/issues")!) {
                         HStack {
@@ -433,39 +457,342 @@ struct SyncStatusBadge: View {
 }
 
 struct LinkedDevicesView: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @State private var devices: [VauchiRepository.DeviceInfo] = []
+    @State private var isLoading = true
+    @State private var errorMessage: String?
+    @State private var showLinkSheet = false
+    @State private var showUnlinkConfirmation = false
+    @State private var deviceToUnlink: VauchiRepository.DeviceInfo?
+    @State private var isPrimary = false
+
     var body: some View {
         List {
-            Section {
-                HStack {
-                    Image(systemName: "iphone")
-                        .foregroundColor(.cyan)
-                        .frame(width: 32)
-                    VStack(alignment: .leading) {
-                        Text("This Device")
-                            .font(.body)
-                        Text("iPhone - Current")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+            if isLoading {
+                Section {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
                     }
-                    Spacer()
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
                 }
-            } header: {
-                Text("Devices")
-            } footer: {
-                Text("Manage devices that have access to your identity. Device linking will be available in a future update.")
-            }
+            } else if let error = errorMessage {
+                Section {
+                    Text(error)
+                        .foregroundColor(.red)
+                }
+            } else {
+                // Devices list
+                Section {
+                    ForEach(devices) { device in
+                        DeviceRow(device: device, onUnlink: {
+                            deviceToUnlink = device
+                            showUnlinkConfirmation = true
+                        })
+                    }
+                } header: {
+                    Text("Devices (\(devices.count))")
+                } footer: {
+                    if isPrimary {
+                        Text("This is the primary device. You can link additional devices to access your identity from multiple places.")
+                    } else {
+                        Text("This device is linked to your primary identity.")
+                    }
+                }
 
-            Section {
-                Button(action: {}) {
-                    Label("Link New Device", systemImage: "plus.circle")
+                // Link new device button
+                Section {
+                    Button(action: { showLinkSheet = true }) {
+                        Label("Link New Device", systemImage: "plus.circle")
+                    }
+                } footer: {
+                    Text("Generate a QR code on this device for a new device to scan.")
                 }
-                .disabled(true) // Not implemented yet
             }
         }
         .navigationTitle("Linked Devices")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            Task {
+                await loadDevices()
+            }
+        }
+        .refreshable {
+            await loadDevices()
+        }
+        .sheet(isPresented: $showLinkSheet) {
+            DeviceLinkSheet()
+        }
+        .alert("Unlink Device?", isPresented: $showUnlinkConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Unlink", role: .destructive) {
+                if let device = deviceToUnlink {
+                    Task {
+                        await unlinkDevice(device)
+                    }
+                }
+            }
+        } message: {
+            if let device = deviceToUnlink {
+                Text("This will remove \"\(device.deviceName)\" from your linked devices. The device will no longer have access to your identity.")
+            }
+        }
+    }
+
+    private func loadDevices() async {
+        isLoading = true
+        errorMessage = nil
+
+        do {
+            devices = try await viewModel.getDevices()
+            isPrimary = try await viewModel.isPrimaryDevice()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isLoading = false
+    }
+
+    private func unlinkDevice(_ device: VauchiRepository.DeviceInfo) async {
+        do {
+            let success = try await viewModel.unlinkDevice(deviceIndex: device.deviceIndex)
+            if success {
+                await loadDevices()
+            } else {
+                errorMessage = "Failed to unlink device"
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
+
+/// Row displaying a single device
+struct DeviceRow: View {
+    let device: VauchiRepository.DeviceInfo
+    let onUnlink: () -> Void
+
+    var deviceIcon: String {
+        // Simple heuristic based on device name
+        let name = device.deviceName.lowercased()
+        if name.contains("iphone") {
+            return "iphone"
+        } else if name.contains("ipad") {
+            return "ipad"
+        } else if name.contains("mac") {
+            return "laptopcomputer"
+        } else if name.contains("watch") {
+            return "applewatch"
+        } else {
+            return "desktopcomputer"
+        }
+    }
+
+    var body: some View {
+        HStack {
+            Image(systemName: deviceIcon)
+                .foregroundColor(.cyan)
+                .frame(width: 32)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text(device.deviceName)
+                        .font(.body)
+                    if device.isCurrent {
+                        Text("(This device)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    Text(device.publicKeyPrefix)
+                        .font(.system(.caption2, design: .monospaced))
+                        .foregroundColor(.secondary)
+
+                    if !device.isActive {
+                        Text("Inactive")
+                            .font(.caption2)
+                            .foregroundColor(.orange)
+                    }
+                }
+            }
+
+            Spacer()
+
+            if device.isCurrent {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+            } else {
+                // Unlink button for non-current devices
+                Button(action: onUnlink) {
+                    Image(systemName: "minus.circle")
+                        .foregroundColor(.red)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .contextMenu {
+            if !device.isCurrent {
+                Button(role: .destructive, action: onUnlink) {
+                    Label("Unlink Device", systemImage: "trash")
+                }
+            }
+
+            Button(action: {
+                UIPasteboard.general.string = device.publicKeyPrefix
+            }) {
+                Label("Copy Device ID", systemImage: "doc.on.doc")
+            }
+        }
+    }
+}
+
+/// Sheet for generating device link QR code
+struct DeviceLinkSheet: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.dismiss) var dismiss
+    @State private var linkData: VauchiRepository.DeviceLinkData?
+    @State private var isGenerating = true
+    @State private var errorMessage: String?
+    @State private var timeRemaining: TimeInterval = 0
+    @State private var timer: Timer?
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                if isGenerating {
+                    ProgressView("Generating link...")
+                } else if let error = errorMessage {
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 48))
+                            .foregroundColor(.orange)
+                        Text(error)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                        Button("Try Again") {
+                            Task {
+                                await generateLinkQr()
+                            }
+                        }
+                    }
+                } else if let data = linkData {
+                    VStack(spacing: 16) {
+                        Text("Scan this QR code on your new device")
+                            .font(.headline)
+                            .multilineTextAlignment(.center)
+
+                        // QR Code
+                        if let qrImage = generateQRCode(from: data.qrData) {
+                            Image(uiImage: qrImage)
+                                .interpolation(.none)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 250, height: 250)
+                                .padding()
+                                .background(Color.white)
+                                .cornerRadius(12)
+                        }
+
+                        // Expiry timer
+                        if timeRemaining > 0 {
+                            HStack {
+                                Image(systemName: "clock")
+                                Text("Expires in \(formatTime(timeRemaining))")
+                            }
+                            .font(.caption)
+                            .foregroundColor(timeRemaining < 60 ? .orange : .secondary)
+                        } else {
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle")
+                                Text("QR code expired")
+                            }
+                            .font(.caption)
+                            .foregroundColor(.red)
+
+                            Button("Generate New Code") {
+                                Task {
+                                    await generateLinkQr()
+                                }
+                            }
+                        }
+
+                        Text("Open Vauchi on your new device and select \"Join Existing Identity\" to scan this code.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                }
+
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Link New Device")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .onAppear {
+                Task {
+                    await generateLinkQr()
+                }
+            }
+            .onDisappear {
+                timer?.invalidate()
+            }
+        }
+    }
+
+    private func generateLinkQr() async {
+        isGenerating = true
+        errorMessage = nil
+        timer?.invalidate()
+
+        do {
+            linkData = try await viewModel.generateDeviceLinkQr()
+            timeRemaining = linkData?.timeRemaining ?? 0
+            startTimer()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isGenerating = false
+    }
+
+    private func startTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+            } else {
+                timer?.invalidate()
+            }
+        }
+    }
+
+    private func formatTime(_ seconds: TimeInterval) -> String {
+        let mins = Int(seconds) / 60
+        let secs = Int(seconds) % 60
+        return String(format: "%d:%02d", mins, secs)
+    }
+
+    private func generateQRCode(from string: String) -> UIImage? {
+        guard let data = string.data(using: .ascii) else { return nil }
+
+        if let filter = CIFilter(name: "CIQRCodeGenerator") {
+            filter.setValue(data, forKey: "inputMessage")
+            filter.setValue("H", forKey: "inputCorrectionLevel")
+
+            if let output = filter.outputImage {
+                let transform = CGAffineTransform(scaleX: 10, y: 10)
+                let scaled = output.transformed(by: transform)
+                return UIImage(ciImage: scaled)
+            }
+        }
+        return nil
     }
 }
 
@@ -1186,7 +1513,7 @@ struct ContentUpdatesSection: View {
         }
     }
 
-    private func updateTypeName(_ type: MobileUpdateType) -> String {
+    private func updateTypeName(_ type: MobileContentType) -> String {
         switch type {
         case .networks:
             return "Social Networks"

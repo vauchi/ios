@@ -2,6 +2,7 @@
 // Persistent settings storage using UserDefaults
 
 import Foundation
+import UIKit
 
 /// Keys for UserDefaults storage
 private enum SettingsKey: String {

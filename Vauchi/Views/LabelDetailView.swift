@@ -27,11 +27,27 @@ struct LabelDetailView: View {
                     onToggleFieldVisibility: toggleFieldVisibility
                 )
             } else {
-                ContentUnavailableView(
-                    "Label Not Found",
-                    systemImage: "tag.slash",
-                    description: Text("This label may have been deleted.")
-                )
+                if #available(iOS 17.0, *) {
+                    ContentUnavailableView(
+                        "Label Not Found",
+                        systemImage: "tag.slash",
+                        description: Text("This label may have been deleted.")
+                    )
+                } else {
+                    VStack(spacing: 16) {
+                        Image(systemName: "tag.slash")
+                            .font(.system(size: 48))
+                            .foregroundColor(.secondary)
+                        Text("Label Not Found")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Text("This label may have been deleted.")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding()
+                }
             }
         }
         .navigationTitle(label.name)
@@ -88,10 +104,10 @@ struct LabelDetailView: View {
         }
     }
 
-    private func toggleFieldVisibility(fieldId: String, visible: Bool) {
+    private func toggleFieldVisibility(fieldLabel: String, isVisible: Bool) {
         Task {
             do {
-                try await viewModel.setLabelFieldVisibility(labelId: label.id, fieldId: fieldId, visible: visible)
+                try await viewModel.setLabelFieldVisibility(labelId: label.id, fieldLabel: fieldLabel, isVisible: isVisible)
                 await loadDetail()
             } catch {
                 viewModel.showError("Error", message: "Failed to update field visibility: \(error.localizedDescription)")
