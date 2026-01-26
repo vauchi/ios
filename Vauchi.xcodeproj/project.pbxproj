@@ -377,6 +377,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_GENERATION_MODE = GeneratedFile;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -384,8 +388,18 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks/VauchiMobile.xcframework/ios-arm64_x86_64-simulator",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks/VauchiMobile.xcframework/ios-arm64",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.vauchi.ios.tests;
 				SDKROOT = iphoneos;
+				"SWIFT_INCLUDE_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/VauchiMobile.xcframework/ios-arm64_x86_64-simulator/Headers";
+				"SWIFT_INCLUDE_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/VauchiMobile.xcframework/ios-arm64/Headers";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Vauchi.app/Vauchi";
 			};
@@ -546,6 +560,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_GENERATION_MODE = GeneratedFile;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -553,8 +571,18 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks/VauchiMobile.xcframework/ios-arm64_x86_64-simulator",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks/VauchiMobile.xcframework/ios-arm64",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.vauchi.ios.tests;
 				SDKROOT = iphoneos;
+				"SWIFT_INCLUDE_PATHS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/Frameworks/VauchiMobile.xcframework/ios-arm64_x86_64-simulator/Headers";
+				"SWIFT_INCLUDE_PATHS[sdk=iphoneos*]" = "$(PROJECT_DIR)/Frameworks/VauchiMobile.xcframework/ios-arm64/Headers";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Vauchi.app/Vauchi";
 			};
