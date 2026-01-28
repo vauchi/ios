@@ -6,6 +6,11 @@
 #
 # iOS app (SwiftUI)
 #
+# Performance optimizations:
+#   - Change-based rules: Jobs run only when relevant files change
+#   - Timeouts: Prevent runaway jobs from blocking runners
+#   - Interruptible: Auto-cancel on new commits
+#
 # Pipeline strategy:
 #   - MR: Full validation (lint, build, test, security)
 #   - Main: Build validation
@@ -42,6 +47,23 @@ variables:
   # Enable Swift SAST analyzer
   SAST_ANALYZER_IMAGE_TAG: "5"
 
+# Interruptible default for auto-cancel
+default:
+  interruptible: true
+
+# Timeout templates
+.timeout-quick:
+  timeout: 10 minutes
+
+.timeout-standard:
+  timeout: 30 minutes
+
+.timeout-long:
+  timeout: 1 hour
+
+.timeout-extended:
+  timeout: 2 hours
+
 .macos-job:
   tags:
     - macos
@@ -53,16 +75,13 @@ variables:
         echo "Run on the runner machine: xcodebuild -downloadPlatform iOS"
         exit 1
       fi
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == "main"
 
 # ============================================================
-# Lint Stage
+# Lint Stage (change-based)
 # ============================================================
 
 lint:swiftlint:
-  extends: .macos-job
+  extends: [.macos-job, .timeout-quick]
   stage: lint
   script:
     - if command -v swiftlint &> /dev/null; then swiftlint lint --strict --reporter json > swiftlint-report.json || true; fi
@@ -71,12 +90,26 @@ lint:swiftlint:
     reports:
       codequality: swiftlint-report.json
     expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.swift"
+        - ".swiftlint.yml"
+        - ".gitlab-ci.yml"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 lint:swiftformat:
-  extends: .macos-job
+  extends: [.macos-job, .timeout-quick]
   stage: lint
   script:
     - if command -v swiftformat &> /dev/null; then swiftformat --lint .; else echo "SwiftFormat not installed, skipping"; fi
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.swift"
+        - ".swiftformat"
+        - ".gitlab-ci.yml"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 lint:xcodegen:
   extends: .macos-job
@@ -90,11 +123,11 @@ lint:xcodegen:
         - project.yml
 
 # ============================================================
-# Build Stage
+# Build Stage (change-based)
 # ============================================================
 
 build:debug:
-  extends: .macos-job
+  extends: [.macos-job, .timeout-extended]
   stage: build
   script:
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages build
@@ -102,9 +135,19 @@ build:debug:
     paths:
       - build/Build/Products/Debug-iphonesimulator/
     expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.swift"
+        - "**/*.xib"
+        - "**/*.storyboard"
+        - "*.xcodeproj/**/*"
+        - "Package.swift"
+        - ".gitlab-ci.yml"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 build:release:
-  extends: .macos-job
+  extends: [.macos-job, .timeout-extended]
   stage: build
   script:
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Release -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages build
@@ -117,11 +160,11 @@ build:release:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/
 
 # ============================================================
-# Test Stage
+# Test Stage (change-based)
 # ============================================================
 
 test:unit:
-  extends: .macos-job
+  extends: [.macos-job, .timeout-long]
   stage: test
   script:
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages test
@@ -130,9 +173,16 @@ test:unit:
       junit: build/reports/junit.xml
     expire_in: 1 week
   allow_failure: true  # Pre-existing: tests reference APIs not yet in v0.1.x bindings
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.swift"
+        - "*.xcodeproj/**/*"
+        - ".gitlab-ci.yml"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 # ============================================================
-# Security Stage
+# Security Stage (change-based)
 # ============================================================
 
 # GitLab security templates configuration
@@ -142,6 +192,9 @@ semgrep-sast:
   tags: [docker]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.swift"
+        - ".gitlab-ci.yml"
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
@@ -154,17 +207,23 @@ secret_detection:
 
 # Swift-specific security analysis
 security:swift-analysis:
-  extends: .macos-job
+  extends: [.macos-job, .timeout-quick]
   stage: security
   script:
     # Check for common iOS security issues
     - 'grep -r "NSAllowsArbitraryLoads" . && echo "WARNING: App Transport Security disabled" || true'
     - 'grep -r "allowsBackup.*true" . && echo "WARNING: Backup enabled" || true'
     - 'grep -r "NSCameraUsageDescription\|NSPhotoLibraryUsageDescription\|NSLocationWhenInUseUsageDescription" Info.plist || echo "INFO: No privacy permissions declared"'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.plist"
+        - ".gitlab-ci.yml"
+    - if: $CI_COMMIT_BRANCH == "main"
 
-# Dependency check for CocoaPods/SPM
+# Dependency check for CocoaPods/SPM (runs on dependency changes)
 security:dependencies:
-  extends: .macos-job
+  extends: [.macos-job, .timeout-quick]
   stage: security
   script:
     - |
@@ -182,4 +241,6 @@ security:dependencies:
       changes:
         - "Podfile*"
         - "project.yml"
+        - "Package.resolved"
+        - ".gitlab-ci.yml"
     - if: $CI_COMMIT_BRANCH == "main"
