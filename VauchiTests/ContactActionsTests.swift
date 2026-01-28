@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ContactActionsTests.swift
 // Tests for ContactActions service
 // Based on: features/contact_card_management.feature - field action requirements

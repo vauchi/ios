@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // WelcomeStepView.swift
 // First step of onboarding - value proposition
 // Based on: features/onboarding.feature @first-launch scenarios

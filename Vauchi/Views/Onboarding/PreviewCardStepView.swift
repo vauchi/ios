@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // PreviewCardStepView.swift
 // Preview card before confirming
 // Based on: features/onboarding.feature @card-creation "Card preview before finishing" scenario

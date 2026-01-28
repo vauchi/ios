@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // VisibilityLabelsTests.swift
 // Tests for visibility labels feature
 // Based on: features/visibility_labels.feature

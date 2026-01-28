@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // DeliveryStatusView.swift
 // Delivery status view showing message delivery history
 // Based on: features/message_delivery.feature

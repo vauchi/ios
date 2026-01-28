@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // DeviceLinkingTests.swift
 // Tests for multi-device linking functionality
 // Based on: features/device_management.feature

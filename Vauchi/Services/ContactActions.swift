@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ContactActions.swift
 // Smart field actions for contact fields in Vauchi iOS
 // Provides URL building, field type detection, and security validation

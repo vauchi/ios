@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // ReadyStepView.swift
 // Completion screen with first exchange prompt
 // Based on: features/onboarding.feature @completion and @first-exchange scenarios

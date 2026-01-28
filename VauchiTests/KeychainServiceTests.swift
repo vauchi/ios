@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // KeychainServiceTests.swift
 // Tests for KeychainService - secure storage with file fallback
 // Based on: features/security.feature

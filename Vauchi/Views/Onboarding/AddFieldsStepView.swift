@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // AddFieldsStepView.swift
 // Quick add phone and email fields
 // Based on: features/onboarding.feature @card-creation "Quick add phone and email" scenario

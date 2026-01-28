@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 // OnboardingTests.swift
 // Tests for onboarding flow
 // Based on: features/onboarding.feature
