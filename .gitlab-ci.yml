@@ -4,11 +4,16 @@
 #
 # Pipeline strategy:
 #   - MR: Full validation (lint, build, test, security)
-#   - Main: No pipeline (validated via MR)
+#   - Main: Build validation
 #
 # Requirements:
 #   - macOS runner with Xcode and SwiftLint
-#   - XCFramework in Frameworks/ (tracked via Git LFS)
+#
+# Native bindings:
+#   Consumed from vauchi-mobile-swift via Swift Package Manager.
+#   The vauchi/core release pipeline builds UniFFI bindings, packages an
+#   XCFramework, and publishes it. vauchi-mobile-swift wraps this as an
+#   SPM binary target that this app depends on.
 #
 # GitLab Ultimate Features:
 #   - SAST: Static application security testing (Swift)
