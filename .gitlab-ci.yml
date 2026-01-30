@@ -73,7 +73,6 @@ lint:swiftformat:
   stage: lint
   script:
     - if command -v swiftformat &> /dev/null; then swiftformat --lint .; else echo "SwiftFormat not installed, skipping"; fi
-  allow_failure: true  # Codebase not yet formatted; tracked separately
 
 lint:xcodegen:
   extends: .macos-job
@@ -94,7 +93,7 @@ build:debug:
   extends: .macos-job
   stage: build
   script:
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' build
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages build
   artifacts:
     paths:
       - build/Build/Products/Debug-iphonesimulator/
@@ -104,7 +103,7 @@ build:release:
   extends: .macos-job
   stage: build
   script:
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Release -destination 'generic/platform=iOS Simulator' build
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Release -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages build
   artifacts:
     paths:
       - build/Build/Products/Release-iphonesimulator/
@@ -121,7 +120,7 @@ test:unit:
   extends: .macos-job
   stage: test
   script:
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages test
   artifacts:
     reports:
       junit: build/reports/junit.xml
