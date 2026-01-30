@@ -82,7 +82,6 @@ build:debug:
   extends: .macos-job
   stage: build
   script:
-    - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' build
   artifacts:
     paths:
@@ -93,7 +92,6 @@ build:release:
   extends: .macos-job
   stage: build
   script:
-    - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Release -destination 'generic/platform=iOS Simulator' build
   artifacts:
     paths:
@@ -111,7 +109,6 @@ test:unit:
   extends: .macos-job
   stage: test
   script:
-    - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
   artifacts:
     reports:

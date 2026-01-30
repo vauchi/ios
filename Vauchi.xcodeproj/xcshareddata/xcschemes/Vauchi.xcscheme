@@ -15,7 +15,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BF99B82C3683F9EC821A440A"
+               BlueprintIdentifier = "8205328B6D921F4914B03739"
                BuildableName = "Vauchi.app"
                BlueprintName = "Vauchi"
                ReferencedContainer = "container:Vauchi.xcodeproj">
@@ -29,7 +29,7 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "B18690F5934AF6702775A1B5"
+               BlueprintIdentifier = "E9D120DDA95653CDD66564FF"
                BuildableName = "VauchiTests.xctest"
                BlueprintName = "VauchiTests"
                ReferencedContainer = "container:Vauchi.xcodeproj">
@@ -46,7 +46,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF99B82C3683F9EC821A440A"
+            BlueprintIdentifier = "8205328B6D921F4914B03739"
             BuildableName = "Vauchi.app"
             BlueprintName = "Vauchi"
             ReferencedContainer = "container:Vauchi.xcodeproj">
@@ -58,7 +58,7 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "B18690F5934AF6702775A1B5"
+               BlueprintIdentifier = "E9D120DDA95653CDD66564FF"
                BuildableName = "VauchiTests.xctest"
                BlueprintName = "VauchiTests"
                ReferencedContainer = "container:Vauchi.xcodeproj">
@@ -82,7 +82,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF99B82C3683F9EC821A440A"
+            BlueprintIdentifier = "8205328B6D921F4914B03739"
             BuildableName = "Vauchi.app"
             BlueprintName = "Vauchi"
             ReferencedContainer = "container:Vauchi.xcodeproj">
@@ -101,7 +101,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF99B82C3683F9EC821A440A"
+            BlueprintIdentifier = "8205328B6D921F4914B03739"
             BuildableName = "Vauchi.app"
             BlueprintName = "Vauchi"
             ReferencedContainer = "container:Vauchi.xcodeproj">
