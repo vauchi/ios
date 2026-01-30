@@ -3,13 +3,12 @@
 //
 // Traces to: features/demo_contact.feature
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Tests for Demo Contact feature
 /// Based on: features/demo_contact.feature
 final class DemoContactTests: XCTestCase {
-
     var tempDir: URL!
 
     override func setUpWithError() throws {
@@ -25,6 +24,7 @@ final class DemoContactTests: XCTestCase {
     }
 
     // MARK: - Demo Contact Appearance Tests
+
     // Based on: features/demo_contact.feature @demo-appear
 
     /// Scenario: Demo contact appears for users with no contacts
@@ -71,10 +71,10 @@ final class DemoContactTests: XCTestCase {
 
         // Alice and Bob exchange contacts
         let aliceQr = try aliceRepo.generateExchangeQr()
-        let _ = try bobRepo.completeExchange(qrData: aliceQr.qrData)
+        _ = try bobRepo.completeExchange(qrData: aliceQr.qrData)
 
         let bobQr = try bobRepo.generateExchangeQr()
-        let _ = try aliceRepo.completeExchange(qrData: bobQr.qrData)
+        _ = try aliceRepo.completeExchange(qrData: bobQr.qrData)
 
         // Alice now has a real contact
         XCTAssertGreaterThan(try aliceRepo.contactCount(), 0)
@@ -99,6 +99,7 @@ final class DemoContactTests: XCTestCase {
     }
 
     // MARK: - Demo Updates Tests
+
     // Based on: features/demo_contact.feature @demo-updates
 
     /// Scenario: Demo updates demonstrate the update flow
@@ -137,6 +138,7 @@ final class DemoContactTests: XCTestCase {
     }
 
     // MARK: - Demo Contact Dismissal Tests
+
     // Based on: features/demo_contact.feature @demo-dismiss
 
     /// Scenario: Demo contact can be manually dismissed
@@ -148,7 +150,7 @@ final class DemoContactTests: XCTestCase {
         try repo.createIdentity(displayName: "Alice")
 
         // Initialize demo contact
-        let _ = try repo.initDemoContactIfNeeded()
+        _ = try repo.initDemoContactIfNeeded()
 
         // Verify demo contact exists
         XCTAssertNotNil(try repo.getDemoContact())
@@ -188,15 +190,15 @@ final class DemoContactTests: XCTestCase {
         try bobRepo.createIdentity(displayName: "Bob")
 
         // Alice has demo contact
-        let _ = try aliceRepo.initDemoContactIfNeeded()
+        _ = try aliceRepo.initDemoContactIfNeeded()
         XCTAssertNotNil(try aliceRepo.getDemoContact(), "Demo contact should exist initially")
 
         // Alice and Bob exchange
         let aliceQr = try aliceRepo.generateExchangeQr()
-        let _ = try bobRepo.completeExchange(qrData: aliceQr.qrData)
+        _ = try bobRepo.completeExchange(qrData: aliceQr.qrData)
 
         let bobQr = try bobRepo.generateExchangeQr()
-        let _ = try aliceRepo.completeExchange(qrData: bobQr.qrData)
+        _ = try aliceRepo.completeExchange(qrData: bobQr.qrData)
 
         // Auto-remove demo contact after first real exchange
         let wasRemoved = try aliceRepo.autoRemoveDemoContact()
@@ -217,7 +219,7 @@ final class DemoContactTests: XCTestCase {
         try repo.createIdentity(displayName: "Alice")
 
         // Initialize and dismiss demo contact
-        let _ = try repo.initDemoContactIfNeeded()
+        _ = try repo.initDemoContactIfNeeded()
         try repo.dismissDemoContact()
 
         // Verify dismissed
@@ -235,6 +237,7 @@ final class DemoContactTests: XCTestCase {
     }
 
     // MARK: - Demo Contact Privacy Tests
+
     // Based on: features/demo_contact.feature @demo-privacy
 
     /// Scenario: Demo contact is local only
@@ -263,7 +266,7 @@ final class DemoContactTests: XCTestCase {
         try repo.createIdentity(displayName: "Alice")
 
         // Initialize demo contact
-        let _ = try repo.initDemoContactIfNeeded()
+        _ = try repo.initDemoContactIfNeeded()
 
         // Contact count should still be 0
         let count = try repo.contactCount()
@@ -271,6 +274,7 @@ final class DemoContactTests: XCTestCase {
     }
 
     // MARK: - Demo Contact Persistence Tests
+
     // Based on: features/demo_contact.feature @demo-persistence
 
     /// Scenario: Demo contact state persists across app restarts
@@ -282,7 +286,7 @@ final class DemoContactTests: XCTestCase {
         do {
             let repo = try VauchiRepository(dataDir: tempDir.path)
             try repo.createIdentity(displayName: "Alice")
-            let _ = try repo.initDemoContactIfNeeded()
+            _ = try repo.initDemoContactIfNeeded()
 
             // Verify demo exists
             XCTAssertNotNil(try repo.getDemoContact())
@@ -305,7 +309,7 @@ final class DemoContactTests: XCTestCase {
         do {
             let repo = try VauchiRepository(dataDir: tempDir.path)
             try repo.createIdentity(displayName: "Alice")
-            let _ = try repo.initDemoContactIfNeeded()
+            _ = try repo.initDemoContactIfNeeded()
             try repo.dismissDemoContact()
         }
 
@@ -335,7 +339,7 @@ final class DemoContactTests: XCTestCase {
         XCTAssertEqual(initialState.updateCount, 0)
 
         // After init - active
-        let _ = try repo.initDemoContactIfNeeded()
+        _ = try repo.initDemoContactIfNeeded()
         let activeState = repo.getDemoContactState()
         XCTAssertTrue(activeState.isActive)
         XCTAssertFalse(activeState.wasDismissed)
@@ -347,13 +351,13 @@ final class DemoContactTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        let _ = try repo.initDemoContactIfNeeded()
+        _ = try repo.initDemoContactIfNeeded()
 
         let initialCount = repo.getDemoContactState().updateCount
 
         // Trigger updates
-        let _ = try repo.triggerDemoUpdate()
-        let _ = try repo.triggerDemoUpdate()
+        _ = try repo.triggerDemoUpdate()
+        _ = try repo.triggerDemoUpdate()
 
         let newCount = repo.getDemoContactState().updateCount
         XCTAssertEqual(newCount, initialCount + 2, "Update count should increment with each update")
@@ -364,7 +368,7 @@ final class DemoContactTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        let _ = try repo.initDemoContactIfNeeded()
+        _ = try repo.initDemoContactIfNeeded()
 
         // Just initialized, update should not be due yet (2 hour interval)
         let isAvailable = repo.isDemoUpdateAvailable()

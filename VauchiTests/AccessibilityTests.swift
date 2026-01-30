@@ -2,14 +2,13 @@
 // Tests for VoiceOver accessibility support
 // Based on: features/accessibility.feature
 
-import XCTest
 import SwiftUI
 @testable import Vauchi
+import XCTest
 
 /// Tests for accessibility support
 /// Traces to: features/accessibility.feature
 final class AccessibilityTests: XCTestCase {
-
     // MARK: - Setup View Accessibility
 
     /// Scenario: Setup view has accessible elements
@@ -167,7 +166,7 @@ final class AccessibilityTests: XCTestCase {
         let expectedOrder = [
             AccessibilityIdentifiers.Setup.welcomeTitle,
             AccessibilityIdentifiers.Setup.nameField,
-            AccessibilityIdentifiers.Setup.createButton
+            AccessibilityIdentifiers.Setup.createButton,
         ]
 
         XCTAssertEqual(expectedOrder.count, 3)

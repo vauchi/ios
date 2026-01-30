@@ -1,9 +1,9 @@
 // VauchiViewModel.swift
 // Main state management for Vauchi iOS app
 
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 import VauchiMobile
 
 /// Contact field for display
@@ -95,7 +95,7 @@ class VauchiViewModel: ObservableObject {
     @Published var lastSyncTime: Date?
     @Published var pendingUpdates: Int = 0
 
-    // Network state
+    /// Network state
     @Published var isOnline = false
 
     // Delivery status
@@ -132,13 +132,14 @@ class VauchiViewModel: ObservableObject {
     }
 
     // MARK: - Proximity Verification
+
     // Uses MobileProximityVerifier with AudioProximityService for ultrasonic verification
 
     @Published var proximitySupported = false
     @Published var proximityCapability = "none"
     private var proximityVerifier: MobileProximityVerifier?
 
-    // Aha moments (progressive onboarding)
+    /// Aha moments (progressive onboarding)
     @Published var currentAhaMoment: MobileAhaMoment?
 
     // MARK: - Private Properties
@@ -218,7 +219,7 @@ class VauchiViewModel: ObservableObject {
                 self?.isOnline = isConnected
 
                 // Auto-sync when connection restored (if enabled and has identity)
-                if isConnected && SettingsService.shared.autoSyncEnabled && (self?.hasIdentity ?? false) {
+                if isConnected, SettingsService.shared.autoSyncEnabled, self?.hasIdentity ?? false {
                     Task {
                         await self?.sync()
                     }
@@ -234,7 +235,7 @@ class VauchiViewModel: ObservableObject {
 
     func loadState() {
         // Don't clear error if repository failed to initialize
-        if repository == nil && errorMessage != nil {
+        if repository == nil, errorMessage != nil {
             isLoading = false
             return
         }
@@ -452,6 +453,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     // MARK: - Demo Contact
+
     // Based on: features/demo_contact.feature
 
     /// Initialize demo contact if user has no real contacts.
@@ -535,6 +537,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     // MARK: - Visibility Labels
+
     // Based on: features/visibility_labels.feature
 
     /// Load all visibility labels
@@ -704,7 +707,7 @@ class VauchiViewModel: ObservableObject {
         guard let repository = repository else { return }
 
         do {
-            pendingUpdates = Int(try repository.pendingUpdateCount())
+            pendingUpdates = try Int(repository.pendingUpdateCount())
         } catch {
             pendingUpdates = 0
         }
@@ -782,7 +785,7 @@ class VauchiViewModel: ObservableObject {
     func hasPendingDeliveryForContact(contactId: String) -> Bool {
         return deliveryRecords.contains { record in
             record.recipientId == contactId &&
-            (record.status == .queued || record.status == .sent || record.status == .stored)
+                (record.status == .queued || record.status == .sent || record.status == .stored)
         }
     }
 

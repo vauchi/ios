@@ -160,7 +160,7 @@ struct ContactDetailView: View {
             loadVisibility()
         }
         .alert("Remove Contact", isPresented: $showRemoveAlert) {
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {}
             Button("Remove", role: .destructive) {
                 Task {
                     do {
@@ -175,7 +175,7 @@ struct ContactDetailView: View {
             Text("Are you sure you want to remove \(contact.displayName)?")
         }
         .alert("Verify Contact", isPresented: $showVerifyAlert) {
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {}
             Button("Verify") {
                 verifyContact()
             }
@@ -183,7 +183,7 @@ struct ContactDetailView: View {
             Text("By verifying \(contact.displayName), you confirm that you have verified their identity in person (e.g., by comparing fingerprints).")
         }
         .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
-            Button("OK", role: .cancel) { }
+            Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.alertMessage)
         }

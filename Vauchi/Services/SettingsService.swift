@@ -47,7 +47,7 @@ final class SettingsService {
             SettingsKey.relayUrl.rawValue: Self.defaultRelayUrl,
             SettingsKey.autoSyncEnabled.rawValue: true,
             SettingsKey.syncOnLaunch.rawValue: true,
-            SettingsKey.notificationsEnabled.rawValue: true
+            SettingsKey.notificationsEnabled.rawValue: true,
         ])
     }
 
@@ -168,7 +168,7 @@ final class SettingsService {
             SettingsKey.hasDismissedDemoContact,
             SettingsKey.reduceMotion,
             SettingsKey.highContrast,
-            SettingsKey.largeTouchTargets
+            SettingsKey.largeTouchTargets,
         ] {
             defaults.removeObject(forKey: key.rawValue)
         }

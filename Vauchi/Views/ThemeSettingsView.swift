@@ -125,7 +125,9 @@ struct ColorSwatch: View {
 struct ThemePreviewCard: View {
     let theme: MobileTheme
 
-    private var themeService: ThemeService { ThemeService.shared }
+    private var themeService: ThemeService {
+        ThemeService.shared
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

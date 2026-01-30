@@ -20,6 +20,7 @@ enum ContactActions {
     }
 
     // MARK: - Security
+
     // URL safety validation: mirrors vauchi-core's is_safe_url()
     // Uses scheme allowlist/blocklist to prevent dangerous URIs
 
@@ -30,6 +31,7 @@ enum ContactActions {
     private static let blockedSchemes = ["javascript", "vbscript", "data", "file", "ftp", "blob"]
 
     // MARK: - Social Network URLs
+
     // Social network URL generation is now handled by vauchi-core via UniFFI.
     // Use VauchiRepository.getProfileUrl(networkId:username:) to generate profile URLs.
     // The core maintains a comprehensive registry of 40+ social networks.
@@ -136,7 +138,8 @@ enum ContactActions {
     static func buildSocialUrl(network: String, username: String, repository: VauchiRepository? = nil) -> URL? {
         // Use core's social network registry which has 40+ networks
         if let repo = repository,
-           let urlString = repo.getProfileUrl(networkId: network, username: username) {
+           let urlString = repo.getProfileUrl(networkId: network, username: username)
+        {
             return URL(string: urlString)
         }
         return nil

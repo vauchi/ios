@@ -496,7 +496,7 @@ struct CreateVoucherSheet: View {
             }
             .navigationTitle(
                 generatedVoucher != nil ? "Voucher Created" :
-                parsedClaim != nil ? "Confirm Voucher" : "Vouch for Recovery"
+                    parsedClaim != nil ? "Confirm Voucher" : "Vouch for Recovery"
             )
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -2,11 +2,10 @@
 // Tests for onboarding flow
 // Based on: features/onboarding.feature
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 final class OnboardingTests: XCTestCase {
-
     var settingsService: SettingsService!
     var testDefaults: UserDefaults!
 

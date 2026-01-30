@@ -2,11 +2,10 @@
 // Tests for ContactActions service
 // Based on: features/contact_card_management.feature - field action requirements
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 final class ContactActionsTests: XCTestCase {
-
     // MARK: - Field Type Detection Tests
 
     /// Scenario: Detect phone field type

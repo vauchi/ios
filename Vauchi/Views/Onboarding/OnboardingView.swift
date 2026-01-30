@@ -25,7 +25,9 @@ enum OnboardingStep: Int, CaseIterable {
     }
 
     /// Total number of user-visible steps (excluding welcome and ready)
-    static var userVisibleStepCount: Int { 4 }
+    static var userVisibleStepCount: Int {
+        4
+    }
 
     /// User-visible step number (1-indexed, excluding welcome)
     var userVisibleStepNumber: Int? {
@@ -197,7 +199,7 @@ struct OnboardingProgressView: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            ForEach(1...totalSteps, id: \.self) { step in
+            ForEach(1 ... totalSteps, id: \.self) { step in
                 Circle()
                     .fill(step <= currentStep ? Color.cyan : Color.gray.opacity(0.3))
                     .frame(width: 8, height: 8)
@@ -221,7 +223,7 @@ struct RestoreIdentitySheet: View {
 
     var canRestore: Bool {
         !backupData.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !password.isEmpty
+            !password.isEmpty
     }
 
     var body: some View {

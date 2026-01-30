@@ -58,23 +58,23 @@ enum VauchiRepositoryError: LocalizedError {
             return "Already initialized"
         case .identityNotFound:
             return "Identity not found"
-        case .contactNotFound(let id):
+        case let .contactNotFound(id):
             return "Contact not found: \(id)"
         case .invalidQrCode:
             return "Invalid QR code"
-        case .exchangeFailed(let msg):
+        case let .exchangeFailed(msg):
             return "Exchange failed: \(msg)"
-        case .syncFailed(let msg):
+        case let .syncFailed(msg):
             return "Sync failed: \(msg)"
-        case .storageError(let msg):
+        case let .storageError(msg):
             return "Storage error: \(msg)"
-        case .cryptoError(let msg):
+        case let .cryptoError(msg):
             return "Crypto error: \(msg)"
-        case .networkError(let msg):
+        case let .networkError(msg):
             return "Network error: \(msg)"
-        case .invalidInput(let msg):
+        case let .invalidInput(msg):
             return "Invalid input: \(msg)"
-        case .internalError(let msg):
+        case let .internalError(msg):
             return "Internal error: \(msg)"
         }
     }
@@ -88,25 +88,25 @@ enum VauchiRepositoryError: LocalizedError {
             return .alreadyInitialized
         case .IdentityNotFound:
             return .identityNotFound
-        case .ContactNotFound(let id):
+        case let .ContactNotFound(id):
             return .contactNotFound(id)
         case .InvalidQrCode:
             return .invalidQrCode
-        case .ExchangeFailed(let msg):
+        case let .ExchangeFailed(msg):
             return .exchangeFailed(msg)
-        case .SyncFailed(let msg):
+        case let .SyncFailed(msg):
             return .syncFailed(msg)
-        case .StorageError(let msg):
+        case let .StorageError(msg):
             return .storageError(msg)
-        case .CryptoError(let msg):
+        case let .CryptoError(msg):
             return .cryptoError(msg)
-        case .NetworkError(let msg):
+        case let .NetworkError(msg):
             return .networkError(msg)
-        case .InvalidInput(let msg):
+        case let .InvalidInput(msg):
             return .invalidInput(msg)
-        case .SerializationError(let msg):
+        case let .SerializationError(msg):
             return .internalError("Serialization: \(msg)")
-        case .Internal(let msg):
+        case let .Internal(msg):
             return .internalError(msg)
         }
     }
@@ -128,12 +128,12 @@ struct VauchiSyncResult {
 
 /// Field type enum matching Rust MobileFieldType
 enum VauchiFieldType: String, CaseIterable {
-    case email = "email"
-    case phone = "phone"
-    case website = "website"
-    case address = "address"
-    case social = "social"
-    case custom = "custom"
+    case email
+    case phone
+    case website
+    case address
+    case social
+    case custom
 
     var displayName: String {
         switch self {
@@ -219,6 +219,7 @@ struct VauchiExchangeResult {
 }
 
 // MARK: - Visibility Label Types
+
 // Based on: features/visibility_labels.feature
 
 /// Visibility label for organizing contacts
@@ -231,12 +232,12 @@ struct VauchiVisibilityLabel: Identifiable {
     let modifiedAt: UInt64
 
     init(from mobile: MobileVisibilityLabel) {
-        self.id = mobile.id
-        self.name = mobile.name
-        self.contactCount = mobile.contactCount
-        self.visibleFieldCount = mobile.visibleFieldCount
-        self.createdAt = mobile.createdAt
-        self.modifiedAt = mobile.modifiedAt
+        id = mobile.id
+        name = mobile.name
+        contactCount = mobile.contactCount
+        visibleFieldCount = mobile.visibleFieldCount
+        createdAt = mobile.createdAt
+        modifiedAt = mobile.modifiedAt
     }
 }
 
@@ -250,12 +251,12 @@ struct VauchiVisibilityLabelDetail: Identifiable {
     let modifiedAt: UInt64
 
     init(from mobile: MobileVisibilityLabelDetail) {
-        self.id = mobile.id
-        self.name = mobile.name
-        self.contactIds = mobile.contactIds
-        self.visibleFieldIds = mobile.visibleFieldIds
-        self.createdAt = mobile.createdAt
-        self.modifiedAt = mobile.modifiedAt
+        id = mobile.id
+        name = mobile.name
+        contactIds = mobile.contactIds
+        visibleFieldIds = mobile.visibleFieldIds
+        createdAt = mobile.createdAt
+        modifiedAt = mobile.modifiedAt
     }
 }
 
@@ -334,8 +335,9 @@ struct VauchiDeliveryRecord: Identifiable {
     let expiresAt: Date?
 
     init(messageId: String, recipientId: String, status: VauchiDeliveryStatus,
-         createdAt: Date, updatedAt: Date, expiresAt: Date?) {
-        self.id = messageId
+         createdAt: Date, updatedAt: Date, expiresAt: Date?)
+    {
+        id = messageId
         self.messageId = messageId
         self.recipientId = recipientId
         self.status = status
@@ -399,7 +401,7 @@ class VauchiRepository {
     private let vauchi: VauchiMobile
     private let dataDir: String
     private let relayUrl: String
-    private static let storageKeyLength = 32  // 256-bit key
+    private static let storageKeyLength = 32 // 256-bit key
 
     // MARK: - Initialization
 
@@ -422,7 +424,7 @@ class VauchiRepository {
 
         // Initialize VauchiMobile with secure key from Keychain
         do {
-            self.vauchi = try VauchiMobile.newWithSecureKey(
+            vauchi = try VauchiMobile.newWithSecureKey(
                 dataDir: dir,
                 relayUrl: relayUrl,
                 storageKeyBytes: storageKeyBytes
@@ -678,6 +680,7 @@ class VauchiRepository {
     }
 
     // MARK: - Visibility Labels Operations
+
     // Based on: features/visibility_labels.feature
 
     /// List all visibility labels
@@ -769,6 +772,7 @@ class VauchiRepository {
     }
 
     // MARK: - Field Validation Operations
+
     // Based on: features/field_validation.feature
 
     /// Validate a contact's field
@@ -940,6 +944,7 @@ class VauchiRepository {
     }
 
     // MARK: - Content Updates
+
     // Based on: features/content_updates.feature
 
     /// Check if content updates feature is supported
@@ -1014,6 +1019,7 @@ class VauchiRepository {
     }
 
     // MARK: - Device Linking Operations
+
     // Based on: features/device_linking.feature
 
     /// Device info for display
@@ -1027,13 +1033,13 @@ class VauchiRepository {
         let createdAt: UInt64
 
         init(from mobile: MobileDeviceInfo) {
-            self.id = mobile.publicKeyPrefix
-            self.deviceIndex = mobile.deviceIndex
-            self.deviceName = mobile.deviceName
-            self.isCurrent = mobile.isCurrent
-            self.isActive = mobile.isActive
-            self.publicKeyPrefix = mobile.publicKeyPrefix
-            self.createdAt = mobile.createdAt
+            id = mobile.publicKeyPrefix
+            deviceIndex = mobile.deviceIndex
+            deviceName = mobile.deviceName
+            isCurrent = mobile.isCurrent
+            isActive = mobile.isActive
+            publicKeyPrefix = mobile.publicKeyPrefix
+            createdAt = mobile.createdAt
         }
     }
 
@@ -1054,10 +1060,10 @@ class VauchiRepository {
         }
 
         init(from mobile: MobileDeviceLinkData) {
-            self.qrData = mobile.qrData
-            self.identityPublicKey = mobile.identityPublicKey
-            self.timestamp = mobile.timestamp
-            self.expiresAt = mobile.expiresAt
+            qrData = mobile.qrData
+            identityPublicKey = mobile.identityPublicKey
+            timestamp = mobile.timestamp
+            expiresAt = mobile.expiresAt
         }
     }
 
@@ -1068,9 +1074,9 @@ class VauchiRepository {
         let isExpired: Bool
 
         init(from mobile: MobileDeviceLinkInfo) {
-            self.identityPublicKey = mobile.identityPublicKey
-            self.timestamp = mobile.timestamp
-            self.isExpired = mobile.isExpired
+            identityPublicKey = mobile.identityPublicKey
+            timestamp = mobile.timestamp
+            isExpired = mobile.isExpired
         }
     }
 
@@ -1342,6 +1348,7 @@ class VauchiRepository {
     }
 
     // MARK: - Demo Contact Operations
+
     // Based on: features/demo_contact.feature
 
     /// Initialize demo contact if user has no real contacts.
@@ -1457,12 +1464,12 @@ struct VauchiDemoContact {
     let tipCategory: String
 
     init(from mobile: MobileDemoContact) {
-        self.id = mobile.id
-        self.displayName = mobile.displayName
-        self.isDemo = mobile.isDemo
-        self.tipTitle = mobile.tipTitle
-        self.tipContent = mobile.tipContent
-        self.tipCategory = mobile.tipCategory
+        id = mobile.id
+        displayName = mobile.displayName
+        isDemo = mobile.isDemo
+        tipTitle = mobile.tipTitle
+        tipContent = mobile.tipContent
+        tipCategory = mobile.tipCategory
     }
 }
 
@@ -1478,9 +1485,9 @@ struct VauchiDemoContactState {
     let updateCount: UInt32
 
     init(from mobile: MobileDemoContactState) {
-        self.isActive = mobile.isActive
-        self.wasDismissed = mobile.wasDismissed
-        self.autoRemoved = mobile.autoRemoved
-        self.updateCount = mobile.updateCount
+        isActive = mobile.isActive
+        wasDismissed = mobile.wasDismissed
+        autoRemoved = mobile.autoRemoved
+        updateCount = mobile.updateCount
     }
 }

@@ -2,13 +2,12 @@
 // Tests for KeychainService - secure storage with file fallback
 // Based on: features/security.feature
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Tests for KeychainService
 /// Based on: features/security.feature - Scenario: Secure credential storage
 final class KeychainServiceTests: XCTestCase {
-
     var keychainService: KeychainService!
 
     override func setUpWithError() throws {
@@ -93,7 +92,7 @@ final class KeychainServiceTests: XCTestCase {
 
     /// Scenario: String with unicode characters
     func testSaveAndLoadUnicodeString() throws {
-        let testString = "Hello \u{1F512} secure \u{2764}\u{FE0F}"  // Lock and heart emoji
+        let testString = "Hello \u{1F512} secure \u{2764}\u{FE0F}" // Lock and heart emoji
 
         try keychainService.saveString(testString, forKey: "test_string")
         let loadedString = try keychainService.loadString(forKey: "test_string")
@@ -106,7 +105,7 @@ final class KeychainServiceTests: XCTestCase {
     /// Scenario: Save and load storage encryption key
     func testSaveAndLoadStorageKey() throws {
         // Simulate 32-byte encryption key
-        let storageKey = Data((0..<32).map { UInt8($0) })
+        let storageKey = Data((0 ..< 32).map { UInt8($0) })
 
         try keychainService.saveStorageKey(storageKey)
         let loadedKey = try keychainService.loadStorageKey()
@@ -121,7 +120,7 @@ final class KeychainServiceTests: XCTestCase {
     /// Scenario: Save and load identity backup
     func testSaveAndLoadIdentityBackup() throws {
         // Simulate encrypted identity backup
-        let backupData = Data([0xDE, 0xAD, 0xBE, 0xEF] + (0..<100).map { UInt8($0) })
+        let backupData = Data([0xDE, 0xAD, 0xBE, 0xEF] + (0 ..< 100).map { UInt8($0) })
 
         try keychainService.saveIdentityBackup(backupData)
         let loadedBackup = try keychainService.loadIdentityBackup()
@@ -148,7 +147,7 @@ final class KeychainServiceTests: XCTestCase {
     /// Scenario: Handle large data
     func testSaveAndLoadLargeData() throws {
         // 1MB of data
-        let largeData = Data((0..<(1024 * 1024)).map { UInt8($0 % 256) })
+        let largeData = Data((0 ..< (1024 * 1024)).map { UInt8($0 % 256) })
 
         try keychainService.save(key: "test_key", data: largeData)
         let loadedData = try keychainService.load(key: "test_key")

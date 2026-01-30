@@ -2,9 +2,9 @@
 // Network connectivity monitoring service for Vauchi iOS
 // Uses NWPathMonitor for reliable network state detection
 
+import Combine
 import Foundation
 import Network
-import Combine
 
 /// Monitors network connectivity and provides current connection state
 final class NetworkMonitor: ObservableObject {

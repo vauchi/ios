@@ -2,14 +2,13 @@
 // Tests for delivery status UI functionality
 // Based on: features/message_delivery.feature
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Tests for delivery status tracking and UI
 /// Traces to: features/message_delivery.feature
 @MainActor
 final class DeliveryStatusTests: XCTestCase {
-
     // MARK: - Delivery Status Type Tests
 
     /// Scenario: DeliveryStatus has correct states

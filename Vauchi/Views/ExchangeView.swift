@@ -1,8 +1,8 @@
 // ExchangeView.swift
 // QR code display for contact exchange
 
-import SwiftUI
 import CoreImage.CIFilterBuiltins
+import SwiftUI
 
 struct ExchangeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
@@ -77,7 +77,7 @@ struct ExchangeView: View {
                                 }
                                 .buttonStyle(.bordered)
                                 .disabled(timeRemaining > 240) // Only allow refresh when < 4 min left
-                                
+
                                 // Proximity verification status
                                 if viewModel.proximitySupported {
                                     HStack(spacing: 6) {
@@ -130,7 +130,7 @@ struct ExchangeView: View {
             }
             .navigationTitle("Exchange")
             .onAppear { loadExchangeData() }
-            .onDisappear { 
+            .onDisappear {
                 stopTimer()
                 viewModel.stopProximityVerification()
             }

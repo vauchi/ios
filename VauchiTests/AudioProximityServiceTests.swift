@@ -2,13 +2,12 @@
 // Tests for AudioProximityService - ultrasonic proximity verification
 // Based on: features/contact_exchange.feature
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Tests for AudioProximityService
 /// Based on: features/contact_exchange.feature - Scenario: Proximity verification via audio
 final class AudioProximityServiceTests: XCTestCase {
-
     var audioService: AudioProximityService!
 
     override func setUpWithError() throws {
@@ -77,7 +76,7 @@ final class AudioProximityServiceTests: XCTestCase {
         let sampleCount = Int(Float(sampleRate) * duration)
 
         var samples = [Float](repeating: 0, count: sampleCount)
-        for i in 0..<sampleCount {
+        for i in 0 ..< sampleCount {
             let t = Float(i) / Float(sampleRate)
             samples[i] = sin(2.0 * .pi * frequency * t) * 0.5
         }
@@ -120,7 +119,7 @@ final class AudioProximityServiceTests: XCTestCase {
 
     /// Scenario: Service can be started and stopped repeatedly
     func testStartStopCycle() {
-        for _ in 0..<3 {
+        for _ in 0 ..< 3 {
             // Start emit
             let samples = [Float](repeating: 0.5, count: 100)
             _ = audioService.emitSignal(samples: samples, sampleRate: 44100)

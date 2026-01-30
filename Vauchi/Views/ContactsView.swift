@@ -78,7 +78,7 @@ struct ContactsView: View {
                 await viewModel.sync()
             }
             .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
-                Button("OK", role: .cancel) { }
+                Button("OK", role: .cancel) {}
             } message: {
                 Text(viewModel.alertMessage)
             }
@@ -216,6 +216,7 @@ struct EmptyContactsView: View {
 }
 
 // MARK: - Demo Contact Card
+
 // Based on: features/demo_contact.feature
 
 struct DemoContactCard: View {
@@ -304,7 +305,7 @@ struct DemoContactCard: View {
     }
 }
 
-// Wrapper to navigate to exchange tab
+/// Wrapper to navigate to exchange tab
 struct ExchangeTabView: View {
     var body: some View {
         ExchangeView()

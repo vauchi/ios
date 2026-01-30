@@ -2,11 +2,10 @@
 // Tests for NetworkMonitor service
 // Based on: features/sync_updates.feature - network connectivity requirements
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 final class NetworkMonitorTests: XCTestCase {
-
     // MARK: - Initialization Tests
 
     /// Scenario: NetworkMonitor is a singleton
@@ -49,7 +48,7 @@ final class NetworkMonitorTests: XCTestCase {
         let monitor = NetworkMonitor.shared
 
         // Access the published property - should not crash
-        let _ = monitor.$isConnected
+        _ = monitor.$isConnected
     }
 
     /// Scenario: connectionType is published for observation
@@ -57,7 +56,7 @@ final class NetworkMonitorTests: XCTestCase {
         let monitor = NetworkMonitor.shared
 
         // Access the published property - should not crash
-        let _ = monitor.$connectionType
+        _ = monitor.$connectionType
     }
 
     // MARK: - Start/Stop Tests

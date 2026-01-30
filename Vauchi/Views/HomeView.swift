@@ -117,7 +117,7 @@ struct HomeView: View {
                 await viewModel.sync()
             }
             .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
-                Button("OK", role: .cancel) { }
+                Button("OK", role: .cancel) {}
             } message: {
                 Text(viewModel.alertMessage)
             }
@@ -229,7 +229,7 @@ struct FieldRow: View {
         .cornerRadius(8)
         .accessibilityIdentifier("card.field.row")
         .alert("Delete Field", isPresented: $showDeleteAlert) {
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
                 onDelete()
             }

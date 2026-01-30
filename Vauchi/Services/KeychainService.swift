@@ -26,22 +26,22 @@ class KeychainService {
 
     private init() {
         #if targetEnvironment(simulator)
-        // In simulator, test if Keychain works
-        let testKey = "__keychain_test__"
-        let testData = Data([0x01, 0x02, 0x03])
-        do {
-            try saveToKeychain(key: testKey, data: testData)
-            _ = try loadFromKeychain(key: testKey)
-            try deleteFromKeychain(key: testKey)
-            print("KeychainService: Keychain working in simulator")
-        } catch {
-            print("KeychainService: Keychain unavailable (error: \(error)), using file storage")
-            useFileStorage = true
-            // Ensure directory exists
-            if let path = fileStoragePath {
-                try? FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
+            // In simulator, test if Keychain works
+            let testKey = "__keychain_test__"
+            let testData = Data([0x01, 0x02, 0x03])
+            do {
+                try saveToKeychain(key: testKey, data: testData)
+                _ = try loadFromKeychain(key: testKey)
+                try deleteFromKeychain(key: testKey)
+                print("KeychainService: Keychain working in simulator")
+            } catch {
+                print("KeychainService: Keychain unavailable (error: \(error)), using file storage")
+                useFileStorage = true
+                // Ensure directory exists
+                if let path = fileStoragePath {
+                    try? FileManager.default.createDirectory(at: path, withIntermediateDirectories: true)
+                }
             }
-        }
         #endif
     }
 
@@ -79,17 +79,17 @@ class KeychainService {
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
             kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked,
         ]
 
         let updateQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: key
+            kSecAttrAccount as String: key,
         ]
 
         let updateAttributes: [String: Any] = [
-            kSecValueData as String: data
+            kSecValueData as String: data,
         ]
 
         // Try to update first
@@ -110,7 +110,7 @@ class KeychainService {
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
             kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
+            kSecMatchLimit as String: kSecMatchLimitOne,
         ]
 
         var result: AnyObject?
@@ -134,7 +134,7 @@ class KeychainService {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: key
+            kSecAttrAccount as String: key,
         ]
 
         let status = SecItemDelete(query as CFDictionary)

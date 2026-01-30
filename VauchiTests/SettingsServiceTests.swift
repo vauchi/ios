@@ -1,12 +1,11 @@
 // SettingsServiceTests.swift
 // Tests for SettingsService
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Tests for SettingsService
 final class SettingsServiceTests: XCTestCase {
-
     var testDefaults: UserDefaults!
     var service: SettingsService!
 

@@ -1,9 +1,9 @@
 // ThemeService.swift
 // Theme management using vauchi-mobile bindings
 
+import Combine
 import SwiftUI
 import UIKit
-import Combine
 import VauchiMobile
 
 /// Keys for theme-related UserDefaults storage
@@ -39,7 +39,7 @@ final class ThemeService: ObservableObject {
     /// Register default values
     private func registerDefaults() {
         defaults.register(defaults: [
-            ThemeSettingsKey.followSystem.rawValue: true
+            ThemeSettingsKey.followSystem.rawValue: true,
         ])
     }
 

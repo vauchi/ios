@@ -2,11 +2,10 @@
 // Tests for BackgroundSyncService
 // Based on: features/sync_updates.feature - background sync requirements
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 final class BackgroundSyncServiceTests: XCTestCase {
-
     // MARK: - Initialization Tests
 
     /// Scenario: BackgroundSyncService is a singleton

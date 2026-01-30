@@ -2,13 +2,12 @@
 // Tests for visibility labels feature
 // Based on: features/visibility_labels.feature
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Tests for visibility labels feature
 /// Traces to: features/visibility_labels.feature
 final class VisibilityLabelsTests: XCTestCase {
-
     var tempDir: URL!
     var repo: VauchiRepository!
 
@@ -27,6 +26,7 @@ final class VisibilityLabelsTests: XCTestCase {
     }
 
     // MARK: - Label Creation Tests
+
     // Traces to: visibility_labels.feature @label-create
 
     /// Scenario: Create a new visibility label
@@ -61,6 +61,7 @@ final class VisibilityLabelsTests: XCTestCase {
     }
 
     // MARK: - Label Listing Tests
+
     // Traces to: visibility_labels.feature @label-list
 
     /// Scenario: List all labels
@@ -85,6 +86,7 @@ final class VisibilityLabelsTests: XCTestCase {
     }
 
     // MARK: - Label Rename Tests
+
     // Traces to: visibility_labels.feature @label-rename
 
     /// Scenario: Rename an existing label
@@ -115,6 +117,7 @@ final class VisibilityLabelsTests: XCTestCase {
     }
 
     // MARK: - Label Deletion Tests
+
     // Traces to: visibility_labels.feature @label-delete
 
     /// Scenario: Delete a label
@@ -156,6 +159,7 @@ final class VisibilityLabelsTests: XCTestCase {
     }
 
     // MARK: - Contact Assignment Tests
+
     // Traces to: visibility_labels.feature @assign-contact
 
     /// Scenario: Add a contact to a label
@@ -219,6 +223,7 @@ final class VisibilityLabelsTests: XCTestCase {
     }
 
     // MARK: - Field Visibility Tests
+
     // Traces to: visibility_labels.feature @field-visibility
 
     /// Scenario: Set field visibility for label
@@ -266,7 +271,7 @@ final class VisibilityLabelsTests: XCTestCase {
 
     /// Scenario: Default labels are suggested on first use
     /// @label-create
-    func testGetSuggestedLabels() throws {
+    func testGetSuggestedLabels() {
         let suggestions = repo.getSuggestedLabels()
 
         XCTAssertFalse(suggestions.isEmpty, "Should have suggested labels")
@@ -276,6 +281,7 @@ final class VisibilityLabelsTests: XCTestCase {
     }
 
     // MARK: - Label Statistics Tests
+
     // Traces to: visibility_labels.feature @stats
 
     /// Scenario: View label statistics
@@ -296,6 +302,7 @@ final class VisibilityLabelsTests: XCTestCase {
     }
 
     // MARK: - Edge Cases
+
     // Traces to: visibility_labels.feature @edge-cases
 
     /// Scenario: Label with no contacts still exists

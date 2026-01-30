@@ -1,18 +1,17 @@
 // VauchiViewModelTests.swift
 // Tests for VauchiViewModel state management
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Tests for VauchiViewModel
 /// Based on: features/identity_management.feature, features/contact_card_management.feature
 @MainActor
 final class VauchiViewModelTests: XCTestCase {
-
     // MARK: - Initial State Tests
 
     /// Scenario: ViewModel starts in loading state
-    func testInitialStateIsLoading() async {
+    func testInitialStateIsLoading() {
         let viewModel = VauchiViewModel()
 
         // Before loadState, should be in loading state
@@ -24,6 +23,7 @@ final class VauchiViewModelTests: XCTestCase {
     }
 
     // MARK: - Identity Creation Tests
+
     // Based on: features/identity_management.feature
 
     /// Scenario: Create identity updates state
@@ -48,6 +48,7 @@ final class VauchiViewModelTests: XCTestCase {
     }
 
     // MARK: - Card Field Tests
+
     // Based on: features/contact_card_management.feature
 
     /// Scenario: Add field to card
@@ -80,13 +81,14 @@ final class VauchiViewModelTests: XCTestCase {
         try await viewModel.createIdentity(name: "Alice")
         try await viewModel.addField(type: "email", label: "Work", value: "alice@work.com")
 
-        let field = viewModel.card!.fields[0]
+        let field = try XCTUnwrap(viewModel.card?.fields[0])
         try await viewModel.removeField(id: field.id)
 
         XCTAssertTrue(viewModel.card?.fields.isEmpty ?? false)
     }
 
     // MARK: - Exchange Tests
+
     // Based on: features/contact_exchange.feature
 
     /// Scenario: Generate QR data for exchange
@@ -100,6 +102,7 @@ final class VauchiViewModelTests: XCTestCase {
     }
 
     // MARK: - Contact Management Tests
+
     // Based on: features/contacts_management.feature
 
     /// Scenario: Initial contacts list is empty
@@ -130,7 +133,7 @@ final class VauchiViewModelTests: XCTestCase {
     // MARK: - Error Handling Tests
 
     /// Scenario: Error message clears on load
-    func testErrorMessageClearsOnLoad() async {
+    func testErrorMessageClearsOnLoad() {
         let viewModel = VauchiViewModel()
 
         // Manually set error for testing
@@ -141,6 +144,7 @@ final class VauchiViewModelTests: XCTestCase {
     }
 
     // MARK: - Sync State Tests
+
     // Based on: features/sync_updates.feature
 
     /// Scenario: Initial sync state is idle

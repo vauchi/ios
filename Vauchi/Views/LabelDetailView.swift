@@ -62,7 +62,7 @@ struct LabelDetailView: View {
             }
         }
         .alert("Delete Label?", isPresented: $showDeleteConfirmation) {
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
                 deleteLabel()
             }

@@ -1,10 +1,10 @@
 // SettingsView.swift
 // Settings and backup view
 
+import CoreImage.CIFilterBuiltins
+import LocalAuthentication
 import SwiftUI
 import UniformTypeIdentifiers
-import LocalAuthentication
-import CoreImage.CIFilterBuiltins
 import VauchiMobile
 
 struct SettingsView: View {
@@ -373,7 +373,7 @@ struct SettingsView: View {
                 TextField("Relay URL", text: $editingRelayUrl)
                     .autocapitalization(.none)
                     .keyboardType(.URL)
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel", role: .cancel) {}
                 Button("Save") {
                     saveRelayUrl()
                 }
@@ -381,14 +381,14 @@ struct SettingsView: View {
                 Text("Enter the secure WebSocket URL of your relay server (wss://).")
             }
             .alert("Invalid URL", isPresented: $showInvalidUrlAlert) {
-                Button("OK", role: .cancel) { }
+                Button("OK", role: .cancel) {}
             } message: {
                 Text("Please enter a valid secure WebSocket URL starting with wss://. Unencrypted connections (ws://) are not allowed for security.")
             }
             .alert("Edit Display Name", isPresented: $showEditNameAlert) {
                 TextField("Display Name", text: $editingDisplayName)
                     .autocapitalization(.words)
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel", role: .cancel) {}
                 Button("Save") {
                     saveDisplayName()
                 }
@@ -440,7 +440,7 @@ struct SyncStatusBadge: View {
         case .syncing:
             ProgressView()
                 .scaleEffect(0.7)
-        case .success(let added, let updated, let sent):
+        case let .success(added, updated, sent):
             if added + updated + sent > 0 {
                 Text("\(added + updated + sent) changes")
                     .font(.caption)
@@ -525,7 +525,7 @@ struct LinkedDevicesView: View {
             DeviceLinkSheet()
         }
         .alert("Unlink Device?", isPresented: $showUnlinkConfirmation) {
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {}
             Button("Unlink", role: .destructive) {
                 if let device = deviceToUnlink {
                     Task {
@@ -850,7 +850,7 @@ struct CertificatePinningView: View {
             })
         }
         .alert("Clear Certificate?", isPresented: $showClearConfirmation) {
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) {}
             Button("Clear", role: .destructive) {
                 viewModel.setPinnedCertificate("")
             }
@@ -870,7 +870,7 @@ struct SetCertificateSheet: View {
     var isValidPem: Bool {
         let trimmed = certificateText.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.hasPrefix("-----BEGIN CERTIFICATE-----") &&
-               trimmed.hasSuffix("-----END CERTIFICATE-----")
+            trimmed.hasSuffix("-----END CERTIFICATE-----")
     }
 
     var body: some View {
@@ -1107,11 +1107,11 @@ struct ExportBackupSheet: View {
 struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
 
-    func makeUIViewController(context: Context) -> UIActivityViewController {
+    func makeUIViewController(context _: Context) -> UIActivityViewController {
         UIActivityViewController(activityItems: items, applicationActivities: nil)
     }
 
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+    func updateUIViewController(_: UIActivityViewController, context _: Context) {}
 }
 
 struct ImportBackupSheet: View {
@@ -1262,7 +1262,7 @@ struct ImportBackupSheet: View {
                     handleFileSelection(result)
                 }
                 .alert("Replace Identity?", isPresented: $showConfirmation) {
-                    Button("Cancel", role: .cancel) { }
+                    Button("Cancel", role: .cancel) {}
                     Button("Replace", role: .destructive) {
                         importBackup()
                     }
@@ -1311,7 +1311,7 @@ struct ImportBackupSheet: View {
 
     private func handleFileSelection(_ result: Result<[URL], Error>) {
         switch result {
-        case .success(let urls):
+        case let .success(urls):
             guard let url = urls.first else { return }
 
             do {
@@ -1327,7 +1327,7 @@ struct ImportBackupSheet: View {
             } catch {
                 errorMessage = "Could not read file: \(error.localizedDescription)"
             }
-        case .failure(let error):
+        case let .failure(error):
             errorMessage = "File selection failed: \(error.localizedDescription)"
         }
     }
@@ -1344,7 +1344,8 @@ struct ImportBackupSheet: View {
                 dismiss()
             } catch {
                 if error.localizedDescription.contains("decrypt") ||
-                   error.localizedDescription.contains("password") {
+                    error.localizedDescription.contains("password")
+                {
                     errorMessage = "Incorrect password"
                 } else {
                     errorMessage = error.localizedDescription
@@ -1453,10 +1454,10 @@ struct ContentUpdatesSection: View {
                     switch status {
                     case .upToDate:
                         successMessage = "Everything is up to date"
-                    case .updatesAvailable(let types):
+                    case let .updatesAvailable(types):
                         let typeNames = types.map { updateTypeName($0) }.joined(separator: ", ")
                         successMessage = "Updates available: \(typeNames)"
-                    case .checkFailed(let error):
+                    case let .checkFailed(error):
                         errorMessage = "Check failed: \(error)"
                     case .disabled:
                         errorMessage = "Content updates are disabled"
@@ -1485,7 +1486,7 @@ struct ContentUpdatesSection: View {
                     switch result {
                     case .noUpdates:
                         successMessage = "No updates to apply"
-                    case .applied(let applied, let failed):
+                    case let .applied(applied, failed):
                         if failed.isEmpty {
                             successMessage = "Applied \(applied.count) update(s)"
                         } else {
@@ -1497,7 +1498,7 @@ struct ContentUpdatesSection: View {
                         }
                     case .disabled:
                         errorMessage = "Content updates are disabled"
-                    case .error(let error):
+                    case let .error(error):
                         errorMessage = "Apply failed: \(error)"
                     }
                     // Reset status after applying
@@ -1542,7 +1543,7 @@ struct UpdateStatusBadge: View {
                     .foregroundColor(.green)
             }
             .font(.caption)
-        case .updatesAvailable(let types):
+        case let .updatesAvailable(types):
             HStack(spacing: 4) {
                 Image(systemName: "arrow.down.circle.fill")
                     .foregroundColor(.cyan)
@@ -1602,7 +1603,7 @@ struct PasswordStrengthIndicator: View {
         VStack(alignment: .leading, spacing: 6) {
             // Strength bar
             HStack(spacing: 4) {
-                ForEach(0..<4, id: \.self) { index in
+                ForEach(0 ..< 4, id: \.self) { index in
                     RoundedRectangle(cornerRadius: 2)
                         .fill(index < filledSegments ? strengthColor : strengthColor.opacity(0.2))
                         .frame(height: 4)

@@ -1,8 +1,8 @@
 // LocalizationService.swift
 // Internationalization service using vauchi-mobile bindings
 
-import Foundation
 import Combine
+import Foundation
 import VauchiMobile
 
 /// Keys for locale-related UserDefaults storage
@@ -38,7 +38,7 @@ final class LocalizationService: ObservableObject {
     /// Register default values
     private func registerDefaults() {
         defaults.register(defaults: [
-            LocaleSettingsKey.followSystem.rawValue: true
+            LocaleSettingsKey.followSystem.rawValue: true,
         ])
     }
 

@@ -2,13 +2,12 @@
 // Tests for multi-device linking functionality
 // Based on: features/device_management.feature
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Tests for device linking functionality
 /// Based on: features/device_management.feature
 final class DeviceLinkingTests: XCTestCase {
-
     var tempDir: URL!
     var repo: VauchiRepository!
 
@@ -26,6 +25,7 @@ final class DeviceLinkingTests: XCTestCase {
     }
 
     // MARK: - Device Info Tests
+
     // Based on: Scenario: View linked devices
 
     /// Scenario: Primary device exists after identity creation
@@ -58,14 +58,15 @@ final class DeviceLinkingTests: XCTestCase {
         }
 
         // Timestamp should be reasonable (after 2024, before 2030)
-        let minTimestamp: UInt64 = 1704067200  // 2024-01-01
-        let maxTimestamp: UInt64 = 1893456000  // 2030-01-01
+        let minTimestamp: UInt64 = 1_704_067_200 // 2024-01-01
+        let maxTimestamp: UInt64 = 1_893_456_000 // 2030-01-01
 
         XCTAssertGreaterThan(device.createdAt, minTimestamp, "Device timestamp should be after 2024")
         XCTAssertLessThan(device.createdAt, maxTimestamp, "Device timestamp should be before 2030")
     }
 
     // MARK: - Link QR Generation Tests
+
     // Based on: Scenario: Generate device link QR on existing device
 
     /// Scenario: Generate device link QR code
@@ -106,6 +107,7 @@ final class DeviceLinkingTests: XCTestCase {
     }
 
     // MARK: - Link Info Parsing Tests
+
     // Based on: Scenario: New device scans link QR
 
     /// Scenario: Parse valid device link QR
@@ -135,6 +137,7 @@ final class DeviceLinkingTests: XCTestCase {
     }
 
     // MARK: - Device Limits Tests
+
     // Based on: Scenario: Maximum devices limit
 
     /// Scenario: Cannot exceed maximum device count
@@ -146,6 +149,7 @@ final class DeviceLinkingTests: XCTestCase {
     }
 
     // MARK: - Device Removal Tests
+
     // Based on: Scenario: Unlink device
 
     /// Scenario: Cannot unlink current device

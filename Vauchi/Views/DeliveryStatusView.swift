@@ -181,7 +181,7 @@ struct DeliveryRecordRow: View {
                     .font(.body)
                     .foregroundColor(statusColor)
 
-                if case .failed(let reason) = record.status {
+                if case let .failed(reason) = record.status {
                     Text(reason)
                         .font(.caption2)
                         .foregroundColor(.red)

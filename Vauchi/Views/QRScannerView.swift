@@ -1,8 +1,8 @@
 // QRScannerView.swift
 // Camera-based QR code scanning
 
-import SwiftUI
 import AVFoundation
+import SwiftUI
 
 struct QRScannerView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
@@ -133,7 +133,7 @@ struct QRScannerView: View {
     }
 }
 
-// Camera preview using AVFoundation
+/// Camera preview using AVFoundation
 struct CameraPreview: UIViewRepresentable {
     @Binding var scannedCode: String?
 
@@ -143,7 +143,7 @@ struct CameraPreview: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ uiView: UIView, context: Context) {}
+    func updateUIView(_: UIView, context _: Context) {}
 
     func makeCoordinator() -> Coordinator {
         Coordinator(scannedCode: $scannedCode)
@@ -158,11 +158,13 @@ struct CameraPreview: UIViewRepresentable {
             _scannedCode = scannedCode
         }
 
-        func metadataOutput(_ output: AVCaptureMetadataOutput,
-                           didOutput metadataObjects: [AVMetadataObject],
-                           from connection: AVCaptureConnection) {
+        func metadataOutput(_: AVCaptureMetadataOutput,
+                            didOutput metadataObjects: [AVMetadataObject],
+                            from _: AVCaptureConnection)
+        {
             guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
-                  let code = metadataObject.stringValue else {
+                  let code = metadataObject.stringValue
+            else {
                 return
             }
 
@@ -170,7 +172,8 @@ struct CameraPreview: UIViewRepresentable {
             if let lastCode = lastScannedCode,
                let lastTime = lastScanTime,
                lastCode == code,
-               Date().timeIntervalSince(lastTime) < 2.0 {
+               Date().timeIntervalSince(lastTime) < 2.0
+            {
                 return
             }
 
@@ -222,7 +225,8 @@ class CameraView: UIView {
         let session = AVCaptureSession()
 
         guard let device = AVCaptureDevice.default(for: .video),
-              let input = try? AVCaptureDeviceInput(device: device) else {
+              let input = try? AVCaptureDeviceInput(device: device)
+        else {
             return
         }
 
@@ -242,8 +246,8 @@ class CameraView: UIView {
         preview.frame = bounds
         layer.addSublayer(preview)
 
-        self.captureSession = session
-        self.previewLayer = preview
+        captureSession = session
+        previewLayer = preview
 
         DispatchQueue.global(qos: .userInitiated).async {
             session.startRunning()
@@ -263,7 +267,7 @@ class CameraView: UIView {
             label.centerXAnchor.constraint(equalTo: centerXAnchor),
             label.centerYAnchor.constraint(equalTo: centerYAnchor),
             label.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 20),
-            label.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20)
+            label.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
         ])
 
         backgroundColor = .black

@@ -1,8 +1,8 @@
 // ContentUpdateService.swift
 // Manages remote content updates (networks, locales, themes, help)
 
-import Foundation
 import Combine
+import Foundation
 
 /// Status of content update availability
 enum ContentUpdateStatus {
@@ -95,7 +95,7 @@ final class ContentUpdateService: ObservableObject {
         defaults.register(defaults: [
             Keys.enabled: true,
             Keys.contentUrl: Defaults.contentUrl,
-            Keys.checkInterval: Defaults.checkInterval
+            Keys.checkInterval: Defaults.checkInterval,
         ])
 
         // Load last check time
@@ -148,7 +148,7 @@ final class ContentUpdateService: ObservableObject {
             throw ContentUpdateError.disabled
         }
 
-        guard case .updatesAvailable(let types) = updateStatus else {
+        guard case let .updatesAvailable(types) = updateStatus else {
             return ContentApplyResult(applied: [], failed: [])
         }
 
@@ -207,7 +207,8 @@ final class ContentUpdateService: ObservableObject {
         let (data, response) = try await session.data(from: url)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
+              httpResponse.statusCode == 200
+        else {
             throw ContentUpdateError.httpError
         }
 
@@ -219,7 +220,8 @@ final class ContentUpdateService: ObservableObject {
 
         // Get cached manifest
         guard let cachedData = defaults.data(forKey: Keys.cachedManifest),
-              let cached = try? JSONDecoder().decode(ContentManifest.self, from: cachedData) else {
+              let cached = try? JSONDecoder().decode(ContentManifest.self, from: cachedData)
+        else {
             // No cache - all content types need update
             if remote.content.networks != nil { updates.append(.networks) }
             if remote.content.locales != nil { updates.append(.locales) }
@@ -229,17 +231,20 @@ final class ContentUpdateService: ObservableObject {
 
         // Compare versions
         if let remoteNetworks = remote.content.networks,
-           cached.content.networks?.version != remoteNetworks.version {
+           cached.content.networks?.version != remoteNetworks.version
+        {
             updates.append(.networks)
         }
 
         if let remoteLocales = remote.content.locales,
-           cached.content.locales?.version != remoteLocales.version {
+           cached.content.locales?.version != remoteLocales.version
+        {
             updates.append(.locales)
         }
 
         if let remoteThemes = remote.content.themes,
-           cached.content.themes?.version != remoteThemes.version {
+           cached.content.themes?.version != remoteThemes.version
+        {
             updates.append(.themes)
         }
 
@@ -257,7 +262,8 @@ final class ContentUpdateService: ObservableObject {
         case .locales:
             // Download English for now
             guard let locales = manifest.content.locales,
-                  let enFile = locales.files["en"] else {
+                  let enFile = locales.files["en"]
+            else {
                 throw ContentUpdateError.noContent
             }
             let url = URL(string: contentUrl)!
@@ -290,7 +296,8 @@ final class ContentUpdateService: ObservableObject {
         let (data, response) = try await session.data(from: url)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 else {
+              httpResponse.statusCode == 200
+        else {
             throw ContentUpdateError.httpError
         }
 

@@ -2,13 +2,12 @@
 // Tests for contact exchange flow integration
 // Based on: features/contact_exchange.feature
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Tests for contact exchange flow
 /// Based on: features/contact_exchange.feature
 final class ExchangeFlowTests: XCTestCase {
-
     var tempDir: URL!
     var repo: VauchiRepository!
 
@@ -26,6 +25,7 @@ final class ExchangeFlowTests: XCTestCase {
     }
 
     // MARK: - QR Code Generation Tests
+
     // Based on: Scenario: Generate QR code for exchange
 
     /// Scenario: Generate QR code data for contact exchange
@@ -62,6 +62,7 @@ final class ExchangeFlowTests: XCTestCase {
     }
 
     // MARK: - QR Code Parsing Tests
+
     // Based on: Scenario: Parse scanned QR code
 
     /// Scenario: Parse invalid QR data returns error
@@ -107,6 +108,7 @@ final class ExchangeFlowTests: XCTestCase {
     }
 
     // MARK: - Contact Card Tests
+
     // Based on: Scenario: Exchange includes contact card
 
     /// Scenario: Own card can be retrieved after identity creation
@@ -134,6 +136,7 @@ final class ExchangeFlowTests: XCTestCase {
     }
 
     // MARK: - Contact List Tests
+
     // Based on: Scenario: Contacts are stored after exchange
 
     /// Scenario: No contacts initially

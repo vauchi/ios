@@ -2,8 +2,8 @@
 // Background sync service using BGTaskScheduler for Vauchi iOS
 // Schedules periodic sync tasks to keep contacts up-to-date
 
-import Foundation
 import BackgroundTasks
+import Foundation
 
 /// Service for managing background sync operations
 final class BackgroundSyncService {
@@ -42,7 +42,7 @@ final class BackgroundSyncService {
 
     /// Set the sync handler that will be called when background sync runs
     func setSyncHandler(_ handler: @escaping () async -> Void) {
-        self.syncHandler = handler
+        syncHandler = handler
     }
 
     /// Schedule the next sync task

@@ -1,13 +1,12 @@
 // VauchiRepositoryTests.swift
 // Tests for VauchiRepository - based on features/*.feature Gherkin scenarios
 
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Tests for VauchiRepository
 /// Based on: features/identity_management.feature, features/contact_card_management.feature
 final class VauchiRepositoryTests: XCTestCase {
-
     var tempDir: URL!
 
     override func setUpWithError() throws {
@@ -23,6 +22,7 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     // MARK: - Identity Management Tests
+
     // Based on: features/identity_management.feature
 
     /// Scenario: First launch - no identity exists
@@ -83,6 +83,7 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     // MARK: - Contact Card Tests
+
     // Based on: features/contact_card_management.feature
 
     /// Scenario: Initial card has display name only
@@ -172,6 +173,7 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     // MARK: - Contact Exchange Tests
+
     // Based on: features/contact_exchange.feature
 
     /// Scenario: Generate exchange QR code
@@ -201,6 +203,7 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     // MARK: - Contact Management Tests
+
     // Based on: features/contacts_management.feature
 
     /// Scenario: Empty contacts list on first launch
@@ -235,6 +238,7 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     // MARK: - Backup Tests
+
     // Based on: features/identity_management.feature
 
     /// Scenario: Export encrypted backup
@@ -276,6 +280,7 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     // MARK: - Sync Tests
+
     // Based on: features/sync_updates.feature
 
     /// Scenario: Initial sync status is idle
@@ -316,6 +321,7 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     // MARK: - Recovery Tests
+
     // Based on: features/contact_recovery.feature
 
     /// Scenario: Create new identity after device loss
@@ -525,6 +531,7 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     // MARK: - Contact Exchange Tests (Full Flow)
+
     // Based on: features/contact_exchange.feature
 
     /// Scenario: Complete contact exchange between two users
@@ -532,7 +539,7 @@ final class VauchiRepositoryTests: XCTestCase {
     /// Note: Requires a running relay server
     func testCompleteContactExchange() throws {
         #if targetEnvironment(simulator)
-        throw XCTSkip("Integration test: requires running relay server (skipped in simulator)")
+            throw XCTSkip("Integration test: requires running relay server (skipped in simulator)")
         #endif
 
         // Create Alice's repository
@@ -599,7 +606,7 @@ final class VauchiRepositoryTests: XCTestCase {
     /// Note: Requires a running relay server
     func testCannotExchangeWithSelf() throws {
         #if targetEnvironment(simulator)
-        throw XCTSkip("Integration test: requires running relay server (skipped in simulator)")
+            throw XCTSkip("Integration test: requires running relay server (skipped in simulator)")
         #endif
 
         let repo = try VauchiRepository(dataDir: tempDir.path)
