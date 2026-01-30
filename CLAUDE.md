@@ -19,6 +19,23 @@ xcodegen generate                # Regenerate Xcode project
 xcodebuild -scheme Vauchi test   # Run tests
 ```
 
+## Pre-MR Checklist
+
+Run before submitting a merge request:
+
+```bash
+# From workspace root:
+just check-ios
+
+# Or manually from ios/:
+xcodegen generate
+xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  -clonedSourcePackagesDirPath .spm-packages build test
+```
+
+CI runs the same checks (lint, build, test) on MR pipelines. No `allow_failure` — all jobs must pass.
+
 ## Rules
 
 - Follow Swift/iOS conventions

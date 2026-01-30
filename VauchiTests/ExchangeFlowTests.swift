@@ -34,35 +34,35 @@ final class ExchangeFlowTests: XCTestCase {
 
     /// Scenario: Generate QR code data for contact exchange
     func testGenerateQRCodeData() throws {
-        let qrData = try repo.generateExchangeQR()
+        let exchangeData = try repo.generateExchangeQr()
 
-        XCTAssertFalse(qrData.isEmpty, "QR data should not be empty")
-        // QR data should be base64 encoded
-        XCTAssertNotNil(Data(base64Encoded: qrData), "QR data should be valid base64")
+        XCTAssertFalse(exchangeData.qrData.isEmpty, "QR data should not be empty")
+        // QR data uses wb:// protocol format
+        XCTAssertTrue(exchangeData.qrData.hasPrefix("wb://"), "QR data should start with wb://")
     }
 
     /// Scenario: QR code contains public key
     func testQRCodeContainsPublicKey() throws {
         let publicId = try repo.getPublicId()
-        let qrData = try repo.generateExchangeQR()
+        let exchangeData = try repo.generateExchangeQr()
 
-        // The QR data should reference the identity somehow
-        // (it's encrypted, but should be valid structure)
-        XCTAssertFalse(qrData.isEmpty)
+        // Exchange data includes the public ID
+        XCTAssertFalse(exchangeData.qrData.isEmpty)
         XCTAssertFalse(publicId.isEmpty)
+        XCTAssertFalse(exchangeData.publicId.isEmpty)
     }
 
     /// Scenario: Multiple QR codes can be generated
     func testMultipleQRCodesUnique() throws {
-        let qr1 = try repo.generateExchangeQR()
-        let qr2 = try repo.generateExchangeQR()
-        let qr3 = try repo.generateExchangeQR()
+        let qr1 = try repo.generateExchangeQr()
+        let qr2 = try repo.generateExchangeQr()
+        let qr3 = try repo.generateExchangeQr()
 
         // Each QR code may include timestamp/nonce, making them different
         // Or they may be the same if deterministic - both are valid
-        XCTAssertFalse(qr1.isEmpty)
-        XCTAssertFalse(qr2.isEmpty)
-        XCTAssertFalse(qr3.isEmpty)
+        XCTAssertFalse(qr1.qrData.isEmpty)
+        XCTAssertFalse(qr2.qrData.isEmpty)
+        XCTAssertFalse(qr3.qrData.isEmpty)
     }
 
     // MARK: - QR Code Parsing Tests
@@ -73,7 +73,7 @@ final class ExchangeFlowTests: XCTestCase {
     func testParseInvalidQRData() throws {
         let invalidData = "not-a-valid-qr-code"
 
-        XCTAssertThrowsError(try repo.parseExchangeQR(qrData: invalidData)) { error in
+        XCTAssertThrowsError(try repo.completeExchange(qrData: invalidData)) { error in
             // Should throw some form of parse error
             XCTAssertNotNil(error)
         }
@@ -81,7 +81,7 @@ final class ExchangeFlowTests: XCTestCase {
 
     /// Scenario: Parse empty QR data returns error
     func testParseEmptyQRData() throws {
-        XCTAssertThrowsError(try repo.parseExchangeQR(qrData: "")) { error in
+        XCTAssertThrowsError(try repo.completeExchange(qrData: "")) { error in
             XCTAssertNotNil(error)
         }
     }
@@ -90,7 +90,7 @@ final class ExchangeFlowTests: XCTestCase {
     func testParseCorruptedBase64() throws {
         let corruptedData = "!!!invalid-base64!!!"
 
-        XCTAssertThrowsError(try repo.parseExchangeQR(qrData: corruptedData))
+        XCTAssertThrowsError(try repo.completeExchange(qrData: corruptedData))
     }
 
     // MARK: - Exchange State Tests
@@ -105,7 +105,7 @@ final class ExchangeFlowTests: XCTestCase {
 
         let repoNoIdentity = try VauchiRepository(dataDir: tempDir2.path)
 
-        XCTAssertThrowsError(try repoNoIdentity.generateExchangeQR()) { error in
+        XCTAssertThrowsError(try repoNoIdentity.generateExchangeQr()) { error in
             // Should require identity
             XCTAssertNotNil(error)
         }
@@ -119,24 +119,20 @@ final class ExchangeFlowTests: XCTestCase {
     func testOwnCardExistsAfterIdentity() throws {
         let card = try repo.getOwnCard()
 
-        XCTAssertNotNil(card, "Should have own card after identity creation")
-        XCTAssertEqual(card?.displayName, "Test User")
+        XCTAssertEqual(card.displayName, "Test User")
     }
 
     /// Scenario: Card can be updated with fields
     func testUpdateCardFields() throws {
-        guard var card = try repo.getOwnCard() else {
-            XCTFail("Should have card")
-            return
-        }
-
-        // Add field
-        card.email = "test@example.com"
-        try repo.updateOwnCard(card)
+        // Add email field via addField API
+        try repo.addField(type: .email, label: "Email", value: "test@example.com")
 
         // Verify update persisted
         let updatedCard = try repo.getOwnCard()
-        XCTAssertEqual(updatedCard?.email, "test@example.com")
+        XCTAssertEqual(updatedCard.fields.count, 1)
+        XCTAssertEqual(updatedCard.fields[0].fieldType, .email)
+        XCTAssertEqual(updatedCard.fields[0].label, "Email")
+        XCTAssertEqual(updatedCard.fields[0].value, "test@example.com")
     }
 
     // MARK: - Contact List Tests
@@ -145,13 +141,13 @@ final class ExchangeFlowTests: XCTestCase {
 
     /// Scenario: No contacts initially
     func testNoContactsInitially() throws {
-        let contacts = try repo.getContacts()
+        let contacts = try repo.listContacts()
         XCTAssertTrue(contacts.isEmpty, "Should have no contacts initially")
     }
 
     /// Scenario: Contact count matches after adds
     func testContactCountAccurate() throws {
-        let initialCount = try repo.getContacts().count
+        let initialCount = try repo.listContacts().count
         XCTAssertEqual(initialCount, 0)
 
         // Note: Actually adding contacts requires completing exchange

@@ -245,7 +245,7 @@ final class VisibilityLabelsTests: XCTestCase {
         }
 
         // Set field visible to this label
-        try repo.setLabelFieldVisibility(labelId: label.id, fieldId: field.id, visible: true)
+        try repo.setLabelFieldVisibility(labelId: label.id, fieldLabel: field.label, isVisible: true)
 
         let detail = try repo.getLabel(id: label.id)
         XCTAssertTrue(detail.visibleFieldIds.contains(field.id))
@@ -264,8 +264,8 @@ final class VisibilityLabelsTests: XCTestCase {
         }
 
         // Add then remove visibility
-        try repo.setLabelFieldVisibility(labelId: label.id, fieldId: field.id, visible: true)
-        try repo.setLabelFieldVisibility(labelId: label.id, fieldId: field.id, visible: false)
+        try repo.setLabelFieldVisibility(labelId: label.id, fieldLabel: field.label, isVisible: true)
+        try repo.setLabelFieldVisibility(labelId: label.id, fieldLabel: field.label, isVisible: false)
 
         let detail = try repo.getLabel(id: label.id)
         XCTAssertFalse(detail.visibleFieldIds.contains(field.id))
