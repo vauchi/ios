@@ -42,6 +42,13 @@ variables:
   tags:
     - macos
     - self-hosted
+  before_script:
+    - |
+      if ! xcrun simctl list runtimes 2>/dev/null | grep -q "iOS.*SimRuntime"; then
+        echo "ERROR: iOS Simulator runtime is not installed."
+        echo "Run on the runner machine: xcodebuild -downloadPlatform iOS"
+        exit 1
+      fi
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
