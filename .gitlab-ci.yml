@@ -74,6 +74,17 @@ lint:swiftformat:
   script:
     - if command -v swiftformat &> /dev/null; then swiftformat --lint .; else echo "SwiftFormat not installed, skipping"; fi
 
+lint:xcodegen:
+  extends: .macos-job
+  stage: lint
+  script:
+    - xcodegen generate
+    - git diff --exit-code Vauchi.xcodeproj/
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - project.yml
+
 # ============================================================
 # Build Stage
 # ============================================================
