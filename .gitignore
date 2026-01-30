@@ -16,6 +16,10 @@ build/
 *.dSYM.zip
 *.dSYM
 
+# UniFFI bindings (now provided by vauchi-mobile-swift SPM package)
+Vauchi/Generated/
+Frameworks/
+
 # CocoaPods (if used)
 Pods/
 

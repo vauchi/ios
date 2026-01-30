@@ -4,6 +4,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import VauchiMobile
 
 /// Contact field for display
 struct FieldInfo: Identifiable, Equatable {

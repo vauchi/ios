@@ -2,6 +2,7 @@
 // Progressive onboarding hint display
 
 import SwiftUI
+import VauchiMobile
 
 /// Displays an "Aha moment" - a progressive onboarding hint at key milestones
 struct AhaMomentView: View {

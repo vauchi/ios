@@ -33,6 +33,7 @@
 // methods implemented. UI added to Settings under Security section.
 
 import Foundation
+import VauchiMobile
 
 /// Repository error types
 enum VauchiRepositoryError: LocalizedError {

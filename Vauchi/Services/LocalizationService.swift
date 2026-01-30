@@ -3,6 +3,7 @@
 
 import Foundation
 import Combine
+import VauchiMobile
 
 /// Keys for locale-related UserDefaults storage
 private enum LocaleSettingsKey: String {

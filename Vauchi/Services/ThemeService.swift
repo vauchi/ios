@@ -4,6 +4,7 @@
 import SwiftUI
 import UIKit
 import Combine
+import VauchiMobile
 
 /// Keys for theme-related UserDefaults storage
 private enum ThemeSettingsKey: String {

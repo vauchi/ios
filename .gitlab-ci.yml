@@ -82,7 +82,7 @@ build:debug:
   extends: .macos-job
   stage: build
   script:
-    - ./build-ios.sh || echo "Native bindings build skipped"
+    - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' build
   artifacts:
     paths:
@@ -93,7 +93,7 @@ build:release:
   extends: .macos-job
   stage: build
   script:
-    - ./build-ios.sh || echo "Native bindings build skipped"
+    - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Release -destination 'generic/platform=iOS Simulator' build
   artifacts:
     paths:
@@ -111,6 +111,7 @@ test:unit:
   extends: .macos-job
   stage: test
   script:
+    - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
   artifacts:
     reports:
@@ -167,6 +168,5 @@ security:dependencies:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         - "Podfile*"
-        - "Package.swift"
-        - "Package.resolved"
+        - "project.yml"
     - if: $CI_COMMIT_BRANCH == "main"

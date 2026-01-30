@@ -3,6 +3,7 @@
 // Based on: features/visibility_labels.feature
 
 import SwiftUI
+import VauchiMobile
 
 /// Detail view for a visibility label
 struct LabelDetailView: View {

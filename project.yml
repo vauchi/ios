@@ -10,6 +10,11 @@ settings:
   SWIFT_VERSION: "5.9"
   IPHONEOS_DEPLOYMENT_TARGET: "16.0"
 
+packages:
+  VauchiMobile:
+    url: https://gitlab.com/vauchi/vauchi-mobile-swift.git
+    from: "0.1.1"
+
 targets:
   Vauchi:
     type: application
@@ -18,6 +23,9 @@ targets:
       - path: Vauchi
         excludes:
           - "**/*.xcassets"
+    dependencies:
+      - package: VauchiMobile
+        product: VauchiMobile
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.vauchi.ios

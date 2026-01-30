@@ -5,6 +5,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import LocalAuthentication
 import CoreImage.CIFilterBuiltins
+import VauchiMobile
 
 struct SettingsView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
