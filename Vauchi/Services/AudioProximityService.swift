@@ -4,6 +4,7 @@
 
 import Accelerate
 import AVFoundation
+import VauchiMobile
 
 /// Service for ultrasonic audio proximity verification.
 /// Uses AVAudioEngine to emit and receive signals at 18-20 kHz.
