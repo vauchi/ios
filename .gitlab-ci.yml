@@ -37,6 +37,7 @@ include:
   - template: Security/Secret-Detection.gitlab-ci.yml
 
 stages:
+  - update
   - lint
   - build
   - test
@@ -77,6 +78,73 @@ default:
         echo "ERROR: iOS Simulator runtime is not installed."
         echo "Run on the runner machine: xcodebuild -downloadPlatform iOS"
         exit 1
+      fi
+
+# ============================================================
+# Update Stage (triggered by upstream distribution repo)
+# ============================================================
+
+# Automatically bump vauchi-mobile-swift dependency and create MR
+update:bindings-version:
+  stage: update
+  tags:
+    - macos
+    - self-hosted
+  rules:
+    - if: ($CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "api") && $BINDINGS_VERSION
+  script:
+    - |
+      echo "Bumping vauchi-mobile-swift to $BINDINGS_VERSION"
+
+      BRANCH="chore/bump-vauchi-mobile-${BINDINGS_VERSION}"
+
+      # Configure git
+      git config user.email "ci@vauchi.com"
+      git config user.name "Vauchi CI"
+      git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
+
+      # Check if branch already exists on remote
+      if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+        echo "Branch $BRANCH already exists — version bump already in progress"
+        exit 0
+      fi
+
+      # Create branch and update version in project.yml
+      git checkout -b "$BRANCH"
+      sed -i '' "s/from: \"[^\"]*\"/from: \"${BINDINGS_VERSION}\"/" project.yml
+
+      # Verify the change was made
+      if ! grep -q "from: \"${BINDINGS_VERSION}\"" project.yml; then
+        echo "ERROR: Version replacement failed"
+        exit 1
+      fi
+
+      # Regenerate Xcode project
+      xcodegen generate
+
+      git add project.yml Vauchi.xcodeproj/
+      git commit -m "chore: Bump vauchi-mobile-swift to $BINDINGS_VERSION"
+      git push -u origin "$BRANCH"
+
+      # Create MR via GitLab API
+      MR_RESPONSE=$(curl -s --request POST \
+        --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"source_branch\": \"$BRANCH\",
+          \"target_branch\": \"main\",
+          \"title\": \"chore: Bump vauchi-mobile-swift to $BINDINGS_VERSION\",
+          \"description\": \"Automated version bump triggered by vauchi-mobile-swift release.\\n\\nUpdates VauchiMobile SPM minimum version to \`$BINDINGS_VERSION\`.\\n\\n---\\n_This MR was created automatically by CI._\",
+          \"remove_source_branch\": true
+        }" \
+        "${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/merge_requests")
+
+      MR_URL=$(echo "$MR_RESPONSE" | jq -r '.web_url // empty')
+      if [ -n "$MR_URL" ]; then
+        echo "Created MR: $MR_URL"
+      else
+        echo "MR creation response: $MR_RESPONSE"
+        echo "WARNING: Could not create MR (may already exist)"
       fi
 
 # ============================================================
