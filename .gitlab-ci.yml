@@ -31,10 +31,15 @@
 #   - SAST: Static application security testing (Swift)
 #   - Secret Detection: Prevent credential leaks
 
-# GitLab Ultimate Templates
+# GitLab Ultimate Templates + shared timeout definitions
 include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
+  - project: 'vauchi/scripts'
+    ref: main
+    file:
+      - '/ci-templates/timeouts.yml'
+      - '/ci-templates/reuse.yml'
 
 stages:
   - update
@@ -55,18 +60,11 @@ variables:
 default:
   interruptible: true
 
-# Timeout templates
-.timeout-quick:
-  timeout: 10 minutes
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
 
-.timeout-standard:
-  timeout: 30 minutes
-
-.timeout-long:
-  timeout: 1 hour
-
-.timeout-extended:
-  timeout: 2 hours
+# Timeout templates provided by vauchi/scripts ci-templates/timeouts.yml
 
 .macos-job:
   tags:
@@ -90,6 +88,7 @@ update:bindings-version:
   tags:
     - macos
     - self-hosted
+  resource_group: bindings-version-update
   rules:
     - if: ($CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "api") && $BINDINGS_VERSION
   script:
@@ -139,9 +138,23 @@ update:bindings-version:
         }" \
         "${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/merge_requests")
 
+      MR_IID=$(echo "$MR_RESPONSE" | jq -r '.iid // empty')
       MR_URL=$(echo "$MR_RESPONSE" | jq -r '.web_url // empty')
-      if [ -n "$MR_URL" ]; then
+      if [ -n "$MR_URL" ] && [ -n "$MR_IID" ]; then
         echo "Created MR: $MR_URL"
+
+        # Enable auto-merge so the MR merges automatically when CI passes
+        echo "Enabling auto-merge..."
+        MERGE_RESPONSE=$(curl -s --request PUT \
+          --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+          "${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${MR_IID}/merge?merge_when_pipeline_succeeds=true")
+        MERGE_STATUS=$(echo "$MERGE_RESPONSE" | jq -r '.merge_when_pipeline_succeeds // empty')
+        if [ "$MERGE_STATUS" = "true" ]; then
+          echo "Auto-merge enabled — MR will merge when pipeline succeeds"
+        else
+          echo "WARNING: Could not enable auto-merge (may require maintainer token)"
+          echo "  Response: $(echo "$MERGE_RESPONSE" | jq -r '.message // .error // "unknown"')"
+        fi
       else
         echo "MR creation response: $MR_RESPONSE"
         echo "WARNING: Could not create MR (may already exist)"
