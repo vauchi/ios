@@ -177,9 +177,11 @@ lint:swiftlint:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - "**/*.swift"
-        - ".swiftlint.yml"
-        - ".gitlab-ci.yml"
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - ".swiftlint.yml"
+          - ".gitlab-ci.yml"
 
 lint:swiftformat:
   extends: [.macos-job, .timeout-quick]
@@ -189,9 +191,11 @@ lint:swiftformat:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - "**/*.swift"
-        - ".swiftformat"
-        - ".gitlab-ci.yml"
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - ".swiftformat"
+          - ".gitlab-ci.yml"
 
 lint:xcodegen:
   extends: .macos-job
@@ -202,7 +206,9 @@ lint:xcodegen:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - project.yml
+        compare_to: refs/heads/main
+        paths:
+          - project.yml
 
 # ============================================================
 # Build Stage (MR: debug, Tag: release)
@@ -220,12 +226,14 @@ build:debug:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - "**/*.swift"
-        - "**/*.xib"
-        - "**/*.storyboard"
-        - "*.xcodeproj/**/*"
-        - "Package.swift"
-        - ".gitlab-ci.yml"
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - "**/*.xib"
+          - "**/*.storyboard"
+          - "*.xcodeproj/**/*"
+          - "Package.swift"
+          - ".gitlab-ci.yml"
 
 build:release:
   extends: [.macos-job, .timeout-extended]
@@ -256,9 +264,11 @@ test:unit:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - "**/*.swift"
-        - "*.xcodeproj/**/*"
-        - ".gitlab-ci.yml"
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - "*.xcodeproj/**/*"
+          - ".gitlab-ci.yml"
 
 # ============================================================
 # Security Stage (MR + scheduled)
@@ -272,8 +282,10 @@ semgrep-sast:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - "**/*.swift"
-        - ".gitlab-ci.yml"
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - ".gitlab-ci.yml"
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
 secret_detection:
@@ -294,8 +306,10 @@ security:swift-analysis:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - "**/*.plist"
-        - ".gitlab-ci.yml"
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.plist"
+          - ".gitlab-ci.yml"
 
 # Dependency check for CocoaPods/SPM (runs on dependency changes)
 security:dependencies:
@@ -315,7 +329,9 @@ security:dependencies:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        - "Podfile*"
-        - "project.yml"
-        - "Package.resolved"
-        - ".gitlab-ci.yml"
+        compare_to: refs/heads/main
+        paths:
+          - "Podfile*"
+          - "project.yml"
+          - "Package.resolved"
+          - ".gitlab-ci.yml"
