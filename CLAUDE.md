@@ -30,7 +30,7 @@ just check-ios
 # Or manually from ios/:
 xcodegen generate
 xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -clonedSourcePackagesDirPath .spm-packages build test
 ```
 
