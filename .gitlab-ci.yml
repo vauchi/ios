@@ -218,6 +218,7 @@ build:debug:
   extends: [.macos-job, .timeout-extended]
   stage: build
   script:
+    - rm -rf .spm-packages
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages build
   artifacts:
     paths:
@@ -239,6 +240,7 @@ build:release:
   extends: [.macos-job, .timeout-extended]
   stage: build
   script:
+    - rm -rf .spm-packages
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Release -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages build
   artifacts:
     paths:
@@ -255,6 +257,7 @@ test:unit:
   extends: [.macos-job, .timeout-long]
   stage: test
   script:
+    - rm -rf .spm-packages
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages test
   artifacts:
     reports:
