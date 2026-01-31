@@ -8,6 +8,7 @@ DerivedData/
 # Swift Package Manager
 .build/
 .swiftpm/
+.spm-packages/
 Package.resolved
 
 # Build artifacts
