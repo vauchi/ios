@@ -260,7 +260,6 @@ test:unit:
     reports:
       junit: build/reports/junit.xml
     expire_in: 1 week
-  allow_failure: true  # VauchiMobileFFI.xcframework has invalid CFBundleExecutable — needs upstream fix in core
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
