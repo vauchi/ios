@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     /// Determines if we should show onboarding
     private var shouldShowOnboarding: Bool {
@@ -36,7 +37,7 @@ struct ContentView: View {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 50))
                         .foregroundColor(.red)
-                    Text("Initialization Error")
+                    Text(localizationService.t("error.generic"))
                         .font(.title)
                         .fontWeight(.bold)
                     Text(error)
@@ -44,7 +45,7 @@ struct ContentView: View {
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
-                    Button("Retry") {
+                    Button(localizationService.t("action.retry")) {
                         viewModel.errorMessage = nil
                         viewModel.loadState()
                     }
@@ -75,7 +76,7 @@ struct LoadingView: View {
     var body: some View {
         VStack {
             ProgressView()
-            Text("Loading...")
+            Text(LocalizationService.shared.t("sync.syncing"))
                 .foregroundColor(.secondary)
                 .padding(.top)
         }
@@ -83,26 +84,28 @@ struct LoadingView: View {
 }
 
 struct MainTabView: View {
+    @ObservedObject private var localizationService = LocalizationService.shared
+
     var body: some View {
         TabView {
             HomeView()
                 .tabItem {
-                    Label("Home", systemImage: "person.crop.rectangle")
+                    Label(localizationService.t("nav.home"), systemImage: "person.crop.rectangle")
                 }
 
             ContactsView()
                 .tabItem {
-                    Label("Contacts", systemImage: "person.2")
+                    Label(localizationService.t("nav.contacts"), systemImage: "person.2")
                 }
 
             ExchangeView()
                 .tabItem {
-                    Label("Exchange", systemImage: "qrcode")
+                    Label(localizationService.t("nav.exchange"), systemImage: "qrcode")
                 }
 
             SettingsView()
                 .tabItem {
-                    Label("Settings", systemImage: "gear")
+                    Label(localizationService.t("nav.settings"), systemImage: "gear")
                 }
         }
         .accentColor(.cyan)

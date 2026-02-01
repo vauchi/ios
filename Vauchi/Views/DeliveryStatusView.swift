@@ -13,6 +13,7 @@ struct DeliveryStatusView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @State private var isLoading = true
     @State private var selectedTab = 0
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         VStack(spacing: 0) {

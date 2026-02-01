@@ -10,6 +10,7 @@ import SwiftUI
 struct RecoveryView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @State private var selectedTab = 0
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         NavigationView {
@@ -31,7 +32,7 @@ struct RecoveryView: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
             }
-            .navigationTitle("Recovery")
+            .navigationTitle(localizationService.t("recovery.title"))
         }
     }
 }
@@ -43,6 +44,7 @@ struct RecoverIdentityTab: View {
     @State private var showClaimSheet = false
     @State private var showAddVoucherSheet = false
     @State private var showStatusSheet = false
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         ScrollView {
@@ -69,7 +71,7 @@ struct RecoverIdentityTab: View {
 
                 // Recovery settings
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Recovery Settings")
+                    Text(localizationService.t("recovery.status"))
                         .font(.headline)
 
                     HStack {
@@ -91,7 +93,7 @@ struct RecoverIdentityTab: View {
 
                 // Steps
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("How Recovery Works")
+                    Text(localizationService.t("recovery.how_it_works"))
                         .font(.headline)
 
                     RecoveryStepRow(number: 1, title: "Create New Identity", description: "First, create a new identity on your new device.")

@@ -11,6 +11,7 @@ struct HomeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @State private var showAddField = false
     @State private var editingField: FieldInfo?
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         NavigationView {
@@ -19,7 +20,7 @@ struct HomeView: View {
                     // Header with sync indicator
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Hello, \(viewModel.card?.displayName ?? "User")!")
+                            Text(localizationService.t("home.greeting", args: ["name": viewModel.card?.displayName ?? "User"]))
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
 
@@ -40,7 +41,7 @@ struct HomeView: View {
                     // Card Section
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
-                            Text("Your Card")
+                            Text(localizationService.t("card.title"))
                                 .font(.headline)
                                 .accessibilityAddTraits(.isHeader)
                             Spacer()
@@ -62,7 +63,7 @@ struct HomeView: View {
                                 )
                             }
                         } else {
-                            Text("No fields yet. Add your first field!")
+                            Text(localizationService.t("home.no_fields"))
                                 .foregroundColor(.secondary)
                                 .padding()
                                 .frame(maxWidth: .infinity)
@@ -102,7 +103,7 @@ struct HomeView: View {
                 }
                 .padding(.vertical)
             }
-            .navigationTitle("Home")
+            .navigationTitle(localizationService.t("nav.home"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { Task { await viewModel.sync() } }) {
@@ -179,6 +180,7 @@ struct FieldRow: View {
     let onDelete: () -> Void
 
     @State private var showDeleteAlert = false
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     private func icon(for type: String) -> String {
         switch type.lowercased() {
@@ -232,9 +234,9 @@ struct FieldRow: View {
         .background(Color(.systemBackground))
         .cornerRadius(8)
         .accessibilityIdentifier("card.field.row")
-        .alert("Delete Field", isPresented: $showDeleteAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+        .alert(localizationService.t("action.delete"), isPresented: $showDeleteAlert) {
+            Button(localizationService.t("action.cancel"), role: .cancel) {}
+            Button(localizationService.t("action.delete"), role: .destructive) {
                 onDelete()
             }
         } message: {
@@ -252,6 +254,7 @@ struct AddFieldSheet: View {
     @State private var value = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     let fieldTypes = ["email", "phone", "website", "address", "social", "custom"]
 
@@ -259,16 +262,16 @@ struct AddFieldSheet: View {
         NavigationView {
             Form {
                 Section {
-                    Picker("Type", selection: $fieldType) {
+                    Picker(localizationService.t("card.field_type"), selection: $fieldType) {
                         ForEach(fieldTypes, id: \.self) { type in
                             Text(type.capitalized).tag(type)
                         }
                     }
 
-                    TextField("Label", text: $label)
+                    TextField(localizationService.t("card.label"), text: $label)
                         .autocapitalization(.words)
 
-                    TextField("Value", text: $value)
+                    TextField(localizationService.t("card.value"), text: $value)
                         .autocapitalization(.none)
                         .keyboardType(keyboardType(for: fieldType))
                 }
@@ -280,14 +283,14 @@ struct AddFieldSheet: View {
                     }
                 }
             }
-            .navigationTitle("Add Field")
+            .navigationTitle(localizationService.t("card.add_field"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(localizationService.t("action.cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") { addField() }
+                    Button(localizationService.t("card.add_field")) { addField() }
                         .disabled(label.isEmpty || value.isEmpty || isLoading)
                 }
             }
@@ -327,28 +330,29 @@ struct EditFieldSheet: View {
     @State private var newValue: String = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         NavigationView {
             Form {
                 Section {
                     HStack {
-                        Text("Type")
+                        Text(localizationService.t("card.field_type"))
                         Spacer()
                         Text(field.fieldType.capitalized)
                             .foregroundColor(.secondary)
                     }
 
                     HStack {
-                        Text("Label")
+                        Text(localizationService.t("card.label"))
                         Spacer()
                         Text(field.label)
                             .foregroundColor(.secondary)
                     }
                 }
 
-                Section("Value") {
-                    TextField("Value", text: $newValue)
+                Section(localizationService.t("card.value")) {
+                    TextField(localizationService.t("card.value"), text: $newValue)
                         .autocapitalization(.none)
                 }
 
@@ -359,14 +363,14 @@ struct EditFieldSheet: View {
                     }
                 }
             }
-            .navigationTitle("Edit Field")
+            .navigationTitle(localizationService.t("card.edit_field"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(localizationService.t("action.cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { saveField() }
+                    Button(localizationService.t("action.save")) { saveField() }
                         .disabled(newValue.trimmingCharacters(in: .whitespaces).isEmpty || isLoading)
                 }
             }

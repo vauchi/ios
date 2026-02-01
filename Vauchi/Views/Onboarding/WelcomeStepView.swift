@@ -11,6 +11,7 @@ import SwiftUI
 struct WelcomeStepView: View {
     let onContinue: () -> Void
     let onRestore: () -> Void
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         VStack(spacing: 0) {
@@ -30,12 +31,12 @@ struct WelcomeStepView: View {
                     )
 
                 // Title
-                Text("Vauchi")
+                Text(localizationService.t("app.name"))
                     .font(.largeTitle)
                     .fontWeight(.bold)
 
                 // Tagline
-                Text("Contact cards that stay up to date")
+                Text(localizationService.t("welcome.subtitle"))
                     .font(.title3)
                     .foregroundColor(.secondary)
             }
@@ -69,7 +70,7 @@ struct WelcomeStepView: View {
             // Actions
             VStack(spacing: 12) {
                 Button(action: onContinue) {
-                    Text("Get Started")
+                    Text(localizationService.t("setup.create"))
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding()

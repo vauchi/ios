@@ -352,4 +352,142 @@ final class VisualRegressionTests: XCTestCase {
             record: isRecording
         )
     }
+
+    // MARK: - Dark Mode Variants
+
+    /// Helper to create a hosting controller with dark mode forced.
+    private func darkController<V: View>(_ view: V) -> UIHostingController<V> {
+        let controller = UIHostingController(rootView: view)
+        controller.overrideUserInterfaceStyle = .dark
+        return controller
+    }
+
+    func testSetupViewDark() {
+        let vm = makeViewModel(hasIdentity: false)
+        let view = SetupView()
+            .environmentObject(vm)
+
+        assertSnapshot(
+            of: darkController(view),
+            as: .image(on: device),
+            record: isRecording
+        )
+    }
+
+    func testHomeViewWithFieldsDark() {
+        let vm = makeViewModel(
+            card: CardInfo(displayName: "Alice", fields: sampleFields)
+        )
+        let view = HomeView()
+            .environmentObject(vm)
+
+        assertSnapshot(
+            of: darkController(view),
+            as: .image(on: device),
+            record: isRecording
+        )
+    }
+
+    func testContactsViewWithContactsDark() {
+        let vm = makeViewModel(contacts: sampleContacts)
+        let view = ContactsView()
+            .environmentObject(vm)
+
+        assertSnapshot(
+            of: darkController(view),
+            as: .image(on: device),
+            record: isRecording
+        )
+    }
+
+    func testSettingsViewDark() {
+        let vm = makeViewModel()
+        let view = SettingsView()
+            .environmentObject(vm)
+
+        assertSnapshot(
+            of: darkController(view),
+            as: .image(on: device),
+            record: isRecording
+        )
+    }
+
+    func testExchangeViewDark() {
+        let vm = makeViewModel()
+        let view = ExchangeView()
+            .environmentObject(vm)
+
+        assertSnapshot(
+            of: darkController(view),
+            as: .image(on: device),
+            record: isRecording
+        )
+    }
+
+    // MARK: - German Locale Variants
+
+    /// Helper to switch locale, run a snapshot, then restore.
+    private func withLocale<V: View>(_ code: String, view: V, file: StaticString = #file, testName: String = #function, line: UInt = #line) {
+        let previousLocale = LocalizationService.shared.currentLocale
+        let wasFollowingSystem = LocalizationService.shared.followSystem
+        LocalizationService.shared.selectLocale(code: code)
+
+        assertSnapshot(
+            of: UIHostingController(rootView: view),
+            as: .image(on: device),
+            record: isRecording,
+            file: file,
+            testName: testName,
+            line: line
+        )
+
+        // Restore previous locale state
+        if wasFollowingSystem {
+            LocalizationService.shared.resetToSystem()
+        } else {
+            LocalizationService.shared.selectLocale(previousLocale)
+        }
+    }
+
+    func testSetupViewGerman() {
+        let vm = makeViewModel(hasIdentity: false)
+        let view = SetupView()
+            .environmentObject(vm)
+
+        withLocale("de", view: view)
+    }
+
+    func testHomeViewWithFieldsGerman() {
+        let vm = makeViewModel(
+            card: CardInfo(displayName: "Alice", fields: sampleFields)
+        )
+        let view = HomeView()
+            .environmentObject(vm)
+
+        withLocale("de", view: view)
+    }
+
+    func testContactsViewWithContactsGerman() {
+        let vm = makeViewModel(contacts: sampleContacts)
+        let view = ContactsView()
+            .environmentObject(vm)
+
+        withLocale("de", view: view)
+    }
+
+    func testSettingsViewGerman() {
+        let vm = makeViewModel()
+        let view = SettingsView()
+            .environmentObject(vm)
+
+        withLocale("de", view: view)
+    }
+
+    func testExchangeViewGerman() {
+        let vm = makeViewModel()
+        let view = ExchangeView()
+            .environmentObject(vm)
+
+        withLocale("de", view: view)
+    }
 }

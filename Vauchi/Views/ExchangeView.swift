@@ -18,6 +18,7 @@ struct ExchangeView: View {
     @State private var timeRemaining: TimeInterval = 0
     @State private var timer: Timer?
     @State private var isEmittingAudio = false
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         NavigationView {
@@ -25,7 +26,7 @@ struct ExchangeView: View {
                 VStack(spacing: 30) {
                     // QR Code section
                     VStack(spacing: 16) {
-                        Text("Your QR Code")
+                        Text(localizationService.t("exchange.your_qr"))
                             .font(.headline)
                             .accessibilityAddTraits(.isHeader)
 
@@ -43,9 +44,9 @@ struct ExchangeView: View {
                                 Image(systemName: "exclamationmark.triangle")
                                     .font(.largeTitle)
                                     .foregroundColor(.orange)
-                                Text("Failed to generate QR code")
+                                Text(localizationService.t("exchange.qr_error"))
                                     .foregroundColor(.secondary)
-                                Button("Retry") {
+                                Button(localizationService.t("action.retry")) {
                                     loadExchangeData()
                                 }
                                 .buttonStyle(.bordered)
@@ -69,7 +70,7 @@ struct ExchangeView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: "clock")
                                         .font(.caption)
-                                    Text("Expires in \(formatTime(timeRemaining))")
+                                    Text(localizationService.t("exchange.expires_in", args: ["time": formatTime(timeRemaining)]))
                                         .font(.caption)
                                 }
                                 .foregroundColor(timeRemaining < 60 ? .orange : .secondary)
@@ -104,7 +105,7 @@ struct ExchangeView: View {
 
                     // Scan section
                     VStack(spacing: 16) {
-                        Text("Scan a Code")
+                        Text(localizationService.t("exchange.scan"))
                             .font(.headline)
                             .accessibilityAddTraits(.isHeader)
 
@@ -132,7 +133,7 @@ struct ExchangeView: View {
                 }
                 .padding(.vertical)
             }
-            .navigationTitle("Exchange")
+            .navigationTitle(localizationService.t("nav.exchange"))
             .onAppear { loadExchangeData() }
             .onDisappear {
                 stopTimer()

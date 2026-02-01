@@ -48,7 +48,7 @@ struct LanguageSettingsView: View {
             // Current language info
             Section("Current Language") {
                 HStack {
-                    Text("Language")
+                    Text(localizationService.t("settings.language"))
                     Spacer()
                     Text(localizationService.currentLocaleInfo.name)
                         .foregroundColor(.secondary)

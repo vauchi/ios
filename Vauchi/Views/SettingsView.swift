@@ -27,17 +27,19 @@ struct SettingsView: View {
     @State private var highContrast = SettingsService.shared.highContrast
     @State private var largeTouchTargets = SettingsService.shared.largeTouchTargets
 
+    @ObservedObject private var localizationService = LocalizationService.shared
+
     var body: some View {
         NavigationView {
             List {
                 // Identity section
-                Section("Identity") {
+                Section(localizationService.t("settings.identity")) {
                     HStack {
-                        Text("Display Name")
+                        Text(localizationService.t("settings.display_name"))
                         Spacer()
                         Text(viewModel.identity?.displayName ?? "Unknown")
                             .foregroundColor(.secondary)
-                        Text("Edit")
+                        Text(localizationService.t("action.edit"))
                             .font(.caption)
                             .foregroundColor(.cyan)
                     }
@@ -48,7 +50,7 @@ struct SettingsView: View {
                     }
 
                     HStack {
-                        Text("Public ID")
+                        Text(localizationService.t("home.public_id"))
                         Spacer()
                         if let publicId = viewModel.identity?.publicId {
                             Text(String(publicId.prefix(16)) + "...")
@@ -73,7 +75,7 @@ struct SettingsView: View {
                 // Sync section
                 Section {
                     HStack {
-                        Text("Relay Server")
+                        Text(localizationService.t("settings.relay"))
                         Spacer()
                         Text(relayUrl)
                             .font(.caption)
@@ -88,7 +90,7 @@ struct SettingsView: View {
 
                     Button(action: { Task { await viewModel.sync() } }) {
                         HStack {
-                            Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
+                            Label(localizationService.t("sync.title"), systemImage: "arrow.triangle.2.circlepath")
                             Spacer()
                             SyncStatusBadge(state: viewModel.syncState)
                         }
@@ -97,7 +99,7 @@ struct SettingsView: View {
 
                     if let lastSync = viewModel.lastSyncTime {
                         HStack {
-                            Text("Last Synced")
+                            Text(localizationService.t("sync.last_sync"))
                             Spacer()
                             Text(lastSync, style: .relative)
                                 .foregroundColor(.secondary)
@@ -113,7 +115,7 @@ struct SettingsView: View {
                         }
                     }
                 } header: {
-                    Text("Sync")
+                    Text(localizationService.t("sync.title"))
                 } footer: {
                     Text("Sync keeps your contacts up to date across devices.")
                 }
@@ -121,14 +123,14 @@ struct SettingsView: View {
                 // Backup section
                 Section {
                     Button(action: { showExportSheet = true }) {
-                        Label("Export Backup", systemImage: "square.and.arrow.up")
+                        Label(localizationService.t("backup.export"), systemImage: "square.and.arrow.up")
                     }
 
                     Button(action: { showImportSheet = true }) {
-                        Label("Import Backup", systemImage: "square.and.arrow.down")
+                        Label(localizationService.t("backup.import"), systemImage: "square.and.arrow.down")
                     }
                 } header: {
-                    Text("Backup")
+                    Text(localizationService.t("backup.title"))
                 } footer: {
                     Text("Back up your identity to restore it on another device or after reinstalling.")
                 }
@@ -149,7 +151,7 @@ struct SettingsView: View {
                 }
 
                 // Privacy section
-                Section("Privacy") {
+                Section(localizationService.t("settings.privacy")) {
                     NavigationLink(destination: LabelsView()) {
                         HStack {
                             Label("Visibility Labels", systemImage: "tag")
@@ -166,11 +168,11 @@ struct SettingsView: View {
                 // Security section
                 Section("Security") {
                     NavigationLink(destination: LinkedDevicesView()) {
-                        Label("Linked Devices", systemImage: "laptopcomputer.and.iphone")
+                        Label(localizationService.t("devices.linked"), systemImage: "laptopcomputer.and.iphone")
                     }
 
                     NavigationLink(destination: RecoveryView()) {
-                        Label("Recovery", systemImage: "person.badge.key")
+                        Label(localizationService.t("recovery.title"), systemImage: "person.badge.key")
                     }
 
                     NavigationLink(destination: CertificatePinningView()) {
@@ -192,10 +194,10 @@ struct SettingsView: View {
                 }
 
                 // Appearance section
-                Section("Appearance") {
+                Section(localizationService.t("settings.appearance")) {
                     NavigationLink(destination: ThemeSettingsView()) {
                         HStack {
-                            Label("Theme", systemImage: "paintpalette")
+                            Label(localizationService.t("settings.theme"), systemImage: "paintpalette")
                             Spacer()
                             if let theme = ThemeService.shared.currentTheme {
                                 Text(theme.name)
@@ -208,7 +210,7 @@ struct SettingsView: View {
 
                     NavigationLink(destination: LanguageSettingsView()) {
                         HStack {
-                            Label("Language", systemImage: "globe")
+                            Label(localizationService.t("settings.language"), systemImage: "globe")
                             Spacer()
                             Text(LocalizationService.shared.currentLocaleInfo.name)
                                 .font(.caption)
@@ -268,7 +270,7 @@ struct SettingsView: View {
                 }
 
                 // Help & Support section
-                Section("Help & Support") {
+                Section(localizationService.t("settings.help_support")) {
                     // Demo contact restore option
                     if let state = viewModel.demoContactState, !state.isActive {
                         Button(action: {
@@ -338,7 +340,7 @@ struct SettingsView: View {
                 }
 
                 // About section
-                Section("About") {
+                Section(localizationService.t("settings.about")) {
                     HStack {
                         Text("Version")
                         Spacer()
@@ -366,7 +368,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(localizationService.t("nav.settings"))
             .sheet(isPresented: $showExportSheet) {
                 ExportBackupSheet()
             }
@@ -377,8 +379,8 @@ struct SettingsView: View {
                 TextField("Relay URL", text: $editingRelayUrl)
                     .autocapitalization(.none)
                     .keyboardType(.URL)
-                Button("Cancel", role: .cancel) {}
-                Button("Save") {
+                Button(localizationService.t("action.cancel"), role: .cancel) {}
+                Button(localizationService.t("action.save")) {
                     saveRelayUrl()
                 }
             } message: {
@@ -392,8 +394,8 @@ struct SettingsView: View {
             .alert("Edit Display Name", isPresented: $showEditNameAlert) {
                 TextField("Display Name", text: $editingDisplayName)
                     .autocapitalization(.words)
-                Button("Cancel", role: .cancel) {}
-                Button("Save") {
+                Button(localizationService.t("action.cancel"), role: .cancel) {}
+                Button(localizationService.t("action.save")) {
                     saveDisplayName()
                 }
             } message: {

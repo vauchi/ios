@@ -17,6 +17,7 @@ struct ContactDetailView: View {
     @State private var isVerifying = false
     @State private var fieldVisibility: [String: Bool] = [:]
     @State private var isLoadingVisibility = true
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         ScrollView {
@@ -42,7 +43,7 @@ struct ContactDetailView: View {
                             Image(systemName: "checkmark.seal.fill")
                                 .foregroundColor(.green)
                         }
-                        Text(contact.verified ? "Verified" : "Not verified")
+                        Text(contact.verified ? localizationService.t("contacts.verified") : localizationService.t("contacts.not_verified"))
                             .foregroundColor(.secondary)
                     }
 
@@ -74,12 +75,12 @@ struct ContactDetailView: View {
                 // Contact's card info section
                 if let card = contact.card {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Contact Info")
+                        Text(localizationService.t("contacts.info"))
                             .font(.headline)
                             .padding(.horizontal)
 
                         if card.fields.isEmpty {
-                            Text("No visible fields")
+                            Text(localizationService.t("contacts.no_info"))
                                 .foregroundColor(.secondary)
                                 .padding()
                                 .frame(maxWidth: .infinity)
@@ -99,7 +100,7 @@ struct ContactDetailView: View {
 
                 // Visibility section - what this contact can see of YOUR card
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Your Visibility")
+                    Text(localizationService.t("visibility.title"))
                         .font(.headline)
                         .padding(.horizontal)
 
@@ -149,7 +150,7 @@ struct ContactDetailView: View {
                 Button(role: .destructive) {
                     showRemoveAlert = true
                 } label: {
-                    Label("Remove Contact", systemImage: "trash")
+                    Label(localizationService.t("action.delete"), systemImage: "trash")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color(.systemGray6))

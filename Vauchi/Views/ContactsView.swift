@@ -12,6 +12,7 @@ struct ContactsView: View {
     @State private var searchText = ""
     @State private var isSearching = false
     @State private var searchResults: [ContactInfo] = []
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     private var displayedContacts: [ContactInfo] {
         if searchText.isEmpty {
@@ -69,8 +70,8 @@ struct ContactsView: View {
                     }
                 }
             }
-            .navigationTitle("Contacts")
-            .searchable(text: $searchText, prompt: "Search contacts")
+            .navigationTitle(localizationService.t("nav.contacts"))
+            .searchable(text: $searchText, prompt: localizationService.t("contacts.search"))
             .onChange(of: searchText) { newValue in
                 performSearch(query: newValue)
             }
@@ -119,6 +120,7 @@ struct ContactsView: View {
 struct ContactRow: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     let contact: ContactInfo
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         HStack(spacing: 12) {
@@ -147,7 +149,7 @@ struct ContactRow: View {
                             .font(.caption)
                             .accessibilityIdentifier("contacts.verified")
                     }
-                    Text(contact.verified ? "Verified" : "Not verified")
+                    Text(contact.verified ? localizationService.t("contacts.verified") : localizationService.t("contacts.not_verified"))
                         .font(.caption)
                         .foregroundColor(.secondary)
 
@@ -178,6 +180,7 @@ struct ContactRow: View {
 
 struct EmptyContactsView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         VStack(spacing: 20) {
@@ -195,7 +198,7 @@ struct EmptyContactsView: View {
                 .foregroundColor(.secondary)
                 .accessibilityHidden(true)
 
-            Text("No contacts yet")
+            Text(localizationService.t("contacts.empty"))
                 .font(.title2)
                 .fontWeight(.medium)
                 .accessibilityAddTraits(.isHeader)
@@ -206,7 +209,7 @@ struct EmptyContactsView: View {
                 .padding(.horizontal)
 
             NavigationLink(destination: ExchangeTabView()) {
-                Label("Start Exchange", systemImage: "qrcode")
+                Label(localizationService.t("exchange.title"), systemImage: "qrcode")
                     .padding()
                     .background(Color.cyan)
                     .foregroundColor(.white)

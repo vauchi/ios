@@ -12,6 +12,7 @@ struct SetupView: View {
     @State private var name = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         VStack(spacing: 30) {
@@ -24,13 +25,13 @@ struct SetupView: View {
                     .foregroundColor(.cyan)
                     .accessibilityHidden(true)
 
-                Text("Welcome to Vauchi")
+                Text(localizationService.t("welcome.title"))
                     .font(.title)
                     .fontWeight(.bold)
                     .accessibilityIdentifier("setup.welcome.title")
                     .accessibilityAddTraits(.isHeader)
 
-                Text("Privacy-focused contact card exchange")
+                Text(localizationService.t("app.tagline"))
                     .foregroundColor(.secondary)
                     .accessibilityIdentifier("setup.welcome.description")
             }
@@ -40,7 +41,7 @@ struct SetupView: View {
 
             // Form
             VStack(alignment: .leading, spacing: 16) {
-                Text("Your Display Name")
+                Text(localizationService.t("settings.display_name"))
                     .font(.headline)
                     .accessibilityHidden(true) // Label is associated with text field
 
@@ -67,7 +68,7 @@ struct SetupView: View {
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 .accessibilityIdentifier("loading.indicator")
                         }
-                        Text(isLoading ? "Creating..." : "Get Started")
+                        Text(isLoading ? "Creating..." : localizationService.t("setup.create"))
                     }
                     .frame(maxWidth: .infinity)
                     .padding()

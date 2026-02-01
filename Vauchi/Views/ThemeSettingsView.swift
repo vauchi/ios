@@ -11,6 +11,7 @@ import VauchiMobile
 struct ThemeSettingsView: View {
     @ObservedObject private var themeService = ThemeService.shared
     @Environment(\.colorScheme) var colorScheme
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         List {
@@ -64,7 +65,7 @@ struct ThemeSettingsView: View {
                 }
             }
         }
-        .navigationTitle("Theme")
+        .navigationTitle(localizationService.t("settings.theme"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }

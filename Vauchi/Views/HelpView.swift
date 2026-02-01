@@ -15,6 +15,7 @@ struct HelpView: View {
 
     private let categories = getHelpCategories()
     private let allFaqs = getFaqs()
+    @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         List {
@@ -55,7 +56,7 @@ struct HelpView: View {
 
     /// Categories list
     private var categoriesSection: some View {
-        Section("Categories") {
+        Section(localizationService.t("help.title")) {
             ForEach(categories, id: \.category) { categoryInfo in
                 Button(action: { selectedCategory = categoryInfo.category }) {
                     HStack {
