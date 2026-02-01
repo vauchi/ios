@@ -275,6 +275,33 @@ test:unit:
           - "*.xcodeproj/**/*"
           - ".gitlab-ci.yml"
 
+# Visual regression snapshot tests (swift-snapshot-testing)
+# Captures reference images for all SwiftUI views and compares against baselines.
+# NOTE: Baselines must be generated locally first by running with isRecording = true.
+# Allowed to fail until initial baselines are committed.
+test:snapshots:
+  extends: [.macos-job, .timeout-long]
+  stage: test
+  allow_failure: true
+  script:
+    - rm -rf .spm-packages ~/Library/Caches/org.swift.swiftpm ~/Library/Developer/Xcode/DerivedData
+    - find . -name "Package.resolved" -exec rm -f {} +
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages test -only-testing VauchiSnapshotTests
+  artifacts:
+    when: on_failure
+    paths:
+      - VauchiSnapshotTests/__Snapshots__/
+    expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - "*.xcodeproj/**/*"
+          - "project.yml"
+          - ".gitlab-ci.yml"
+
 # ============================================================
 # Security Stage (MR + scheduled)
 # ============================================================

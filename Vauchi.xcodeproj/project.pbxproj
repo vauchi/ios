@@ -35,10 +35,12 @@
 		748B9CFE5B176CC483106B14 /* ReadyStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C37A3C9E6A9B48F269CEBD /* ReadyStepView.swift */; };
 		76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */; };
 		80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A63B916A948A0A03F3F45B6 /* AhaMomentView.swift */; };
+		8233D17C24CBA0A46042C2BF /* SnapshotHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EEF8A8901309034B87F6CB /* SnapshotHelpers.swift */; };
 		857AF56DE7694784EA6A426B /* PreviewCardStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5245729BF56BF14CCC81681B /* PreviewCardStepView.swift */; };
 		8CD4D48FC7E49B0DA82AD497 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B31DFE6F23CEA01F0437957B /* KeychainService.swift */; };
 		95BC61A3D294112ABFFB021E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA83A41E3BAD133CD9929BD /* SettingsView.swift */; };
 		9A29351B039D6F08127F7A3E /* VisibilityLabelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C2E5A32B1033C46E976D2F /* VisibilityLabelsTests.swift */; };
+		9B12926FA62EF78944BBD659 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */; };
 		9DB670EF78DB7FBAEEF7696B /* DeliveryStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9F60104DE94274578CB08 /* DeliveryStatusTests.swift */; };
 		9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */; };
 		9ECAED5D4945C8D7669BD1CC /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2760186DEA7C9870633BA8E8 /* HelpView.swift */; };
@@ -46,6 +48,7 @@
 		A71B3D9B635D86B0626C301F /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2D8422E9B837A1B336A071 /* SetupView.swift */; };
 		AA3F337ED100BA98F8D5B5E3 /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A96FE811E67752C2D8F9079E /* SettingsService.swift */; };
 		AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95373D9E6440FED4B532EBDD /* VauchiRepository.swift */; };
+		B1BAEDCA4134802BFA607609 /* VisualRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */; };
 		B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */; };
 		C2AB3CF694C96461836AADB2 /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */; };
 		C2BF1FC510A65D73DD722C95 /* VauchiMobile in Frameworks */ = {isa = PBXBuildFile; productRef = 0F8A335546193F75655208E3 /* VauchiMobile */; };
@@ -61,6 +64,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		B95F19EBE98537A08B8D1E85 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1DC8B7A8F6AB7F95DD20F80F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8205328B6D921F4914B03739;
+			remoteInfo = Vauchi;
+		};
 		C82D14E740F6977817082681 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1DC8B7A8F6AB7F95DD20F80F /* Project object */;
@@ -100,16 +110,19 @@
 		71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiApp.swift; sourceTree = "<group>"; };
 		773071C286EDA29BCB17B365 /* ContactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
 		7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoContactTests.swift; sourceTree = "<group>"; };
+		7D255A687EB281C01D297ED7 /* VauchiSnapshotTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7ECC96545C3966B83B1D1AC7 /* VauchiTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		83F7822AFA66B14D7128C99D /* AccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityTests.swift; sourceTree = "<group>"; };
 		84CF989EA84DBE8A9F43E05D /* ThemeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeService.swift; sourceTree = "<group>"; };
 		852C63AD7ECE19A3177E137A /* SettingsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsServiceTests.swift; sourceTree = "<group>"; };
 		87F097D48EF96B8E6440ACD9 /* ContactActionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactActionsTests.swift; sourceTree = "<group>"; };
 		8814BC91D7F7804BEC20F59B /* ExchangeFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeFlowTests.swift; sourceTree = "<group>"; };
+		93EEF8A8901309034B87F6CB /* SnapshotHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelpers.swift; sourceTree = "<group>"; };
 		95373D9E6440FED4B532EBDD /* VauchiRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiRepository.swift; sourceTree = "<group>"; };
 		999B3BCD812A17506CBA6807 /* SecurityStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityStepView.swift; sourceTree = "<group>"; };
 		A96FE811E67752C2D8F9079E /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
 		A9B1FA31282CE69594A3840C /* AddFieldsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFieldsStepView.swift; sourceTree = "<group>"; };
+		AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualRegressionTests.swift; sourceTree = "<group>"; };
 		B1075C1A497CE28C82672E93 /* Vauchi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Vauchi.entitlements; sourceTree = "<group>"; };
 		B2C37A3C9E6A9B48F269CEBD /* ReadyStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadyStepView.swift; sourceTree = "<group>"; };
 		B31DFE6F23CEA01F0437957B /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
@@ -136,6 +149,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C9ED3424B80F19D8EDEDC790 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B12926FA62EF78944BBD659 /* SnapshotTesting in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -143,6 +164,7 @@
 			isa = PBXGroup;
 			children = (
 				CE3F5B89773435D1670DD40B /* Vauchi */,
+				B703A0DE1FDBFC69D604E07F /* VauchiSnapshotTests */,
 				5B9EAC8491A990983095623D /* VauchiTests */,
 				6044B0E63DE2F73C5FDC8885 /* Products */,
 			);
@@ -188,9 +210,19 @@
 			isa = PBXGroup;
 			children = (
 				0D3497B12DDDF10370069F86 /* Vauchi.app */,
+				7D255A687EB281C01D297ED7 /* VauchiSnapshotTests.xctest */,
 				7ECC96545C3966B83B1D1AC7 /* VauchiTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B703A0DE1FDBFC69D604E07F /* VauchiSnapshotTests */ = {
+			isa = PBXGroup;
+			children = (
+				93EEF8A8901309034B87F6CB /* SnapshotHelpers.swift */,
+				AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */,
+			);
+			path = VauchiSnapshotTests;
 			sourceTree = "<group>";
 		};
 		CC27001BE792CD487814D16E /* Views */ = {
@@ -277,6 +309,26 @@
 			productReference = 0D3497B12DDDF10370069F86 /* Vauchi.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C288D45F00B14D12ACFAD0BC /* VauchiSnapshotTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 572C838FA86B126CA380BA94 /* Build configuration list for PBXNativeTarget "VauchiSnapshotTests" */;
+			buildPhases = (
+				9E0AD1E18A293EA54C5115CE /* Sources */,
+				C9ED3424B80F19D8EDEDC790 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A57E2F8BA092042B66E5E4CC /* PBXTargetDependency */,
+			);
+			name = VauchiSnapshotTests;
+			packageProductDependencies = (
+				584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */,
+			);
+			productName = VauchiSnapshotTests;
+			productReference = 7D255A687EB281C01D297ED7 /* VauchiSnapshotTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		E9D120DDA95653CDD66564FF /* VauchiTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BCE5DB128EA3C8AD7DC194AE /* Build configuration list for PBXNativeTarget "VauchiTests" */;
@@ -320,6 +372,7 @@
 			mainGroup = 01344AB2D3CDD59B4D0E3149;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 				DFBFF58311F6476C3FF1CCBB /* XCRemoteSwiftPackageReference "vauchi-mobile-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -327,6 +380,7 @@
 			projectRoot = "";
 			targets = (
 				8205328B6D921F4914B03739 /* Vauchi */,
+				C288D45F00B14D12ACFAD0BC /* VauchiSnapshotTests */,
 				E9D120DDA95653CDD66564FF /* VauchiTests */,
 			);
 		};
@@ -352,6 +406,15 @@
 				C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */,
 				EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */,
 				9A29351B039D6F08127F7A3E /* VisibilityLabelsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E0AD1E18A293EA54C5115CE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8233D17C24CBA0A46042C2BF /* SnapshotHelpers.swift in Sources */,
+				B1BAEDCA4134802BFA607609 /* VisualRegressionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -405,6 +468,11 @@
 			target = 8205328B6D921F4914B03739 /* Vauchi */;
 			targetProxy = C82D14E740F6977817082681 /* PBXContainerItemProxy */;
 		};
+		A57E2F8BA092042B66E5E4CC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8205328B6D921F4914B03739 /* Vauchi */;
+			targetProxy = B95F19EBE98537A08B8D1E85 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -438,6 +506,24 @@
 					"@loader_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.vauchi.ios.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Vauchi.app/Vauchi";
+			};
+			name = Debug;
+		};
+		52CC2E1889B183BAA1DDA0D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_GENERATION_MODE = GeneratedFile;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "app.vauchi.ios.snapshot-tests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Vauchi.app/Vauchi";
@@ -546,6 +632,24 @@
 			};
 			name = Release;
 		};
+		D15DEF3CBD3B4C2DC43627D7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_GENERATION_MODE = GeneratedFile;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "app.vauchi.ios.snapshot-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Vauchi.app/Vauchi";
+			};
+			name = Release;
+		};
 		EFFAD80EFBBA6580DC1CAD5E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -621,6 +725,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		572C838FA86B126CA380BA94 /* Build configuration list for PBXNativeTarget "VauchiSnapshotTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				52CC2E1889B183BAA1DDA0D8 /* Debug */,
+				D15DEF3CBD3B4C2DC43627D7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		BAFFDC71FBCC5FC569766377 /* Build configuration list for PBXProject "Vauchi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -642,6 +755,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.17.0;
+			};
+		};
 		DFBFF58311F6476C3FF1CCBB /* XCRemoteSwiftPackageReference "vauchi-mobile-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://gitlab.com/vauchi/vauchi-mobile-swift.git";
@@ -657,6 +778,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DFBFF58311F6476C3FF1CCBB /* XCRemoteSwiftPackageReference "vauchi-mobile-swift" */;
 			productName = VauchiMobile;
+		};
+		584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

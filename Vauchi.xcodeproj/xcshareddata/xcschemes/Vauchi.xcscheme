@@ -29,6 +29,20 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "C288D45F00B14D12ACFAD0BC"
+               BuildableName = "VauchiSnapshotTests.xctest"
+               BlueprintName = "VauchiSnapshotTests"
+               ReferencedContainer = "container:Vauchi.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "E9D120DDA95653CDD66564FF"
                BuildableName = "VauchiTests.xctest"
                BlueprintName = "VauchiTests"
@@ -61,6 +75,17 @@
                BlueprintIdentifier = "E9D120DDA95653CDD66564FF"
                BuildableName = "VauchiTests.xctest"
                BlueprintName = "VauchiTests"
+               ReferencedContainer = "container:Vauchi.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "C288D45F00B14D12ACFAD0BC"
+               BuildableName = "VauchiSnapshotTests.xctest"
+               BlueprintName = "VauchiSnapshotTests"
                ReferencedContainer = "container:Vauchi.xcodeproj">
             </BuildableReference>
          </TestableReference>
