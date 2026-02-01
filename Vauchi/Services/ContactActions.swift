@@ -137,6 +137,18 @@ enum ContactActions {
         return URL(string: "sms:\(cleaned)")
     }
 
+    /// Fallback URL templates for common social networks when no VauchiRepository is available
+    private static let fallbackSocialUrls: [String: String] = [
+        "github": "https://github.com/",
+        "twitter": "https://twitter.com/",
+        "x": "https://x.com/",
+        "linkedin": "https://linkedin.com/in/",
+        "instagram": "https://instagram.com/",
+        "mastodon": "https://mastodon.social/@",
+        "reddit": "https://reddit.com/u/",
+        "youtube": "https://youtube.com/@",
+    ]
+
     /// Build a social network profile URL using vauchi-core registry
     /// Note: Prefer using VauchiRepository.getProfileUrl(networkId:username:) directly
     static func buildSocialUrl(network: String, username: String, repository: VauchiRepository? = nil) -> URL? {
@@ -145,6 +157,10 @@ enum ContactActions {
            let urlString = repo.getProfileUrl(networkId: network, username: username)
         {
             return URL(string: urlString)
+        }
+        // Fallback for common networks when no repository is available
+        if let baseUrl = fallbackSocialUrls[network.lowercased()] {
+            return URL(string: baseUrl + username)
         }
         return nil
     }

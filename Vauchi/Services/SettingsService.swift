@@ -64,13 +64,19 @@ final class SettingsService {
     }
 
     /// Validates a relay URL
-    /// Only secure WebSocket (wss://) is allowed in production
+    /// Only secure WebSocket (wss://) is allowed for remote servers.
+    /// Unencrypted ws:// is permitted for localhost/loopback only (development).
     func isValidRelayUrl(_ url: String) -> Bool {
         guard let urlObj = URL(string: url) else { return false }
         let scheme = urlObj.scheme?.lowercased()
-        // Security: Only allow secure WebSocket connections
-        // ws:// is blocked to prevent MITM attacks
-        return scheme == "wss"
+        if scheme == "wss" {
+            return true
+        }
+        if scheme == "ws" {
+            let host = urlObj.host?.lowercased() ?? ""
+            return host == "localhost" || host == "127.0.0.1" || host == "::1"
+        }
+        return false
     }
 
     // MARK: - Sync Settings

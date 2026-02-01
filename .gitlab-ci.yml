@@ -262,7 +262,6 @@ test:unit:
     - rm -rf .spm-packages ~/Library/Caches/org.swift.swiftpm ~/Library/Developer/Xcode/DerivedData
     - find . -name "Package.resolved" -exec rm -f {} +
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages test
-  allow_failure: true  # Pre-existing test failures in AudioProximity, ContactActions, DemoContact, DeviceLinking — tracked separately
   artifacts:
     reports:
       junit: build/reports/junit.xml

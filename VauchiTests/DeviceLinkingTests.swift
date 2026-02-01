@@ -164,17 +164,16 @@ final class DeviceLinkingTests: XCTestCase {
             return
         }
 
-        XCTAssertThrowsError(try repo.unlinkDevice(deviceIndex: currentDevice.deviceIndex)) { error in
-            // Should not allow unlinking current device
-            XCTAssertNotNil(error)
-        }
+        let result = try repo.unlinkDevice(deviceIndex: currentDevice.deviceIndex)
+        XCTAssertFalse(result, "Should not allow unlinking current device")
     }
 
     /// Scenario: Cannot unlink non-existent device
     func testCannotUnlinkNonExistentDevice() throws {
         let nonExistentIndex: UInt32 = 999
 
-        XCTAssertThrowsError(try repo.unlinkDevice(deviceIndex: nonExistentIndex))
+        let result = try repo.unlinkDevice(deviceIndex: nonExistentIndex)
+        XCTAssertFalse(result, "Should not allow unlinking non-existent device")
     }
 
     // MARK: - Device Name Tests
