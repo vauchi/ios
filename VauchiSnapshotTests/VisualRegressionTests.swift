@@ -8,8 +8,8 @@
 
 import SnapshotTesting
 import SwiftUI
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Visual regression tests for all major views.
 ///
@@ -19,16 +19,16 @@ import XCTest
 /// Device: iPhone 15 Pro (393×852 pt)
 @MainActor
 final class VisualRegressionTests: XCTestCase {
-    // Use a consistent device for all snapshots
+    /// Consistent device for all snapshots.
     private let device: ViewImageConfig = .iPhone13Pro
-    // Set to true when generating initial baselines or updating after intentional changes
-    // In CI, this should always be false (default)
-    private var isRecording: Bool { false }
+
+    /// Whether to record new baselines. Always false in CI.
+    private var isRecording: Bool {
+        false
+    }
 
     override func setUp() {
         super.setUp()
-        // Ensure consistent rendering
-        // isRecording can be toggled via environment variable in CI if needed
     }
 
     // MARK: - Setup / No Identity State
