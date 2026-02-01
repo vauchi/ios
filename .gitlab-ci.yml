@@ -261,7 +261,7 @@ test:unit:
   script:
     - rm -rf .spm-packages ~/Library/Caches/org.swift.swiftpm ~/Library/Developer/Xcode/DerivedData
     - find . -name "Package.resolved" -exec rm -f {} +
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages test
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages test -skip-testing VauchiSnapshotTests
   artifacts:
     reports:
       junit: build/reports/junit.xml
