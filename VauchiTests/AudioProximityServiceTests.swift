@@ -6,8 +6,8 @@
 // Tests for AudioProximityService - ultrasonic proximity verification
 // Based on: features/contact_exchange.feature
 
-@testable import Vauchi
 import AVFoundation
+@testable import Vauchi
 import XCTest
 
 /// Tests for AudioProximityService
@@ -102,7 +102,7 @@ final class AudioProximityServiceTests: XCTestCase {
     /// Scenario: Receive with zero timeout returns immediately
     func testReceiveZeroTimeout() throws {
         try XCTSkipIf(!AVAudioSession.sharedInstance().isInputAvailable,
-                       "Audio input not available (simulator)")
+                      "Audio input not available (simulator)")
         let samples = audioService.receiveSignal(timeoutMs: 0, sampleRate: 44100)
 
         // Should return empty or minimal samples with 0 timeout
@@ -113,7 +113,7 @@ final class AudioProximityServiceTests: XCTestCase {
     /// Scenario: Receive returns float array
     func testReceiveReturnsFloatArray() throws {
         try XCTSkipIf(!AVAudioSession.sharedInstance().isInputAvailable,
-                       "Audio input not available (simulator)")
+                      "Audio input not available (simulator)")
         // Very short recording - 50ms
         let samples = audioService.receiveSignal(timeoutMs: 50, sampleRate: 44100)
 
@@ -129,7 +129,7 @@ final class AudioProximityServiceTests: XCTestCase {
     /// Scenario: Service can be started and stopped repeatedly
     func testStartStopCycle() throws {
         try XCTSkipIf(!AVAudioSession.sharedInstance().isInputAvailable,
-                       "Audio input not available (simulator)")
+                      "Audio input not available (simulator)")
         for _ in 0 ..< 3 {
             // Start emit
             let samples = [Float](repeating: 0.5, count: 100)
@@ -167,7 +167,7 @@ final class AudioProximityServiceTests: XCTestCase {
     /// Scenario: Different sample rates are handled
     func testDifferentSampleRates() throws {
         try XCTSkipIf(!AVAudioSession.sharedInstance().isInputAvailable,
-                       "Audio input not available (simulator)")
+                      "Audio input not available (simulator)")
         let sampleRates: [UInt32] = [22050, 44100, 48000]
 
         for rate in sampleRates {
