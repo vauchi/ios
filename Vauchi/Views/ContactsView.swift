@@ -62,8 +62,21 @@ struct ContactsView: View {
                                     NavigationLink(destination: ContactDetailView(contact: contact)) {
                                         ContactRow(contact: contact)
                                     }
+                                    .onAppear {
+                                        if contact.id == displayedContacts.last?.id && searchText.isEmpty {
+                                            Task { await viewModel.loadMoreContacts() }
+                                        }
+                                    }
                                 }
                                 .onDelete(perform: deleteContacts)
+
+                                if viewModel.hasMoreContacts && searchText.isEmpty {
+                                    HStack {
+                                        Spacer()
+                                        ProgressView()
+                                        Spacer()
+                                    }
+                                }
                             }
                             .listStyle(.plain)
                         }

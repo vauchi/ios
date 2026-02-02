@@ -619,6 +619,15 @@ class VauchiRepository {
         }
     }
 
+    /// List contacts with pagination
+    func listContactsPaginated(offset: UInt32, limit: UInt32) throws -> [VauchiContact] {
+        do {
+            return try vauchi.listContactsPaginated(offset: offset, limit: limit).map(convertContact)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     /// Get contact by ID
     func getContact(id: String) throws -> VauchiContact? {
         do {

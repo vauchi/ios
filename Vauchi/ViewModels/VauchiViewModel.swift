@@ -94,6 +94,9 @@ class VauchiViewModel: ObservableObject {
     @Published var identity: IdentityInfo?
     @Published var card: CardInfo?
     @Published var contacts: [ContactInfo] = []
+    private let contactsPageSize: UInt32 = 20
+    @Published var hasMoreContacts = true
+    private var contactsOffset: UInt32 = 0
     @Published var errorMessage: String?
     @Published var syncState: SyncState = .idle
     @Published var lastSyncTime: Date?
@@ -370,8 +373,12 @@ class VauchiViewModel: ObservableObject {
     func loadContacts() async {
         guard let repository = repository else { return }
 
+        // Reset pagination
+        contactsOffset = 0
+        hasMoreContacts = true
+
         do {
-            let contactsData = try repository.listContacts()
+            let contactsData = try repository.listContactsPaginated(offset: 0, limit: contactsPageSize)
             contacts = contactsData.map { contact in
                 ContactInfo(
                     id: contact.id,
@@ -391,8 +398,43 @@ class VauchiViewModel: ObservableObject {
                     addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt))
                 )
             }
+            contactsOffset = UInt32(contacts.count)
+            hasMoreContacts = contactsData.count == Int(contactsPageSize)
         } catch {
             contacts = []
+            hasMoreContacts = false
+        }
+    }
+
+    func loadMoreContacts() async {
+        guard let repository = repository, hasMoreContacts else { return }
+
+        do {
+            let moreData = try repository.listContactsPaginated(offset: contactsOffset, limit: contactsPageSize)
+            let moreContacts = moreData.map { contact in
+                ContactInfo(
+                    id: contact.id,
+                    displayName: contact.displayName,
+                    verified: contact.isVerified,
+                    card: CardInfo(
+                        displayName: contact.card.displayName,
+                        fields: contact.card.fields.map { field in
+                            FieldInfo(
+                                id: field.id,
+                                fieldType: field.fieldType.rawValue,
+                                label: field.label,
+                                value: field.value
+                            )
+                        }
+                    ),
+                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt))
+                )
+            }
+            contacts.append(contentsOf: moreContacts)
+            contactsOffset += UInt32(moreContacts.count)
+            hasMoreContacts = moreData.count == Int(contactsPageSize)
+        } catch {
+            hasMoreContacts = false
         }
     }
 
