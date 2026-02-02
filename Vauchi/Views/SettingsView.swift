@@ -163,6 +163,18 @@ struct SettingsView: View {
                             }
                         }
                     }
+
+                    NavigationLink(destination: ConsentSettingsView()) {
+                        Label("Consent Settings", systemImage: "hand.raised")
+                    }
+
+                    NavigationLink(destination: AccountDeletionView()) {
+                        Label("Account Deletion", systemImage: "trash.circle")
+                    }
+
+                    Button(action: exportGdprData) {
+                        Label("Export My Data", systemImage: "square.and.arrow.up.on.square")
+                    }
                 }
 
                 // Security section
@@ -431,6 +443,32 @@ struct SettingsView: View {
             } catch {
                 // Error handling - the view model will update on success
                 print("Failed to update display name: \(error)")
+            }
+        }
+    }
+
+    private func exportGdprData() {
+        Task {
+            do {
+                let export = try await viewModel.exportGdprData()
+                // Share the exported JSON data
+                let tempDir = FileManager.default.temporaryDirectory
+                let fileUrl = tempDir.appendingPathComponent("vauchi-data-export.json")
+                try export.jsonData.write(to: fileUrl, atomically: true, encoding: .utf8)
+
+                await MainActor.run {
+                    let activityController = UIActivityViewController(
+                        activityItems: [fileUrl],
+                        applicationActivities: nil
+                    )
+                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                       let rootViewController = windowScene.windows.first?.rootViewController
+                    {
+                        rootViewController.present(activityController, animated: true)
+                    }
+                }
+            } catch {
+                viewModel.showError("Export Failed", message: error.localizedDescription)
             }
         }
     }

@@ -53,6 +53,8 @@ enum VauchiRepositoryError: LocalizedError {
     case networkError(String)
     case invalidInput(String)
     case internalError(String)
+    case gdprError(String)
+    case deletionNotAllowed(String)
 
     var errorDescription: String? {
         switch self {
@@ -80,6 +82,10 @@ enum VauchiRepositoryError: LocalizedError {
             return "Invalid input: \(msg)"
         case let .internalError(msg):
             return "Internal error: \(msg)"
+        case let .gdprError(msg):
+            return "GDPR error: \(msg)"
+        case let .deletionNotAllowed(msg):
+            return "Deletion not allowed: \(msg)"
         }
     }
 
@@ -112,6 +118,10 @@ enum VauchiRepositoryError: LocalizedError {
             return .internalError("Serialization: \(msg)")
         case let .Internal(msg):
             return .internalError(msg)
+        case let .GdprError(msg):
+            return .gdprError(msg)
+        case let .DeletionNotAllowed(msg):
+            return .deletionNotAllowed(msg)
         }
     }
 }
@@ -1446,6 +1456,197 @@ class VauchiRepository {
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
+    }
+
+    // MARK: - GDPR Operations
+
+    /// Export all user data in GDPR-compliant format
+    func exportGdprData() throws -> VauchiGdprExport {
+        do {
+            let export = try vauchi.exportGdprData()
+            return VauchiGdprExport(
+                jsonData: export.jsonData,
+                exportedAt: export.exportedAt,
+                version: export.version
+            )
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Schedule account deletion with grace period
+    func scheduleAccountDeletion() throws -> VauchiDeletionInfo {
+        do {
+            let info = try vauchi.scheduleAccountDeletion()
+            return VauchiDeletionInfo(from: info)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Cancel a scheduled account deletion
+    func cancelAccountDeletion() throws {
+        do {
+            try vauchi.cancelAccountDeletion()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get current deletion state
+    func getDeletionState() throws -> VauchiDeletionInfo {
+        do {
+            let info = try vauchi.getDeletionState()
+            return VauchiDeletionInfo(from: info)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Grant consent for a specific type
+    func grantConsent(consentType: VauchiConsentType) throws {
+        do {
+            try vauchi.grantConsent(consentType: consentType.toMobile)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Revoke consent for a specific type
+    func revokeConsent(consentType: VauchiConsentType) throws {
+        do {
+            try vauchi.revokeConsent(consentType: consentType.toMobile)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Check if consent is granted for a specific type
+    func checkConsent(consentType: VauchiConsentType) throws -> Bool {
+        do {
+            return try vauchi.checkConsent(consentType: consentType.toMobile)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get all consent records
+    func getConsentRecords() throws -> [VauchiConsentRecord] {
+        do {
+            return try vauchi.getConsentRecords().map { VauchiConsentRecord(from: $0) }
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+}
+
+// MARK: - GDPR Types
+
+/// Deletion state enum matching MobileDeletionState
+enum VauchiDeletionState {
+    case none
+    case scheduled
+    case executed
+
+    /// Convert from MobileDeletionState
+    static func from(_ mobile: MobileDeletionState) -> VauchiDeletionState {
+        switch mobile {
+        case .none: return .none
+        case .scheduled: return .scheduled
+        case .executed: return .executed
+        }
+    }
+}
+
+/// GDPR data export result
+struct VauchiGdprExport {
+    let jsonData: String
+    let exportedAt: UInt64
+    let version: UInt32
+
+    var exportedDate: Date {
+        Date(timeIntervalSince1970: TimeInterval(exportedAt))
+    }
+}
+
+/// Consent type enum matching MobileConsentType
+enum VauchiConsentType: String, CaseIterable {
+    case dataProcessing
+    case contactSharing
+    case analytics
+    case recoveryVouching
+
+    var displayName: String {
+        switch self {
+        case .dataProcessing: return "Data Processing"
+        case .contactSharing: return "Contact Sharing"
+        case .analytics: return "Analytics"
+        case .recoveryVouching: return "Recovery Vouching"
+        }
+    }
+
+    /// Convert to MobileConsentType
+    var toMobile: MobileConsentType {
+        switch self {
+        case .dataProcessing: return .dataProcessing
+        case .contactSharing: return .contactSharing
+        case .analytics: return .analytics
+        case .recoveryVouching: return .recoveryVouching
+        }
+    }
+
+    /// Convert from MobileConsentType
+    static func from(_ mobile: MobileConsentType) -> VauchiConsentType {
+        switch mobile {
+        case .dataProcessing: return .dataProcessing
+        case .contactSharing: return .contactSharing
+        case .analytics: return .analytics
+        case .recoveryVouching: return .recoveryVouching
+        }
+    }
+}
+
+/// Consent record
+struct VauchiConsentRecord: Identifiable {
+    let id: String
+    let consentType: VauchiConsentType
+    let granted: Bool
+    let timestamp: UInt64
+    let policyVersion: String?
+
+    init(from mobile: MobileConsentRecord) {
+        id = mobile.id
+        consentType = VauchiConsentType.from(mobile.consentType)
+        granted = mobile.granted
+        timestamp = mobile.timestamp
+        policyVersion = mobile.policyVersion
+    }
+
+    var date: Date {
+        Date(timeIntervalSince1970: TimeInterval(timestamp))
+    }
+}
+
+/// Deletion info containing state and timing
+struct VauchiDeletionInfo {
+    let state: VauchiDeletionState
+    let scheduledAt: UInt64
+    let executeAt: UInt64
+    let daysRemaining: UInt32
+
+    init(from mobile: MobileDeletionInfo) {
+        state = VauchiDeletionState.from(mobile.state)
+        scheduledAt = mobile.scheduledAt
+        executeAt = mobile.executeAt
+        daysRemaining = mobile.daysRemaining
+    }
+
+    var scheduledDate: Date {
+        Date(timeIntervalSince1970: TimeInterval(scheduledAt))
+    }
+
+    var executeDate: Date {
+        Date(timeIntervalSince1970: TimeInterval(executeAt))
     }
 }
 

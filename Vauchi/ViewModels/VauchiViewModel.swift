@@ -111,6 +111,11 @@ class VauchiViewModel: ObservableObject {
     @Published var demoContact: VauchiDemoContact?
     @Published var demoContactState: VauchiDemoContactState?
 
+    // GDPR
+    @Published var deletionState: VauchiDeletionState = .none
+    @Published var deletionInfo: VauchiDeletionInfo?
+    @Published var consentRecords: [VauchiConsentRecord] = []
+
     // Visibility labels (for organizing contacts)
     // Based on: features/visibility_labels.feature
     @Published var visibilityLabels: [VauchiVisibilityLabel] = []
@@ -1062,5 +1067,78 @@ class VauchiViewModel: ObservableObject {
             throw VauchiRepositoryError.notInitialized
         }
         return try repository.isPrimaryDevice()
+    }
+
+    // MARK: - GDPR Operations
+
+    /// Export all user data in GDPR-compliant format
+    func exportGdprData() async throws -> VauchiGdprExport {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        return try repository.exportGdprData()
+    }
+
+    /// Schedule account deletion with grace period
+    func scheduleAccountDeletion() async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        let info = try repository.scheduleAccountDeletion()
+        deletionState = info.state
+        deletionInfo = info
+    }
+
+    /// Cancel a scheduled account deletion
+    func cancelAccountDeletion() async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.cancelAccountDeletion()
+        deletionState = .none
+        deletionInfo = nil
+    }
+
+    /// Load the current deletion state
+    func loadDeletionState() async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        let info = try repository.getDeletionState()
+        deletionState = info.state
+        deletionInfo = info
+    }
+
+    /// Grant consent for a specific type
+    func grantConsent(_ type: VauchiConsentType) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.grantConsent(consentType: type)
+        try await loadConsentRecords()
+    }
+
+    /// Revoke consent for a specific type
+    func revokeConsent(_ type: VauchiConsentType) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.revokeConsent(consentType: type)
+        try await loadConsentRecords()
+    }
+
+    /// Load all consent records
+    func loadConsentRecords() async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        consentRecords = try repository.getConsentRecords()
     }
 }
