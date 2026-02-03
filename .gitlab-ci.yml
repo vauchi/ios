@@ -42,6 +42,7 @@ include:
       - '/ci-templates/reuse.yml'
 
 stages:
+  - auto-tag
   - update
   - lint
   - build
@@ -77,6 +78,50 @@ workflow:
         echo "Run on the runner machine: xcodebuild -downloadPlatform iOS"
         exit 1
       fi
+
+# ============================================================
+# Auto-Tag Stage
+# ============================================================
+
+# When MARKETING_VERSION is bumped and merged to main,
+# automatically create a v{version} tag to trigger the release pipeline.
+auto-tag:version:
+  stage: auto-tag
+  image: alpine:latest
+  needs: []
+  variables:
+    GIT_STRATEGY: clone
+    GIT_DEPTH: "1"
+  script:
+    - apk add --no-cache git
+    - |
+      VERSION=$(grep 'MARKETING_VERSION' project.yml | sed 's/.*"\(.*\)"/\1/')
+      TAG="v${VERSION}"
+      echo "project.yml MARKETING_VERSION: ${VERSION}"
+      echo "Expected tag: ${TAG}"
+
+      # Check if tag already exists
+      if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q "${TAG}"; then
+        echo "✓ Tag ${TAG} already exists — nothing to do"
+        exit 0
+      fi
+
+      echo "Tag ${TAG} does not exist — creating it..."
+
+      git config user.name "vauchi-gitlab-runner"
+      git config user.email "noreply@vauchi.app"
+
+      # Use project access token for push — CI_JOB_TOKEN cannot be used here
+      # because pushes via CI_JOB_TOKEN do not trigger new pipelines, and the
+      # tag push must trigger the release pipeline (build:release stage).
+      # PROJECT_ACCESS_TOKEN is set at group level in Settings > CI/CD > Variables.
+      git remote set-url origin "https://vauchi-gitlab-runner:${PROJECT_ACCESS_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
+
+      git tag -a "${TAG}" -m "Release ${TAG}"
+      git push origin "${TAG}"
+      echo "✓ Created and pushed tag ${TAG}"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 # ============================================================
 # Update Stage (triggered by upstream distribution repo)
