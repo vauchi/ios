@@ -464,30 +464,13 @@ class VauchiRepository {
     // MARK: - Secure Key Management
 
     /// Get or create storage key from Keychain
-    /// Handles migration from legacy file-based key storage
     private static func getOrCreateStorageKey(dataDir: String) throws -> Data {
         let keychain = KeychainService.shared
-        let legacyKeyPath = (dataDir as NSString).appendingPathComponent("storage.key")
 
         // Try to load from Keychain first
         if let keyData = try? keychain.loadStorageKey() {
             if keyData.count == storageKeyLength {
                 return keyData
-            }
-        }
-
-        // Check for legacy file-based key (migration scenario)
-        if FileManager.default.fileExists(atPath: legacyKeyPath) {
-            // Load legacy key
-            let legacyKeyData = try Data(contentsOf: URL(fileURLWithPath: legacyKeyPath))
-            if legacyKeyData.count == storageKeyLength {
-                // Migrate to Keychain
-                try keychain.saveStorageKey(legacyKeyData)
-
-                // Securely delete old file
-                try FileManager.default.removeItem(atPath: legacyKeyPath)
-
-                return legacyKeyData
             }
         }
 
