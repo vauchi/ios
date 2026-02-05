@@ -209,6 +209,7 @@ struct VauchiContact: Identifiable {
     let id: String
     let displayName: String
     let isVerified: Bool
+    let isRecoveryTrusted: Bool
     let card: VauchiContactCard
     let addedAt: UInt64
 }
@@ -526,6 +527,7 @@ class VauchiRepository {
             id: contact.id,
             displayName: contact.displayName,
             isVerified: contact.isVerified,
+            isRecoveryTrusted: contact.isRecoveryTrusted,
             card: convertCard(contact.card),
             addedAt: contact.addedAt
         )
