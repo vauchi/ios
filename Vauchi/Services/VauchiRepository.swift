@@ -1277,6 +1277,33 @@ class VauchiRepository {
         }
     }
 
+    /// Mark a contact as trusted for recovery
+    func trustContactForRecovery(id: String) throws {
+        do {
+            try vauchi.trustContactForRecovery(id: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Remove recovery trust from a contact
+    func untrustContactForRecovery(id: String) throws {
+        do {
+            try vauchi.untrustContactForRecovery(id: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get the number of contacts trusted for recovery
+    func trustedContactCount() throws -> UInt32 {
+        do {
+            return try vauchi.trustedContactCount()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     // MARK: - Delivery Status Operations
 
     /// Get all delivery records

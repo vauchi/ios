@@ -44,6 +44,7 @@ struct RecoverIdentityTab: View {
     @State private var showClaimSheet = false
     @State private var showAddVoucherSheet = false
     @State private var showStatusSheet = false
+    @State private var trustedCount: UInt32 = 0
     @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
@@ -86,10 +87,28 @@ struct RecoverIdentityTab: View {
                         Text("7 days")
                             .foregroundColor(.secondary)
                     }
+                    HStack {
+                        Text("Trusted contacts:")
+                        Spacer()
+                        Text("\(trustedCount)/3")
+                            .foregroundColor(trustedCount >= 3 ? .secondary : .red)
+                    }
+                    if trustedCount < 3 {
+                        Text("Mark \(3 - trustedCount) more contact(s) as trusted for recovery")
+                            .font(.caption)
+                            .foregroundColor(.red.opacity(0.8))
+                    }
                 }
                 .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
+                .task {
+                    do {
+                        trustedCount = try await viewModel.trustedContactCount()
+                    } catch {
+                        // Graceful failure
+                    }
+                }
 
                 // Steps
                 VStack(alignment: .leading, spacing: 16) {

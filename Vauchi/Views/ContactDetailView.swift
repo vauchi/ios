@@ -15,6 +15,7 @@ struct ContactDetailView: View {
     @State private var showRemoveAlert = false
     @State private var showVerifyAlert = false
     @State private var isVerifying = false
+    @State private var isTogglingTrust = false
     @State private var fieldVisibility: [String: Bool] = [:]
     @State private var isLoadingVisibility = true
     @ObservedObject private var localizationService = LocalizationService.shared
@@ -69,6 +70,44 @@ struct ContactDetailView: View {
                         }
                         .disabled(isVerifying)
                     }
+
+                    // Recovery trust indicator
+                    if contact.recoveryTrusted {
+                        HStack(spacing: 4) {
+                            Image(systemName: "shield.checkered")
+                                .foregroundColor(.cyan)
+                            Text("Recovery Trusted")
+                                .foregroundColor(.cyan)
+                        }
+                    }
+
+                    // Recovery trust toggle
+                    Button(action: {
+                        isTogglingTrust = true
+                        Task {
+                            do {
+                                if contact.recoveryTrusted {
+                                    try await viewModel.untrustContactForRecovery(id: contact.id)
+                                } else {
+                                    try await viewModel.trustContactForRecovery(id: contact.id)
+                                }
+                            } catch {
+                                viewModel.showError("Error", message: error.localizedDescription)
+                            }
+                            isTogglingTrust = false
+                        }
+                    }) {
+                        Label(
+                            contact.recoveryTrusted ? "Remove Recovery Trust" : "Trust for Recovery",
+                            systemImage: contact.recoveryTrusted ? "shield.slash" : "shield.checkered"
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(contact.recoveryTrusted ? Color.gray.opacity(0.2) : Color.cyan.opacity(0.2))
+                        .foregroundColor(contact.recoveryTrusted ? .gray : .cyan)
+                        .cornerRadius(8)
+                    }
+                    .disabled(isTogglingTrust)
                 }
                 .padding()
 

@@ -29,13 +29,15 @@ struct ContactInfo: Identifiable, Equatable {
     let id: String
     let displayName: String
     let verified: Bool
+    let recoveryTrusted: Bool
     let card: CardInfo?
     let addedAt: Date?
 
-    init(id: String, displayName: String, verified: Bool, card: CardInfo? = nil, addedAt: Date? = nil) {
+    init(id: String, displayName: String, verified: Bool, recoveryTrusted: Bool = false, card: CardInfo? = nil, addedAt: Date? = nil) {
         self.id = id
         self.displayName = displayName
         self.verified = verified
+        self.recoveryTrusted = recoveryTrusted
         self.card = card
         self.addedAt = addedAt
     }
@@ -384,6 +386,7 @@ class VauchiViewModel: ObservableObject {
                     id: contact.id,
                     displayName: contact.displayName,
                     verified: contact.isVerified,
+                    recoveryTrusted: contact.isRecoveryTrusted,
                     card: CardInfo(
                         displayName: contact.card.displayName,
                         fields: contact.card.fields.map { field in
@@ -416,6 +419,7 @@ class VauchiViewModel: ObservableObject {
                     id: contact.id,
                     displayName: contact.displayName,
                     verified: contact.isVerified,
+                    recoveryTrusted: contact.isRecoveryTrusted,
                     card: CardInfo(
                         displayName: contact.card.displayName,
                         fields: contact.card.fields.map { field in
@@ -477,7 +481,8 @@ class VauchiViewModel: ObservableObject {
                 ContactInfo(
                     id: contact.id,
                     displayName: contact.displayName,
-                    verified: contact.isVerified
+                    verified: contact.isVerified,
+                    recoveryTrusted: contact.isRecoveryTrusted
                 )
             }
         } catch {
@@ -501,6 +506,32 @@ class VauchiViewModel: ObservableObject {
 
         try repository.verifyContact(id: id)
         await loadContacts()
+    }
+
+    func trustContactForRecovery(id: String) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.trustContactForRecovery(id: id)
+        await loadContacts()
+    }
+
+    func untrustContactForRecovery(id: String) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.untrustContactForRecovery(id: id)
+        await loadContacts()
+    }
+
+    func trustedContactCount() async throws -> UInt32 {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        return try repository.trustedContactCount()
     }
 
     // MARK: - Demo Contact
