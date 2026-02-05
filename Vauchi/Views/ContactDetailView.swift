@@ -90,7 +90,7 @@ struct ContactDetailView: View {
                         } else {
                             VStack(spacing: 8) {
                                 ForEach(card.fields) { field in
-                                    ContactFieldRow(field: field)
+                                    ContactFieldRow(field: field, contactId: contact.id)
                                 }
                             }
                             .padding(.horizontal)
@@ -256,6 +256,7 @@ struct ContactDetailView: View {
 
 struct ContactFieldRow: View {
     let field: FieldInfo
+    var contactId: String = ""
 
     private func icon(for type: String) -> String {
         switch type.lowercased() {
@@ -284,6 +285,10 @@ struct ContactFieldRow: View {
                     .foregroundColor(.secondary)
                 Text(field.value)
                     .font(.body)
+            }
+
+            if !contactId.isEmpty {
+                ValidationBadgeView(contactId: contactId, field: field)
             }
 
             Spacer()

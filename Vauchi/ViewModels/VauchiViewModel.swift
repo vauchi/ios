@@ -888,6 +888,40 @@ class VauchiViewModel: ObservableObject {
         return try repository.isFieldVisibleToContact(contactId: contactId, fieldLabel: fieldLabel)
     }
 
+    // MARK: - Field Validation
+
+    func getFieldValidationStatus(contactId: String, fieldId: String, fieldValue: String) async throws -> MobileValidationStatus {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        return try repository.getFieldValidationStatus(contactId: contactId, fieldId: fieldId, fieldValue: fieldValue)
+    }
+
+    func validateField(contactId: String, fieldId: String, fieldValue: String) async throws -> MobileFieldValidation {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        return try repository.validateField(contactId: contactId, fieldId: fieldId, fieldValue: fieldValue)
+    }
+
+    func revokeFieldValidation(contactId: String, fieldId: String) async throws -> Bool {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        return try repository.revokeFieldValidation(contactId: contactId, fieldId: fieldId)
+    }
+
+    func getFieldValidationCount(contactId: String, fieldId: String) async throws -> UInt32 {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        return try repository.getFieldValidationCount(contactId: contactId, fieldId: fieldId)
+    }
+
     // MARK: - Social Networks
 
     func listSocialNetworks() -> [(id: String, displayName: String, urlTemplate: String)] {
