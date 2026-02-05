@@ -55,6 +55,7 @@ enum VauchiRepositoryError: LocalizedError {
     case internalError(String)
     case gdprError(String)
     case deletionNotAllowed(String)
+    case shredError(String)
 
     var errorDescription: String? {
         switch self {
@@ -86,6 +87,8 @@ enum VauchiRepositoryError: LocalizedError {
             return "GDPR error: \(msg)"
         case let .deletionNotAllowed(msg):
             return "Deletion not allowed: \(msg)"
+        case let .shredError(msg):
+            return "Shred error: \(msg)"
         }
     }
 
@@ -122,6 +125,8 @@ enum VauchiRepositoryError: LocalizedError {
             return .gdprError(msg)
         case let .DeletionNotAllowed(msg):
             return .deletionNotAllowed(msg)
+        case let .ShredError(msg):
+            return .shredError(msg)
         }
     }
 }
