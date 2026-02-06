@@ -16,11 +16,20 @@ import XCTest
 /// Uses swift-snapshot-testing to capture reference images and compare
 /// against baselines. Run with `--update-snapshots` to regenerate baselines.
 ///
-/// Device: iPhone 15 Pro (393×852 pt)
+/// Device: iPhone 13 Pro logical size (390×844 pt) rendered at 2x scale.
+/// IMPORTANT: Must run on a 2x simulator (e.g. iPhone SE 3) for baselines to match.
+/// Renders at 780×1688 px — large enough to catch layout issues,
+/// small enough to keep baselines under 80 KB each (~45% smaller than 3x).
 @MainActor
 final class VisualRegressionTests: XCTestCase {
     /// Consistent device for all snapshots.
-    private let device: ViewImageConfig = .iPhone13Pro
+    /// Uses 2x scale instead of 3x to reduce baseline image size while
+    /// preserving the same logical layout (390×844 pt).
+    private let device: ViewImageConfig = ViewImageConfig(
+        safeArea: UIEdgeInsets(top: 47, left: 0, bottom: 34, right: 0),
+        size: CGSize(width: 390, height: 844),
+        traits: UITraitCollection(displayScale: 2.0)
+    )
 
     /// Whether to record new baselines. Always false in CI.
     private var isRecording: Bool {

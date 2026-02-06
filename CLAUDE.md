@@ -32,6 +32,12 @@ xcodegen generate
 xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -clonedSourcePackagesDirPath .spm-packages build test
+
+# Snapshot tests MUST run on a 2x simulator (iPhone SE 3) for baselines to match:
+xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
+  -destination 'platform=iOS Simulator,name=iPhone SE 3' \
+  -only-testing:VauchiSnapshotTests \
+  -clonedSourcePackagesDirPath .spm-packages test
 ```
 
 CI runs the same checks (lint, build, test) on MR pipelines. No `allow_failure` — all jobs must pass.
