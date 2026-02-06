@@ -183,7 +183,7 @@ Vauchi is open source and community-funded — no VC money, no data harvesting.
 
 - [GitHub Sponsors](https://github.com/sponsors/vauchi)
 - [Liberapay](https://liberapay.com/Vauchi/donate)
-- [SUPPORTERS.md](https://gitlab.com/vauchi/vauchi/-/blob/main/SUPPORTERS.md) for sponsorship tiers
+- [Supporters](https://docs.vauchi.app/about/supporters/) for sponsorship tiers
 
 ## License
 
