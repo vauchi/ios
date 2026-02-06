@@ -846,24 +846,32 @@ class VauchiRepository {
 
     // MARK: - Exchange Operations
 
-    /// Generate QR data for exchange
+    /// Generate QR data for exchange using ExchangeSession state machine.
     func generateExchangeQr() throws -> VauchiExchangeData {
         do {
-            let data = try vauchi.generateExchangeQr()
+            let session = try vauchi.createExchangeInitiatorManual()
+            let qrData = try session.generateQr()
+            let publicId = try vauchi.getPublicId()
+            let expiresAt = UInt64(Date().timeIntervalSince1970) + 300 // 5 minutes
             return VauchiExchangeData(
-                qrData: data.qrData,
-                publicId: data.publicId,
-                expiresAt: data.expiresAt
+                qrData: qrData,
+                publicId: publicId,
+                expiresAt: expiresAt
             )
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
     }
 
-    /// Complete exchange with scanned QR data
+    /// Complete exchange by driving ExchangeSession state machine as responder.
     func completeExchange(qrData: String) throws -> VauchiExchangeResult {
         do {
-            let result = try vauchi.completeExchange(qrData: qrData)
+            let session = try vauchi.createExchangeResponderManual()
+            try session.processQr(qrData: qrData)
+            try session.verifyProximity()
+            try session.performKeyAgreement()
+            try session.completeCardExchange(theirCardName: "New Contact")
+            let result = try vauchi.finalizeExchange(session: session)
             return VauchiExchangeResult(
                 contactId: result.contactId,
                 contactName: result.contactName,
