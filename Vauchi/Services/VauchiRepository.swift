@@ -127,6 +127,8 @@ enum VauchiRepositoryError: LocalizedError {
             return .deletionNotAllowed(msg)
         case let .ShredError(msg):
             return .shredError(msg)
+        @unknown default:
+            return .internalError("Unknown error")
         }
     }
 }
