@@ -20,7 +20,7 @@ final class PlatformEdgeTests: XCTestCase {
     /// Then a background task should be requested
     /// And the sync should complete if possible
     /// And state should be saved before termination
-    func test_background_task_completion() async {
+    func test_background_task_completion() {
         let service = BackgroundSyncService.shared
 
         // Verify background task identifier is set correctly
