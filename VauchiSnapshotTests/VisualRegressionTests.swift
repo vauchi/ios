@@ -25,7 +25,7 @@ final class VisualRegressionTests: XCTestCase {
     /// Consistent device for all snapshots.
     /// Uses 2x scale instead of 3x to reduce baseline image size while
     /// preserving the same logical layout (390×844 pt).
-    private let device: ViewImageConfig = ViewImageConfig(
+    private let device = ViewImageConfig(
         safeArea: UIEdgeInsets(top: 47, left: 0, bottom: 34, right: 0),
         size: CGSize(width: 390, height: 844),
         traits: UITraitCollection(displayScale: 2.0)
