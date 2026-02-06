@@ -464,7 +464,7 @@ class VauchiRepository {
     // MARK: - Secure Key Management
 
     /// Get or create storage key from Keychain
-    private static func getOrCreateStorageKey(dataDir: String) throws -> Data {
+    private static func getOrCreateStorageKey(dataDir _: String) throws -> Data {
         let keychain = KeychainService.shared
 
         // Try to load from Keychain first
