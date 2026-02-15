@@ -164,6 +164,7 @@ update:bindings-version:
       fi
 
       # Regenerate Xcode project
+      command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
       xcodegen generate
 
       git add project.yml Vauchi.xcodeproj/
@@ -245,6 +246,8 @@ lint:swiftformat:
 lint:xcodegen:
   extends: .macos-job
   stage: lint
+  before_script:
+    - command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
   script:
     - xcodegen generate
     - |
