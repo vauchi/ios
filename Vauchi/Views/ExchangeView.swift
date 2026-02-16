@@ -130,6 +130,31 @@ struct ExchangeView: View {
                     .background(Color(.systemGray6))
                     .cornerRadius(12)
                     .padding(.horizontal)
+
+                    // BLE Exchange stub
+                    VStack(spacing: 16) {
+                        Text("Bluetooth Exchange")
+                            .font(.headline)
+                            .accessibilityAddTraits(.isHeader)
+
+                        Image(systemName: "antenna.radiowaves.left.and.right")
+                            .font(.system(size: 40))
+                            .foregroundColor(.secondary)
+
+                        Text("Coming soon")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+
+                        Text("Exchange contact cards via Bluetooth when both devices are nearby. Requires Bluetooth hardware.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(12)
+                    .padding(.horizontal)
                 }
                 .padding(.vertical)
             }
