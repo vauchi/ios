@@ -33,6 +33,7 @@ struct QRScannerView: View {
                         .stroke(Color.white, lineWidth: 3)
                         .frame(width: 250, height: 250)
                         .background(Color.clear)
+                        .accessibilityHidden(true)
 
                     Spacer()
 
@@ -51,6 +52,8 @@ struct QRScannerView: View {
                                 .padding(.vertical, 8)
                                 .background(Color.red.opacity(0.8))
                                 .cornerRadius(8)
+                                .accessibilityLabel("Try scanning again")
+                                .accessibilityHint("Clears the error and restarts the camera scanner")
                             }
                             .padding()
                             .background(Color.black.opacity(0.7))
@@ -65,12 +68,15 @@ struct QRScannerView: View {
                             .padding()
                             .background(Color.black.opacity(0.7))
                             .cornerRadius(8)
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("Processing exchange")
                         } else {
                             Text("Point camera at a Vauchi QR code")
                                 .foregroundColor(.white)
                                 .padding()
                                 .background(Color.black.opacity(0.7))
                                 .cornerRadius(8)
+                                .accessibilityLabel("Camera ready. Point at a Vauchi QR code to scan")
                         }
                     }
                     .padding(.bottom, 50)
@@ -82,6 +88,8 @@ struct QRScannerView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                         .foregroundColor(.white)
+                        .accessibilityLabel("Cancel scanning")
+                        .accessibilityHint("Returns to the previous screen")
                 }
             }
             .onChange(of: scannedCode) { newValue in
