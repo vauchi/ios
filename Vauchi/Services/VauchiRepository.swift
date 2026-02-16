@@ -759,6 +759,24 @@ class VauchiRepository {
         throw VauchiRepositoryError.internalError("Emergency broadcast not yet available in bindings")
     }
 
+    // MARK: - Tor Mode Operations
+    // Based on: features/tor_mode.feature - R4 Tor Mode
+    // NOTE: These methods are stubs until vauchi-core tor bindings
+    // are published via vauchi-mobile-swift. Once core MR merges and
+    // bindings are updated, replace stubs with actual UniFFI calls.
+
+    /// Get Tor configuration
+    func getTorConfig() throws -> (enabled: Bool, bridges: [String], preferOnion: Bool) {
+        // TODO: Replace with actual UniFFI call once bindings are published
+        return (enabled: false, bridges: [], preferOnion: true)
+    }
+
+    /// Save Tor configuration
+    func saveTorConfig(enabled: Bool, bridges: [String], preferOnion: Bool) throws {
+        // TODO: Replace with actual UniFFI call once bindings are published
+        throw VauchiRepositoryError.internalError("Tor mode not yet available in bindings")
+    }
+
     /// Verify contact fingerprint
     func verifyContact(id: String) throws {
         do {
