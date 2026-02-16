@@ -22,6 +22,8 @@ struct RecoveryView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding()
+                .accessibilityLabel("Recovery mode")
+                .accessibilityHint("Switch between recovering your own identity or helping others recover theirs")
 
                 // Content
                 TabView(selection: $selectedTab) {
@@ -55,6 +57,7 @@ struct RecoverIdentityTab: View {
                     Image(systemName: "lock.shield")
                         .font(.system(size: 48))
                         .foregroundColor(.cyan)
+                        .accessibilityHidden(true)
 
                     Text("Lost Your Device?")
                         .font(.title2)
@@ -134,6 +137,8 @@ struct RecoverIdentityTab: View {
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
+                    .accessibilityLabel("Start recovery process")
+                    .accessibilityHint("Begin recovering your identity using social vouching")
 
                     Button(action: { showAddVoucherSheet = true }) {
                         Text("Add Received Voucher")
@@ -143,6 +148,8 @@ struct RecoverIdentityTab: View {
                             .foregroundColor(.white)
                             .cornerRadius(10)
                     }
+                    .accessibilityLabel("Add received voucher")
+                    .accessibilityHint("Submit a voucher received from a trusted contact")
 
                     Button(action: { showStatusSheet = true }) {
                         Text("Check Recovery Status")
@@ -152,6 +159,8 @@ struct RecoverIdentityTab: View {
                             .foregroundColor(.primary)
                             .cornerRadius(10)
                     }
+                    .accessibilityLabel("Check recovery status")
+                    .accessibilityHint("View progress of your current recovery attempt")
                 }
             }
             .padding()
@@ -182,6 +191,7 @@ struct HelpOthersTab: View {
                     Image(systemName: "checkmark.shield")
                         .font(.system(size: 48))
                         .foregroundColor(.green)
+                        .accessibilityHidden(true)
 
                     Text("Help a Contact Recover")
                         .font(.title2)
@@ -232,6 +242,8 @@ struct HelpOthersTab: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
+                .accessibilityLabel("Vouch for someone")
+                .accessibilityHint("Help a contact recover their identity by vouching for them")
             }
             .padding()
         }
@@ -285,6 +297,8 @@ struct CreateClaimSheet: View {
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
                         }
+                        .accessibilityLabel("Copy claim data")
+                        .accessibilityHint("Copies claim data to clipboard to share with trusted contacts")
                     }
                     .padding()
                 } else {
@@ -298,6 +312,8 @@ struct CreateClaimSheet: View {
                             .font(.system(.body, design: .monospaced))
                             .autocapitalization(.none)
                             .disabled(isCreating)
+                            .accessibilityLabel("Old public key")
+                            .accessibilityHint("Enter your old public key from your backup or previous device")
 
                         if let error = errorMessage {
                             Text(error)
@@ -321,6 +337,8 @@ struct CreateClaimSheet: View {
                             .cornerRadius(10)
                         }
                         .disabled(oldPublicKey.count < 64 || isCreating)
+                        .accessibilityLabel("Create claim")
+                        .accessibilityHint("Generate a recovery claim using the old public key")
                     }
                     .padding()
                 }
@@ -400,6 +418,8 @@ struct CreateVoucherSheet: View {
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
                         }
+                        .accessibilityLabel("Copy voucher data")
+                        .accessibilityHint("Copies voucher data to clipboard to share with the recovering contact")
                     }
                     .padding()
                 } else if let claim = parsedClaim {
@@ -463,6 +483,8 @@ struct CreateVoucherSheet: View {
                                 .cornerRadius(10)
                             }
                             .disabled(isCreatingVoucher)
+                            .accessibilityLabel("Create voucher")
+                            .accessibilityHint("Generate a voucher to help this contact recover their identity")
                         }
 
                         if let error = errorMessage {
@@ -513,6 +535,8 @@ struct CreateVoucherSheet: View {
                             .cornerRadius(10)
                         }
                         .disabled(claimData.count < 20 || isParsing)
+                        .accessibilityLabel("Verify claim")
+                        .accessibilityHint("Parse and verify the recovery claim data")
                     }
                     .padding()
                 }
@@ -668,6 +692,8 @@ struct AddVoucherSheet: View {
                             .cornerRadius(10)
                         }
                         .disabled(voucherData.count < 20 || isAdding)
+                        .accessibilityLabel("Add voucher")
+                        .accessibilityHint("Submit the voucher to your recovery claim")
                     }
                     .padding()
                 }
@@ -855,6 +881,8 @@ struct RecoveryStepRow: View {
                     .foregroundColor(.secondary)
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Step \(number): \(title). \(description)")
     }
 }
 
