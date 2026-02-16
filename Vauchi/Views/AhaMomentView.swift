@@ -21,11 +21,13 @@ struct AhaMomentView: View {
             if moment.hasAnimation && showAnimation {
                 LottieAnimationPlaceholder()
                     .frame(width: 120, height: 120)
+                    .accessibilityHidden(true)
             } else {
                 // Icon based on moment type
                 momentIcon
                     .font(.system(size: 48))
                     .foregroundColor(.cyan)
+                    .accessibilityHidden(true)
             }
 
             // Title
@@ -33,6 +35,7 @@ struct AhaMomentView: View {
                 .font(.title2)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
+                .accessibilityAddTraits(.isHeader)
 
             // Message
             Text(moment.message)
@@ -53,6 +56,8 @@ struct AhaMomentView: View {
             }
             .padding(.horizontal, 24)
             .padding(.top, 8)
+            .accessibilityLabel("Got it!")
+            .accessibilityHint("Dismiss this tip and continue")
         }
         .padding(24)
         .background(
