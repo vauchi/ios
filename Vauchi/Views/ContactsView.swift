@@ -12,6 +12,7 @@ struct ContactsView: View {
     @State private var searchText = ""
     @State private var isSearching = false
     @State private var searchResults: [ContactInfo] = []
+    @State private var showHiddenContacts = false
     @ObservedObject private var localizationService = LocalizationService.shared
 
     private var displayedContacts: [ContactInfo] {
@@ -38,12 +39,22 @@ struct ContactsView: View {
                             HStack {
                                 Text("\(contactCount) contact\(contactCount == 1 ? "" : "s")")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(showHiddenContacts ? .purple : .secondary)
                                 Spacer()
+                                if showHiddenContacts {
+                                    Image(systemName: "eye.slash.fill")
+                                        .font(.caption)
+                                        .foregroundColor(.purple)
+                                }
                             }
                             .padding(.horizontal)
                             .padding(.vertical, 8)
-                            .background(Color(.systemGroupedBackground))
+                            .background(showHiddenContacts ? Color.purple.opacity(0.1) : Color(.systemGroupedBackground))
+                            .onTapGesture(count: 3) {
+                                toggleHiddenContactsMode()
+                            }
+                            .accessibilityLabel("Contact count header")
+                            .accessibilityHint("Triple tap to toggle hidden contacts view")
                         }
 
                         if displayedContacts.isEmpty && !searchText.isEmpty {
@@ -67,6 +78,23 @@ struct ContactsView: View {
                                             Task { await viewModel.loadMoreContacts() }
                                         }
                                     }
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                        if showHiddenContacts {
+                                            Button {
+                                                Task { await unhideContact(contact) }
+                                            } label: {
+                                                Label("Unhide", systemImage: "eye")
+                                            }
+                                            .tint(.green)
+                                        } else {
+                                            Button {
+                                                Task { await hideContact(contact) }
+                                            } label: {
+                                                Label("Hide", systemImage: "eye.slash")
+                                            }
+                                            .tint(.orange)
+                                        }
+                                    }
                                 }
                                 .onDelete(perform: deleteContacts)
 
@@ -83,13 +111,19 @@ struct ContactsView: View {
                     }
                 }
             }
-            .navigationTitle(localizationService.t("nav.contacts"))
+            .navigationTitle(showHiddenContacts ? "Hidden Contacts" : localizationService.t("nav.contacts"))
             .searchable(text: $searchText, prompt: localizationService.t("contacts.search"))
             .onChange(of: searchText) { newValue in
                 performSearch(query: newValue)
             }
             .onAppear {
-                Task { await viewModel.loadContacts() }
+                Task {
+                    if showHiddenContacts {
+                        await viewModel.loadHiddenContacts()
+                    } else {
+                        await viewModel.loadContacts()
+                    }
+                }
             }
             .refreshable {
                 await viewModel.loadContacts()
@@ -126,6 +160,43 @@ struct ContactsView: View {
                     viewModel.showError("Failed to Delete", message: "Could not remove \(contact.displayName): \(error.localizedDescription)")
                 }
             }
+        }
+    }
+
+    private func toggleHiddenContactsMode() {
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+
+        // Toggle mode
+        showHiddenContacts.toggle()
+
+        // Clear search when switching modes
+        searchText = ""
+
+        // Load appropriate contacts
+        Task {
+            if showHiddenContacts {
+                await viewModel.loadHiddenContacts()
+            } else {
+                await viewModel.loadContacts()
+            }
+        }
+    }
+
+    private func hideContact(_ contact: ContactInfo) async {
+        do {
+            try await viewModel.hideContact(id: contact.id)
+        } catch {
+            viewModel.showError("Failed to Hide", message: "Could not hide \(contact.displayName): \(error.localizedDescription)")
+        }
+    }
+
+    private func unhideContact(_ contact: ContactInfo) async {
+        do {
+            try await viewModel.unhideContact(id: contact.id)
+        } catch {
+            viewModel.showError("Failed to Unhide", message: "Could not unhide \(contact.displayName): \(error.localizedDescription)")
         }
     }
 }

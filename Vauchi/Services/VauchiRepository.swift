@@ -656,6 +656,36 @@ class VauchiRepository {
         }
     }
 
+    // MARK: - Hidden Contacts Operations
+    // Based on: features/resistance.feature - R3 Hidden Contact UI
+
+    /// Hide a contact
+    func hideContact(id: String) throws {
+        do {
+            try vauchi.hideContact(id: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Unhide a contact
+    func unhideContact(id: String) throws {
+        do {
+            try vauchi.unhideContact(id: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// List hidden contacts
+    func listHiddenContacts() throws -> [VauchiContact] {
+        do {
+            return try vauchi.listHiddenContacts().map(convertContact)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     /// Verify contact fingerprint
     func verifyContact(id: String) throws {
         do {

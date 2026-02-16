@@ -490,6 +490,76 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Hidden Contacts
+    // Based on: features/resistance.feature - R3 Hidden Contact UI
+
+    /// Load hidden contacts
+    func loadHiddenContacts() async {
+        guard let repository = repository else { return }
+
+        do {
+            let hiddenData = try repository.listHiddenContacts()
+            contacts = hiddenData.map { contact in
+                ContactInfo(
+                    id: contact.id,
+                    displayName: contact.displayName,
+                    verified: contact.isVerified,
+                    recoveryTrusted: contact.isRecoveryTrusted,
+                    card: CardInfo(
+                        displayName: contact.card.displayName,
+                        fields: contact.card.fields.map { field in
+                            FieldInfo(
+                                id: field.id,
+                                fieldType: field.fieldType.rawValue,
+                                label: field.label,
+                                value: field.value
+                            )
+                        }
+                    ),
+                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt))
+                )
+            }
+        } catch {
+            // Gracefully handle if method not available yet in UniFFI bindings
+            print("VauchiViewModel: loadHiddenContacts not yet available: \(error)")
+            contacts = []
+        }
+    }
+
+    /// Hide a contact
+    func hideContact(id: String) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        do {
+            try repository.hideContact(id: id)
+            // Remove from current contacts list
+            contacts.removeAll { $0.id == id }
+        } catch {
+            // Gracefully handle if method not available yet
+            print("VauchiViewModel: hideContact not yet available: \(error)")
+            throw VauchiRepositoryError.internalError("Hidden contacts feature not yet available")
+        }
+    }
+
+    /// Unhide a contact
+    func unhideContact(id: String) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        do {
+            try repository.unhideContact(id: id)
+            // Remove from hidden contacts list
+            contacts.removeAll { $0.id == id }
+        } catch {
+            // Gracefully handle if method not available yet
+            print("VauchiViewModel: unhideContact not yet available: \(error)")
+            throw VauchiRepositoryError.internalError("Hidden contacts feature not yet available")
+        }
+    }
+
     func removeContact(id: String) async throws {
         guard let repository = repository else {
             throw VauchiRepositoryError.notInitialized
