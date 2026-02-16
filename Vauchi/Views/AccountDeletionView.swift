@@ -23,6 +23,7 @@ struct AccountDeletionView: View {
                     HStack {
                         Spacer()
                         ProgressView()
+                            .accessibilityLabel("Loading account deletion status")
                         Spacer()
                     }
                 }
@@ -50,6 +51,7 @@ struct AccountDeletionView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Label("What happens when you delete your account", systemImage: "info.circle")
                         .font(.subheadline.bold())
+                        .accessibilityAddTraits(.isHeader)
 
                     Text("All your contacts, cards, and identity data will be permanently erased.")
                         .font(.caption)
@@ -106,6 +108,7 @@ struct AccountDeletionView: View {
                     Image(systemName: "checkmark.shield")
                         .foregroundColor(.green)
                         .font(.title2)
+                        .accessibilityHidden(true)
                     VStack(alignment: .leading) {
                         Text("Account Active")
                             .font(.headline)
@@ -114,6 +117,7 @@ struct AccountDeletionView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                .accessibilityElement(children: .combine)
             }
             .padding(.vertical, 4)
 
@@ -124,6 +128,8 @@ struct AccountDeletionView: View {
                     Spacer()
                 }
             }
+            .accessibilityLabel("Schedule account deletion")
+            .accessibilityHint("Begin the 7-day deletion process for your account")
         } header: {
             Text("Status")
         } footer: {
@@ -138,6 +144,7 @@ struct AccountDeletionView: View {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.orange)
                         .font(.title2)
+                        .accessibilityHidden(true)
                     VStack(alignment: .leading) {
                         Text("Deletion Scheduled")
                             .font(.headline)
@@ -149,6 +156,7 @@ struct AccountDeletionView: View {
                         }
                     }
                 }
+                .accessibilityElement(children: .combine)
 
                 if let info = viewModel.deletionInfo {
                     Divider()
@@ -186,6 +194,8 @@ struct AccountDeletionView: View {
                     Spacer()
                 }
             }
+            .accessibilityLabel("Cancel deletion")
+            .accessibilityHint("Stop the deletion process and keep your account")
         } header: {
             Text("Status")
         } footer: {
@@ -200,6 +210,7 @@ struct AccountDeletionView: View {
                     Image(systemName: "trash.fill")
                         .foregroundColor(.red)
                         .font(.title2)
+                        .accessibilityHidden(true)
                     VStack(alignment: .leading) {
                         Text("Account Deleted")
                             .font(.headline)
@@ -209,6 +220,7 @@ struct AccountDeletionView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                .accessibilityElement(children: .combine)
             }
             .padding(.vertical, 4)
         } header: {
