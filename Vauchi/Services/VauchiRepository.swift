@@ -658,32 +658,26 @@ class VauchiRepository {
 
     // MARK: - Hidden Contacts Operations
     // Based on: features/resistance.feature - R3 Hidden Contact UI
+    // NOTE: These methods are stubs until vauchi-core hidden contact bindings
+    // are published via vauchi-mobile-swift. Once core MR !109 merges and
+    // bindings are updated, replace stubs with actual UniFFI calls.
 
     /// Hide a contact
     func hideContact(id: String) throws {
-        do {
-            try vauchi.hideContact(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
+        // TODO: Replace with `try vauchi.hideContact(id: id)` once bindings are published
+        throw VauchiRepositoryError.internalError("Hidden contacts not yet available in bindings")
     }
 
     /// Unhide a contact
     func unhideContact(id: String) throws {
-        do {
-            try vauchi.unhideContact(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
+        // TODO: Replace with `try vauchi.unhideContact(id: id)` once bindings are published
+        throw VauchiRepositoryError.internalError("Hidden contacts not yet available in bindings")
     }
 
     /// List hidden contacts
     func listHiddenContacts() throws -> [VauchiContact] {
-        do {
-            return try vauchi.listHiddenContacts().map(convertContact)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
+        // TODO: Replace with `try vauchi.listHiddenContacts().map(convertContact)` once bindings are published
+        throw VauchiRepositoryError.internalError("Hidden contacts not yet available in bindings")
     }
 
     /// Verify contact fingerprint
