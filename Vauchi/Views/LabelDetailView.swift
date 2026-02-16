@@ -23,6 +23,7 @@ struct LabelDetailView: View {
         Group {
             if isLoading {
                 ProgressView("Loading...")
+                    .accessibilityLabel("Loading label details")
             } else if let detail = labelDetail {
                 LabelDetailContent(
                     label: label,
@@ -147,6 +148,8 @@ struct LabelDetailContent: View {
                 .onTapGesture {
                     onRename()
                 }
+                .accessibilityLabel("Label name: \(detail.name)")
+                .accessibilityHint("Double tap to rename this label")
 
                 HStack {
                     Text("Contacts")
@@ -154,6 +157,7 @@ struct LabelDetailContent: View {
                     Text("\(detail.contactIds.count)")
                         .foregroundColor(.secondary)
                 }
+                .accessibilityLabel("\(detail.contactIds.count) contacts")
 
                 HStack {
                     Text("Visible Fields")
@@ -161,6 +165,7 @@ struct LabelDetailContent: View {
                     Text("\(detail.visibleFieldIds.count)")
                         .foregroundColor(.secondary)
                 }
+                .accessibilityLabel("\(detail.visibleFieldIds.count) visible fields")
             } header: {
                 Text("Label Info")
             }
@@ -183,6 +188,8 @@ struct LabelDetailContent: View {
                                     .lineLimit(1)
                             }
                         }
+                        .accessibilityLabel("Visibility for \(field.label)")
+                        .accessibilityValue(isVisible ? "Visible" : "Hidden")
                     }
                 } header: {
                     Text("Field Visibility")
@@ -227,6 +234,8 @@ struct LabelDetailContent: View {
                 Button(role: .destructive, action: onDelete) {
                     Label("Delete Label", systemImage: "trash")
                 }
+                .accessibilityLabel("Delete label")
+                .accessibilityHint("Permanently delete this label. Contacts will remain in your list.")
             } footer: {
                 Text("Deleting this label will not remove the contacts from your contacts list.")
             }
@@ -256,6 +265,8 @@ struct RenameLabelSheet: View {
                                 rename()
                             }
                         }
+                        .accessibilityLabel("Label name")
+                        .accessibilityHint("Enter a new name for this label")
                 } footer: {
                     Text("Enter a new name for this label.")
                 }
