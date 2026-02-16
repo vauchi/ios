@@ -23,6 +23,8 @@ struct SecurityStepView: View {
                     }
                     .foregroundColor(.cyan)
                 }
+                .accessibilityLabel("Back")
+                .accessibilityHint("Return to card preview")
                 Spacer()
             }
             .padding(.horizontal)
@@ -34,12 +36,14 @@ struct SecurityStepView: View {
             VStack(spacing: 32) {
                 // Visual diagram
                 SecurityDiagram()
+                    .accessibilityLabel("Security diagram showing encrypted communication between you and your contacts")
 
                 // Title
                 VStack(spacing: 12) {
                     Text("Your info is private")
                         .font(.title)
                         .fontWeight(.bold)
+                        .accessibilityAddTraits(.isHeader)
 
                     Text("Only you and your contacts can see your information. Not even us.")
                         .font(.body)
@@ -84,6 +88,8 @@ struct SecurityStepView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                 }
+                .accessibilityLabel("Finish setup")
+                .accessibilityHint("Complete onboarding and start using Vauchi")
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
@@ -156,6 +162,7 @@ struct SecurityPoint: View {
 
             Spacer()
         }
+        .accessibilityElement(children: .combine)
     }
 }
 

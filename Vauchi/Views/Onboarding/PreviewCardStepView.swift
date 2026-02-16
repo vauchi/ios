@@ -24,6 +24,8 @@ struct PreviewCardStepView: View {
                     }
                     .foregroundColor(.cyan)
                 }
+                .accessibilityLabel("Back")
+                .accessibilityHint("Return to add fields screen")
                 Spacer()
             }
             .padding(.horizontal)
@@ -38,6 +40,7 @@ struct PreviewCardStepView: View {
                     Text("Your card")
                         .font(.title)
                         .fontWeight(.bold)
+                        .accessibilityAddTraits(.isHeader)
 
                     Text("This is how you'll appear to contacts")
                         .font(.body)
@@ -63,10 +66,12 @@ struct PreviewCardStepView: View {
                                     .font(.system(size: 36, weight: .bold))
                                     .foregroundColor(.white)
                             )
+                            .accessibilityHidden(true)
 
                         Text(onboardingData.displayName)
                             .font(.title2)
                             .fontWeight(.semibold)
+                            .accessibilityLabel("Display name: \(onboardingData.displayName)")
                     }
                     .padding(.vertical, 24)
 
@@ -112,12 +117,16 @@ struct PreviewCardStepView: View {
                     .foregroundColor(.white)
                     .cornerRadius(12)
                 }
+                .accessibilityLabel("Looks good!")
+                .accessibilityHint("Confirm card and proceed to security information")
 
                 Button(action: onBack) {
                     Text("Edit card")
                         .font(.subheadline)
                         .foregroundColor(.cyan)
                 }
+                .accessibilityLabel("Edit card")
+                .accessibilityHint("Go back to edit your contact information")
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
@@ -149,6 +158,8 @@ struct PreviewFieldRow: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(label): \(value)")
     }
 }
 

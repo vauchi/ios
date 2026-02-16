@@ -32,6 +32,8 @@ struct AddFieldsStepView: View {
                     }
                     .foregroundColor(.cyan)
                 }
+                .accessibilityLabel("Back")
+                .accessibilityHint("Return to name input screen")
                 Spacer()
             }
             .padding(.horizontal)
@@ -44,12 +46,14 @@ struct AddFieldsStepView: View {
                         .font(.system(size: 60))
                         .foregroundColor(.cyan)
                         .padding(.top, 24)
+                        .accessibilityHidden(true)
 
                     // Title
                     VStack(spacing: 8) {
                         Text("Add your info")
                             .font(.title)
                             .fontWeight(.bold)
+                            .accessibilityAddTraits(.isHeader)
 
                         Text("Help contacts reach you")
                             .font(.body)
@@ -71,6 +75,8 @@ struct AddFieldsStepView: View {
                                 .background(Color(.systemGray6))
                                 .cornerRadius(12)
                                 .focused($focusedField, equals: .phone)
+                                .accessibilityLabel("Phone number")
+                                .accessibilityHint("Enter your phone number for contacts to reach you")
                         }
 
                         // Email
@@ -87,6 +93,8 @@ struct AddFieldsStepView: View {
                                 .background(Color(.systemGray6))
                                 .cornerRadius(12)
                                 .focused($focusedField, equals: .email)
+                                .accessibilityLabel("Email address")
+                                .accessibilityHint("Enter your email address for contacts to reach you")
                         }
                     }
                     .padding(.horizontal, 24)
@@ -111,12 +119,16 @@ struct AddFieldsStepView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                 }
+                .accessibilityLabel("Continue")
+                .accessibilityHint("Proceed to card preview")
 
                 Button(action: onSkip) {
                     Text("Skip for now")
                         .font(.subheadline)
                         .foregroundColor(.cyan)
                 }
+                .accessibilityLabel("Skip for now")
+                .accessibilityHint("Proceed to card preview without adding fields")
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)

@@ -29,11 +29,13 @@ struct WelcomeStepView: View {
                             endPoint: .bottomTrailing
                         )
                     )
+                    .accessibilityHidden(true)
 
                 // Title
                 Text(localizationService.t("app.name"))
                     .font(.largeTitle)
                     .fontWeight(.bold)
+                    .accessibilityAddTraits(.isHeader)
 
                 // Tagline
                 Text(localizationService.t("welcome.subtitle"))
@@ -78,6 +80,8 @@ struct WelcomeStepView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                 }
+                .accessibilityLabel("Get started")
+                .accessibilityHint("Begin creating your Vauchi identity")
 
                 Button(action: onRestore) {
                     Text("I have a backup")
@@ -85,6 +89,8 @@ struct WelcomeStepView: View {
                         .foregroundColor(.cyan)
                 }
                 .padding(.bottom, 8)
+                .accessibilityLabel("Restore from backup")
+                .accessibilityHint("Recover your identity from an existing backup")
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
@@ -115,6 +121,7 @@ struct ValuePropRow: View {
             Spacer()
         }
         .padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
     }
 }
 

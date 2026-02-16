@@ -28,6 +28,7 @@ struct ReadyStepView: View {
                         .foregroundColor(.green)
                         .scaleEffect(showConfetti ? 1.0 : 0.5)
                         .opacity(showConfetti ? 1.0 : 0.0)
+                        .accessibilityHidden(true)
                 }
                 .animation(.spring(response: 0.5, dampingFraction: 0.6), value: showConfetti)
 
@@ -36,6 +37,7 @@ struct ReadyStepView: View {
                     Text("You're all set!")
                         .font(.title)
                         .fontWeight(.bold)
+                        .accessibilityAddTraits(.isHeader)
 
                     Text("Your card is ready to share")
                         .font(.body)
@@ -109,6 +111,7 @@ struct NextStepCard: View {
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .accessibilityElement(children: .combine)
     }
 }
 

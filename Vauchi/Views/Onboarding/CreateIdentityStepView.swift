@@ -30,6 +30,8 @@ struct CreateIdentityStepView: View {
                     }
                     .foregroundColor(.cyan)
                 }
+                .accessibilityLabel("Back")
+                .accessibilityHint("Return to welcome screen")
                 Spacer()
             }
             .padding(.horizontal)
@@ -43,12 +45,14 @@ struct CreateIdentityStepView: View {
                 Image(systemName: "person.circle")
                     .font(.system(size: 60))
                     .foregroundColor(.cyan)
+                    .accessibilityHidden(true)
 
                 // Title
                 VStack(spacing: 8) {
                     Text("What's your name?")
                         .font(.title)
                         .fontWeight(.bold)
+                        .accessibilityAddTraits(.isHeader)
 
                     Text("This is how you'll appear to your contacts")
                         .font(.body)
@@ -73,6 +77,8 @@ struct CreateIdentityStepView: View {
                         }
                     }
                     .padding(.horizontal, 32)
+                    .accessibilityLabel("Your name")
+                    .accessibilityHint("Enter your display name for your contact card")
             }
 
             Spacer()
@@ -89,6 +95,8 @@ struct CreateIdentityStepView: View {
                         .cornerRadius(12)
                 }
                 .disabled(!isValid)
+                .accessibilityLabel("Continue")
+                .accessibilityHint("Proceed to add contact fields")
 
                 Text("You can change this later")
                     .font(.caption)
