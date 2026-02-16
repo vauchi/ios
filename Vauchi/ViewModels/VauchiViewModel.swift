@@ -622,6 +622,37 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Emergency Broadcast
+
+    @Published var emergencyConfigured = false
+
+    func loadEmergencyConfig() async {
+        guard let repository = repository else { return }
+        do {
+            let config = try repository.getEmergencyConfig()
+            emergencyConfigured = config != nil
+        } catch {
+            print("VauchiViewModel: loadEmergencyConfig not yet available: \(error)")
+        }
+    }
+
+    func configureEmergencyBroadcast(contactIds: [String], message: String, includeLocation: Bool) async throws {
+        guard let repository = repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.configureEmergencyBroadcast(contactIds: contactIds, message: message, includeLocation: includeLocation)
+        emergencyConfigured = true
+    }
+
+    func sendEmergencyBroadcast() async throws -> (sent: Int, total: Int) {
+        guard let repository = repository else { throw VauchiRepositoryError.notInitialized }
+        return try repository.sendEmergencyBroadcast()
+    }
+
+    func disableEmergencyBroadcast() async throws {
+        guard let repository = repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.disableEmergencyBroadcast()
+        emergencyConfigured = false
+    }
+
     func removeContact(id: String) async throws {
         guard let repository = repository else {
             throw VauchiRepositoryError.notInitialized

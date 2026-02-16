@@ -732,6 +732,33 @@ class VauchiRepository {
         throw VauchiRepositoryError.internalError("Panic shred not yet available in bindings")
     }
 
+    // MARK: - Emergency Broadcast Operations
+    // Based on: features/emergency_broadcast.feature - R5 Emergency Broadcast
+
+    /// Configure emergency broadcast
+    func configureEmergencyBroadcast(contactIds: [String], message: String, includeLocation: Bool) throws {
+        // TODO: Replace with `try vauchi.configureEmergencyBroadcast(contactIds: contactIds, message: message, includeLocation: includeLocation)` once bindings are published
+        throw VauchiRepositoryError.internalError("Emergency broadcast not yet available in bindings")
+    }
+
+    /// Get emergency broadcast config
+    func getEmergencyConfig() throws -> (contactIds: [String], message: String, includeLocation: Bool)? {
+        // TODO: Replace with real UniFFI call once bindings are published
+        return nil
+    }
+
+    /// Send emergency broadcast
+    func sendEmergencyBroadcast() throws -> (sent: Int, total: Int) {
+        // TODO: Replace with `try vauchi.sendEmergencyBroadcast()` once bindings are published
+        throw VauchiRepositoryError.internalError("Emergency broadcast not yet available in bindings")
+    }
+
+    /// Disable emergency broadcast
+    func disableEmergencyBroadcast() throws {
+        // TODO: Replace with `try vauchi.disableEmergencyBroadcast()` once bindings are published
+        throw VauchiRepositoryError.internalError("Emergency broadcast not yet available in bindings")
+    }
+
     /// Verify contact fingerprint
     func verifyContact(id: String) throws {
         do {

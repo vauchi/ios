@@ -219,6 +219,18 @@ struct SettingsView: View {
                             }
                         }
                     }
+
+                    NavigationLink(destination: EmergencyBroadcastView()) {
+                        HStack {
+                            Label("Emergency Broadcast", systemImage: "megaphone")
+                            Spacer()
+                            if viewModel.emergencyConfigured {
+                                Text("Configured")
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            }
+                        }
+                    }
                 }
 
                 // Content Updates section
@@ -1076,6 +1088,83 @@ struct DuressSettingsView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+struct EmergencyBroadcastView: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @State private var contactIds = ""
+    @State private var message = "I may be in danger. Please check on me."
+    @State private var includeLocation = false
+    @State private var errorMessage = ""
+    @State private var successMessage = ""
+
+    var body: some View {
+        List {
+            Section {
+                HStack {
+                    Label("Status", systemImage: viewModel.emergencyConfigured ? "megaphone.fill" : "megaphone")
+                    Spacer()
+                    Text(viewModel.emergencyConfigured ? "Configured" : "Not configured")
+                        .foregroundColor(viewModel.emergencyConfigured ? .green : .secondary)
+                }
+            } header: {
+                Text("Emergency Broadcast")
+            } footer: {
+                Text("Send encrypted emergency alerts to trusted contacts. Alerts are indistinguishable from normal card updates.")
+            }
+
+            Section {
+                TextField("Contact IDs (comma-separated)", text: $contactIds)
+                    .autocapitalization(.none)
+                TextField("Alert message", text: $message)
+                Toggle("Include location", isOn: $includeLocation)
+            } header: {
+                Text("Configuration")
+            }
+
+            Section {
+                Button("Save Configuration") {
+                    let ids = contactIds.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespaces)) }.filter { !$0.isEmpty }
+                    Task {
+                        do {
+                            try await viewModel.configureEmergencyBroadcast(contactIds: ids, message: message, includeLocation: includeLocation)
+                            successMessage = "Emergency broadcast configured"
+                        } catch {
+                            errorMessage = error.localizedDescription
+                        }
+                    }
+                }
+
+                if viewModel.emergencyConfigured {
+                    Button(role: .destructive) {
+                        Task {
+                            do {
+                                try await viewModel.disableEmergencyBroadcast()
+                                successMessage = "Emergency broadcast disabled"
+                            } catch {
+                                errorMessage = error.localizedDescription
+                            }
+                        }
+                    } label: {
+                        Label("Disable", systemImage: "xmark.circle")
+                    }
+                }
+            } header: {
+                Text("Actions")
+            }
+
+            if !successMessage.isEmpty {
+                Section { Text(successMessage).foregroundColor(.green) }
+            }
+            if !errorMessage.isEmpty {
+                Section { Text(errorMessage).foregroundColor(.red) }
+            }
+        }
+        .navigationTitle("Emergency Broadcast")
+        .task {
+            await viewModel.loadEmergencyConfig()
         }
     }
 }
