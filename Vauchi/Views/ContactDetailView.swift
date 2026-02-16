@@ -29,15 +29,18 @@ struct ContactDetailView: View {
                         Circle()
                             .fill(Color.cyan)
                             .frame(width: 80, height: 80)
+                            .accessibilityHidden(true)
 
                         Text(String(contact.displayName.prefix(1)).uppercased())
                             .font(.largeTitle)
                             .foregroundColor(.white)
                     }
+                    .accessibilityLabel("Profile picture for \(contact.displayName)")
 
                     Text(contact.displayName)
                         .font(.title)
                         .fontWeight(.bold)
+                        .accessibilityAddTraits(.isHeader)
 
                     HStack(spacing: 4) {
                         if contact.verified {
@@ -47,10 +50,12 @@ struct ContactDetailView: View {
                         Text(contact.verified ? localizationService.t("contacts.verified") : localizationService.t("contacts.not_verified"))
                             .foregroundColor(.secondary)
                     }
+                    .accessibilityElement(children: .combine)
 
                     Text("ID: \(String(contact.id.prefix(16)))...")
                         .font(.system(.caption, design: .monospaced))
                         .foregroundColor(.secondary)
+                        .accessibilityLabel("Contact ID: \(String(contact.id.prefix(16)))")
 
                     if let addedAt = contact.addedAt {
                         Text("Added \(addedAt, style: .relative) ago")
@@ -69,6 +74,8 @@ struct ContactDetailView: View {
                                 .cornerRadius(8)
                         }
                         .disabled(isVerifying)
+                        .accessibilityLabel("Verify contact")
+                        .accessibilityHint("Mark this contact as verified after confirming their identity in person")
                     }
 
                     // Recovery trust indicator
@@ -108,6 +115,8 @@ struct ContactDetailView: View {
                         .cornerRadius(8)
                     }
                     .disabled(isTogglingTrust)
+                    .accessibilityLabel(contact.recoveryTrusted ? "Remove recovery trust" : "Trust for recovery")
+                    .accessibilityHint(contact.recoveryTrusted ? "Remove this contact from your recovery helpers" : "Allow this contact to help you recover your account")
                 }
                 .padding()
 
@@ -117,6 +126,7 @@ struct ContactDetailView: View {
                         Text(localizationService.t("contacts.info"))
                             .font(.headline)
                             .padding(.horizontal)
+                            .accessibilityAddTraits(.isHeader)
 
                         if card.fields.isEmpty {
                             Text(localizationService.t("contacts.no_info"))
@@ -142,6 +152,7 @@ struct ContactDetailView: View {
                     Text(localizationService.t("visibility.title"))
                         .font(.headline)
                         .padding(.horizontal)
+                        .accessibilityAddTraits(.isHeader)
 
                     Text("Control which of your fields this contact can see.")
                         .font(.caption)
@@ -196,6 +207,8 @@ struct ContactDetailView: View {
                         .cornerRadius(10)
                 }
                 .padding(.horizontal)
+                .accessibilityLabel("Remove contact")
+                .accessibilityHint("Permanently delete this contact from your list")
             }
             .padding(.vertical)
         }
@@ -317,6 +330,7 @@ struct ContactFieldRow: View {
             Image(systemName: icon(for: field.fieldType))
                 .foregroundColor(.cyan)
                 .frame(width: 24)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(field.label)
@@ -340,6 +354,8 @@ struct ContactFieldRow: View {
                     Image(systemName: "envelope.circle")
                         .foregroundColor(.blue)
                 }
+                .accessibilityLabel("Send email")
+                .accessibilityHint("Opens email app to compose message to \(field.value)")
             } else if fieldType == .phone {
                 HStack(spacing: 8) {
                     Button(action: {
@@ -348,6 +364,8 @@ struct ContactFieldRow: View {
                         Image(systemName: "phone.circle")
                             .foregroundColor(.green)
                     }
+                    .accessibilityLabel("Call")
+                    .accessibilityHint("Starts phone call to \(field.value)")
                     Button(action: {
                         if let url = ContactActions.buildSmsUrl(for: field.value) {
                             ContactActions.openUrl(url)
@@ -356,6 +374,8 @@ struct ContactFieldRow: View {
                         Image(systemName: "message.circle")
                             .foregroundColor(.blue)
                     }
+                    .accessibilityLabel("Send SMS")
+                    .accessibilityHint("Opens messages app to send SMS to \(field.value)")
                 }
             } else if fieldType == .website {
                 Button(action: {
@@ -364,6 +384,8 @@ struct ContactFieldRow: View {
                     Image(systemName: "safari")
                         .foregroundColor(.blue)
                 }
+                .accessibilityLabel("Open website")
+                .accessibilityHint("Opens \(field.value) in Safari")
             } else if fieldType == .address {
                 Button(action: {
                     ContactActions.openField(value: field.value, type: .address)
@@ -371,6 +393,8 @@ struct ContactFieldRow: View {
                     Image(systemName: "map")
                         .foregroundColor(.orange)
                 }
+                .accessibilityLabel("Open in maps")
+                .accessibilityHint("Opens \(field.value) in Maps app")
             }
         }
         .padding()
@@ -458,6 +482,8 @@ struct VisibilityToggleRow: View {
                 set: { onToggle($0) }
             ))
             .labelsHidden()
+            .accessibilityLabel("Visibility for \(field.label)")
+            .accessibilityValue(isVisible ? "Visible" : "Hidden")
         }
         .padding()
         .background(Color(.systemGray6))
