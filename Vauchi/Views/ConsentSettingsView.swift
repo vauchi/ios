@@ -22,6 +22,7 @@ struct ConsentSettingsView: View {
                     HStack {
                         Spacer()
                         ProgressView()
+                            .accessibilityLabel("Loading consent settings")
                         Spacer()
                     }
                 }
@@ -158,12 +159,16 @@ struct ConsentToggleRow: View {
         Toggle(isOn: $isGranted) {
             VStack(alignment: .leading, spacing: 2) {
                 Label(consentType.displayName, systemImage: consentIcon)
+                    .accessibilityHidden(true)
                 Text(consentDescription)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
         }
         .tint(.cyan)
+        .accessibilityLabel("\(consentType.displayName): \(consentDescription)")
+        .accessibilityValue(isGranted ? "Granted" : "Revoked")
+        .accessibilityHint("Double tap to \(isGranted ? "revoke" : "grant") consent")
     }
 }
 
@@ -207,7 +212,10 @@ struct ConsentRecordRow: View {
 
             Image(systemName: record.granted ? "checkmark.circle.fill" : "xmark.circle.fill")
                 .foregroundColor(record.granted ? .green : .orange)
+                .accessibilityHidden(true)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(record.consentType.displayName) \(record.granted ? "granted" : "revoked") on \(record.date.formatted())")
     }
 }
 
