@@ -560,6 +560,54 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Duress PIN
+    // Based on: features/duress_pin.feature - R1 Duress PIN
+
+    @Published var isPasswordEnabled = false
+    @Published var isDuressEnabled = false
+
+    /// Load duress status
+    func loadDuressStatus() async {
+        guard let repository = repository else { return }
+
+        do {
+            isPasswordEnabled = try repository.isPasswordEnabled()
+            isDuressEnabled = try repository.isDuressEnabled()
+        } catch {
+            print("VauchiViewModel: loadDuressStatus not yet available: \(error)")
+        }
+    }
+
+    /// Set up app password
+    func setupAppPassword(password: String) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.setupAppPassword(password: password)
+        isPasswordEnabled = true
+    }
+
+    /// Set up duress PIN
+    func setupDuressPassword(duressPassword: String) async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.setupDuressPassword(duressPassword: duressPassword)
+        isDuressEnabled = true
+    }
+
+    /// Disable duress PIN
+    func disableDuress() async throws {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.disableDuress()
+        isDuressEnabled = false
+    }
+
     func removeContact(id: String) async throws {
         guard let repository = repository else {
             throw VauchiRepositoryError.notInitialized

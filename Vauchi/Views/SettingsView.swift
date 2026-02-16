@@ -198,6 +198,18 @@ struct SettingsView: View {
                             }
                         }
                     }
+
+                    NavigationLink(destination: DuressSettingsView()) {
+                        HStack {
+                            Label("Duress PIN", systemImage: "shield.lefthalf.filled")
+                            Spacer()
+                            if viewModel.isDuressEnabled {
+                                Text("Enabled")
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            }
+                        }
+                    }
                 }
 
                 // Content Updates section
@@ -900,6 +912,150 @@ struct CertificatePinningView: View {
             }
         } message: {
             Text("This will disable certificate pinning and allow connections to any valid relay server.")
+        }
+    }
+}
+
+struct DuressSettingsView: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @State private var showPasswordSetup = false
+    @State private var showDuressSetup = false
+    @State private var password = ""
+    @State private var confirmPassword = ""
+    @State private var duressPin = ""
+    @State private var confirmDuressPin = ""
+    @State private var errorMessage = ""
+    @State private var successMessage = ""
+
+    var body: some View {
+        List {
+            Section {
+                HStack {
+                    Label("App Password", systemImage: "lock.fill")
+                    Spacer()
+                    Text(viewModel.isPasswordEnabled ? "Enabled" : "Not set")
+                        .foregroundColor(viewModel.isPasswordEnabled ? .green : .secondary)
+                }
+
+                HStack {
+                    Label("Duress PIN", systemImage: "shield.lefthalf.filled")
+                    Spacer()
+                    Text(viewModel.isDuressEnabled ? "Enabled" : "Not set")
+                        .foregroundColor(viewModel.isDuressEnabled ? .green : .secondary)
+                }
+            } header: {
+                Text("Status")
+            } footer: {
+                Text("When the duress PIN is entered instead of the app password, contacts are replaced with decoy data for plausible deniability.")
+            }
+
+            if !viewModel.isPasswordEnabled {
+                Section {
+                    Button(action: { showPasswordSetup = true }) {
+                        Label("Set App Password", systemImage: "lock.badge.plus")
+                    }
+                } header: {
+                    Text("Setup")
+                }
+            }
+
+            if viewModel.isPasswordEnabled {
+                Section {
+                    if !viewModel.isDuressEnabled {
+                        Button(action: { showDuressSetup = true }) {
+                            Label("Set Duress PIN", systemImage: "shield.lefthalf.filled.badge.checkmark")
+                        }
+                    } else {
+                        Button(role: .destructive) {
+                            Task {
+                                do {
+                                    try await viewModel.disableDuress()
+                                    successMessage = "Duress PIN disabled"
+                                } catch {
+                                    errorMessage = error.localizedDescription
+                                }
+                            }
+                        } label: {
+                            Label("Disable Duress PIN", systemImage: "shield.slash")
+                        }
+                    }
+                } header: {
+                    Text("Actions")
+                }
+            }
+
+            if !successMessage.isEmpty {
+                Section {
+                    Text(successMessage)
+                        .foregroundColor(.green)
+                }
+            }
+            if !errorMessage.isEmpty {
+                Section {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                }
+            }
+        }
+        .navigationTitle("Duress PIN")
+        .task {
+            await viewModel.loadDuressStatus()
+        }
+        .alert("Set App Password", isPresented: $showPasswordSetup) {
+            SecureField("Password", text: $password)
+            SecureField("Confirm Password", text: $confirmPassword)
+            Button("Cancel", role: .cancel) {
+                password = ""
+                confirmPassword = ""
+            }
+            Button("Set") {
+                guard password.count >= 4 else {
+                    errorMessage = "Password must be at least 4 characters"
+                    return
+                }
+                guard password == confirmPassword else {
+                    errorMessage = "Passwords do not match"
+                    return
+                }
+                Task {
+                    do {
+                        try await viewModel.setupAppPassword(password: password)
+                        successMessage = "App password set"
+                        password = ""
+                        confirmPassword = ""
+                    } catch {
+                        errorMessage = error.localizedDescription
+                    }
+                }
+            }
+        }
+        .alert("Set Duress PIN", isPresented: $showDuressSetup) {
+            SecureField("Duress PIN", text: $duressPin)
+            SecureField("Confirm PIN", text: $confirmDuressPin)
+            Button("Cancel", role: .cancel) {
+                duressPin = ""
+                confirmDuressPin = ""
+            }
+            Button("Set") {
+                guard duressPin.count >= 4 else {
+                    errorMessage = "PIN must be at least 4 characters"
+                    return
+                }
+                guard duressPin == confirmDuressPin else {
+                    errorMessage = "PINs do not match"
+                    return
+                }
+                Task {
+                    do {
+                        try await viewModel.setupDuressPassword(duressPassword: duressPin)
+                        successMessage = "Duress PIN configured"
+                        duressPin = ""
+                        confirmDuressPin = ""
+                    } catch {
+                        errorMessage = error.localizedDescription
+                    }
+                }
+            }
         }
     }
 }

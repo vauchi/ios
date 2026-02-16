@@ -680,6 +680,49 @@ class VauchiRepository {
         throw VauchiRepositoryError.internalError("Hidden contacts not yet available in bindings")
     }
 
+    // MARK: - Duress PIN Operations
+    // Based on: features/duress_pin.feature - R1 Duress PIN
+    // NOTE: These methods are stubs until vauchi-core duress bindings
+    // are published via vauchi-mobile-swift. Once core MR merges and
+    // bindings are updated, replace stubs with actual UniFFI calls.
+
+    /// Set up app password
+    func setupAppPassword(password: String) throws {
+        // TODO: Replace with `try vauchi.setupAppPassword(password: password)` once bindings are published
+        throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
+    }
+
+    /// Set up duress PIN (requires app password to be set first)
+    func setupDuressPassword(duressPassword: String) throws {
+        // TODO: Replace with `try vauchi.setupDuressPassword(duressPassword: duressPassword)` once bindings are published
+        throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
+    }
+
+    /// Authenticate with password/PIN — returns "normal", "duress", or throws on invalid
+    func authenticate(password: String) throws -> String {
+        // TODO: Replace with `try vauchi.authenticate(password: password)` once bindings are published
+        // Returns MobileAuthMode.normal or MobileAuthMode.duress
+        throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
+    }
+
+    /// Check if app password is enabled
+    func isPasswordEnabled() throws -> Bool {
+        // TODO: Replace with `try vauchi.isPasswordEnabled()` once bindings are published
+        return false
+    }
+
+    /// Check if duress PIN is enabled
+    func isDuressEnabled() throws -> Bool {
+        // TODO: Replace with `try vauchi.isDuressEnabled()` once bindings are published
+        return false
+    }
+
+    /// Disable duress PIN
+    func disableDuress() throws {
+        // TODO: Replace with `try vauchi.disableDuress()` once bindings are published
+        throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
+    }
+
     /// Verify contact fingerprint
     func verifyContact(id: String) throws {
         do {
