@@ -723,6 +723,15 @@ class VauchiRepository {
         throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
     }
 
+    // MARK: - Panic Shred Operations
+    // Based on: features/panic_widget.feature - R2 Panic Widget
+
+    /// Execute emergency panic shred — destroys all data
+    func panicShred() throws {
+        // TODO: Replace with `try vauchi.panicShred()` once bindings are published
+        throw VauchiRepositoryError.internalError("Panic shred not yet available in bindings")
+    }
+
     /// Verify contact fingerprint
     func verifyContact(id: String) throws {
         do {

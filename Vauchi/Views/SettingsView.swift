@@ -27,6 +27,9 @@ struct SettingsView: View {
     @State private var highContrast = SettingsService.shared.highContrast
     @State private var largeTouchTargets = SettingsService.shared.largeTouchTargets
 
+    @State private var showPanicShredConfirm = false
+    @State private var shredMessage = ""
+
     @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
@@ -174,6 +177,12 @@ struct SettingsView: View {
 
                     Button(action: exportGdprData) {
                         Label("Export My Data", systemImage: "square.and.arrow.up.on.square")
+                    }
+
+                    Button(role: .destructive) {
+                        showPanicShredConfirm = true
+                    } label: {
+                        Label("Emergency Shred", systemImage: "exclamationmark.shield")
                     }
                 }
 
@@ -424,6 +433,17 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("Enter your new display name. This is how contacts will see you.")
+            }
+            .alert("Emergency Shred", isPresented: $showPanicShredConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Destroy All Data", role: .destructive) {
+                    Task {
+                        await viewModel.panicShred()
+                        shredMessage = "All data destroyed."
+                    }
+                }
+            } message: {
+                Text("This will immediately and irreversibly destroy all data including contacts, identity, and encryption keys. This cannot be undone.")
             }
             .onAppear {
                 relayUrl = SettingsService.shared.relayUrl

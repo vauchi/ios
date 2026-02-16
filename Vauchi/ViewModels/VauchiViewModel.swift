@@ -608,6 +608,20 @@ class VauchiViewModel: ObservableObject {
         isDuressEnabled = false
     }
 
+    // MARK: - Panic Shred
+    // Based on: features/panic_widget.feature - R2 Panic Widget
+
+    /// Execute emergency panic shred — destroys all data immediately
+    func panicShred() async {
+        guard let repository = repository else { return }
+
+        do {
+            try repository.panicShred()
+        } catch {
+            print("VauchiViewModel: panicShred not yet available: \(error)")
+        }
+    }
+
     func removeContact(id: String) async throws {
         guard let repository = repository else {
             throw VauchiRepositoryError.notInitialized
