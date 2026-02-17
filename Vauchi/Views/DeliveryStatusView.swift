@@ -25,11 +25,13 @@ struct DeliveryStatusView: View {
             }
             .pickerStyle(.segmented)
             .padding()
+            .accessibilityLabel("Delivery status filter")
 
             // Content
             if isLoading {
                 Spacer()
                 ProgressView()
+                    .accessibilityLabel("Loading delivery status")
                 Spacer()
             } else {
                 switch selectedTab {
@@ -132,6 +134,8 @@ struct FailedDeliveriesView: View {
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(.blue)
+                        .accessibilityLabel("Retry delivery")
+                        .accessibilityHint("Schedules another delivery attempt for this message")
                     }
                     .padding(.vertical, 4)
                 }
@@ -175,6 +179,7 @@ struct DeliveryRecordRow: View {
             Image(systemName: record.status.iconName)
                 .foregroundColor(statusColor)
                 .frame(width: 24)
+                .accessibilityHidden(true)
 
             // Details
             VStack(alignment: .leading, spacing: 2) {
@@ -203,6 +208,7 @@ struct DeliveryRecordRow: View {
             if record.isExpired {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundColor(.orange)
+                    .accessibilityHidden(true)
             } else if let expiresAt = record.expiresAt {
                 if expiresAt.timeIntervalSinceNow < 86400 { // Less than 1 day
                     VStack(alignment: .trailing) {
@@ -217,6 +223,8 @@ struct DeliveryRecordRow: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Delivery to \(record.recipientId.prefix(8)), status: \(record.status.displayName)")
     }
 
     private var statusColor: Color {
@@ -240,6 +248,7 @@ struct RetryEntryRow: View {
             Image(systemName: "arrow.clockwise.circle")
                 .foregroundColor(.orange)
                 .frame(width: 24)
+                .accessibilityHidden(true)
 
             // Details
             VStack(alignment: .leading, spacing: 2) {
@@ -268,6 +277,8 @@ struct RetryEntryRow: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Retry for \(entry.recipientId.prefix(8)), attempt \(entry.attempt) of \(entry.maxAttempts)")
     }
 }
 
@@ -283,9 +294,11 @@ struct EmptyDeliveryView: View {
             Image(systemName: icon)
                 .font(.system(size: 50))
                 .foregroundColor(.secondary)
+                .accessibilityHidden(true)
 
             Text(title)
                 .font(.headline)
+                .accessibilityAddTraits(.isHeader)
 
             Text(message)
                 .font(.subheadline)
@@ -308,10 +321,13 @@ struct DeliveryStatusIndicator: View {
         HStack(spacing: 4) {
             Image(systemName: status.iconName)
                 .font(.caption2)
+                .accessibilityHidden(true)
             Text(status.displayName)
                 .font(.caption2)
         }
         .foregroundColor(color)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Delivery status: \(status.displayName)")
     }
 
     private var color: Color {
@@ -348,6 +364,7 @@ struct DeliverySummaryView: View {
                 }
             }
             .frame(height: 8)
+            .accessibilityHidden(true)
 
             // Status text
             HStack {
@@ -363,6 +380,9 @@ struct DeliverySummaryView: View {
                 }
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Delivery progress: \(summary.displayText), \(summary.progressPercent) percent")
+        .accessibilityValue("\(summary.progressPercent)%")
     }
 
     private var progressColor: Color {
