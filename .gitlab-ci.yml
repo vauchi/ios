@@ -278,7 +278,7 @@ build:debug:
   extends: [.macos-job, .timeout-extended]
   stage: build
   script:
-    - rm -rf .spm-packages ~/Library/Caches/org.swift.swiftpm ~/Library/org.swift.swiftpm ~/Library/Developer/Xcode/DerivedData
+    - rm -rf .spm-packages "${HOME}/Library/Caches/org.swift.swiftpm" "${HOME}/Library/org.swift.swiftpm" "${HOME}/Library/Developer/Xcode/DerivedData"
     - find . -name "Package.resolved" -exec rm -f {} +
     - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages build
@@ -302,7 +302,7 @@ build:release:
   extends: [.macos-job, .timeout-extended]
   stage: build
   script:
-    - rm -rf .spm-packages ~/Library/Caches/org.swift.swiftpm ~/Library/org.swift.swiftpm ~/Library/Developer/Xcode/DerivedData
+    - rm -rf .spm-packages "${HOME}/Library/Caches/org.swift.swiftpm" "${HOME}/Library/org.swift.swiftpm" "${HOME}/Library/Developer/Xcode/DerivedData"
     - find . -name "Package.resolved" -exec rm -f {} +
     - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Release -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages build
@@ -321,7 +321,7 @@ test:unit:
   extends: [.macos-job, .timeout-long]
   stage: test
   script:
-    - rm -rf .spm-packages ~/Library/Caches/org.swift.swiftpm ~/Library/org.swift.swiftpm ~/Library/Developer/Xcode/DerivedData
+    - rm -rf .spm-packages "${HOME}/Library/Caches/org.swift.swiftpm" "${HOME}/Library/org.swift.swiftpm" "${HOME}/Library/Developer/Xcode/DerivedData"
     - find . -name "Package.resolved" -exec rm -f {} +
     - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages test -skip-testing VauchiSnapshotTests -skip-testing VauchiUITests
@@ -347,7 +347,7 @@ test:snapshots:
   stage: test
   allow_failure: true
   script:
-    - rm -rf .spm-packages ~/Library/Caches/org.swift.swiftpm ~/Library/org.swift.swiftpm ~/Library/Developer/Xcode/DerivedData
+    - rm -rf .spm-packages "${HOME}/Library/Caches/org.swift.swiftpm" "${HOME}/Library/org.swift.swiftpm" "${HOME}/Library/Developer/Xcode/DerivedData"
     - find . -name "Package.resolved" -exec rm -f {} +
     - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages test -only-testing VauchiSnapshotTests
