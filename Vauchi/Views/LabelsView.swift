@@ -35,6 +35,8 @@ struct LabelsView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
+                        .accessibilityLabel("Create \(suggestion) label")
+                        .accessibilityHint("Creates a new visibility label named \(suggestion)")
                     }
                 } header: {
                     Text("Suggested Labels")
@@ -54,6 +56,8 @@ struct LabelsView: View {
                         NavigationLink(destination: LabelDetailView(label: label)) {
                             LabelRow(label: label)
                         }
+                        .accessibilityLabel("\(label.name), \(label.contactCount) contacts")
+                        .accessibilityHint("Opens label details")
                     }
                     .onDelete(perform: deleteLabels)
                 }
@@ -168,6 +172,8 @@ struct CreateLabelSheet: View {
                         .focused($isNameFocused)
                         .autocapitalization(.words)
                         .submitLabel(.done)
+                        .accessibilityLabel("Label name")
+                        .accessibilityHint("Enter a name for your new visibility label")
                         .onSubmit {
                             if isValid {
                                 create()
