@@ -88,6 +88,19 @@ targets:
         INFOPLIST_GENERATION_MODE: GeneratedFile
         GENERATE_INFOPLIST_FILE: YES
 
+  VauchiUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: VauchiUITests
+    dependencies:
+      - target: Vauchi
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.vauchi.ios.uitests
+        INFOPLIST_GENERATION_MODE: GeneratedFile
+        GENERATE_INFOPLIST_FILE: YES
+
 schemes:
   Vauchi:
     build:
@@ -95,6 +108,7 @@ schemes:
         Vauchi: all
         VauchiTests: [test]
         VauchiSnapshotTests: [test]
+        VauchiUITests: [test]
     run:
       config: Debug
     test:
@@ -102,6 +116,7 @@ schemes:
       targets:
         - VauchiTests
         - VauchiSnapshotTests
+        - VauchiUITests
     profile:
       config: Release
     analyze:
