@@ -51,6 +51,11 @@ struct SettingsView: View {
                         editingDisplayName = viewModel.identity?.displayName ?? ""
                         showEditNameAlert = true
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(localizationService.t("settings.display_name"))
+                    .accessibilityValue(viewModel.identity?.displayName ?? "Unknown")
+                    .accessibilityHint("Double tap to edit your display name")
+                    .accessibilityAddTraits(.isButton)
 
                     HStack {
                         Text(localizationService.t("home.public_id"))
@@ -64,6 +69,10 @@ struct SettingsView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(localizationService.t("home.public_id"))
+                    .accessibilityValue(viewModel.identity?.publicId ?? "Unknown")
+                    .accessibilityHint("Long press to copy full public ID")
                     .contextMenu {
                         if let publicId = viewModel.identity?.publicId {
                             Button(action: {
@@ -128,10 +137,14 @@ struct SettingsView: View {
                     Button(action: { showExportSheet = true }) {
                         Label(localizationService.t("backup.export"), systemImage: "square.and.arrow.up")
                     }
+                    .accessibilityLabel(localizationService.t("backup.export"))
+                    .accessibilityHint("Opens the backup export sheet to save your identity")
 
                     Button(action: { showImportSheet = true }) {
                         Label(localizationService.t("backup.import"), systemImage: "square.and.arrow.down")
                     }
+                    .accessibilityLabel(localizationService.t("backup.import"))
+                    .accessibilityHint("Opens the backup import sheet to restore an identity")
                 } header: {
                     Text(localizationService.t("backup.title"))
                 } footer: {
@@ -184,6 +197,8 @@ struct SettingsView: View {
                     } label: {
                         Label("Emergency Shred", systemImage: "exclamationmark.shield")
                     }
+                    .accessibilityLabel("Emergency Shred")
+                    .accessibilityHint("Irreversibly destroys all data including contacts, identity, and encryption keys")
                 }
 
                 // Security section
@@ -369,6 +384,7 @@ struct SettingsView: View {
                             Spacer()
                             Image(systemName: "arrow.up.right")
                                 .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
                         }
                     }
 
@@ -383,6 +399,7 @@ struct SettingsView: View {
                             Spacer()
                             Image(systemName: "arrow.up.right")
                                 .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
                         }
                     }
 
@@ -392,6 +409,7 @@ struct SettingsView: View {
                             Spacer()
                             Image(systemName: "arrow.up.right")
                                 .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
                         }
                     }
                 }
@@ -413,6 +431,7 @@ struct SettingsView: View {
                             Spacer()
                             Image(systemName: "arrow.up.right")
                                 .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
                         }
                     }
 
@@ -540,6 +559,7 @@ struct SyncStatusBadge: View {
         case .syncing:
             ProgressView()
                 .scaleEffect(0.7)
+                .accessibilityLabel("Syncing")
         case let .success(added, updated, sent):
             if added + updated + sent > 0 {
                 Text("\(added + updated + sent) changes")
@@ -553,6 +573,7 @@ struct SyncStatusBadge: View {
         case .error:
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.orange)
+                .accessibilityLabel("Sync error")
         }
     }
 }
@@ -694,6 +715,7 @@ struct DeviceRow: View {
             Image(systemName: deviceIcon)
                 .foregroundColor(.cyan)
                 .frame(width: 32)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
@@ -724,6 +746,7 @@ struct DeviceRow: View {
             if device.isCurrent {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.green)
+                    .accessibilityLabel("Current device")
             } else {
                 // Unlink button for non-current devices
                 Button(action: onUnlink) {
@@ -731,6 +754,8 @@ struct DeviceRow: View {
                         .foregroundColor(.red)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Unlink \(device.deviceName)")
+                .accessibilityHint("Removes this device from your linked devices")
             }
         }
         .contextMenu {
@@ -769,6 +794,7 @@ struct DeviceLinkSheet: View {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.system(size: 48))
                             .foregroundColor(.orange)
+                            .accessibilityHidden(true)
                         Text(error)
                             .foregroundColor(.red)
                             .multilineTextAlignment(.center)
@@ -777,6 +803,7 @@ struct DeviceLinkSheet: View {
                                 await generateLinkQr()
                             }
                         }
+                        .accessibilityHint("Attempts to generate a new device link QR code")
                     }
                 } else if let data = linkData {
                     VStack(spacing: 16) {
@@ -794,19 +821,24 @@ struct DeviceLinkSheet: View {
                                 .padding()
                                 .background(Color.white)
                                 .cornerRadius(12)
+                                .accessibilityLabel("Device link QR code")
+                                .accessibilityHint("Show this QR code to the new device to scan")
                         }
 
                         // Expiry timer
                         if timeRemaining > 0 {
                             HStack {
                                 Image(systemName: "clock")
+                                    .accessibilityHidden(true)
                                 Text("Expires in \(formatTime(timeRemaining))")
                             }
                             .font(.caption)
                             .foregroundColor(timeRemaining < 60 ? .orange : .secondary)
+                            .accessibilityElement(children: .combine)
                         } else {
                             HStack {
                                 Image(systemName: "exclamationmark.triangle")
+                                    .accessibilityHidden(true)
                                 Text("QR code expired")
                             }
                             .font(.caption)
@@ -926,11 +958,15 @@ struct CertificatePinningView: View {
                 Button(action: { showPasteSheet = true }) {
                     Label("Set Certificate", systemImage: "doc.badge.plus")
                 }
+                .accessibilityLabel("Set Certificate")
+                .accessibilityHint("Opens a sheet to paste a PEM certificate for pinning")
 
                 if isPinningEnabled {
                     Button(role: .destructive, action: { showClearConfirmation = true }) {
                         Label("Clear Certificate", systemImage: "trash")
                     }
+                    .accessibilityLabel("Clear Certificate")
+                    .accessibilityHint("Removes the pinned certificate and allows connections to any valid relay server")
                 }
             } header: {
                 Text("Actions")
@@ -1047,7 +1083,9 @@ struct DuressSettingsView: View {
         }
         .alert("Set App Password", isPresented: $showPasswordSetup) {
             SecureField("Password", text: $password)
+                .accessibilityLabel("App password")
             SecureField("Confirm Password", text: $confirmPassword)
+                .accessibilityLabel("Confirm app password")
             Button("Cancel", role: .cancel) {
                 password = ""
                 confirmPassword = ""
@@ -1075,7 +1113,9 @@ struct DuressSettingsView: View {
         }
         .alert("Set Duress PIN", isPresented: $showDuressSetup) {
             SecureField("Duress PIN", text: $duressPin)
+                .accessibilityLabel("Duress PIN")
             SecureField("Confirm PIN", text: $confirmDuressPin)
+                .accessibilityLabel("Confirm duress PIN")
             Button("Cancel", role: .cancel) {
                 duressPin = ""
                 confirmDuressPin = ""
@@ -1130,8 +1170,14 @@ struct EmergencyBroadcastView: View {
             Section {
                 TextField("Contact IDs (comma-separated)", text: $contactIds)
                     .autocapitalization(.none)
+                    .accessibilityLabel("Emergency contact IDs")
+                    .accessibilityHint("Enter contact IDs separated by commas")
                 TextField("Alert message", text: $message)
+                    .accessibilityLabel("Emergency alert message")
+                    .accessibilityHint("The message sent to your emergency contacts")
                 Toggle("Include location", isOn: $includeLocation)
+                    .accessibilityLabel("Include location in emergency broadcast")
+                    .accessibilityHint("When enabled, your location will be sent with the emergency alert")
             } header: {
                 Text("Configuration")
             }
@@ -1980,12 +2026,16 @@ struct TorSettingsView: View {
                         let bridges = bridgeText.split(separator: "\n").map(String.init)
                         viewModel.saveTorConfig(enabled: newValue, bridges: bridges, preferOnion: preferOnion)
                     }
+                    .accessibilityLabel("Enable Tor")
+                    .accessibilityHint("Routes all relay traffic through the Tor network for enhanced anonymity")
 
                 Toggle("Prefer .onion Addresses", isOn: $preferOnion)
                     .onChange(of: preferOnion) { newValue in
                         let bridges = bridgeText.split(separator: "\n").map(String.init)
                         viewModel.saveTorConfig(enabled: torEnabled, bridges: bridges, preferOnion: newValue)
                     }
+                    .accessibilityLabel("Prefer onion addresses")
+                    .accessibilityHint("When enabled, connects to onion service addresses when available")
             } header: {
                 Text("Connection")
             } footer: {
