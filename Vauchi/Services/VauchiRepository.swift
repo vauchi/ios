@@ -995,6 +995,7 @@ class VauchiRepository {
             let session = try vauchi.createQrExchangeManual()
             _ = try session.generateQr()
             try session.processQr(qrData: qrData)
+            try session.confirmProximity()
             try session.theyScannedOurQr()
             try session.performKeyAgreement()
             try session.completeCardExchange(theirCardName: "New Contact")
