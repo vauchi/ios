@@ -232,11 +232,18 @@ lint:swiftlint:
   extends: [.macos-job, .timeout-quick]
   stage: lint
   script:
-    - if command -v swiftlint &> /dev/null; then swiftlint lint --strict --reporter json > swiftlint-report.json || true; fi
-    - if command -v swiftlint &> /dev/null; then swiftlint lint --strict; fi
+    - |
+      if command -v swiftlint &> /dev/null; then
+        echo "SwiftLint version: $(swiftlint version)"
+        swiftlint lint --strict --config .swiftlint.yml --reporter codeclimate > swiftlint-report.json || true
+        swiftlint lint --strict --config .swiftlint.yml
+      else
+        echo "SwiftLint not installed — skipping lint"
+      fi
   artifacts:
     reports:
       codequality: swiftlint-report.json
+    when: always
     expire_in: 1 week
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
