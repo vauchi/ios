@@ -491,6 +491,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     // MARK: - Hidden Contacts
+
     // Based on: features/resistance.feature - R3 Hidden Contact UI
 
     /// Load hidden contacts
@@ -561,6 +562,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     // MARK: - Duress PIN
+
     // Based on: features/duress_pin.feature - R1 Duress PIN
 
     @Published var isPasswordEnabled = false
@@ -609,6 +611,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     // MARK: - Panic Shred
+
     // Based on: features/panic_widget.feature - R2 Panic Widget
 
     /// Execute emergency panic shred — destroys all data immediately
@@ -623,6 +626,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     // MARK: - Tor Mode
+
     @Published var isTorEnabled: Bool = false
     @Published var torPreferOnion: Bool = true
     @Published var torBridges: [String] = []

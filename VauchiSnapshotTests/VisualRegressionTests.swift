@@ -36,9 +36,7 @@ final class VisualRegressionTests: XCTestCase {
         false
     }
 
-    override func setUp() {
-        super.setUp()
-    }
+    // setUp intentionally removed — no custom setup needed
 
     // MARK: - Setup / No Identity State
 

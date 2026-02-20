@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# SwiftLint configuration for Vauchi iOS app
+
+excluded:
+  - .build
+  - .spm-packages
+  - DerivedData
+  - Pods
+
+# Disable rules that conflict with project style or SwiftFormat
+disabled_rules:
+  # SwiftFormat manages trailing commas — let it decide
+  - trailing_comma
+  # TODOs are intentional markers for stub methods awaiting UniFFI bindings
+  - todo
+  # Large tuples are used for multi-value returns in repository stubs
+  - large_tuple
+  # SwiftFormat handles blank line formatting
+  - blanket_disable_command
+  # SwiftUI uses multiple trailing closures extensively (Button, Alert, etc.)
+  - multiple_closures_with_trailing_closure
+  # SwiftFormat handles brace spacing
+  - opening_brace
+
+# Configure rules with project-appropriate thresholds
+line_length:
+  warning: 170
+  error: 200
+  ignores_comments: true
+  ignores_urls: true
+  ignores_interpolated_strings: true
+
+file_length:
+  warning: 2200
+  error: 3000
+  ignore_comment_only_lines: true
+
+type_body_length:
+  warning: 1500
+  error: 2000
+
+function_body_length:
+  warning: 60
+  error: 100
+
+identifier_name:
+  min_length:
+    warning: 1
+  max_length:
+    warning: 60
+    error: 80
+  excluded:
+    - id
+    - i
+    - t
+    - x
+    - y
+
+cyclomatic_complexity:
+  warning: 20
+  error: 30
+
+nesting:
+  type_level:
+    warning: 3
+  function_level:
+    warning: 5

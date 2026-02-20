@@ -657,19 +657,20 @@ class VauchiRepository {
     }
 
     // MARK: - Hidden Contacts Operations
+
     // Based on: features/resistance.feature - R3 Hidden Contact UI
     // NOTE: These methods are stubs until vauchi-core hidden contact bindings
     // are published via vauchi-mobile-swift. Once core MR !109 merges and
     // bindings are updated, replace stubs with actual UniFFI calls.
 
     /// Hide a contact
-    func hideContact(id: String) throws {
+    func hideContact(id _: String) throws {
         // TODO: Replace with `try vauchi.hideContact(id: id)` once bindings are published
         throw VauchiRepositoryError.internalError("Hidden contacts not yet available in bindings")
     }
 
     /// Unhide a contact
-    func unhideContact(id: String) throws {
+    func unhideContact(id _: String) throws {
         // TODO: Replace with `try vauchi.unhideContact(id: id)` once bindings are published
         throw VauchiRepositoryError.internalError("Hidden contacts not yet available in bindings")
     }
@@ -681,25 +682,26 @@ class VauchiRepository {
     }
 
     // MARK: - Duress PIN Operations
+
     // Based on: features/duress_pin.feature - R1 Duress PIN
     // NOTE: These methods are stubs until vauchi-core duress bindings
     // are published via vauchi-mobile-swift. Once core MR merges and
     // bindings are updated, replace stubs with actual UniFFI calls.
 
     /// Set up app password
-    func setupAppPassword(password: String) throws {
+    func setupAppPassword(password _: String) throws {
         // TODO: Replace with `try vauchi.setupAppPassword(password: password)` once bindings are published
         throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
     }
 
     /// Set up duress PIN (requires app password to be set first)
-    func setupDuressPassword(duressPassword: String) throws {
+    func setupDuressPassword(duressPassword _: String) throws {
         // TODO: Replace with `try vauchi.setupDuressPassword(duressPassword: duressPassword)` once bindings are published
         throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
     }
 
     /// Authenticate with password/PIN — returns "normal", "duress", or throws on invalid
-    func authenticate(password: String) throws -> String {
+    func authenticate(password _: String) throws -> String {
         // TODO: Replace with `try vauchi.authenticate(password: password)` once bindings are published
         // Returns MobileAuthMode.normal or MobileAuthMode.duress
         throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
@@ -724,6 +726,7 @@ class VauchiRepository {
     }
 
     // MARK: - Panic Shred Operations
+
     // Based on: features/panic_widget.feature - R2 Panic Widget
 
     /// Execute emergency panic shred — destroys all data
@@ -733,10 +736,11 @@ class VauchiRepository {
     }
 
     // MARK: - Emergency Broadcast Operations
+
     // Based on: features/emergency_broadcast.feature - R5 Emergency Broadcast
 
     /// Configure emergency broadcast
-    func configureEmergencyBroadcast(contactIds: [String], message: String, includeLocation: Bool) throws {
+    func configureEmergencyBroadcast(contactIds _: [String], message _: String, includeLocation _: Bool) throws {
         // TODO: Replace with `try vauchi.configureEmergencyBroadcast(contactIds: contactIds, message: message, includeLocation: includeLocation)` once bindings are published
         throw VauchiRepositoryError.internalError("Emergency broadcast not yet available in bindings")
     }
@@ -760,6 +764,7 @@ class VauchiRepository {
     }
 
     // MARK: - Tor Mode Operations
+
     // Based on: features/tor_mode.feature - R4 Tor Mode
     // NOTE: These methods are stubs until vauchi-core tor bindings
     // are published via vauchi-mobile-swift. Once core MR merges and
@@ -772,7 +777,7 @@ class VauchiRepository {
     }
 
     /// Save Tor configuration
-    func saveTorConfig(enabled: Bool, bridges: [String], preferOnion: Bool) throws {
+    func saveTorConfig(enabled _: Bool, bridges _: [String], preferOnion _: Bool) throws {
         // TODO: Replace with actual UniFFI call once bindings are published
         throw VauchiRepositoryError.internalError("Tor mode not yet available in bindings")
     }
@@ -988,7 +993,7 @@ class VauchiRepository {
     func completeExchange(qrData: String) throws -> VauchiExchangeResult {
         do {
             let session = try vauchi.createQrExchangeManual()
-            let _ = try session.generateQr()
+            _ = try session.generateQr()
             try session.processQr(qrData: qrData)
             try session.theyScannedOurQr()
             try session.performKeyAgreement()

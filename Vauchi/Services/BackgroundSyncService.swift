@@ -40,7 +40,8 @@ final class BackgroundSyncService {
             forTaskWithIdentifier: Self.syncTaskIdentifier,
             using: nil
         ) { [weak self] task in
-            self?.handleSyncTask(task as! BGProcessingTask)
+            guard let processingTask = task as? BGProcessingTask else { return }
+            self?.handleSyncTask(processingTask)
         }
     }
 
