@@ -52,10 +52,11 @@ struct ContactDetailView: View {
                     }
                     .accessibilityElement(children: .combine)
 
-                    Text("ID: \(String(contact.id.prefix(16)))...")
+                    Text(contact.fingerprint)
                         .font(.system(.caption, design: .monospaced))
                         .foregroundColor(.secondary)
-                        .accessibilityLabel("Contact ID: \(String(contact.id.prefix(16)))")
+                        .lineLimit(2)
+                        .accessibilityLabel("Fingerprint: \(contact.fingerprint)")
 
                     if let addedAt = contact.addedAt {
                         Text("Added \(addedAt, style: .relative) ago")
@@ -237,7 +238,7 @@ struct ContactDetailView: View {
                 verifyContact()
             }
         } message: {
-            Text("By verifying \(contact.displayName), you confirm that you have verified their identity in person (e.g., by comparing fingerprints).")
+            Text("Their fingerprint:\n\(contact.fingerprint)\n\nCompare this fingerprint with \(contact.displayName) in person before verifying.")
         }
         .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
             Button("OK", role: .cancel) {}
