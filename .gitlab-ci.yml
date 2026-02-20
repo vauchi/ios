@@ -84,7 +84,13 @@ workflow:
 # which is the primary source of slow iOS CI builds (PI-01).
 .spm-cache:
   cache:
-    key: ios-spm-${CI_COMMIT_REF_SLUG}
+    key:
+      files:
+        - Package.resolved
+      prefix: ios-spm
+    fallback_keys:
+      - ios-spm-${CI_DEFAULT_BRANCH}
+      - ios-spm
     paths:
       - .spm-packages/
     policy: pull-push
@@ -92,7 +98,13 @@ workflow:
 # Read-only SPM cache for jobs that don't need to update it
 .spm-cache-readonly:
   cache:
-    key: ios-spm-${CI_COMMIT_REF_SLUG}
+    key:
+      files:
+        - Package.resolved
+      prefix: ios-spm
+    fallback_keys:
+      - ios-spm-${CI_DEFAULT_BRANCH}
+      - ios-spm
     paths:
       - .spm-packages/
     policy: pull
