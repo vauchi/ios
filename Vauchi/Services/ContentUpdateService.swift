@@ -235,20 +235,17 @@ final class ContentUpdateService: ObservableObject {
 
         // Compare versions
         if let remoteNetworks = remote.content.networks,
-           cached.content.networks?.version != remoteNetworks.version
-        {
+           cached.content.networks?.version != remoteNetworks.version {
             updates.append(.networks)
         }
 
         if let remoteLocales = remote.content.locales,
-           cached.content.locales?.version != remoteLocales.version
-        {
+           cached.content.locales?.version != remoteLocales.version {
             updates.append(.locales)
         }
 
         if let remoteThemes = remote.content.themes,
-           cached.content.themes?.version != remoteThemes.version
-        {
+           cached.content.themes?.version != remoteThemes.version {
             updates.append(.themes)
         }
 

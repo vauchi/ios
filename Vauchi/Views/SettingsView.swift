@@ -537,8 +537,7 @@ struct SettingsView: View {
                         applicationActivities: nil
                     )
                     if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                       let rootViewController = windowScene.windows.first?.rootViewController
-                    {
+                       let rootViewController = windowScene.windows.first?.rootViewController {
                         rootViewController.present(activityController, animated: true)
                     }
                 }
@@ -1949,8 +1948,7 @@ struct ImportBackupSheet: View {
                 dismiss()
             } catch {
                 if error.localizedDescription.contains("decrypt") ||
-                    error.localizedDescription.contains("password")
-                {
+                    error.localizedDescription.contains("password") {
                     errorMessage = "Incorrect password"
                 } else {
                     errorMessage = error.localizedDescription

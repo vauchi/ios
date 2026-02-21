@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# SwiftFormat configuration — aligned with SwiftLint defaults
+# SwiftFormat configuration — aligned with project conventions
 
-# Disable trailing commas to match SwiftLint trailing_comma rule
---trailingcommas never
+# Project uses trailing commas (Swift standard style)
+--trailingcommas always
 
 # Disable wrapMultilineStatementBraces to match SwiftLint opening_brace rule
 --disable wrapMultilineStatementBraces

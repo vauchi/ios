@@ -361,8 +361,7 @@ struct VauchiDeliveryRecord: Identifiable {
     let expiresAt: Date?
 
     init(messageId: String, recipientId: String, status: VauchiDeliveryStatus,
-         createdAt: Date, updatedAt: Date, expiresAt: Date?)
-    {
+         createdAt: Date, updatedAt: Date, expiresAt: Date?) {
         id = messageId
         self.messageId = messageId
         self.recipientId = recipientId

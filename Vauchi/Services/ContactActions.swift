@@ -154,8 +154,7 @@ enum ContactActions {
     static func buildSocialUrl(network: String, username: String, repository: VauchiRepository? = nil) -> URL? {
         // Use core's social network registry which has 40+ networks
         if let repo = repository,
-           let urlString = repo.getProfileUrl(networkId: network, username: username)
-        {
+           let urlString = repo.getProfileUrl(networkId: network, username: username) {
             return URL(string: urlString)
         }
         // Fallback for common networks when no repository is available

@@ -208,8 +208,7 @@ struct CameraPreview: UIViewRepresentable {
 
         func metadataOutput(_: AVCaptureMetadataOutput,
                             didOutput metadataObjects: [AVMetadataObject],
-                            from _: AVCaptureConnection)
-        {
+                            from _: AVCaptureConnection) {
             guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
                   let code = metadataObject.stringValue
             else {
@@ -220,8 +219,7 @@ struct CameraPreview: UIViewRepresentable {
             if let lastCode = lastScannedCode,
                let lastTime = lastScanTime,
                lastCode == code,
-               Date().timeIntervalSince(lastTime) < 2.0
-            {
+               Date().timeIntervalSince(lastTime) < 2.0 {
                 return
             }
 
