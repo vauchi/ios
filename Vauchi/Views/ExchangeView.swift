@@ -44,12 +44,14 @@ struct ExchangeView: View {
                                 Image(systemName: "exclamationmark.triangle")
                                     .font(.largeTitle)
                                     .foregroundColor(.orange)
+                                    .accessibilityHidden(true)
                                 Text(localizationService.t("exchange.qr_error"))
                                     .foregroundColor(.secondary)
                                 Button(localizationService.t("action.retry")) {
                                     loadExchangeData()
                                 }
                                 .buttonStyle(.bordered)
+                                .accessibilityHint("Attempts to regenerate your QR code")
                             }
                             .frame(width: 200, height: 200)
                         } else if let image = qrImage {
@@ -70,10 +72,12 @@ struct ExchangeView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: "clock")
                                         .font(.caption)
+                                        .accessibilityHidden(true)
                                     Text(localizationService.t("exchange.expires_in", args: ["time": formatTime(timeRemaining)]))
                                         .font(.caption)
                                 }
                                 .foregroundColor(timeRemaining < 60 ? .orange : .secondary)
+                                .accessibilityElement(children: .combine)
 
                                 // Refresh button
                                 Button(action: { loadExchangeData() }) {
@@ -88,11 +92,14 @@ struct ExchangeView: View {
                                     HStack(spacing: 6) {
                                         Image(systemName: isEmittingAudio ? "waveform" : "waveform.circle")
                                             .foregroundColor(isEmittingAudio ? .green : .blue)
+                                            .accessibilityHidden(true)
                                         Text(isEmittingAudio ? "Emitting audio..." : "Ultrasonic ready")
                                             .font(.caption2)
                                             .foregroundColor(.secondary)
                                     }
                                     .padding(.top, 4)
+                                    .accessibilityElement(children: .combine)
+                                    .accessibilityLabel(isEmittingAudio ? "Ultrasonic proximity verification: emitting audio" : "Ultrasonic proximity verification: ready")
                                 }
                             }
                         }
@@ -140,6 +147,7 @@ struct ExchangeView: View {
                         Image(systemName: "antenna.radiowaves.left.and.right")
                             .font(.system(size: 40))
                             .foregroundColor(.secondary)
+                            .accessibilityHidden(true)
 
                         Text("Coming soon")
                             .font(.subheadline)
