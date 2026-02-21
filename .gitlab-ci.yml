@@ -52,6 +52,7 @@ stages:
 # Override: reuse-lint runs on Docker (doesn't need macOS)
 reuse-lint:
   tags: [docker]
+  image: fsfe/reuse:latest
 
 variables:
   # GitLab Ultimate Security Configuration
