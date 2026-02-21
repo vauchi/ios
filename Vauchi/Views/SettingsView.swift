@@ -99,6 +99,11 @@ struct SettingsView: View {
                         editingRelayUrl = relayUrl
                         showRelayEdit = true
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(localizationService.t("settings.relay"))
+                    .accessibilityValue(relayUrl)
+                    .accessibilityHint("Double tap to edit the relay server URL")
+                    .accessibilityAddTraits(.isButton)
 
                     Button(action: { Task { await viewModel.sync() } }) {
                         HStack {
@@ -183,14 +188,17 @@ struct SettingsView: View {
                     NavigationLink(destination: ConsentSettingsView()) {
                         Label("Consent Settings", systemImage: "hand.raised")
                     }
+                    .accessibilityHint("Manage your data processing and sharing consent preferences")
 
                     NavigationLink(destination: AccountDeletionView()) {
                         Label("Account Deletion", systemImage: "trash.circle")
                     }
+                    .accessibilityHint("Schedule or cancel deletion of your account")
 
                     Button(action: exportGdprData) {
                         Label("Export My Data", systemImage: "square.and.arrow.up.on.square")
                     }
+                    .accessibilityHint("Download a copy of all your personal data")
 
                     Button(role: .destructive) {
                         showPanicShredConfirm = true
@@ -1551,9 +1559,11 @@ struct ExportBackupSheet: View {
                     Image(systemName: "faceid")
                         .font(.system(size: 60))
                         .foregroundColor(.cyan)
+                        .accessibilityHidden(true)
 
                     Text("Authentication Required")
                         .font(.title2)
+                        .accessibilityAddTraits(.isHeader)
 
                     Text("Exporting your backup requires Face ID or Touch ID authentication to protect your identity.")
                         .multilineTextAlignment(.center)
@@ -1569,6 +1579,7 @@ struct ExportBackupSheet: View {
                             .cornerRadius(10)
                     }
                     .padding(.horizontal)
+                    .accessibilityHint("Use Face ID or Touch ID to verify your identity before exporting")
 
                     if let error = errorMessage {
                         Text(error)
@@ -1737,9 +1748,11 @@ struct ImportBackupSheet: View {
                     Image(systemName: "faceid")
                         .font(.system(size: 60))
                         .foregroundColor(.cyan)
+                        .accessibilityHidden(true)
 
                     Text("Authentication Required")
                         .font(.title2)
+                        .accessibilityAddTraits(.isHeader)
 
                     Text("Importing a backup requires Face ID or Touch ID authentication to protect your identity.")
                         .multilineTextAlignment(.center)
@@ -1755,6 +1768,7 @@ struct ImportBackupSheet: View {
                             .cornerRadius(10)
                     }
                     .padding(.horizontal)
+                    .accessibilityHint("Use Face ID or Touch ID to verify your identity before importing")
 
                     if let error = errorMessage {
                         Text(error)
@@ -1778,9 +1792,11 @@ struct ImportBackupSheet: View {
                     Image(systemName: "doc.badge.arrow.up")
                         .font(.system(size: 60))
                         .foregroundColor(.cyan)
+                        .accessibilityHidden(true)
 
                     Text("Import Backup")
                         .font(.title)
+                        .accessibilityAddTraits(.isHeader)
 
                     if viewModel.hasIdentity {
                         Text("Warning: Importing a backup will replace your current identity!")
@@ -1795,8 +1811,10 @@ struct ImportBackupSheet: View {
                             HStack {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.green)
+                                    .accessibilityHidden(true)
                                 Text("Backup file loaded")
                             }
+                            .accessibilityElement(children: .combine)
 
                             SecureField("Enter backup password", text: $password)
                                 .textFieldStyle(.roundedBorder)
@@ -2142,26 +2160,35 @@ struct UpdateStatusBadge: View {
             HStack(spacing: 4) {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.green)
+                    .accessibilityHidden(true)
                 Text("Up to date")
                     .foregroundColor(.green)
             }
             .font(.caption)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Content updates: up to date")
         case let .updatesAvailable(types):
             HStack(spacing: 4) {
                 Image(systemName: "arrow.down.circle.fill")
                     .foregroundColor(.cyan)
+                    .accessibilityHidden(true)
                 Text("\(types.count) available")
                     .foregroundColor(.cyan)
             }
             .font(.caption)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Content updates: \(types.count) available")
         case .checkFailed:
             HStack(spacing: 4) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundColor(.orange)
+                    .accessibilityHidden(true)
                 Text("Error")
                     .foregroundColor(.orange)
             }
             .font(.caption)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Content updates: error checking for updates")
         case .disabled:
             Text("Disabled")
                 .font(.caption)
@@ -2212,6 +2239,7 @@ struct PasswordStrengthIndicator: View {
                         .frame(height: 4)
                 }
             }
+            .accessibilityHidden(true)
 
             // Strength description and status
             HStack {
@@ -2225,10 +2253,12 @@ struct PasswordStrengthIndicator: View {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
+                            .accessibilityHidden(true)
                         Text("OK")
                             .foregroundColor(.green)
                     }
                     .font(.caption)
+                    .accessibilityLabel("Password strength acceptable")
                 }
             }
 
