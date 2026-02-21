@@ -44,9 +44,11 @@ struct LabelDetailView: View {
                         Image(systemName: "tag.slash")
                             .font(.system(size: 48))
                             .foregroundColor(.secondary)
+                            .accessibilityHidden(true)
                         Text("Label Not Found")
                             .font(.title2)
                             .fontWeight(.semibold)
+                            .accessibilityAddTraits(.isHeader)
                         Text("This label may have been deleted.")
                             .font(.body)
                             .foregroundColor(.secondary)
@@ -214,8 +216,11 @@ struct LabelDetailContent: View {
                                     Image(systemName: "checkmark.seal.fill")
                                         .foregroundColor(.green)
                                         .font(.caption)
+                                        .accessibilityHidden(true)
                                 }
                             }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("\(contact.displayName)\(contact.verified ? ", verified" : "")")
                         } else {
                             Text(contactId)
                                 .font(.caption)

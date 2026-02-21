@@ -210,6 +210,9 @@ struct OnboardingProgressView: View {
             }
         }
         .padding(.vertical, 8)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Step \(currentStep) of \(totalSteps)")
+        .accessibilityValue("\(currentStep) of \(totalSteps)")
     }
 }
 

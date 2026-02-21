@@ -106,6 +106,7 @@ struct NextStepCard: View {
 
             Image(systemName: "chevron.right")
                 .foregroundColor(.secondary)
+                .accessibilityHidden(true)
         }
         .padding()
         .background(Color(.systemBackground))

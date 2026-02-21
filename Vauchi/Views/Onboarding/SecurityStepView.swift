@@ -137,6 +137,8 @@ struct SecurityDiagram: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(16)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Diagram showing encrypted communication between your phone and your contact's phone")
     }
 }
 

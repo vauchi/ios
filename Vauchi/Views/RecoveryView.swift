@@ -211,6 +211,7 @@ struct HelpOthersTab: View {
                 HStack(spacing: 12) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.orange)
+                        .accessibilityHidden(true)
                     Text("Only vouch for someone you can verify IN PERSON. This prevents identity theft.")
                         .font(.subheadline)
                 }
@@ -218,6 +219,7 @@ struct HelpOthersTab: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.orange.opacity(0.1))
                 .cornerRadius(12)
+                .accessibilityElement(children: .combine)
 
                 // Steps
                 VStack(alignment: .leading, spacing: 16) {
@@ -272,10 +274,12 @@ struct CreateClaimSheet: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.green)
+                            .accessibilityHidden(true)
 
                         Text("Claim Created!")
                             .font(.title2)
                             .fontWeight(.semibold)
+                            .accessibilityAddTraits(.isHeader)
 
                         Text("Share this claim with your trusted contacts:")
                             .foregroundColor(.secondary)
@@ -394,10 +398,12 @@ struct CreateVoucherSheet: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.green)
+                            .accessibilityHidden(true)
 
                         Text("Voucher Created!")
                             .font(.title2)
                             .fontWeight(.semibold)
+                            .accessibilityAddTraits(.isHeader)
 
                         Text("Give this voucher to your contact:")
                             .foregroundColor(.secondary)
@@ -612,10 +618,12 @@ struct AddVoucherSheet: View {
                         Image(systemName: progress.isComplete ? "checkmark.circle.fill" : "plus.circle.fill")
                             .font(.system(size: 60))
                             .foregroundColor(progress.isComplete ? .green : .blue)
+                            .accessibilityHidden(true)
 
                         Text(progress.isComplete ? "Recovery Complete!" : "Voucher Added!")
                             .font(.title2)
                             .fontWeight(.semibold)
+                            .accessibilityAddTraits(.isHeader)
 
                         VStack(spacing: 8) {
                             HStack {
@@ -746,10 +754,12 @@ struct RecoveryStatusSheet: View {
                         Image(systemName: status.isComplete ? "checkmark.shield.fill" : "shield.lefthalf.filled")
                             .font(.system(size: 60))
                             .foregroundColor(status.isComplete ? .green : .cyan)
+                            .accessibilityHidden(true)
 
                         Text(status.isComplete ? "Recovery Complete" : "Recovery In Progress")
                             .font(.title2)
                             .fontWeight(.semibold)
+                            .accessibilityAddTraits(.isHeader)
 
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
@@ -806,10 +816,12 @@ struct RecoveryStatusSheet: View {
                         Image(systemName: "questionmark.circle")
                             .font(.system(size: 60))
                             .foregroundColor(.secondary)
+                            .accessibilityHidden(true)
 
                         Text("No Active Recovery")
                             .font(.title2)
                             .fontWeight(.semibold)
+                            .accessibilityAddTraits(.isHeader)
 
                         Text("You don't have an active recovery claim. Start a new recovery process if you need to recover a lost identity.")
                             .foregroundColor(.secondary)

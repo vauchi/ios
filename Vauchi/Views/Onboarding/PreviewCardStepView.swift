@@ -145,6 +145,7 @@ struct PreviewFieldRow: View {
             Image(systemName: icon)
                 .foregroundColor(.cyan)
                 .frame(width: 24)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
