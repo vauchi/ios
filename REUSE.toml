@@ -20,7 +20,7 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 
 # Git and editor config files
 [[annotations]]
-path = [".gitignore", "**/.gitignore", ".gitattributes", ".DS_Store", "**/.gitkeep", ".dockerignore"]
+path = [".gitignore", "**/.gitignore", ".gitattributes", ".DS_Store", "**/.gitkeep", ".dockerignore", ".swift-version"]
 SPDX-FileCopyrightText = "2026 Mattia Egloff <mattia.egloff@pm.me>"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
