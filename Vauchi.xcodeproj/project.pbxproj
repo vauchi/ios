@@ -56,6 +56,7 @@
 		6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C859B6215BADD6A45480D9F /* LocalizationService.swift */; };
 		6EB33DF7D6BD4A8CCC6A8075 /* ValidationBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4A76E62A085CC5836324B5 /* ValidationBadgeView.swift */; };
 		7017670F8C2EDE1BDBDDAA7B /* testHelpView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 367C77DA03F258D4B1D9C6FF /* testHelpView.1.png */; };
+		7230742E816AC8FFCD0F3284 /* ProximityVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16ECAB2250253E9F51032786 /* ProximityVerificationView.swift */; };
 		748B9CFE5B176CC483106B14 /* ReadyStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C37A3C9E6A9B48F269CEBD /* ReadyStepView.swift */; };
 		767BDC51FFC0FFA5A5131E0E /* testLabelsView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = A2E7533C698BC2DD14E881AD /* testLabelsView.1.png */; };
 		76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */; };
@@ -131,6 +132,7 @@
 		0D3497B12DDDF10370069F86 /* Vauchi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Vauchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0FC890F55872A927941111CE /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		15E6797B86856C4F432E265B /* testExchangeViewDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeViewDark.1.png; sourceTree = "<group>"; };
+		16ECAB2250253E9F51032786 /* ProximityVerificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityVerificationView.swift; sourceTree = "<group>"; };
 		180FA5B6237A3C3CE4ACB83B /* ContactActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactActions.swift; sourceTree = "<group>"; };
 		1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModel.swift; sourceTree = "<group>"; };
 		1EE116FC8484DF9F6D73F91F /* testContactDetailView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactDetailView.1.png; sourceTree = "<group>"; };
@@ -390,6 +392,7 @@
 				2C2D8422E9B837A1B336A071 /* SetupView.swift */,
 				63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */,
 				7E4A76E62A085CC5836324B5 /* ValidationBadgeView.swift */,
+				E187C8E8E4D2A6C1CDA025AA /* Components */,
 				2CBD4B5D0F233D7B3EA59CED /* Onboarding */,
 			);
 			path = Views;
@@ -415,6 +418,14 @@
 				1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		E187C8E8E4D2A6C1CDA025AA /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				16ECAB2250253E9F51032786 /* ProximityVerificationView.swift */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		F9FC793A89B3CAD3083ACA25 /* Services */ = {
@@ -668,6 +679,7 @@
 				281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */,
 				33048DBF138B6D56FF2FAD0B /* OnboardingView.swift in Sources */,
 				857AF56DE7694784EA6A426B /* PreviewCardStepView.swift in Sources */,
+				7230742E816AC8FFCD0F3284 /* ProximityVerificationView.swift in Sources */,
 				E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */,
 				748B9CFE5B176CC483106B14 /* ReadyStepView.swift in Sources */,
 				3D787C329E429BC3B8206837 /* RecoveryView.swift in Sources */,
