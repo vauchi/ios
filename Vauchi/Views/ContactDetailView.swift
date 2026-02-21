@@ -56,7 +56,7 @@ struct ContactDetailView: View {
                         .font(.system(.caption, design: .monospaced))
                         .foregroundColor(.secondary)
                         .lineLimit(2)
-                        .accessibilityLabel("Fingerprint: \(contact.fingerprint)")
+                        .accessibilityLabel("Contact fingerprint: \(contact.fingerprint)")
 
                     if let addedAt = contact.addedAt {
                         Text("Added \(addedAt, style: .relative) ago")
@@ -238,7 +238,15 @@ struct ContactDetailView: View {
                 verifyContact()
             }
         } message: {
-            Text("Their fingerprint:\n\(contact.fingerprint)\n\nCompare this fingerprint with \(contact.displayName) in person before verifying.")
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Compare these fingerprints with \(contact.displayName) in person:")
+                Text("Theirs: \(contact.fingerprint)")
+                    .font(.system(.caption, design: .monospaced))
+                if let ownFp = viewModel.getOwnFingerprint() {
+                    Text("Yours: \(ownFp)")
+                        .font(.system(.caption, design: .monospaced))
+                }
+            }
         }
         .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
             Button("OK", role: .cancel) {}

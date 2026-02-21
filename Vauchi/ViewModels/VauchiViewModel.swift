@@ -28,18 +28,18 @@ struct CardInfo: Equatable {
 struct ContactInfo: Identifiable, Equatable {
     let id: String
     let displayName: String
-    let fingerprint: String
     let verified: Bool
     let recoveryTrusted: Bool
+    let fingerprint: String
     let card: CardInfo?
     let addedAt: Date?
 
-    init(id: String, displayName: String, fingerprint: String = "", verified: Bool, recoveryTrusted: Bool = false, card: CardInfo? = nil, addedAt: Date? = nil) {
+    init(id: String, displayName: String, verified: Bool, recoveryTrusted: Bool = false, fingerprint: String = "", card: CardInfo? = nil, addedAt: Date? = nil) {
         self.id = id
         self.displayName = displayName
-        self.fingerprint = fingerprint
         self.verified = verified
         self.recoveryTrusted = recoveryTrusted
+        self.fingerprint = fingerprint
         self.card = card
         self.addedAt = addedAt
     }
@@ -390,6 +390,7 @@ class VauchiViewModel: ObservableObject {
                     fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
+                    fingerprint: contact.fingerprint,
                     card: CardInfo(
                         displayName: contact.card.displayName,
                         fields: contact.card.fields.map { field in
@@ -424,6 +425,7 @@ class VauchiViewModel: ObservableObject {
                     fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
+                    fingerprint: contact.fingerprint,
                     card: CardInfo(
                         displayName: contact.card.displayName,
                         fields: contact.card.fields.map { field in
@@ -459,6 +461,7 @@ class VauchiViewModel: ObservableObject {
                 displayName: contact.displayName,
                 fingerprint: contact.fingerprint,
                 verified: contact.isVerified,
+                fingerprint: contact.fingerprint,
                 card: CardInfo(
                     displayName: contact.card.displayName,
                     fields: contact.card.fields.map { field in
@@ -488,7 +491,8 @@ class VauchiViewModel: ObservableObject {
                     displayName: contact.displayName,
                     fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
-                    recoveryTrusted: contact.isRecoveryTrusted
+                    recoveryTrusted: contact.isRecoveryTrusted,
+                    fingerprint: contact.fingerprint
                 )
             }
         } catch {
@@ -513,6 +517,7 @@ class VauchiViewModel: ObservableObject {
                     fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
+                    fingerprint: contact.fingerprint,
                     card: CardInfo(
                         displayName: contact.card.displayName,
                         fields: contact.card.fields.map { field in
@@ -715,6 +720,12 @@ class VauchiViewModel: ObservableObject {
 
         try repository.verifyContact(id: id)
         await loadContacts()
+    }
+
+    /// Get own identity fingerprint for verification display.
+    func getOwnFingerprint() -> String? {
+        guard let repository else { return nil }
+        return try? repository.getOwnFingerprint()
     }
 
     func trustContactForRecovery(id: String) async throws {
@@ -1404,7 +1415,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Start the initiator flow: generate QR, listen for request.
     func startDeviceLinkInitiator() async throws -> String {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1418,7 +1429,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Listen for device link request via relay (blocking, call from background).
     func listenForDeviceLinkRequest() async throws {
-        guard let repository = repository, let initiator = currentInitiator else {
+        guard let repository, let initiator = currentInitiator else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1439,7 +1450,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Approve the device link after proximity verification.
     func approveDeviceLink() async throws {
-        guard let repository = repository,
+        guard let repository,
               let initiator = currentInitiator,
               let senderToken = currentSenderToken
         else {

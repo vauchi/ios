@@ -215,6 +215,7 @@ struct VauchiContact: Identifiable {
     let fingerprint: String
     let isVerified: Bool
     let isRecoveryTrusted: Bool
+    let fingerprint: String
     let card: VauchiContactCard
     let addedAt: UInt64
 }
@@ -517,6 +518,7 @@ class VauchiRepository {
             fingerprint: contact.fingerprint,
             isVerified: contact.isVerified,
             isRecoveryTrusted: contact.isRecoveryTrusted,
+            fingerprint: contact.fingerprint,
             card: convertCard(contact.card),
             addedAt: contact.addedAt
         )
@@ -784,6 +786,15 @@ class VauchiRepository {
     func saveTorConfig(enabled _: Bool, bridges _: [String], preferOnion _: Bool) throws {
         // TODO: Replace with actual UniFFI call once bindings are published
         throw VauchiRepositoryError.internalError("Tor mode not yet available in bindings")
+    }
+
+    /// Get own identity fingerprint for verification display.
+    func getOwnFingerprint() throws -> String {
+        do {
+            return try vauchi.getOwnFingerprint()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Verify contact fingerprint
