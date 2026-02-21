@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// swiftlint:disable file_length
-
 // VauchiViewModel.swift
 // Main state management for Vauchi iOS app
 
@@ -101,7 +99,6 @@ struct SyncResultInfo: Equatable {
 }
 
 @MainActor
-// swiftlint:disable:next type_body_length
 class VauchiViewModel: ObservableObject {
     // MARK: - Published State
 
