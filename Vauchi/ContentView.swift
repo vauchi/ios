@@ -37,9 +37,11 @@ struct ContentView: View {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 50))
                         .foregroundColor(.red)
+                        .accessibilityHidden(true)
                     Text(localizationService.t("error.generic"))
                         .font(.title)
                         .fontWeight(.bold)
+                        .accessibilityAddTraits(.isHeader)
                     Text(error)
                         .font(.body)
                         .foregroundColor(.secondary)
@@ -50,6 +52,7 @@ struct ContentView: View {
                         viewModel.loadState()
                     }
                     .buttonStyle(.borderedProminent)
+                    .accessibilityHint("Dismiss error and reload the app")
                 }
                 .padding()
             } else if viewModel.isLoading {

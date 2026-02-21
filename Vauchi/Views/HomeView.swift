@@ -23,6 +23,7 @@ struct HomeView: View {
                             Text(localizationService.t("home.greeting", args: ["name": viewModel.card?.displayName ?? "User"]))
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
+                                .accessibilityAddTraits(.isHeader)
 
                             if let publicId = viewModel.identity?.publicId {
                                 Text("ID: \(String(publicId.prefix(16)))...")
@@ -83,22 +84,26 @@ struct HomeView: View {
                         HStack {
                             Image(systemName: "arrow.up.circle")
                                 .foregroundColor(.orange)
+                                .accessibilityHidden(true)
                             Text("\(viewModel.pendingUpdates) pending updates")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                         .padding(.horizontal)
+                        .accessibilityElement(children: .combine)
                     }
 
                     if let lastSync = viewModel.lastSyncTime {
                         HStack {
                             Image(systemName: "clock")
                                 .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
                             Text("Last synced: \(lastSync, style: .relative) ago")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                         .padding(.horizontal)
+                        .accessibilityElement(children: .combine)
                     }
                 }
                 .padding(.vertical)
@@ -110,6 +115,8 @@ struct HomeView: View {
                         Image(systemName: "arrow.triangle.2.circlepath")
                     }
                     .disabled(viewModel.syncState == .syncing)
+                    .accessibilityLabel("Sync")
+                    .accessibilityHint("Synchronize your card and contacts with the relay server")
                 }
             }
             .sheet(isPresented: $showAddField) {
