@@ -49,10 +49,12 @@ stages:
   - test
   - security
 
-# Override: reuse-lint runs on Docker (doesn't need macOS)
+# Override: serialize reuse-lint with other lint jobs on macOS shell executor
 reuse-lint:
-  tags: [docker]
-  image: fsfe/reuse:latest
+  tags: [macos, self-hosted]
+  variables:
+    GIT_DEPTH: "20"
+  needs: []
 
 variables:
   # GitLab Ultimate Security Configuration
@@ -244,7 +246,7 @@ update:bindings-version:
 lint:swiftlint:
   extends: [.macos-job, .timeout-quick]
   stage: lint
-  needs: []  # first macOS lint job
+  needs: [reuse-lint]  # sequential: prevents shell executor git races
   script:
     - |
       if command -v swiftlint &> /dev/null; then
