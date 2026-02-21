@@ -106,9 +106,14 @@ struct ProximityVerificationView: View {
             Image(systemName: "wave.3.right.circle")
                 .foregroundColor(.cyan)
         case .ultrasonicInProgress:
-            Image(systemName: "waveform")
-                .foregroundColor(.cyan)
-                .symbolEffect(.variableColor.iterative, options: .repeating)
+            if #available(iOS 17.0, *) {
+                Image(systemName: "waveform")
+                    .foregroundColor(.cyan)
+                    .symbolEffect(.variableColor.iterative, options: .repeating)
+            } else {
+                Image(systemName: "waveform")
+                    .foregroundColor(.cyan)
+            }
         case .manualRequired:
             Image(systemName: "person.2.fill")
                 .foregroundColor(.orange)
