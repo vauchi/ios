@@ -78,6 +78,7 @@
 		A71B3D9B635D86B0626C301F /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2D8422E9B837A1B336A071 /* SetupView.swift */; };
 		AA3F337ED100BA98F8D5B5E3 /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A96FE811E67752C2D8F9079E /* SettingsService.swift */; };
 		AABC39234A780149080C84AB /* testSettingsViewGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 754BD6DA5325E71B6D09BAAB /* testSettingsViewGerman.1.png */; };
+		ADBDBB305DC254FE3A94B2F3 /* MultipartQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D4DF5873BED53D99177B4A /* MultipartQRView.swift */; };
 		AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95373D9E6440FED4B532EBDD /* VauchiRepository.swift */; };
 		B12893BD37DD85CC1749CD01 /* testExchangeViewDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 15E6797B86856C4F432E265B /* testExchangeViewDark.1.png */; };
 		B1BAEDCA4134802BFA607609 /* VisualRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */; };
@@ -89,6 +90,7 @@
 		C9A763F2C3F5E581F08EFD13 /* testContactDetailView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EE116FC8484DF9F6D73F91F /* testContactDetailView.1.png */; };
 		CA32F697BDD3346B24319D5E /* ContactDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */; };
 		D07F5E38E2DDD0A47633E879 /* AddFieldsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B1FA31282CE69594A3840C /* AddFieldsStepView.swift */; };
+		D2EF571FC20DD01AF5776C64 /* MultipartQRScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */; };
 		D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49509AE0DF70B880F977B015 /* AudioProximityService.swift */; };
 		DA673F09635BBBF9871092A8 /* VauchiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773C796EDEEFF9B928C04229 /* VauchiUITests.swift */; };
 		DD478B0145A11A9B9277A5BB /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773071C286EDA29BCB17B365 /* ContactsView.swift */; };
@@ -129,6 +131,7 @@
 /* Begin PBXFileReference section */
 		023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewEmpty.1.png; sourceTree = "<group>"; };
 		05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProximityServiceTests.swift; sourceTree = "<group>"; };
+		09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRScanner.swift; sourceTree = "<group>"; };
 		0D3497B12DDDF10370069F86 /* Vauchi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Vauchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0FC890F55872A927941111CE /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		15E6797B86856C4F432E265B /* testExchangeViewDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeViewDark.1.png; sourceTree = "<group>"; };
@@ -166,6 +169,7 @@
 		6310B8BCD3B5DC621926CA76 /* testSecurityStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSecurityStep.1.png; sourceTree = "<group>"; };
 		63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSettingsView.swift; sourceTree = "<group>"; };
 		6490FD404F8F6EB461A4DE38 /* testSetupView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSetupView.1.png; sourceTree = "<group>"; };
+		66D4DF5873BED53D99177B4A /* MultipartQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRView.swift; sourceTree = "<group>"; };
 		6C859B6215BADD6A45480D9F /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationService.swift; sourceTree = "<group>"; };
 		6FA83A41E3BAD133CD9929BD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiApp.swift; sourceTree = "<group>"; };
@@ -423,6 +427,8 @@
 		E187C8E8E4D2A6C1CDA025AA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */,
+				66D4DF5873BED53D99177B4A /* MultipartQRView.swift */,
 				16ECAB2250253E9F51032786 /* ProximityVerificationView.swift */,
 			);
 			path = Components;
@@ -676,6 +682,8 @@
 				4C2FD95F148553C2A12B2991 /* LabelsView.swift in Sources */,
 				0098BE4EAD470F85DBCBE2E7 /* LanguageSettingsView.swift in Sources */,
 				6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */,
+				D2EF571FC20DD01AF5776C64 /* MultipartQRScanner.swift in Sources */,
+				ADBDBB305DC254FE3A94B2F3 /* MultipartQRView.swift in Sources */,
 				281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */,
 				33048DBF138B6D56FF2FAD0B /* OnboardingView.swift in Sources */,
 				857AF56DE7694784EA6A426B /* PreviewCardStepView.swift in Sources */,
