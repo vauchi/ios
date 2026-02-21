@@ -774,142 +774,271 @@ struct DeviceRow: View {
     }
 }
 
-/// Sheet for generating device link QR code
+/// Sheet for device linking full protocol flow
 struct DeviceLinkSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @Environment(\.dismiss) var dismiss
-    @State private var linkData: VauchiRepository.DeviceLinkData?
-    @State private var isGenerating = true
-    @State private var errorMessage: String?
-    @State private var timeRemaining: TimeInterval = 0
-    @State private var timer: Timer?
+    @State private var qrData: String?
+    @State private var isListening = false
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                if isGenerating {
-                    ProgressView("Generating link...")
-                } else if let error = errorMessage {
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.system(size: 48))
-                            .foregroundColor(.orange)
-                            .accessibilityHidden(true)
-                        Text(error)
-                            .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
-                        Button("Try Again") {
-                            Task {
-                                await generateLinkQr()
-                            }
-                        }
-                        .accessibilityHint("Attempts to generate a new device link QR code")
+            Group {
+                switch viewModel.deviceLinkState {
+                case .idle, .generatingQR:
+                    VStack(spacing: 20) {
+                        ProgressView("Generating link...")
                     }
-                } else if let data = linkData {
-                    VStack(spacing: 16) {
-                        Text("Scan this QR code on your new device")
-                            .font(.headline)
-                            .multilineTextAlignment(.center)
 
-                        // QR Code
-                        if let qrImage = generateQRCode(from: data.qrData) {
-                            Image(uiImage: qrImage)
-                                .interpolation(.none)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 250, height: 250)
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(12)
-                                .accessibilityLabel("Device link QR code")
-                                .accessibilityHint("Show this QR code to the new device to scan")
-                        }
+                case .waitingForRequest:
+                    waitingForRequestView
 
-                        // Expiry timer
-                        if timeRemaining > 0 {
-                            HStack {
-                                Image(systemName: "clock")
-                                    .accessibilityHidden(true)
-                                Text("Expires in \(formatTime(timeRemaining))")
-                            }
-                            .font(.caption)
-                            .foregroundColor(timeRemaining < 60 ? .orange : .secondary)
-                            .accessibilityElement(children: .combine)
-                        } else {
-                            HStack {
-                                Image(systemName: "exclamationmark.triangle")
-                                    .accessibilityHidden(true)
-                                Text("QR code expired")
-                            }
-                            .font(.caption)
-                            .foregroundColor(.red)
+                case let .confirmingDevice(name, code, challenge):
+                    confirmingDeviceView(name: name, code: code, challenge: challenge)
 
-                            Button("Generate New Code") {
-                                Task {
-                                    await generateLinkQr()
+                case let .verifyingProximity(challenge):
+                    ProximityVerificationView(
+                        challenge: challenge,
+                        onVerified: {
+                            Task {
+                                do {
+                                    try await viewModel.approveDeviceLink()
+                                } catch {
+                                    viewModel.deviceLinkState = .failed(error.localizedDescription)
                                 }
                             }
+                        },
+                        onCancel: {
+                            viewModel.cancelDeviceLink()
+                            dismiss()
                         }
+                    )
 
-                        Text("Open Vauchi on your new device and select \"Join Existing Identity\" to scan this code.")
+                case .completing:
+                    VStack(spacing: 20) {
+                        ProgressView("Completing link...")
+                        Text("Sending credentials to new device...")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
                     }
-                }
 
-                Spacer()
+                case .success:
+                    successView
+
+                case let .failed(message):
+                    failedView(message: message)
+                }
             }
             .padding()
             .navigationTitle("Link New Device")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Cancel") {
+                        viewModel.cancelDeviceLink()
+                        dismiss()
+                    }
                 }
             }
             .onAppear {
-                Task {
-                    await generateLinkQr()
-                }
+                startLinkFlow()
             }
             .onDisappear {
-                timer?.invalidate()
+                if case .success = viewModel.deviceLinkState {
+                    viewModel.cancelDeviceLink()
+                } else if case .idle = viewModel.deviceLinkState {
+                    // already cleaned up
+                } else {
+                    viewModel.cancelDeviceLink()
+                }
             }
         }
     }
 
-    private func generateLinkQr() async {
-        isGenerating = true
-        errorMessage = nil
-        timer?.invalidate()
+    // MARK: - Subviews
 
-        do {
-            linkData = try await viewModel.generateDeviceLinkQr()
-            timeRemaining = linkData?.timeRemaining ?? 0
-            startTimer()
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+    private var waitingForRequestView: some View {
+        VStack(spacing: 20) {
+            if let qrData = qrData, let qrImage = generateQRCode(from: qrData) {
+                Text("Scan this QR code on your new device")
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
 
-        isGenerating = false
-    }
+                Image(uiImage: qrImage)
+                    .interpolation(.none)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 250, height: 250)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .accessibilityLabel("Device link QR code")
 
-    private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if timeRemaining > 0 {
-                timeRemaining -= 1
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .scaleEffect(0.8)
+                    Text("Waiting for new device...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Text("Open Vauchi on your new device and select \"Join Existing Identity\" to scan this code.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
             } else {
-                timer?.invalidate()
+                ProgressView("Preparing...")
             }
         }
     }
 
-    private func formatTime(_ seconds: TimeInterval) -> String {
-        let mins = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        return String(format: "%d:%02d", mins, secs)
+    private func confirmingDeviceView(name: String, code: String, challenge: Data) -> some View {
+        VStack(spacing: 24) {
+            Image(systemName: "iphone.and.arrow.forward")
+                .font(.system(size: 48))
+                .foregroundColor(.cyan)
+                .accessibilityHidden(true)
+
+            Text("Device Wants to Link")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            VStack(spacing: 8) {
+                Text("Device: **\(name)**")
+                    .font(.body)
+
+                Text("Confirmation Code")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Text(code)
+                    .font(.system(.title, design: .monospaced))
+                    .fontWeight(.bold)
+                    .foregroundColor(.cyan)
+                    .accessibilityLabel("Confirmation code: \(code)")
+            }
+
+            Text("Verify this code matches the code shown on the new device, then proceed to proximity verification.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            Spacer().frame(height: 8)
+
+            Button(action: {
+                viewModel.deviceLinkState = .verifyingProximity(challenge: challenge)
+            }) {
+                Text("Codes Match — Verify Proximity")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.cyan)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .accessibilityHint("Proceeds to proximity verification step")
+
+            Button(action: {
+                viewModel.cancelDeviceLink()
+                dismiss()
+            }) {
+                Text("Deny")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color(.systemGray5))
+                    .foregroundColor(.primary)
+                    .cornerRadius(10)
+            }
+            .accessibilityHint("Rejects the device link request")
+        }
+    }
+
+    private var successView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 56))
+                .foregroundColor(.green)
+                .accessibilityHidden(true)
+
+            Text("Device Linked Successfully")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Text("The new device now has access to your identity. You can manage linked devices in Settings.")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            Button("Done") {
+                viewModel.cancelDeviceLink()
+                dismiss()
+            }
+            .fontWeight(.semibold)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.cyan)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+        }
+    }
+
+    private func failedView(message: String) -> some View {
+        VStack(spacing: 20) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 56))
+                .foregroundColor(.red)
+                .accessibilityHidden(true)
+
+            Text("Linking Failed")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Text(message)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            Button("Try Again") {
+                viewModel.cancelDeviceLink()
+                startLinkFlow()
+            }
+            .fontWeight(.semibold)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.cyan)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+
+            Button("Cancel") {
+                viewModel.cancelDeviceLink()
+                dismiss()
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color(.systemGray5))
+            .foregroundColor(.primary)
+            .cornerRadius(10)
+        }
+    }
+
+    // MARK: - Flow Control
+
+    private func startLinkFlow() {
+        Task {
+            do {
+                let data = try await viewModel.startDeviceLinkInitiator()
+                qrData = data
+
+                // Start listening for incoming request in background
+                try await viewModel.listenForDeviceLinkRequest()
+            } catch {
+                viewModel.deviceLinkState = .failed(error.localizedDescription)
+            }
+        }
     }
 
     private func generateQRCode(from string: String) -> UIImage? {

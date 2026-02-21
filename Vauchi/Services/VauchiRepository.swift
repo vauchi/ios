@@ -1264,6 +1264,58 @@ class VauchiRepository {
         }
     }
 
+    /// Start device linking as the existing (initiator) device.
+    func startDeviceLink() throws -> MobileDeviceLinkInitiator {
+        do {
+            return try vauchi.startDeviceLink()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Start device join as the new (responder) device.
+    func startDeviceJoin(qrData: String, deviceName: String) throws -> MobileDeviceLinkResponder {
+        do {
+            return try vauchi.startDeviceJoin(qrData: qrData, deviceName: deviceName)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Relay transport request received from a new device wanting to link.
+    struct DeviceLinkRequest {
+        let encryptedPayload: Data
+        let senderToken: String
+    }
+
+    /// Listen for incoming device link request via relay.
+    /// NOTE: Stub until relay transport bindings are published in vauchi-mobile-swift.
+    /// Once core relay bindings merge, replace with:
+    ///   `return try vauchi.listenForDeviceLinkRequest(timeoutSecs: timeoutSecs)`
+    func listenForDeviceLinkRequest(timeoutSecs _: UInt64) throws -> DeviceLinkRequest {
+        // TODO: Replace with actual UniFFI call once relay bindings are published
+        throw VauchiRepositoryError.internalError("Relay transport not yet available in bindings")
+    }
+
+    /// Send device link response via relay.
+    /// NOTE: Stub until relay transport bindings are published in vauchi-mobile-swift.
+    func sendDeviceLinkResponse(senderToken _: String, encryptedResponse _: Data) throws {
+        // TODO: Replace with actual UniFFI call once relay bindings are published
+        throw VauchiRepositoryError.internalError("Relay transport not yet available in bindings")
+    }
+
+    /// Send device link request via relay and wait for response.
+    /// NOTE: Stub until relay transport bindings are published in vauchi-mobile-swift.
+    func sendDeviceLinkRequest(
+        targetIdentity _: String,
+        senderToken _: String,
+        encryptedRequest _: Data,
+        timeoutSecs _: UInt64
+    ) throws -> Data {
+        // TODO: Replace with actual UniFFI call once relay bindings are published
+        throw VauchiRepositoryError.internalError("Relay transport not yet available in bindings")
+    }
+
     /// Get the number of linked devices
     func deviceCount() throws -> UInt32 {
         do {

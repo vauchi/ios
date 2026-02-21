@@ -1385,6 +1385,88 @@ class VauchiViewModel: ObservableObject {
         return try repository.isPrimaryDevice()
     }
 
+    // MARK: - Device Linking Protocol
+
+    enum DeviceLinkState {
+        case idle
+        case generatingQR
+        case waitingForRequest
+        case confirmingDevice(name: String, code: String, challenge: Data)
+        case verifyingProximity(challenge: Data)
+        case completing
+        case success
+        case failed(String)
+    }
+
+    @Published var deviceLinkState: DeviceLinkState = .idle
+    private var currentInitiator: MobileDeviceLinkInitiator?
+    private var currentSenderToken: String?
+
+    /// Start the initiator flow: generate QR, listen for request.
+    func startDeviceLinkInitiator() async throws -> String {
+        guard let repository = repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        deviceLinkState = .generatingQR
+        let initiator = try repository.startDeviceLink()
+        currentInitiator = initiator
+        let qrData = initiator.qrData()
+        deviceLinkState = .waitingForRequest
+        return qrData
+    }
+
+    /// Listen for device link request via relay (blocking, call from background).
+    func listenForDeviceLinkRequest() async throws {
+        guard let repository = repository, let initiator = currentInitiator else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        let request = try repository.listenForDeviceLinkRequest(timeoutSecs: 300)
+        currentSenderToken = request.senderToken
+        let confirmation = try initiator.prepareConfirmation(
+            encryptedRequest: request.encryptedPayload
+        )
+
+        let challenge = Data(initiator.proximityChallenge())
+
+        deviceLinkState = .confirmingDevice(
+            name: confirmation.deviceName,
+            code: confirmation.confirmationCode,
+            challenge: challenge
+        )
+    }
+
+    /// Approve the device link after proximity verification.
+    func approveDeviceLink() async throws {
+        guard let repository = repository,
+              let initiator = currentInitiator,
+              let senderToken = currentSenderToken
+        else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        deviceLinkState = .completing
+        initiator.setProximityVerified()
+        let result = try initiator.confirmLink()
+        if let responseBytes = result.encryptedResponse {
+            try repository.sendDeviceLinkResponse(
+                senderToken: senderToken,
+                encryptedResponse: responseBytes
+            )
+        }
+        deviceLinkState = .success
+        currentInitiator = nil
+        currentSenderToken = nil
+    }
+
+    /// Cancel the device link flow.
+    func cancelDeviceLink() {
+        deviceLinkState = .idle
+        currentInitiator = nil
+        currentSenderToken = nil
+    }
+
     // MARK: - GDPR Operations
 
     /// Export all user data in GDPR-compliant format
