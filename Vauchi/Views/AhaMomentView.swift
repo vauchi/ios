@@ -18,7 +18,7 @@ struct AhaMomentView: View {
     var body: some View {
         VStack(spacing: 24) {
             // Celebration animation if enabled
-            if moment.hasAnimation && showAnimation {
+            if moment.hasAnimation, showAnimation {
                 LottieAnimationPlaceholder()
                     .frame(width: 120, height: 120)
                     .accessibilityHidden(true)
@@ -109,7 +109,7 @@ struct AhaMomentOverlay: ViewModifier {
     func body(content: Content) -> some View {
         content
             .overlay {
-                if let moment = moment {
+                if let moment {
                     ZStack {
                         // Dimmed background
                         Color.black.opacity(0.4)

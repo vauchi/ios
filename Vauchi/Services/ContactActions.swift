@@ -186,7 +186,7 @@ enum ContactActions {
 
     /// Check if a URL is safe to open using vauchi-core validation
     static func isSafeUrl(_ url: URL) -> Bool {
-        return isSafeUrl(url.absoluteString)
+        isSafeUrl(url.absoluteString)
     }
 
     // MARK: - Available Actions
@@ -195,17 +195,17 @@ enum ContactActions {
     static func availableActions(for type: VauchiFieldType) -> [Action] {
         switch type {
         case .phone:
-            return [.call, .sms, .copy]
+            [.call, .sms, .copy]
         case .email:
-            return [.email, .copy]
+            [.email, .copy]
         case .website:
-            return [.openUrl, .copy]
+            [.openUrl, .copy]
         case .address:
-            return [.openMaps, .copy]
+            [.openMaps, .copy]
         case .social:
-            return [.openUrl, .copy]
+            [.openUrl, .copy]
         case .custom:
-            return [.copy]
+            [.copy]
         }
     }
 

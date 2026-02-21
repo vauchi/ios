@@ -17,9 +17,9 @@ struct ContactsView: View {
 
     private var displayedContacts: [ContactInfo] {
         if searchText.isEmpty {
-            return viewModel.contacts
+            viewModel.contacts
         } else {
-            return searchResults
+            searchResults
         }
     }
 
@@ -30,7 +30,7 @@ struct ContactsView: View {
     var body: some View {
         NavigationView {
             Group {
-                if viewModel.contacts.isEmpty && searchText.isEmpty {
+                if viewModel.contacts.isEmpty, searchText.isEmpty {
                     EmptyContactsView()
                 } else {
                     VStack(spacing: 0) {
@@ -57,7 +57,7 @@ struct ContactsView: View {
                             .accessibilityHint("Triple tap to toggle hidden contacts view")
                         }
 
-                        if displayedContacts.isEmpty && !searchText.isEmpty {
+                        if displayedContacts.isEmpty, !searchText.isEmpty {
                             // No search results
                             VStack(spacing: 16) {
                                 Image(systemName: "magnifyingglass")
@@ -74,7 +74,7 @@ struct ContactsView: View {
                                         ContactRow(contact: contact)
                                     }
                                     .onAppear {
-                                        if contact.id == displayedContacts.last?.id && searchText.isEmpty {
+                                        if contact.id == displayedContacts.last?.id, searchText.isEmpty {
                                             Task { await viewModel.loadMoreContacts() }
                                         }
                                     }
@@ -98,7 +98,7 @@ struct ContactsView: View {
                                 }
                                 .onDelete(perform: deleteContacts)
 
-                                if viewModel.hasMoreContacts && searchText.isEmpty {
+                                if viewModel.hasMoreContacts, searchText.isEmpty {
                                     HStack {
                                         Spacer()
                                         ProgressView()

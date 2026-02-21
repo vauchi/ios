@@ -434,7 +434,7 @@ final class VisualRegressionTests: XCTestCase {
     // MARK: - German Locale Variants
 
     /// Helper to switch locale, run a snapshot, then restore.
-    private func withLocale<V: View>(_ code: String, view: V, file: StaticString = #file, testName: String = #function, line: UInt = #line) {
+    private func withLocale(_ code: String, view: some View, file: StaticString = #file, testName: String = #function, line: UInt = #line) {
         let previousLocale = LocalizationService.shared.currentLocale
         let wasFollowingSystem = LocalizationService.shared.followSystem
         LocalizationService.shared.selectLocale(code: code)

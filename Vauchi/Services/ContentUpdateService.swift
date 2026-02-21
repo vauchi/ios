@@ -283,7 +283,7 @@ final class ContentUpdateService: ObservableObject {
             return
         }
 
-        guard let entry = entry else {
+        guard let entry else {
             throw ContentUpdateError.noContent
         }
 
@@ -416,11 +416,11 @@ enum ContentUpdateError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .disabled: return "Content updates are disabled"
-        case .alreadyUpdating: return "Already updating content"
-        case .httpError: return "Failed to download content"
-        case .checksumMismatch: return "Content integrity check failed"
-        case .noContent: return "No content available"
+        case .disabled: "Content updates are disabled"
+        case .alreadyUpdating: "Already updating content"
+        case .httpError: "Failed to download content"
+        case .checksumMismatch: "Content integrity check failed"
+        case .noContent: "No content available"
         }
     }
 }

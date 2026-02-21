@@ -61,9 +61,9 @@ class KeychainService {
 
     func load(key: String) throws -> Data {
         if useFileStorage {
-            return try loadFromFile(key: key)
+            try loadFromFile(key: key)
         } else {
-            return try loadFromKeychain(key: key)
+            try loadFromKeychain(key: key)
         }
     }
 
@@ -204,7 +204,7 @@ class KeychainService {
     }
 
     func loadStorageKey() throws -> Data {
-        return try load(key: "storage_key")
+        try load(key: "storage_key")
     }
 
     func saveIdentityBackup(_ backup: Data) throws {
@@ -212,6 +212,6 @@ class KeychainService {
     }
 
     func loadIdentityBackup() throws -> Data {
-        return try load(key: "identity_backup")
+        try load(key: "identity_backup")
     }
 }

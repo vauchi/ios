@@ -77,7 +77,7 @@ final class VisibilityLabelsTests: XCTestCase {
         let labels = try repo.listLabels()
 
         XCTAssertEqual(labels.count, 2)
-        let labelNames = Set(labels.map { $0.name })
+        let labelNames = Set(labels.map(\.name))
         XCTAssertTrue(labelNames.contains("Work"))
         XCTAssertTrue(labelNames.contains("Family"))
     }
@@ -204,7 +204,7 @@ final class VisibilityLabelsTests: XCTestCase {
         let contactLabels = try repo.getLabelsForContact(contactId: contactId)
 
         XCTAssertEqual(contactLabels.count, 2)
-        let labelIds = Set(contactLabels.map { $0.id })
+        let labelIds = Set(contactLabels.map(\.id))
         XCTAssertTrue(labelIds.contains(label1.id))
         XCTAssertTrue(labelIds.contains(label2.id))
     }

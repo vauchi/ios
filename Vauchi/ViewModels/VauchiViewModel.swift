@@ -28,14 +28,16 @@ struct CardInfo: Equatable {
 struct ContactInfo: Identifiable, Equatable {
     let id: String
     let displayName: String
+    let fingerprint: String
     let verified: Bool
     let recoveryTrusted: Bool
     let card: CardInfo?
     let addedAt: Date?
 
-    init(id: String, displayName: String, verified: Bool, recoveryTrusted: Bool = false, card: CardInfo? = nil, addedAt: Date? = nil) {
+    init(id: String, displayName: String, fingerprint: String = "", verified: Bool, recoveryTrusted: Bool = false, card: CardInfo? = nil, addedAt: Date? = nil) {
         self.id = id
         self.displayName = displayName
+        self.fingerprint = fingerprint
         self.verified = verified
         self.recoveryTrusted = recoveryTrusted
         self.card = card
@@ -275,7 +277,7 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Identity
 
     func createIdentity(name: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -291,7 +293,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     private func loadIdentity() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             let displayName = try repository.getDisplayName()
@@ -306,7 +308,7 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Card
 
     func loadCard() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             let cardData = try repository.getOwnCard()
@@ -328,7 +330,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func addField(type: String, label: String, value: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -338,7 +340,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func updateField(label: String, newValue: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -347,7 +349,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func removeField(id: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -361,7 +363,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func setDisplayName(_ name: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -373,7 +375,7 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Contacts
 
     func loadContacts() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         // Reset pagination
         contactsOffset = 0
@@ -385,6 +387,7 @@ class VauchiViewModel: ObservableObject {
                 ContactInfo(
                     id: contact.id,
                     displayName: contact.displayName,
+                    fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     card: CardInfo(
@@ -410,7 +413,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func loadMoreContacts() async {
-        guard let repository = repository, hasMoreContacts else { return }
+        guard let repository, hasMoreContacts else { return }
 
         do {
             let moreData = try repository.listContactsPaginated(offset: contactsOffset, limit: contactsPageSize)
@@ -418,6 +421,7 @@ class VauchiViewModel: ObservableObject {
                 ContactInfo(
                     id: contact.id,
                     displayName: contact.displayName,
+                    fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     card: CardInfo(
@@ -443,7 +447,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func getContact(id: String) async -> ContactInfo? {
-        guard let repository = repository else { return nil }
+        guard let repository else { return nil }
 
         do {
             guard let contact = try repository.getContact(id: id) else {
@@ -453,6 +457,7 @@ class VauchiViewModel: ObservableObject {
             return ContactInfo(
                 id: contact.id,
                 displayName: contact.displayName,
+                fingerprint: contact.fingerprint,
                 verified: contact.isVerified,
                 card: CardInfo(
                     displayName: contact.card.displayName,
@@ -473,7 +478,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func searchContacts(query: String) async -> [ContactInfo] {
-        guard let repository = repository else { return [] }
+        guard let repository else { return [] }
 
         do {
             let results = try repository.searchContacts(query: query)
@@ -481,6 +486,7 @@ class VauchiViewModel: ObservableObject {
                 ContactInfo(
                     id: contact.id,
                     displayName: contact.displayName,
+                    fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted
                 )
@@ -496,7 +502,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Load hidden contacts
     func loadHiddenContacts() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             let hiddenData = try repository.listHiddenContacts()
@@ -504,6 +510,7 @@ class VauchiViewModel: ObservableObject {
                 ContactInfo(
                     id: contact.id,
                     displayName: contact.displayName,
+                    fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     card: CardInfo(
@@ -529,7 +536,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Hide a contact
     func hideContact(id: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -546,7 +553,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Unhide a contact
     func unhideContact(id: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -570,7 +577,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Load duress status
     func loadDuressStatus() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             isPasswordEnabled = try repository.isPasswordEnabled()
@@ -582,7 +589,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Set up app password
     func setupAppPassword(password: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -592,7 +599,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Set up duress PIN
     func setupDuressPassword(duressPassword: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -602,7 +609,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Disable duress PIN
     func disableDuress() async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -616,7 +623,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Execute emergency panic shred — destroys all data immediately
     func panicShred() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             try repository.panicShred()
@@ -636,7 +643,7 @@ class VauchiViewModel: ObservableObject {
     @Published var emergencyConfigured = false
 
     func loadEmergencyConfig() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
         do {
             let config = try repository.getEmergencyConfig()
             emergencyConfigured = config != nil
@@ -646,18 +653,18 @@ class VauchiViewModel: ObservableObject {
     }
 
     func configureEmergencyBroadcast(contactIds: [String], message: String, includeLocation: Bool) async throws {
-        guard let repository = repository else { throw VauchiRepositoryError.notInitialized }
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
         try repository.configureEmergencyBroadcast(contactIds: contactIds, message: message, includeLocation: includeLocation)
         emergencyConfigured = true
     }
 
     func sendEmergencyBroadcast() async throws -> (sent: Int, total: Int) {
-        guard let repository = repository else { throw VauchiRepositoryError.notInitialized }
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
         return try repository.sendEmergencyBroadcast()
     }
 
     func disableEmergencyBroadcast() async throws {
-        guard let repository = repository else { throw VauchiRepositoryError.notInitialized }
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
         try repository.disableEmergencyBroadcast()
         emergencyConfigured = false
     }
@@ -665,7 +672,7 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Tor Mode
 
     func loadTorConfig() {
-        guard let repository = repository else { return }
+        guard let repository else { return }
         do {
             let config = try repository.getTorConfig()
             DispatchQueue.main.async {
@@ -679,7 +686,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func saveTorConfig(enabled: Bool, bridges: [String], preferOnion: Bool) {
-        guard let repository = repository else { return }
+        guard let repository else { return }
         do {
             try repository.saveTorConfig(enabled: enabled, bridges: bridges, preferOnion: preferOnion)
             DispatchQueue.main.async {
@@ -693,7 +700,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func removeContact(id: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -702,7 +709,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func verifyContact(id: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -711,7 +718,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func trustContactForRecovery(id: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -720,7 +727,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func untrustContactForRecovery(id: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -729,7 +736,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func trustedContactCount() async throws -> UInt32 {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -743,7 +750,7 @@ class VauchiViewModel: ObservableObject {
     /// Initialize demo contact if user has no real contacts.
     /// Call this after onboarding completes.
     func initDemoContactIfNeeded() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             demoContact = try repository.initDemoContactIfNeeded()
@@ -755,7 +762,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Load the current demo contact state
     func loadDemoContact() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             demoContact = try repository.getDemoContact()
@@ -768,7 +775,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Dismiss the demo contact manually
     func dismissDemoContact() async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -779,7 +786,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Auto-remove demo contact after first real exchange
     func autoRemoveDemoContact() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             let removed = try repository.autoRemoveDemoContact()
@@ -794,7 +801,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Restore the demo contact from Settings
     func restoreDemoContact() async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -804,7 +811,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Trigger a demo update
     func triggerDemoUpdate() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             demoContact = try repository.triggerDemoUpdate()
@@ -816,7 +823,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Check if demo update is available
     func isDemoUpdateAvailable() -> Bool {
-        guard let repository = repository else { return false }
+        guard let repository else { return false }
         return repository.isDemoUpdateAvailable()
     }
 
@@ -826,7 +833,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Load all visibility labels
     func loadLabels() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             visibilityLabels = try repository.listLabels()
@@ -839,7 +846,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Create a new visibility label
     func createLabel(name: String) async throws -> VauchiVisibilityLabel {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -850,7 +857,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Get label details
     func getLabel(id: String) throws -> VauchiVisibilityLabelDetail {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -859,7 +866,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Rename a visibility label
     func renameLabel(id: String, newName: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -869,7 +876,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Delete a visibility label
     func deleteLabel(id: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -879,7 +886,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Add contact to a label
     func addContactToLabel(labelId: String, contactId: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -889,7 +896,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Remove contact from a label
     func removeContactFromLabel(labelId: String, contactId: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -899,7 +906,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Get all labels for a contact
     func getLabelsForContact(contactId: String) throws -> [VauchiVisibilityLabel] {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -908,7 +915,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Set field visibility for a label
     func setLabelFieldVisibility(labelId: String, fieldLabel: String, isVisible: Bool) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -919,7 +926,7 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Exchange
 
     func generateQRData() throws -> String {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -928,7 +935,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func generateExchangeData() throws -> ExchangeDataInfo {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -941,7 +948,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func completeExchange(qrData: String) async throws -> ExchangeResultInfo {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -964,7 +971,7 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Sync
 
     func sync() async {
-        guard let repository = repository else {
+        guard let repository else {
             syncState = .error("Not initialized")
             return
         }
@@ -988,7 +995,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func loadPendingUpdates() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             pendingUpdates = try Int(repository.pendingUpdateCount())
@@ -1000,11 +1007,11 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Delivery Status
 
     func loadDeliveryRecords() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             deliveryRecords = try repository.getAllDeliveryRecords()
-            failedDeliveryCount = deliveryRecords.filter { $0.isFailed }.count
+            failedDeliveryCount = deliveryRecords.filter(\.isFailed).count
         } catch {
             deliveryRecords = []
             failedDeliveryCount = 0
@@ -1012,7 +1019,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func loadRetryEntries() async {
-        guard let repository = repository else { return }
+        guard let repository else { return }
 
         do {
             retryEntries = try repository.getRetryEntries()
@@ -1022,7 +1029,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func getDeliveryRecordsForContact(contactId: String) async -> [VauchiDeliveryRecord] {
-        guard let repository = repository else { return [] }
+        guard let repository else { return [] }
 
         do {
             return try repository.getDeliveryRecordsForContact(contactId: contactId)
@@ -1032,7 +1039,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func getDeliverySummary(messageId: String) async -> VauchiDeliverySummary? {
-        guard let repository = repository else { return nil }
+        guard let repository else { return nil }
 
         do {
             return try repository.getDeliverySummary(messageId: messageId)
@@ -1042,7 +1049,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func retryDelivery(messageId: String) async -> Bool {
-        guard let repository = repository else { return false }
+        guard let repository else { return false }
 
         do {
             let success = try repository.retryDelivery(messageId: messageId)
@@ -1067,7 +1074,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Check if a contact has any pending deliveries
     func hasPendingDeliveryForContact(contactId: String) -> Bool {
-        return deliveryRecords.contains { record in
+        deliveryRecords.contains { record in
             record.recipientId == contactId &&
                 (record.status == .queued || record.status == .sent || record.status == .stored)
         }
@@ -1076,7 +1083,7 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Backup
 
     func exportBackup(password: String) async throws -> String {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1084,7 +1091,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func importBackup(data: String, password: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1098,7 +1105,7 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Visibility
 
     func hideFieldFromContact(contactId: String, fieldLabel: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1106,7 +1113,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func showFieldToContact(contactId: String, fieldLabel: String) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1114,7 +1121,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func isFieldVisibleToContact(contactId: String, fieldLabel: String) async throws -> Bool {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1124,7 +1131,7 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Field Validation
 
     func getFieldValidationStatus(contactId: String, fieldId: String, fieldValue: String) async throws -> MobileValidationStatus {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1132,7 +1139,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func validateField(contactId: String, fieldId: String, fieldValue: String) async throws -> MobileFieldValidation {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1140,7 +1147,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func revokeFieldValidation(contactId: String, fieldId: String) async throws -> Bool {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1148,7 +1155,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func getFieldValidationCount(contactId: String, fieldId: String) async throws -> UInt32 {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1158,7 +1165,7 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Social Networks
 
     func listSocialNetworks() -> [(id: String, displayName: String, urlTemplate: String)] {
-        guard let repository = repository else { return [] }
+        guard let repository else { return [] }
 
         return repository.listSocialNetworks().map {
             (id: $0.id, displayName: $0.displayName, urlTemplate: $0.urlTemplate)
@@ -1166,7 +1173,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     func getProfileUrl(networkId: String, username: String) -> String? {
-        guard let repository = repository else { return nil }
+        guard let repository else { return nil }
 
         return repository.getProfileUrl(networkId: networkId, username: username)
     }
@@ -1175,13 +1182,13 @@ class VauchiViewModel: ObservableObject {
 
     /// Check if content updates feature is supported
     func isContentUpdatesSupported() -> Bool {
-        guard let repository = repository else { return false }
+        guard let repository else { return false }
         return repository.isContentUpdatesSupported()
     }
 
     /// Check for available content updates
     func checkContentUpdates() async throws -> MobileUpdateStatus {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
         return try repository.checkContentUpdates()
@@ -1189,7 +1196,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Apply available content updates
     func applyContentUpdates() async throws -> MobileApplyResult {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
         return try repository.applyContentUpdates()
@@ -1197,7 +1204,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Reload social networks after content updates
     func reloadSocialNetworks() async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
         try repository.reloadSocialNetworks()
@@ -1207,7 +1214,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Try to trigger an aha moment and display it
     func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) {
-        guard let repository = repository else { return }
+        guard let repository else { return }
         do {
             if let moment = try repository.tryTriggerAhaMoment(momentType) {
                 DispatchQueue.main.async {
@@ -1221,7 +1228,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Try to trigger an aha moment with context
     func tryTriggerAhaMomentWithContext(_ momentType: MobileAhaMomentType, context: String) {
-        guard let repository = repository else { return }
+        guard let repository else { return }
         do {
             if let moment = try repository.tryTriggerAhaMomentWithContext(momentType, context: context) {
                 DispatchQueue.main.async {
@@ -1240,19 +1247,19 @@ class VauchiViewModel: ObservableObject {
 
     /// Check if user has seen a specific aha moment
     func hasSeenAhaMoment(_ momentType: MobileAhaMomentType) -> Bool {
-        guard let repository = repository else { return true }
+        guard let repository else { return true }
         return repository.hasSeenAhaMoment(momentType)
     }
 
     /// Get aha moments progress (seen/total)
     func ahaMomentsProgress() -> (seen: Int, total: Int) {
-        guard let repository = repository else { return (0, 0) }
+        guard let repository else { return (0, 0) }
         return (Int(repository.ahaMomentsSeenCount()), Int(repository.ahaMomentsTotalCount()))
     }
 
     /// Reset aha moments (for Settings)
     func resetAhaMoments() async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
         try repository.resetAhaMoments()
@@ -1262,13 +1269,13 @@ class VauchiViewModel: ObservableObject {
 
     /// Check if certificate pinning is enabled
     func isCertificatePinningEnabled() -> Bool {
-        guard let repository = repository else { return false }
+        guard let repository else { return false }
         return repository.isCertificatePinningEnabled()
     }
 
     /// Set the pinned certificate for relay TLS connections
     func setPinnedCertificate(_ certPem: String) {
-        guard let repository = repository else { return }
+        guard let repository else { return }
         repository.setPinnedCertificate(certPem)
     }
 
@@ -1276,7 +1283,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Create a recovery claim for a lost identity
     func createRecoveryClaim(oldPkHex: String) async throws -> VauchiRepository.RecoveryClaimInfo {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1285,7 +1292,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Parse a recovery claim from base64
     func parseRecoveryClaim(claimB64: String) async throws -> VauchiRepository.RecoveryClaimInfo {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1294,7 +1301,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Create a voucher for someone's recovery claim
     func createRecoveryVoucher(claimB64: String) async throws -> VauchiRepository.RecoveryVoucherInfo {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1303,7 +1310,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Add a voucher to current recovery
     func addRecoveryVoucher(voucherB64: String) async throws -> VauchiRepository.RecoveryProgressInfo {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1312,7 +1319,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Get current recovery status
     func getRecoveryStatus() async throws -> VauchiRepository.RecoveryProgressInfo? {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1321,7 +1328,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Get completed recovery proof
     func getRecoveryProof() async throws -> String? {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1332,7 +1339,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Get list of linked devices
     func getDevices() async throws -> [VauchiRepository.DeviceInfo] {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
         return try repository.getDevices()
@@ -1340,7 +1347,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Generate QR code data for linking a new device
     func generateDeviceLinkQr() async throws -> VauchiRepository.DeviceLinkData {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
         return try repository.generateDeviceLinkQr()
@@ -1348,7 +1355,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Parse device link QR code data
     func parseDeviceLinkQr(qrData: String) async throws -> VauchiRepository.DeviceLinkInfo {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
         return try repository.parseDeviceLinkQr(qrData: qrData)
@@ -1356,7 +1363,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Get the number of linked devices
     func deviceCount() async throws -> UInt32 {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
         return try repository.deviceCount()
@@ -1364,7 +1371,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Unlink a device by index
     func unlinkDevice(deviceIndex: UInt32) async throws -> Bool {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
         return try repository.unlinkDevice(deviceIndex: deviceIndex)
@@ -1372,7 +1379,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Check if this is the primary device
     func isPrimaryDevice() async throws -> Bool {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
         return try repository.isPrimaryDevice()
@@ -1382,7 +1389,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Export all user data in GDPR-compliant format
     func exportGdprData() async throws -> VauchiGdprExport {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1391,7 +1398,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Schedule account deletion with grace period
     func scheduleAccountDeletion() async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1402,7 +1409,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Cancel a scheduled account deletion
     func cancelAccountDeletion() async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1413,7 +1420,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Load the current deletion state
     func loadDeletionState() async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1424,7 +1431,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Grant consent for a specific type
     func grantConsent(_ type: VauchiConsentType) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1434,7 +1441,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Revoke consent for a specific type
     func revokeConsent(_ type: VauchiConsentType) async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
@@ -1444,7 +1451,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Load all consent records
     func loadConsentRecords() async throws {
-        guard let repository = repository else {
+        guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 

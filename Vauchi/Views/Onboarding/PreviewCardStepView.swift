@@ -87,7 +87,7 @@ struct PreviewCardStepView: View {
                             PreviewFieldRow(icon: "envelope", label: "Email", value: onboardingData.email)
                         }
 
-                        if onboardingData.phone.isEmpty && onboardingData.email.isEmpty {
+                        if onboardingData.phone.isEmpty, onboardingData.email.isEmpty {
                             Text("No additional info yet")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)

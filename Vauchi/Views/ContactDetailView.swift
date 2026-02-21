@@ -313,12 +313,12 @@ struct ContactFieldRow: View {
 
     private func icon(for type: String) -> String {
         switch type.lowercased() {
-        case "email": return "envelope"
-        case "phone": return "phone"
-        case "website": return "globe"
-        case "address": return "house"
-        case "social": return "at"
-        default: return "note.text"
+        case "email": "envelope"
+        case "phone": "phone"
+        case "website": "globe"
+        case "address": "house"
+        case "social": "at"
+        default: "note.text"
         }
     }
 
@@ -452,12 +452,12 @@ struct VisibilityToggleRow: View {
 
     private func icon(for type: String) -> String {
         switch type.lowercased() {
-        case "email": return "envelope"
-        case "phone": return "phone"
-        case "website": return "globe"
-        case "address": return "house"
-        case "social": return "at"
-        default: return "note.text"
+        case "email": "envelope"
+        case "phone": "phone"
+        case "website": "globe"
+        case "address": "house"
+        case "social": "at"
+        default: "note.text"
         }
     }
 

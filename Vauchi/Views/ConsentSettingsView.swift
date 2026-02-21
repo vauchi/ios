@@ -136,22 +136,22 @@ struct ConsentToggleRow: View {
     var consentDescription: String {
         switch consentType {
         case .dataProcessing:
-            return "Allow processing of your contact data for core functionality."
+            "Allow processing of your contact data for core functionality."
         case .contactSharing:
-            return "Allow sharing your contact card with others via QR exchange."
+            "Allow sharing your contact card with others via QR exchange."
         case .analytics:
-            return "Allow anonymous usage analytics to improve the app."
+            "Allow anonymous usage analytics to improve the app."
         case .recoveryVouching:
-            return "Allow participating in identity recovery vouching for contacts."
+            "Allow participating in identity recovery vouching for contacts."
         }
     }
 
     var consentIcon: String {
         switch consentType {
-        case .dataProcessing: return "gearshape.2"
-        case .contactSharing: return "person.2"
-        case .analytics: return "chart.bar"
-        case .recoveryVouching: return "person.badge.key"
+        case .dataProcessing: "gearshape.2"
+        case .contactSharing: "person.2"
+        case .analytics: "chart.bar"
+        case .recoveryVouching: "person.badge.key"
         }
     }
 

@@ -166,10 +166,10 @@ struct SyncStatusIndicator: View {
 
     private var accessibilityLabel: String {
         switch syncState {
-        case .idle: return "Sync ready"
-        case .syncing: return "Syncing in progress"
-        case .success: return "Sync completed successfully"
-        case .error: return "Sync error occurred"
+        case .idle: "Sync ready"
+        case .syncing: "Syncing in progress"
+        case .success: "Sync completed successfully"
+        case .error: "Sync error occurred"
         }
     }
 }
@@ -184,12 +184,12 @@ struct FieldRow: View {
 
     private func icon(for type: String) -> String {
         switch type.lowercased() {
-        case "email": return "envelope"
-        case "phone": return "phone"
-        case "website": return "globe"
-        case "address": return "house"
-        case "social": return "at"
-        default: return "note.text"
+        case "email": "envelope"
+        case "phone": "phone"
+        case "website": "globe"
+        case "address": "house"
+        case "social": "at"
+        default: "note.text"
         }
     }
 
@@ -299,10 +299,10 @@ struct AddFieldSheet: View {
 
     private func keyboardType(for type: String) -> UIKeyboardType {
         switch type {
-        case "email": return .emailAddress
-        case "phone": return .phonePad
-        case "website": return .URL
-        default: return .default
+        case "email": .emailAddress
+        case "phone": .phonePad
+        case "website": .URL
+        default: .default
         }
     }
 

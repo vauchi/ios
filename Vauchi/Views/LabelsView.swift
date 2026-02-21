@@ -19,7 +19,7 @@ struct LabelsView: View {
     var body: some View {
         List {
             // Suggested labels section (if no labels exist)
-            if viewModel.visibilityLabels.isEmpty && !viewModel.suggestedLabels.isEmpty {
+            if viewModel.visibilityLabels.isEmpty, !viewModel.suggestedLabels.isEmpty {
                 Section {
                     ForEach(viewModel.suggestedLabels, id: \.self) { suggestion in
                         Button(action: {

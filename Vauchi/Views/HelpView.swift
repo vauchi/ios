@@ -153,12 +153,12 @@ struct HelpView: View {
 
     private func iconForCategory(_ category: MobileHelpCategory) -> String {
         switch category {
-        case .gettingStarted: return "star"
-        case .privacy: return "lock.shield"
-        case .recovery: return "arrow.counterclockwise"
-        case .contacts: return "person.2"
-        case .updates: return "arrow.triangle.2.circlepath"
-        case .features: return "sparkles"
+        case .gettingStarted: "star"
+        case .privacy: "lock.shield"
+        case .recovery: "arrow.counterclockwise"
+        case .contacts: "person.2"
+        case .updates: "arrow.triangle.2.circlepath"
+        case .features: "sparkles"
         }
     }
 }

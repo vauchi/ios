@@ -57,7 +57,7 @@ struct DeliveryStatusView: View {
     }
 
     private var failedRecords: [VauchiDeliveryRecord] {
-        viewModel.deliveryRecords.filter { $0.isFailed }
+        viewModel.deliveryRecords.filter(\.isFailed)
     }
 
     private func loadData() {
@@ -229,12 +229,12 @@ struct DeliveryRecordRow: View {
 
     private var statusColor: Color {
         switch record.status {
-        case .queued: return .gray
-        case .sent: return .blue
-        case .stored: return .cyan
-        case .delivered: return .green
-        case .expired: return .orange
-        case .failed: return .red
+        case .queued: .gray
+        case .sent: .blue
+        case .stored: .cyan
+        case .delivered: .green
+        case .expired: .orange
+        case .failed: .red
         }
     }
 }
@@ -332,12 +332,12 @@ struct DeliveryStatusIndicator: View {
 
     private var color: Color {
         switch status {
-        case .queued: return .gray
-        case .sent: return .blue
-        case .stored: return .cyan
-        case .delivered: return .green
-        case .expired: return .orange
-        case .failed: return .red
+        case .queued: .gray
+        case .sent: .blue
+        case .stored: .cyan
+        case .delivered: .green
+        case .expired: .orange
+        case .failed: .red
         }
     }
 }
@@ -387,11 +387,11 @@ struct DeliverySummaryView: View {
 
     private var progressColor: Color {
         if summary.isFullyDelivered {
-            return .green
+            .green
         } else if summary.failedDevices > 0 {
-            return .orange
+            .orange
         } else {
-            return .blue
+            .blue
         }
     }
 }

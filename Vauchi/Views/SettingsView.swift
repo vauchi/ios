@@ -1253,7 +1253,7 @@ struct SetCertificateSheet: View {
                     Text("Paste the certificate provided by your organization. It should begin with '-----BEGIN CERTIFICATE-----'.")
                 }
 
-                if !certificateText.isEmpty && !isValidPem {
+                if !certificateText.isEmpty, !isValidPem {
                     Section {
                         Text("Invalid PEM format. Certificate must begin with '-----BEGIN CERTIFICATE-----' and end with '-----END CERTIFICATE-----'.")
                             .foregroundColor(.red)
@@ -1369,7 +1369,7 @@ struct ExportBackupSheet: View {
                             PasswordStrengthIndicator(check: check)
                         }
 
-                        if !password.isEmpty && !confirmPassword.isEmpty && !passwordsMatch {
+                        if !password.isEmpty, !confirmPassword.isEmpty, !passwordsMatch {
                             Text("Passwords don't match")
                                 .font(.caption)
                                 .foregroundColor(.red)
@@ -1802,9 +1802,9 @@ struct ContentUpdatesSection: View {
     private func hasUpdatesAvailable(_ status: MobileUpdateStatus) -> Bool {
         switch status {
         case .updatesAvailable:
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 
@@ -1885,13 +1885,13 @@ struct ContentUpdatesSection: View {
     private func updateTypeName(_ type: MobileContentType) -> String {
         switch type {
         case .networks:
-            return "Social Networks"
+            "Social Networks"
         case .locales:
-            return "Languages"
+            "Languages"
         case .themes:
-            return "Themes"
+            "Themes"
         case .help:
-            return "Help Content"
+            "Help Content"
         }
     }
 }
@@ -1943,26 +1943,26 @@ struct PasswordStrengthIndicator: View {
     var strengthColor: Color {
         switch check.strength {
         case .tooWeak:
-            return .red
+            .red
         case .fair:
-            return .orange
+            .orange
         case .strong:
-            return .green
+            .green
         case .veryStrong:
-            return .green
+            .green
         }
     }
 
     var filledSegments: Int {
         switch check.strength {
         case .tooWeak:
-            return 1
+            1
         case .fair:
-            return 2
+            2
         case .strong:
-            return 3
+            3
         case .veryStrong:
-            return 4
+            4
         }
     }
 

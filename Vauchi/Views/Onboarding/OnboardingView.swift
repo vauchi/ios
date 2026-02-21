@@ -19,12 +19,12 @@ enum OnboardingStep: Int, CaseIterable {
 
     var title: String {
         switch self {
-        case .welcome: return "Welcome"
-        case .createIdentity: return "Your Name"
-        case .addFields: return "Add Info"
-        case .preview: return "Preview"
-        case .security: return "Security"
-        case .ready: return "Ready"
+        case .welcome: "Welcome"
+        case .createIdentity: "Your Name"
+        case .addFields: "Add Info"
+        case .preview: "Preview"
+        case .security: "Security"
+        case .ready: "Ready"
         }
     }
 
@@ -36,11 +36,11 @@ enum OnboardingStep: Int, CaseIterable {
     /// User-visible step number (1-indexed, excluding welcome)
     var userVisibleStepNumber: Int? {
         switch self {
-        case .welcome, .ready: return nil
-        case .createIdentity: return 1
-        case .addFields: return 2
-        case .preview: return 3
-        case .security: return 4
+        case .welcome, .ready: nil
+        case .createIdentity: 1
+        case .addFields: 2
+        case .preview: 3
+        case .security: 4
         }
     }
 }

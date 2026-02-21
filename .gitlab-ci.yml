@@ -73,6 +73,8 @@ workflow:
   tags:
     - macos
     - self-hosted
+  variables:
+    GIT_DEPTH: "20"
   before_script:
     - |
       if ! xcrun simctl list runtimes 2>/dev/null | grep -q "iOS.*SimRuntime"; then

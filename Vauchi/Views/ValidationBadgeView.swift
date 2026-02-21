@@ -23,7 +23,7 @@ struct ValidationBadgeView: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            if let status = status {
+            if let status {
                 // Trust level badge
                 HStack(spacing: 3) {
                     if status.count > 0 {
@@ -75,10 +75,10 @@ struct ValidationBadgeView: View {
 
     private func trustColor(_ color: String) -> Color {
         switch color {
-        case "green": return .green
-        case "light_green": return Color.green.opacity(0.7)
-        case "yellow": return .yellow
-        default: return .gray
+        case "green": .green
+        case "light_green": Color.green.opacity(0.7)
+        case "yellow": .yellow
+        default: .gray
         }
     }
 

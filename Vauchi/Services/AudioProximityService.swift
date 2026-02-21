@@ -67,7 +67,7 @@ class AudioProximityService: PlatformAudioHandler {
             return "none"
         }
 
-        if hasInput && hasOutput {
+        if hasInput, hasOutput {
             return "full"
         } else if hasOutput {
             return "emit_only"
@@ -147,13 +147,13 @@ class AudioProximityService: PlatformAudioHandler {
 
             // Install tap on input
             inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
-                guard let self = self, self.isRecording else { return }
+                guard let self, isRecording else { return }
 
-                let samples = self.extractSamples(from: buffer)
+                let samples = extractSamples(from: buffer)
 
-                self.sampleLock.lock()
-                self.recordedSamples.append(contentsOf: samples)
-                self.sampleLock.unlock()
+                sampleLock.lock()
+                recordedSamples.append(contentsOf: samples)
+                sampleLock.unlock()
             }
 
             try audioEngine.start()
@@ -188,7 +188,7 @@ class AudioProximityService: PlatformAudioHandler {
 
     /// Check if audio is currently active.
     func isActive() -> Bool {
-        return isRecording || isPlaying
+        isRecording || isPlaying
     }
 
     /// Stop any ongoing audio operation.

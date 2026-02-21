@@ -60,35 +60,35 @@ enum VauchiRepositoryError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notInitialized:
-            return "Library not initialized"
+            "Library not initialized"
         case .alreadyInitialized:
-            return "Already initialized"
+            "Already initialized"
         case .identityNotFound:
-            return "Identity not found"
+            "Identity not found"
         case let .contactNotFound(id):
-            return "Contact not found: \(id)"
+            "Contact not found: \(id)"
         case .invalidQrCode:
-            return "Invalid QR code"
+            "Invalid QR code"
         case let .exchangeFailed(msg):
-            return "Exchange failed: \(msg)"
+            "Exchange failed: \(msg)"
         case let .syncFailed(msg):
-            return "Sync failed: \(msg)"
+            "Sync failed: \(msg)"
         case let .storageError(msg):
-            return "Storage error: \(msg)"
+            "Storage error: \(msg)"
         case let .cryptoError(msg):
-            return "Crypto error: \(msg)"
+            "Crypto error: \(msg)"
         case let .networkError(msg):
-            return "Network error: \(msg)"
+            "Network error: \(msg)"
         case let .invalidInput(msg):
-            return "Invalid input: \(msg)"
+            "Invalid input: \(msg)"
         case let .internalError(msg):
-            return "Internal error: \(msg)"
+            "Internal error: \(msg)"
         case let .gdprError(msg):
-            return "GDPR error: \(msg)"
+            "GDPR error: \(msg)"
         case let .deletionNotAllowed(msg):
-            return "Deletion not allowed: \(msg)"
+            "Deletion not allowed: \(msg)"
         case let .shredError(msg):
-            return "Shred error: \(msg)"
+            "Shred error: \(msg)"
         }
     }
 
@@ -160,36 +160,36 @@ enum VauchiFieldType: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .email: return "Email"
-        case .phone: return "Phone"
-        case .website: return "Website"
-        case .address: return "Address"
-        case .social: return "Social"
-        case .custom: return "Custom"
+        case .email: "Email"
+        case .phone: "Phone"
+        case .website: "Website"
+        case .address: "Address"
+        case .social: "Social"
+        case .custom: "Custom"
         }
     }
 
     /// Convert to MobileFieldType
     var toMobile: MobileFieldType {
         switch self {
-        case .email: return .email
-        case .phone: return .phone
-        case .website: return .website
-        case .address: return .address
-        case .social: return .social
-        case .custom: return .custom
+        case .email: .email
+        case .phone: .phone
+        case .website: .website
+        case .address: .address
+        case .social: .social
+        case .custom: .custom
         }
     }
 
     /// Convert from MobileFieldType
     static func from(_ mobile: MobileFieldType) -> VauchiFieldType {
         switch mobile {
-        case .email: return .email
-        case .phone: return .phone
-        case .website: return .website
-        case .address: return .address
-        case .social: return .social
-        case .custom: return .custom
+        case .email: .email
+        case .phone: .phone
+        case .website: .website
+        case .address: .address
+        case .social: .social
+        case .custom: .custom
         }
     }
 }
@@ -212,6 +212,7 @@ struct VauchiContactCard {
 struct VauchiContact: Identifiable {
     let id: String
     let displayName: String
+    let fingerprint: String
     let isVerified: Bool
     let isRecoveryTrusted: Bool
     let card: VauchiContactCard
@@ -304,46 +305,46 @@ enum VauchiDeliveryStatus: Equatable {
 
     var displayName: String {
         switch self {
-        case .queued: return "Queued"
-        case .sent: return "Sent"
-        case .stored: return "Stored"
-        case .delivered: return "Delivered"
-        case .expired: return "Expired"
-        case .failed: return "Failed"
+        case .queued: "Queued"
+        case .sent: "Sent"
+        case .stored: "Stored"
+        case .delivered: "Delivered"
+        case .expired: "Expired"
+        case .failed: "Failed"
         }
     }
 
     var iconName: String {
         switch self {
-        case .queued: return "clock"
-        case .sent: return "arrow.up.circle"
-        case .stored: return "checkmark.circle"
-        case .delivered: return "checkmark.circle.fill"
-        case .expired: return "exclamationmark.triangle"
-        case .failed: return "xmark.circle"
+        case .queued: "clock"
+        case .sent: "arrow.up.circle"
+        case .stored: "checkmark.circle"
+        case .delivered: "checkmark.circle.fill"
+        case .expired: "exclamationmark.triangle"
+        case .failed: "xmark.circle"
         }
     }
 
     var color: String {
         switch self {
-        case .queued: return "gray"
-        case .sent: return "blue"
-        case .stored: return "cyan"
-        case .delivered: return "green"
-        case .expired: return "orange"
-        case .failed: return "red"
+        case .queued: "gray"
+        case .sent: "blue"
+        case .stored: "cyan"
+        case .delivered: "green"
+        case .expired: "orange"
+        case .failed: "red"
         }
     }
 
     /// Convert from MobileDeliveryStatus
     static func from(_ mobile: MobileDeliveryStatus) -> VauchiDeliveryStatus {
         switch mobile {
-        case .queued: return .queued
-        case .sent: return .sent
-        case .stored: return .stored
-        case .delivered: return .delivered
-        case .expired: return .expired
-        case .failed: return .failed(reason: "")
+        case .queued: .queued
+        case .sent: .sent
+        case .stored: .stored
+        case .delivered: .delivered
+        case .expired: .expired
+        case .failed: .failed(reason: "")
         }
     }
 }
@@ -371,7 +372,7 @@ struct VauchiDeliveryRecord: Identifiable {
     }
 
     var isExpired: Bool {
-        guard let expiresAt = expiresAt else { return false }
+        guard let expiresAt else { return false }
         return Date() > expiresAt
     }
 
@@ -488,7 +489,7 @@ class VauchiRepository {
     /// Export current storage key (for backup purposes only)
     /// WARNING: Handle the returned data with extreme care
     func exportStorageKey() -> Data {
-        return vauchi.exportStorageKey()
+        vauchi.exportStorageKey()
     }
 
     // MARK: - Type Conversion Helpers
@@ -513,6 +514,7 @@ class VauchiRepository {
         VauchiContact(
             id: contact.id,
             displayName: contact.displayName,
+            fingerprint: contact.fingerprint,
             isVerified: contact.isVerified,
             isRecoveryTrusted: contact.isRecoveryTrusted,
             card: convertCard(contact.card),
@@ -524,7 +526,7 @@ class VauchiRepository {
 
     /// Check if identity exists
     func hasIdentity() -> Bool {
-        return vauchi.hasIdentity()
+        vauchi.hasIdentity()
     }
 
     /// Create new identity with display name
@@ -712,13 +714,13 @@ class VauchiRepository {
     /// Check if app password is enabled
     func isPasswordEnabled() throws -> Bool {
         // TODO: Replace with `try vauchi.isPasswordEnabled()` once bindings are published
-        return false
+        false
     }
 
     /// Check if duress PIN is enabled
     func isDuressEnabled() throws -> Bool {
         // TODO: Replace with `try vauchi.isDuressEnabled()` once bindings are published
-        return false
+        false
     }
 
     /// Disable duress PIN
@@ -750,7 +752,7 @@ class VauchiRepository {
     /// Get emergency broadcast config
     func getEmergencyConfig() throws -> (contactIds: [String], message: String, includeLocation: Bool)? {
         // TODO: Replace with real UniFFI call once bindings are published
-        return nil
+        nil
     }
 
     /// Send emergency broadcast
@@ -775,7 +777,7 @@ class VauchiRepository {
     /// Get Tor configuration
     func getTorConfig() throws -> (enabled: Bool, bridges: [String], preferOnion: Bool) {
         // TODO: Replace with actual UniFFI call once bindings are published
-        return (enabled: false, bridges: [], preferOnion: true)
+        (enabled: false, bridges: [], preferOnion: true)
     }
 
     /// Save Tor configuration
@@ -911,7 +913,7 @@ class VauchiRepository {
 
     /// Get suggested label names
     func getSuggestedLabels() -> [String] {
-        return vauchi.getSuggestedLabels()
+        vauchi.getSuggestedLabels()
     }
 
     // MARK: - Field Validation Operations
@@ -1032,9 +1034,9 @@ class VauchiRepository {
     /// Get sync status
     func getSyncStatus() -> VauchiSyncStatus {
         switch vauchi.getSyncStatus() {
-        case .idle: return .idle
-        case .syncing: return .syncing
-        case .error: return .error
+        case .idle: .idle
+        case .syncing: .syncing
+        case .error: .error
         }
     }
 
@@ -1071,7 +1073,7 @@ class VauchiRepository {
 
     /// List available social networks
     func listSocialNetworks() -> [VauchiSocialNetwork] {
-        return vauchi.listSocialNetworks().map { sn in
+        vauchi.listSocialNetworks().map { sn in
             VauchiSocialNetwork(
                 id: sn.id,
                 displayName: sn.displayName,
@@ -1082,7 +1084,7 @@ class VauchiRepository {
 
     /// Search social networks
     func searchSocialNetworks(query: String) -> [VauchiSocialNetwork] {
-        return vauchi.searchSocialNetworks(query: query).map { sn in
+        vauchi.searchSocialNetworks(query: query).map { sn in
             VauchiSocialNetwork(
                 id: sn.id,
                 displayName: sn.displayName,
@@ -1093,7 +1095,7 @@ class VauchiRepository {
 
     /// Get profile URL for social network
     func getProfileUrl(networkId: String, username: String) -> String? {
-        return vauchi.getProfileUrl(networkId: networkId, username: username)
+        vauchi.getProfileUrl(networkId: networkId, username: username)
     }
 
     // MARK: - Content Updates
@@ -1102,22 +1104,22 @@ class VauchiRepository {
 
     /// Check if content updates feature is supported
     func isContentUpdatesSupported() -> Bool {
-        return vauchi.isContentUpdatesSupported()
+        vauchi.isContentUpdatesSupported()
     }
 
     /// Check for available content updates
     func checkContentUpdates() -> MobileUpdateStatus {
-        return vauchi.checkContentUpdates()
+        vauchi.checkContentUpdates()
     }
 
     /// Apply available content updates
     func applyContentUpdates() -> MobileApplyResult {
-        return vauchi.applyContentUpdates()
+        vauchi.applyContentUpdates()
     }
 
     /// Reload social networks after content updates
     func reloadSocialNetworks() -> [VauchiSocialNetwork] {
-        return vauchi.reloadSocialNetworks().map { sn in
+        vauchi.reloadSocialNetworks().map { sn in
             VauchiSocialNetwork(
                 id: sn.id,
                 displayName: sn.displayName,
@@ -1130,27 +1132,27 @@ class VauchiRepository {
 
     /// Check if user has seen a specific aha moment
     func hasSeenAhaMoment(_ momentType: MobileAhaMomentType) -> Bool {
-        return vauchi.hasSeenAhaMoment(momentType: momentType)
+        vauchi.hasSeenAhaMoment(momentType: momentType)
     }
 
     /// Try to trigger an aha moment (returns nil if already seen)
     func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) throws -> MobileAhaMoment? {
-        return try vauchi.tryTriggerAhaMoment(momentType: momentType)
+        try vauchi.tryTriggerAhaMoment(momentType: momentType)
     }
 
     /// Try to trigger an aha moment with context (returns nil if already seen)
     func tryTriggerAhaMomentWithContext(_ momentType: MobileAhaMomentType, context: String) throws -> MobileAhaMoment? {
-        return try vauchi.tryTriggerAhaMomentWithContext(momentType: momentType, context: context)
+        try vauchi.tryTriggerAhaMomentWithContext(momentType: momentType, context: context)
     }
 
     /// Get count of seen aha moments
     func ahaMomentsSeenCount() -> UInt32 {
-        return vauchi.ahaMomentsSeenCount()
+        vauchi.ahaMomentsSeenCount()
     }
 
     /// Get total count of aha moments
     func ahaMomentsTotalCount() -> UInt32 {
-        return vauchi.ahaMomentsTotalCount()
+        vauchi.ahaMomentsTotalCount()
     }
 
     /// Reset all aha moments (for development/testing)
@@ -1162,7 +1164,7 @@ class VauchiRepository {
 
     /// Check if certificate pinning is enabled
     func isCertificatePinningEnabled() -> Bool {
-        return vauchi.isCertificatePinningEnabled()
+        vauchi.isCertificatePinningEnabled()
     }
 
     /// Set the pinned certificate for relay TLS connections
@@ -1495,14 +1497,13 @@ class VauchiRepository {
     // MARK: - Delivery Type Conversion
 
     private func convertDeliveryRecord(_ record: MobileDeliveryRecord) -> VauchiDeliveryRecord {
-        let status: VauchiDeliveryStatus
-        switch record.status {
-        case .queued: status = .queued
-        case .sent: status = .sent
-        case .stored: status = .stored
-        case .delivered: status = .delivered
-        case .expired: status = .expired
-        case .failed: status = .failed(reason: record.errorReason ?? "Unknown error")
+        let status: VauchiDeliveryStatus = switch record.status {
+        case .queued: .queued
+        case .sent: .sent
+        case .stored: .stored
+        case .delivered: .delivered
+        case .expired: .expired
+        case .failed: .failed(reason: record.errorReason ?? "Unknown error")
         }
 
         return VauchiDeliveryRecord(
@@ -1572,7 +1573,7 @@ class VauchiRepository {
     ///
     /// - Returns: True if an update is due (based on 2-hour interval)
     func isDemoUpdateAvailable() -> Bool {
-        return vauchi.isDemoUpdateAvailable()
+        vauchi.isDemoUpdateAvailable()
     }
 
     /// Trigger a demo update and get the new content.
@@ -1717,9 +1718,9 @@ enum VauchiDeletionState {
     /// Convert from MobileDeletionState
     static func from(_ mobile: MobileDeletionState) -> VauchiDeletionState {
         switch mobile {
-        case .none: return .none
-        case .scheduled: return .scheduled
-        case .executed: return .executed
+        case .none: .none
+        case .scheduled: .scheduled
+        case .executed: .executed
         }
     }
 }
@@ -1744,30 +1745,30 @@ enum VauchiConsentType: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .dataProcessing: return "Data Processing"
-        case .contactSharing: return "Contact Sharing"
-        case .analytics: return "Analytics"
-        case .recoveryVouching: return "Recovery Vouching"
+        case .dataProcessing: "Data Processing"
+        case .contactSharing: "Contact Sharing"
+        case .analytics: "Analytics"
+        case .recoveryVouching: "Recovery Vouching"
         }
     }
 
     /// Convert to MobileConsentType
     var toMobile: MobileConsentType {
         switch self {
-        case .dataProcessing: return .dataProcessing
-        case .contactSharing: return .contactSharing
-        case .analytics: return .analytics
-        case .recoveryVouching: return .recoveryVouching
+        case .dataProcessing: .dataProcessing
+        case .contactSharing: .contactSharing
+        case .analytics: .analytics
+        case .recoveryVouching: .recoveryVouching
         }
     }
 
     /// Convert from MobileConsentType
     static func from(_ mobile: MobileConsentType) -> VauchiConsentType {
         switch mobile {
-        case .dataProcessing: return .dataProcessing
-        case .contactSharing: return .contactSharing
-        case .analytics: return .analytics
-        case .recoveryVouching: return .recoveryVouching
+        case .dataProcessing: .dataProcessing
+        case .contactSharing: .contactSharing
+        case .analytics: .analytics
+        case .recoveryVouching: .recoveryVouching
         }
     }
 }

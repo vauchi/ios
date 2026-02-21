@@ -551,7 +551,7 @@ struct CreateVoucherSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(generatedVoucher != nil ? "Done" : parsedClaim != nil ? "Back" : "Cancel") {
-                        if parsedClaim != nil && generatedVoucher == nil {
+                        if parsedClaim != nil, generatedVoucher == nil {
                             parsedClaim = nil
                             errorMessage = nil
                         } else {
@@ -606,7 +606,7 @@ struct AddVoucherSheet: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                if let progress = progress {
+                if let progress {
                     // Success state
                     VStack(spacing: 16) {
                         Image(systemName: progress.isComplete ? "checkmark.circle.fill" : "plus.circle.fill")
@@ -741,7 +741,7 @@ struct RecoveryStatusSheet: View {
             VStack(spacing: 20) {
                 if isLoading {
                     ProgressView("Loading status...")
-                } else if let status = status {
+                } else if let status {
                     VStack(spacing: 16) {
                         Image(systemName: status.isComplete ? "checkmark.shield.fill" : "shield.lefthalf.filled")
                             .font(.system(size: 60))
