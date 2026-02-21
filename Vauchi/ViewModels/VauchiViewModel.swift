@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import Security
 import SwiftUI
 import VauchiMobile
 
@@ -977,6 +978,21 @@ class VauchiViewModel: ObservableObject {
             success: result.success,
             errorMessage: result.errorMessage
         )
+    }
+
+    /// Generate a random proximity challenge for the exchange flow.
+    /// TODO: When createQrExchangeProximity() bindings are published,
+    /// replace this with the session's actual proximity challenge.
+    func generateExchangeProximityChallenge() -> Data {
+        var bytes = [UInt8](repeating: 0, count: 16)
+        let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        if status != errSecSuccess {
+            // Fallback: use SystemRandomNumberGenerator if SecRandomCopyBytes fails
+            for idx in 0 ..< bytes.count {
+                bytes[idx] = UInt8.random(in: 0 ... 255)
+            }
+        }
+        return Data(bytes)
     }
 
     // MARK: - Sync

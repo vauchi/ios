@@ -16,6 +16,9 @@ struct QRScannerView: View {
     @State private var errorMessage: String?
     @State private var exchangeResult: ExchangeResultInfo?
     @State private var showSuccessAlert = false
+    @State private var pendingQrData: String?
+    @State private var showProximityVerification = false
+    @State private var proximityChallenge = Data()
 
     var body: some View {
         NavigationView {
@@ -104,6 +107,22 @@ struct QRScannerView: View {
                     Text("Successfully added \(result.contactName) as a contact!")
                 }
             }
+            .sheet(isPresented: $showProximityVerification) {
+                ProximityVerificationView(
+                    challenge: proximityChallenge,
+                    onVerified: {
+                        showProximityVerification = false
+                        completeExchangeAfterProximity()
+                    },
+                    onCancel: {
+                        showProximityVerification = false
+                        pendingQrData = nil
+                        scannedCode = nil
+                        isProcessing = false
+                    }
+                )
+                .environmentObject(viewModel)
+            }
         }
     }
 
@@ -120,9 +139,25 @@ struct QRScannerView: View {
         isProcessing = true
         errorMessage = nil
 
+        // Store the QR data and show proximity verification before completing exchange.
+        // TODO: When createQrExchangeProximity() bindings are published, use the session's
+        // actual proximity challenge instead of generating a random one here.
+        pendingQrData = code
+        proximityChallenge = viewModel.generateExchangeProximityChallenge()
+        showProximityVerification = true
+    }
+
+    /// Completes the exchange after proximity has been verified.
+    /// Called by ProximityVerificationView's onVerified callback.
+    private func completeExchangeAfterProximity() {
+        guard let qrData = pendingQrData else {
+            isProcessing = false
+            return
+        }
+
         Task {
             do {
-                let result = try await viewModel.completeExchange(qrData: code)
+                let result = try await viewModel.completeExchange(qrData: qrData)
                 exchangeResult = result
 
                 if result.success {
@@ -140,6 +175,7 @@ struct QRScannerView: View {
                 }
                 scannedCode = nil
             }
+            pendingQrData = nil
             isProcessing = false
         }
     }
