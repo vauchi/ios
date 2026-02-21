@@ -24,16 +24,21 @@ struct HelpView: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
+                        .accessibilityHidden(true)
                     TextField("Search FAQs", text: $searchQuery)
                         .textFieldStyle(.plain)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled(true)
+                        .accessibilityLabel("Search FAQs")
+                        .accessibilityHint("Type to search frequently asked questions")
 
                     if !searchQuery.isEmpty {
                         Button(action: { searchQuery = "" }) {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(.secondary)
                         }
+                        .accessibilityLabel("Clear search")
+                        .accessibilityHint("Clears the search text and shows all categories")
                     }
                 }
             }
@@ -63,6 +68,7 @@ struct HelpView: View {
                         Image(systemName: iconForCategory(categoryInfo.category))
                             .frame(width: 24)
                             .foregroundColor(.accentColor)
+                            .accessibilityHidden(true)
 
                         Text(categoryInfo.displayName)
                             .foregroundColor(.primary)
@@ -76,9 +82,12 @@ struct HelpView: View {
                         Image(systemName: "chevron.right")
                             .font(.caption)
                             .foregroundColor(.secondary)
+                            .accessibilityHidden(true)
                     }
                 }
                 .accessibilityIdentifier("help.category.\(categoryInfo.displayName)")
+                .accessibilityLabel("\(categoryInfo.displayName), \(faqCountForCategory(categoryInfo.category)) questions")
+                .accessibilityHint("Opens this help category")
             }
         }
     }
@@ -90,10 +99,13 @@ struct HelpView: View {
             Button(action: { selectedCategory = nil }) {
                 HStack {
                     Image(systemName: "chevron.left")
+                        .accessibilityHidden(true)
                     Text("All Categories")
                 }
                 .foregroundColor(.accentColor)
             }
+            .accessibilityLabel("Back to all categories")
+            .accessibilityHint("Returns to the help categories list")
 
             // Category FAQs
             ForEach(getFaqsByCategory(category: category), id: \.id) { faq in
@@ -176,6 +188,7 @@ struct FaqRow: View {
                     Image(systemName: "questionmark.circle")
                         .foregroundColor(.accentColor)
                         .frame(width: 24)
+                        .accessibilityHidden(true)
 
                     Text(faq.question)
                         .foregroundColor(.primary)
@@ -186,9 +199,11 @@ struct FaqRow: View {
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.caption)
                         .foregroundColor(.secondary)
+                        .accessibilityHidden(true)
                 }
             }
             .accessibilityIdentifier("help.faq.\(faq.id)")
+            .accessibilityLabel(faq.question)
             .accessibilityHint(isExpanded ? "Tap to collapse" : "Tap to expand")
 
             if isExpanded {
