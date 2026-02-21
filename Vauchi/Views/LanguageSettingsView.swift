@@ -104,14 +104,18 @@ struct LanguageRow: View {
                     .padding(.vertical, 4)
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(4)
+                    .accessibilityHidden(true)
 
                 if isSelected {
                     Image(systemName: "checkmark")
                         .foregroundColor(.accentColor)
+                        .accessibilityHidden(true)
                 }
             }
         }
         .accessibilityIdentifier("language.select.\(locale.code)")
+        .accessibilityLabel("\(locale.name) (\(locale.englishName))")
+        .accessibilityValue(isSelected ? "Selected" : "")
         .accessibilityHint(isSelected ? "Currently selected" : "Tap to select this language")
     }
 }

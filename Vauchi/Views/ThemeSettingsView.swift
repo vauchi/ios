@@ -85,6 +85,7 @@ struct ThemeRow: View {
                     ColorSwatch(hex: theme.colors.accent)
                     ColorSwatch(hex: theme.colors.textPrimary)
                 }
+                .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(theme.name)
@@ -103,10 +104,13 @@ struct ThemeRow: View {
                 if isSelected {
                     Image(systemName: "checkmark")
                         .foregroundColor(.accentColor)
+                        .accessibilityHidden(true)
                 }
             }
         }
         .accessibilityIdentifier("theme.select.\(theme.id)")
+        .accessibilityLabel("\(theme.name)\(theme.author.map { " by \($0)" } ?? "")")
+        .accessibilityValue(isSelected ? "Selected" : "")
         .accessibilityHint(isSelected ? "Currently selected" : "Tap to select this theme")
     }
 }
@@ -174,6 +178,8 @@ struct ThemePreviewCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(themeService.color(from: theme.colors.border), lineWidth: 1)
         )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Preview of \(theme.name) theme, \(theme.mode == .dark ? "dark" : "light") mode")
     }
 }
 
@@ -191,6 +197,7 @@ struct ColorPill: View {
                 .font(.system(size: 8))
                 .foregroundColor(.secondary)
         }
+        .accessibilityHidden(true)
     }
 }
 
