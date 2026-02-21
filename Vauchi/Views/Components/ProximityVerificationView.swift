@@ -24,11 +24,11 @@ enum ProximityVerificationState: Equatable {
              (.ultrasonicInProgress, .ultrasonicInProgress),
              (.manualRequired, .manualRequired),
              (.verified, .verified):
-            return true
+            true
         case let (.failed(lhsMsg), .failed(rhsMsg)):
-            return lhsMsg == rhsMsg
+            lhsMsg == rhsMsg
         default:
-            return false
+            false
         }
     }
 }

@@ -967,7 +967,7 @@ struct DeviceLinkSheet: View {
 
     private var waitingForRequestView: some View {
         VStack(spacing: 20) {
-            if let qrData = qrData, let qrImage = generateQRCode(from: qrData) {
+            if let qrData, let qrImage = generateQRCode(from: qrData) {
                 Text("Scan this QR code on your new device")
                     .font(.headline)
                     .multilineTextAlignment(.center)
