@@ -46,6 +46,7 @@ struct ContactDetailView: View {
                         if contact.verified {
                             Image(systemName: "checkmark.seal.fill")
                                 .foregroundColor(.green)
+                                .accessibilityHidden(true)
                         }
                         Text(contact.verified ? localizationService.t("contacts.verified") : localizationService.t("contacts.not_verified"))
                             .foregroundColor(.secondary)
@@ -84,9 +85,12 @@ struct ContactDetailView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "shield.checkered")
                                 .foregroundColor(.cyan)
+                                .accessibilityHidden(true)
                             Text("Recovery Trusted")
                                 .foregroundColor(.cyan)
                         }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("Recovery trusted contact")
                     }
 
                     // Recovery trust toggle
@@ -348,6 +352,8 @@ struct ContactFieldRow: View {
                 Text(field.value)
                     .font(.body)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(field.fieldType.capitalized) field: \(field.label), \(field.value)")
 
             if !contactId.isEmpty {
                 ValidationBadgeView(contactId: contactId, field: field)
@@ -474,6 +480,7 @@ struct VisibilityToggleRow: View {
             Image(systemName: icon(for: field.fieldType))
                 .foregroundColor(isVisible ? .cyan : .secondary)
                 .frame(width: 24)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(field.label)
