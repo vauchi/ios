@@ -109,6 +109,6 @@ struct MultipartQRView: View {
     MultipartQRView(chunks: [
         "VQ|1|3|SGVsbG8gV29ybGQ=",
         "VQ|2|3|VGhpcyBpcyBwYXJ0IDI=",
-        "VQ|3|3|QW5kIHBhcnQgdGhyZWU=",
+        "VQ|3|3|QW5kIHBhcnQgdGhyZWU="
     ])
 }

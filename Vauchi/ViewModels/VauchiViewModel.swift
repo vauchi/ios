@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+// swiftlint:disable file_length
+
 // VauchiViewModel.swift
 // Main state management for Vauchi iOS app
 
@@ -35,7 +37,15 @@ struct ContactInfo: Identifiable, Equatable {
     let card: CardInfo?
     let addedAt: Date?
 
-    init(id: String, displayName: String, verified: Bool, recoveryTrusted: Bool = false, fingerprint: String = "", card: CardInfo? = nil, addedAt: Date? = nil) {
+    init(
+        id: String,
+        displayName: String,
+        verified: Bool,
+        recoveryTrusted: Bool = false,
+        fingerprint: String = "",
+        card: CardInfo? = nil,
+        addedAt: Date? = nil
+    ) {
         self.id = id
         self.displayName = displayName
         self.verified = verified
@@ -91,6 +101,7 @@ struct SyncResultInfo: Equatable {
 }
 
 @MainActor
+// swiftlint:disable:next type_body_length
 class VauchiViewModel: ObservableObject {
     // MARK: - Published State
 
@@ -660,7 +671,11 @@ class VauchiViewModel: ObservableObject {
 
     func configureEmergencyBroadcast(contactIds: [String], message: String, includeLocation: Bool) async throws {
         guard let repository else { throw VauchiRepositoryError.notInitialized }
-        try repository.configureEmergencyBroadcast(contactIds: contactIds, message: message, includeLocation: includeLocation)
+        try repository.configureEmergencyBroadcast(
+            contactIds: contactIds,
+            message: message,
+            includeLocation: includeLocation
+        )
         emergencyConfigured = true
     }
 
@@ -981,7 +996,7 @@ class VauchiViewModel: ObservableObject {
     }
 
     /// Generate a random proximity challenge for the exchange flow.
-    /// TODO: When createQrExchangeProximity() bindings are published,
+    /// FUTURE: When createQrExchangeProximity() bindings are published,
     /// replace this with the session's actual proximity challenge.
     func generateExchangeProximityChallenge() -> Data {
         var bytes = [UInt8](repeating: 0, count: 16)
@@ -1157,7 +1172,11 @@ class VauchiViewModel: ObservableObject {
 
     // MARK: - Field Validation
 
-    func getFieldValidationStatus(contactId: String, fieldId: String, fieldValue: String) async throws -> MobileValidationStatus {
+    func getFieldValidationStatus(
+        contactId: String,
+        fieldId: String,
+        fieldValue: String
+    ) async throws -> MobileValidationStatus {
         guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
@@ -1191,12 +1210,10 @@ class VauchiViewModel: ObservableObject {
 
     // MARK: - Social Networks
 
-    func listSocialNetworks() -> [(id: String, displayName: String, urlTemplate: String)] {
+    func listSocialNetworks() -> [VauchiSocialNetwork] {
         guard let repository else { return [] }
 
-        return repository.listSocialNetworks().map {
-            (id: $0.id, displayName: $0.displayName, urlTemplate: $0.urlTemplate)
-        }
+        return repository.listSocialNetworks()
     }
 
     func getProfileUrl(networkId: String, username: String) -> String? {

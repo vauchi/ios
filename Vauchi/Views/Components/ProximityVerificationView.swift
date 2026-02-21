@@ -151,7 +151,11 @@ struct ProximityVerificationView: View {
         case .ultrasonicInProgress:
             Text("Hold both devices close together. Verifying proximity using ultrasonic audio...")
         case .manualRequired:
-            Text("Automatic verification is not available. Please confirm that both devices are physically next to each other.")
+            Text(
+                "Automatic verification is not available. "
+                    + "Please confirm that both devices are physically "
+                    + "next to each other."
+            )
         case .verified:
             Text("Both devices have been confirmed to be in close proximity.")
         case let .failed(message):
@@ -172,20 +176,26 @@ struct ProximityVerificationView: View {
                 cancelButton
 
             case .manualRequired:
-                Button(action: {
-                    state = .verified
-                    onVerified()
-                }) {
-                    Text("Confirm Nearby")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.cyan)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
+                Button(
+                    action: {
+                        state = .verified
+                        onVerified()
+                    },
+                    label: {
+                        Text("Confirm Nearby")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.cyan)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                )
                 .accessibilityLabel("Confirm nearby")
-                .accessibilityHint("Confirms that both devices are physically next to each other and completes verification")
+                .accessibilityHint(
+                    "Confirms that both devices are physically "
+                        + "next to each other and completes verification"
+                )
 
                 cancelButton
 
@@ -194,18 +204,21 @@ struct ProximityVerificationView: View {
                 EmptyView()
 
             case .failed:
-                Button(action: {
-                    state = .checking
-                    checkCapabilityAndStart()
-                }) {
-                    Text("Retry")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.cyan)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
+                Button(
+                    action: {
+                        state = .checking
+                        checkCapabilityAndStart()
+                    },
+                    label: {
+                        Text("Retry")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.cyan)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                )
                 .accessibilityLabel("Retry verification")
                 .accessibilityHint("Attempts proximity verification again from the beginning")
 
@@ -216,17 +229,20 @@ struct ProximityVerificationView: View {
     }
 
     private var cancelButton: some View {
-        Button(action: {
-            viewModel.stopProximityVerification()
-            onCancel()
-        }) {
-            Text("Cancel")
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color(.systemGray5))
-                .foregroundColor(.primary)
-                .cornerRadius(10)
-        }
+        Button(
+            action: {
+                viewModel.stopProximityVerification()
+                onCancel()
+            },
+            label: {
+                Text("Cancel")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color(.systemGray5))
+                    .foregroundColor(.primary)
+                    .cornerRadius(10)
+            }
+        )
         .accessibilityLabel("Cancel verification")
         .accessibilityHint("Stops the proximity verification process and goes back")
     }

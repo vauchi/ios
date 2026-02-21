@@ -232,8 +232,7 @@ struct MultipartCameraPreview: UIViewRepresentable {
             if let lastCode = lastScannedCode,
                let lastTime = lastScanTime,
                lastCode == code,
-               Date().timeIntervalSince(lastTime) < 0.1
-            {
+               Date().timeIntervalSince(lastTime) < 0.1 {
                 return
             }
 
@@ -329,7 +328,7 @@ class MultipartCameraView: UIView {
             label.centerXAnchor.constraint(equalTo: centerXAnchor),
             label.centerYAnchor.constraint(equalTo: centerYAnchor),
             label.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 20),
-            label.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
+            label.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20)
         ])
 
         backgroundColor = .black
