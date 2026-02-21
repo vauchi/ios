@@ -395,6 +395,8 @@ test:snapshots:
   extends: [.macos-job, .spm-cache-readonly, .timeout-long]
   stage: test
   needs:
+    - job: test:unit
+      artifacts: false
     - job: build:debug
       artifacts: true
   allow_failure: true
@@ -444,6 +446,13 @@ secret_detection:
 security:swift-analysis:
   extends: [.macos-job, .timeout-quick]
   stage: security
+  needs:
+    - job: test:snapshots
+      optional: true
+      artifacts: false
+    - job: test:unit
+      optional: true
+      artifacts: false
   script:
     # Check for common iOS security issues
     - 'grep -r "NSAllowsArbitraryLoads" . && echo "WARNING: App Transport Security disabled" || true'
@@ -461,6 +470,10 @@ security:swift-analysis:
 security:dependencies:
   extends: [.macos-job, .timeout-quick]
   stage: security
+  needs:
+    - job: security:swift-analysis
+      optional: true
+      artifacts: false
   script:
     - |
       if [ -f "Podfile.lock" ]; then
