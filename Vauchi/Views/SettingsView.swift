@@ -774,59 +774,33 @@ struct DeviceRow: View {
     }
 }
 
+/// Transport selection for device linking
+enum DeviceLinkTransport {
+    case notSelected
+    case internet // existing relay flow
+    case offline // multipart QR flow (stub)
+}
+
 /// Sheet for device linking full protocol flow
 struct DeviceLinkSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @Environment(\.dismiss) var dismiss
     @State private var qrData: String?
     @State private var isListening = false
+    @State private var transport: DeviceLinkTransport = .notSelected
 
     var body: some View {
         NavigationView {
             Group {
-                switch viewModel.deviceLinkState {
-                case .idle, .generatingQR:
-                    VStack(spacing: 20) {
-                        ProgressView("Generating link...")
-                    }
+                switch transport {
+                case .notSelected:
+                    transportSelectionView
 
-                case .waitingForRequest:
-                    waitingForRequestView
+                case .offline:
+                    offlineStubView
 
-                case let .confirmingDevice(name, code, challenge):
-                    confirmingDeviceView(name: name, code: code, challenge: challenge)
-
-                case let .verifyingProximity(challenge):
-                    ProximityVerificationView(
-                        challenge: challenge,
-                        onVerified: {
-                            Task {
-                                do {
-                                    try await viewModel.approveDeviceLink()
-                                } catch {
-                                    viewModel.deviceLinkState = .failed(error.localizedDescription)
-                                }
-                            }
-                        },
-                        onCancel: {
-                            viewModel.cancelDeviceLink()
-                            dismiss()
-                        }
-                    )
-
-                case .completing:
-                    VStack(spacing: 20) {
-                        ProgressView("Completing link...")
-                        Text("Sending credentials to new device...")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-
-                case .success:
-                    successView
-
-                case let .failed(message):
-                    failedView(message: message)
+                case .internet:
+                    internetFlowView
                 }
             }
             .padding()
@@ -840,9 +814,6 @@ struct DeviceLinkSheet: View {
                     }
                 }
             }
-            .onAppear {
-                startLinkFlow()
-            }
             .onDisappear {
                 if case .success = viewModel.deviceLinkState {
                     viewModel.cancelDeviceLink()
@@ -851,6 +822,144 @@ struct DeviceLinkSheet: View {
                 } else {
                     viewModel.cancelDeviceLink()
                 }
+            }
+        }
+    }
+
+    // MARK: - Transport Selection
+
+    private var transportSelectionView: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "link.badge.plus")
+                .font(.system(size: 48))
+                .foregroundColor(.cyan)
+                .accessibilityHidden(true)
+
+            Text("How would you like to link?")
+                .font(.title3)
+                .fontWeight(.semibold)
+
+            Text("Choose how to connect with your new device.")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+
+            VStack(spacing: 12) {
+                Button(action: {
+                    transport = .internet
+                    startLinkFlow()
+                }) {
+                    Label("Link via Internet", systemImage: "wifi")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.cyan)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .accessibilityHint("Links devices using the relay server over the internet")
+
+                Button(action: {
+                    transport = .offline
+                }) {
+                    Label("Link Offline (QR)", systemImage: "qrcode")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(.systemGray5))
+                        .foregroundColor(.primary)
+                        .cornerRadius(10)
+                }
+                .accessibilityHint("Links devices using animated QR codes without internet")
+            }
+        }
+    }
+
+    // MARK: - Offline Stub
+
+    private var offlineStubView: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "qrcode")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary)
+                .accessibilityHidden(true)
+
+            Text("Offline Device Linking")
+                .font(.title3)
+                .fontWeight(.semibold)
+
+            Text("Coming soon — offline device linking requires protocol updates.")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            Text("This mode will use animated QR codes to exchange device linking data without requiring an internet connection.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            Button(action: {
+                transport = .notSelected
+            }) {
+                Label("Back", systemImage: "chevron.left")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color(.systemGray5))
+                    .foregroundColor(.primary)
+                    .cornerRadius(10)
+            }
+        }
+    }
+
+    // MARK: - Internet Flow (existing relay flow)
+
+    private var internetFlowView: some View {
+        Group {
+            switch viewModel.deviceLinkState {
+            case .idle, .generatingQR:
+                VStack(spacing: 20) {
+                    ProgressView("Generating link...")
+                }
+
+            case .waitingForRequest:
+                waitingForRequestView
+
+            case let .confirmingDevice(name, code, challenge):
+                confirmingDeviceView(name: name, code: code, challenge: challenge)
+
+            case let .verifyingProximity(challenge):
+                ProximityVerificationView(
+                    challenge: challenge,
+                    onVerified: {
+                        Task {
+                            do {
+                                try await viewModel.approveDeviceLink()
+                            } catch {
+                                viewModel.deviceLinkState = .failed(error.localizedDescription)
+                            }
+                        }
+                    },
+                    onCancel: {
+                        viewModel.cancelDeviceLink()
+                        dismiss()
+                    }
+                )
+
+            case .completing:
+                VStack(spacing: 20) {
+                    ProgressView("Completing link...")
+                    Text("Sending credentials to new device...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+            case .success:
+                successView
+
+            case let .failed(message):
+                failedView(message: message)
             }
         }
     }
