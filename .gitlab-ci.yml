@@ -49,9 +49,11 @@ stages:
   - test
   - security
 
-variables:
-  GIT_DEPTH: "1"
+# Override: reuse-lint runs on Docker (doesn't need macOS)
+reuse-lint:
+  tags: [docker]
 
+variables:
   # GitLab Ultimate Security Configuration
   SAST_EXCLUDED_PATHS: "build/, DerivedData/, Pods/"
   SECRET_DETECTION_EXCLUDED_PATHS: "build/, DerivedData/, Pods/"
@@ -75,6 +77,7 @@ workflow:
     - self-hosted
   variables:
     GIT_DEPTH: "20"
+    GIT_STRATEGY: fetch
   before_script:
     - |
       if ! xcrun simctl list runtimes 2>/dev/null | grep -q "iOS.*SimRuntime"; then
