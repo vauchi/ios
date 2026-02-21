@@ -45,6 +45,7 @@ struct ContactsView: View {
                                     Image(systemName: "eye.slash.fill")
                                         .font(.caption)
                                         .foregroundColor(.purple)
+                                        .accessibilityHidden(true)
                                 }
                             }
                             .padding(.horizontal)
@@ -63,6 +64,7 @@ struct ContactsView: View {
                                 Image(systemName: "magnifyingglass")
                                     .font(.largeTitle)
                                     .foregroundColor(.secondary)
+                                    .accessibilityHidden(true)
                                 Text("No results for \"\(searchText)\"")
                                     .foregroundColor(.secondary)
                             }
@@ -232,6 +234,7 @@ struct ContactRow: View {
                             .foregroundColor(.green)
                             .font(.caption)
                             .accessibilityIdentifier("contacts.verified")
+                            .accessibilityHidden(true)
                     }
                     Text(contact.verified ? localizationService.t("contacts.verified") : localizationService.t("contacts.not_verified"))
                         .font(.caption)
@@ -326,6 +329,7 @@ struct DemoContactCard: View {
                     Image(systemName: "lightbulb.fill")
                         .foregroundColor(.purple)
                 }
+                .accessibilityHidden(true)
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
@@ -360,6 +364,7 @@ struct DemoContactCard: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Dismiss demo contact")
+                .accessibilityHint("Removes the demo contact card from the contacts list")
             }
 
             // Tip content
@@ -382,11 +387,13 @@ struct DemoContactCard: View {
                 Image(systemName: "info.circle")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .accessibilityHidden(true)
 
                 Text("This is a demo contact showing how Vauchi updates work")
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
+            .accessibilityElement(children: .combine)
         }
         .padding()
         .background(Color(.systemBackground))
