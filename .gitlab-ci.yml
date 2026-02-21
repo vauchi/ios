@@ -77,9 +77,6 @@ workflow:
     - self-hosted
   variables:
     GIT_DEPTH: "20"
-    # Each job type gets its own build directory to prevent concurrent
-    # shell executor jobs from racing on shared git state.
-    GIT_CLONE_PATH: "${CI_BUILDS_DIR}/ios/${CI_JOB_NAME}"
   before_script:
     - |
       if ! xcrun simctl list runtimes 2>/dev/null | grep -q "iOS.*SimRuntime"; then
@@ -246,7 +243,7 @@ update:bindings-version:
 lint:swiftlint:
   extends: [.macos-job, .timeout-quick]
   stage: lint
-  needs: []
+  needs: []  # first macOS lint job
   script:
     - |
       if command -v swiftlint &> /dev/null; then
@@ -273,7 +270,7 @@ lint:swiftlint:
 lint:swiftformat:
   extends: [.macos-job, .timeout-quick]
   stage: lint
-  needs: []
+  needs: [lint:swiftlint]  # sequential: prevents shell executor git races
   script:
     - if command -v swiftformat &> /dev/null; then swiftformat --lint .; else echo "SwiftFormat not installed, skipping"; fi
   rules:
@@ -288,6 +285,7 @@ lint:swiftformat:
 lint:xcodegen:
   extends: .macos-job
   stage: lint
+  needs: [lint:swiftformat]  # sequential: prevents shell executor git races
   before_script:
     - command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
   script:
