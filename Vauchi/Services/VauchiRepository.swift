@@ -215,7 +215,6 @@ struct VauchiContact: Identifiable {
     let fingerprint: String
     let isVerified: Bool
     let isRecoveryTrusted: Bool
-    let fingerprint: String
     let card: VauchiContactCard
     let addedAt: UInt64
 }
@@ -517,7 +516,6 @@ class VauchiRepository {
             fingerprint: contact.fingerprint,
             isVerified: contact.isVerified,
             isRecoveryTrusted: contact.isRecoveryTrusted,
-            fingerprint: contact.fingerprint,
             card: convertCard(contact.card),
             addedAt: contact.addedAt
         )
