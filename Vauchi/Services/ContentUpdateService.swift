@@ -66,6 +66,11 @@ final class ContentUpdateService: ObservableObject {
         set { defaults.set(newValue, forKey: Keys.checkInterval) }
     }
 
+    // MARK: - Constants
+
+    /// Maximum content download size (5 MB, matches vauchi-core and Android).
+    static let maxContentSize = 5 * 1024 * 1024
+
     // MARK: - Private Properties
 
     private let defaults: UserDefaults
@@ -294,7 +299,13 @@ final class ContentUpdateService: ObservableObject {
     }
 
     private func downloadAndVerify(url: URL, checksum: String, filename: String, type: ContentType) async throws {
-        let (data, response) = try await session.data(from: url)
+        let maxSize = ContentUpdateService.maxContentSize
+
+        // Use URLRequest to stream and enforce size limits
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 30
+
+        let (asyncBytes, response) = try await session.bytes(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200
@@ -302,14 +313,31 @@ final class ContentUpdateService: ObservableObject {
             throw ContentUpdateError.httpError
         }
 
+        // Pre-flight Content-Length check
+        if let contentLength = Int(httpResponse.value(forHTTPHeaderField: "Content-Length") ?? ""),
+           contentLength > maxSize {
+            throw ContentUpdateError.contentTooLarge
+        }
+
+        // Stream with per-chunk size enforcement
+        var buffer = Data()
+        buffer.reserveCapacity(min(httpResponse.expectedContentLength > 0 ? Int(httpResponse.expectedContentLength) : maxSize, maxSize))
+
+        for try await byte in asyncBytes {
+            buffer.append(byte)
+            if buffer.count > maxSize {
+                throw ContentUpdateError.contentTooLarge
+            }
+        }
+
         // Verify checksum
-        let actualChecksum = computeChecksum(data)
+        let actualChecksum = computeChecksum(buffer)
         guard actualChecksum == checksum else {
             throw ContentUpdateError.checksumMismatch
         }
 
         // Save to cache
-        try saveCachedContent(type: type, filename: filename, data: data)
+        try saveCachedContent(type: type, filename: filename, data: buffer)
     }
 
     private func computeChecksum(_ data: Data) -> String {
@@ -410,6 +438,7 @@ enum ContentUpdateError: LocalizedError {
     case httpError
     case checksumMismatch
     case noContent
+    case contentTooLarge
 
     var errorDescription: String? {
         switch self {
@@ -418,6 +447,7 @@ enum ContentUpdateError: LocalizedError {
         case .httpError: "Failed to download content"
         case .checksumMismatch: "Content integrity check failed"
         case .noContent: "No content available"
+        case .contentTooLarge: "Content exceeds maximum allowed size"
         }
     }
 }
