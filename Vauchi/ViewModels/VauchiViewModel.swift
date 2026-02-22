@@ -1002,6 +1002,27 @@ class VauchiViewModel: ObservableObject {
         return Data(bytes)
     }
 
+    /// Start an exchange from a deep link payload.
+    /// Called after the user grants consent in the deep link consent gate (SP-9).
+    /// The payload is treated the same as scanned QR data.
+    func startExchangeWithDeepLink(payload: String) {
+        Task {
+            do {
+                let result = try await completeExchange(qrData: payload)
+                if result.success {
+                    showSuccess("Exchange Complete",
+                                message: "Contact \(result.contactName) added successfully.")
+                } else {
+                    showError("Exchange Failed",
+                              message: result.errorMessage ?? "Unknown error")
+                }
+            } catch {
+                showError("Exchange Failed",
+                          message: error.localizedDescription)
+            }
+        }
+    }
+
     // MARK: - Sync
 
     func sync() async {

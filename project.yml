@@ -59,6 +59,10 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - vauchi
+            CFBundleURLName: app.vauchi.ios
         NSCameraUsageDescription: "Vauchi uses the camera to scan QR codes for contact exchange."
 
   VauchiTests:
