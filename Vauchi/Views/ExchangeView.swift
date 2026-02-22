@@ -99,7 +99,11 @@ struct ExchangeView: View {
                                     }
                                     .padding(.top, 4)
                                     .accessibilityElement(children: .combine)
-                                    .accessibilityLabel(isEmittingAudio ? "Ultrasonic proximity verification: emitting audio" : "Ultrasonic proximity verification: ready")
+                                    .accessibilityLabel(
+                                        isEmittingAudio
+                                            ? "Ultrasonic proximity verification: emitting audio"
+                                            : "Ultrasonic proximity verification: ready"
+                                    )
                                 }
                             }
                         }
