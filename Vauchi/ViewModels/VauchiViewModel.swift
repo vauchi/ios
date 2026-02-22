@@ -396,7 +396,6 @@ class VauchiViewModel: ObservableObject {
                 ContactInfo(
                     id: contact.id,
                     displayName: contact.displayName,
-                    fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     fingerprint: contact.fingerprint,
@@ -431,7 +430,6 @@ class VauchiViewModel: ObservableObject {
                 ContactInfo(
                     id: contact.id,
                     displayName: contact.displayName,
-                    fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     fingerprint: contact.fingerprint,
@@ -468,7 +466,6 @@ class VauchiViewModel: ObservableObject {
             return ContactInfo(
                 id: contact.id,
                 displayName: contact.displayName,
-                fingerprint: contact.fingerprint,
                 verified: contact.isVerified,
                 fingerprint: contact.fingerprint,
                 card: CardInfo(
@@ -498,7 +495,6 @@ class VauchiViewModel: ObservableObject {
                 ContactInfo(
                     id: contact.id,
                     displayName: contact.displayName,
-                    fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     fingerprint: contact.fingerprint
@@ -523,7 +519,6 @@ class VauchiViewModel: ObservableObject {
                 ContactInfo(
                     id: contact.id,
                     displayName: contact.displayName,
-                    fingerprint: contact.fingerprint,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     fingerprint: contact.fingerprint,
