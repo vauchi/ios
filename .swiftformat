@@ -8,3 +8,6 @@
 
 # Disable wrapMultilineStatementBraces to match SwiftLint opening_brace rule
 --disable wrapMultilineStatementBraces
+
+# Exclude build artifacts and dependency checkouts
+--exclude build
