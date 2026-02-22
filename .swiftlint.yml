@@ -6,6 +6,7 @@
 
 excluded:
   - .build
+  - build
   - .spm-packages
   - DerivedData
   - Pods
