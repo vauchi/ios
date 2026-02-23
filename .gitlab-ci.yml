@@ -275,7 +275,9 @@ lint:swiftlint:
 lint:swiftformat:
   extends: [.macos-job, .timeout-quick]
   stage: lint
-  needs: [lint:swiftlint]  # sequential: prevents shell executor git races
+  needs:
+    - job: lint:swiftlint
+      optional: true  # may be excluded by change-based rules
   script:
     - if command -v swiftformat &> /dev/null; then swiftformat --lint .; else echo "SwiftFormat not installed, skipping"; fi
   rules:
@@ -290,7 +292,9 @@ lint:swiftformat:
 lint:xcodegen:
   extends: .macos-job
   stage: lint
-  needs: [lint:swiftformat]  # sequential: prevents shell executor git races
+  needs:
+    - job: lint:swiftformat
+      optional: true  # may be excluded by change-based rules
   before_script:
     - command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
   script:
