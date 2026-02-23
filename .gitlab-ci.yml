@@ -180,7 +180,7 @@ update:bindings-version:
       # Configure git
       git config user.email "ci@vauchi.com"
       git config user.name "Vauchi CI"
-      git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
+      git remote set-url origin "https://ci:${PROJECT_ACCESS_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
 
       # Check if branch already exists on remote
       if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
@@ -208,7 +208,7 @@ update:bindings-version:
 
       # Create MR via GitLab API
       MR_RESPONSE=$(curl -s --request POST \
-        --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --header "PRIVATE-TOKEN: ${PROJECT_ACCESS_TOKEN}" \
         --header "Content-Type: application/json" \
         --data "{
           \"source_branch\": \"$BRANCH\",
@@ -227,7 +227,7 @@ update:bindings-version:
         # Enable auto-merge so the MR merges automatically when CI passes
         echo "Enabling auto-merge..."
         MERGE_RESPONSE=$(curl -s --request PUT \
-          --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+          --header "PRIVATE-TOKEN: ${PROJECT_ACCESS_TOKEN}" \
           "${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${MR_IID}/merge?merge_when_pipeline_succeeds=true")
         MERGE_STATUS=$(echo "$MERGE_RESPONSE" | jq -r '.merge_when_pipeline_succeeds // empty')
         if [ "$MERGE_STATUS" = "true" ]; then
