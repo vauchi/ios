@@ -190,7 +190,8 @@ update:bindings-version:
 
       # Create branch and update version in project.yml
       git checkout -b "$BRANCH"
-      sed -i '' "s/from: \"[^\"]*\"/from: \"${BINDINGS_VERSION}\"/" project.yml
+      # Only update VauchiMobile version (not other SPM deps like SnapshotTesting)
+      sed -i '' '/vauchi-mobile-swift/{n;s/from: "[^"]*"/from: "${BINDINGS_VERSION}"/;}' project.yml
 
       # Verify the change was made
       if ! grep -q "from: \"${BINDINGS_VERSION}\"" project.yml; then
