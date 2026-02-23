@@ -1757,6 +1757,15 @@ class VauchiRepository {
         }
     }
 
+    /// Get aggregated consent status for a specific type
+    func getConsentStatus(consentType: VauchiConsentType) throws -> MobileConsentStatus {
+        do {
+            return try vauchi.getConsentStatus(consentType: consentType.toMobile)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     /// Get all consent records
     func getConsentRecords() throws -> [VauchiConsentRecord] {
         do {

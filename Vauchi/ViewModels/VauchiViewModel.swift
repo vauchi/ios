@@ -1588,6 +1588,15 @@ class VauchiViewModel: ObservableObject {
         try await loadConsentRecords()
     }
 
+    /// Get aggregated consent status for a specific type
+    func getConsentStatus(_ type: VauchiConsentType) throws -> MobileConsentStatus {
+        guard let repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        return try repository.getConsentStatus(consentType: type)
+    }
+
     /// Load all consent records
     func loadConsentRecords() async throws {
         guard let repository else {

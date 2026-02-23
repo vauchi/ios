@@ -91,15 +91,11 @@ struct ConsentSettingsView: View {
         do {
             try await viewModel.loadConsentRecords()
 
-            // Build current consent states from the latest records
+            // Query consent status from core for each type
             var states: [VauchiConsentType: Bool] = [:]
             for consentType in VauchiConsentType.allCases {
-                // Find the most recent record for this type
-                let latestRecord = viewModel.consentRecords
-                    .filter { $0.consentType == consentType }
-                    .sorted { $0.timestamp > $1.timestamp }
-                    .first
-                states[consentType] = latestRecord?.granted ?? false
+                let status = try viewModel.getConsentStatus(consentType)
+                states[consentType] = status.granted
             }
             consentStates = states
         } catch {
