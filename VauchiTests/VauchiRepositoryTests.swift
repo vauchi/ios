@@ -5,6 +5,7 @@
 // VauchiRepositoryTests.swift
 // Tests for VauchiRepository - based on features/*.feature Gherkin scenarios
 
+import Darwin
 @testable import Vauchi
 import XCTest
 
@@ -12,6 +13,33 @@ import XCTest
 /// Based on: features/identity_management.feature, features/contact_card_management.feature
 final class VauchiRepositoryTests: XCTestCase {
     var tempDir: URL!
+
+    /// Local dev relay URL for integration tests (started via `just dev-relay`)
+    private static let localRelayUrl = "ws://127.0.0.1:8080"
+
+    /// Skip test if local relay is not running.
+    /// Uses a quick TCP connect check to port 8080.
+    private func requireLocalRelay() throws {
+        let sock = socket(AF_INET, SOCK_STREAM, 0)
+        guard sock >= 0 else {
+            throw XCTSkip("Local relay not available — start with: just dev-relay")
+        }
+        defer { close(sock) }
+
+        var addr = sockaddr_in()
+        addr.sin_family = sa_family_t(AF_INET)
+        addr.sin_port = UInt16(8080).bigEndian
+        addr.sin_addr.s_addr = inet_addr("127.0.0.1")
+
+        let result = withUnsafePointer(to: &addr) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                Darwin.connect(sock, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
+            }
+        }
+        if result != 0 {
+            throw XCTSkip("Local relay not running at \(Self.localRelayUrl) — start with: just dev-relay")
+        }
+    }
 
     override func setUpWithError() throws {
         // Create temp directory for each test
@@ -496,14 +524,15 @@ final class VauchiRepositoryTests: XCTestCase {
     /// Note: Voucher validation now requires the signer to be a recovery-trusted contact,
     /// which requires a contact exchange (relay). Core-level voucher tests cover this logic.
     func testAddRecoveryVoucher() throws {
-        throw XCTSkip("Requires relay for contact exchange — vouchers must come from trusted contacts")
+        try requireLocalRelay()
+
         // Alice creates a claim on her new device
         let aliceDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: aliceDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: aliceDir) }
 
-        let aliceRepo = try VauchiRepository(dataDir: aliceDir.path)
+        let aliceRepo = try VauchiRepository(dataDir: aliceDir.path, relayUrl: Self.localRelayUrl)
         try aliceRepo.createIdentity(displayName: "Alice")
 
         let oldPkHex = String(repeating: "3", count: 64)
@@ -520,7 +549,7 @@ final class VauchiRepositoryTests: XCTestCase {
         try FileManager.default.createDirectory(at: bobDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: bobDir) }
 
-        let bobRepo = try VauchiRepository(dataDir: bobDir.path)
+        let bobRepo = try VauchiRepository(dataDir: bobDir.path, relayUrl: Self.localRelayUrl)
         try bobRepo.createIdentity(displayName: "Bob")
 
         let voucher = try bobRepo.createRecoveryVoucher(claimB64: claim.claimData)
@@ -545,9 +574,7 @@ final class VauchiRepositoryTests: XCTestCase {
     /// Tests the full QR exchange flow between Alice and Bob
     /// Note: Requires a running relay server
     func testCompleteContactExchange() throws {
-        #if targetEnvironment(simulator)
-            throw XCTSkip("Integration test: requires running relay server (skipped in simulator)")
-        #endif
+        try requireLocalRelay()
 
         // Create Alice's repository
         let aliceDir = FileManager.default.temporaryDirectory
@@ -555,7 +582,7 @@ final class VauchiRepositoryTests: XCTestCase {
         try FileManager.default.createDirectory(at: aliceDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: aliceDir) }
 
-        let aliceRepo = try VauchiRepository(dataDir: aliceDir.path)
+        let aliceRepo = try VauchiRepository(dataDir: aliceDir.path, relayUrl: Self.localRelayUrl)
         try aliceRepo.createIdentity(displayName: "Alice")
         try aliceRepo.addField(type: .email, label: "Work", value: "alice@company.com")
 
@@ -565,7 +592,7 @@ final class VauchiRepositoryTests: XCTestCase {
         try FileManager.default.createDirectory(at: bobDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: bobDir) }
 
-        let bobRepo = try VauchiRepository(dataDir: bobDir.path)
+        let bobRepo = try VauchiRepository(dataDir: bobDir.path, relayUrl: Self.localRelayUrl)
         try bobRepo.createIdentity(displayName: "Bob")
         try bobRepo.addField(type: .phone, label: "Mobile", value: "+1234567890")
 
@@ -612,11 +639,9 @@ final class VauchiRepositoryTests: XCTestCase {
     /// Scenario: Cannot exchange with self
     /// Note: Requires a running relay server
     func testCannotExchangeWithSelf() throws {
-        #if targetEnvironment(simulator)
-            throw XCTSkip("Integration test: requires running relay server (skipped in simulator)")
-        #endif
+        try requireLocalRelay()
 
-        let repo = try VauchiRepository(dataDir: tempDir.path)
+        let repo = try VauchiRepository(dataDir: tempDir.path, relayUrl: Self.localRelayUrl)
         try repo.createIdentity(displayName: "Alice")
 
         let exchange = try repo.generateExchangeQr()
