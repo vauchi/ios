@@ -13,7 +13,7 @@
 #
 # Pipeline strategy:
 #   - MR: Full validation (lint, build, test, security)
-#   - Tag: Release build
+#   - Tag: Release build + TestFlight upload
 #   - Scheduled: Security scans
 #   Main branch is protected and merge-only. All validation happens
 #   during the MR pipeline; post-merge pipelines are unnecessary.
@@ -48,6 +48,7 @@ stages:
   - build
   - test
   - security
+  - deploy
 
 # Override: serialize reuse-lint with other lint jobs on macOS shell executor
 reuse-lint:
@@ -359,11 +360,24 @@ build:release:
   script:
     # Release builds start clean for reproducibility
     - rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"
+    - ./scripts/setup-signing.sh
     - xcodegen generate
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Release -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
+    - xcodebuild archive
+        -project Vauchi.xcodeproj
+        -scheme Vauchi
+        -configuration Release
+        -archivePath build/Vauchi.xcarchive
+        -clonedSourcePackagesDirPath .spm-packages
+        -allowProvisioningUpdates
+        -authenticationKeyPath "private_keys/AuthKey_${ASC_KEY_ID}.p8"
+        -authenticationKeyID "$ASC_KEY_ID"
+        -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+        ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO
+  after_script:
+    - ./scripts/teardown-signing.sh
   artifacts:
     paths:
-      - build/Build/Products/Release-iphonesimulator/
+      - build/Vauchi.xcarchive
     expire_in: 1 week
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/
@@ -503,3 +517,39 @@ security:dependencies:
           - "project.yml"
           - "Package.resolved"
           - ".gitlab-ci.yml"
+
+# ============================================================
+# Deploy Stage (Tag only — upload to TestFlight)
+# ============================================================
+
+deploy:testflight:
+  extends: [.macos-job, .timeout-extended]
+  stage: deploy
+  needs:
+    - job: build:release
+      artifacts: true
+  script:
+    - ./scripts/setup-signing.sh
+    # Export IPA from archive
+    - xcodebuild -exportArchive
+        -archivePath build/Vauchi.xcarchive
+        -exportOptionsPlist ExportOptions.plist
+        -exportPath build/export
+        -allowProvisioningUpdates
+        -authenticationKeyPath "private_keys/AuthKey_${ASC_KEY_ID}.p8"
+        -authenticationKeyID "$ASC_KEY_ID"
+        -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+    # Upload to TestFlight
+    - xcrun altool --upload-app
+        -f build/export/Vauchi.ipa
+        -t ios
+        --apiKey "$ASC_KEY_ID"
+        --apiIssuer "$ASC_ISSUER_ID"
+  after_script:
+    - ./scripts/teardown-signing.sh
+  artifacts:
+    paths:
+      - build/export/
+    expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/
