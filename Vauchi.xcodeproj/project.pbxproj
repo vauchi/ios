@@ -543,7 +543,8 @@
 						TestTargetID = 8205328B6D921F4914B03739;
 					};
 					8205328B6D921F4914B03739 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = L2853TNSJ4;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -820,11 +821,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGNING_REQUIRED = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = L2853TNSJ4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Vauchi/Info.plist;
 				INFOPLIST_GENERATION_MODE = GeneratedFile;
@@ -843,11 +845,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGNING_REQUIRED = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = L2853TNSJ4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Vauchi/Info.plist;
 				INFOPLIST_GENERATION_MODE = GeneratedFile;
