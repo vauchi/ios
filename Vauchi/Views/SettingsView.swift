@@ -702,18 +702,14 @@ struct DeviceRow: View {
     let onUnlink: () -> Void
 
     var deviceIcon: String {
-        // Simple heuristic based on device name
-        let name = device.deviceName.lowercased()
-        if name.contains("iphone") {
-            return "iphone"
-        } else if name.contains("ipad") {
-            return "ipad"
-        } else if name.contains("mac") {
-            return "laptopcomputer"
-        } else if name.contains("watch") {
-            return "applewatch"
-        } else {
-            return "desktopcomputer"
+        let deviceType = classifyDeviceType(name: device.deviceName)
+        switch deviceType {
+        case .phone: return "iphone"
+        case .tablet: return "ipad"
+        case .laptop: return "laptopcomputer"
+        case .watch: return "applewatch"
+        case .desktop: return "desktopcomputer"
+        case .unknown: return "desktopcomputer"
         }
     }
 
