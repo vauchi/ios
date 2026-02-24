@@ -5,7 +5,7 @@
 # Teardown code signing after CI build.
 # Removes the temporary keychain and API key files.
 
-set -euo pipefail
+set -uo pipefail  # No -e: best-effort cleanup
 
 KEYCHAIN_NAME="ci-signing.keychain-db"
 

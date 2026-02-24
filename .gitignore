@@ -36,6 +36,8 @@ fastlane/test_output/
 # Code signing
 *.mobileprovision
 *.p12
+*.p8
+private_keys/
 
 # IDE
 .idea/

@@ -525,6 +525,7 @@ security:dependencies:
 deploy:testflight:
   extends: [.macos-job, .timeout-extended]
   stage: deploy
+  interruptible: false
   needs:
     - job: build:release
       artifacts: true

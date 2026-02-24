@@ -15,8 +15,16 @@
 
 set -euo pipefail
 
+# Validate required CI variables
+for var in IOS_DIST_CERT IOS_DIST_CERT_PASSWORD ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_CONTENT; do
+    if [ -z "${!var:-}" ]; then
+        echo "ERROR: Required CI variable $var is not set"
+        exit 1
+    fi
+done
+
 KEYCHAIN_NAME="ci-signing.keychain-db"
-KEYCHAIN_PASSWORD="ci-temp-$(date +%s)"
+KEYCHAIN_PASSWORD=$(head -c 32 /dev/urandom | base64)
 
 echo "--- Setting up code signing ---"
 
@@ -30,6 +38,7 @@ security list-keychains -d user -s "$KEYCHAIN_NAME" $(security list-keychains -d
 
 # Import distribution certificate
 CERT_PATH=$(mktemp /tmp/cert.XXXXXX.p12)
+chmod 600 "$CERT_PATH"
 echo "$IOS_DIST_CERT" | base64 --decode > "$CERT_PATH"
 security import "$CERT_PATH" \
     -k "$KEYCHAIN_NAME" \
