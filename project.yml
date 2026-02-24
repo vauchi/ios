@@ -17,7 +17,7 @@ settings:
 packages:
   VauchiMobile:
     url: https://gitlab.com/vauchi/vauchi-mobile-swift.git
-    from: "0.1.17"
+    from: "0.1.18"
   SnapshotTesting:
     url: https://github.com/pointfreeco/swift-snapshot-testing.git
     from: "1.17.0"
