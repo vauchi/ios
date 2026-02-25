@@ -422,6 +422,33 @@ struct SettingsView: View {
                     }
                 }
 
+                // Support section
+                Section(localizationService.t("support.title")) {
+                    Text(localizationService.t("support.description"))
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+
+                    Link(destination: URL(string: "https://github.com/sponsors/vauchi")!) {
+                        HStack {
+                            Label(localizationService.t("support.github_sponsors"), systemImage: "heart")
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
+                        }
+                    }
+
+                    Link(destination: URL(string: "https://liberapay.com/Vauchi/donate")!) {
+                        HStack {
+                            Label(localizationService.t("support.liberapay"), systemImage: "heart")
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .foregroundColor(.secondary)
+                                .accessibilityHidden(true)
+                        }
+                    }
+                }
+
                 // About section
                 Section(localizationService.t("settings.about")) {
                     HStack {
