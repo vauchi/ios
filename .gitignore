@@ -43,6 +43,7 @@ private_keys/
 .idea/
 *.swp
 *~
+.claude/
 
 # OS
 .DS_Store
