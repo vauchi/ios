@@ -966,16 +966,19 @@ struct DeviceLinkSheet: View {
                     onVerified: { result in
                         Task {
                             do {
-                                switch result {
+                                let proof: MobileProximityProof = switch result {
                                 case let .ultrasonic(challengeResponse):
-                                    try await viewModel.approveDeviceLinkUltrasonic(
-                                        challengeResponse: challengeResponse
+                                    .ultrasonic(
+                                        challengeResponse: Array(challengeResponse),
+                                        verifiedAt: UInt64(Date().timeIntervalSince1970)
                                     )
                                 case let .manual(code):
-                                    try await viewModel.approveDeviceLinkManual(
-                                        confirmationCode: code
+                                    .manualConfirmation(
+                                        confirmationCode: code,
+                                        confirmedAt: UInt64(Date().timeIntervalSince1970)
                                     )
                                 }
+                                try await viewModel.approveDeviceLink(proof: proof)
                             } catch {
                                 viewModel.deviceLinkState = .failed(error.localizedDescription)
                             }
