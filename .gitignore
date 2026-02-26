@@ -46,3 +46,6 @@ private_keys/
 
 # OS
 .DS_Store
+
+# CI local testing
+.gitlab-ci-local/
