@@ -1448,7 +1448,7 @@ class VauchiViewModel: ObservableObject {
         case generatingQR
         case waitingForRequest
         case confirmingDevice(name: String, code: String, challenge: Data)
-        case verifyingProximity(challenge: Data)
+        case verifyingProximity(challenge: Data, confirmationCode: String)
         case completing
         case success
         case failed(String)
@@ -1493,8 +1493,8 @@ class VauchiViewModel: ObservableObject {
         )
     }
 
-    /// Approve the device link after proximity verification.
-    func approveDeviceLink() async throws {
+    /// Approve the device link with ultrasonic proof.
+    func approveDeviceLinkUltrasonic(challengeResponse: Data) async throws {
         guard let repository,
               let initiator = currentInitiator,
               let senderToken = currentSenderToken
@@ -1503,8 +1503,37 @@ class VauchiViewModel: ObservableObject {
         }
 
         deviceLinkState = .completing
-        initiator.setProximityVerified()
-        let result = try initiator.confirmLink()
+        let now = UInt64(Date().timeIntervalSince1970)
+        let result = try initiator.confirmLinkUltrasonic(
+            challengeResponse: Array(challengeResponse),
+            verifiedAt: now
+        )
+        if let responseBytes = result.encryptedResponse {
+            try repository.sendDeviceLinkResponse(
+                senderToken: senderToken,
+                encryptedResponse: responseBytes
+            )
+        }
+        deviceLinkState = .success
+        currentInitiator = nil
+        currentSenderToken = nil
+    }
+
+    /// Approve the device link with manual confirmation code proof.
+    func approveDeviceLinkManual(confirmationCode: String) async throws {
+        guard let repository,
+              let initiator = currentInitiator,
+              let senderToken = currentSenderToken
+        else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        deviceLinkState = .completing
+        let now = UInt64(Date().timeIntervalSince1970)
+        let result = try initiator.confirmLinkManual(
+            confirmationCode: confirmationCode,
+            confirmedAt: now
+        )
         if let responseBytes = result.encryptedResponse {
             try repository.sendDeviceLinkResponse(
                 senderToken: senderToken,

@@ -33,6 +33,16 @@ enum ProximityVerificationState: Equatable {
     }
 }
 
+// MARK: - ProximityVerificationResult
+
+/// The result of a proximity verification attempt.
+enum ProximityVerificationResult {
+    /// Ultrasonic verification succeeded with the challenge response data.
+    case ultrasonic(challengeResponse: Data)
+    /// Manual confirmation with the user-verified confirmation code.
+    case manual(confirmationCode: String)
+}
+
 // MARK: - ProximityVerificationView
 
 /// A reusable SwiftUI view for proximity verification.
@@ -45,8 +55,11 @@ struct ProximityVerificationView: View {
     /// The proximity challenge bytes to verify.
     let challenge: Data
 
+    /// The confirmation code for manual fallback verification.
+    let confirmationCode: String
+
     /// Called when proximity verification succeeds (ultrasonic or manual).
-    let onVerified: () -> Void
+    let onVerified: (ProximityVerificationResult) -> Void
 
     /// Called when the user cancels the verification flow.
     let onCancel: () -> Void
@@ -179,7 +192,7 @@ struct ProximityVerificationView: View {
                 Button(
                     action: {
                         state = .verified
-                        onVerified()
+                        onVerified(.manual(confirmationCode: confirmationCode))
                     },
                     label: {
                         Text("Confirm Nearby")
@@ -313,9 +326,9 @@ struct ProximityVerificationView: View {
             let response = viewModel.listenForProximityResponse(timeoutMs: 5000)
 
             await MainActor.run {
-                if response != nil {
+                if let responseData = response {
                     state = .verified
-                    onVerified()
+                    onVerified(.ultrasonic(challengeResponse: responseData))
                 } else {
                     // Ultrasonic timed out or failed — fall back to manual
                     state = .manualRequired
@@ -330,7 +343,8 @@ struct ProximityVerificationView: View {
 #Preview {
     ProximityVerificationView(
         challenge: Data([0x01, 0x02, 0x03, 0x04]),
-        onVerified: { print("Verified!") },
+        confirmationCode: "123456",
+        onVerified: { result in print("Verified: \(result)") },
         onCancel: { print("Cancelled.") }
     )
     .environmentObject(VauchiViewModel())

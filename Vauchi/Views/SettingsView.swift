@@ -959,13 +959,23 @@ struct DeviceLinkSheet: View {
             case let .confirmingDevice(name, code, challenge):
                 confirmingDeviceView(name: name, code: code, challenge: challenge)
 
-            case let .verifyingProximity(challenge):
+            case let .verifyingProximity(challenge, confirmationCode):
                 ProximityVerificationView(
                     challenge: challenge,
-                    onVerified: {
+                    confirmationCode: confirmationCode,
+                    onVerified: { result in
                         Task {
                             do {
-                                try await viewModel.approveDeviceLink()
+                                switch result {
+                                case let .ultrasonic(challengeResponse):
+                                    try await viewModel.approveDeviceLinkUltrasonic(
+                                        challengeResponse: challengeResponse
+                                    )
+                                case let .manual(code):
+                                    try await viewModel.approveDeviceLinkManual(
+                                        confirmationCode: code
+                                    )
+                                }
                             } catch {
                                 viewModel.deviceLinkState = .failed(error.localizedDescription)
                             }
@@ -1067,7 +1077,7 @@ struct DeviceLinkSheet: View {
             Spacer().frame(height: 8)
 
             Button(action: {
-                viewModel.deviceLinkState = .verifyingProximity(challenge: challenge)
+                viewModel.deviceLinkState = .verifyingProximity(challenge: challenge, confirmationCode: code)
             }) {
                 Text("Codes Match — Verify Proximity")
                     .fontWeight(.semibold)
