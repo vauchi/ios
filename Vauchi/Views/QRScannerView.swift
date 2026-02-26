@@ -110,7 +110,8 @@ struct QRScannerView: View {
             .sheet(isPresented: $showProximityVerification) {
                 ProximityVerificationView(
                     challenge: proximityChallenge,
-                    onVerified: {
+                    confirmationCode: "",
+                    onVerified: { _ in
                         showProximityVerification = false
                         completeExchangeAfterProximity()
                     },
