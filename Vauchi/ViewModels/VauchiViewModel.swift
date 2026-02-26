@@ -1493,8 +1493,8 @@ class VauchiViewModel: ObservableObject {
         )
     }
 
-    /// Approve the device link with proximity proof.
-    func approveDeviceLink(proof: MobileProximityProof) async throws {
+    /// Approve the device link with ultrasonic proximity proof.
+    func approveDeviceLinkUltrasonic(challengeResponse: Data, verifiedAt: UInt64) async throws {
         guard let repository,
               let initiator = currentInitiator,
               let senderToken = currentSenderToken
@@ -1503,7 +1503,35 @@ class VauchiViewModel: ObservableObject {
         }
 
         deviceLinkState = .completing
-        let result = try initiator.confirmLink(proof: proof)
+        let result = try initiator.confirmLinkUltrasonic(
+            challengeResponse: challengeResponse,
+            verifiedAt: verifiedAt
+        )
+        if let responseBytes = result.encryptedResponse {
+            try repository.sendDeviceLinkResponse(
+                senderToken: senderToken,
+                encryptedResponse: responseBytes
+            )
+        }
+        deviceLinkState = .success
+        currentInitiator = nil
+        currentSenderToken = nil
+    }
+
+    /// Approve the device link with manual confirmation.
+    func approveDeviceLinkManual(confirmationCode: String, confirmedAt: UInt64) async throws {
+        guard let repository,
+              let initiator = currentInitiator,
+              let senderToken = currentSenderToken
+        else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        deviceLinkState = .completing
+        let result = try initiator.confirmLinkManual(
+            confirmationCode: confirmationCode,
+            confirmedAt: confirmedAt
+        )
         if let responseBytes = result.encryptedResponse {
             try repository.sendDeviceLinkResponse(
                 senderToken: senderToken,
