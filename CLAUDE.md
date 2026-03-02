@@ -1,6 +1,3 @@
-<!-- SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me> -->
-<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-
 # CLAUDE.md - iOS App
 
 Native iOS app: SwiftUI, Xcode/SPM, UniFFI bindings via `vauchi-mobile-swift`.
