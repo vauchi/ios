@@ -16,6 +16,7 @@
 		08FE2DB74EB09F3226F6371C /* testCreateIdentityStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = FE7FAFE456A1F513CADD0631 /* testCreateIdentityStep.1.png */; };
 		096B891F7A059A83D77D46FB /* testHomeViewWithFieldsDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = CACA1754B8EE1F6D0FC0A04D /* testHomeViewWithFieldsDark.1.png */; };
 		10B3D5481A8E17F07E439629 /* testContactsViewWithContactsGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 2708AF0FE3066AC85A5EAF63 /* testContactsViewWithContactsGerman.1.png */; };
+		10BCAB3BFF0E6F665B519A1F /* WaitingForUnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */; };
 		10E60235A5FD647963680956 /* AudioProximityServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */; };
 		1476FDD2E15DE78B3798DE8A /* SecurityStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999B3BCD812A17506CBA6807 /* SecurityStepView.swift */; };
 		1552B5F6D02172C2BA2C691D /* PlatformEdgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */; };
@@ -73,6 +74,7 @@
 		9A29351B039D6F08127F7A3E /* VisibilityLabelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C2E5A32B1033C46E976D2F /* VisibilityLabelsTests.swift */; };
 		9B12926FA62EF78944BBD659 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */; };
 		9C356FC3005B310BF322001D /* testAddFieldsStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 268841458ED0C3A21E73ECA5 /* testAddFieldsStep.1.png */; };
+		9C9A5E8876CAFA84118E8DBF /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644F12D83413B334E234F4AC /* LockScreenView.swift */; };
 		9DB670EF78DB7FBAEEF7696B /* DeliveryStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9F60104DE94274578CB08 /* DeliveryStatusTests.swift */; };
 		9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */; };
 		9ECAED5D4945C8D7669BD1CC /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2760186DEA7C9870633BA8E8 /* HelpView.swift */; };
@@ -133,6 +135,7 @@
 /* Begin PBXFileReference section */
 		023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewEmpty.1.png; sourceTree = "<group>"; };
 		05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProximityServiceTests.swift; sourceTree = "<group>"; };
+		08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitingForUnlockView.swift; sourceTree = "<group>"; };
 		09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRScanner.swift; sourceTree = "<group>"; };
 		0D3497B12DDDF10370069F86 /* Vauchi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Vauchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0FC890F55872A927941111CE /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -171,6 +174,7 @@
 		5A0105ADEB1ADDB86013DBCF /* testLanguageSettingsView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testLanguageSettingsView.1.png; sourceTree = "<group>"; };
 		6310B8BCD3B5DC621926CA76 /* testSecurityStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSecurityStep.1.png; sourceTree = "<group>"; };
 		63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSettingsView.swift; sourceTree = "<group>"; };
+		644F12D83413B334E234F4AC /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
 		6490FD404F8F6EB461A4DE38 /* testSetupView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSetupView.1.png; sourceTree = "<group>"; };
 		66D4DF5873BED53D99177B4A /* MultipartQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRView.swift; sourceTree = "<group>"; };
 		6C859B6215BADD6A45480D9F /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationService.swift; sourceTree = "<group>"; };
@@ -395,12 +399,14 @@
 				3F12B12FCE38D7CBAB15A8A0 /* LabelDetailView.swift */,
 				B6D061F7460DEBA9C1024D92 /* LabelsView.swift */,
 				5846280A9FFC79FBBBCF600D /* LanguageSettingsView.swift */,
+				644F12D83413B334E234F4AC /* LockScreenView.swift */,
 				36EBCAF628D08C167C0D9721 /* QRScannerView.swift */,
 				F8736078E77840EDC8E0283A /* RecoveryView.swift */,
 				6FA83A41E3BAD133CD9929BD /* SettingsView.swift */,
 				2C2D8422E9B837A1B336A071 /* SetupView.swift */,
 				63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */,
 				7E4A76E62A085CC5836324B5 /* ValidationBadgeView.swift */,
+				08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */,
 				E187C8E8E4D2A6C1CDA025AA /* Components */,
 				2CBD4B5D0F233D7B3EA59CED /* Onboarding */,
 			);
@@ -691,6 +697,7 @@
 				4C2FD95F148553C2A12B2991 /* LabelsView.swift in Sources */,
 				0098BE4EAD470F85DBCBE2E7 /* LanguageSettingsView.swift in Sources */,
 				6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */,
+				9C9A5E8876CAFA84118E8DBF /* LockScreenView.swift in Sources */,
 				D2EF571FC20DD01AF5776C64 /* MultipartQRScanner.swift in Sources */,
 				ADBDBB305DC254FE3A94B2F3 /* MultipartQRView.swift in Sources */,
 				281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */,
@@ -710,6 +717,7 @@
 				2F7D817E60BDE6223F5E0484 /* VauchiApp.swift in Sources */,
 				AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */,
 				5DB1F56C8F6BC86226B8180F /* VauchiViewModel.swift in Sources */,
+				10BCAB3BFF0E6F665B519A1F /* WaitingForUnlockView.swift in Sources */,
 				9F0554E5313D44B13878E6FE /* WelcomeStepView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
