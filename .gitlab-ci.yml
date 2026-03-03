@@ -410,6 +410,32 @@ test:unit:
           - "project.yml"
           - ".gitlab-ci.yml"
 
+coverage:unit:
+  extends: [.macos-job, .spm-cache-readonly, .timeout-long]
+  stage: test
+  needs:
+    - job: build:debug
+      artifacts: true
+  before_script:
+    - command -v xcresultparser >/dev/null 2>&1 || brew install a7ex/formulae/xcresultparser
+  script:
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -enableCodeCoverage YES -resultBundlePath coverage_result -skip-testing VauchiSnapshotTests -skip-testing VauchiUITests -parallel-testing-enabled YES -parallel-testing-worker-count 4
+    - xcrun xccov view --report coverage_result.xcresult
+    - xcresultparser --output-format cobertura coverage_result.xcresult > cobertura.xml
+  coverage: '/(?:line coverage:|Coverage:)\s*(\d+(?:\.\d+)?%)/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
+    paths:
+      - cobertura.xml
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "api"
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
 # Visual regression snapshot tests (swift-snapshot-testing)
 # Captures reference images for all SwiftUI views and compares against baselines.
 # NOTE: Baselines must be generated locally first by running with isRecording = true.
