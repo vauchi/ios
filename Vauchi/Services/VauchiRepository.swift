@@ -129,6 +129,8 @@ enum VauchiRepositoryError: LocalizedError {
             return .shredError(msg)
         case let .InitError(msg):
             return .internalError("Init: \(msg)")
+        case let .BleNotAvailable(msg):
+            return .internalError("BLE: \(msg)")
         @unknown default:
             return .internalError("Unknown error")
         }
@@ -158,6 +160,7 @@ enum VauchiFieldType: String, CaseIterable {
     case website
     case address
     case social
+    case birthday
     case custom
 
     var displayName: String {
@@ -167,6 +170,7 @@ enum VauchiFieldType: String, CaseIterable {
         case .website: "Website"
         case .address: "Address"
         case .social: "Social"
+        case .birthday: "Birthday"
         case .custom: "Custom"
         }
     }
@@ -179,6 +183,7 @@ enum VauchiFieldType: String, CaseIterable {
         case .website: .website
         case .address: .address
         case .social: .social
+        case .birthday: .birthday
         case .custom: .custom
         }
     }
@@ -191,6 +196,7 @@ enum VauchiFieldType: String, CaseIterable {
         case .website: .website
         case .address: .address
         case .social: .social
+        case .birthday: .birthday
         case .custom: .custom
         }
     }
