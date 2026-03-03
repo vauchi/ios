@@ -121,6 +121,9 @@ enum ContactActions {
             }
             return nil
 
+        case .birthday:
+            return nil
+
         case .custom:
             // Try to detect and handle custom fields
             let detected = detectFieldType(trimmed)
@@ -203,6 +206,8 @@ enum ContactActions {
             [.openMaps, .copy]
         case .social:
             [.openUrl, .copy]
+        case .birthday:
+            [.copy]
         case .custom:
             [.copy]
         }
