@@ -40,6 +40,7 @@
 		3D787C329E429BC3B8206837 /* RecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8736078E77840EDC8E0283A /* RecoveryView.swift */; };
 		3EE222C1CDE5AA17773953B3 /* testLoadingView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */; };
 		426502D48730CB634E517392 /* CreateIdentityStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27ACF669867CF3A793842FA0 /* CreateIdentityStepView.swift */; };
+		4342D012B76952454E5D89B9 /* SocialGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4A1EE447C60A79208FE622 /* SocialGraphView.swift */; };
 		4B50D00F10FB956AAB85BAA7 /* testLanguageSettingsView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 5A0105ADEB1ADDB86013DBCF /* testLanguageSettingsView.1.png */; };
 		4C2FD95F148553C2A12B2991 /* LabelsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D061F7460DEBA9C1024D92 /* LabelsView.swift */; };
 		4C52B33A572F7C4F2EB5D736 /* DeliveryStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30C91B081CDC3A250428A644 /* DeliveryStatusView.swift */; };
@@ -71,6 +72,7 @@
 		8CD4D48FC7E49B0DA82AD497 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B31DFE6F23CEA01F0437957B /* KeychainService.swift */; };
 		950CE4D91D128D63DD0CCD7F /* testReadyStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = C2A9361B22965ACC0939BC78 /* testReadyStep.1.png */; };
 		95BC61A3D294112ABFFB021E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA83A41E3BAD133CD9929BD /* SettingsView.swift */; };
+		975814A17842850E5538C6EF /* ContactGroupBadges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 794858315D56910FBB0F9531 /* ContactGroupBadges.swift */; };
 		9A29351B039D6F08127F7A3E /* VisibilityLabelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C2E5A32B1033C46E976D2F /* VisibilityLabelsTests.swift */; };
 		9B12926FA62EF78944BBD659 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */; };
 		9C356FC3005B310BF322001D /* testAddFieldsStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 268841458ED0C3A21E73ECA5 /* testAddFieldsStep.1.png */; };
@@ -91,6 +93,7 @@
 		C2AB3CF694C96461836AADB2 /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */; };
 		C2BF1FC510A65D73DD722C95 /* VauchiMobile in Frameworks */ = {isa = PBXBuildFile; productRef = 0F8A335546193F75655208E3 /* VauchiMobile */; };
 		C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */; };
+		C93A0D7367B46594F457C13B /* GroupsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78FA47BD58BB7B71D2AC250D /* GroupsView.swift */; };
 		C9A763F2C3F5E581F08EFD13 /* testContactDetailView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EE116FC8484DF9F6D73F91F /* testContactDetailView.1.png */; };
 		CA32F697BDD3346B24319D5E /* ContactDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */; };
 		D07F5E38E2DDD0A47633E879 /* AddFieldsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B1FA31282CE69594A3840C /* AddFieldsStepView.swift */; };
@@ -178,6 +181,7 @@
 		6490FD404F8F6EB461A4DE38 /* testSetupView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSetupView.1.png; sourceTree = "<group>"; };
 		66D4DF5873BED53D99177B4A /* MultipartQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRView.swift; sourceTree = "<group>"; };
 		6C859B6215BADD6A45480D9F /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationService.swift; sourceTree = "<group>"; };
+		6D4A1EE447C60A79208FE622 /* SocialGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialGraphView.swift; sourceTree = "<group>"; };
 		6FA83A41E3BAD133CD9929BD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiApp.swift; sourceTree = "<group>"; };
 		73C57002D4EAE39D0378F9F4 /* testContactsViewWithContacts.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewWithContacts.1.png; sourceTree = "<group>"; };
@@ -185,6 +189,8 @@
 		773071C286EDA29BCB17B365 /* ContactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
 		773C796EDEEFF9B928C04229 /* VauchiUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiUITests.swift; sourceTree = "<group>"; };
 		7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoContactTests.swift; sourceTree = "<group>"; };
+		78FA47BD58BB7B71D2AC250D /* GroupsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsView.swift; sourceTree = "<group>"; };
+		794858315D56910FBB0F9531 /* ContactGroupBadges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactGroupBadges.swift; sourceTree = "<group>"; };
 		7D255A687EB281C01D297ED7 /* VauchiSnapshotTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E4A76E62A085CC5836324B5 /* ValidationBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationBadgeView.swift; sourceTree = "<group>"; };
 		7ECC96545C3966B83B1D1AC7 /* VauchiTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -394,6 +400,7 @@
 				773071C286EDA29BCB17B365 /* ContactsView.swift */,
 				30C91B081CDC3A250428A644 /* DeliveryStatusView.swift */,
 				54104E52AA5396675142F673 /* ExchangeView.swift */,
+				78FA47BD58BB7B71D2AC250D /* GroupsView.swift */,
 				2760186DEA7C9870633BA8E8 /* HelpView.swift */,
 				0FC890F55872A927941111CE /* HomeView.swift */,
 				3F12B12FCE38D7CBAB15A8A0 /* LabelDetailView.swift */,
@@ -404,6 +411,7 @@
 				F8736078E77840EDC8E0283A /* RecoveryView.swift */,
 				6FA83A41E3BAD133CD9929BD /* SettingsView.swift */,
 				2C2D8422E9B837A1B336A071 /* SetupView.swift */,
+				6D4A1EE447C60A79208FE622 /* SocialGraphView.swift */,
 				63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */,
 				7E4A76E62A085CC5836324B5 /* ValidationBadgeView.swift */,
 				08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */,
@@ -438,6 +446,7 @@
 		E187C8E8E4D2A6C1CDA025AA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				794858315D56910FBB0F9531 /* ContactGroupBadges.swift */,
 				09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */,
 				66D4DF5873BED53D99177B4A /* MultipartQRView.swift */,
 				16ECAB2250253E9F51032786 /* ProximityVerificationView.swift */,
@@ -683,6 +692,7 @@
 				08512AFB915670B874B58220 /* ConsentSettingsView.swift in Sources */,
 				02DD49946382C26E78CE06C9 /* ContactActions.swift in Sources */,
 				CA32F697BDD3346B24319D5E /* ContactDetailView.swift in Sources */,
+				975814A17842850E5538C6EF /* ContactGroupBadges.swift in Sources */,
 				DD478B0145A11A9B9277A5BB /* ContactsView.swift in Sources */,
 				9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */,
 				5680FAB9C220183B0BB3AC03 /* ContentView.swift in Sources */,
@@ -690,6 +700,7 @@
 				4D6C3EC272054F44F67201EE /* DeepLinkHandler.swift in Sources */,
 				4C52B33A572F7C4F2EB5D736 /* DeliveryStatusView.swift in Sources */,
 				53AB469C972C6E43723B5C0A /* ExchangeView.swift in Sources */,
+				C93A0D7367B46594F457C13B /* GroupsView.swift in Sources */,
 				9ECAED5D4945C8D7669BD1CC /* HelpView.swift in Sources */,
 				4DA8D8A5C3D704C592248C27 /* HomeView.swift in Sources */,
 				8CD4D48FC7E49B0DA82AD497 /* KeychainService.swift in Sources */,
@@ -711,6 +722,7 @@
 				AA3F337ED100BA98F8D5B5E3 /* SettingsService.swift in Sources */,
 				95BC61A3D294112ABFFB021E /* SettingsView.swift in Sources */,
 				A71B3D9B635D86B0626C301F /* SetupView.swift in Sources */,
+				4342D012B76952454E5D89B9 /* SocialGraphView.swift in Sources */,
 				2D0728F99D4DBB3C8491C25B /* ThemeService.swift in Sources */,
 				C2AB3CF694C96461836AADB2 /* ThemeSettingsView.swift in Sources */,
 				6EB33DF7D6BD4A8CCC6A8075 /* ValidationBadgeView.swift in Sources */,
