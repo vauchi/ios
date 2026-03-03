@@ -438,6 +438,7 @@ coverage:unit:
     - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "api"
       when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "schedule"
 
 # Visual regression snapshot tests (swift-snapshot-testing)
 # Captures reference images for all SwiftUI views and compares against baselines.
