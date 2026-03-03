@@ -1094,7 +1094,7 @@
 			repositoryURL = "https://gitlab.com/vauchi/vauchi-mobile-swift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.7;
+				minimumVersion = 0.2.8;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
