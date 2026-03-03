@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import LocalAuthentication
 import Security
 import SwiftUI
 import VauchiMobile
@@ -98,10 +99,19 @@ struct SyncResultInfo: Equatable {
     let updatesSent: Int
 }
 
+/// App-level state for device lock handling
+enum AppState: Equatable {
+    case loading
+    case waitingForUnlock // Layer B: protected data unavailable (prewarming)
+    case authenticationRequired // Layer C: auth window expired
+    case ready // Normal operation
+}
+
 @MainActor
 class VauchiViewModel: ObservableObject {
     // MARK: - Published State
 
+    @Published var appState: AppState = .loading
     @Published var isLoading = true
     @Published var hasIdentity = false
     @Published var identity: IdentityInfo?
@@ -223,16 +233,73 @@ class VauchiViewModel: ObservableObject {
     }
 
     private func initializeRepository() {
+        // Layer B: check if protected data is available before accessing Keychain
+        guard UIApplication.shared.isProtectedDataAvailable else {
+            print("VauchiViewModel: protected data unavailable, waiting for unlock")
+            appState = .waitingForUnlock
+            subscribeToProtectedDataAvailable()
+            return
+        }
+
         do {
             print("VauchiViewModel: initializing repository...")
             repository = try VauchiRepository(
                 relayUrl: SettingsService.shared.relayUrl
             )
+            appState = .ready
             print("VauchiViewModel: repository initialized successfully")
+        } catch VauchiRepositoryError.deviceLocked {
+            // Layer C: Keychain accessible but auth required
+            print("VauchiViewModel: device locked, authentication required")
+            appState = .authenticationRequired
         } catch {
             let msg = "Failed to initialize: \(error.localizedDescription) (\(String(describing: error)))"
             print("VauchiViewModel: \(msg)")
             errorMessage = msg
+        }
+    }
+
+    private var protectedDataObserver: NSObjectProtocol?
+
+    private func subscribeToProtectedDataAvailable() {
+        protectedDataObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.protectedDataDidBecomeAvailableNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.removeProtectedDataObserver()
+            self?.initializeRepository()
+        }
+    }
+
+    private func removeProtectedDataObserver() {
+        if let observer = protectedDataObserver {
+            NotificationCenter.default.removeObserver(observer)
+            protectedDataObserver = nil
+        }
+    }
+
+    /// Trigger system authentication (Face ID / Touch ID / passcode) and retry initialization
+    func authenticateAndRetry() {
+        let context = LAContext()
+        context.evaluatePolicy(
+            .deviceOwnerAuthentication,
+            localizedReason: NSLocalizedString(
+                "Unlock Vauchi to access your contacts",
+                comment: "Biometric/passcode prompt reason"
+            )
+        ) { [weak self] success, error in
+            DispatchQueue.main.async {
+                if success {
+                    self?.initializeRepository()
+                    if self?.appState == .ready {
+                        self?.loadState()
+                    }
+                } else {
+                    // If cancelled/failed, stay on lock screen — user can tap again
+                    print("VauchiViewModel: authentication failed or cancelled: \(String(describing: error))")
+                }
+            }
         }
     }
 
@@ -259,6 +326,12 @@ class VauchiViewModel: ObservableObject {
     // MARK: - State Management
 
     func loadState() {
+        // Don't attempt to load if we're waiting for unlock or auth
+        if appState == .waitingForUnlock || appState == .authenticationRequired {
+            isLoading = false
+            return
+        }
+
         // Don't clear error if repository failed to initialize
         if repository == nil, errorMessage != nil {
             isLoading = false

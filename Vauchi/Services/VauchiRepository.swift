@@ -56,6 +56,7 @@ enum VauchiRepositoryError: LocalizedError {
     case gdprError(String)
     case deletionNotAllowed(String)
     case shredError(String)
+    case deviceLocked
 
     var errorDescription: String? {
         switch self {
@@ -89,6 +90,8 @@ enum VauchiRepositoryError: LocalizedError {
             "Deletion not allowed: \(msg)"
         case let .shredError(msg):
             "Shred error: \(msg)"
+        case .deviceLocked:
+            "Device is locked — unlock your device to access Vauchi"
         }
     }
 
@@ -479,12 +482,19 @@ class VauchiRepository {
     private static func getOrCreateStorageKey(dataDir _: String) throws -> Data {
         let keychain = KeychainService.shared
 
-        // Try to load from Keychain first
-        if let keyData = try? keychain.loadStorageKey() {
+        do {
+            let keyData = try keychain.loadStorageKey()
             if keyData.count == storageKeyLength {
                 return keyData
             }
+            // Key exists but wrong length — regenerate (migration scenario)
+        } catch KeychainError.notFound {
+            // No key exists yet — first launch, generate below
+        } catch KeychainError.deviceLocked {
+            // Device locked — DO NOT generate a new key, propagate the error
+            throw VauchiRepositoryError.deviceLocked
         }
+        // Other KeychainError variants re-throw automatically
 
         // Generate new key and store in Keychain
         let newKeyData = generateStorageKey()

@@ -13,6 +13,7 @@ enum KeychainError: Error {
     case unknown(OSStatus)
     case notFound
     case invalidData
+    case deviceLocked // errSecInteractionNotAllowed (-25308)
 }
 
 class KeychainService {
@@ -104,6 +105,9 @@ class KeychainService {
         }
 
         guard status == errSecSuccess else {
+            if status == errSecInteractionNotAllowed {
+                throw KeychainError.deviceLocked
+            }
             throw KeychainError.unknown(status)
         }
     }
@@ -123,6 +127,9 @@ class KeychainService {
         guard status == errSecSuccess else {
             if status == errSecItemNotFound {
                 throw KeychainError.notFound
+            }
+            if status == errSecInteractionNotAllowed {
+                throw KeychainError.deviceLocked
             }
             throw KeychainError.unknown(status)
         }
