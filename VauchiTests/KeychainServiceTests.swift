@@ -172,4 +172,47 @@ final class KeychainServiceTests: XCTestCase {
 
         try keychainService.delete(key: specialKey)
     }
+
+    // MARK: - Device Locked Error Tests
+
+    /// Scenario: KeychainError.deviceLocked maps to errSecInteractionNotAllowed
+    /// Verifies that the error enum case exists and is distinct from other errors
+    func testDeviceLockedErrorIsDistinctFromOtherErrors() {
+        let deviceLockedError = KeychainError.deviceLocked
+        let notFoundError = KeychainError.notFound
+        let unknownError = KeychainError.unknown(-25308)
+
+        // deviceLocked should be a distinct case, not conflated with unknown(-25308)
+        switch deviceLockedError {
+        case .deviceLocked:
+            // Expected — this is the correct case
+            break
+        default:
+            XCTFail("Expected .deviceLocked, got \(deviceLockedError)")
+        }
+
+        // Verify it's not the same as notFound
+        switch notFoundError {
+        case .deviceLocked:
+            XCTFail("notFound should not match deviceLocked")
+        default:
+            break // Expected
+        }
+
+        // Verify unknown(-25308) is distinct from the named deviceLocked case
+        switch unknownError {
+        case .deviceLocked:
+            XCTFail("unknown(-25308) should not match deviceLocked")
+        default:
+            break // Expected — they are distinct enum cases
+        }
+    }
+
+    /// Scenario: errSecInteractionNotAllowed status code matches deviceLocked semantics
+    /// Verifies the OSStatus constant value used in the Keychain API
+    func testErrSecInteractionNotAllowedStatusCode() {
+        // errSecInteractionNotAllowed is -25308 per Apple Security framework
+        let status: OSStatus = errSecInteractionNotAllowed
+        XCTAssertEqual(status, -25308, "errSecInteractionNotAllowed should be -25308")
+    }
 }

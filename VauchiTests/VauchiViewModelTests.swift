@@ -197,4 +197,83 @@ final class VauchiViewModelTests: XCTestCase {
         // Method should exist and not crash
         XCTAssertTrue(true, "unhideContact method exists")
     }
+
+    // MARK: - App State Tests (Locked Device)
+
+    // Based on: _private/docs/problems/2026-03-02-locked-device-startup-error/
+
+    /// Scenario: AppState enum has all required cases
+    func testAppStateEnumCases() {
+        // Verify all expected cases exist and are distinct
+        let loading = AppState.loading
+        let waiting = AppState.waitingForUnlock
+        let authRequired = AppState.authenticationRequired
+        let ready = AppState.ready
+
+        XCTAssertEqual(loading, AppState.loading)
+        XCTAssertEqual(waiting, AppState.waitingForUnlock)
+        XCTAssertEqual(authRequired, AppState.authenticationRequired)
+        XCTAssertEqual(ready, AppState.ready)
+
+        // Verify distinct values
+        XCTAssertNotEqual(loading, waiting)
+        XCTAssertNotEqual(loading, authRequired)
+        XCTAssertNotEqual(loading, ready)
+        XCTAssertNotEqual(waiting, authRequired)
+        XCTAssertNotEqual(waiting, ready)
+        XCTAssertNotEqual(authRequired, ready)
+    }
+
+    /// Scenario: ViewModel initial appState is loading
+    func testInitialAppStateIsLoading() {
+        let viewModel = VauchiViewModel()
+
+        // On simulator with protected data available, it should initialize successfully
+        // and move to .ready (or stay .loading briefly then .ready)
+        // The important check: it should NOT be .waitingForUnlock or .authenticationRequired
+        // since the simulator has protected data available
+        XCTAssertNotEqual(viewModel.appState, .waitingForUnlock,
+                          "Should not be waiting for unlock on simulator")
+        XCTAssertNotEqual(viewModel.appState, .authenticationRequired,
+                          "Should not require authentication on simulator")
+    }
+
+    /// Scenario: loadState bails out when appState is waitingForUnlock
+    func testLoadStateBailsOutWhenWaitingForUnlock() {
+        let viewModel = VauchiViewModel()
+
+        // Force the state to waitingForUnlock
+        viewModel.appState = .waitingForUnlock
+        viewModel.isLoading = true
+
+        viewModel.loadState()
+
+        // loadState should bail out immediately, setting isLoading to false
+        XCTAssertFalse(viewModel.isLoading,
+                       "isLoading should be false when appState is waitingForUnlock")
+    }
+
+    /// Scenario: loadState bails out when appState is authenticationRequired
+    func testLoadStateBailsOutWhenAuthenticationRequired() {
+        let viewModel = VauchiViewModel()
+
+        // Force the state to authenticationRequired
+        viewModel.appState = .authenticationRequired
+        viewModel.isLoading = true
+
+        viewModel.loadState()
+
+        // loadState should bail out immediately, setting isLoading to false
+        XCTAssertFalse(viewModel.isLoading,
+                       "isLoading should be false when appState is authenticationRequired")
+    }
+
+    /// Scenario: VauchiRepositoryError.deviceLocked has correct description
+    func testDeviceLockedErrorDescription() {
+        let error = VauchiRepositoryError.deviceLocked
+
+        XCTAssertEqual(error.errorDescription,
+                       "Device is locked \u{2014} unlock your device to access Vauchi",
+                       "deviceLocked error should have a user-friendly description")
+    }
 }
