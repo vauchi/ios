@@ -422,6 +422,9 @@ coverage:unit:
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -enableCodeCoverage YES -resultBundlePath coverage_result -skip-testing VauchiSnapshotTests -skip-testing VauchiUITests -parallel-testing-enabled YES -parallel-testing-worker-count 4
     - xcrun xccov view --report coverage_result.xcresult
     - xcresultparser --output-format cobertura coverage_result.xcresult > cobertura.xml
+    - mkdir -p /tmp/ci-${CI_PIPELINE_ID} && curl -sL -H "JOB-TOKEN:$CI_JOB_TOKEN" "$CI_API_V4_URL/projects/vauchi%2Fscripts/repository/files/scripts%2Fci%2Fpush-coverage.sh/raw?ref=main" -o /tmp/ci-${CI_PIPELINE_ID}/push-coverage.sh
+    - "bash /tmp/ci-${CI_PIPELINE_ID}/push-coverage.sh cobertura.xml ios || echo WARNING: coverage push failed"
+    - rm -rf /tmp/ci-${CI_PIPELINE_ID}
   coverage: '/(?:line coverage:|Coverage:)\s*(\d+(?:\.\d+)?%)/'
   artifacts:
     reports:
