@@ -246,6 +246,9 @@ struct ContactRow: View {
                         DeliveryStatusIndicator(status: status)
                     }
                 }
+
+                // Group badges
+                ContactGroupBadgesLoader(contactId: contact.id, compact: true)
             }
 
             Spacer()

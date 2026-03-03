@@ -185,6 +185,24 @@ struct SettingsView: View {
                         }
                     }
 
+                    NavigationLink(destination: GroupsView()) {
+                        HStack {
+                            Label("Contact Groups", systemImage: "person.3")
+                            Spacer()
+                            if !viewModel.visibilityLabels.isEmpty {
+                                Text("\(viewModel.visibilityLabels.count)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .accessibilityHint("Manage contact groups and their visibility settings")
+
+                    NavigationLink(destination: SocialGraphView()) {
+                        Label("Contact Network", systemImage: "network")
+                    }
+                    .accessibilityHint("View your contact network with trust levels and group memberships")
+
                     NavigationLink(destination: ConsentSettingsView()) {
                         Label("Consent Settings", systemImage: "hand.raised")
                     }

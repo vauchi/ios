@@ -18,6 +18,8 @@ struct ContactDetailView: View {
     @State private var isTogglingTrust = false
     @State private var fieldVisibility: [String: Bool] = [:]
     @State private var isLoadingVisibility = true
+    @State private var contactGroups: [VauchiVisibilityLabel] = []
+    @State private var showManageGroupsSheet = false
     @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
@@ -152,6 +154,12 @@ struct ContactDetailView: View {
                     }
                 }
 
+                // Groups section
+                ContactGroupsSection(
+                    contactGroups: contactGroups,
+                    onManageGroups: { showManageGroupsSheet = true }
+                )
+
                 // Visibility section - what this contact can see of YOUR card
                 VStack(alignment: .leading, spacing: 12) {
                     Text(localizationService.t("visibility.title"))
@@ -220,6 +228,15 @@ struct ContactDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             loadVisibility()
+            loadContactGroups()
+        }
+        .sheet(isPresented: $showManageGroupsSheet) {
+            ManageContactGroupsSheet(
+                contactId: contact.id,
+                contactName: contact.displayName,
+                isPresented: $showManageGroupsSheet,
+                onUpdated: { loadContactGroups() }
+            )
         }
         .alert("Remove Contact", isPresented: $showRemoveAlert) {
             Button("Cancel", role: .cancel) {}
@@ -256,6 +273,14 @@ struct ContactDetailView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(viewModel.alertMessage)
+        }
+    }
+
+    private func loadContactGroups() {
+        do {
+            contactGroups = try viewModel.getLabelsForContact(contactId: contact.id)
+        } catch {
+            contactGroups = []
         }
     }
 
@@ -504,6 +529,179 @@ struct VisibilityToggleRow: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(8)
+    }
+}
+
+/// Section showing a contact's group memberships with manage button
+struct ContactGroupsSection: View {
+    let contactGroups: [VauchiVisibilityLabel]
+    let onManageGroups: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Groups")
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+                Spacer()
+                Button(action: onManageGroups) {
+                    Text("Manage")
+                        .font(.caption)
+                        .foregroundColor(.cyan)
+                }
+                .accessibilityLabel("Manage group memberships")
+                .accessibilityHint("Opens a sheet to add or remove this contact from groups")
+            }
+            .padding(.horizontal)
+
+            if contactGroups.isEmpty {
+                HStack(spacing: 8) {
+                    Image(systemName: "person.3")
+                        .foregroundColor(.secondary)
+                        .accessibilityHidden(true)
+                    Text("Not in any group")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Button(action: onManageGroups) {
+                        Text("Add to group")
+                            .font(.caption)
+                            .foregroundColor(.cyan)
+                    }
+                    .accessibilityLabel("Add to group")
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
+                .padding(.horizontal)
+            } else {
+                ContactGroupBadges(
+                    groups: contactGroups,
+                    compact: false
+                )
+                .padding(.horizontal)
+            }
+        }
+    }
+}
+
+/// Sheet for managing which groups a contact belongs to
+struct ManageContactGroupsSheet: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+    let contactId: String
+    let contactName: String
+    @Binding var isPresented: Bool
+    let onUpdated: () -> Void
+
+    @State private var allGroups: [VauchiVisibilityLabel] = []
+    @State private var memberGroupIds: Set<String> = []
+    @State private var isLoading = true
+    @State private var isSaving = false
+
+    var body: some View {
+        NavigationView {
+            Group {
+                if isLoading {
+                    ProgressView("Loading groups...")
+                        .accessibilityLabel("Loading groups")
+                } else if allGroups.isEmpty {
+                    VStack(spacing: 16) {
+                        Image(systemName: "person.3")
+                            .font(.system(size: 48))
+                            .foregroundColor(.secondary)
+                            .accessibilityHidden(true)
+                        Text("No groups created yet")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                        Text("Create groups in Settings > Contact Groups to organize your contacts.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                } else {
+                    List {
+                        Section {
+                            ForEach(allGroups) { group in
+                                let isMember = memberGroupIds.contains(group.id)
+                                Button(action: {
+                                    toggleGroupMembership(group: group, isMember: isMember)
+                                }) {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: isMember ? "checkmark.circle.fill" : "circle")
+                                            .foregroundColor(isMember ? .cyan : .secondary)
+                                            .font(.title3)
+
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(group.name)
+                                                .font(.body)
+                                                .foregroundColor(.primary)
+                                            Text("\(group.contactCount) member\(group.contactCount == 1 ? "" : "s")")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        Spacer()
+                                    }
+                                }
+                                .disabled(isSaving)
+                                .accessibilityLabel("\(group.name)\(isMember ? ", member" : "")")
+                                .accessibilityHint("Double tap to \(isMember ? "remove from" : "add to") this group")
+                            }
+                        } header: {
+                            Text("Groups for \(contactName)")
+                        } footer: {
+                            Text("Tap a group to add or remove this contact. Group membership controls which of your fields this contact can see.")
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Manage Groups")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        isPresented = false
+                    }
+                }
+            }
+            .task {
+                await loadData()
+            }
+        }
+    }
+
+    private func loadData() async {
+        isLoading = true
+        await viewModel.loadLabels()
+        allGroups = viewModel.visibilityLabels
+
+        do {
+            let currentGroups = try viewModel.getLabelsForContact(contactId: contactId)
+            memberGroupIds = Set(currentGroups.map(\.id))
+        } catch {
+            memberGroupIds = []
+        }
+        isLoading = false
+    }
+
+    private func toggleGroupMembership(group: VauchiVisibilityLabel, isMember: Bool) {
+        isSaving = true
+        Task {
+            do {
+                if isMember {
+                    try await viewModel.removeContactFromLabel(labelId: group.id, contactId: contactId)
+                    memberGroupIds.remove(group.id)
+                } else {
+                    try await viewModel.addContactToLabel(labelId: group.id, contactId: contactId)
+                    memberGroupIds.insert(group.id)
+                }
+                onUpdated()
+            } catch {
+                viewModel.showError("Error", message: "Failed to update group: \(error.localizedDescription)")
+            }
+            isSaving = false
+        }
     }
 }
 
