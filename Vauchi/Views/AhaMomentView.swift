@@ -81,6 +81,12 @@ struct AhaMomentView: View {
             Image(systemName: "arrow.down.circle.fill")
         case .firstOutboundDelivered:
             Image(systemName: "arrow.up.circle.fill")
+        case .firstFieldEdit:
+            Image(systemName: "square.and.pencil")
+        case .threeContactsReached:
+            Image(systemName: "person.3.fill")
+        case .deviceLinked:
+            Image(systemName: "link.circle.fill")
         }
     }
 }
