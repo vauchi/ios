@@ -46,14 +46,34 @@ enum OnboardingStep: Int, CaseIterable {
 }
 
 /// Data collected during onboarding
+///
+/// Values are persisted to SettingsService so the card preview (and any
+/// resumed onboarding session) sees the name, phone, and email that the
+/// user entered in earlier steps — even after an app restart.
 class OnboardingData: ObservableObject {
-    @Published var displayName: String = ""
-    @Published var phone: String = ""
-    @Published var email: String = ""
+    @Published var displayName: String {
+        didSet { SettingsService.shared.onboardingDisplayName = displayName }
+    }
+
+    @Published var phone: String {
+        didSet { SettingsService.shared.onboardingPhone = phone }
+    }
+
+    @Published var email: String {
+        didSet { SettingsService.shared.onboardingEmail = email }
+    }
+
     @Published var additionalFields: [(type: String, label: String, value: String)] = []
 
     var hasMinimumData: Bool {
         !displayName.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    init() {
+        // Restore any data saved from a previous session
+        displayName = SettingsService.shared.onboardingDisplayName
+        phone = SettingsService.shared.onboardingPhone
+        email = SettingsService.shared.onboardingEmail
     }
 }
 
@@ -125,9 +145,12 @@ struct OnboardingView: View {
         }
         .sheet(isPresented: $showRestoreSheet) {
             RestoreIdentitySheet(onRestoreComplete: {
-                // Mark onboarding complete and go to ready
+                // Mark onboarding complete, clear draft data, and go to ready
                 SettingsService.shared.hasCompletedOnboarding = true
                 SettingsService.shared.onboardingStep = OnboardingStep.ready.rawValue
+                SettingsService.shared.onboardingDisplayName = ""
+                SettingsService.shared.onboardingPhone = ""
+                SettingsService.shared.onboardingEmail = ""
                 currentStep = .ready
             })
         }
@@ -182,9 +205,12 @@ struct OnboardingView: View {
                     try await viewModel.addField(type: field.type, label: field.label, value: field.value)
                 }
 
-                // Mark onboarding complete
+                // Mark onboarding complete and clear persisted draft data
                 SettingsService.shared.hasCompletedOnboarding = true
                 SettingsService.shared.onboardingStep = OnboardingStep.ready.rawValue
+                SettingsService.shared.onboardingDisplayName = ""
+                SettingsService.shared.onboardingPhone = ""
+                SettingsService.shared.onboardingEmail = ""
 
                 // Transition to ready step briefly, then main app will take over
                 currentStep = .ready

@@ -19,6 +19,11 @@ private enum SettingsKey: String {
     case onboardingStep = "vauchi.onboardingStep"
     case hasDismissedDemoContact = "vauchi.hasDismissedDemoContact"
 
+    // Onboarding data (persisted across app restarts)
+    case onboardingDisplayName = "vauchi.onboarding.displayName"
+    case onboardingPhone = "vauchi.onboarding.phone"
+    case onboardingEmail = "vauchi.onboarding.email"
+
     // Accessibility settings
     case reduceMotion = "vauchi.accessibility.reduceMotion"
     case highContrast = "vauchi.accessibility.highContrast"
@@ -128,6 +133,26 @@ final class SettingsService {
         set { defaults.set(newValue, forKey: SettingsKey.hasDismissedDemoContact.rawValue) }
     }
 
+    // MARK: - Onboarding Data (persisted for resume)
+
+    /// Display name entered during onboarding (survives app restart)
+    var onboardingDisplayName: String {
+        get { defaults.string(forKey: SettingsKey.onboardingDisplayName.rawValue) ?? "" }
+        set { defaults.set(newValue, forKey: SettingsKey.onboardingDisplayName.rawValue) }
+    }
+
+    /// Phone entered during onboarding (survives app restart)
+    var onboardingPhone: String {
+        get { defaults.string(forKey: SettingsKey.onboardingPhone.rawValue) ?? "" }
+        set { defaults.set(newValue, forKey: SettingsKey.onboardingPhone.rawValue) }
+    }
+
+    /// Email entered during onboarding (survives app restart)
+    var onboardingEmail: String {
+        get { defaults.string(forKey: SettingsKey.onboardingEmail.rawValue) ?? "" }
+        set { defaults.set(newValue, forKey: SettingsKey.onboardingEmail.rawValue) }
+    }
+
     // MARK: - Accessibility Settings
 
     /// Whether to reduce motion/animations (supplements system setting)
@@ -175,6 +200,9 @@ final class SettingsService {
             SettingsKey.notificationsEnabled,
             SettingsKey.hasCompletedOnboarding,
             SettingsKey.onboardingStep,
+            SettingsKey.onboardingDisplayName,
+            SettingsKey.onboardingPhone,
+            SettingsKey.onboardingEmail,
             SettingsKey.hasDismissedDemoContact,
             SettingsKey.reduceMotion,
             SettingsKey.highContrast,
@@ -188,5 +216,8 @@ final class SettingsService {
     func resetOnboarding() {
         defaults.removeObject(forKey: SettingsKey.hasCompletedOnboarding.rawValue)
         defaults.removeObject(forKey: SettingsKey.onboardingStep.rawValue)
+        defaults.removeObject(forKey: SettingsKey.onboardingDisplayName.rawValue)
+        defaults.removeObject(forKey: SettingsKey.onboardingPhone.rawValue)
+        defaults.removeObject(forKey: SettingsKey.onboardingEmail.rawValue)
     }
 }
