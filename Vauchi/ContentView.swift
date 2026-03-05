@@ -111,7 +111,7 @@ struct MainTabView: View {
                     Label(localizationService.t("nav.contacts"), systemImage: "person.2")
                 }
 
-            ExchangeView()
+            FaceToFaceExchangeView()
                 .tabItem {
                     Label(localizationService.t("nav.exchange"), systemImage: "qrcode")
                 }

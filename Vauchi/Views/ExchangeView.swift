@@ -8,6 +8,14 @@
 import CoreImage.CIFilterBuiltins
 import SwiftUI
 
+/// Exchange flow state for QR-based contact exchange.
+enum ExchangeFlowState: Equatable {
+    case idle
+    case completing
+    case success(contactName: String)
+    case failed(error: String)
+}
+
 struct ExchangeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @State private var showScanner = false
@@ -17,156 +25,26 @@ struct ExchangeView: View {
     @State private var hasError = false
     @State private var timeRemaining: TimeInterval = 0
     @State private var timer: Timer?
-    @State private var isEmittingAudio = false
+    @State private var flowState: ExchangeFlowState = .idle
     @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 30) {
-                    // QR Code section
-                    VStack(spacing: 16) {
-                        Text(localizationService.t("exchange.your_qr"))
-                            .font(.headline)
-                            .accessibilityAddTraits(.isHeader)
+                    switch flowState {
+                    case .idle:
+                        idleContent
 
-                        Text("Have someone scan this to add you as a contact")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .accessibilityIdentifier("exchange.instructions")
+                    case .completing:
+                        completingContent
 
-                        if isLoading {
-                            ProgressView()
-                                .frame(width: 200, height: 200)
-                        } else if hasError {
-                            VStack(spacing: 12) {
-                                Image(systemName: "exclamationmark.triangle")
-                                    .font(.largeTitle)
-                                    .foregroundColor(.orange)
-                                    .accessibilityHidden(true)
-                                Text(localizationService.t("exchange.qr_error"))
-                                    .foregroundColor(.secondary)
-                                Button(localizationService.t("action.retry")) {
-                                    loadExchangeData()
-                                }
-                                .buttonStyle(.bordered)
-                                .accessibilityHint("Attempts to regenerate your QR code")
-                            }
-                            .frame(width: 200, height: 200)
-                        } else if let image = qrImage {
-                            VStack(spacing: 8) {
-                                Image(uiImage: image)
-                                    .interpolation(.none)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 200, height: 200)
-                                    .padding()
-                                    .background(Color.white)
-                                    .cornerRadius(12)
-                                    .accessibilityIdentifier("exchange.qrcode")
-                                    .accessibilityLabel("Your contact exchange QR code")
-                                    .accessibilityHint("Show this to someone to let them scan and add you as a contact")
+                    case let .success(contactName):
+                        successContent(contactName: contactName)
 
-                                // Expiration timer
-                                HStack(spacing: 4) {
-                                    Image(systemName: "clock")
-                                        .font(.caption)
-                                        .accessibilityHidden(true)
-                                    Text(localizationService.t("exchange.expires_in", args: ["time": formatTime(timeRemaining)]))
-                                        .font(.caption)
-                                }
-                                .foregroundColor(timeRemaining < 60 ? .orange : .secondary)
-                                .accessibilityElement(children: .combine)
-
-                                // Refresh button
-                                Button(action: { loadExchangeData() }) {
-                                    Label("Refresh", systemImage: "arrow.clockwise")
-                                        .font(.caption)
-                                }
-                                .buttonStyle(.bordered)
-                                .disabled(timeRemaining > 240) // Only allow refresh when < 4 min left
-
-                                // Proximity verification status
-                                if viewModel.proximitySupported {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: isEmittingAudio ? "waveform" : "waveform.circle")
-                                            .foregroundColor(isEmittingAudio ? .green : .blue)
-                                            .accessibilityHidden(true)
-                                        Text(isEmittingAudio ? "Emitting audio..." : "Ultrasonic ready")
-                                            .font(.caption2)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .padding(.top, 4)
-                                    .accessibilityElement(children: .combine)
-                                    .accessibilityLabel(
-                                        isEmittingAudio
-                                            ? "Ultrasonic proximity verification: emitting audio"
-                                            : "Ultrasonic proximity verification: ready"
-                                    )
-                                }
-                            }
-                        }
+                    case let .failed(error):
+                        failedContent(error: error)
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-
-                    // Scan section
-                    VStack(spacing: 16) {
-                        Text(localizationService.t("exchange.scan"))
-                            .font(.headline)
-                            .accessibilityAddTraits(.isHeader)
-
-                        Text("Scan someone else's QR code to add them")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        Button(action: { showScanner = true }) {
-                            Label("Open Camera", systemImage: "camera")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.cyan)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                        }
-                        .accessibilityIdentifier("exchange.scan.button")
-                        .accessibilityLabel("Scan QR code")
-                        .accessibilityHint("Opens the camera to scan someone else's QR code and add them as a contact")
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-
-                    // BLE Exchange stub
-                    VStack(spacing: 16) {
-                        Text("Bluetooth Exchange")
-                            .font(.headline)
-                            .accessibilityAddTraits(.isHeader)
-
-                        Image(systemName: "antenna.radiowaves.left.and.right")
-                            .font(.system(size: 40))
-                            .foregroundColor(.secondary)
-                            .accessibilityHidden(true)
-
-                        Text("Coming soon")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-
-                        Text("Exchange contact cards via Bluetooth when both devices are nearby. Requires Bluetooth hardware.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .padding(.horizontal)
                 }
                 .padding(.vertical)
             }
@@ -177,7 +55,275 @@ struct ExchangeView: View {
                 viewModel.stopProximityVerification()
             }
             .sheet(isPresented: $showScanner) {
-                QRScannerView()
+                QRScannerView(onQrScanned: { code in
+                    handleScannedCode(code)
+                })
+            }
+        }
+    }
+
+    // MARK: - Idle State (QR display + scan button)
+
+    @ViewBuilder
+    private var idleContent: some View {
+        // QR Code section
+        VStack(spacing: 16) {
+            Text(localizationService.t("exchange.your_qr"))
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+
+            Text("Have someone scan this to add you as a contact")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .accessibilityIdentifier("exchange.instructions")
+
+            if isLoading {
+                ProgressView()
+                    .frame(width: 200, height: 200)
+            } else if hasError {
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .foregroundColor(.orange)
+                        .accessibilityHidden(true)
+                    Text(localizationService.t("exchange.qr_error"))
+                        .foregroundColor(.secondary)
+                    Button(localizationService.t("action.retry")) {
+                        loadExchangeData()
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityHint("Attempts to regenerate your QR code")
+                }
+                .frame(width: 200, height: 200)
+            } else if let image = qrImage {
+                VStack(spacing: 8) {
+                    Image(uiImage: image)
+                        .interpolation(.none)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 200, height: 200)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(12)
+                        .accessibilityIdentifier("exchange.qrcode")
+                        .accessibilityLabel("Your contact exchange QR code")
+                        .accessibilityHint("Show this to someone to let them scan and add you as a contact")
+
+                    // Expiration timer
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.caption)
+                            .accessibilityHidden(true)
+                        Text(localizationService.t("exchange.expires_in", args: ["time": formatTime(timeRemaining)]))
+                            .font(.caption)
+                    }
+                    .foregroundColor(timeRemaining < 60 ? .orange : .secondary)
+                    .accessibilityElement(children: .combine)
+
+                    // Refresh button
+                    Button(action: { loadExchangeData() }) {
+                        Label("Refresh", systemImage: "arrow.clockwise")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(timeRemaining > 240) // Only allow refresh when < 4 min left
+
+                    // Proximity verification status
+                    if viewModel.proximitySupported {
+                        HStack(spacing: 6) {
+                            Image(systemName: "waveform.circle")
+                                .foregroundColor(.blue)
+                                .accessibilityHidden(true)
+                            Text("Ultrasonic ready")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.top, 4)
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("Ultrasonic proximity verification: ready")
+                    }
+                }
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .padding(.horizontal)
+
+        // Scan section
+        VStack(spacing: 16) {
+            Text(localizationService.t("exchange.scan"))
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+
+            Text("Scan someone else's QR code to add them")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Button(action: { showScanner = true }) {
+                Label("Open Camera", systemImage: "camera")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.cyan)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .accessibilityIdentifier("exchange.scan.button")
+            .accessibilityLabel("Scan QR code")
+            .accessibilityHint("Opens the camera to scan someone else's QR code and add them as a contact")
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .padding(.horizontal)
+
+        // BLE Exchange stub
+        VStack(spacing: 16) {
+            Text("Bluetooth Exchange")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+
+            Image(systemName: "antenna.radiowaves.left.and.right")
+                .font(.system(size: 40))
+                .foregroundColor(.secondary)
+                .accessibilityHidden(true)
+
+            Text("Coming soon")
+                .font(.subheadline)
+                .fontWeight(.medium)
+
+            Text("Exchange contact cards via Bluetooth when both devices are nearby. Requires Bluetooth hardware.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .padding(.horizontal)
+    }
+
+    // MARK: - Completing State
+
+    private var completingContent: some View {
+        VStack(spacing: 16) {
+            Spacer().frame(height: 60)
+
+            ProgressView()
+                .scaleEffect(1.5)
+
+            Text("Completing exchange...")
+                .font(.body)
+                .foregroundColor(.secondary)
+
+            Spacer().frame(height: 60)
+        }
+        .padding()
+    }
+
+    // MARK: - Success State
+
+    private func successContent(contactName: String) -> some View {
+        VStack(spacing: 16) {
+            Spacer().frame(height: 40)
+
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 64))
+                .foregroundColor(.green)
+
+            Text("Contact exchanged!")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Text("Successfully added \(contactName) as a contact!")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+
+            Button(action: { flowState = .idle }) {
+                Text(localizationService.t("action.done"))
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding(.horizontal)
+
+            Spacer().frame(height: 40)
+        }
+        .padding()
+    }
+
+    // MARK: - Failed State
+
+    private func failedContent(error: String) -> some View {
+        VStack(spacing: 16) {
+            Spacer().frame(height: 40)
+
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 64))
+                .foregroundColor(.red)
+
+            Text("Exchange failed")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.red)
+
+            Text(error)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+
+            Button(action: { flowState = .idle }) {
+                Text(localizationService.t("action.retry"))
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding(.horizontal)
+
+            Spacer().frame(height: 40)
+        }
+        .padding()
+    }
+
+    // MARK: - Actions
+
+    private func handleScannedCode(_ code: String) {
+        // QR scanning at close range already proves physical proximity.
+        // Skip ultrasonic verification (which requires bidirectional coordination
+        // not yet implemented) and complete the exchange directly.
+        completeExchange(qrData: code)
+    }
+
+    private func completeExchange(qrData: String) {
+        flowState = .completing
+
+        Task {
+            do {
+                let result = try await viewModel.completeExchange(qrData: qrData)
+                await MainActor.run {
+                    if result.success {
+                        flowState = .success(contactName: result.contactName)
+                    } else {
+                        flowState = .failed(error: result.errorMessage ?? "Exchange failed")
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    if error.localizedDescription.contains("already exists") {
+                        flowState = .failed(error: "You already have this contact")
+                    } else {
+                        flowState = .failed(error: error.localizedDescription)
+                    }
+                }
             }
         }
     }

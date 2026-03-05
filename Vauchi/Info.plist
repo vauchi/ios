@@ -18,19 +18,19 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
-	<key>CFBundleVersion</key>
-	<string>1</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleURLName</key>
+			<string>app.vauchi.ios</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>vauchi</string>
 			</array>
-			<key>CFBundleURLName</key>
-			<string>app.vauchi.ios</string>
 		</dict>
 	</array>
+	<key>CFBundleVersion</key>
+	<string>1</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Vauchi uses the camera to scan QR codes for contact exchange.</string>
 	<key>NSMicrophoneUsageDescription</key>

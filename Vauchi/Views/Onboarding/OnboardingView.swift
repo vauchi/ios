@@ -190,19 +190,31 @@ struct OnboardingView: View {
                 // Create identity
                 try await viewModel.createIdentity(name: onboardingData.displayName)
 
-                // Add phone field if provided
+                // Add phone field if provided (non-fatal — validation errors skip the field)
                 if !onboardingData.phone.isEmpty {
-                    try await viewModel.addField(type: "phone", label: "Phone", value: onboardingData.phone)
+                    do {
+                        try await viewModel.addField(type: "phone", label: "Phone", value: onboardingData.phone)
+                    } catch {
+                        print("Onboarding: skipping phone field: \(error.localizedDescription)")
+                    }
                 }
 
-                // Add email field if provided
+                // Add email field if provided (non-fatal — validation errors skip the field)
                 if !onboardingData.email.isEmpty {
-                    try await viewModel.addField(type: "email", label: "Email", value: onboardingData.email)
+                    do {
+                        try await viewModel.addField(type: "email", label: "Email", value: onboardingData.email)
+                    } catch {
+                        print("Onboarding: skipping email field: \(error.localizedDescription)")
+                    }
                 }
 
-                // Add any additional fields
+                // Add any additional fields (non-fatal)
                 for field in onboardingData.additionalFields {
-                    try await viewModel.addField(type: field.type, label: field.label, value: field.value)
+                    do {
+                        try await viewModel.addField(type: field.type, label: field.label, value: field.value)
+                    } catch {
+                        print("Onboarding: skipping field \(field.label): \(error.localizedDescription)")
+                    }
                 }
 
                 // Mark onboarding complete and clear persisted draft data

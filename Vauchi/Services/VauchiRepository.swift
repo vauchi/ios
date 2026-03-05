@@ -1020,15 +1020,21 @@ class VauchiRepository {
     }
 
     /// Complete exchange by driving ExchangeSession state machine (mutual QR flow).
+    ///
+    /// Face-to-face exchanges are bilateral — both devices scan each other's QR and
+    /// independently derive the shared secret. No relay notification needed.
     func completeExchange(qrData: String) throws -> VauchiExchangeResult {
         do {
             let session = try vauchi.createQrExchangeManual()
             _ = try session.generateQr()
             try session.processQr(qrData: qrData)
+            guard let contactName = session.peerDisplayName() else {
+                throw VauchiRepositoryError.exchangeFailed("QR code missing display name")
+            }
             try session.confirmProximity()
             try session.theyScannedOurQr()
             try session.performKeyAgreement()
-            try session.completeCardExchange(theirCardName: "New Contact")
+            try session.completeCardExchange(theirCardName: contactName)
             let result = try vauchi.finalizeExchange(session: session)
             return VauchiExchangeResult(
                 contactId: result.contactId,

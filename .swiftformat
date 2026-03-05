@@ -10,4 +10,4 @@
 --disable wrapMultilineStatementBraces
 
 # Exclude build artifacts and dependency checkouts
---exclude build
+--exclude build,Vauchi/Generated

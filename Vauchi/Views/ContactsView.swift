@@ -409,7 +409,7 @@ struct DemoContactCard: View {
 /// Wrapper to navigate to exchange tab
 struct ExchangeTabView: View {
     var body: some View {
-        ExchangeView()
+        FaceToFaceExchangeView()
     }
 }
 
