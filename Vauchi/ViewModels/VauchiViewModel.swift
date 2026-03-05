@@ -176,14 +176,6 @@ class VauchiViewModel: ObservableObject {
         showAlert = true
     }
 
-    // MARK: - Proximity Verification
-
-    // Uses MobileProximityVerifier with AudioProximityService for ultrasonic verification
-
-    @Published var proximitySupported = false
-    @Published var proximityCapability = "none"
-    private var proximityVerifier: MobileProximityVerifier?
-
     /// Aha moments (progressive onboarding)
     @Published var currentAhaMoment: MobileAhaMoment?
 
@@ -198,48 +190,6 @@ class VauchiViewModel: ObservableObject {
         lastSyncTime = SettingsService.shared.lastSyncTime
         initializeRepository()
         setupNetworkMonitoring()
-        setupProximityVerification()
-    }
-
-    private func setupProximityVerification() {
-        let audioHandler = AudioProximityService.shared
-        proximityVerifier = MobileProximityVerifier(handler: audioHandler)
-        proximitySupported = proximityVerifier?.isSupported() ?? false
-        proximityCapability = proximityVerifier?.getCapability() ?? "none"
-        print("VauchiViewModel: Proximity verification enabled - capability: \(proximityCapability)")
-    }
-
-    /// Emit a proximity challenge (for QR displayer)
-    func emitProximityChallenge(_ challenge: Data) -> Bool {
-        guard let verifier = proximityVerifier, proximitySupported else {
-            print("VauchiViewModel: Proximity verification not supported")
-            return false
-        }
-
-        let result = verifier.emitChallenge(challenge: challenge)
-        if !result.success {
-            print("VauchiViewModel: emitProximityChallenge failed: \(result.error)")
-        }
-        return result.success
-    }
-
-    /// Listen for proximity response (for QR scanner)
-    func listenForProximityResponse(timeoutMs: UInt64 = 5000) -> Data? {
-        guard let verifier = proximityVerifier, proximitySupported else {
-            print("VauchiViewModel: Proximity verification not supported")
-            return nil
-        }
-
-        let response = verifier.listenForResponse(timeoutMs: timeoutMs)
-        if response.isEmpty {
-            return nil
-        }
-        return Data(response)
-    }
-
-    /// Stop any ongoing proximity verification
-    func stopProximityVerification() {
-        proximityVerifier?.stop()
     }
 
     private func initializeRepository() {
@@ -1072,70 +1022,6 @@ class VauchiViewModel: ObservableObject {
         return name
     }
 
-    /// Ultrasonic coordination loop: emit their challenge, listen for ours.
-    /// Returns true if we heard our challenge (meaning the peer scanned our QR).
-    /// After confirmation, keeps emitting for postConfirmSeconds so the peer also
-    /// hears their challenge — ensures BOTH devices confirm mutual scanning.
-    func ultrasonicCoordinate(scannedQrData: String, timeoutSeconds: Int = 15, postConfirmSeconds: Int = 5) async -> Bool {
-        guard let ourData = activeExchangeData,
-              let ourChallenge = ourData.audioChallenge,
-              let theirChallenge = ExchangeDataInfo.extractAudioChallenge(from: scannedQrData) else {
-            return false
-        }
-
-        // Stagger timing: compare first challenge byte to determine role.
-        // One device emits first, the other listens first — avoids synchronized collision.
-        let emitFirst = (theirChallenge[theirChallenge.startIndex] >= ourChallenge[ourChallenge.startIndex])
-        NSLog("[Exchange] Ultrasonic: role=\(emitFirst ? "emit-first" : "listen-first")")
-
-        let deadline = Date().addingTimeInterval(TimeInterval(timeoutSeconds))
-        var confirmedAt: Date?
-        var cycle = 0
-        while Date() < deadline {
-            if let confirmed = confirmedAt,
-               Date().timeIntervalSince(confirmed) > TimeInterval(postConfirmSeconds) {
-                NSLog("[Exchange] Ultrasonic: post-confirm emit done after \(cycle) cycles")
-                return true
-            }
-
-            cycle += 1
-
-            if emitFirst {
-                // Emit then listen
-                _ = emitProximityChallenge(theirChallenge)
-                try? await Task.sleep(nanoseconds: 250_000_000)
-                stopProximityVerification()
-                let response = listenForProximityResponse(timeoutMs: 2000)
-                if let response, response == ourChallenge {
-                    if confirmedAt == nil {
-                        confirmedAt = Date()
-                        NSLog("[Exchange] Ultrasonic: heard our challenge on cycle \(cycle)!")
-                    }
-                }
-                stopProximityVerification()
-            } else {
-                // Listen then emit (staggered)
-                let response = listenForProximityResponse(timeoutMs: 2000)
-                if let response, response == ourChallenge {
-                    if confirmedAt == nil {
-                        confirmedAt = Date()
-                        NSLog("[Exchange] Ultrasonic: heard our challenge on cycle \(cycle)!")
-                    }
-                }
-                stopProximityVerification()
-                _ = emitProximityChallenge(theirChallenge)
-                try? await Task.sleep(nanoseconds: 250_000_000)
-                stopProximityVerification()
-            }
-        }
-        if confirmedAt != nil {
-            NSLog("[Exchange] Ultrasonic: confirmed (hit overall deadline during post-confirm)")
-            return true
-        }
-        NSLog("[Exchange] Ultrasonic: timed out after \(cycle) cycles without confirmation")
-        return false
-    }
-
     /// Complete the exchange using the held session.
     func completeExchangeAfterCoordination() async throws -> ExchangeResultInfo {
         guard let session = activeExchangeSession, let repository else {
@@ -1172,6 +1058,22 @@ class VauchiViewModel: ObservableObject {
         activeExchangeSession = nil
         activeExchangeData = nil
     }
+
+    // Proximity stubs — ultrasonic removed from exchange. Kept for device linking views.
+    @Published var proximitySupported = false
+    var proximityCapability: String {
+        "none"
+    }
+
+    func emitProximityChallenge(_: Data) -> Bool {
+        false
+    }
+
+    func listenForProximityResponse(timeoutMs _: UInt64 = 5000) -> Data? {
+        nil
+    }
+
+    func stopProximityVerification() {}
 
     /// Start an exchange from a deep link payload.
     /// Called after the user grants consent in the deep link consent gate (SP-9).

@@ -31,21 +31,14 @@ struct FaceToFaceExchangeView: View {
     @State private var timer: Timer?
     @State private var flowState: FaceToFaceFlowState = .scanning
     @State private var useFrontCamera = true
-    @State private var proximityConfirmed = false
-    @State private var emitTask: Task<Void, Never>?
     @State private var cameraGranted = false
-    @State private var micGranted = false
     @State private var permissionsChecked = false
     @StateObject private var qrScanner = HeadlessQrScanner()
-
-    private var allPermissionsGranted: Bool {
-        cameraGranted && micGranted
-    }
 
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                if !allPermissionsGranted, permissionsChecked {
+                if !cameraGranted, permissionsChecked {
                     permissionNeededContent
                 } else {
                     switch flowState {
@@ -71,8 +64,7 @@ struct FaceToFaceExchangeView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Back") {
-                        stopEmitting()
-                        viewModel.stopProximityVerification()
+                        viewModel.clearActiveSession()
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -89,14 +81,12 @@ struct FaceToFaceExchangeView: View {
             .onDisappear {
                 qrScanner.stop()
                 stopTimer()
-                stopEmitting()
-                viewModel.stopProximityVerification()
             }
-            .onChange(of: allPermissionsGranted) { _ in
+            .onChange(of: cameraGranted) { _ in
                 startScannerIfReady()
             }
             .onChange(of: useFrontCamera) { front in
-                if allPermissionsGranted {
+                if cameraGranted {
                     qrScanner.switchCamera(toFront: front)
                 }
             }
@@ -156,18 +146,6 @@ struct FaceToFaceExchangeView: View {
                     .disabled(timeRemaining > 240)
                 }
 
-                // Proximity indicator
-                if viewModel.proximitySupported {
-                    HStack(spacing: 4) {
-                        Image(systemName: "waveform.circle")
-                            .font(.caption2)
-                            .foregroundColor(proximityConfirmed ? .green : .blue)
-                        Text(proximityConfirmed ? "Proximity verified" : "Ultrasonic active")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
                 Text("Point camera at other phone's QR")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -218,12 +196,6 @@ struct FaceToFaceExchangeView: View {
             Text("Contact exchanged!")
                 .font(.title2)
                 .fontWeight(.semibold)
-
-            if proximityConfirmed {
-                Text("Proximity verified via ultrasonic")
-                    .font(.caption)
-                    .foregroundColor(.green)
-            }
 
             Text("Successfully added \(contactName)")
                 .font(.body)
@@ -289,18 +261,18 @@ struct FaceToFaceExchangeView: View {
                 .font(.system(size: 48))
                 .foregroundColor(.secondary)
 
-            Text("Camera & Microphone Required")
+            Text("Camera Required")
                 .font(.title3)
                 .fontWeight(.semibold)
 
-            Text("Camera scans QR codes for contact exchange.\nMicrophone verifies proximity via ultrasonic.")
+            Text("Camera is needed to scan QR codes for contact exchange.")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
 
             Button(action: requestPermissions) {
-                Text("Grant Permissions")
+                Text("Grant Permission")
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.accentColor)
@@ -317,53 +289,29 @@ struct FaceToFaceExchangeView: View {
     // MARK: - Permissions
 
     private func requestPermissions() {
-        let group = DispatchGroup()
-
-        // Camera
-        group.enter()
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             cameraGranted = true
-            group.leave()
+            permissionsChecked = true
+            loadExchangeData()
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
-                DispatchQueue.main.async { cameraGranted = granted }
-                group.leave()
+                DispatchQueue.main.async {
+                    cameraGranted = granted
+                    permissionsChecked = true
+                    if granted { loadExchangeData() }
+                }
             }
         default:
             cameraGranted = false
-            group.leave()
-        }
-
-        // Microphone
-        group.enter()
-        switch AVCaptureDevice.authorizationStatus(for: .audio) {
-        case .authorized:
-            micGranted = true
-            group.leave()
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .audio) { granted in
-                DispatchQueue.main.async { micGranted = granted }
-                group.leave()
-            }
-        default:
-            micGranted = false
-            group.leave()
-        }
-
-        group.notify(queue: .main) {
             permissionsChecked = true
-            if allPermissionsGranted {
-                loadExchangeData()
-                startEmitting()
-            }
         }
     }
 
     // MARK: - Actions
 
     private func startScannerIfReady() {
-        guard allPermissionsGranted else { return }
+        guard cameraGranted else { return }
         qrScanner.start(useFrontCamera: useFrontCamera) { code in
             handleScannedCode(code)
         }
@@ -383,26 +331,11 @@ struct FaceToFaceExchangeView: View {
             flowState = .failed(error: "Invalid QR: \(error.localizedDescription)")
             return
         }
-        NSLog("[Exchange] Peer recognized, starting coordination...")
+        NSLog("[Exchange] Peer recognized, completing exchange...")
         flowState = .scanned(peerName: peerName)
 
-        // Step 2: Ultrasonic coordination — QR stays visible during Scanned state
-        // so the peer can still scan ours. Emit their challenge, listen for ours.
+        // Step 2: Complete exchange — mutual QR scan proves proximity
         Task {
-            if viewModel.proximitySupported,
-               ExchangeDataInfo.extractAudioChallenge(from: code) != nil {
-                let confirmed = await viewModel.ultrasonicCoordinate(scannedQrData: code)
-                if confirmed {
-                    NSLog("[Exchange] Ultrasonic confirmed, completing exchange...")
-                    proximityConfirmed = true
-                } else {
-                    NSLog("[Exchange] Ultrasonic timed out — completing with QR-only proximity (mutual scan proves proximity)")
-                }
-            } else {
-                NSLog("[Exchange] No ultrasonic support, completing without proximity check")
-            }
-
-            // Step 3: Complete exchange
             flowState = .completing
             do {
                 let result = try await viewModel.completeExchangeAfterCoordination()
@@ -422,9 +355,7 @@ struct FaceToFaceExchangeView: View {
     private func resetToScanning() {
         viewModel.clearActiveSession()
         flowState = .scanning
-        proximityConfirmed = false
         loadExchangeData()
-        startEmitting()
     }
 
     private func loadExchangeData() {
@@ -445,32 +376,6 @@ struct FaceToFaceExchangeView: View {
         }
 
         isLoading = false
-    }
-
-    // MARK: - Ultrasonic Emit Loop
-
-    private func startEmitting() {
-        guard viewModel.proximitySupported, let challenge = exchangeData?.audioChallenge else { return }
-        emitTask?.cancel()
-        emitTask = Task {
-            while !Task.isCancelled {
-                // Run blocking emit on background thread
-                let vm = viewModel
-                await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-                    DispatchQueue.global(qos: .userInitiated).async {
-                        _ = vm.emitProximityChallenge(challenge)
-                        continuation.resume()
-                    }
-                }
-                try? await Task.sleep(nanoseconds: 1_500_000_000)
-            }
-        }
-    }
-
-    private func stopEmitting() {
-        emitTask?.cancel()
-        emitTask = nil
-        viewModel.stopProximityVerification()
     }
 
     // MARK: - Timer
