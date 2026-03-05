@@ -438,11 +438,13 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
               let code = metadataObject.stringValue
         else { return }
 
-        // Debounce
+        // Short debounce: multi-stage protocol needs repeated scans of the
+        // same QR to advance through stages. 100ms prevents duplicate processing
+        // of the same camera frame while allowing rapid re-scanning.
         if let lastCode = lastScannedCode,
            let lastTime = lastScanTime,
            lastCode == code,
-           Date().timeIntervalSince(lastTime) < 3.0 {
+           Date().timeIntervalSince(lastTime) < 0.1 {
             return
         }
 
