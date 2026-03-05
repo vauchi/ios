@@ -14,8 +14,6 @@ import SwiftUI
 enum FaceToFaceFlowState: Equatable {
     case scanning
     case scanned(peerName: String)
-    case coordinating
-    case manualFallback
     case completing
     case success(contactName: String)
     case failed(error: String)
@@ -38,6 +36,7 @@ struct FaceToFaceExchangeView: View {
     @State private var cameraGranted = false
     @State private var micGranted = false
     @State private var permissionsChecked = false
+    @StateObject private var qrScanner = HeadlessQrScanner()
 
     private var allPermissionsGranted: Bool {
         cameraGranted && micGranted
@@ -54,16 +53,10 @@ struct FaceToFaceExchangeView: View {
                         scanningContent
 
                     case let .scanned(peerName):
-                        scannedContent(peerName: peerName)
-
-                    case .coordinating:
-                        coordinatingContent
-
-                    case .manualFallback:
-                        manualFallbackContent
+                        qrWithStatusContent(status: "Found \(peerName)!")
 
                     case .completing:
-                        completingContent
+                        qrWithStatusContent(status: "Exchanging contacts...")
 
                     case let .success(contactName):
                         successContent(contactName: contactName)
@@ -91,11 +84,21 @@ struct FaceToFaceExchangeView: View {
             }
             .onAppear {
                 requestPermissions()
+                startScannerIfReady()
             }
             .onDisappear {
+                qrScanner.stop()
                 stopTimer()
                 stopEmitting()
                 viewModel.stopProximityVerification()
+            }
+            .onChange(of: allPermissionsGranted) { _ in
+                startScannerIfReady()
+            }
+            .onChange(of: useFrontCamera) { front in
+                if allPermissionsGranted {
+                    qrScanner.switchCamera(toFront: front)
+                }
             }
         }
     }
@@ -120,29 +123,18 @@ struct FaceToFaceExchangeView: View {
                         .font(.caption)
                 }
             } else if let image = qrImage {
-                // QR code with camera square in the center
-                ZStack {
-                    Image(uiImage: image)
-                        .interpolation(.none)
-                        .resizable()
-                        .scaledToFit()
-                        .padding(2)
-                        .background(Color.white)
-                        .cornerRadius(8)
-                        .accessibilityLabel("Your contact exchange QR code")
+                // QR code — full width for easy scanning by peer
+                Image(uiImage: image)
+                    .interpolation(.none)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(2)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .padding(.horizontal, 2)
+                    .accessibilityLabel("Your contact exchange QR code")
 
-                    // Hidden camera scanner (no visible preview, just QR analysis)
-                    FaceToFaceCameraPreview(
-                        useFrontCamera: useFrontCamera,
-                        onQrScanned: { code in
-                            handleScannedCode(code)
-                        }
-                    )
-                    .frame(width: 50, height: 50)
-                    .opacity(0)
-                    .allowsHitTesting(false)
-                }
-                .padding(.horizontal, 2)
+                // Camera scanner runs headless (no UIView) — just QR metadata detection
 
                 HStack(spacing: 12) {
                     // Timer
@@ -187,116 +179,30 @@ struct FaceToFaceExchangeView: View {
         .background(Color(.systemGray6))
     }
 
-    // MARK: - Scanned State
+    // MARK: - QR With Status (intermediate states — QR stays visible for peer)
 
-    private func scannedContent(peerName: String) -> some View {
-        VStack(spacing: 16) {
-            Spacer()
-            ProgressView()
-                .scaleEffect(1.5)
-            Text("Found \(peerName)!")
-                .font(.title2)
-                .fontWeight(.semibold)
-            Text("Verifying proximity...")
-                .font(.body)
-                .foregroundColor(.secondary)
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    // MARK: - Coordinating State
-
-    private var coordinatingContent: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            ProgressView()
-                .scaleEffect(1.5)
-            Text("Verifying...")
-                .font(.title2)
-                .fontWeight(.semibold)
-            Text("Confirming the other device scanned your QR")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    // MARK: - Manual Fallback State
-
-    private var manualFallbackContent: some View {
-        VStack(spacing: 16) {
-            Spacer()
-
-            Text("Confirm face-to-face")
-                .font(.title2)
-                .fontWeight(.semibold)
-
-            Text("Ultrasonic verification timed out. Confirm you are physically next to the other person.")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Button(action: {
-                Task {
-                    flowState = .completing
-                    do {
-                        let result = try await viewModel.confirmManualAndComplete()
-                        if result.success {
-                            flowState = .success(contactName: result.contactName)
-                        } else {
-                            flowState = .failed(error: result.errorMessage ?? "Exchange failed")
-                        }
-                    } catch {
-                        flowState = .failed(error: error.localizedDescription)
-                    }
-                }
-            }) {
-                Text("Confirm & Exchange")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+    private func qrWithStatusContent(status: String) -> some View {
+        VStack(spacing: 4) {
+            // Status at top, compact
+            HStack(spacing: 6) {
+                ProgressView()
+                Text(status)
+                    .font(.callout)
+                    .fontWeight(.medium)
             }
-            .padding(.horizontal)
+            .padding(.top, 8)
 
-            Button(action: {
-                viewModel.clearActiveSession()
-                resetToScanning()
-            }) {
-                Text(localizationService.t("action.cancel"))
-                    .frame(maxWidth: .infinity)
-                    .padding()
+            // QR stays FULL WIDTH so peer can still scan
+            if let image = qrImage {
+                Image(uiImage: image)
+                    .interpolation(.none)
+                    .resizable()
+                    .scaledToFit()
+                    .background(Color.white)
             }
-            .padding(.horizontal)
-
-            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    // MARK: - Completing State
-
-    private var completingContent: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            ProgressView()
-                .scaleEffect(1.5)
-            Text("Completing exchange...")
-                .font(.body)
-                .foregroundColor(.secondary)
-            if proximityConfirmed {
-                Text("Proximity verified")
-                    .font(.caption)
-                    .foregroundColor(.green)
-            }
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGray6))
     }
 
     // MARK: - Success State
@@ -456,48 +362,58 @@ struct FaceToFaceExchangeView: View {
 
     // MARK: - Actions
 
+    private func startScannerIfReady() {
+        guard allPermissionsGranted else { return }
+        qrScanner.start(useFrontCamera: useFrontCamera) { code in
+            handleScannedCode(code)
+        }
+    }
+
     private func handleScannedCode(_ code: String) {
         guard code.hasPrefix("wb://"), flowState == .scanning else { return }
 
-        stopEmitting()
+        NSLog("[Exchange] Scanned QR, processing on held session...")
 
         // Step 1: Process the scanned QR on the held session
         let peerName: String
         do {
             peerName = try viewModel.processScannedQr(qrData: code)
         } catch {
+            NSLog("[Exchange] processQr failed: \(error.localizedDescription)")
             flowState = .failed(error: "Invalid QR: \(error.localizedDescription)")
             return
         }
+        NSLog("[Exchange] Peer recognized, starting coordination...")
         flowState = .scanned(peerName: peerName)
 
-        // Step 2: Ultrasonic coordination or manual fallback
+        // Step 2: Ultrasonic coordination — QR stays visible during Scanned state
+        // so the peer can still scan ours. Emit their challenge, listen for ours.
         Task {
             if viewModel.proximitySupported,
                ExchangeDataInfo.extractAudioChallenge(from: code) != nil {
-                flowState = .coordinating
                 let confirmed = await viewModel.ultrasonicCoordinate(scannedQrData: code)
-                if !confirmed {
-                    flowState = .manualFallback
-                    return
+                if confirmed {
+                    NSLog("[Exchange] Ultrasonic confirmed, completing exchange...")
+                    proximityConfirmed = true
+                } else {
+                    NSLog("[Exchange] Ultrasonic timed out — completing with QR-only proximity (mutual scan proves proximity)")
                 }
-                proximityConfirmed = true
             } else {
-                // No ultrasonic support — go straight to manual fallback
-                flowState = .manualFallback
-                return
+                NSLog("[Exchange] No ultrasonic support, completing without proximity check")
             }
 
-            // Step 3: Ultrasonic confirmed — complete exchange
+            // Step 3: Complete exchange
             flowState = .completing
             do {
                 let result = try await viewModel.completeExchangeAfterCoordination()
+                NSLog("[Exchange] Exchange completed: success=\(result.success)")
                 if result.success {
                     flowState = .success(contactName: result.contactName)
                 } else {
                     flowState = .failed(error: result.errorMessage ?? "Exchange failed")
                 }
             } catch {
+                NSLog("[Exchange] Exchange FAILED: \(error.localizedDescription)")
                 flowState = .failed(error: error.localizedDescription)
             }
         }
@@ -584,7 +500,7 @@ struct FaceToFaceExchangeView: View {
         let context = CIContext()
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(string.utf8)
-        filter.correctionLevel = "M"
+        filter.correctionLevel = "L"
 
         guard let outputImage = filter.outputImage else { return nil }
         let transform = CGAffineTransform(scaleX: 10, y: 10)
@@ -597,133 +513,50 @@ struct FaceToFaceExchangeView: View {
     }
 }
 
-// MARK: - Camera Preview (supports front/rear switching)
+// MARK: - Headless QR Scanner (no UIView — prevents camera preview leak)
 
-struct FaceToFaceCameraPreview: UIViewRepresentable {
-    let useFrontCamera: Bool
-    let onQrScanned: (String) -> Void
-
-    func makeUIView(context: Context) -> FaceToFaceCameraView {
-        let view = FaceToFaceCameraView()
-        view.delegate = context.coordinator
-        return view
-    }
-
-    func updateUIView(_ uiView: FaceToFaceCameraView, context _: Context) {
-        uiView.switchCamera(toFront: useFrontCamera)
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onQrScanned: onQrScanned)
-    }
-
-    class Coordinator: NSObject, AVCaptureMetadataOutputObjectsDelegate {
-        let onQrScanned: (String) -> Void
-        private var lastScannedCode: String?
-        private var lastScanTime: Date?
-
-        init(onQrScanned: @escaping (String) -> Void) {
-            self.onQrScanned = onQrScanned
-        }
-
-        func metadataOutput(_: AVCaptureMetadataOutput,
-                            didOutput metadataObjects: [AVMetadataObject],
-                            from _: AVCaptureConnection) {
-            guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
-                  let code = metadataObject.stringValue
-            else { return }
-
-            // Debounce
-            if let lastCode = lastScannedCode,
-               let lastTime = lastScanTime,
-               lastCode == code,
-               Date().timeIntervalSince(lastTime) < 3.0 {
-                return
-            }
-
-            lastScannedCode = code
-            lastScanTime = Date()
-
-            DispatchQueue.main.async {
-                self.onQrScanned(code)
-            }
-        }
-    }
-}
-
-class FaceToFaceCameraView: UIView {
-    weak var delegate: AVCaptureMetadataOutputObjectsDelegate?
-
+/// Runs AVCaptureSession + AVCaptureMetadataOutput without any view hierarchy.
+/// This avoids the GPU-backed camera layer that punches through SwiftUI opacity.
+class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObjectsDelegate {
     private var captureSession: AVCaptureSession?
-    private var previewLayer: AVCaptureVideoPreviewLayer?
     private var currentPosition: AVCaptureDevice.Position = .unspecified
-    private var metadataOutput: AVCaptureMetadataOutput?
-    private var desiredPosition: AVCaptureDevice.Position = .front
-    private var isSettingUp = false
+    private var onQrScanned: ((String) -> Void)?
+    private var lastScannedCode: String?
+    private var lastScanTime: Date?
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        previewLayer?.frame = bounds
+    func start(useFrontCamera: Bool, onQrScanned: @escaping (String) -> Void) {
+        self.onQrScanned = onQrScanned
+        let position: AVCaptureDevice.Position = useFrontCamera ? .front : .back
+        initializeCamera(position: position)
+    }
 
-        // Start camera once we have non-zero bounds
-        if captureSession == nil, !isSettingUp, bounds.width > 0, bounds.height > 0 {
-            setupCamera(position: desiredPosition)
-        }
+    func stop() {
+        captureSession?.stopRunning()
+        captureSession = nil
+        currentPosition = .unspecified
     }
 
     func switchCamera(toFront: Bool) {
         let newPosition: AVCaptureDevice.Position = toFront ? .front : .back
-        desiredPosition = newPosition
         guard newPosition != currentPosition else { return }
-        if captureSession != nil {
-            setupCamera(position: newPosition)
-        }
-        // If captureSession is nil, layoutSubviews will pick up desiredPosition
-    }
-
-    private func setupCamera(position: AVCaptureDevice.Position) {
-        isSettingUp = true
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            initializeCamera(position: position)
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-                if granted {
-                    DispatchQueue.main.async {
-                        self?.initializeCamera(position: position)
-                    }
-                } else {
-                    DispatchQueue.main.async { self?.isSettingUp = false }
-                }
-            }
-        default:
-            isSettingUp = false
-            showPermissionDenied()
-        }
+        initializeCamera(position: newPosition)
     }
 
     private func initializeCamera(position: AVCaptureDevice.Position) {
-        // Stop existing session
         captureSession?.stopRunning()
-        previewLayer?.removeFromSuperlayer()
 
         let session = AVCaptureSession()
-        session.sessionPreset = .hd1920x1080
+        session.sessionPreset = .hd1280x720
 
-        // Try requested position first, fall back to other if unavailable
         var device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
         var actualPosition = position
         if device == nil {
             let fallback: AVCaptureDevice.Position = position == .front ? .back : .front
             device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: fallback)
             actualPosition = fallback
-            print("FaceToFace: \(position) camera unavailable, falling back to \(fallback)")
         }
 
-        guard let cam = device, let input = try? AVCaptureDeviceInput(device: cam) else {
-            isSettingUp = false
-            return
-        }
+        guard let cam = device, let input = try? AVCaptureDeviceInput(device: cam) else { return }
 
         if session.canAddInput(input) {
             session.addInput(input)
@@ -732,44 +565,38 @@ class FaceToFaceCameraView: UIView {
         let output = AVCaptureMetadataOutput()
         if session.canAddOutput(output) {
             session.addOutput(output)
-            output.setMetadataObjectsDelegate(delegate, queue: DispatchQueue.main)
+            output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
             if output.availableMetadataObjectTypes.contains(.qr) {
                 output.metadataObjectTypes = [.qr]
             }
         }
-        metadataOutput = output
-
-        let preview = AVCaptureVideoPreviewLayer(session: session)
-        preview.videoGravity = .resizeAspectFill
-        preview.frame = bounds
-        layer.addSublayer(preview)
 
         captureSession = session
-        previewLayer = preview
         currentPosition = actualPosition
-        isSettingUp = false
 
         DispatchQueue.global(qos: .userInitiated).async {
             session.startRunning()
         }
     }
 
-    private func showPermissionDenied() {
-        let label = UILabel()
-        label.text = "Camera access required.\nPlease enable in Settings."
-        label.textColor = .white
-        label.textAlignment = .center
-        label.numberOfLines = 0
-        label.translatesAutoresizingMaskIntoConstraints = false
+    func metadataOutput(_: AVCaptureMetadataOutput,
+                        didOutput metadataObjects: [AVMetadataObject],
+                        from _: AVCaptureConnection) {
+        guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
+              let code = metadataObject.stringValue
+        else { return }
 
-        addSubview(label)
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: centerYAnchor),
-            label.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 20),
-            label.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
-        ])
-        backgroundColor = .black
+        // Debounce
+        if let lastCode = lastScannedCode,
+           let lastTime = lastScanTime,
+           lastCode == code,
+           Date().timeIntervalSince(lastTime) < 3.0 {
+            return
+        }
+
+        lastScannedCode = code
+        lastScanTime = Date()
+        onQrScanned?(code)
     }
 
     deinit {

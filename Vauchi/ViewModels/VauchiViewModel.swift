@@ -1055,56 +1055,106 @@ class VauchiViewModel: ObservableObject {
             audioChallenge: ExchangeDataInfo.extractAudioChallenge(from: sessionData.exchangeData.qrData)
         )
         activeExchangeData = info
+        NSLog("[Exchange] Session created, QR generated (challenge=\(info.audioChallenge?.count ?? 0) bytes)")
         return info
     }
 
     /// Process a scanned QR on the held session and return the peer display name.
     func processScannedQr(qrData: String) throws -> String {
         guard let session = activeExchangeSession else {
+            NSLog("[Exchange] processScannedQr: no active session")
             throw VauchiRepositoryError.exchangeFailed("No active exchange session")
         }
+        NSLog("[Exchange] processScannedQr: processing on held session...")
         try session.processQr(qrData: qrData)
-        return session.peerDisplayName() ?? "Unknown"
+        let name = session.peerDisplayName() ?? "Unknown"
+        NSLog("[Exchange] processScannedQr: peer recognized")
+        return name
     }
 
     /// Ultrasonic coordination loop: emit their challenge, listen for ours.
     /// Returns true if we heard our challenge (meaning the peer scanned our QR).
-    func ultrasonicCoordinate(scannedQrData: String, timeoutSeconds: Int = 12) async -> Bool {
+    /// After confirmation, keeps emitting for postConfirmSeconds so the peer also
+    /// hears their challenge — ensures BOTH devices confirm mutual scanning.
+    func ultrasonicCoordinate(scannedQrData: String, timeoutSeconds: Int = 15, postConfirmSeconds: Int = 5) async -> Bool {
         guard let ourData = activeExchangeData,
               let ourChallenge = ourData.audioChallenge,
               let theirChallenge = ExchangeDataInfo.extractAudioChallenge(from: scannedQrData) else {
             return false
         }
 
-        let deadline = Date().addingTimeInterval(TimeInterval(timeoutSeconds))
-        while Date() < deadline {
-            // Emit their challenge so they can confirm we scanned theirs
-            _ = emitProximityChallenge(theirChallenge)
-            try? await Task.sleep(nanoseconds: 250_000_000) // 250ms
-            stopProximityVerification()
+        // Stagger timing: compare first challenge byte to determine role.
+        // One device emits first, the other listens first — avoids synchronized collision.
+        let emitFirst = (theirChallenge[theirChallenge.startIndex] >= ourChallenge[ourChallenge.startIndex])
+        NSLog("[Exchange] Ultrasonic: role=\(emitFirst ? "emit-first" : "listen-first")")
 
-            // Listen for our challenge — means they scanned our QR
-            let response = listenForProximityResponse(timeoutMs: 2000)
-            if let response, response == ourChallenge {
-                stopProximityVerification()
+        let deadline = Date().addingTimeInterval(TimeInterval(timeoutSeconds))
+        var confirmedAt: Date?
+        var cycle = 0
+        while Date() < deadline {
+            if let confirmed = confirmedAt,
+               Date().timeIntervalSince(confirmed) > TimeInterval(postConfirmSeconds) {
+                NSLog("[Exchange] Ultrasonic: post-confirm emit done after \(cycle) cycles")
                 return true
             }
-            stopProximityVerification()
+
+            cycle += 1
+
+            if emitFirst {
+                // Emit then listen
+                _ = emitProximityChallenge(theirChallenge)
+                try? await Task.sleep(nanoseconds: 250_000_000)
+                stopProximityVerification()
+                let response = listenForProximityResponse(timeoutMs: 2000)
+                if let response, response == ourChallenge {
+                    if confirmedAt == nil {
+                        confirmedAt = Date()
+                        NSLog("[Exchange] Ultrasonic: heard our challenge on cycle \(cycle)!")
+                    }
+                }
+                stopProximityVerification()
+            } else {
+                // Listen then emit (staggered)
+                let response = listenForProximityResponse(timeoutMs: 2000)
+                if let response, response == ourChallenge {
+                    if confirmedAt == nil {
+                        confirmedAt = Date()
+                        NSLog("[Exchange] Ultrasonic: heard our challenge on cycle \(cycle)!")
+                    }
+                }
+                stopProximityVerification()
+                _ = emitProximityChallenge(theirChallenge)
+                try? await Task.sleep(nanoseconds: 250_000_000)
+                stopProximityVerification()
+            }
         }
+        if confirmedAt != nil {
+            NSLog("[Exchange] Ultrasonic: confirmed (hit overall deadline during post-confirm)")
+            return true
+        }
+        NSLog("[Exchange] Ultrasonic: timed out after \(cycle) cycles without confirmation")
         return false
     }
 
-    /// Complete the exchange using the held session after coordination succeeds.
+    /// Complete the exchange using the held session.
     func completeExchangeAfterCoordination() async throws -> ExchangeResultInfo {
         guard let session = activeExchangeSession, let repository else {
+            NSLog("[Exchange] completeExchange: no active session")
             throw VauchiRepositoryError.exchangeFailed("No active exchange session")
         }
         let peerName = session.peerDisplayName() ?? "Unknown"
+        NSLog("[Exchange] completeExchange: starting state machine steps...")
+        NSLog("[Exchange]   confirmProximity...")
         try session.confirmProximity()
+        NSLog("[Exchange]   theyScannedOurQr...")
         try session.theyScannedOurQr()
+        NSLog("[Exchange]   performKeyAgreement...")
         try session.performKeyAgreement()
+        NSLog("[Exchange]   completeCardExchange...")
         try session.completeCardExchange(theirCardName: peerName)
+        NSLog("[Exchange]   finalizeExchange...")
         let result = try repository.finalizeExchange(session: session)
+        NSLog("[Exchange] Exchange completed: success=\(result.success)")
         clearActiveSession()
         await loadContacts()
         if result.success {
@@ -1116,11 +1166,6 @@ class VauchiViewModel: ObservableObject {
             success: result.success,
             errorMessage: result.errorMessage
         )
-    }
-
-    /// Manual fallback — same completion path, skips ultrasonic.
-    func confirmManualAndComplete() async throws -> ExchangeResultInfo {
-        try await completeExchangeAfterCoordination()
     }
 
     func clearActiveSession() {
