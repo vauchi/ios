@@ -41,7 +41,7 @@ class AudioProximityService: PlatformAudioHandler {
     private func setupAudioSession() {
         let session = AVAudioSession.sharedInstance()
         do {
-            try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+            try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
             try session.setPreferredSampleRate(targetSampleRate)
             try session.setActive(true)
         } catch {
