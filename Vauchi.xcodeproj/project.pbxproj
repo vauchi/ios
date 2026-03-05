@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA1111111111111111111006 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111003 /* DiagnosticLogger.swift */; };
+		AA1111111111111111111005 /* FftAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111002 /* FftAnalyzer.swift */; };
+		AA1111111111111111111004 /* SineWaveGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111001 /* SineWaveGenerator.swift */; };
 		0098BE4EAD470F85DBCBE2E7 /* LanguageSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5846280A9FFC79FBBBCF600D /* LanguageSettingsView.swift */; };
 		02DD49946382C26E78CE06C9 /* ContactActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180FA5B6237A3C3CE4ACB83B /* ContactActions.swift */; };
 		04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44506B768565C7F52A328D17 /* BackgroundSyncService.swift */; };
@@ -136,6 +139,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA1111111111111111111003 /* DiagnosticLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
+		AA1111111111111111111002 /* FftAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FftAnalyzer.swift; sourceTree = "<group>"; };
+		AA1111111111111111111001 /* SineWaveGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SineWaveGenerator.swift; sourceTree = "<group>"; };
 		023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewEmpty.1.png; sourceTree = "<group>"; };
 		05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProximityServiceTests.swift; sourceTree = "<group>"; };
 		08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitingForUnlockView.swift; sourceTree = "<group>"; };
@@ -264,6 +270,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AA1111111111111111111007 /* Diagnostic */ = {
+			isa = PBXGroup;
+			children = (
+				AA1111111111111111111003 /* DiagnosticLogger.swift */,
+				AA1111111111111111111002 /* FftAnalyzer.swift */,
+				AA1111111111111111111001 /* SineWaveGenerator.swift */,
+			);
+			path = Diagnostic;
+			sourceTree = "<group>";
+		};
 		01344AB2D3CDD59B4D0E3149 = {
 			isa = PBXGroup;
 			children = (
@@ -428,6 +444,7 @@
 				3741052F03E3274B5C209EF6 /* Info.plist */,
 				B1075C1A497CE28C82672E93 /* Vauchi.entitlements */,
 				71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */,
+				AA1111111111111111111007 /* Diagnostic */,
 				F9FC793A89B3CAD3083ACA25 /* Services */,
 				DE4003224F0F48BD0A224CE5 /* ViewModels */,
 				CC27001BE792CD487814D16E /* Views */,
@@ -688,6 +705,9 @@
 				D07F5E38E2DDD0A47633E879 /* AddFieldsStepView.swift in Sources */,
 				80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
+				AA1111111111111111111006 /* DiagnosticLogger.swift in Sources */,
+				AA1111111111111111111005 /* FftAnalyzer.swift in Sources */,
+				AA1111111111111111111004 /* SineWaveGenerator.swift in Sources */,
 				04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */,
 				08512AFB915670B874B58220 /* ConsentSettingsView.swift in Sources */,
 				02DD49946382C26E78CE06C9 /* ContactActions.swift in Sources */,
