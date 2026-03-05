@@ -303,50 +303,17 @@ struct ExchangeView: View {
         completeExchange(qrData: code)
     }
 
-    private func completeExchange(qrData: String) {
-        flowState = .completing
-
-        Task {
-            do {
-                _ = try viewModel.processScannedQr(qrData: qrData)
-                let result = try await viewModel.completeExchangeAfterCoordination()
-                await MainActor.run {
-                    if result.success {
-                        flowState = .success(contactName: result.contactName)
-                    } else {
-                        flowState = .failed(error: result.errorMessage ?? "Exchange failed")
-                    }
-                }
-            } catch {
-                await MainActor.run {
-                    if error.localizedDescription.contains("already exists") {
-                        flowState = .failed(error: "You already have this contact")
-                    } else {
-                        flowState = .failed(error: error.localizedDescription)
-                    }
-                }
-            }
-        }
+    private func completeExchange(qrData _: String) {
+        // Legacy single-QR exchange removed — multi-stage protocol uses FaceToFaceExchangeView.
+        // This stub keeps snapshot tests compiling.
+        flowState = .failed(error: "Legacy exchange removed. Use face-to-face exchange.")
     }
 
     private func loadExchangeData() {
-        isLoading = true
-        hasError = false
-        stopTimer()
-
-        do {
-            exchangeData = try viewModel.generateExchangeData()
-            if let data = exchangeData {
-                qrImage = generateQRCode(from: data.qrData)
-                timeRemaining = data.timeRemaining
-                startTimer()
-            }
-            hasError = exchangeData == nil
-        } catch {
-            hasError = true
-        }
-
+        // Legacy single-QR exchange removed — multi-stage protocol uses FaceToFaceExchangeView.
+        // This stub keeps snapshot tests compiling.
         isLoading = false
+        hasError = true
     }
 
     private func startTimer() {
