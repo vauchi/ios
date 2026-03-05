@@ -32,6 +32,11 @@ struct FaceToFaceExchangeView: View {
     @State private var debugScanCount = 0
     @State private var debugLastScan: String = "—"
     @State private var debugLastState: String = "—"
+    @State private var debugInitCount = 0
+    @State private var debugDataCount = 0
+    @State private var debugVrfyCount = 0
+    @State private var debugConfCount = 0
+    @State private var debugOtherCount = 0
     @StateObject private var qrScanner = HeadlessQrScanner()
 
     var body: some View {
@@ -148,7 +153,7 @@ struct FaceToFaceExchangeView: View {
 
             // Debug overlay
             VStack(alignment: .leading, spacing: 2) {
-                Text("cam=\(cameraGranted ? "Y" : "N") front=\(useFrontCamera ? "Y" : "N") scans=\(debugScanCount)")
+                Text("scans=\(debugScanCount) I:\(debugInitCount) D:\(debugDataCount) V:\(debugVrfyCount) C:\(debugConfCount)")
                     .font(.system(.caption2, design: .monospaced))
                 Text("last: \(debugLastScan)")
                     .font(.system(.caption2, design: .monospaced))
@@ -236,7 +241,12 @@ struct FaceToFaceExchangeView: View {
     private func startQrCycleTimer() {
         qrCycleTimer?.invalidate()
         qrCycleTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
-            guard let payload = viewModel.getMultiStageDisplayQr() else { return }
+            guard let payload = viewModel.getMultiStageDisplayQr() else {
+                // Core returned nil — grace period expired or not started.
+                // Stop QR cycling but keep state poll alive for UI updates.
+                stopQrCycleTimer()
+                return
+            }
             multiStageQrImage = generateQRCode(from: payload.data, correctionLevel: payload.errorCorrection)
         }
     }
@@ -247,9 +257,10 @@ struct FaceToFaceExchangeView: View {
             let newState = viewModel.getMultiStageState()
             protocolState = newState
 
-            // Stop timers on terminal states
+            // Only stop on Failed — Complete still needs the QR cycle timer
+            // running so core can display grace-period QR codes for the slower peer.
             switch newState {
-            case .complete, .failed:
+            case .failed:
                 stopQrCycleTimer()
                 stopStatePollTimer()
             default:
@@ -297,6 +308,15 @@ struct FaceToFaceExchangeView: View {
         // Pass raw QR string to core — do NOT parse content in Swift
         debugScanCount += 1
         debugLastScan = String(code.prefix(30))
+        // Count per QR type
+        let prefix = String(code.prefix(4))
+        switch prefix {
+        case "INIT": debugInitCount += 1
+        case "DATA": debugDataCount += 1
+        case "VRFY": debugVrfyCount += 1
+        case "CONF": debugConfCount += 1
+        default: debugOtherCount += 1
+        }
         let newState = viewModel.processMultiStageQr(raw: code)
         debugLastState = String(describing: newState)
         protocolState = newState
