@@ -975,7 +975,38 @@ class VauchiViewModel: ObservableObject {
         await loadLabels()
     }
 
-    // MARK: - Exchange
+    // MARK: - Multi-Stage Exchange
+
+    /// Multi-stage exchange session — drives the cycling QR protocol
+    private(set) var multiStageSession: MobileMultiStageSession?
+
+    func startMultiStageExchange(localCard: Data) {
+        multiStageSession = MobileMultiStageSession(localCard: localCard)
+    }
+
+    func getMultiStageDisplayQr() -> MobileQrPayload? {
+        multiStageSession?.getDisplayQr()
+    }
+
+    func processMultiStageQr(raw: String) -> MobileProtocolState {
+        guard let session = multiStageSession else { return .failed(reason: "No session") }
+        return session.processScannedQr(raw: raw)
+    }
+
+    func getMultiStageState() -> MobileProtocolState {
+        multiStageSession?.getState() ?? .idle
+    }
+
+    func getMultiStageReceivedData() -> Data? {
+        multiStageSession?.getReceivedData()
+    }
+
+    func cancelMultiStageExchange() {
+        multiStageSession?.cancel()
+        multiStageSession = nil
+    }
+
+    // MARK: - Exchange (Legacy Single-QR)
 
     /// Active exchange session — MUST be reused for the entire exchange lifecycle
     private var activeExchangeSession: MobileExchangeSession?

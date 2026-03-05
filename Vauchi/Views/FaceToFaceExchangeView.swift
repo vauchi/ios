@@ -3,14 +3,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // FaceToFaceExchangeView.swift
-// Split-screen exchange: QR code on top, front camera scanner on bottom.
+// Split-screen exchange: cycling QR codes on top, front camera scanner on bottom.
 // Both users hold phones face-to-face for simultaneous contact exchange.
+// The core Rust library drives the multi-stage protocol — this view is a pure display shell.
 
 import AVFoundation
 import CoreImage.CIFilterBuiltins
 import SwiftUI
+import VauchiMobile
 
-/// Flow state for the bidirectional face-to-face exchange
+/// Flow state for the bidirectional face-to-face exchange (legacy single-QR)
 enum FaceToFaceFlowState: Equatable {
     case scanning
     case scanned(peerName: String)
@@ -23,6 +25,17 @@ struct FaceToFaceExchangeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
 
+    // MARK: - Multi-stage exchange state
+
+    @State private var multiStageQrImage: UIImage?
+    @State private var multiStageActive = false
+    @State private var protocolState: MobileProtocolState = .idle
+    @State private var qrCycleTimer: Timer?
+    @State private var statePollTimer: Timer?
+    @State private var previousBrightness: CGFloat = 0.5
+
+    // MARK: - Legacy single-QR state (kept for Task 13 removal)
+
     @State private var exchangeData: ExchangeDataInfo?
     @State private var qrImage: UIImage?
     @State private var isLoading = true
@@ -30,6 +43,9 @@ struct FaceToFaceExchangeView: View {
     @State private var timeRemaining: TimeInterval = 0
     @State private var timer: Timer?
     @State private var flowState: FaceToFaceFlowState = .scanning
+
+    // MARK: - Shared state
+
     @State private var useFrontCamera = true
     @State private var cameraGranted = false
     @State private var permissionsChecked = false
@@ -40,7 +56,10 @@ struct FaceToFaceExchangeView: View {
             VStack(spacing: 0) {
                 if !cameraGranted, permissionsChecked {
                     permissionNeededContent
+                } else if multiStageActive {
+                    multiStageContent
                 } else {
+                    // Legacy single-QR flow (kept until Task 13 removes it)
                     switch flowState {
                     case .scanning:
                         scanningContent
@@ -64,7 +83,7 @@ struct FaceToFaceExchangeView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Back") {
-                        viewModel.clearActiveSession()
+                        cancelAndDismiss()
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -75,12 +94,17 @@ struct FaceToFaceExchangeView: View {
                 }
             }
             .onAppear {
+                previousBrightness = UIScreen.main.brightness
+                UIScreen.main.brightness = 1.0
                 requestPermissions()
                 startScannerIfReady()
+                startMultiStageSession()
             }
             .onDisappear {
+                UIScreen.main.brightness = previousBrightness
                 qrScanner.stop()
-                stopTimer()
+                stopAllTimers()
+                viewModel.cancelMultiStageExchange()
             }
             .onChange(of: cameraGranted) { _ in
                 startScannerIfReady()
@@ -93,7 +117,213 @@ struct FaceToFaceExchangeView: View {
         }
     }
 
-    // MARK: - Scanning State (QR with camera overlay in center)
+    // MARK: - Multi-Stage Content
+
+    private var multiStageContent: some View {
+        VStack(spacing: 0) {
+            switch protocolState {
+            case .idle, .advertising:
+                multiStageQrDisplay(statusText: "Waiting for peer...", showProgress: false)
+
+            case .discovered:
+                multiStageQrDisplay(statusText: "Peer found! Exchanging...", showProgress: true)
+
+            case let .transferring(_, _, chunksReceived, peerChunksTotal):
+                multiStageQrDisplay(
+                    statusText: transferProgressText(received: chunksReceived, total: peerChunksTotal),
+                    showProgress: true
+                )
+
+            case .verifying, .confirming:
+                multiStageQrDisplay(statusText: "Verifying exchange...", showProgress: true)
+
+            case .complete:
+                multiStageSuccessContent
+
+            case let .failed(reason):
+                multiStageFailedContent(reason: reason)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemGray6))
+    }
+
+    private func multiStageQrDisplay(statusText: String, showProgress: Bool) -> some View {
+        VStack(spacing: 8) {
+            // Status bar
+            HStack(spacing: 6) {
+                if showProgress {
+                    ProgressView()
+                }
+                Text(statusText)
+                    .font(.callout)
+                    .fontWeight(.medium)
+            }
+            .padding(.top, 8)
+
+            // Cycling QR code — full width for easy scanning by peer
+            if let image = multiStageQrImage {
+                Image(uiImage: image)
+                    .interpolation(.none)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(2)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .padding(.horizontal, 2)
+                    .accessibilityLabel("Exchange QR code")
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, minHeight: 200)
+            }
+
+            Text("Point camera at other phone's QR")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Spacer()
+        }
+    }
+
+    private var multiStageSuccessContent: some View {
+        VStack(spacing: 16) {
+            Spacer()
+
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 64))
+                .foregroundColor(.green)
+
+            Text("Contact exchanged!")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Button(action: { cancelAndDismiss() }) {
+                Text(localizationService.t("action.done"))
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding(.horizontal)
+
+            Spacer()
+        }
+    }
+
+    private func multiStageFailedContent(reason: String) -> some View {
+        VStack(spacing: 16) {
+            Spacer()
+
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 64))
+                .foregroundColor(.red)
+
+            Text("Exchange failed")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.red)
+
+            Text(reason)
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+
+            Button(action: { retryMultiStageExchange() }) {
+                Text(localizationService.t("action.retry"))
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding(.horizontal)
+
+            Spacer()
+        }
+    }
+
+    // MARK: - Multi-Stage Actions
+
+    private func startMultiStageSession() {
+        // TODO: Replace placeholder with actual serialized contact card from identity
+        let localCard = "Vauchi User".data(using: .utf8)!
+        viewModel.startMultiStageExchange(localCard: localCard)
+        multiStageActive = true
+        protocolState = .idle
+        startQrCycleTimer()
+        startStatePollTimer()
+    }
+
+    private func startQrCycleTimer() {
+        qrCycleTimer?.invalidate()
+        qrCycleTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
+            guard let payload = viewModel.getMultiStageDisplayQr() else { return }
+            multiStageQrImage = generateQRCode(from: payload.data, correctionLevel: payload.errorCorrection)
+        }
+    }
+
+    private func startStatePollTimer() {
+        statePollTimer?.invalidate()
+        statePollTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
+            let newState = viewModel.getMultiStageState()
+            protocolState = newState
+
+            // Stop timers on terminal states
+            switch newState {
+            case .complete, .failed:
+                stopQrCycleTimer()
+                stopStatePollTimer()
+            default:
+                break
+            }
+        }
+    }
+
+    private func retryMultiStageExchange() {
+        viewModel.cancelMultiStageExchange()
+        stopAllTimers()
+        multiStageQrImage = nil
+        startMultiStageSession()
+    }
+
+    private func cancelAndDismiss() {
+        viewModel.cancelMultiStageExchange()
+        viewModel.clearActiveSession()
+    }
+
+    private func stopQrCycleTimer() {
+        qrCycleTimer?.invalidate()
+        qrCycleTimer = nil
+    }
+
+    private func stopStatePollTimer() {
+        statePollTimer?.invalidate()
+        statePollTimer = nil
+    }
+
+    private func stopAllTimers() {
+        stopQrCycleTimer()
+        stopStatePollTimer()
+        stopTimer()
+    }
+
+    private func transferProgressText(received: UInt8, total: UInt8) -> String {
+        if total > 0 {
+            return "Receiving \(received)/\(total) chunks..."
+        }
+        return "Transferring data..."
+    }
+
+    // MARK: - Multi-Stage Scanner
+
+    private func handleMultiStageScannedCode(_ code: String) {
+        // Pass raw QR string to core — do NOT parse content in Swift
+        let newState = viewModel.processMultiStageQr(raw: code)
+        protocolState = newState
+    }
+
+    // MARK: - Legacy Scanning State (QR with camera overlay in center)
 
     private var scanningContent: some View {
         VStack(spacing: 12) {
@@ -157,7 +387,7 @@ struct FaceToFaceExchangeView: View {
         .background(Color(.systemGray6))
     }
 
-    // MARK: - QR With Status (intermediate states — QR stays visible for peer)
+    // MARK: - Legacy QR With Status (intermediate states — QR stays visible for peer)
 
     private func qrWithStatusContent(status: String) -> some View {
         VStack(spacing: 4) {
@@ -293,13 +523,13 @@ struct FaceToFaceExchangeView: View {
         case .authorized:
             cameraGranted = true
             permissionsChecked = true
-            loadExchangeData()
+            if !multiStageActive { loadExchangeData() }
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 DispatchQueue.main.async {
                     cameraGranted = granted
                     permissionsChecked = true
-                    if granted { loadExchangeData() }
+                    if granted, !multiStageActive { loadExchangeData() }
                 }
             }
         default:
@@ -313,7 +543,11 @@ struct FaceToFaceExchangeView: View {
     private func startScannerIfReady() {
         guard cameraGranted else { return }
         qrScanner.start(useFrontCamera: useFrontCamera) { code in
-            handleScannedCode(code)
+            if multiStageActive {
+                handleMultiStageScannedCode(code)
+            } else {
+                handleScannedCode(code)
+            }
         }
     }
 
@@ -401,11 +635,13 @@ struct FaceToFaceExchangeView: View {
         return String(format: "%d:%02d", mins, secs)
     }
 
-    private func generateQRCode(from string: String) -> UIImage? {
+    // MARK: - QR Generation
+
+    private func generateQRCode(from string: String, correctionLevel: String = "L") -> UIImage? {
         let context = CIContext()
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(string.utf8)
-        filter.correctionLevel = "L"
+        filter.correctionLevel = correctionLevel
 
         guard let outputImage = filter.outputImage else { return nil }
         let transform = CGAffineTransform(scaleX: 10, y: 10)
