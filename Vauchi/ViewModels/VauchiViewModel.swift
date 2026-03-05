@@ -1410,6 +1410,14 @@ class VauchiViewModel: ObservableObject {
     }
 
     /// Generate QR code data for linking a new device
+    /// Create NFC initiator handshake session for iOS reader.
+    func createNfcInitiator() throws -> MobileNfcHandshake {
+        guard let repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        return try repository.createNfcInitiator()
+    }
+
     func generateDeviceLinkQr() async throws -> VauchiRepository.DeviceLinkData {
         guard let repository else {
             throw VauchiRepositoryError.notInitialized

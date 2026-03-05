@@ -1051,6 +1051,17 @@ class VauchiRepository {
         }
     }
 
+    // MARK: - NFC Exchange
+
+    /// Create an NFC initiator (reader) handshake session.
+    func createNfcInitiator() throws -> MobileNfcHandshake {
+        do {
+            return try vauchi.createNfcInitiator()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     // MARK: - Sync Operations
 
     /// Sync with relay server
