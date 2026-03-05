@@ -139,13 +139,11 @@ struct DiagnosticView: View {
         let bins = FftAnalyzer.analyzeBand(
             samples: recorded, startHz: 16000, endHz: 22000, stepHz: 100, sampleRate: sampleRate
         )
-        var allPass = true
-        for bin in bins {
-            if bin.magnitudeDb >= -30.0 {
-                log("FAIL \(bin.frequencyHz) Hz: \(String(format: "%.1f", bin.magnitudeDb)) dBFS")
-                allPass = false
-            }
+        let noisyBins = bins.filter { $0.magnitudeDb >= -30.0 }
+        for bin in noisyBins {
+            log("FAIL \(bin.frequencyHz) Hz: \(String(format: "%.1f", bin.magnitudeDb)) dBFS")
         }
+        let allPass = noisyBins.isEmpty
         if allPass {
             log("PASS: all bins < -30 dBFS")
         }
