@@ -33,6 +33,14 @@
 	<string>1</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Vauchi uses the camera to scan QR codes for contact exchange.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Vauchi uses the microphone for ultrasonic proximity verification during contact exchange.</string>
+	<key>NFCReaderUsageDescription</key>
+	<string>Vauchi uses NFC to exchange contact cards with nearby devices.</string>
+	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+	<array>
+		<string>F0564155434849</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
