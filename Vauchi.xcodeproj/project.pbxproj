@@ -7,11 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA1111111111111111111009 /* DiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111008 /* DiagnosticView.swift */; };
-		AA1111111111111111111006 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111003 /* DiagnosticLogger.swift */; };
-		AA1111111111111111111005 /* FftAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111002 /* FftAnalyzer.swift */; };
-		AA1111111111111111111004 /* SineWaveGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111001 /* SineWaveGenerator.swift */; };
-		AA1111111111111111111011 /* ExistingCodeDiagnostic.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111010 /* ExistingCodeDiagnostic.swift */; };
 		0098BE4EAD470F85DBCBE2E7 /* LanguageSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5846280A9FFC79FBBBCF600D /* LanguageSettingsView.swift */; };
 		02DD49946382C26E78CE06C9 /* ContactActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180FA5B6237A3C3CE4ACB83B /* ContactActions.swift */; };
 		04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44506B768565C7F52A328D17 /* BackgroundSyncService.swift */; };
@@ -30,6 +25,7 @@
 		1AA3266DB9FF1423DCFE7514 /* testContactsViewEmpty.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */; };
 		1D22C6DA15AF438F73F63C09 /* testExchangeView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = ABE3E2645901C7F1B2FAF813 /* testExchangeView.1.png */; };
 		1ECD2FDE78B2CD9672DDD697 /* testPreviewCardStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B8C613C7D55CF224BEE622D /* testPreviewCardStep.1.png */; };
+		1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */; };
 		219FBDD532C8C32A529055AC /* testSetupViewGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4B0784606C0D57CC2593CE /* testSetupViewGerman.1.png */; };
 		27A936CD7057DF31FD867C86 /* testContactsViewWithContactsDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 25A0A7E324ADCC9333CC08A5 /* testContactsViewWithContactsDark.1.png */; };
 		281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */; };
@@ -89,6 +85,7 @@
 		A71B3D9B635D86B0626C301F /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2D8422E9B837A1B336A071 /* SetupView.swift */; };
 		AA3F337ED100BA98F8D5B5E3 /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A96FE811E67752C2D8F9079E /* SettingsService.swift */; };
 		AABC39234A780149080C84AB /* testSettingsViewGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 754BD6DA5325E71B6D09BAAB /* testSettingsViewGerman.1.png */; };
+		AD01F0575CCEB6301F6F7834 /* DiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */; };
 		ADBDBB305DC254FE3A94B2F3 /* MultipartQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D4DF5873BED53D99177B4A /* MultipartQRView.swift */; };
 		AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95373D9E6440FED4B532EBDD /* VauchiRepository.swift */; };
 		B12893BD37DD85CC1749CD01 /* testExchangeViewDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 15E6797B86856C4F432E265B /* testExchangeViewDark.1.png */; };
@@ -100,10 +97,12 @@
 		C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */; };
 		C93A0D7367B46594F457C13B /* GroupsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78FA47BD58BB7B71D2AC250D /* GroupsView.swift */; };
 		C9A763F2C3F5E581F08EFD13 /* testContactDetailView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EE116FC8484DF9F6D73F91F /* testContactDetailView.1.png */; };
+		C9C86FD0A30B8E8FBAD1245C /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F79BD1F4A165335E472E06C /* DiagnosticLogger.swift */; };
 		CA32F697BDD3346B24319D5E /* ContactDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */; };
 		D07F5E38E2DDD0A47633E879 /* AddFieldsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B1FA31282CE69594A3840C /* AddFieldsStepView.swift */; };
 		D2EF571FC20DD01AF5776C64 /* MultipartQRScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */; };
 		D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49509AE0DF70B880F977B015 /* AudioProximityService.swift */; };
+		D6F192EAAFA4D534AC285A8E /* ExistingCodeDiagnostic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FE92FFF24932C40ACAA1A02 /* ExistingCodeDiagnostic.swift */; };
 		DA673F09635BBBF9871092A8 /* VauchiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773C796EDEEFF9B928C04229 /* VauchiUITests.swift */; };
 		DD478B0145A11A9B9277A5BB /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773071C286EDA29BCB17B365 /* ContactsView.swift */; };
 		E4ABA23960463F55C2C3FB0D /* ContactActionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F097D48EF96B8E6440ACD9 /* ContactActionsTests.swift */; };
@@ -113,6 +112,7 @@
 		E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EBCAF628D08C167C0D9721 /* QRScannerView.swift */; };
 		EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */; };
 		EE06B8DCB941892BEACE00A0 /* testCreateIdentityStepFilled.1.png in Resources */ = {isa = PBXBuildFile; fileRef = BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */; };
+		EE61E717891162E1E64D6B6E /* SineWaveGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */; };
 		F6D31D935D519BD6C6821BE9 /* LabelDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F12B12FCE38D7CBAB15A8A0 /* LabelDetailView.swift */; };
 /* End PBXBuildFile section */
 
@@ -141,11 +141,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		AA1111111111111111111008 /* DiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticView.swift; sourceTree = "<group>"; };
-		AA1111111111111111111003 /* DiagnosticLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
-		AA1111111111111111111002 /* FftAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FftAnalyzer.swift; sourceTree = "<group>"; };
-		AA1111111111111111111001 /* SineWaveGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SineWaveGenerator.swift; sourceTree = "<group>"; };
-		AA1111111111111111111010 /* ExistingCodeDiagnostic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExistingCodeDiagnostic.swift; sourceTree = "<group>"; };
+		013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticView.swift; sourceTree = "<group>"; };
 		023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewEmpty.1.png; sourceTree = "<group>"; };
 		05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProximityServiceTests.swift; sourceTree = "<group>"; };
 		08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitingForUnlockView.swift; sourceTree = "<group>"; };
@@ -157,6 +153,7 @@
 		180FA5B6237A3C3CE4ACB83B /* ContactActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactActions.swift; sourceTree = "<group>"; };
 		1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModel.swift; sourceTree = "<group>"; };
 		1EE116FC8484DF9F6D73F91F /* testContactDetailView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactDetailView.1.png; sourceTree = "<group>"; };
+		1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SineWaveGenerator.swift; sourceTree = "<group>"; };
 		200902ADA24D8C97BC83DA08 /* testHomeViewEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testHomeViewEmpty.1.png; sourceTree = "<group>"; };
 		24FCEEBE15B1A5CB1ACD4DAD /* testSettingsViewDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSettingsViewDark.1.png; sourceTree = "<group>"; };
 		25A0A7E324ADCC9333CC08A5 /* testContactsViewWithContactsDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewWithContactsDark.1.png; sourceTree = "<group>"; };
@@ -210,12 +207,14 @@
 		87F097D48EF96B8E6440ACD9 /* ContactActionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactActionsTests.swift; sourceTree = "<group>"; };
 		8814BC91D7F7804BEC20F59B /* ExchangeFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeFlowTests.swift; sourceTree = "<group>"; };
 		8D5B1A7DCA3B64FEF00204F1 /* testDeliveryStatusView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testDeliveryStatusView.1.png; sourceTree = "<group>"; };
+		8F79BD1F4A165335E472E06C /* DiagnosticLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
 		8FDE9009AE079A27B82E5CB6 /* VauchiUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		93EEF8A8901309034B87F6CB /* SnapshotHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelpers.swift; sourceTree = "<group>"; };
 		95147D906B74EF746C328B63 /* testWelcomeStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testWelcomeStep.1.png; sourceTree = "<group>"; };
 		95373D9E6440FED4B532EBDD /* VauchiRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiRepository.swift; sourceTree = "<group>"; };
 		999B3BCD812A17506CBA6807 /* SecurityStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityStepView.swift; sourceTree = "<group>"; };
 		9ED684F1F87BD46FD5FFE578 /* testSettingsView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSettingsView.1.png; sourceTree = "<group>"; };
+		9FE92FFF24932C40ACAA1A02 /* ExistingCodeDiagnostic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExistingCodeDiagnostic.swift; sourceTree = "<group>"; };
 		A043222259F8702455558BF6 /* testExchangeViewGerman.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeViewGerman.1.png; sourceTree = "<group>"; };
 		A2E7533C698BC2DD14E881AD /* testLabelsView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testLabelsView.1.png; sourceTree = "<group>"; };
 		A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testLoadingView.1.png; sourceTree = "<group>"; };
@@ -229,6 +228,7 @@
 		B31DFE6F23CEA01F0437957B /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		B6D061F7460DEBA9C1024D92 /* LabelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelsView.swift; sourceTree = "<group>"; };
 		BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCreateIdentityStepFilled.1.png; sourceTree = "<group>"; };
+		BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FftAnalyzer.swift; sourceTree = "<group>"; };
 		C2A9361B22965ACC0939BC78 /* testReadyStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testReadyStep.1.png; sourceTree = "<group>"; };
 		C7F414A334965B2F677686A6 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
@@ -274,18 +274,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		AA1111111111111111111007 /* Diagnostic */ = {
-			isa = PBXGroup;
-			children = (
-				AA1111111111111111111003 /* DiagnosticLogger.swift */,
-				AA1111111111111111111008 /* DiagnosticView.swift */,
-				AA1111111111111111111010 /* ExistingCodeDiagnostic.swift */,
-				AA1111111111111111111002 /* FftAnalyzer.swift */,
-				AA1111111111111111111001 /* SineWaveGenerator.swift */,
-			);
-			path = Diagnostic;
-			sourceTree = "<group>";
-		};
 		01344AB2D3CDD59B4D0E3149 = {
 			isa = PBXGroup;
 			children = (
@@ -344,6 +332,18 @@
 				8FDE9009AE079A27B82E5CB6 /* VauchiUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		909E60FB02223B078CC3A058 /* Diagnostic */ = {
+			isa = PBXGroup;
+			children = (
+				8F79BD1F4A165335E472E06C /* DiagnosticLogger.swift */,
+				013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */,
+				9FE92FFF24932C40ACAA1A02 /* ExistingCodeDiagnostic.swift */,
+				BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */,
+				1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */,
+			);
+			path = Diagnostic;
 			sourceTree = "<group>";
 		};
 		B703A0DE1FDBFC69D604E07F /* VauchiSnapshotTests */ = {
@@ -450,7 +450,7 @@
 				3741052F03E3274B5C209EF6 /* Info.plist */,
 				B1075C1A497CE28C82672E93 /* Vauchi.entitlements */,
 				71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */,
-				AA1111111111111111111007 /* Diagnostic */,
+				909E60FB02223B078CC3A058 /* Diagnostic */,
 				F9FC793A89B3CAD3083ACA25 /* Services */,
 				DE4003224F0F48BD0A224CE5 /* ViewModels */,
 				CC27001BE792CD487814D16E /* Views */,
@@ -711,11 +711,6 @@
 				D07F5E38E2DDD0A47633E879 /* AddFieldsStepView.swift in Sources */,
 				80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
-				AA1111111111111111111009 /* DiagnosticView.swift in Sources */,
-				AA1111111111111111111006 /* DiagnosticLogger.swift in Sources */,
-				AA1111111111111111111005 /* FftAnalyzer.swift in Sources */,
-				AA1111111111111111111004 /* SineWaveGenerator.swift in Sources */,
-				AA1111111111111111111011 /* ExistingCodeDiagnostic.swift in Sources */,
 				04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */,
 				08512AFB915670B874B58220 /* ConsentSettingsView.swift in Sources */,
 				02DD49946382C26E78CE06C9 /* ContactActions.swift in Sources */,
@@ -727,7 +722,11 @@
 				426502D48730CB634E517392 /* CreateIdentityStepView.swift in Sources */,
 				4D6C3EC272054F44F67201EE /* DeepLinkHandler.swift in Sources */,
 				4C52B33A572F7C4F2EB5D736 /* DeliveryStatusView.swift in Sources */,
+				C9C86FD0A30B8E8FBAD1245C /* DiagnosticLogger.swift in Sources */,
+				AD01F0575CCEB6301F6F7834 /* DiagnosticView.swift in Sources */,
 				53AB469C972C6E43723B5C0A /* ExchangeView.swift in Sources */,
+				D6F192EAAFA4D534AC285A8E /* ExistingCodeDiagnostic.swift in Sources */,
+				1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */,
 				C93A0D7367B46594F457C13B /* GroupsView.swift in Sources */,
 				9ECAED5D4945C8D7669BD1CC /* HelpView.swift in Sources */,
 				4DA8D8A5C3D704C592248C27 /* HomeView.swift in Sources */,
@@ -750,6 +749,7 @@
 				AA3F337ED100BA98F8D5B5E3 /* SettingsService.swift in Sources */,
 				95BC61A3D294112ABFFB021E /* SettingsView.swift in Sources */,
 				A71B3D9B635D86B0626C301F /* SetupView.swift in Sources */,
+				EE61E717891162E1E64D6B6E /* SineWaveGenerator.swift in Sources */,
 				4342D012B76952454E5D89B9 /* SocialGraphView.swift in Sources */,
 				2D0728F99D4DBB3C8491C25B /* ThemeService.swift in Sources */,
 				C2AB3CF694C96461836AADB2 /* ThemeSettingsView.swift in Sources */,
