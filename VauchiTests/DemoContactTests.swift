@@ -73,17 +73,29 @@ final class DemoContactTests: XCTestCase {
         let bobRepo = try VauchiRepository(dataDir: bobDir.path)
         try bobRepo.createIdentity(displayName: "Bob")
 
-        // Alice and Bob exchange contacts (requires relay connectivity)
-        let aliceQr = try aliceRepo.generateExchangeQr()
+        // Alice and Bob exchange contacts using session-based flow
+        let aliceSession = try aliceRepo.generateExchangeQrWithSession()
+        let bobSession = try bobRepo.generateExchangeQrWithSession()
         do {
-            _ = try bobRepo.completeExchange(qrData: aliceQr.qrData)
+            try bobSession.session.processQr(qrData: aliceSession.exchangeData.qrData)
+            let peerName = bobSession.session.peerDisplayName() ?? "Unknown"
+            try bobSession.session.confirmProximity()
+            try bobSession.session.theyScannedOurQr()
+            try bobSession.session.performKeyAgreement()
+            try bobSession.session.completeCardExchange(theirCardName: peerName)
+            _ = try bobRepo.finalizeExchange(session: bobSession.session)
         } catch {
             throw XCTSkip("Relay server unavailable: \(error.localizedDescription)")
         }
 
-        let bobQr = try bobRepo.generateExchangeQr()
         do {
-            _ = try aliceRepo.completeExchange(qrData: bobQr.qrData)
+            try aliceSession.session.processQr(qrData: bobSession.exchangeData.qrData)
+            let peerName = aliceSession.session.peerDisplayName() ?? "Unknown"
+            try aliceSession.session.confirmProximity()
+            try aliceSession.session.theyScannedOurQr()
+            try aliceSession.session.performKeyAgreement()
+            try aliceSession.session.completeCardExchange(theirCardName: peerName)
+            _ = try aliceRepo.finalizeExchange(session: aliceSession.session)
         } catch {
             throw XCTSkip("Relay server unavailable: \(error.localizedDescription)")
         }
@@ -205,17 +217,29 @@ final class DemoContactTests: XCTestCase {
         _ = try aliceRepo.initDemoContactIfNeeded()
         XCTAssertNotNil(try aliceRepo.getDemoContact(), "Demo contact should exist initially")
 
-        // Alice and Bob exchange (requires relay connectivity)
-        let aliceQr = try aliceRepo.generateExchangeQr()
+        // Alice and Bob exchange using session-based flow
+        let aliceSession = try aliceRepo.generateExchangeQrWithSession()
+        let bobSession = try bobRepo.generateExchangeQrWithSession()
         do {
-            _ = try bobRepo.completeExchange(qrData: aliceQr.qrData)
+            try bobSession.session.processQr(qrData: aliceSession.exchangeData.qrData)
+            let peerName = bobSession.session.peerDisplayName() ?? "Unknown"
+            try bobSession.session.confirmProximity()
+            try bobSession.session.theyScannedOurQr()
+            try bobSession.session.performKeyAgreement()
+            try bobSession.session.completeCardExchange(theirCardName: peerName)
+            _ = try bobRepo.finalizeExchange(session: bobSession.session)
         } catch {
             throw XCTSkip("Relay server unavailable: \(error.localizedDescription)")
         }
 
-        let bobQr = try bobRepo.generateExchangeQr()
         do {
-            _ = try aliceRepo.completeExchange(qrData: bobQr.qrData)
+            try aliceSession.session.processQr(qrData: bobSession.exchangeData.qrData)
+            let peerName = aliceSession.session.peerDisplayName() ?? "Unknown"
+            try aliceSession.session.confirmProximity()
+            try aliceSession.session.theyScannedOurQr()
+            try aliceSession.session.performKeyAgreement()
+            try aliceSession.session.completeCardExchange(theirCardName: peerName)
+            _ = try aliceRepo.finalizeExchange(session: aliceSession.session)
         } catch {
             throw XCTSkip("Relay server unavailable: \(error.localizedDescription)")
         }

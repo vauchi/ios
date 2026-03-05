@@ -34,35 +34,35 @@ final class ExchangeFlowTests: XCTestCase {
 
     /// Scenario: Generate QR code data for contact exchange
     func testGenerateQRCodeData() throws {
-        let exchangeData = try repo.generateExchangeQr()
+        let sessionData = try repo.generateExchangeQrWithSession()
 
-        XCTAssertFalse(exchangeData.qrData.isEmpty, "QR data should not be empty")
+        XCTAssertFalse(sessionData.exchangeData.qrData.isEmpty, "QR data should not be empty")
         // QR data uses wb:// protocol format
-        XCTAssertTrue(exchangeData.qrData.hasPrefix("wb://"), "QR data should start with wb://")
+        XCTAssertTrue(sessionData.exchangeData.qrData.hasPrefix("wb://"), "QR data should start with wb://")
     }
 
     /// Scenario: QR code contains public key
     func testQRCodeContainsPublicKey() throws {
         let publicId = try repo.getPublicId()
-        let exchangeData = try repo.generateExchangeQr()
+        let sessionData = try repo.generateExchangeQrWithSession()
 
         // Exchange data includes the public ID
-        XCTAssertFalse(exchangeData.qrData.isEmpty)
+        XCTAssertFalse(sessionData.exchangeData.qrData.isEmpty)
         XCTAssertFalse(publicId.isEmpty)
-        XCTAssertFalse(exchangeData.publicId.isEmpty)
+        XCTAssertFalse(sessionData.exchangeData.publicId.isEmpty)
     }
 
     /// Scenario: Multiple QR codes can be generated
     func testMultipleQRCodesUnique() throws {
-        let qr1 = try repo.generateExchangeQr()
-        let qr2 = try repo.generateExchangeQr()
-        let qr3 = try repo.generateExchangeQr()
+        let qr1 = try repo.generateExchangeQrWithSession()
+        let qr2 = try repo.generateExchangeQrWithSession()
+        let qr3 = try repo.generateExchangeQrWithSession()
 
         // Each QR code may include timestamp/nonce, making them different
         // Or they may be the same if deterministic - both are valid
-        XCTAssertFalse(qr1.qrData.isEmpty)
-        XCTAssertFalse(qr2.qrData.isEmpty)
-        XCTAssertFalse(qr3.qrData.isEmpty)
+        XCTAssertFalse(qr1.exchangeData.qrData.isEmpty)
+        XCTAssertFalse(qr2.exchangeData.qrData.isEmpty)
+        XCTAssertFalse(qr3.exchangeData.qrData.isEmpty)
     }
 
     // MARK: - QR Code Parsing Tests
@@ -72,8 +72,9 @@ final class ExchangeFlowTests: XCTestCase {
     /// Scenario: Parse invalid QR data returns error
     func testParseInvalidQRData() throws {
         let invalidData = "not-a-valid-qr-code"
+        let sessionData = try repo.generateExchangeQrWithSession()
 
-        XCTAssertThrowsError(try repo.completeExchange(qrData: invalidData)) { error in
+        XCTAssertThrowsError(try sessionData.session.processQr(qrData: invalidData)) { error in
             // Should throw some form of parse error
             XCTAssertNotNil(error)
         }
@@ -81,7 +82,9 @@ final class ExchangeFlowTests: XCTestCase {
 
     /// Scenario: Parse empty QR data returns error
     func testParseEmptyQRData() throws {
-        XCTAssertThrowsError(try repo.completeExchange(qrData: "")) { error in
+        let sessionData = try repo.generateExchangeQrWithSession()
+
+        XCTAssertThrowsError(try sessionData.session.processQr(qrData: "")) { error in
             XCTAssertNotNil(error)
         }
     }
@@ -89,8 +92,9 @@ final class ExchangeFlowTests: XCTestCase {
     /// Scenario: Parse corrupted base64 returns error
     func testParseCorruptedBase64() throws {
         let corruptedData = "!!!invalid-base64!!!"
+        let sessionData = try repo.generateExchangeQrWithSession()
 
-        XCTAssertThrowsError(try repo.completeExchange(qrData: corruptedData))
+        XCTAssertThrowsError(try sessionData.session.processQr(qrData: corruptedData))
     }
 
     // MARK: - Exchange State Tests
@@ -105,7 +109,7 @@ final class ExchangeFlowTests: XCTestCase {
 
         let repoNoIdentity = try VauchiRepository(dataDir: tempDir2.path)
 
-        XCTAssertThrowsError(try repoNoIdentity.generateExchangeQr()) { error in
+        XCTAssertThrowsError(try repoNoIdentity.generateExchangeQrWithSession()) { error in
             // Should require identity
             XCTAssertNotNil(error)
         }

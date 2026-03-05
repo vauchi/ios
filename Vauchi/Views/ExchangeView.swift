@@ -308,7 +308,8 @@ struct ExchangeView: View {
 
         Task {
             do {
-                let result = try await viewModel.completeExchange(qrData: qrData)
+                _ = try viewModel.processScannedQr(qrData: qrData)
+                let result = try await viewModel.completeExchangeAfterCoordination()
                 await MainActor.run {
                     if result.success {
                         flowState = .success(contactName: result.contactName)

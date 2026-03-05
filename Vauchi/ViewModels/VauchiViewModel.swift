@@ -1027,42 +1027,89 @@ class VauchiViewModel: ObservableObject {
 
     // MARK: - Exchange
 
+    /// Active exchange session — MUST be reused for the entire exchange lifecycle
+    private var activeExchangeSession: MobileExchangeSession?
+    private var activeExchangeData: ExchangeDataInfo?
+
     func generateQRData() throws -> String {
         guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
-        let exchangeData = try repository.generateExchangeQr()
-        return exchangeData.qrData
+        let sessionData = try repository.generateExchangeQrWithSession()
+        return sessionData.exchangeData.qrData
     }
 
+    /// Generate exchange QR and store the session for later reuse.
     func generateExchangeData() throws -> ExchangeDataInfo {
         guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
-        let data = try repository.generateExchangeQr()
-        return ExchangeDataInfo(
-            qrData: data.qrData,
-            publicId: data.publicId,
-            expiresAt: Date(timeIntervalSince1970: TimeInterval(data.expiresAt)),
-            audioChallenge: ExchangeDataInfo.extractAudioChallenge(from: data.qrData)
+        let sessionData = try repository.generateExchangeQrWithSession()
+        activeExchangeSession = sessionData.session
+        let info = ExchangeDataInfo(
+            qrData: sessionData.exchangeData.qrData,
+            publicId: sessionData.exchangeData.publicId,
+            expiresAt: Date(timeIntervalSince1970: TimeInterval(sessionData.exchangeData.expiresAt)),
+            audioChallenge: ExchangeDataInfo.extractAudioChallenge(from: sessionData.exchangeData.qrData)
         )
+        activeExchangeData = info
+        return info
     }
 
-    func completeExchange(qrData: String) async throws -> ExchangeResultInfo {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
+    /// Process a scanned QR on the held session and return the peer display name.
+    func processScannedQr(qrData: String) throws -> String {
+        guard let session = activeExchangeSession else {
+            throw VauchiRepositoryError.exchangeFailed("No active exchange session")
+        }
+        try session.processQr(qrData: qrData)
+        return session.peerDisplayName() ?? "Unknown"
+    }
+
+    /// Ultrasonic coordination loop: emit their challenge, listen for ours.
+    /// Returns true if we heard our challenge (meaning the peer scanned our QR).
+    func ultrasonicCoordinate(scannedQrData: String, timeoutSeconds: Int = 12) async -> Bool {
+        guard let ourData = activeExchangeData,
+              let ourChallenge = ourData.audioChallenge,
+              let theirChallenge = ExchangeDataInfo.extractAudioChallenge(from: scannedQrData) else {
+            return false
         }
 
-        let result = try repository.completeExchange(qrData: qrData)
-        await loadContacts()
+        let deadline = Date().addingTimeInterval(TimeInterval(timeoutSeconds))
+        while Date() < deadline {
+            // Emit their challenge so they can confirm we scanned theirs
+            _ = emitProximityChallenge(theirChallenge)
+            try? await Task.sleep(nanoseconds: 250_000_000) // 250ms
+            stopProximityVerification()
 
-        // Auto-remove demo contact after first real exchange
+            // Listen for our challenge — means they scanned our QR
+            let response = listenForProximityResponse(timeoutMs: 2000)
+            if let response, response == ourChallenge {
+                stopProximityVerification()
+                return true
+            }
+            stopProximityVerification()
+        }
+        return false
+    }
+
+    /// Complete the exchange using the held session after coordination succeeds.
+    func completeExchangeAfterCoordination() async throws -> ExchangeResultInfo {
+        guard let session = activeExchangeSession, let repository else {
+            throw VauchiRepositoryError.exchangeFailed("No active exchange session")
+        }
+        let peerName = session.peerDisplayName() ?? "Unknown"
+        try session.confirmProximity()
+        try session.theyScannedOurQr()
+        try session.performKeyAgreement()
+        try session.completeCardExchange(theirCardName: peerName)
+        let result = try repository.finalizeExchange(session: session)
+        clearActiveSession()
+        await loadContacts()
         if result.success {
             await autoRemoveDemoContact()
         }
-
         return ExchangeResultInfo(
             contactId: result.contactId,
             contactName: result.contactName,
@@ -1071,19 +1118,14 @@ class VauchiViewModel: ObservableObject {
         )
     }
 
-    /// Generate a random proximity challenge for the exchange flow.
-    /// FUTURE: When createQrExchangeProximity() bindings are published,
-    /// replace this with the session's actual proximity challenge.
-    func generateExchangeProximityChallenge() -> Data {
-        var bytes = [UInt8](repeating: 0, count: 16)
-        let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-        if status != errSecSuccess {
-            // Fallback: use SystemRandomNumberGenerator if SecRandomCopyBytes fails
-            for idx in 0 ..< bytes.count {
-                bytes[idx] = UInt8.random(in: 0 ... 255)
-            }
-        }
-        return Data(bytes)
+    /// Manual fallback — same completion path, skips ultrasonic.
+    func confirmManualAndComplete() async throws -> ExchangeResultInfo {
+        try await completeExchangeAfterCoordination()
+    }
+
+    func clearActiveSession() {
+        activeExchangeSession = nil
+        activeExchangeData = nil
     }
 
     /// Start an exchange from a deep link payload.
@@ -1092,7 +1134,8 @@ class VauchiViewModel: ObservableObject {
     func startExchangeWithDeepLink(payload: String) {
         Task {
             do {
-                let result = try await completeExchange(qrData: payload)
+                let peerName = try processScannedQr(qrData: payload)
+                let result = try await completeExchangeAfterCoordination()
                 if result.success {
                     showSuccess("Exchange Complete",
                                 message: "Contact \(result.contactName) added successfully.")

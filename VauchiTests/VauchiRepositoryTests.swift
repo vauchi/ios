@@ -213,7 +213,8 @@ final class VauchiRepositoryTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        let exchangeData = try repo.generateExchangeQr()
+        let sessionData = try repo.generateExchangeQrWithSession()
+        let exchangeData = sessionData.exchangeData
 
         XCTAssertTrue(exchangeData.qrData.hasPrefix("wb://"), "QR data should start with wb://")
         XCTAssertFalse(exchangeData.publicId.isEmpty)
@@ -225,7 +226,8 @@ final class VauchiRepositoryTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        let exchangeData = try repo.generateExchangeQr()
+        let sessionData = try repo.generateExchangeQrWithSession()
+        let exchangeData = sessionData.exchangeData
         let now = UInt64(Date().timeIntervalSince1970)
 
         // Should expire in ~5 minutes (300 seconds)
@@ -596,12 +598,20 @@ final class VauchiRepositoryTests: XCTestCase {
         try bobRepo.createIdentity(displayName: "Bob")
         try bobRepo.addField(type: .phone, label: "Mobile", value: "+1234567890")
 
-        // Alice generates QR code
-        let aliceExchange = try aliceRepo.generateExchangeQr()
-        XCTAssertFalse(aliceExchange.qrData.isEmpty)
+        // Alice generates QR code (with session)
+        let aliceSession = try aliceRepo.generateExchangeQrWithSession()
+        XCTAssertFalse(aliceSession.exchangeData.qrData.isEmpty)
 
-        // Bob scans Alice's QR and completes exchange
-        let bobResult = try bobRepo.completeExchange(qrData: aliceExchange.qrData)
+        // Bob generates QR and scans Alice's QR using the held session
+        let bobSession = try bobRepo.generateExchangeQrWithSession()
+        try bobSession.session.processQr(qrData: aliceSession.exchangeData.qrData)
+        let bobPeerName = bobSession.session.peerDisplayName() ?? "Unknown"
+        XCTAssertEqual(bobPeerName, "Alice")
+        try bobSession.session.confirmProximity()
+        try bobSession.session.theyScannedOurQr()
+        try bobSession.session.performKeyAgreement()
+        try bobSession.session.completeCardExchange(theirCardName: bobPeerName)
+        let bobResult = try bobRepo.finalizeExchange(session: bobSession.session)
         XCTAssertTrue(bobResult.success, "Bob's exchange should succeed: \(bobResult.errorMessage ?? "no error")")
         XCTAssertEqual(bobResult.contactName, "Alice")
 
@@ -610,11 +620,15 @@ final class VauchiRepositoryTests: XCTestCase {
         XCTAssertEqual(bobContacts.count, 1)
         XCTAssertEqual(bobContacts[0].displayName, "Alice")
 
-        // Bob generates QR for Alice
-        let bobExchange = try bobRepo.generateExchangeQr()
-
-        // Alice scans Bob's QR and completes exchange
-        let aliceResult = try aliceRepo.completeExchange(qrData: bobExchange.qrData)
+        // Alice scans Bob's QR using her held session
+        try aliceSession.session.processQr(qrData: bobSession.exchangeData.qrData)
+        let alicePeerName = aliceSession.session.peerDisplayName() ?? "Unknown"
+        XCTAssertEqual(alicePeerName, "Bob")
+        try aliceSession.session.confirmProximity()
+        try aliceSession.session.theyScannedOurQr()
+        try aliceSession.session.performKeyAgreement()
+        try aliceSession.session.completeCardExchange(theirCardName: alicePeerName)
+        let aliceResult = try aliceRepo.finalizeExchange(session: aliceSession.session)
         XCTAssertTrue(aliceResult.success, "Alice's exchange should succeed: \(aliceResult.errorMessage ?? "no error")")
         XCTAssertEqual(aliceResult.contactName, "Bob")
 
@@ -629,11 +643,9 @@ final class VauchiRepositoryTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        // Try to complete exchange with invalid QR data
-        XCTAssertThrowsError(try repo.completeExchange(qrData: "invalid_qr_data")) { error in
-            // Should throw an error for invalid QR
-            XCTAssertTrue(error is VauchiRepositoryError)
-        }
+        // Try to process invalid QR data on a fresh session
+        let sessionData = try repo.generateExchangeQrWithSession()
+        XCTAssertThrowsError(try sessionData.session.processQr(qrData: "invalid_qr_data"))
     }
 
     /// Scenario: Cannot exchange with self
@@ -644,10 +656,15 @@ final class VauchiRepositoryTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path, relayUrl: Self.localRelayUrl)
         try repo.createIdentity(displayName: "Alice")
 
-        let exchange = try repo.generateExchangeQr()
+        let sessionData = try repo.generateExchangeQrWithSession()
 
-        // Try to complete exchange with own QR
-        let result = try repo.completeExchange(qrData: exchange.qrData)
+        // Try to complete exchange with own QR on the same session
+        try sessionData.session.processQr(qrData: sessionData.exchangeData.qrData)
+        try sessionData.session.confirmProximity()
+        try sessionData.session.theyScannedOurQr()
+        try sessionData.session.performKeyAgreement()
+        try sessionData.session.completeCardExchange(theirCardName: "Alice")
+        let result = try repo.finalizeExchange(session: sessionData.session)
 
         // Exchange with self should fail
         XCTAssertFalse(result.success, "Should not be able to exchange with self")

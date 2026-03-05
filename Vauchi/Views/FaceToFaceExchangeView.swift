@@ -10,9 +10,12 @@ import AVFoundation
 import CoreImage.CIFilterBuiltins
 import SwiftUI
 
-/// Flow state for the face-to-face exchange
+/// Flow state for the bidirectional face-to-face exchange
 enum FaceToFaceFlowState: Equatable {
     case scanning
+    case scanned(peerName: String)
+    case coordinating
+    case manualFallback
     case completing
     case success(contactName: String)
     case failed(error: String)
@@ -49,6 +52,15 @@ struct FaceToFaceExchangeView: View {
                     switch flowState {
                     case .scanning:
                         scanningContent
+
+                    case let .scanned(peerName):
+                        scannedContent(peerName: peerName)
+
+                    case .coordinating:
+                        coordinatingContent
+
+                    case .manualFallback:
+                        manualFallbackContent
 
                     case .completing:
                         completingContent
@@ -173,6 +185,98 @@ struct FaceToFaceExchangeView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGray6))
+    }
+
+    // MARK: - Scanned State
+
+    private func scannedContent(peerName: String) -> some View {
+        VStack(spacing: 16) {
+            Spacer()
+            ProgressView()
+                .scaleEffect(1.5)
+            Text("Found \(peerName)!")
+                .font(.title2)
+                .fontWeight(.semibold)
+            Text("Verifying proximity...")
+                .font(.body)
+                .foregroundColor(.secondary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    // MARK: - Coordinating State
+
+    private var coordinatingContent: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            ProgressView()
+                .scaleEffect(1.5)
+            Text("Verifying...")
+                .font(.title2)
+                .fontWeight(.semibold)
+            Text("Confirming the other device scanned your QR")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    // MARK: - Manual Fallback State
+
+    private var manualFallbackContent: some View {
+        VStack(spacing: 16) {
+            Spacer()
+
+            Text("Confirm face-to-face")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Text("Ultrasonic verification timed out. Confirm you are physically next to the other person.")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            Button(action: {
+                Task {
+                    flowState = .completing
+                    do {
+                        let result = try await viewModel.confirmManualAndComplete()
+                        if result.success {
+                            flowState = .success(contactName: result.contactName)
+                        } else {
+                            flowState = .failed(error: result.errorMessage ?? "Exchange failed")
+                        }
+                    } catch {
+                        flowState = .failed(error: error.localizedDescription)
+                    }
+                }
+            }) {
+                Text("Confirm & Exchange")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding(.horizontal)
+
+            Button(action: {
+                viewModel.clearActiveSession()
+                resetToScanning()
+            }) {
+                Text(localizationService.t("action.cancel"))
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            }
+            .padding(.horizontal)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Completing State
@@ -355,49 +459,55 @@ struct FaceToFaceExchangeView: View {
     private func handleScannedCode(_ code: String) {
         guard code.hasPrefix("wb://"), flowState == .scanning else { return }
 
-        flowState = .completing
         stopEmitting()
 
-        // Ultrasonic proximity check on background thread (non-blocking, fire-and-forget)
-        if viewModel.proximitySupported {
-            let challenge = ExchangeDataInfo.extractAudioChallenge(from: code)
-            if let challenge {
-                let vm = viewModel
-                DispatchQueue.global(qos: .userInitiated).async {
-                    let response = vm.listenForProximityResponse(timeoutMs: 3000)
-                    if let resp = response, resp == challenge {
-                        DispatchQueue.main.async {
-                            proximityConfirmed = true
-                        }
-                        print("FaceToFace: Ultrasonic proximity confirmed")
-                    }
-                    vm.stopProximityVerification()
-                }
-            }
+        // Step 1: Process the scanned QR on the held session
+        let peerName: String
+        do {
+            peerName = try viewModel.processScannedQr(qrData: code)
+        } catch {
+            flowState = .failed(error: "Invalid QR: \(error.localizedDescription)")
+            return
         }
+        flowState = .scanned(peerName: peerName)
 
-        // Complete exchange immediately (don't wait for proximity)
+        // Step 2: Ultrasonic coordination or manual fallback
         Task {
+            if viewModel.proximitySupported,
+               ExchangeDataInfo.extractAudioChallenge(from: code) != nil {
+                flowState = .coordinating
+                let confirmed = await viewModel.ultrasonicCoordinate(scannedQrData: code)
+                if !confirmed {
+                    flowState = .manualFallback
+                    return
+                }
+                proximityConfirmed = true
+            } else {
+                // No ultrasonic support — go straight to manual fallback
+                flowState = .manualFallback
+                return
+            }
+
+            // Step 3: Ultrasonic confirmed — complete exchange
+            flowState = .completing
             do {
-                let result = try await viewModel.completeExchange(qrData: code)
-                await MainActor.run {
-                    if result.success {
-                        flowState = .success(contactName: result.contactName)
-                    } else {
-                        flowState = .failed(error: result.errorMessage ?? "Exchange failed")
-                    }
+                let result = try await viewModel.completeExchangeAfterCoordination()
+                if result.success {
+                    flowState = .success(contactName: result.contactName)
+                } else {
+                    flowState = .failed(error: result.errorMessage ?? "Exchange failed")
                 }
             } catch {
-                await MainActor.run {
-                    flowState = .failed(error: error.localizedDescription)
-                }
+                flowState = .failed(error: error.localizedDescription)
             }
         }
     }
 
     private func resetToScanning() {
+        viewModel.clearActiveSession()
         flowState = .scanning
         proximityConfirmed = false
+        loadExchangeData()
         startEmitting()
     }
 

@@ -254,6 +254,14 @@ struct VauchiExchangeResult {
     let errorMessage: String?
 }
 
+/// Holds both the display data and the live session for a single exchange.
+/// The session MUST be reused for processQr/finalize — creating a new session
+/// generates different ephemeral keys and breaks key agreement.
+struct ExchangeSessionData {
+    let exchangeData: VauchiExchangeData
+    let session: MobileExchangeSession
+}
+
 // MARK: - Visibility Label Types
 
 // Based on: features/visibility_labels.feature
@@ -1002,39 +1010,31 @@ class VauchiRepository {
 
     // MARK: - Exchange Operations
 
-    /// Generate QR data for exchange using ExchangeSession state machine.
-    func generateExchangeQr() throws -> VauchiExchangeData {
+    /// Generate QR data AND return the live session.
+    /// The caller MUST hold onto the session and pass it to `finalizeExchange(session:)`
+    /// — creating a new session generates different ephemeral keys.
+    func generateExchangeQrWithSession() throws -> ExchangeSessionData {
         do {
             let session = try vauchi.createQrExchangeManual()
             let qrData = try session.generateQr()
             let publicId = try vauchi.getPublicId()
             let expiresAt = UInt64(Date().timeIntervalSince1970) + 300 // 5 minutes
-            return VauchiExchangeData(
+            let data = VauchiExchangeData(
                 qrData: qrData,
                 publicId: publicId,
                 expiresAt: expiresAt
             )
+            return ExchangeSessionData(exchangeData: data, session: session)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
     }
 
-    /// Complete exchange by driving ExchangeSession state machine (mutual QR flow).
-    ///
-    /// Face-to-face exchanges are bilateral — both devices scan each other's QR and
-    /// independently derive the shared secret. No relay notification needed.
-    func completeExchange(qrData: String) throws -> VauchiExchangeResult {
+    /// Finalize an exchange using the SAME session that generated the QR.
+    /// The session must have already been driven through processQr → confirmProximity →
+    /// theyScannedOurQr → performKeyAgreement → completeCardExchange.
+    func finalizeExchange(session: MobileExchangeSession) throws -> VauchiExchangeResult {
         do {
-            let session = try vauchi.createQrExchangeManual()
-            _ = try session.generateQr()
-            try session.processQr(qrData: qrData)
-            guard let contactName = session.peerDisplayName() else {
-                throw VauchiRepositoryError.exchangeFailed("QR code missing display name")
-            }
-            try session.confirmProximity()
-            try session.theyScannedOurQr()
-            try session.performKeyAgreement()
-            try session.completeCardExchange(theirCardName: contactName)
             let result = try vauchi.finalizeExchange(session: session)
             return VauchiExchangeResult(
                 contactId: result.contactId,
