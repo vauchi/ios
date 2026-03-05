@@ -438,6 +438,10 @@ struct SettingsView: View {
                                 .accessibilityHidden(true)
                         }
                     }
+
+                    NavigationLink(destination: QRDiagnosticView()) {
+                        Label("QR Diagnostic", systemImage: "qrcode.viewfinder")
+                    }
                 }
 
                 // Support section

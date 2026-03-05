@@ -18,7 +18,8 @@ struct VauchiApp: App {
     init() {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
-        NSLog("[Vauchi] Build: v%@ (%@) core=%@", v, b, coreVersion())
+        let buildId = Self.binaryBuildDate() ?? "?"
+        NSLog("[Vauchi] Build: v%@ (%@) core=%@ buildId=%@", v, b, coreVersion(), buildId)
         // Register background tasks
         BackgroundSyncService.shared.registerBackgroundTasks()
         print("VauchiApp: background tasks registered")
@@ -38,6 +39,18 @@ struct VauchiApp: App {
             // Perform sync
             _ = try? repository.sync()
         }
+    }
+
+    /// Returns the binary's modification date as a compact build ID string.
+    private static func binaryBuildDate() -> String? {
+        guard let executableURL = Bundle.main.executableURL,
+              let attrs = try? FileManager.default.attributesOfItem(atPath: executableURL.path),
+              let date = attrs[.modificationDate] as? Date
+        else { return nil }
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyyMMdd-HHmmss"
+        fmt.timeZone = TimeZone(identifier: "UTC")
+        return fmt.string(from: date)
     }
 
     var body: some Scene {

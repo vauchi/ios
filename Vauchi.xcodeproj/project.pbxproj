@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F728972A1B56B11A4002F18 /* QRDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8165E561C220986638BFB3 /* QRDiagnosticView.swift */; };
 		0098BE4EAD470F85DBCBE2E7 /* LanguageSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5846280A9FFC79FBBBCF600D /* LanguageSettingsView.swift */; };
 		02DD49946382C26E78CE06C9 /* ContactActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180FA5B6237A3C3CE4ACB83B /* ContactActions.swift */; };
 		04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44506B768565C7F52A328D17 /* BackgroundSyncService.swift */; };
@@ -222,6 +223,7 @@
 		A043222259F8702455558BF6 /* testExchangeViewGerman.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeViewGerman.1.png; sourceTree = "<group>"; };
 		A2E7533C698BC2DD14E881AD /* testLabelsView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testLabelsView.1.png; sourceTree = "<group>"; };
 		A34F01BD07BC1A3FF39429C8 /* FaceToFaceExchangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceToFaceExchangeView.swift; sourceTree = "<group>"; };
+		6E8165E561C220986638BFB3 /* QRDiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRDiagnosticView.swift; sourceTree = "<group>"; };
 		A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testLoadingView.1.png; sourceTree = "<group>"; };
 		A96FE811E67752C2D8F9079E /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
 		A9B1FA31282CE69594A3840C /* AddFieldsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFieldsStepView.swift; sourceTree = "<group>"; };
@@ -438,6 +440,7 @@
 				30C91B081CDC3A250428A644 /* DeliveryStatusView.swift */,
 				54104E52AA5396675142F673 /* ExchangeView.swift */,
 				A34F01BD07BC1A3FF39429C8 /* FaceToFaceExchangeView.swift */,
+				6E8165E561C220986638BFB3 /* QRDiagnosticView.swift */,
 				78FA47BD58BB7B71D2AC250D /* GroupsView.swift */,
 				2760186DEA7C9870633BA8E8 /* HelpView.swift */,
 				0FC890F55872A927941111CE /* HomeView.swift */,
@@ -763,6 +766,7 @@
 				D6F192EAAFA4D534AC285A8E /* ExistingCodeDiagnostic.swift in Sources */,
 				1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */,
 				105F980BB187FE89CD24B5D0 /* FaceToFaceExchangeView.swift in Sources */,
+				4F728972A1B56B11A4002F18 /* QRDiagnosticView.swift in Sources */,
 				C93A0D7367B46594F457C13B /* GroupsView.swift in Sources */,
 				9ECAED5D4945C8D7669BD1CC /* HelpView.swift in Sources */,
 				4DA8D8A5C3D704C592248C27 /* HomeView.swift in Sources */,
