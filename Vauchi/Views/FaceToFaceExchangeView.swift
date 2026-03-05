@@ -29,6 +29,9 @@ struct FaceToFaceExchangeView: View {
     @State private var useFrontCamera = true
     @State private var cameraGranted = false
     @State private var permissionsChecked = false
+    @State private var debugScanCount = 0
+    @State private var debugLastScan: String = "—"
+    @State private var debugLastState: String = "—"
     @StateObject private var qrScanner = HeadlessQrScanner()
 
     var body: some View {
@@ -142,6 +145,20 @@ struct FaceToFaceExchangeView: View {
             Text("Point camera at other phone's QR")
                 .font(.caption)
                 .foregroundColor(.secondary)
+
+            // Debug overlay
+            VStack(alignment: .leading, spacing: 2) {
+                Text("cam=\(cameraGranted ? "Y" : "N") front=\(useFrontCamera ? "Y" : "N") scans=\(debugScanCount)")
+                    .font(.system(.caption2, design: .monospaced))
+                Text("last: \(debugLastScan)")
+                    .font(.system(.caption2, design: .monospaced))
+                Text("state: \(debugLastState)")
+                    .font(.system(.caption2, design: .monospaced))
+            }
+            .padding(6)
+            .background(Color.black.opacity(0.7))
+            .foregroundColor(.green)
+            .cornerRadius(6)
 
             Spacer()
         }
@@ -278,7 +295,10 @@ struct FaceToFaceExchangeView: View {
 
     private func handleMultiStageScannedCode(_ code: String) {
         // Pass raw QR string to core — do NOT parse content in Swift
+        debugScanCount += 1
+        debugLastScan = String(code.prefix(30))
         let newState = viewModel.processMultiStageQr(raw: code)
+        debugLastState = String(describing: newState)
         protocolState = newState
     }
 
@@ -340,7 +360,11 @@ struct FaceToFaceExchangeView: View {
     // MARK: - Actions
 
     private func startScannerIfReady() {
-        guard cameraGranted else { return }
+        guard cameraGranted else {
+            NSLog("[Exchange] scanner not ready — cameraGranted=false")
+            return
+        }
+        NSLog("[Exchange] starting scanner, useFrontCamera=%d", useFrontCamera ? 1 : 0)
         qrScanner.start(useFrontCamera: useFrontCamera) { code in
             handleMultiStageScannedCode(code)
         }
@@ -436,7 +460,11 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
                         from _: AVCaptureConnection) {
         guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
               let code = metadataObject.stringValue
-        else { return }
+        else {
+            NSLog("[HeadlessScanner] frame with no QR (%d objects)", metadataObjects.count)
+            return
+        }
+        NSLog("[HeadlessScanner] detected: %@", String(code.prefix(40)))
 
         // Short debounce: multi-stage protocol needs repeated scans of the
         // same QR to advance through stages. 100ms prevents duplicate processing
