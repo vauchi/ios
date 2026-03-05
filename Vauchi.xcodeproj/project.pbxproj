@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA1111111111111111111009 /* DiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111008 /* DiagnosticView.swift */; };
 		AA1111111111111111111006 /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111003 /* DiagnosticLogger.swift */; };
 		AA1111111111111111111005 /* FftAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111002 /* FftAnalyzer.swift */; };
 		AA1111111111111111111004 /* SineWaveGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111001 /* SineWaveGenerator.swift */; };
@@ -139,6 +140,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA1111111111111111111008 /* DiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticView.swift; sourceTree = "<group>"; };
 		AA1111111111111111111003 /* DiagnosticLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
 		AA1111111111111111111002 /* FftAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FftAnalyzer.swift; sourceTree = "<group>"; };
 		AA1111111111111111111001 /* SineWaveGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SineWaveGenerator.swift; sourceTree = "<group>"; };
@@ -274,6 +276,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1111111111111111111003 /* DiagnosticLogger.swift */,
+				AA1111111111111111111008 /* DiagnosticView.swift */,
 				AA1111111111111111111002 /* FftAnalyzer.swift */,
 				AA1111111111111111111001 /* SineWaveGenerator.swift */,
 			);
@@ -705,6 +708,7 @@
 				D07F5E38E2DDD0A47633E879 /* AddFieldsStepView.swift in Sources */,
 				80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
+				AA1111111111111111111009 /* DiagnosticView.swift in Sources */,
 				AA1111111111111111111006 /* DiagnosticLogger.swift in Sources */,
 				AA1111111111111111111005 /* FftAnalyzer.swift in Sources */,
 				AA1111111111111111111004 /* SineWaveGenerator.swift in Sources */,

@@ -467,6 +467,13 @@ struct SettingsView: View {
                     }
                 }
 
+                // Diagnostics
+                Section("Diagnostics") {
+                    NavigationLink("Ultrasonic Diagnostic") {
+                        DiagnosticView()
+                    }
+                }
+
                 // About section
                 Section(localizationService.t("settings.about")) {
                     HStack {
