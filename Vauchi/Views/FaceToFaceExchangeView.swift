@@ -12,15 +12,6 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 import VauchiMobile
 
-/// Flow state for the bidirectional face-to-face exchange (legacy single-QR)
-enum FaceToFaceFlowState: Equatable {
-    case scanning
-    case scanned(peerName: String)
-    case completing
-    case success(contactName: String)
-    case failed(error: String)
-}
-
 struct FaceToFaceExchangeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
@@ -28,21 +19,10 @@ struct FaceToFaceExchangeView: View {
     // MARK: - Multi-stage exchange state
 
     @State private var multiStageQrImage: UIImage?
-    @State private var multiStageActive = false
     @State private var protocolState: MobileProtocolState = .idle
     @State private var qrCycleTimer: Timer?
     @State private var statePollTimer: Timer?
     @State private var previousBrightness: CGFloat = 0.5
-
-    // MARK: - Legacy single-QR state (kept for Task 13 removal)
-
-    @State private var exchangeData: ExchangeDataInfo?
-    @State private var qrImage: UIImage?
-    @State private var isLoading = true
-    @State private var hasError = false
-    @State private var timeRemaining: TimeInterval = 0
-    @State private var timer: Timer?
-    @State private var flowState: FaceToFaceFlowState = .scanning
 
     // MARK: - Shared state
 
@@ -56,26 +36,8 @@ struct FaceToFaceExchangeView: View {
             VStack(spacing: 0) {
                 if !cameraGranted, permissionsChecked {
                     permissionNeededContent
-                } else if multiStageActive {
-                    multiStageContent
                 } else {
-                    // Legacy single-QR flow (kept until Task 13 removes it)
-                    switch flowState {
-                    case .scanning:
-                        scanningContent
-
-                    case let .scanned(peerName):
-                        qrWithStatusContent(status: "Found \(peerName)!")
-
-                    case .completing:
-                        qrWithStatusContent(status: "Exchanging contacts...")
-
-                    case let .success(contactName):
-                        successContent(contactName: contactName)
-
-                    case let .failed(error):
-                        failedContent(error: error)
-                    }
+                    multiStageContent
                 }
             }
             .navigationTitle(localizationService.t("nav.exchange"))
@@ -249,7 +211,6 @@ struct FaceToFaceExchangeView: View {
         // TODO: Replace placeholder with actual serialized contact card from identity
         let localCard = "Vauchi User".data(using: .utf8)!
         viewModel.startMultiStageExchange(localCard: localCard)
-        multiStageActive = true
         protocolState = .idle
         startQrCycleTimer()
         startStatePollTimer()
@@ -289,7 +250,6 @@ struct FaceToFaceExchangeView: View {
 
     private func cancelAndDismiss() {
         viewModel.cancelMultiStageExchange()
-        viewModel.clearActiveSession()
     }
 
     private func stopQrCycleTimer() {
@@ -305,7 +265,6 @@ struct FaceToFaceExchangeView: View {
     private func stopAllTimers() {
         stopQrCycleTimer()
         stopStatePollTimer()
-        stopTimer()
     }
 
     private func transferProgressText(received: UInt8, total: UInt8) -> String {
@@ -321,164 +280,6 @@ struct FaceToFaceExchangeView: View {
         // Pass raw QR string to core — do NOT parse content in Swift
         let newState = viewModel.processMultiStageQr(raw: code)
         protocolState = newState
-    }
-
-    // MARK: - Legacy Scanning State (QR with camera overlay in center)
-
-    private var scanningContent: some View {
-        VStack(spacing: 12) {
-            Spacer()
-
-            if isLoading {
-                ProgressView()
-            } else if hasError {
-                VStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.title2)
-                        .foregroundColor(.orange)
-                    Text(localizationService.t("exchange.qr_error"))
-                        .font(.caption)
-                    Button("Retry") { loadExchangeData() }
-                        .buttonStyle(.bordered)
-                        .font(.caption)
-                }
-            } else if let image = qrImage {
-                // QR code — full width for easy scanning by peer
-                Image(uiImage: image)
-                    .interpolation(.none)
-                    .resizable()
-                    .scaledToFit()
-                    .padding(2)
-                    .background(Color.white)
-                    .cornerRadius(8)
-                    .padding(.horizontal, 2)
-                    .accessibilityLabel("Your contact exchange QR code")
-
-                // Camera scanner runs headless (no UIView) — just QR metadata detection
-
-                HStack(spacing: 12) {
-                    // Timer
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                            .font(.caption2)
-                        Text(localizationService.t("exchange.expires_in", args: ["time": formatTime(timeRemaining)]))
-                            .font(.caption2)
-                    }
-                    .foregroundColor(timeRemaining < 60 ? .orange : .secondary)
-
-                    // Refresh
-                    Button(action: { loadExchangeData() }) {
-                        Label("Refresh", systemImage: "arrow.clockwise")
-                            .font(.caption2)
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.mini)
-                    .disabled(timeRemaining > 240)
-                }
-
-                Text("Point camera at other phone's QR")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGray6))
-    }
-
-    // MARK: - Legacy QR With Status (intermediate states — QR stays visible for peer)
-
-    private func qrWithStatusContent(status: String) -> some View {
-        VStack(spacing: 4) {
-            // Status at top, compact
-            HStack(spacing: 6) {
-                ProgressView()
-                Text(status)
-                    .font(.callout)
-                    .fontWeight(.medium)
-            }
-            .padding(.top, 8)
-
-            // QR stays FULL WIDTH so peer can still scan
-            if let image = qrImage {
-                Image(uiImage: image)
-                    .interpolation(.none)
-                    .resizable()
-                    .scaledToFit()
-                    .background(Color.white)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGray6))
-    }
-
-    // MARK: - Success State
-
-    private func successContent(contactName: String) -> some View {
-        VStack(spacing: 16) {
-            Spacer()
-
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 64))
-                .foregroundColor(.green)
-
-            Text("Contact exchanged!")
-                .font(.title2)
-                .fontWeight(.semibold)
-
-            Text("Successfully added \(contactName)")
-                .font(.body)
-                .foregroundColor(.secondary)
-
-            Button(action: resetToScanning) {
-                Text(localizationService.t("action.done"))
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding(.horizontal)
-
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    // MARK: - Failed State
-
-    private func failedContent(error: String) -> some View {
-        VStack(spacing: 16) {
-            Spacer()
-
-            Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 64))
-                .foregroundColor(.red)
-
-            Text("Exchange failed")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(.red)
-
-            Text(error)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-
-            Button(action: resetToScanning) {
-                Text(localizationService.t("action.retry"))
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding(.horizontal)
-
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Permission Needed State
@@ -523,13 +324,11 @@ struct FaceToFaceExchangeView: View {
         case .authorized:
             cameraGranted = true
             permissionsChecked = true
-            if !multiStageActive { loadExchangeData() }
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 DispatchQueue.main.async {
                     cameraGranted = granted
                     permissionsChecked = true
-                    if granted, !multiStageActive { loadExchangeData() }
                 }
             }
         default:
@@ -543,96 +342,8 @@ struct FaceToFaceExchangeView: View {
     private func startScannerIfReady() {
         guard cameraGranted else { return }
         qrScanner.start(useFrontCamera: useFrontCamera) { code in
-            if multiStageActive {
-                handleMultiStageScannedCode(code)
-            } else {
-                handleScannedCode(code)
-            }
+            handleMultiStageScannedCode(code)
         }
-    }
-
-    private func handleScannedCode(_ code: String) {
-        guard code.hasPrefix("wb://"), flowState == .scanning else { return }
-
-        NSLog("[Exchange] Scanned QR, processing on held session...")
-
-        // Step 1: Process the scanned QR on the held session
-        let peerName: String
-        do {
-            peerName = try viewModel.processScannedQr(qrData: code)
-        } catch {
-            NSLog("[Exchange] processQr failed: \(error.localizedDescription)")
-            flowState = .failed(error: "Invalid QR: \(error.localizedDescription)")
-            return
-        }
-        NSLog("[Exchange] Peer recognized, completing exchange...")
-        flowState = .scanned(peerName: peerName)
-
-        // Step 2: Complete exchange — mutual QR scan proves proximity
-        Task {
-            flowState = .completing
-            do {
-                let result = try await viewModel.completeExchangeAfterCoordination()
-                NSLog("[Exchange] Exchange completed: success=\(result.success)")
-                if result.success {
-                    flowState = .success(contactName: result.contactName)
-                } else {
-                    flowState = .failed(error: result.errorMessage ?? "Exchange failed")
-                }
-            } catch {
-                NSLog("[Exchange] Exchange FAILED: \(error.localizedDescription)")
-                flowState = .failed(error: error.localizedDescription)
-            }
-        }
-    }
-
-    private func resetToScanning() {
-        viewModel.clearActiveSession()
-        flowState = .scanning
-        loadExchangeData()
-    }
-
-    private func loadExchangeData() {
-        isLoading = true
-        hasError = false
-        stopTimer()
-
-        do {
-            exchangeData = try viewModel.generateExchangeData()
-            if let data = exchangeData {
-                qrImage = generateQRCode(from: data.qrData)
-                timeRemaining = data.timeRemaining
-                startTimer()
-            }
-            hasError = exchangeData == nil
-        } catch {
-            hasError = true
-        }
-
-        isLoading = false
-    }
-
-    // MARK: - Timer
-
-    private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if timeRemaining > 0 {
-                timeRemaining -= 1
-            } else {
-                loadExchangeData()
-            }
-        }
-    }
-
-    private func stopTimer() {
-        timer?.invalidate()
-        timer = nil
-    }
-
-    private func formatTime(_ seconds: TimeInterval) -> String {
-        let mins = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        return String(format: "%d:%02d", mins, secs)
     }
 
     // MARK: - QR Generation

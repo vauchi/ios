@@ -1006,90 +1006,6 @@ class VauchiViewModel: ObservableObject {
         multiStageSession = nil
     }
 
-    // MARK: - Exchange (Legacy Single-QR)
-
-    /// Active exchange session — MUST be reused for the entire exchange lifecycle
-    private var activeExchangeSession: MobileExchangeSession?
-    private var activeExchangeData: ExchangeDataInfo?
-
-    func generateQRData() throws -> String {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        let sessionData = try repository.generateExchangeQrWithSession()
-        return sessionData.exchangeData.qrData
-    }
-
-    /// Generate exchange QR and store the session for later reuse.
-    func generateExchangeData() throws -> ExchangeDataInfo {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        let sessionData = try repository.generateExchangeQrWithSession()
-        activeExchangeSession = sessionData.session
-        let info = ExchangeDataInfo(
-            qrData: sessionData.exchangeData.qrData,
-            publicId: sessionData.exchangeData.publicId,
-            expiresAt: Date(timeIntervalSince1970: TimeInterval(sessionData.exchangeData.expiresAt)),
-            audioChallenge: ExchangeDataInfo.extractAudioChallenge(from: sessionData.exchangeData.qrData)
-        )
-        activeExchangeData = info
-        NSLog("[Exchange] Session created, QR generated (challenge=\(info.audioChallenge?.count ?? 0) bytes)")
-        return info
-    }
-
-    /// Process a scanned QR on the held session and return the peer display name.
-    func processScannedQr(qrData: String) throws -> String {
-        guard let session = activeExchangeSession else {
-            NSLog("[Exchange] processScannedQr: no active session")
-            throw VauchiRepositoryError.exchangeFailed("No active exchange session")
-        }
-        NSLog("[Exchange] processScannedQr: processing on held session...")
-        try session.processQr(qrData: qrData)
-        let name = session.peerDisplayName() ?? "Unknown"
-        NSLog("[Exchange] processScannedQr: peer recognized")
-        return name
-    }
-
-    /// Complete the exchange using the held session.
-    func completeExchangeAfterCoordination() async throws -> ExchangeResultInfo {
-        guard let session = activeExchangeSession, let repository else {
-            NSLog("[Exchange] completeExchange: no active session")
-            throw VauchiRepositoryError.exchangeFailed("No active exchange session")
-        }
-        let peerName = session.peerDisplayName() ?? "Unknown"
-        NSLog("[Exchange] completeExchange: starting state machine steps...")
-        NSLog("[Exchange]   confirmProximity...")
-        try session.confirmProximity()
-        NSLog("[Exchange]   theyScannedOurQr...")
-        try session.theyScannedOurQr()
-        NSLog("[Exchange]   performKeyAgreement...")
-        try session.performKeyAgreement()
-        NSLog("[Exchange]   completeCardExchange...")
-        try session.completeCardExchange(theirCardName: peerName)
-        NSLog("[Exchange]   finalizeExchange...")
-        let result = try repository.finalizeExchange(session: session)
-        NSLog("[Exchange] Exchange completed: success=\(result.success)")
-        clearActiveSession()
-        await loadContacts()
-        if result.success {
-            await autoRemoveDemoContact()
-        }
-        return ExchangeResultInfo(
-            contactId: result.contactId,
-            contactName: result.contactName,
-            success: result.success,
-            errorMessage: result.errorMessage
-        )
-    }
-
-    func clearActiveSession() {
-        activeExchangeSession = nil
-        activeExchangeData = nil
-    }
-
     // Proximity stubs — ultrasonic removed from exchange. Kept for device linking views.
     @Published var proximitySupported = false
     var proximityCapability: String {
@@ -1108,24 +1024,11 @@ class VauchiViewModel: ObservableObject {
 
     /// Start an exchange from a deep link payload.
     /// Called after the user grants consent in the deep link consent gate (SP-9).
-    /// The payload is treated the same as scanned QR data.
-    func startExchangeWithDeepLink(payload: String) {
-        Task {
-            do {
-                let peerName = try processScannedQr(qrData: payload)
-                let result = try await completeExchangeAfterCoordination()
-                if result.success {
-                    showSuccess("Exchange Complete",
-                                message: "Contact \(result.contactName) added successfully.")
-                } else {
-                    showError("Exchange Failed",
-                              message: result.errorMessage ?? "Unknown error")
-                }
-            } catch {
-                showError("Exchange Failed",
-                          message: error.localizedDescription)
-            }
-        }
+    /// TODO: Deep links use the old wb:// single-QR format. Re-implement when
+    /// the multi-stage protocol supports deep link payloads.
+    func startExchangeWithDeepLink(payload _: String) {
+        showError("Not Supported",
+                  message: "Deep link exchange is not yet supported with the new protocol.")
     }
 
     // MARK: - Sync
