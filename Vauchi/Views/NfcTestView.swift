@@ -72,7 +72,7 @@ struct NfcTestView: View {
                 case let .success(exchangeResult):
                     let keyHex = exchangeResult.remoteIdentityKey
                         .prefix(8)
-                        .map { String(format: "%02x", UInt8(bitPattern: $0)) }
+                        .map { String(format: "%02x", $0) }
                         .joined()
                     result = "Exchange complete!\n" +
                         "Remote: \(exchangeResult.remoteDisplayName)\n" +

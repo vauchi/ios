@@ -20,7 +20,7 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
 
     enum ExchangeResult {
         case success(MobileNfcExchangeResult)
-        case relayFallback(exchangeId: [UInt8])
+        case relayFallback(exchangeId: Data)
         case error(String)
     }
 
@@ -116,7 +116,7 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
         }
 
         // Phase 1: Send key offer
-        let keyOfferData: [Int8]
+        let keyOfferData: Data
         do {
             keyOfferData = try handshake.createKeyOffer()
         } catch {
@@ -129,7 +129,7 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
             instructionCode: Self.insKeyOffer,
             p1Parameter: 0x00,
             p2Parameter: 0x00,
-            data: Data(keyOfferData.map { UInt8(bitPattern: $0) }),
+            data: keyOfferData,
             expectedResponseLength: -1
         )
 
@@ -156,15 +156,15 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
                 session.invalidate(errorMessage: "Invalid ack length")
                 return
             }
-            let ackBytes = Array(responseData[2 ..< (2 + ackLen)]).map { Int8(bitPattern: $0) }
-            let encryptedCard = Array(responseData[(2 + ackLen)...]).map { Int8(bitPattern: $0) }
+            let ackBytes = responseData[2 ..< (2 + ackLen)]
+            let encryptedCard = responseData[(2 + ackLen)...]
 
             // Phase 2: Process key ack + encrypted card
-            let ourEncryptedCard: [Int8]
+            let ourEncryptedCard: Data
             do {
                 ourEncryptedCard = try handshake.processKeyAck(
-                    theirAckBytes: ackBytes,
-                    theirEncryptedCard: encryptedCard
+                    theirAckBytes: Data(ackBytes),
+                    theirEncryptedCard: Data(encryptedCard)
                 )
             } catch {
                 handleTagLoss(handshake: handshake, session: session, error: error)
@@ -177,7 +177,7 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
                 instructionCode: Self.insEncryptedCard,
                 p1Parameter: 0x00,
                 p2Parameter: 0x00,
-                data: Data(ourEncryptedCard.map { UInt8(bitPattern: $0) }),
+                data: ourEncryptedCard,
                 expectedResponseLength: -1
             )
 
@@ -211,7 +211,7 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
         do {
             let exchangeId = try handshake.enterRelayFallback()
             session.invalidate(errorMessage: "Connection lost — continuing via relay")
-            complete(with: .relayFallback(exchangeId: exchangeId.map { UInt8(bitPattern: $0) }))
+            complete(with: .relayFallback(exchangeId: exchangeId))
         } catch {
             session.invalidate(errorMessage: "Exchange failed: \(error.localizedDescription)")
             complete(with: .error(error.localizedDescription))
