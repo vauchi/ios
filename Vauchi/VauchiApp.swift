@@ -6,6 +6,7 @@
 // Main entry point for Vauchi iOS app
 
 import SwiftUI
+import VauchiMobile
 
 @main
 struct VauchiApp: App {
@@ -15,7 +16,9 @@ struct VauchiApp: App {
     @State private var pendingDeepLinkPayload: String?
 
     init() {
-        print("VauchiApp: init starting")
+        let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+        let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        NSLog("[Vauchi] Build: v%@ (%@) core=%@", v, b, coreVersion())
         // Register background tasks
         BackgroundSyncService.shared.registerBackgroundTasks()
         print("VauchiApp: background tasks registered")

@@ -1043,7 +1043,11 @@ class VauchiRepository {
                 errorMessage: result.errorMessage
             )
         } catch let error as MobileError {
+            NSLog("[Exchange] Failed: %@", "\(error)")
             throw VauchiRepositoryError.from(error)
+        } catch {
+            NSLog("[Exchange] Failed: %@", "\(error)")
+            throw error
         }
     }
 
