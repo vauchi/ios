@@ -598,6 +598,7 @@ class FaceToFaceCameraView: UIView {
         previewLayer?.removeFromSuperlayer()
 
         let session = AVCaptureSession()
+        session.sessionPreset = .hd1920x1080
 
         // Try requested position first, fall back to other if unavailable
         var device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
