@@ -15,6 +15,7 @@ import VauchiMobile
 struct FaceToFaceExchangeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
+    var switchToContacts: (() -> Void)?
 
     // MARK: - Multi-stage exchange state
 
@@ -23,6 +24,7 @@ struct FaceToFaceExchangeView: View {
     @State private var qrCycleTimer: Timer?
     @State private var statePollTimer: Timer?
     @State private var previousBrightness: CGFloat = 0.5
+    @State private var graceCompleted = false
 
     // MARK: - Shared state
 
@@ -100,7 +102,11 @@ struct FaceToFaceExchangeView: View {
                 multiStageQrDisplay(statusText: "Verifying exchange...", showProgress: true)
 
             case .complete:
-                multiStageSuccessContent
+                if !graceCompleted {
+                    multiStageQrDisplay(statusText: "Completing exchange...", showProgress: true)
+                } else {
+                    multiStageSuccessContent
+                }
 
             case let .failed(reason):
                 multiStageFailedContent(reason: reason)
@@ -209,9 +215,11 @@ struct FaceToFaceExchangeView: View {
 
     private func startMultiStageSession() {
         // TODO: Replace placeholder with actual serialized contact card from identity
-        let localCard = "Vauchi User".data(using: .utf8)!
+        let localCard = Data("Vauchi User".utf8)
         viewModel.startMultiStageExchange(localCard: localCard)
         protocolState = .idle
+        graceCompleted = false
+        multiStageQrImage = nil
         startQrCycleTimer()
         startStatePollTimer()
     }
@@ -221,7 +229,9 @@ struct FaceToFaceExchangeView: View {
         qrCycleTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
             guard let payload = viewModel.getMultiStageDisplayQr() else {
                 // Core returned nil — grace period expired or not started.
-                // Stop QR cycling but keep state poll alive for UI updates.
+                if case .complete = protocolState {
+                    graceCompleted = true
+                }
                 stopQrCycleTimer()
                 return
             }
@@ -250,12 +260,14 @@ struct FaceToFaceExchangeView: View {
     private func retryMultiStageExchange() {
         viewModel.cancelMultiStageExchange()
         stopAllTimers()
-        multiStageQrImage = nil
+        qrScanner.stop()
         startMultiStageSession()
+        startScannerIfReady()
     }
 
     private func cancelAndDismiss() {
         viewModel.cancelMultiStageExchange()
+        switchToContacts?()
     }
 
     private func stopQrCycleTimer() {
@@ -382,6 +394,9 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
     private var onQrScanned: ((String) -> Void)?
     private var lastScannedCode: String?
     private var lastScanTime: Date?
+    /// Retain a 1x1 preview layer — prevents AVCaptureMetadataOutput from
+    /// silently stopping callbacks on some iOS versions (known Apple bug).
+    private var dummyPreviewLayer: AVCaptureVideoPreviewLayer?
 
     func start(useFrontCamera: Bool, onQrScanned: @escaping (String) -> Void) {
         self.onQrScanned = onQrScanned
@@ -392,6 +407,7 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
     func stop() {
         captureSession?.stopRunning()
         captureSession = nil
+        dummyPreviewLayer = nil
         currentPosition = .unspecified
     }
 
@@ -405,7 +421,7 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
         captureSession?.stopRunning()
 
         let session = AVCaptureSession()
-        session.sessionPreset = .hd1280x720
+        session.sessionPreset = .medium
 
         var device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
         var actualPosition = position
@@ -416,6 +432,13 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
         }
 
         guard let cam = device, let input = try? AVCaptureDeviceInput(device: cam) else { return }
+
+        // Enable continuous auto-focus for better QR readability
+        if cam.isFocusModeSupported(.continuousAutoFocus) {
+            try? cam.lockForConfiguration()
+            cam.focusMode = .continuousAutoFocus
+            cam.unlockForConfiguration()
+        }
 
         if session.canAddInput(input) {
             session.addInput(input)
@@ -429,6 +452,11 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
                 output.metadataObjectTypes = [.qr]
             }
         }
+
+        // Retain a dummy preview layer to keep the metadata pipeline active
+        let preview = AVCaptureVideoPreviewLayer(session: session)
+        preview.frame = CGRect(x: 0, y: 0, width: 1, height: 1)
+        dummyPreviewLayer = preview
 
         captureSession = session
         currentPosition = actualPosition
@@ -468,6 +496,6 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
 }
 
 #Preview {
-    FaceToFaceExchangeView()
+    FaceToFaceExchangeView(switchToContacts: {})
         .environmentObject(VauchiViewModel())
 }

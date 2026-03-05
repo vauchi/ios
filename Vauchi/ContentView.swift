@@ -98,28 +98,33 @@ struct LoadingView: View {
 
 struct MainTabView: View {
     @ObservedObject private var localizationService = LocalizationService.shared
+    @State private var selectedTab = 0
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             HomeView()
                 .tabItem {
                     Label(localizationService.t("nav.home"), systemImage: "person.crop.rectangle")
                 }
+                .tag(0)
 
             ContactsView()
                 .tabItem {
                     Label(localizationService.t("nav.contacts"), systemImage: "person.2")
                 }
+                .tag(1)
 
-            FaceToFaceExchangeView()
+            FaceToFaceExchangeView(switchToContacts: { selectedTab = 1 })
                 .tabItem {
                     Label(localizationService.t("nav.exchange"), systemImage: "qrcode")
                 }
+                .tag(2)
 
             SettingsView()
                 .tabItem {
                     Label(localizationService.t("nav.settings"), systemImage: "gear")
                 }
+                .tag(3)
         }
         .accentColor(.cyan)
     }
