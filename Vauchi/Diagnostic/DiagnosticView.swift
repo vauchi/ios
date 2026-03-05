@@ -30,6 +30,19 @@ struct DiagnosticView: View {
                 diagButton("C: Emit") { testCrossDeviceEmit() }
             }
 
+            Divider()
+            Text("Existing Code Track:").font(.caption).bold()
+            HStack(spacing: 8) {
+                Button("A: Loopback (existing)") {
+                    let diag = ExistingCodeDiagnostic()
+                    runAsync { diag.runLoopbackTest(log: log) }
+                }.disabled(running)
+                Button("B: Noise (existing)") {
+                    let diag = ExistingCodeDiagnostic()
+                    runAsync { diag.runNoiseFloorTest(log: log) }
+                }.disabled(running)
+            }
+
             if running {
                 ProgressView("Running...")
                     .padding(.vertical, 4)
