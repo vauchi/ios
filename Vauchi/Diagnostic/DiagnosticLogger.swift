@@ -3,12 +3,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import Foundation
-import os.log
 import UIKit
 
-enum DiagnosticLogger {
-    private static let logger = Logger(subsystem: "ULTRASONIC_DIAG", category: "diagnostic")
+private let kTag = "ULTRASONIC_DIAG"
 
+enum DiagnosticLogger {
     static func logResult(
         test: String, track: String,
         frequencyHz: Int? = nil, snrDb: Double? = nil,
@@ -30,7 +29,7 @@ enum DiagnosticLogger {
 
         if let data = try? JSONSerialization.data(withJSONObject: dict),
            let json = String(data: data, encoding: .utf8) {
-            logger.info("\(json)")
+            NSLog("[%@] %@", kTag, json)
         }
     }
 
@@ -43,7 +42,7 @@ enum DiagnosticLogger {
         ]
         if let data = try? JSONSerialization.data(withJSONObject: dict),
            let json = String(data: data, encoding: .utf8) {
-            logger.error("\(json)")
+            NSLog("[%@] ERROR %@", kTag, json)
         }
     }
 }
