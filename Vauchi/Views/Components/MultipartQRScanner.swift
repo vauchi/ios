@@ -284,6 +284,7 @@ class MultipartCameraView: UIView {
 
     private func initializeCamera() {
         let session = AVCaptureSession()
+        session.sessionPreset = .hd1280x720
 
         guard let device = AVCaptureDevice.default(for: .video),
               let input = try? AVCaptureDeviceInput(device: device)
