@@ -43,6 +43,12 @@ struct DiagnosticView: View {
                 }.disabled(running)
             }
 
+            NavigationLink("QR Camera Tuner") {
+                QrTunerView()
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(.top, 8)
+
             if running {
                 ProgressView("Running...")
                     .padding(.vertical, 4)
