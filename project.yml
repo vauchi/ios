@@ -30,6 +30,7 @@ targets:
       - path: Vauchi
         excludes:
           - "**/*.xcassets"
+          - "Generated"
     dependencies:
       - package: VauchiMobile
         product: VauchiMobile
