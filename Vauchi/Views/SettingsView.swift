@@ -438,10 +438,6 @@ struct SettingsView: View {
                                 .accessibilityHidden(true)
                         }
                     }
-
-                    NavigationLink(destination: QRDiagnosticView()) {
-                        Label("QR Diagnostic", systemImage: "qrcode.viewfinder")
-                    }
                 }
 
                 // Support section
@@ -473,8 +469,14 @@ struct SettingsView: View {
 
                 // Diagnostics
                 Section("Diagnostics") {
+                    NavigationLink(destination: QRDiagnosticView()) {
+                        Label("QR Diagnostic", systemImage: "qrcode.viewfinder")
+                    }
                     NavigationLink("Ultrasonic Diagnostic") {
                         DiagnosticView()
+                    }
+                    NavigationLink(destination: NfcTestView()) {
+                        Label("NFC Exchange Test", systemImage: "wave.3.right")
                     }
                 }
 

@@ -33,6 +33,7 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
     /// Vauchi NFC exchange AID: F0564155434849
     private static let vauchiAID = Data([0xF0, 0x56, 0x41, 0x55, 0x43, 0x48, 0x49])
     private static let insKeyOffer: UInt8 = 0xE0
+    private static let insGetEncryptedCard: UInt8 = 0xE1
     private static let insEncryptedCard: UInt8 = 0xE2
 
     // MARK: - Public API
@@ -133,7 +134,8 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
             expectedResponseLength: -1
         )
 
-        tag.sendCommand(apdu: offerApdu) { [weak self] responseData, sw1, sw2, error in
+        // Phase 2a: Send key offer → receive key ack
+        tag.sendCommand(apdu: offerApdu) { [weak self] ackData, sw1, sw2, error in
             guard let self else { return }
 
             if let error {
@@ -146,61 +148,70 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
                 return
             }
 
-            // Parse response: [ack_len_hi, ack_len_lo, ack_bytes..., card_bytes...]
-            guard responseData.count >= 2 else {
-                session.invalidate(errorMessage: "Response too short")
-                return
-            }
-            let ackLen = (Int(responseData[0]) << 8) | Int(responseData[1])
-            guard responseData.count >= 2 + ackLen else {
-                session.invalidate(errorMessage: "Invalid ack length")
-                return
-            }
-            let ackBytes = responseData[2 ..< (2 + ackLen)]
-            let encryptedCard = responseData[(2 + ackLen)...]
-
-            // Phase 2: Process key ack + encrypted card
-            let ourEncryptedCard: Data
-            do {
-                ourEncryptedCard = try handshake.processKeyAck(
-                    theirAckBytes: Data(ackBytes),
-                    theirEncryptedCard: Data(encryptedCard)
-                )
-            } catch {
-                handleTagLoss(handshake: handshake, session: session, error: error)
-                return
-            }
-
-            // Phase 3: Send our encrypted card
-            let cardApdu = NFCISO7816APDU(
+            // Phase 2b: Fetch encrypted card (separate APDU to stay under HCE response size limits)
+            let getCardApdu = NFCISO7816APDU(
                 instructionClass: 0x00,
-                instructionCode: Self.insEncryptedCard,
+                instructionCode: Self.insGetEncryptedCard,
                 p1Parameter: 0x00,
                 p2Parameter: 0x00,
-                data: ourEncryptedCard,
+                data: Data(),
                 expectedResponseLength: -1
             )
 
-            tag.sendCommand(apdu: cardApdu) { _, sw1_2, sw2_2, error2 in
-                if let error2 {
-                    self.handleTagLoss(handshake: handshake, session: session, error: error2)
+            tag.sendCommand(apdu: getCardApdu) { cardData, sw1_c, sw2_c, errorC in
+                if let errorC {
+                    self.handleTagLoss(handshake: handshake, session: session, error: errorC)
                     return
                 }
 
-                guard sw1_2 == 0x90, sw2_2 == 0x00 else {
-                    session.invalidate(errorMessage: "Card exchange rejected")
+                guard sw1_c == 0x90, sw2_c == 0x00 else {
+                    session.invalidate(errorMessage: "Failed to get encrypted card")
                     return
                 }
 
-                // Confirm send success
+                // Phase 2: Process key ack + encrypted card
+                let ourEncryptedCard: Data
                 do {
-                    let result = try handshake.confirmSendSuccess()
-                    session.alertMessage = "Exchange complete!"
-                    session.invalidate()
-                    self.complete(with: .success(result))
+                    ourEncryptedCard = try handshake.processKeyAck(
+                        theirAckBytes: ackData,
+                        theirEncryptedCard: cardData
+                    )
                 } catch {
-                    session.invalidate(errorMessage: "Exchange failed: \(error)")
-                    self.complete(with: .error(error.localizedDescription))
+                    self.handleTagLoss(handshake: handshake, session: session, error: error)
+                    return
+                }
+
+                // Phase 3: Send our encrypted card
+                let cardApdu = NFCISO7816APDU(
+                    instructionClass: 0x00,
+                    instructionCode: Self.insEncryptedCard,
+                    p1Parameter: 0x00,
+                    p2Parameter: 0x00,
+                    data: ourEncryptedCard,
+                    expectedResponseLength: -1
+                )
+
+                tag.sendCommand(apdu: cardApdu) { _, sw1_2, sw2_2, error2 in
+                    if let error2 {
+                        self.handleTagLoss(handshake: handshake, session: session, error: error2)
+                        return
+                    }
+
+                    guard sw1_2 == 0x90, sw2_2 == 0x00 else {
+                        session.invalidate(errorMessage: "Card exchange rejected")
+                        return
+                    }
+
+                    // Confirm send success
+                    do {
+                        let result = try handshake.confirmSendSuccess()
+                        session.alertMessage = "Exchange complete!"
+                        session.invalidate()
+                        self.complete(with: .success(result))
+                    } catch {
+                        session.invalidate(errorMessage: "Exchange failed: \(error)")
+                        self.complete(with: .error(error.localizedDescription))
+                    }
                 }
             }
         }
