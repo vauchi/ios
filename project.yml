@@ -45,6 +45,7 @@ targets:
         CODE_SIGN_STYLE: Automatic
         CODE_SIGNING_REQUIRED: YES
         CODE_SIGNING_ALLOWED: YES
+        CODE_SIGN_ENTITLEMENTS: Vauchi/Vauchi.entitlements
     info:
       path: Vauchi/Info.plist
       properties:
@@ -64,6 +65,10 @@ targets:
               - vauchi
             CFBundleURLName: app.vauchi.ios
         NSCameraUsageDescription: "Vauchi uses the camera to scan QR codes for contact exchange."
+        NSMicrophoneUsageDescription: "Vauchi uses the microphone for ultrasonic proximity verification during contact exchange."
+        NFCReaderUsageDescription: "Vauchi uses NFC to exchange contact cards with nearby devices."
+        com.apple.developer.nfc.readersession.iso7816.select-identifiers:
+          - F0564155434849
 
   VauchiTests:
     type: bundle.unit-test
