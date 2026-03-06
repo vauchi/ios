@@ -334,9 +334,6 @@ struct QrTunerView: View {
         let features = detector?.features(in: ciImage) ?? []
         let decoded = features.contains { $0 is CIQRCodeFeature }
 
-        // Release the retained pixel buffer (see FrameCaptureDelegate.captureOutput)
-        CVPixelBufferRelease(pixelBuffer)
-
         let endNs = DispatchTime.now().uptimeNanoseconds
         let latencyMs = Float(endNs - startNs) / 1_000_000.0
 
@@ -416,12 +413,10 @@ private final class FrameCaptureDelegate: NSObject, AVCaptureVideoDataOutputSamp
         self.continuation = nil
         lock.unlock()
 
+        // CMSampleBufferGetImageBuffer returns unretained; assigning to a
+        // Swift optional lets ARC retain the pixel buffer automatically so
+        // it outlives the sample buffer.
         let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
-        // Retain the pixel buffer so it outlives the sample buffer.
-        // Caller is responsible for releasing via CVPixelBufferRelease.
-        if let pixelBuffer {
-            CVPixelBufferRetain(pixelBuffer)
-        }
         continuation.resume(returning: pixelBuffer)
     }
 }
