@@ -4,6 +4,7 @@
 
 #if DEBUG
     import AVFoundation
+    import CoreImage.CIFilterBuiltins
     import SwiftUI
 
     // MARK: - Camera Config
@@ -232,6 +233,7 @@
     /// - `nil`: Interactive mode with buttons
     struct QrCameraTunerView: View {
         /// Auto-test mode: "sweep", "front", "quick", or nil for interactive.
+        /// Append "-dual" for dual mode (e.g. "front-dual").
         var autoTest: String?
 
         @State private var logLines: [String] = []
@@ -240,6 +242,8 @@
         @State private var results: [QrTunerConfigResult] = []
         @State private var cameraAuthorized = false
         @State private var errorMessage: String?
+        @State private var dualMode = false
+        @State private var qrOverlayImage: UIImage?
 
         /// Measurement window per config (seconds). Must be >= 3s to match Android's ~30 frames.
         private static let testDurationSeconds: Double = 4.0
@@ -287,6 +291,19 @@
                         .buttonStyle(.borderedProminent)
                         .disabled(running || !cameraAuthorized)
                     }
+
+                    Toggle("Dual Mode (show QR while scanning)", isOn: $dualMode)
+                        .font(.caption)
+                        .padding(.horizontal)
+                        .onChange(of: dualMode) { isDual in
+                            if isDual {
+                                qrOverlayImage = generateQrImage(
+                                    "wb://BIDIRECTIONAL_TEST_iPhoneSE_\(Int(Date().timeIntervalSince1970))"
+                                )
+                            } else {
+                                qrOverlayImage = nil
+                            }
+                        }
                 }
 
                 if running {
@@ -300,6 +317,23 @@
                     resultsSection()
                 }
 
+                // Dual mode: show QR overlay below results (simulates bidirectional exchange)
+                if dualMode, let qrImage = qrOverlayImage {
+                    VStack(spacing: 4) {
+                        Text("DUAL MODE: QR displayed while scanning")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Image(uiImage: qrImage)
+                            .interpolation(.none)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 160, height: 160)
+                    }
+                    .padding(8)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+                }
+
                 logSection()
             }
             .padding()
@@ -309,7 +343,17 @@
                 // Clear log file at start
                 try? "".write(to: Self.logFileURL, atomically: true, encoding: .utf8)
                 if let mode = autoTest {
-                    startSweep(mode: mode)
+                    // Parse dual mode suffix
+                    if mode.hasSuffix("-dual") {
+                        dualMode = true
+                        qrOverlayImage = generateQrImage(
+                            "wb://BIDIRECTIONAL_TEST_iPhoneSE_\(Int(Date().timeIntervalSince1970))"
+                        )
+                        log("DUAL MODE: Showing QR overlay while scanning")
+                        startSweep(mode: String(mode.dropLast(5))) // strip "-dual"
+                    } else {
+                        startSweep(mode: mode)
+                    }
                 }
             }
         }
@@ -629,6 +673,22 @@
                     ))
                 }
             }
+        }
+
+        // MARK: - QR Generation (Dual Mode)
+
+        /// Generate a QR code image using Core Image for dual mode overlay.
+        private func generateQrImage(_ data: String) -> UIImage? {
+            guard let filter = CIFilter(name: "CIQRCodeGenerator") else { return nil }
+            filter.setValue(data.data(using: .utf8), forKey: "inputMessage")
+            filter.setValue("M", forKey: "inputCorrectionLevel")
+            guard let ciImage = filter.outputImage else { return nil }
+            // Scale up from tiny CIFilter output to usable size
+            let scale = 10.0
+            let transformed = ciImage.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+            let context = CIContext()
+            guard let cgImage = context.createCGImage(transformed, from: transformed.extent) else { return nil }
+            return UIImage(cgImage: cgImage)
         }
 
         // MARK: - Logging

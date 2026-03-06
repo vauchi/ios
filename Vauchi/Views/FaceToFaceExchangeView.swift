@@ -12,6 +12,35 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 import VauchiMobile
 
+/// QR code colors: gray reduces screen glare at close face-to-face distance.
+private let qrForegroundColor = CIColor(red: 64.0 / 255, green: 64.0 / 255, blue: 64.0 / 255) // #404040
+private let qrBackgroundColor = CIColor(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255) // #E0E0E0
+
+/// Warm beige background: soft, non-reflective.
+private let exchangeBackgroundColor = Color(red: 0.96, green: 0.94, blue: 0.92) // #F5F0EB
+
+private enum ScanQuality {
+    case good // Green — QR being scanned right now
+    case fair // Orange — scanned recently but stale
+    case none // Red — no scan detected
+
+    var color: Color {
+        switch self {
+        case .good: Color(red: 0.298, green: 0.686, blue: 0.314) // #4CAF50
+        case .fair: Color(red: 1.0, green: 0.596, blue: 0.0) // #FF9800
+        case .none: Color(red: 0.957, green: 0.263, blue: 0.212) // #F44336
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .good: "Scanning"
+        case .fair: "Weak signal"
+        case .none: "No QR detected"
+        }
+    }
+}
+
 struct FaceToFaceExchangeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
@@ -23,8 +52,11 @@ struct FaceToFaceExchangeView: View {
     @State private var protocolState: MobileProtocolState = .idle
     @State private var qrCycleTimer: Timer?
     @State private var statePollTimer: Timer?
+    @State private var scanQualityTimer: Timer?
     @State private var previousBrightness: CGFloat = 0.5
     @State private var graceCompleted = false
+    @State private var lastScanTimestamp: Date?
+    @State private var scanQuality: ScanQuality = .none
 
     // MARK: - Shared state
 
@@ -63,6 +95,7 @@ struct FaceToFaceExchangeView: View {
                 requestPermissions()
                 startScannerIfReady()
                 startMultiStageSession()
+                startScanQualityTimer()
             }
             .onDisappear {
                 UIScreen.main.brightness = previousBrightness
@@ -113,43 +146,93 @@ struct FaceToFaceExchangeView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGray6))
+        .background(exchangeBackgroundColor)
     }
 
     private func multiStageQrDisplay(statusText: String, showProgress: Bool) -> some View {
-        VStack(spacing: 8) {
-            // Status bar
-            HStack(spacing: 6) {
-                if showProgress {
-                    ProgressView()
-                }
-                Text(statusText)
-                    .font(.callout)
-                    .fontWeight(.medium)
-            }
-            .padding(.top, 8)
+        VStack(spacing: 0) {
+            // === TOP: QR code with generous margins ===
+            Spacer().frame(height: 8)
 
-            // Cycling QR code — full width for easy scanning by peer
             if let image = multiStageQrImage {
                 Image(uiImage: image)
                     .interpolation(.none)
                     .resizable()
                     .scaledToFit()
-                    .padding(2)
-                    .background(Color.white)
-                    .cornerRadius(8)
-                    .padding(.horizontal, 2)
+                    .padding(8)
+                    .background(Color(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255))
+                    .cornerRadius(12)
+                    .frame(maxWidth: UIScreen.main.bounds.width * 0.98)
                     .accessibilityLabel("Exchange QR code")
             } else {
-                ProgressView()
-                    .frame(maxWidth: .infinity, minHeight: 200)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255))
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(maxWidth: UIScreen.main.bounds.width * 0.98)
+                    .overlay(ProgressView())
             }
 
-            Text("Point camera at other phone's QR")
-                .font(.caption)
-                .foregroundColor(.secondary)
-
             Spacer()
+
+            // === MIDDLE: Instruction text ===
+            Text("Point camera at other phone's QR")
+                .font(.callout)
+                .foregroundColor(Color(white: 0.4))
+
+            Spacer().frame(height: 16)
+
+            // === BOTTOM: Camera preview + status indicators ===
+            HStack(alignment: .bottom, spacing: 12) {
+                // Small camera preview square
+                if cameraGranted {
+                    CameraPreviewView(previewLayer: qrScanner.previewLayer)
+                        .frame(width: 100, height: 100)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(white: 0.6), lineWidth: 2)
+                        )
+                }
+
+                // Status indicators
+                VStack(alignment: .leading, spacing: 4) {
+                    if showProgress {
+                        HStack(spacing: 6) {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                            Text(statusText)
+                                .font(.caption)
+                                .foregroundColor(Color(white: 0.27))
+                        }
+                    } else {
+                        Text(statusText)
+                            .font(.caption)
+                            .foregroundColor(Color(white: 0.27))
+                    }
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+
+            Spacer().frame(height: 8)
+
+            // === STATUS BAR: scan quality indicator ===
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(scanQuality.color)
+                    .frame(width: 10, height: 10)
+                Text(scanQuality.label)
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .foregroundColor(Color(white: 0.27))
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color(red: 0.93, green: 0.91, blue: 0.89)) // Slightly darker beige
+
+            Spacer().frame(height: 4)
         }
     }
 
@@ -283,6 +366,26 @@ struct FaceToFaceExchangeView: View {
     private func stopAllTimers() {
         stopQrCycleTimer()
         stopStatePollTimer()
+        scanQualityTimer?.invalidate()
+        scanQualityTimer = nil
+    }
+
+    private func startScanQualityTimer() {
+        scanQualityTimer?.invalidate()
+        scanQualityTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
+            guard let lastScan = lastScanTimestamp else {
+                scanQuality = .none
+                return
+            }
+            let elapsed = Date().timeIntervalSince(lastScan)
+            if elapsed < 0.5 {
+                scanQuality = .good
+            } else if elapsed < 2.0 {
+                scanQuality = .fair
+            } else {
+                scanQuality = .none
+            }
+        }
     }
 
     private func transferProgressText(received: UInt8, total: UInt8) -> String {
@@ -295,6 +398,7 @@ struct FaceToFaceExchangeView: View {
     // MARK: - Multi-Stage Scanner
 
     private func handleMultiStageScannedCode(_ code: String) {
+        lastScanTimestamp = Date()
         let newState = viewModel.processMultiStageQr(raw: code)
         protocolState = newState
     }
@@ -367,15 +471,24 @@ struct FaceToFaceExchangeView: View {
 
     // MARK: - QR Generation
 
+    /// Generate a gray QR code image. Gray reduces screen glare at close face-to-face distance.
     private func generateQRCode(from string: String, correctionLevel: String = "L") -> UIImage? {
         let context = CIContext()
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(string.utf8)
         filter.correctionLevel = correctionLevel
 
-        guard let outputImage = filter.outputImage else { return nil }
+        guard let qrImage = filter.outputImage else { return nil }
+
+        // Apply gray colors using CIFalseColor filter
+        let colorFilter = CIFilter.falseColor()
+        colorFilter.inputImage = qrImage
+        colorFilter.color0 = qrForegroundColor // Dark gray for QR modules
+        colorFilter.color1 = qrBackgroundColor // Light gray for background
+
+        guard let coloredImage = colorFilter.outputImage else { return nil }
         let transform = CGAffineTransform(scaleX: 10, y: 10)
-        let scaledImage = outputImage.transformed(by: transform)
+        let scaledImage = coloredImage.transformed(by: transform)
 
         guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else {
             return nil
@@ -384,19 +497,53 @@ struct FaceToFaceExchangeView: View {
     }
 }
 
-// MARK: - Headless QR Scanner (no UIView — prevents camera preview leak)
+// MARK: - Camera Preview (SwiftUI wrapper for AVCaptureVideoPreviewLayer)
 
-/// Runs AVCaptureSession + AVCaptureMetadataOutput without any view hierarchy.
-/// This avoids the GPU-backed camera layer that punches through SwiftUI opacity.
+/// UIView subclass that keeps the preview layer sized to its bounds.
+class PreviewContainerView: UIView {
+    var previewLayer: AVCaptureVideoPreviewLayer? {
+        didSet {
+            oldValue?.removeFromSuperlayer()
+            guard let layer = previewLayer else { return }
+            layer.videoGravity = .resizeAspectFill
+            layer.frame = bounds
+            self.layer.addSublayer(layer)
+        }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        previewLayer?.frame = bounds
+    }
+}
+
+/// Small camera preview that shows what the scanner sees.
+struct CameraPreviewView: UIViewRepresentable {
+    var previewLayer: AVCaptureVideoPreviewLayer?
+
+    func makeUIView(context _: Context) -> PreviewContainerView {
+        let view = PreviewContainerView()
+        view.backgroundColor = .black
+        view.previewLayer = previewLayer
+        return view
+    }
+
+    func updateUIView(_ uiView: PreviewContainerView, context _: Context) {
+        uiView.previewLayer = previewLayer
+    }
+}
+
+// MARK: - QR Scanner with Preview
+
+/// Runs AVCaptureSession + AVCaptureMetadataOutput with an optional visible preview layer.
 class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObjectsDelegate {
     private var captureSession: AVCaptureSession?
     private var currentPosition: AVCaptureDevice.Position = .unspecified
     private var onQrScanned: ((String) -> Void)?
     private var lastScannedCode: String?
     private var lastScanTime: Date?
-    /// Retain a 1x1 preview layer — prevents AVCaptureMetadataOutput from
-    /// silently stopping callbacks on some iOS versions (known Apple bug).
-    private var dummyPreviewLayer: AVCaptureVideoPreviewLayer?
+    /// Preview layer — used both to keep metadata pipeline active and for the small camera preview.
+    @Published private(set) var previewLayer: AVCaptureVideoPreviewLayer?
 
     func start(useFrontCamera: Bool, onQrScanned: @escaping (String) -> Void) {
         self.onQrScanned = onQrScanned
@@ -407,7 +554,7 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
     func stop() {
         captureSession?.stopRunning()
         captureSession = nil
-        dummyPreviewLayer = nil
+        previewLayer = nil
         currentPosition = .unspecified
     }
 
@@ -421,7 +568,8 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
         captureSession?.stopRunning()
 
         let session = AVCaptureSession()
-        session.sessionPreset = .medium
+        // 480p — best decode rate at close face-to-face distance
+        session.sessionPreset = .vga640x480
 
         var device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
         var actualPosition = position
@@ -453,10 +601,10 @@ class HeadlessQrScanner: NSObject, ObservableObject, AVCaptureMetadataOutputObje
             }
         }
 
-        // Retain a dummy preview layer to keep the metadata pipeline active
+        // Preview layer — drives both the small camera preview and keeps the metadata pipeline active
         let preview = AVCaptureVideoPreviewLayer(session: session)
-        preview.frame = CGRect(x: 0, y: 0, width: 1, height: 1)
-        dummyPreviewLayer = preview
+        preview.videoGravity = .resizeAspectFill
+        previewLayer = preview
 
         captureSession = session
         currentPosition = actualPosition
