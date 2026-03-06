@@ -118,11 +118,11 @@
 		EE06B8DCB941892BEACE00A0 /* testCreateIdentityStepFilled.1.png in Resources */ = {isa = PBXBuildFile; fileRef = BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */; };
 		EE61E717891162E1E64D6B6E /* SineWaveGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */; };
 		F6D31D935D519BD6C6821BE9 /* LabelDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F12B12FCE38D7CBAB15A8A0 /* LabelDetailView.swift */; };
-		BB0003030303030303030303 /* CameraConfigTuner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0003030303030303030303 /* CameraConfigTuner.swift */; };
-		BB0001010101010101010101 /* DeviceCapabilityProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001010101010101010101 /* DeviceCapabilityProbe.swift */; };
-		BB0004040404040404040404 /* DiagnosticCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0004040404040404040404 /* DiagnosticCapture.swift */; };
-		BB0005050505050505050505 /* QrTunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0005050505050505050505 /* QrTunerView.swift */; };
-		BB0002020202020202020202 /* ThermalMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0002020202020202020202 /* ThermalMonitor.swift */; };
+		B2F2A3CA944A8BBD07983F62 /* CameraConfigTuner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D683F0BAD6EC0A35DF68A20C /* CameraConfigTuner.swift */; };
+		66485D10B3D7D776A56B292B /* DeviceCapabilityProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB17236BD900A0C2F0052650 /* DeviceCapabilityProbe.swift */; };
+		115467AB91337D423683082A /* DiagnosticCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17024ED07BF0B46DE8E5AE77 /* DiagnosticCapture.swift */; };
+		E66CA9966817319E8BF6572A /* QrTunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CAA9F9C5704A3175B7E182A /* QrTunerView.swift */; };
+		E48901DCA0C7DC6AEF596276 /* ThermalMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C013FFE82B67BE8142B8917 /* ThermalMonitor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -265,11 +265,11 @@
 		F8736078E77840EDC8E0283A /* RecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryView.swift; sourceTree = "<group>"; };
 		FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncServiceTests.swift; sourceTree = "<group>"; };
 		FE7FAFE456A1F513CADD0631 /* testCreateIdentityStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCreateIdentityStep.1.png; sourceTree = "<group>"; };
-		AA0003030303030303030303 /* CameraConfigTuner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraConfigTuner.swift; sourceTree = "<group>"; };
-		AA0001010101010101010101 /* DeviceCapabilityProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilityProbe.swift; sourceTree = "<group>"; };
-		AA0004040404040404040404 /* DiagnosticCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticCapture.swift; sourceTree = "<group>"; };
-		AA0005050505050505050505 /* QrTunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrTunerView.swift; sourceTree = "<group>"; };
-		AA0002020202020202020202 /* ThermalMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalMonitor.swift; sourceTree = "<group>"; };
+		D683F0BAD6EC0A35DF68A20C /* CameraConfigTuner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraConfigTuner.swift; sourceTree = "<group>"; };
+		DB17236BD900A0C2F0052650 /* DeviceCapabilityProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilityProbe.swift; sourceTree = "<group>"; };
+		17024ED07BF0B46DE8E5AE77 /* DiagnosticCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticCapture.swift; sourceTree = "<group>"; };
+		6CAA9F9C5704A3175B7E182A /* QrTunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrTunerView.swift; sourceTree = "<group>"; };
+		8C013FFE82B67BE8142B8917 /* ThermalMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalMonitor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -359,7 +359,7 @@
 				013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */,
 				9FE92FFF24932C40ACAA1A02 /* ExistingCodeDiagnostic.swift */,
 				BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */,
-				CC0001010101010101010101 /* QrTuner */,
+				8B26A5AB59C269CFD29FEE76 /* QrTuner */,
 				1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */,
 			);
 			path = Diagnostic;
@@ -518,14 +518,14 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
-		CC0001010101010101010101 /* QrTuner */ = {
+		8B26A5AB59C269CFD29FEE76 /* QrTuner */ = {
 			isa = PBXGroup;
 			children = (
-				AA0003030303030303030303 /* CameraConfigTuner.swift */,
-				AA0001010101010101010101 /* DeviceCapabilityProbe.swift */,
-				AA0004040404040404040404 /* DiagnosticCapture.swift */,
-				AA0005050505050505050505 /* QrTunerView.swift */,
-				AA0002020202020202020202 /* ThermalMonitor.swift */,
+				D683F0BAD6EC0A35DF68A20C /* CameraConfigTuner.swift */,
+				DB17236BD900A0C2F0052650 /* DeviceCapabilityProbe.swift */,
+				17024ED07BF0B46DE8E5AE77 /* DiagnosticCapture.swift */,
+				6CAA9F9C5704A3175B7E182A /* QrTunerView.swift */,
+				8C013FFE82B67BE8142B8917 /* ThermalMonitor.swift */,
 			);
 			path = QrTuner;
 			sourceTree = "<group>";
@@ -759,11 +759,11 @@
 				4C52B33A572F7C4F2EB5D736 /* DeliveryStatusView.swift in Sources */,
 				C9C86FD0A30B8E8FBAD1245C /* DiagnosticLogger.swift in Sources */,
 				AD01F0575CCEB6301F6F7834 /* DiagnosticView.swift in Sources */,
-				BB0003030303030303030303 /* CameraConfigTuner.swift in Sources */,
-				BB0001010101010101010101 /* DeviceCapabilityProbe.swift in Sources */,
-				BB0004040404040404040404 /* DiagnosticCapture.swift in Sources */,
-				BB0005050505050505050505 /* QrTunerView.swift in Sources */,
-				BB0002020202020202020202 /* ThermalMonitor.swift in Sources */,
+				B2F2A3CA944A8BBD07983F62 /* CameraConfigTuner.swift in Sources */,
+				66485D10B3D7D776A56B292B /* DeviceCapabilityProbe.swift in Sources */,
+				115467AB91337D423683082A /* DiagnosticCapture.swift in Sources */,
+				E66CA9966817319E8BF6572A /* QrTunerView.swift in Sources */,
+				E48901DCA0C7DC6AEF596276 /* ThermalMonitor.swift in Sources */,
 				53AB469C972C6E43723B5C0A /* ExchangeView.swift in Sources */,
 				D6F192EAAFA4D534AC285A8E /* ExistingCodeDiagnostic.swift in Sources */,
 				105F980BB187FE89CD24B5D0 /* FaceToFaceExchangeView.swift in Sources */,

@@ -21,6 +21,10 @@ struct ConfigRunResult {
 
 /// Applies camera configurations to `AVCaptureDevice` and runs frame-capture sweeps.
 enum CameraConfigTuner {
+    private static let stabilisationDelayNs: UInt64 = 1_500_000_000
+    private static let framesPerConfig = 60
+    private static let thermalCheckInterval = 20
+
     /// Apply a `MobileCameraConfig` to the given capture device.
     ///
     /// Locks the device for configuration, sets ISO, exposure bias, focus mode,
@@ -98,16 +102,14 @@ enum CameraConfigTuner {
         decodeFrame: () async -> FrameResult
     ) async -> ConfigRunResult {
         // Stabilisation delay
-        try? await Task.sleep(nanoseconds: 1_500_000_000)
+        try? await Task.sleep(nanoseconds: stabilisationDelayNs)
 
         var frames: [FrameResult] = []
         var thermalEvents = 0
-        let totalFrames = 60
-        let thermalCheckInterval = 20
 
-        for i in 0 ..< totalFrames {
-            // Thermal check every 20 frames
-            if i > 0, i % thermalCheckInterval == 0, ThermalMonitor.isCritical {
+        for i in 0 ..< framesPerConfig {
+            // Thermal check every thermalCheckInterval frames
+            if i > 0, i % Self.thermalCheckInterval == 0, ThermalMonitor.isCritical {
                 thermalEvents += 1
                 await ThermalMonitor.waitForCooldown()
             }

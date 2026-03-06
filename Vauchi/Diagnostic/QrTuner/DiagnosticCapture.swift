@@ -16,6 +16,8 @@ enum DiagnosticCapture {
         category: "capture"
     )
 
+    private static let ciContext = CIContext()
+
     /// Save a JPEG snapshot from a pixel buffer with optional redaction.
     ///
     /// - Parameters:
@@ -43,8 +45,7 @@ enum DiagnosticCapture {
             ciImage = raw
         }
 
-        let context = CIContext()
-        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else {
+        guard let cgImage = Self.ciContext.createCGImage(ciImage, from: ciImage.extent) else {
             logger.error("Failed to create CGImage from pixel buffer")
             return
         }
@@ -87,7 +88,11 @@ enum DiagnosticCapture {
         if let jsonData = try? JSONSerialization.data(
             withJSONObject: sidecar, options: [.prettyPrinted, .sortedKeys]
         ) {
-            try? jsonData.write(to: sidecarPath)
+            do {
+                try jsonData.write(to: sidecarPath)
+            } catch {
+                logger.error("Failed to write sidecar JSON for frame \(frameIndex): \(error)")
+            }
         }
 
         logger.debug("Saved snapshot: \(filename) decoded=\(decodeResult)")

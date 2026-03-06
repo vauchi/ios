@@ -114,8 +114,8 @@ enum DeviceCapabilityProbe {
             afModes: ["auto"],
             awbModes: ["auto"],
             fpsRanges: [MobileFpsRange(min: 30, max: 30)],
-            maxResolutionWidth: 640,
-            maxResolutionHeight: 480
+            maxResolutionWidth: 1280,
+            maxResolutionHeight: 720
         )
     }
 }

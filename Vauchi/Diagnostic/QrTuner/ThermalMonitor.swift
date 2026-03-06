@@ -12,6 +12,8 @@ enum ThermalMonitor {
         category: "thermal"
     )
 
+    private static let cooldownPollNs: UInt64 = 5_000_000_000
+
     /// Returns `true` when the thermal state is `.serious` or `.critical`.
     static var isCritical: Bool {
         let state = ProcessInfo.processInfo.thermalState
@@ -41,7 +43,7 @@ enum ThermalMonitor {
     static func waitForCooldown() async {
         logger.info("Waiting for cooldown (current: \(stateString))")
         while !isSafeToResume {
-            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            try? await Task.sleep(nanoseconds: cooldownPollNs)
             logger.info("Thermal state: \(stateString)")
         }
         logger.info("Cooldown complete")
