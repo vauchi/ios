@@ -28,6 +28,7 @@
 		1ECD2FDE78B2CD9672DDD697 /* testPreviewCardStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B8C613C7D55CF224BEE622D /* testPreviewCardStep.1.png */; };
 		1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */; };
 		219FBDD532C8C32A529055AC /* testSetupViewGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = CB4B0784606C0D57CC2593CE /* testSetupViewGerman.1.png */; };
+		267AAD2A7234482B9DE7E828 /* CameraConfigTuner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D913B20ECD0578660C609C /* CameraConfigTuner.swift */; };
 		27A936CD7057DF31FD867C86 /* testContactsViewWithContactsDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 25A0A7E324ADCC9333CC08A5 /* testContactsViewWithContactsDark.1.png */; };
 		281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */; };
 		2841C875B5ADCE5A837F139B /* DeepLinkConsentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F10CFAFFF2CD3F74871E914 /* DeepLinkConsentTests.swift */; };
@@ -59,6 +60,7 @@
 		65262CC8E09632011AB35DB5 /* testSyncingState.1.png in Resources */ = {isa = PBXBuildFile; fileRef = D42379D47C2AFA9F80BAAB6A /* testSyncingState.1.png */; };
 		655FCE4413340F3FF3F5E5CF /* QRDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */; };
 		66B3D241905E9D64213D575A /* testWelcomeStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 95147D906B74EF746C328B63 /* testWelcomeStep.1.png */; };
+		6994FE07BAADB190463A082F /* QrTunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC4F5F15EACCC9865B45B816 /* QrTunerView.swift */; };
 		6C775CA748C7BDD8C00321F0 /* testHomeViewWithFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = AE391D2B30E4ECCA0C1161B7 /* testHomeViewWithFields.1.png */; };
 		6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C859B6215BADD6A45480D9F /* LocalizationService.swift */; };
 		6EB33DF7D6BD4A8CCC6A8075 /* ValidationBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4A76E62A085CC5836324B5 /* ValidationBadgeView.swift */; };
@@ -87,12 +89,14 @@
 		A71B3D9B635D86B0626C301F /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2D8422E9B837A1B336A071 /* SetupView.swift */; };
 		AA3F337ED100BA98F8D5B5E3 /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A96FE811E67752C2D8F9079E /* SettingsService.swift */; };
 		AABC39234A780149080C84AB /* testSettingsViewGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 754BD6DA5325E71B6D09BAAB /* testSettingsViewGerman.1.png */; };
+		AB5DB9FB58DFCA589E8DC728 /* DiagnosticCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB0C02F14B29023AFB1E720 /* DiagnosticCapture.swift */; };
 		ACB1FE30772E1BEAF475FAD3 /* NFCExchangeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D34EC3AF2AE35F80A5354A /* NFCExchangeService.swift */; };
 		AD01F0575CCEB6301F6F7834 /* DiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */; };
 		ADBDBB305DC254FE3A94B2F3 /* MultipartQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D4DF5873BED53D99177B4A /* MultipartQRView.swift */; };
 		AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95373D9E6440FED4B532EBDD /* VauchiRepository.swift */; };
 		B12893BD37DD85CC1749CD01 /* testExchangeViewDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 15E6797B86856C4F432E265B /* testExchangeViewDark.1.png */; };
 		B1BAEDCA4134802BFA607609 /* VisualRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */; };
+		B4CF3F8161D4269AFCDE020B /* libvauchi_mobile_sim.a in Resources */ = {isa = PBXBuildFile; fileRef = E4B290315791D381B9E33AB1 /* libvauchi_mobile_sim.a */; };
 		B563E7C8C786433BB4392AF3 /* testSettingsView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 9ED684F1F87BD46FD5FFE578 /* testSettingsView.1.png */; };
 		B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */; };
 		C2AB3CF694C96461836AADB2 /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */; };
@@ -115,14 +119,12 @@
 		E90014729E0D4394D5A26628 /* AccountDeletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB5E7CFFD83945D91D395072 /* AccountDeletionView.swift */; };
 		E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EBCAF628D08C167C0D9721 /* QRScannerView.swift */; };
 		EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */; };
+		ED757883268741BAFEB3CCC5 /* ThermalMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9385E8354DD6F15573D12D0E /* ThermalMonitor.swift */; };
 		EE06B8DCB941892BEACE00A0 /* testCreateIdentityStepFilled.1.png in Resources */ = {isa = PBXBuildFile; fileRef = BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */; };
 		EE61E717891162E1E64D6B6E /* SineWaveGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */; };
 		F6D31D935D519BD6C6821BE9 /* LabelDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F12B12FCE38D7CBAB15A8A0 /* LabelDetailView.swift */; };
-		B2F2A3CA944A8BBD07983F62 /* CameraConfigTuner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D683F0BAD6EC0A35DF68A20C /* CameraConfigTuner.swift */; };
-		66485D10B3D7D776A56B292B /* DeviceCapabilityProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB17236BD900A0C2F0052650 /* DeviceCapabilityProbe.swift */; };
-		115467AB91337D423683082A /* DiagnosticCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17024ED07BF0B46DE8E5AE77 /* DiagnosticCapture.swift */; };
-		E66CA9966817319E8BF6572A /* QrTunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CAA9F9C5704A3175B7E182A /* QrTunerView.swift */; };
-		E48901DCA0C7DC6AEF596276 /* ThermalMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C013FFE82B67BE8142B8917 /* ThermalMonitor.swift */; };
+		F86600372445B6AF823C54FE /* DeviceCapabilityProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A46A8A88126EBC1624268B /* DeviceCapabilityProbe.swift */; };
+		FD807DB7B88F6248A5248672 /* libvauchi_mobile_device.a in Resources */ = {isa = PBXBuildFile; fileRef = 329A826ABDCE4D2E317F6A61 /* libvauchi_mobile_device.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -152,6 +154,7 @@
 /* Begin PBXFileReference section */
 		013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticView.swift; sourceTree = "<group>"; };
 		023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewEmpty.1.png; sourceTree = "<group>"; };
+		04A46A8A88126EBC1624268B /* DeviceCapabilityProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilityProbe.swift; sourceTree = "<group>"; };
 		05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProximityServiceTests.swift; sourceTree = "<group>"; };
 		08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitingForUnlockView.swift; sourceTree = "<group>"; };
 		09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRScanner.swift; sourceTree = "<group>"; };
@@ -173,6 +176,7 @@
 		2C2D8422E9B837A1B336A071 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModelTests.swift; sourceTree = "<group>"; };
 		30C91B081CDC3A250428A644 /* DeliveryStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliveryStatusView.swift; sourceTree = "<group>"; };
+		329A826ABDCE4D2E317F6A61 /* libvauchi_mobile_device.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libvauchi_mobile_device.a; sourceTree = "<group>"; };
 		32C2E5A32B1033C46E976D2F /* VisibilityLabelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityLabelsTests.swift; sourceTree = "<group>"; };
 		367C77DA03F258D4B1D9C6FF /* testHelpView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testHelpView.1.png; sourceTree = "<group>"; };
 		36EBCAF628D08C167C0D9721 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
@@ -196,6 +200,7 @@
 		644F12D83413B334E234F4AC /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
 		6490FD404F8F6EB461A4DE38 /* testSetupView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSetupView.1.png; sourceTree = "<group>"; };
 		66D4DF5873BED53D99177B4A /* MultipartQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRView.swift; sourceTree = "<group>"; };
+		66D913B20ECD0578660C609C /* CameraConfigTuner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraConfigTuner.swift; sourceTree = "<group>"; };
 		6B1F349466E7039EA4F918FC /* NfcTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NfcTestView.swift; sourceTree = "<group>"; };
 		6C859B6215BADD6A45480D9F /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationService.swift; sourceTree = "<group>"; };
 		6D4A1EE447C60A79208FE622 /* SocialGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialGraphView.swift; sourceTree = "<group>"; };
@@ -219,6 +224,7 @@
 		8D5B1A7DCA3B64FEF00204F1 /* testDeliveryStatusView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testDeliveryStatusView.1.png; sourceTree = "<group>"; };
 		8F79BD1F4A165335E472E06C /* DiagnosticLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
 		8FDE9009AE079A27B82E5CB6 /* VauchiUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9385E8354DD6F15573D12D0E /* ThermalMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalMonitor.swift; sourceTree = "<group>"; };
 		93EEF8A8901309034B87F6CB /* SnapshotHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelpers.swift; sourceTree = "<group>"; };
 		95147D906B74EF746C328B63 /* testWelcomeStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testWelcomeStep.1.png; sourceTree = "<group>"; };
 		95373D9E6440FED4B532EBDD /* VauchiRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiRepository.swift; sourceTree = "<group>"; };
@@ -240,8 +246,10 @@
 		B2D34EC3AF2AE35F80A5354A /* NFCExchangeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFCExchangeService.swift; sourceTree = "<group>"; };
 		B31DFE6F23CEA01F0437957B /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		B6D061F7460DEBA9C1024D92 /* LabelsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelsView.swift; sourceTree = "<group>"; };
+		BC4F5F15EACCC9865B45B816 /* QrTunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrTunerView.swift; sourceTree = "<group>"; };
 		BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCreateIdentityStepFilled.1.png; sourceTree = "<group>"; };
 		BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FftAnalyzer.swift; sourceTree = "<group>"; };
+		BFB0C02F14B29023AFB1E720 /* DiagnosticCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticCapture.swift; sourceTree = "<group>"; };
 		C2A9361B22965ACC0939BC78 /* testReadyStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testReadyStep.1.png; sourceTree = "<group>"; };
 		C7F414A334965B2F677686A6 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
@@ -256,6 +264,7 @@
 		E044AD16B5BA923A443ADFC7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTests.swift; sourceTree = "<group>"; };
 		E454B8F698D68725F434338E /* ConsentSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsentSettingsView.swift; sourceTree = "<group>"; };
+		E4B290315791D381B9E33AB1 /* libvauchi_mobile_sim.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libvauchi_mobile_sim.a; sourceTree = "<group>"; };
 		E58D46C6249D7838AD9DE1CF /* DeviceLinkingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceLinkingTests.swift; sourceTree = "<group>"; };
 		E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentUpdateService.swift; sourceTree = "<group>"; };
 		E9A9F60104DE94274578CB08 /* DeliveryStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliveryStatusTests.swift; sourceTree = "<group>"; };
@@ -265,11 +274,6 @@
 		F8736078E77840EDC8E0283A /* RecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryView.swift; sourceTree = "<group>"; };
 		FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncServiceTests.swift; sourceTree = "<group>"; };
 		FE7FAFE456A1F513CADD0631 /* testCreateIdentityStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCreateIdentityStep.1.png; sourceTree = "<group>"; };
-		D683F0BAD6EC0A35DF68A20C /* CameraConfigTuner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraConfigTuner.swift; sourceTree = "<group>"; };
-		DB17236BD900A0C2F0052650 /* DeviceCapabilityProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilityProbe.swift; sourceTree = "<group>"; };
-		17024ED07BF0B46DE8E5AE77 /* DiagnosticCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticCapture.swift; sourceTree = "<group>"; };
-		6CAA9F9C5704A3175B7E182A /* QrTunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrTunerView.swift; sourceTree = "<group>"; };
-		8C013FFE82B67BE8142B8917 /* ThermalMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalMonitor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -301,6 +305,27 @@
 				C9DFA1127C049CB0C36BDF57 /* VauchiUITests */,
 				6044B0E63DE2F73C5FDC8885 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		084CDA50E8A47328DA35C07B /* QrTuner */ = {
+			isa = PBXGroup;
+			children = (
+				66D913B20ECD0578660C609C /* CameraConfigTuner.swift */,
+				04A46A8A88126EBC1624268B /* DeviceCapabilityProbe.swift */,
+				BFB0C02F14B29023AFB1E720 /* DiagnosticCapture.swift */,
+				BC4F5F15EACCC9865B45B816 /* QrTunerView.swift */,
+				9385E8354DD6F15573D12D0E /* ThermalMonitor.swift */,
+			);
+			path = QrTuner;
+			sourceTree = "<group>";
+		};
+		237CDF99CC9731164A85CC39 /* Libs */ = {
+			isa = PBXGroup;
+			children = (
+				329A826ABDCE4D2E317F6A61 /* libvauchi_mobile_device.a */,
+				E4B290315791D381B9E33AB1 /* libvauchi_mobile_sim.a */,
+			);
+			path = Libs;
 			sourceTree = "<group>";
 		};
 		2CBD4B5D0F233D7B3EA59CED /* Onboarding */ = {
@@ -359,8 +384,8 @@
 				013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */,
 				9FE92FFF24932C40ACAA1A02 /* ExistingCodeDiagnostic.swift */,
 				BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */,
-				8B26A5AB59C269CFD29FEE76 /* QrTuner */,
 				1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */,
+				084CDA50E8A47328DA35C07B /* QrTuner */,
 			);
 			path = Diagnostic;
 			sourceTree = "<group>";
@@ -473,6 +498,7 @@
 				B1075C1A497CE28C82672E93 /* Vauchi.entitlements */,
 				71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */,
 				909E60FB02223B078CC3A058 /* Diagnostic */,
+				237CDF99CC9731164A85CC39 /* Libs */,
 				F9FC793A89B3CAD3083ACA25 /* Services */,
 				DE4003224F0F48BD0A224CE5 /* ViewModels */,
 				CC27001BE792CD487814D16E /* Views */,
@@ -518,18 +544,6 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
-		8B26A5AB59C269CFD29FEE76 /* QrTuner */ = {
-			isa = PBXGroup;
-			children = (
-				D683F0BAD6EC0A35DF68A20C /* CameraConfigTuner.swift */,
-				DB17236BD900A0C2F0052650 /* DeviceCapabilityProbe.swift */,
-				17024ED07BF0B46DE8E5AE77 /* DiagnosticCapture.swift */,
-				6CAA9F9C5704A3175B7E182A /* QrTunerView.swift */,
-				8C013FFE82B67BE8142B8917 /* ThermalMonitor.swift */,
-			);
-			path = QrTuner;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -556,6 +570,7 @@
 			buildConfigurationList = 3B3830A9525A77F2518613CC /* Build configuration list for PBXNativeTarget "Vauchi" */;
 			buildPhases = (
 				DE5AA344301B2E541CD5D0C2 /* Sources */,
+				6C09AB341DD01574C70414B7 /* Resources */,
 				6F80E44C1C2EFE8789449827 /* Frameworks */,
 			);
 			buildRules = (
@@ -654,6 +669,15 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6C09AB341DD01574C70414B7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FD807DB7B88F6248A5248672 /* libvauchi_mobile_device.a in Resources */,
+				B4CF3F8161D4269AFCDE020B /* libvauchi_mobile_sim.a in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B1481DC68744A5E5111CA39F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -747,6 +771,7 @@
 				80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
 				04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */,
+				267AAD2A7234482B9DE7E828 /* CameraConfigTuner.swift in Sources */,
 				08512AFB915670B874B58220 /* ConsentSettingsView.swift in Sources */,
 				02DD49946382C26E78CE06C9 /* ContactActions.swift in Sources */,
 				CA32F697BDD3346B24319D5E /* ContactDetailView.swift in Sources */,
@@ -757,13 +782,10 @@
 				426502D48730CB634E517392 /* CreateIdentityStepView.swift in Sources */,
 				4D6C3EC272054F44F67201EE /* DeepLinkHandler.swift in Sources */,
 				4C52B33A572F7C4F2EB5D736 /* DeliveryStatusView.swift in Sources */,
+				F86600372445B6AF823C54FE /* DeviceCapabilityProbe.swift in Sources */,
+				AB5DB9FB58DFCA589E8DC728 /* DiagnosticCapture.swift in Sources */,
 				C9C86FD0A30B8E8FBAD1245C /* DiagnosticLogger.swift in Sources */,
 				AD01F0575CCEB6301F6F7834 /* DiagnosticView.swift in Sources */,
-				B2F2A3CA944A8BBD07983F62 /* CameraConfigTuner.swift in Sources */,
-				66485D10B3D7D776A56B292B /* DeviceCapabilityProbe.swift in Sources */,
-				115467AB91337D423683082A /* DiagnosticCapture.swift in Sources */,
-				E66CA9966817319E8BF6572A /* QrTunerView.swift in Sources */,
-				E48901DCA0C7DC6AEF596276 /* ThermalMonitor.swift in Sources */,
 				53AB469C972C6E43723B5C0A /* ExchangeView.swift in Sources */,
 				D6F192EAAFA4D534AC285A8E /* ExistingCodeDiagnostic.swift in Sources */,
 				105F980BB187FE89CD24B5D0 /* FaceToFaceExchangeView.swift in Sources */,
@@ -787,6 +809,7 @@
 				7230742E816AC8FFCD0F3284 /* ProximityVerificationView.swift in Sources */,
 				655FCE4413340F3FF3F5E5CF /* QRDiagnosticView.swift in Sources */,
 				E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */,
+				6994FE07BAADB190463A082F /* QrTunerView.swift in Sources */,
 				748B9CFE5B176CC483106B14 /* ReadyStepView.swift in Sources */,
 				3D787C329E429BC3B8206837 /* RecoveryView.swift in Sources */,
 				1476FDD2E15DE78B3798DE8A /* SecurityStepView.swift in Sources */,
@@ -797,6 +820,7 @@
 				4342D012B76952454E5D89B9 /* SocialGraphView.swift in Sources */,
 				2D0728F99D4DBB3C8491C25B /* ThemeService.swift in Sources */,
 				C2AB3CF694C96461836AADB2 /* ThemeSettingsView.swift in Sources */,
+				ED757883268741BAFEB3CCC5 /* ThermalMonitor.swift in Sources */,
 				6EB33DF7D6BD4A8CCC6A8075 /* ValidationBadgeView.swift in Sources */,
 				2F7D817E60BDE6223F5E0484 /* VauchiApp.swift in Sources */,
 				AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */,
