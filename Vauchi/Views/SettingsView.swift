@@ -39,7 +39,7 @@ struct SettingsView: View {
                     // Diagnostics (debug builds only)
                     Section("Diagnostics") {
                         NavigationLink("QR Diagnostic") {
-                            QRDiagnosticView()
+                            QRDiagnosticView(autoTest: nil)
                         }
                         NavigationLink("BLE Diagnostic") {
                             BleDiagnosticView(autoTest: nil, autoMode: nil)

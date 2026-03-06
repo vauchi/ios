@@ -18,6 +18,8 @@ struct VauchiApp: App {
         @State private var showBleDiagnostic = false
         @State private var bleDiagAutoTest: String?
         @State private var bleDiagAutoMode: String?
+        @State private var showQrDiagnostic = false
+        @State private var qrDiagAutoTest: String?
     #endif
 
     init() {
@@ -39,6 +41,10 @@ struct VauchiApp: App {
                 _bleDiagAutoMode = State(initialValue: "server")
                 _showBleDiagnostic = State(initialValue: true)
                 NSLog("[Vauchi] Launch arg: --ble-server")
+            } else if let idx = args.firstIndex(of: "--qr-test"), idx + 1 < args.count {
+                _qrDiagAutoTest = State(initialValue: args[idx + 1])
+                _showQrDiagnostic = State(initialValue: true)
+                NSLog("[Vauchi] Launch arg: --qr-test %@", args[idx + 1])
             }
         #endif
         // Register background tasks
@@ -135,6 +141,16 @@ struct VauchiApp: App {
                             .toolbar {
                                 ToolbarItem(placement: .navigationBarLeading) {
                                     Button("Close") { showBleDiagnostic = false }
+                                }
+                            }
+                    }
+                }
+                .fullScreenCover(isPresented: $showQrDiagnostic) {
+                    NavigationView {
+                        QRDiagnosticView(autoTest: qrDiagAutoTest)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    Button("Close") { showQrDiagnostic = false }
                                 }
                             }
                     }
