@@ -200,11 +200,16 @@ struct FaceToFaceExchangeView: View {
             VStack(alignment: .leading, spacing: 4) {
                 if showProgress {
                     HStack(spacing: 6) {
-                        ProgressView().scaleEffect(0.7)
-                        Text(statusText).font(.caption).foregroundColor(Color(white: 0.27))
+                        ProgressView()
+                            .scaleEffect(0.7)
+                        Text(statusText)
+                            .font(.caption)
+                            .foregroundColor(Color(white: 0.27))
                     }
                 } else {
-                    Text(statusText).font(.caption).foregroundColor(Color(white: 0.27))
+                    Text(statusText)
+                        .font(.caption)
+                        .foregroundColor(Color(white: 0.27))
                 }
             }
             Spacer()
@@ -214,9 +219,13 @@ struct FaceToFaceExchangeView: View {
 
     private var exchangeScanQualityBar: some View {
         HStack(spacing: 8) {
-            Circle().fill(scanQuality.color).frame(width: 10, height: 10)
+            Circle()
+                .fill(scanQuality.color)
+                .frame(width: 10, height: 10)
             Text(scanQuality.label)
-                .font(.caption2).fontWeight(.medium).foregroundColor(Color(white: 0.27))
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundColor(Color(white: 0.27))
             Spacer()
         }
         .padding(.horizontal, 16)
