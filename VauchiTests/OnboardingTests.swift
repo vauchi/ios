@@ -18,6 +18,11 @@ final class OnboardingTests: XCTestCase {
         testDefaults = UserDefaults(suiteName: "test_onboarding")!
         testDefaults.removePersistentDomain(forName: "test_onboarding")
         settingsService = SettingsService(defaults: testDefaults)
+
+        // Clear shared defaults so OnboardingData() starts clean
+        SettingsService.shared.onboardingDisplayName = ""
+        SettingsService.shared.onboardingPhone = ""
+        SettingsService.shared.onboardingEmail = ""
     }
 
     override func tearDownWithError() throws {
