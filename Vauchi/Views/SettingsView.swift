@@ -478,6 +478,9 @@ struct SettingsView: View {
                     NavigationLink(destination: NfcTestView()) {
                         Label("NFC Exchange Test", systemImage: "wave.3.right")
                     }
+                    NavigationLink("BLE Diagnostic") {
+                        BleDiagnosticView()
+                    }
                 }
 
                 // About section

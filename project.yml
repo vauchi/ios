@@ -66,6 +66,7 @@ targets:
           - CFBundleURLSchemes:
               - vauchi
             CFBundleURLName: app.vauchi.ios
+        NSBluetoothAlwaysUsageDescription: "Vauchi uses Bluetooth to exchange contact cards with nearby devices."
         NSCameraUsageDescription: "Vauchi uses the camera to scan QR codes for contact exchange."
         NSMicrophoneUsageDescription: "Vauchi uses the microphone for ultrasonic proximity verification during contact exchange."
         NFCReaderUsageDescription: "Vauchi uses NFC to exchange contact cards with nearby devices."

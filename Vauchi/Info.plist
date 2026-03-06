@@ -33,6 +33,8 @@
 	<string>1</string>
 	<key>NFCReaderUsageDescription</key>
 	<string>Vauchi uses NFC to exchange contact cards with nearby devices.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Vauchi uses Bluetooth to exchange contact cards with nearby devices.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Vauchi uses the camera to scan QR codes for contact exchange.</string>
 	<key>NSMicrophoneUsageDescription</key>
