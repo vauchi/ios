@@ -17,10 +17,14 @@ build/
 *.dSYM.zip
 *.dSYM
 
-# UniFFI bindings (now provided by vauchi-mobile-swift SPM package)
+# UniFFI bindings (provided by vauchi-mobile-swift SPM package;
+# local copies created by `just bindings` for dev builds)
 Vauchi/Generated/
 Vauchi/Libs/
 Frameworks/
+
+# Local-bindings workspace (created by `just bindings-local`)
+Vauchi.xcworkspace/
 
 # CocoaPods (if used)
 Pods/
