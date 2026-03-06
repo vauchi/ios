@@ -19,6 +19,7 @@ build/
 
 # UniFFI bindings (now provided by vauchi-mobile-swift SPM package)
 Vauchi/Generated/
+Vauchi/Libs/
 Frameworks/
 
 # CocoaPods (if used)
