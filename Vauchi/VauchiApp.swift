@@ -14,12 +14,33 @@ struct VauchiApp: App {
     @State private var deepLinkHandler = DeepLinkHandler()
     @State private var showDeepLinkConsent = false
     @State private var pendingDeepLinkPayload: String?
+    #if DEBUG
+        @State private var showBleDiagnostic = false
+        @State private var bleDiagAutoTest: String?
+        @State private var bleDiagAutoMode: String?
+    #endif
 
     init() {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
         let buildId = Self.binaryBuildDate() ?? "?"
         NSLog("[Vauchi] Build: v%@ (%@) core=%@ buildId=%@", v, b, coreVersion(), buildId)
+
+        #if DEBUG
+            // Check launch arguments for BLE diagnostic automation
+            // Usage: devicectl device process launch ... app.vauchi.ios --ble-test discovery
+            // Usage: devicectl device process launch ... app.vauchi.ios --ble-server
+            let args = ProcessInfo.processInfo.arguments
+            if let idx = args.firstIndex(of: "--ble-test"), idx + 1 < args.count {
+                _bleDiagAutoTest = State(initialValue: args[idx + 1])
+                _showBleDiagnostic = State(initialValue: true)
+                NSLog("[Vauchi] Launch arg: --ble-test %@", args[idx + 1])
+            } else if args.contains("--ble-server") {
+                _bleDiagAutoMode = State(initialValue: "server")
+                _showBleDiagnostic = State(initialValue: true)
+                NSLog("[Vauchi] Launch arg: --ble-server")
+            }
+        #endif
         // Register background tasks
         BackgroundSyncService.shared.registerBackgroundTasks()
         print("VauchiApp: background tasks registered")
@@ -64,6 +85,18 @@ struct VauchiApp: App {
                     }
                 }
                 .onOpenURL { url in
+                    #if DEBUG
+                        // Handle diagnostic deep links: vauchi://diagnostic/ble?test=discovery&mode=server
+                        if url.host == "diagnostic" {
+                            let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+                            bleDiagAutoTest = components?.queryItems?.first(where: { $0.name == "test" })?.value
+                            bleDiagAutoMode = components?.queryItems?.first(where: { $0.name == "mode" })?.value
+                            showBleDiagnostic = true
+                            NSLog("[Vauchi] Diagnostic deep link: test=%@ mode=%@",
+                                  bleDiagAutoTest ?? "nil", bleDiagAutoMode ?? "nil")
+                            return
+                        }
+                    #endif
                     // Deep link consent gate (SP-9)
                     // NEVER auto-process — always ask the user first
                     let result = deepLinkHandler.handleDeepLink(url: url)
@@ -95,6 +128,18 @@ struct VauchiApp: App {
                         "Do you want to proceed with the contact exchange?\n\n" +
                         "Only accept if you trust the source of this link.")
                 }
+            #if DEBUG
+                .fullScreenCover(isPresented: $showBleDiagnostic) {
+                    NavigationView {
+                        BleDiagnosticView(autoTest: bleDiagAutoTest, autoMode: bleDiagAutoMode)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    Button("Close") { showBleDiagnostic = false }
+                                }
+                            }
+                    }
+                }
+            #endif
         }
     }
 }

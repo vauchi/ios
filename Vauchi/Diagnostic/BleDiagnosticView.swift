@@ -10,25 +10,32 @@
     private let diagnosticCharUUID = CBUUID(string: "a1b2c3d4-e5f6-7890-abcd-ef12345678A1")
 
     struct BleDiagnosticView: View {
+        /// Set to run a specific test on appear: "discovery", "mtu", "throughput", "latency", "rssi", "stability", "all"
+        var autoTest: String?
+        /// Set to "server" to run GATT server only (no client tests)
+        var autoMode: String?
+
         @State private var logLines: [String] = []
         @State private var running = false
 
         var body: some View {
             VStack(spacing: 16) {
-                Text("BLE Diagnostic")
+                Text(autoMode == "server" ? "BLE Server Mode" : "BLE Diagnostic")
                     .font(.title2)
                     .fontWeight(.bold)
 
-                HStack(spacing: 12) {
-                    diagButton("A: Discovery") { testDiscovery() }
-                    diagButton("B: MTU") { testMtuNegotiation() }
-                    diagButton("C: Throughput") { testThroughput() }
-                }
+                if autoMode != "server" {
+                    HStack(spacing: 12) {
+                        diagButton("A: Discovery") { testDiscovery() }
+                        diagButton("B: MTU") { testMtuNegotiation() }
+                        diagButton("C: Throughput") { testThroughput() }
+                    }
 
-                HStack(spacing: 12) {
-                    diagButton("D: Latency") { testLatency() }
-                    diagButton("E: RSSI") { testRssiRange() }
-                    diagButton("F: Stability") { testConnectionStability() }
+                    HStack(spacing: 12) {
+                        diagButton("D: Latency") { testLatency() }
+                        diagButton("E: RSSI") { testRssiRange() }
+                        diagButton("F: Stability") { testConnectionStability() }
+                    }
                 }
 
                 if running {
@@ -56,6 +63,13 @@
             }
             .padding()
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                if autoMode == "server" {
+                    runAsync { startServerMode() }
+                } else if let test = autoTest {
+                    runAsync { runAutoTest(test) }
+                }
+            }
         }
 
         // MARK: - UI Helpers
@@ -77,9 +91,25 @@
             }
         }
 
+        private static let logFileURL: URL = {
+            let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            return docs.appendingPathComponent("ble-diagnostic.log")
+        }()
+
         private func log(_ msg: String) {
             let timestamped = "[\(timeStamp())] \(msg)"
             NSLog("[BLE Diag] %@", msg)
+            // Append to file for retrieval via devicectl/idevice
+            let line = timestamped + "\n"
+            if let data = line.data(using: .utf8) {
+                if let handle = try? FileHandle(forWritingTo: Self.logFileURL) {
+                    handle.seekToEndOfFile()
+                    handle.write(data)
+                    handle.closeFile()
+                } else {
+                    try? data.write(to: Self.logFileURL)
+                }
+            }
             DispatchQueue.main.async {
                 logLines.append(timestamped)
             }
@@ -89,6 +119,47 @@
             let f = DateFormatter()
             f.dateFormat = "HH:mm:ss"
             return f.string(from: Date())
+        }
+
+        // MARK: - Auto-run Support
+
+        private func clearLogFile() {
+            try? "".write(to: Self.logFileURL, atomically: true, encoding: .utf8)
+        }
+
+        private func startServerMode() {
+            clearLogFile()
+            log("=== GATT Server Mode ===")
+            let manager = BleDiagnosticManager()
+            manager.startPeripheral(log: log)
+            log("Server running — waiting for client connections...")
+            // Keep server alive for 5 minutes
+            Thread.sleep(forTimeInterval: 300)
+            manager.stopAll()
+            log("Server stopped after timeout")
+        }
+
+        private func runAutoTest(_ name: String) {
+            clearLogFile()
+            let tests: [(String, () -> Void)] = [
+                ("discovery", testDiscovery),
+                ("mtu", testMtuNegotiation),
+                ("throughput", testThroughput),
+                ("latency", testLatency),
+                ("rssi", testRssiRange),
+                ("stability", testConnectionStability),
+            ]
+
+            if name == "all" {
+                for (_, test) in tests {
+                    test()
+                    Thread.sleep(forTimeInterval: 1.0)
+                }
+            } else if let match = tests.first(where: { $0.0 == name }) {
+                match.1()
+            } else {
+                log("Unknown test: \(name)")
+            }
         }
 
         // MARK: - Test A: Discovery
@@ -717,7 +788,7 @@
 
     #Preview {
         NavigationView {
-            BleDiagnosticView()
+            BleDiagnosticView(autoTest: nil, autoMode: nil)
         }
     }
 #endif
