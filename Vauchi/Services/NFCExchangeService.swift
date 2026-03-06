@@ -116,7 +116,6 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
             return
         }
 
-        // Phase 1: Send key offer
         let keyOfferData: Data
         do {
             keyOfferData = try handshake.createKeyOffer()
@@ -134,85 +133,89 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
             expectedResponseLength: -1
         )
 
-        // Phase 2a: Send key offer → receive key ack
         tag.sendCommand(apdu: offerApdu) { [weak self] ackData, sw1, sw2, error in
             guard let self else { return }
-
             if let error {
                 handleTagLoss(handshake: handshake, session: session, error: error)
                 return
             }
-
             guard sw1 == 0x90, sw2 == 0x00 else {
                 session.invalidate(errorMessage: "Key offer rejected (SW: \(String(format: "%02X%02X", sw1, sw2)))")
                 return
             }
+            fetchCardAndFinish(tag: tag, session: session, handshake: handshake, ackData: ackData)
+        }
+    }
 
-            // Phase 2b: Fetch encrypted card (separate APDU to stay under HCE response size limits)
-            let getCardApdu = NFCISO7816APDU(
-                instructionClass: 0x00,
-                instructionCode: Self.insGetEncryptedCard,
-                p1Parameter: 0x00,
-                p2Parameter: 0x00,
-                data: Data(),
-                expectedResponseLength: -1
-            )
+    private func fetchCardAndFinish(
+        tag: NFCISO7816Tag, session: NFCTagReaderSession,
+        handshake: MobileNfcHandshake, ackData: Data
+    ) {
+        let getCardApdu = NFCISO7816APDU(
+            instructionClass: 0x00,
+            instructionCode: Self.insGetEncryptedCard,
+            p1Parameter: 0x00,
+            p2Parameter: 0x00,
+            data: Data(),
+            expectedResponseLength: -1
+        )
 
-            tag.sendCommand(apdu: getCardApdu) { cardData, sw1_c, sw2_c, errorC in
-                if let errorC {
-                    self.handleTagLoss(handshake: handshake, session: session, error: errorC)
-                    return
-                }
+        tag.sendCommand(apdu: getCardApdu) { [weak self] cardData, cardSw1, cardSw2, cardError in
+            guard let self else { return }
+            if let cardError {
+                handleTagLoss(handshake: handshake, session: session, error: cardError)
+                return
+            }
+            guard cardSw1 == 0x90, cardSw2 == 0x00 else {
+                session.invalidate(errorMessage: "Failed to get encrypted card")
+                return
+            }
 
-                guard sw1_c == 0x90, sw2_c == 0x00 else {
-                    session.invalidate(errorMessage: "Failed to get encrypted card")
-                    return
-                }
-
-                // Phase 2: Process key ack + encrypted card
-                let ourEncryptedCard: Data
-                do {
-                    ourEncryptedCard = try handshake.processKeyAck(
-                        theirAckBytes: ackData,
-                        theirEncryptedCard: cardData
-                    )
-                } catch {
-                    self.handleTagLoss(handshake: handshake, session: session, error: error)
-                    return
-                }
-
-                // Phase 3: Send our encrypted card
-                let cardApdu = NFCISO7816APDU(
-                    instructionClass: 0x00,
-                    instructionCode: Self.insEncryptedCard,
-                    p1Parameter: 0x00,
-                    p2Parameter: 0x00,
-                    data: ourEncryptedCard,
-                    expectedResponseLength: -1
+            let ourEncryptedCard: Data
+            do {
+                ourEncryptedCard = try handshake.processKeyAck(
+                    theirAckBytes: ackData,
+                    theirEncryptedCard: cardData
                 )
+            } catch {
+                handleTagLoss(handshake: handshake, session: session, error: error)
+                return
+            }
+            sendOurCard(tag: tag, session: session, handshake: handshake, cardData: ourEncryptedCard)
+        }
+    }
 
-                tag.sendCommand(apdu: cardApdu) { _, sw1_2, sw2_2, error2 in
-                    if let error2 {
-                        self.handleTagLoss(handshake: handshake, session: session, error: error2)
-                        return
-                    }
+    private func sendOurCard(
+        tag: NFCISO7816Tag, session: NFCTagReaderSession,
+        handshake: MobileNfcHandshake, cardData: Data
+    ) {
+        let cardApdu = NFCISO7816APDU(
+            instructionClass: 0x00,
+            instructionCode: Self.insEncryptedCard,
+            p1Parameter: 0x00,
+            p2Parameter: 0x00,
+            data: cardData,
+            expectedResponseLength: -1
+        )
 
-                    guard sw1_2 == 0x90, sw2_2 == 0x00 else {
-                        session.invalidate(errorMessage: "Card exchange rejected")
-                        return
-                    }
-
-                    // Confirm send success
-                    do {
-                        let result = try handshake.confirmSendSuccess()
-                        session.alertMessage = "Exchange complete!"
-                        session.invalidate()
-                        self.complete(with: .success(result))
-                    } catch {
-                        session.invalidate(errorMessage: "Exchange failed: \(error)")
-                        self.complete(with: .error(error.localizedDescription))
-                    }
-                }
+        tag.sendCommand(apdu: cardApdu) { [weak self] _, respSw1, respSw2, respError in
+            guard let self else { return }
+            if let respError {
+                handleTagLoss(handshake: handshake, session: session, error: respError)
+                return
+            }
+            guard respSw1 == 0x90, respSw2 == 0x00 else {
+                session.invalidate(errorMessage: "Card exchange rejected")
+                return
+            }
+            do {
+                let result = try handshake.confirmSendSuccess()
+                session.alertMessage = "Exchange complete!"
+                session.invalidate()
+                complete(with: .success(result))
+            } catch {
+                session.invalidate(errorMessage: "Exchange failed: \(error)")
+                complete(with: .error(error.localizedDescription))
             }
         }
     }
