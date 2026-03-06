@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#if DEBUG
 import Accelerate
 import Foundation
 
@@ -55,3 +56,4 @@ enum FftAnalyzer {
         }
     }
 }
+#endif

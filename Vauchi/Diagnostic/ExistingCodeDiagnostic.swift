@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#if DEBUG
 import Foundation
 
 class ExistingCodeDiagnostic {
@@ -69,3 +70,4 @@ class ExistingCodeDiagnostic {
         log("Result: \(pass ? "PASS" : "FAIL")")
     }
 }
+#endif

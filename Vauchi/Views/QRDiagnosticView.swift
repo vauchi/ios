@@ -7,6 +7,7 @@
 // detection, and reports live stats to find the optimal configuration
 // for the multi-stage exchange protocol.
 
+#if DEBUG
 import AVFoundation
 import CoreImage.CIFilterBuiltins
 import SwiftUI
@@ -396,3 +397,4 @@ struct QRDiagnosticView: View {
         QRDiagnosticView()
     }
 }
+#endif

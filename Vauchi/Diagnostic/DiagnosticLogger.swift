@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#if DEBUG
 import Foundation
 import UIKit
 
@@ -46,3 +47,4 @@ enum DiagnosticLogger {
         }
     }
 }
+#endif

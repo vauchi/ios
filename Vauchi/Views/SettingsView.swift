@@ -35,6 +35,24 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             List {
+                #if DEBUG
+                    // Diagnostics (debug builds only)
+                    Section("Diagnostics") {
+                        NavigationLink("QR Diagnostic") {
+                            QRDiagnosticView()
+                        }
+                        NavigationLink("BLE Diagnostic") {
+                            BleDiagnosticView()
+                        }
+                        NavigationLink("Ultrasonic Diagnostic") {
+                            DiagnosticView()
+                        }
+                        NavigationLink(destination: NfcTestView()) {
+                            Label("NFC Exchange Test", systemImage: "wave.3.right")
+                        }
+                    }
+                #endif
+
                 // Identity section
                 Section(localizationService.t("settings.identity")) {
                     HStack {
@@ -464,22 +482,6 @@ struct SettingsView: View {
                                 .foregroundColor(.secondary)
                                 .accessibilityHidden(true)
                         }
-                    }
-                }
-
-                // Diagnostics
-                Section("Diagnostics") {
-                    NavigationLink(destination: QRDiagnosticView()) {
-                        Label("QR Diagnostic", systemImage: "qrcode.viewfinder")
-                    }
-                    NavigationLink("Ultrasonic Diagnostic") {
-                        DiagnosticView()
-                    }
-                    NavigationLink(destination: NfcTestView()) {
-                        Label("NFC Exchange Test", systemImage: "wave.3.right")
-                    }
-                    NavigationLink("BLE Diagnostic") {
-                        BleDiagnosticView()
                     }
                 }
 

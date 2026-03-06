@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#if DEBUG
 import Foundation
 
 enum SineWaveGenerator {
@@ -30,3 +31,4 @@ enum SineWaveGenerator {
         return (samples, markers)
     }
 }
+#endif

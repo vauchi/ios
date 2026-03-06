@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#if DEBUG
 import AVFoundation
 import SwiftUI
 
@@ -457,3 +458,4 @@ struct DiagnosticView: View {
         return output
     }
 }
+#endif

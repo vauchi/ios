@@ -98,6 +98,7 @@
 		B1BAEDCA4134802BFA607609 /* VisualRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */; };
 		B563E7C8C786433BB4392AF3 /* testSettingsView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 9ED684F1F87BD46FD5FFE578 /* testSettingsView.1.png */; };
 		B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */; };
+		C01C71A1C3DBB3F2AB123B59 /* BleDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0153EB12C0E84B1A0F5A0B74 /* BleDiagnosticView.swift */; };
 		C2AB3CF694C96461836AADB2 /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */; };
 		C2BF1FC510A65D73DD722C95 /* VauchiMobile in Frameworks */ = {isa = PBXBuildFile; productRef = 0F8A335546193F75655208E3 /* VauchiMobile */; };
 		C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */; };
@@ -151,6 +152,7 @@
 
 /* Begin PBXFileReference section */
 		013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticView.swift; sourceTree = "<group>"; };
+		0153EB12C0E84B1A0F5A0B74 /* BleDiagnosticView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BleDiagnosticView.swift; sourceTree = "<group>"; };
 		023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewEmpty.1.png; sourceTree = "<group>"; };
 		04A46A8A88126EBC1624268B /* DeviceCapabilityProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilityProbe.swift; sourceTree = "<group>"; };
 		05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProximityServiceTests.swift; sourceTree = "<group>"; };
@@ -265,6 +267,7 @@
 		E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentUpdateService.swift; sourceTree = "<group>"; };
 		E9A9F60104DE94274578CB08 /* DeliveryStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliveryStatusTests.swift; sourceTree = "<group>"; };
 		F3D6D0CAF371C529012A00BB /* DeepLinkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkHandler.swift; sourceTree = "<group>"; };
+		F4BDAB286E79D832FF995486 /* iOSBleDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = iOSBleDelegate.swift; path = BLE/iOSBleDelegate.swift; sourceTree = "<group>"; };
 		F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailView.swift; sourceTree = "<group>"; };
 		F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEdgeTests.swift; sourceTree = "<group>"; };
 		F8736078E77840EDC8E0283A /* RecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryView.swift; sourceTree = "<group>"; };
@@ -313,6 +316,14 @@
 				9385E8354DD6F15573D12D0E /* ThermalMonitor.swift */,
 			);
 			path = QrTuner;
+			sourceTree = "<group>";
+		};
+		1CA0B6D881FCC9666D51E36D /* BLE */ = {
+			isa = PBXGroup;
+			children = (
+				F4BDAB286E79D832FF995486 /* iOSBleDelegate.swift */,
+			);
+			name = BLE;
 			sourceTree = "<group>";
 		};
 		2CBD4B5D0F233D7B3EA59CED /* Onboarding */ = {
@@ -373,6 +384,7 @@
 				BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */,
 				1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */,
 				084CDA50E8A47328DA35C07B /* QrTuner */,
+				0153EB12C0E84B1A0F5A0B74 /* BleDiagnosticView.swift */,
 			);
 			path = Diagnostic;
 			sourceTree = "<group>";
@@ -488,6 +500,7 @@
 				F9FC793A89B3CAD3083ACA25 /* Services */,
 				DE4003224F0F48BD0A224CE5 /* ViewModels */,
 				CC27001BE792CD487814D16E /* Views */,
+				1CA0B6D881FCC9666D51E36D /* BLE */,
 			);
 			path = Vauchi;
 			sourceTree = "<group>";
@@ -545,8 +558,6 @@
 				13445D470E061541BC7A2E78 /* PBXTargetDependency */,
 			);
 			name = VauchiUITests;
-			packageProductDependencies = (
-			);
 			productName = VauchiUITests;
 			productReference = 8FDE9009AE079A27B82E5CB6 /* VauchiUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -603,8 +614,6 @@
 				48FE5B771C3291933CFB4AA3 /* PBXTargetDependency */,
 			);
 			name = VauchiTests;
-			packageProductDependencies = (
-			);
 			productName = VauchiTests;
 			productReference = 7ECC96545C3966B83B1D1AC7 /* VauchiTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -642,6 +651,7 @@
 				DFBFF58311F6476C3FF1CCBB /* XCRemoteSwiftPackageReference "vauchi-mobile-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
+			productRefGroup = 6044B0E63DE2F73C5FDC8885 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -803,6 +813,7 @@
 				5DB1F56C8F6BC86226B8180F /* VauchiViewModel.swift in Sources */,
 				10BCAB3BFF0E6F665B519A1F /* WaitingForUnlockView.swift in Sources */,
 				9F0554E5313D44B13878E6FE /* WelcomeStepView.swift in Sources */,
+				C01C71A1C3DBB3F2AB123B59 /* BleDiagnosticView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
