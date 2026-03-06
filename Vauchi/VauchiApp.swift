@@ -20,6 +20,8 @@ struct VauchiApp: App {
         @State private var bleDiagAutoMode: String?
         @State private var showQrDiagnostic = false
         @State private var qrDiagAutoTest: String?
+        @State private var showQrTuner = false
+        @State private var qrTunerAutoTest: String?
     #endif
 
     init() {
@@ -45,6 +47,10 @@ struct VauchiApp: App {
                 _qrDiagAutoTest = State(initialValue: args[idx + 1])
                 _showQrDiagnostic = State(initialValue: true)
                 NSLog("[Vauchi] Launch arg: --qr-test %@", args[idx + 1])
+            } else if let idx = args.firstIndex(of: "--qr-tuner"), idx + 1 < args.count {
+                _qrTunerAutoTest = State(initialValue: args[idx + 1])
+                _showQrTuner = State(initialValue: true)
+                NSLog("[Vauchi] Launch arg: --qr-tuner %@", args[idx + 1])
             }
         #endif
         // Register background tasks
@@ -151,6 +157,16 @@ struct VauchiApp: App {
                             .toolbar {
                                 ToolbarItem(placement: .navigationBarLeading) {
                                     Button("Close") { showQrDiagnostic = false }
+                                }
+                            }
+                    }
+                }
+                .fullScreenCover(isPresented: $showQrTuner) {
+                    NavigationView {
+                        QrCameraTunerView(autoTest: qrTunerAutoTest)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    Button("Close") { showQrTuner = false }
                                 }
                             }
                     }

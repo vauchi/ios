@@ -44,6 +44,9 @@ struct SettingsView: View {
                         NavigationLink("BLE Diagnostic") {
                             BleDiagnosticView(autoTest: nil, autoMode: nil)
                         }
+                        NavigationLink("QR Camera Tuner") {
+                            QrCameraTunerView(autoTest: nil)
+                        }
                         NavigationLink("Ultrasonic Diagnostic") {
                             DiagnosticView()
                         }
