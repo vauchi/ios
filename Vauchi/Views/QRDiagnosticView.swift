@@ -311,9 +311,9 @@
                 }
 
                 // Check front camera availability
-                if let _ = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) {
+                if AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) != nil {
                     log("PASS: Front camera available")
-                } else if let _ = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
+                } else if AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) != nil {
                     log("PASS: Rear camera available (no front camera)")
                 } else {
                     log("FAIL: No camera available")
