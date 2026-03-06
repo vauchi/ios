@@ -33,8 +33,6 @@
 	<string>1</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Vauchi uses the camera to scan QR codes for contact exchange.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Vauchi uses the microphone for ultrasonic proximity verification during contact exchange.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
