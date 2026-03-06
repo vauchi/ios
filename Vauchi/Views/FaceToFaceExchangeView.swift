@@ -151,89 +151,77 @@ struct FaceToFaceExchangeView: View {
 
     private func multiStageQrDisplay(statusText: String, showProgress: Bool) -> some View {
         VStack(spacing: 0) {
-            // === TOP: QR code with generous margins ===
             Spacer().frame(height: 8)
-
-            if let image = multiStageQrImage {
-                Image(uiImage: image)
-                    .interpolation(.none)
-                    .resizable()
-                    .scaledToFit()
-                    .padding(8)
-                    .background(Color(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255))
-                    .cornerRadius(12)
-                    .frame(maxWidth: UIScreen.main.bounds.width * 0.98)
-                    .accessibilityLabel("Exchange QR code")
-            } else {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255))
-                    .aspectRatio(1, contentMode: .fit)
-                    .frame(maxWidth: UIScreen.main.bounds.width * 0.98)
-                    .overlay(ProgressView())
-            }
-
+            exchangeQrImage
             Spacer()
-
-            // === MIDDLE: Instruction text ===
             Text("Point camera at other phone's QR")
                 .font(.callout)
                 .foregroundColor(Color(white: 0.4))
-
             Spacer().frame(height: 16)
-
-            // === BOTTOM: Camera preview + status indicators ===
-            HStack(alignment: .bottom, spacing: 12) {
-                // Small camera preview square
-                if cameraGranted {
-                    CameraPreviewView(previewLayer: qrScanner.previewLayer)
-                        .frame(width: 100, height: 100)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color(white: 0.6), lineWidth: 2)
-                        )
-                }
-
-                // Status indicators
-                VStack(alignment: .leading, spacing: 4) {
-                    if showProgress {
-                        HStack(spacing: 6) {
-                            ProgressView()
-                                .scaleEffect(0.7)
-                            Text(statusText)
-                                .font(.caption)
-                                .foregroundColor(Color(white: 0.27))
-                        }
-                    } else {
-                        Text(statusText)
-                            .font(.caption)
-                            .foregroundColor(Color(white: 0.27))
-                    }
-                }
-
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-
+            exchangeBottomBar(statusText: statusText, showProgress: showProgress)
             Spacer().frame(height: 8)
-
-            // === STATUS BAR: scan quality indicator ===
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(scanQuality.color)
-                    .frame(width: 10, height: 10)
-                Text(scanQuality.label)
-                    .font(.caption2)
-                    .fontWeight(.medium)
-                    .foregroundColor(Color(white: 0.27))
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(Color(red: 0.93, green: 0.91, blue: 0.89)) // Slightly darker beige
-
+            exchangeScanQualityBar
             Spacer().frame(height: 4)
         }
+    }
+
+    @ViewBuilder
+    private var exchangeQrImage: some View {
+        if let image = multiStageQrImage {
+            Image(uiImage: image)
+                .interpolation(.none)
+                .resizable()
+                .scaledToFit()
+                .padding(8)
+                .background(Color(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255))
+                .cornerRadius(12)
+                .frame(maxWidth: UIScreen.main.bounds.width * 0.98)
+                .accessibilityLabel("Exchange QR code")
+        } else {
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255))
+                .aspectRatio(1, contentMode: .fit)
+                .frame(maxWidth: UIScreen.main.bounds.width * 0.98)
+                .overlay(ProgressView())
+        }
+    }
+
+    private func exchangeBottomBar(statusText: String, showProgress: Bool) -> some View {
+        HStack(alignment: .bottom, spacing: 12) {
+            if cameraGranted {
+                CameraPreviewView(previewLayer: qrScanner.previewLayer)
+                    .frame(width: 100, height: 100)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color(white: 0.6), lineWidth: 2)
+                    )
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                if showProgress {
+                    HStack(spacing: 6) {
+                        ProgressView().scaleEffect(0.7)
+                        Text(statusText).font(.caption).foregroundColor(Color(white: 0.27))
+                    }
+                } else {
+                    Text(statusText).font(.caption).foregroundColor(Color(white: 0.27))
+                }
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+    }
+
+    private var exchangeScanQualityBar: some View {
+        HStack(spacing: 8) {
+            Circle().fill(scanQuality.color).frame(width: 10, height: 10)
+            Text(scanQuality.label)
+                .font(.caption2).fontWeight(.medium).foregroundColor(Color(white: 0.27))
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color(red: 0.93, green: 0.91, blue: 0.89))
     }
 
     private var multiStageSuccessContent: some View {

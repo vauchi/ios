@@ -499,15 +499,8 @@
 
         // MARK: - Single Config Test
 
-        /// Tests a single camera configuration for `testDurationSeconds`, counting
-        /// frames and QR detections via AVCaptureMetadataOutput.
-        ///
-        /// Key fixes vs original:
-        /// 1. metadataObjectTypes set AFTER commitConfiguration (availableMetadataObjectTypes
-        ///    is empty before commit)
-        /// 2. Session start/stop on dedicated serial queue
-        /// 3. Longer stabilization window (1.5s) and measurement window (4s)
-        /// 4. Logs first decoded QR content
+        // swiftlint:disable function_body_length
+        /// Tests a single camera configuration, counting frames and QR detections.
         private func testConfig(_ config: QrTunerCameraConfig) async -> QrTunerConfigResult {
             // Get camera device
             guard let device = AVCaptureDevice.default(
@@ -674,6 +667,8 @@
                 }
             }
         }
+
+        // swiftlint:enable function_body_length
 
         // MARK: - QR Generation (Dual Mode)
 
