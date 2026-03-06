@@ -205,25 +205,47 @@ struct QrTunerView: View {
         let configCount = matrix.cameraConfigs.count
         await log("Generated \(configCount) camera configs, \(matrix.qrConfigs.count) QR configs")
 
+        guard let (session, device, delegate) = await setupCaptureSession() else { return }
+        defer { session.stopRunning() }
+
+        await log("Camera session started. Session ID: \(sessionId)")
+
+        let qrConfig = matrix.qrConfigs.first ?? MobileQrConfig(
+            errorCorrection: .m, payloadSizeBytes: 100, moduleSizePx: 10
+        )
+        let ciDetector = CIDetector(
+            ofType: CIDetectorTypeQRCode, context: nil,
+            options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]
+        )
+
+        let tuningResults = await runConfigSweep(
+            configs: matrix.cameraConfigs, device: device,
+            delegate: delegate, detector: ciDetector, qrConfig: qrConfig
+        )
+
+        await log("Ranking \(tuningResults.count) results...")
+        let ranked = diagnosticRankConfigs(results: tuningResults)
+        await MainActor.run { rankedResults = ranked }
+
+        saveSummary(results: tuningResults, ranked: ranked)
+        await log("Sweep complete. Top config: \(ranked.first.map { "id=\($0.configId) score=\(String(format: "%.3f", $0.score))" } ?? "none")")
+    }
+
+    private func setupCaptureSession() async -> (AVCaptureSession, AVCaptureDevice, FrameCaptureDelegate)? {
         guard let device = AVCaptureDevice.default(
             .builtInWideAngleCamera, for: .video, position: .front
         ) else {
             await log("ERROR: No front camera available")
-            return
+            return nil
         }
 
-        // Set up capture session
         let session = AVCaptureSession()
         session.sessionPreset = .high
 
-        guard let input = try? AVCaptureDeviceInput(device: device) else {
-            await log("ERROR: Cannot create device input")
-            return
-        }
-
-        guard session.canAddInput(input) else {
-            await log("ERROR: Cannot add input to session")
-            return
+        guard let input = try? AVCaptureDeviceInput(device: device),
+              session.canAddInput(input) else {
+            await log("ERROR: Cannot create/add device input")
+            return nil
         }
         session.addInput(input)
 
@@ -231,39 +253,27 @@ struct QrTunerView: View {
         videoOutput.videoSettings = [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
         ]
-
         guard session.canAddOutput(videoOutput) else {
             await log("ERROR: Cannot add video output to session")
-            return
+            return nil
         }
         session.addOutput(videoOutput)
 
         let delegate = FrameCaptureDelegate()
-        let queue = DispatchQueue(label: "com.vauchi.qrtuner.capture")
-        videoOutput.setSampleBufferDelegate(delegate, queue: queue)
-
+        videoOutput.setSampleBufferDelegate(delegate, queue: DispatchQueue(label: "com.vauchi.qrtuner.capture"))
         session.startRunning()
-        defer { session.stopRunning() }
 
-        await log("Camera session started. Session ID: \(sessionId)")
+        return (session, device, delegate)
+    }
 
-        // Use first QR config for the sweep
-        let qrConfig = matrix.qrConfigs.first ?? MobileQrConfig(
-            errorCorrection: .m,
-            payloadSizeBytes: 100,
-            moduleSizePx: 10
-        )
+    private func runConfigSweep(
+        configs: [MobileCameraConfig], device: AVCaptureDevice,
+        delegate: FrameCaptureDelegate, detector: CIDetector?, qrConfig: MobileQrConfig
+    ) async -> [MobileTuningResult] {
+        var results: [MobileTuningResult] = []
+        let total = configs.count
 
-        let ciDetector = CIDetector(
-            ofType: CIDetectorTypeQRCode,
-            context: nil,
-            options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]
-        )
-
-        var tuningResults: [MobileTuningResult] = []
-
-        for (index, config) in matrix.cameraConfigs.enumerated() {
-            // Apply config
+        for (index, config) in configs.enumerated() {
             do {
                 try CameraConfigTuner.applyConfig(config, to: device)
             } catch {
@@ -271,50 +281,27 @@ struct QrTunerView: View {
                 continue
             }
 
-            // Run config sweep
             let run = await CameraConfigTuner.runConfig(configId: config.id) {
                 await captureAndDecode(
-                    delegate: delegate,
-                    detector: ciDetector,
-                    configId: config.id,
-                    sessionId: String(sessionId)
+                    delegate: delegate, detector: detector,
+                    configId: config.id, sessionId: String(sessionId)
                 )
             }
 
-            // Read actual values
-            let actualIso = Int32(device.iso)
-            let actualEv = Int32(device.exposureTargetBias)
-
             let result = CameraConfigTuner.toTuningResult(
-                run: run,
-                qrConfig: qrConfig,
-                actualIso: actualIso,
-                actualExposureEv: actualEv
+                run: run, qrConfig: qrConfig,
+                actualIso: Int32(device.iso),
+                actualExposureEv: Int32(device.exposureTargetBias)
             )
-            tuningResults.append(result)
+            results.append(result)
 
-            let progress = Double(index + 1) / Double(configCount)
-            await MainActor.run {
-                sweepProgress = progress
-            }
+            await MainActor.run { sweepProgress = Double(index + 1) / Double(total) }
 
-            if index % 10 == 0 || index == configCount - 1 {
+            if index % 10 == 0 || index == total - 1 {
                 await log("Config \(config.id): decode=\(String(format: "%.0f%%", result.decodeRate * 100)) latency=\(String(format: "%.1fms", result.avgLatencyMs))")
             }
         }
-
-        // Rank results
-        await log("Ranking \(tuningResults.count) results...")
-        let ranked = diagnosticRankConfigs(results: tuningResults)
-
-        await MainActor.run {
-            rankedResults = ranked
-        }
-
-        // Save summary
-        saveSummary(results: tuningResults, ranked: ranked)
-
-        await log("Sweep complete. Top config: \(ranked.first.map { "id=\($0.configId) score=\(String(format: "%.3f", $0.score))" } ?? "none")")
+        return results
     }
 
     private func captureAndDecode(
