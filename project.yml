@@ -31,6 +31,7 @@ targets:
         excludes:
           - "**/*.xcassets"
           - "Generated"
+          - "Libs"
     dependencies:
       - package: VauchiMobile
         product: VauchiMobile
