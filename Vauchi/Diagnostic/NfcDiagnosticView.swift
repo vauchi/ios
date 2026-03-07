@@ -23,6 +23,7 @@
 
         @State private var logLines: [String] = []
         @State private var running = false
+        @State private var nfcManager: NfcDiagnosticManager?
 
         var body: some View {
             VStack(spacing: 16) {
@@ -131,9 +132,11 @@
             clearLogFile()
 
             let manager = NfcDiagnosticManager()
+            nfcManager = manager
             manager.runTest(name: name, log: log) {
                 DispatchQueue.main.async {
                     running = false
+                    nfcManager = nil
                 }
             }
         }
