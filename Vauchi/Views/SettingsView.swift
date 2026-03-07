@@ -50,6 +50,9 @@ struct SettingsView: View {
                         NavigationLink("Ultrasonic Diagnostic") {
                             DiagnosticView()
                         }
+                        NavigationLink("NFC Diagnostic") {
+                            NfcDiagnosticView(autoTest: nil)
+                        }
                         NavigationLink(destination: NfcTestView()) {
                             Label("NFC Exchange Test", systemImage: "wave.3.right")
                         }
