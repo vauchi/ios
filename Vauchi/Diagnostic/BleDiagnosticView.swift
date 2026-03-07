@@ -588,7 +588,10 @@
                         completion(mtu)
                     }
                 }
-                centralManager?.connect(peripheral, options: nil)
+                centralManager?.connect(peripheral, options: [
+                    CBConnectPeripheralOptionNotifyOnConnectionKey: true,
+                    CBConnectPeripheralOptionNotifyOnDisconnectionKey: true,
+                ])
             }
 
             centralManager?.scanForPeripherals(
@@ -651,7 +654,10 @@
                         completion(peripheral, char)
                     }
                 }
-                centralManager?.connect(peripheral, options: nil)
+                centralManager?.connect(peripheral, options: [
+                    CBConnectPeripheralOptionNotifyOnConnectionKey: true,
+                    CBConnectPeripheralOptionNotifyOnDisconnectionKey: true,
+                ])
             }
 
             centralManager?.scanForPeripherals(
@@ -723,7 +729,8 @@
             onConnected?()
         }
 
-        func centralManager(_: CBCentralManager, didFailToConnect _: CBPeripheral, error: Error?) {
+        func centralManager(_: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+            NSLog("[BLE Diag] didFailToConnect %@ error=%@", peripheral.identifier.uuidString, error?.localizedDescription ?? "nil")
             logFn?("Connection failed: \(error?.localizedDescription ?? "unknown")")
         }
 
