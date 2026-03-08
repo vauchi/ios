@@ -290,14 +290,14 @@ enum UserAction: Encodable {
                 keyedBy: FieldVisibilityKeys.self, forKey: .fieldVisibilityChanged
             )
             try nested.encode(fieldId, forKey: .fieldId)
-            try nested.encodeIfPresent(groupId, forKey: .groupId)
+            try nested.encode(groupId, forKey: .groupId)
             try nested.encode(visible, forKey: .visible)
 
         case let .groupViewSelected(groupName):
             var nested = container.nestedContainer(
                 keyedBy: GroupViewSelectedKeys.self, forKey: .groupViewSelected
             )
-            try nested.encodeIfPresent(groupName, forKey: .groupName)
+            try nested.encode(groupName, forKey: .groupName)
         }
     }
 
