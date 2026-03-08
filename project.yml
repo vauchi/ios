@@ -32,9 +32,10 @@ targets:
           - "**/*.xcassets"
           - "Generated"
           - "Libs"
-          # OnboardingViewModel depends on MobileOnboardingWorkflow (UniFFI binding)
+          # CoreUI views that depend on MobileOnboardingWorkflow (UniFFI binding)
           # which isn't in the published VauchiMobile yet. Exclude until bindings update.
           - "CoreUI/OnboardingViewModel.swift"
+          - "CoreUI/CoreOnboardingView.swift"
     dependencies:
       - package: VauchiMobile
         product: VauchiMobile
