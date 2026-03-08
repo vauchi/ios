@@ -1,0 +1,262 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+@testable import Vauchi
+import XCTest
+
+/// Contract tests that verify the iOS decoder stays compatible with core's golden JSON fixtures.
+/// If core changes the ScreenModel format, these tests catch the drift.
+final class ContractTests: XCTestCase {
+    // MARK: - Fixture Loading
+
+    /// Path to golden fixtures in the core repo, resolved relative to this source file.
+    private static let fixturesURL: URL = {
+        let testFileURL = URL(fileURLWithPath: #filePath)
+        return testFileURL
+            .deletingLastPathComponent() // CoreUI/
+            .deletingLastPathComponent() // VauchiTests/
+            .deletingLastPathComponent() // ios/
+            .appendingPathComponent("core/vauchi-core/tests/fixtures/golden")
+            .standardized
+    }()
+
+    /// All expected golden fixture filenames (without .json extension).
+    private static let expectedFixtures = [
+        "backup_prompt",
+        "contact_info",
+        "default_name",
+        "groups_setup",
+        "preview_card",
+        "ready",
+        "security_explanation",
+        "skip_gate",
+        "welcome",
+    ]
+
+    /// Load and decode a single golden fixture as ScreenModel.
+    private func loadFixture(_ name: String) throws -> ScreenModel {
+        let url = Self.fixturesURL.appendingPathComponent("\(name).json")
+        let data = try Data(contentsOf: url)
+        return try coreJSONDecoder.decode(ScreenModel.self, from: data)
+    }
+
+    // MARK: - Golden Fixture Decode Tests
+
+    /// Every golden fixture must decode as a valid ScreenModel.
+    /// This is the primary contract test: if core changes the JSON schema,
+    /// this test fails and tells us exactly which fixture broke.
+    func testAllGoldenFixturesDecodeAsScreenModel() throws {
+        for name in Self.expectedFixtures {
+            let screen = try loadFixture(name)
+            // Verify it decoded to something meaningful (not just empty defaults)
+            XCTAssertFalse(screen.screenId.isEmpty, "Fixture '\(name)': screen_id must not be empty")
+            XCTAssertFalse(screen.title.isEmpty, "Fixture '\(name)': title must not be empty")
+        }
+    }
+
+    /// Verify that no golden fixtures are missing from our expected list.
+    /// If core adds a new onboarding step, this test catches it.
+    func testNoUnexpectedFixturesMissing() throws {
+        let contents = try FileManager.default.contentsOfDirectory(
+            at: Self.fixturesURL,
+            includingPropertiesForKeys: nil
+        )
+        let jsonFiles = contents
+            .filter { $0.pathExtension == "json" }
+            .map { $0.deletingPathExtension().lastPathComponent }
+            .sorted()
+
+        let expected = Self.expectedFixtures.sorted()
+        XCTAssertEqual(
+            jsonFiles, expected,
+            "Golden fixtures on disk don't match expected list. "
+                + "Added: \(Set(jsonFiles).subtracting(expected).sorted()). "
+                + "Removed: \(Set(expected).subtracting(jsonFiles).sorted())."
+        )
+    }
+
+    // MARK: - Field-Level Assertions
+
+    /// Decode each fixture and verify critical fields are populated.
+    func testScreenModelFieldsNotNil() throws {
+        for name in Self.expectedFixtures {
+            let screen = try loadFixture(name)
+
+            XCTAssertFalse(
+                screen.screenId.isEmpty,
+                "Fixture '\(name)': screen_id must not be empty"
+            )
+            XCTAssertFalse(
+                screen.title.isEmpty,
+                "Fixture '\(name)': title must not be empty"
+            )
+            XCTAssertFalse(
+                screen.components.isEmpty,
+                "Fixture '\(name)': components must not be empty"
+            )
+            XCTAssertFalse(
+                screen.actions.isEmpty,
+                "Fixture '\(name)': actions must not be empty"
+            )
+        }
+    }
+
+    /// Verify the welcome fixture has specific expected values.
+    func testWelcomeFixtureContent() throws {
+        let screen = try loadFixture("welcome")
+
+        XCTAssertEqual(screen.screenId, "welcome")
+        XCTAssertEqual(screen.title, "Welcome to Vauchi")
+        XCTAssertEqual(screen.subtitle, "Your contacts, your rules.")
+        XCTAssertEqual(screen.progress?.currentStep, 1)
+        XCTAssertEqual(screen.progress?.totalSteps, 9)
+
+        // Welcome has an InfoPanel component
+        guard case let .infoPanel(panel) = screen.components[0] else {
+            XCTFail("Expected first component to be InfoPanel, got \(screen.components[0])")
+            return
+        }
+        XCTAssertEqual(panel.id, "value_proposition")
+        XCTAssertEqual(panel.title, "Why Vauchi?")
+        XCTAssertEqual(panel.items.count, 3)
+
+        // Actions: Get Started + Restore Backup
+        XCTAssertEqual(screen.actions.count, 2)
+        XCTAssertEqual(screen.actions[0].id, "get_started")
+        XCTAssertEqual(screen.actions[0].style, .primary)
+        XCTAssertEqual(screen.actions[1].id, "restore_backup")
+        XCTAssertEqual(screen.actions[1].style, .secondary)
+    }
+
+    /// Verify the preview_card fixture decodes its CardPreview component.
+    func testPreviewCardFixtureContent() throws {
+        let screen = try loadFixture("preview_card")
+
+        XCTAssertEqual(screen.screenId, "preview_card")
+        XCTAssertEqual(screen.progress?.currentStep, 6)
+
+        guard case let .cardPreview(preview) = screen.components[0] else {
+            XCTFail("Expected first component to be CardPreview, got \(screen.components[0])")
+            return
+        }
+        XCTAssertEqual(preview.name, "Alice")
+    }
+
+    // MARK: - Progress Consistency
+
+    /// All fixtures should have progress with total_steps == 9 (onboarding has 9 steps).
+    func testAllFixturesHaveConsistentProgress() throws {
+        for name in Self.expectedFixtures {
+            let screen = try loadFixture(name)
+            let progress = screen.progress
+            XCTAssertNotNil(progress, "Fixture '\(name)': expected progress to be present")
+            XCTAssertEqual(
+                progress?.totalSteps, 9,
+                "Fixture '\(name)': expected total_steps == 9, got \(progress?.totalSteps ?? 0)"
+            )
+        }
+    }
+
+    // MARK: - UserAction Round-Trip Encoding
+
+    /// Encode each UserAction variant, decode the JSON, and verify the structure
+    /// matches serde's expected format (PascalCase variant key, snake_case field names).
+    func testUserActionRoundtripTextChanged() throws {
+        let action = UserAction.textChanged(componentId: "name_input", value: "Alice")
+        let data = try coreJSONEncoder.encode(action)
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+
+        let inner = json?["TextChanged"] as? [String: Any]
+        XCTAssertNotNil(inner, "Expected 'TextChanged' key")
+        XCTAssertEqual(inner?["component_id"] as? String, "name_input")
+        XCTAssertEqual(inner?["value"] as? String, "Alice")
+
+        // Round-trip: re-encode from parsed JSON and compare
+        let reEncoded = try JSONSerialization.data(
+            withJSONObject: json as Any, options: [.sortedKeys]
+        )
+        let original = try JSONSerialization.data(
+            withJSONObject: JSONSerialization.jsonObject(with: data), options: [.sortedKeys]
+        )
+        XCTAssertEqual(reEncoded, original, "Round-trip encoding must produce identical JSON")
+    }
+
+    func testUserActionRoundtripItemToggled() throws {
+        let action = UserAction.itemToggled(componentId: "groups", itemId: "family")
+        let data = try coreJSONEncoder.encode(action)
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+
+        let inner = json?["ItemToggled"] as? [String: Any]
+        XCTAssertNotNil(inner, "Expected 'ItemToggled' key")
+        XCTAssertEqual(inner?["component_id"] as? String, "groups")
+        XCTAssertEqual(inner?["item_id"] as? String, "family")
+    }
+
+    func testUserActionRoundtripActionPressed() throws {
+        let action = UserAction.actionPressed(actionId: "get_started")
+        let data = try coreJSONEncoder.encode(action)
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+
+        let inner = json?["ActionPressed"] as? [String: Any]
+        XCTAssertNotNil(inner, "Expected 'ActionPressed' key")
+        XCTAssertEqual(inner?["action_id"] as? String, "get_started")
+    }
+
+    func testUserActionRoundtripFieldVisibilityChanged() throws {
+        let action = UserAction.fieldVisibilityChanged(
+            fieldId: "f1", groupId: "Family", visible: true
+        )
+        let data = try coreJSONEncoder.encode(action)
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+
+        let inner = json?["FieldVisibilityChanged"] as? [String: Any]
+        XCTAssertNotNil(inner, "Expected 'FieldVisibilityChanged' key")
+        XCTAssertEqual(inner?["field_id"] as? String, "f1")
+        XCTAssertEqual(inner?["group_id"] as? String, "Family")
+        XCTAssertEqual(inner?["visible"] as? Bool, true)
+    }
+
+    func testUserActionRoundtripGroupViewSelected() throws {
+        let action = UserAction.groupViewSelected(groupName: "Friends")
+        let data = try coreJSONEncoder.encode(action)
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+
+        let inner = json?["GroupViewSelected"] as? [String: Any]
+        XCTAssertNotNil(inner, "Expected 'GroupViewSelected' key")
+        XCTAssertEqual(inner?["group_name"] as? String, "Friends")
+    }
+
+    /// Verify that all UserAction variant keys use PascalCase (matching serde).
+    func testUserActionVariantKeysArePascalCase() throws {
+        let actions: [UserAction] = [
+            .textChanged(componentId: "c", value: "v"),
+            .itemToggled(componentId: "c", itemId: "i"),
+            .actionPressed(actionId: "a"),
+            .fieldVisibilityChanged(fieldId: "f", groupId: nil, visible: false),
+            .groupViewSelected(groupName: nil),
+        ]
+
+        let expectedKeys = [
+            "TextChanged",
+            "ItemToggled",
+            "ActionPressed",
+            "FieldVisibilityChanged",
+            "GroupViewSelected",
+        ]
+
+        for (action, expectedKey) in zip(actions, expectedKeys) {
+            let data = try coreJSONEncoder.encode(action)
+            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            XCTAssertNotNil(json, "Failed to parse JSON for \(expectedKey)")
+            XCTAssertTrue(
+                json?.keys.contains(expectedKey) == true,
+                "Expected PascalCase key '\(expectedKey)', got keys: \(json?.keys.sorted() ?? [])"
+            )
+            XCTAssertEqual(
+                json?.keys.count, 1,
+                "Expected exactly one top-level key for \(expectedKey)"
+            )
+        }
+    }
+}
