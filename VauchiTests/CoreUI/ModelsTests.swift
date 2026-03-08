@@ -9,7 +9,7 @@ final class ModelsTests: XCTestCase {
     // MARK: - ScreenModel Decoding
 
     func testScreenModelDecodesFullJSON() throws {
-        let json = """
+        let json = Data("""
         {
             "screen_id": "welcome",
             "title": "Welcome",
@@ -26,7 +26,7 @@ final class ModelsTests: XCTestCase {
                 "label": "Step 1 of 5"
             }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let screen = try coreJSONDecoder.decode(ScreenModel.self, from: json)
 
@@ -45,14 +45,14 @@ final class ModelsTests: XCTestCase {
     }
 
     func testScreenModelDecodesWithoutOptionalFields() throws {
-        let json = """
+        let json = Data("""
         {
             "screen_id": "done",
             "title": "Done",
             "components": [],
             "actions": []
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let screen = try coreJSONDecoder.decode(ScreenModel.self, from: json)
 
@@ -67,9 +67,9 @@ final class ModelsTests: XCTestCase {
     // MARK: - Component Variants
 
     func testComponentTextDecoding() throws {
-        let json = """
+        let json = Data("""
         {"Text": {"id": "t1", "content": "Hello world", "style": "Title"}}
-        """.data(using: .utf8)!
+        """.utf8)
 
         let component = try coreJSONDecoder.decode(Component.self, from: json)
 
@@ -83,7 +83,7 @@ final class ModelsTests: XCTestCase {
     }
 
     func testComponentTextInputDecoding() throws {
-        let json = """
+        let json = Data("""
         {
             "TextInput": {
                 "id": "name_input",
@@ -95,7 +95,7 @@ final class ModelsTests: XCTestCase {
                 "input_type": "Text"
             }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let component = try coreJSONDecoder.decode(Component.self, from: json)
 
@@ -113,7 +113,7 @@ final class ModelsTests: XCTestCase {
     }
 
     func testComponentToggleListDecoding() throws {
-        let json = """
+        let json = Data("""
         {
             "ToggleList": {
                 "id": "groups",
@@ -124,7 +124,7 @@ final class ModelsTests: XCTestCase {
                 ]
             }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let component = try coreJSONDecoder.decode(Component.self, from: json)
 
@@ -145,7 +145,7 @@ final class ModelsTests: XCTestCase {
     }
 
     func testComponentFieldListDecoding() throws {
-        let json = """
+        let json = Data("""
         {
             "FieldList": {
                 "id": "fields",
@@ -162,7 +162,7 @@ final class ModelsTests: XCTestCase {
                 "available_groups": ["Family", "Friends"]
             }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let component = try coreJSONDecoder.decode(Component.self, from: json)
 
@@ -181,7 +181,7 @@ final class ModelsTests: XCTestCase {
     }
 
     func testComponentCardPreviewDecoding() throws {
-        let json = """
+        let json = Data("""
         {
             "CardPreview": {
                 "name": "Alice",
@@ -204,7 +204,7 @@ final class ModelsTests: XCTestCase {
                 "selected_group": "Family"
             }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let component = try coreJSONDecoder.decode(Component.self, from: json)
 
@@ -223,7 +223,7 @@ final class ModelsTests: XCTestCase {
     }
 
     func testComponentInfoPanelDecoding() throws {
-        let json = """
+        let json = Data("""
         {
             "InfoPanel": {
                 "id": "security_info",
@@ -234,7 +234,7 @@ final class ModelsTests: XCTestCase {
                 ]
             }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let component = try coreJSONDecoder.decode(Component.self, from: json)
 
@@ -252,9 +252,9 @@ final class ModelsTests: XCTestCase {
     }
 
     func testComponentDividerDecoding() throws {
-        let json = """
+        let json = Data("""
         "Divider"
-        """.data(using: .utf8)!
+        """.utf8)
 
         let component = try coreJSONDecoder.decode(Component.self, from: json)
 
@@ -267,9 +267,9 @@ final class ModelsTests: XCTestCase {
     // MARK: - UiFieldVisibility
 
     func testUiFieldVisibilityShown() throws {
-        let json = """
+        let json = Data("""
         "Shown"
-        """.data(using: .utf8)!
+        """.utf8)
 
         let visibility = try coreJSONDecoder.decode(UiFieldVisibility.self, from: json)
 
@@ -280,9 +280,9 @@ final class ModelsTests: XCTestCase {
     }
 
     func testUiFieldVisibilityHidden() throws {
-        let json = """
+        let json = Data("""
         "Hidden"
-        """.data(using: .utf8)!
+        """.utf8)
 
         let visibility = try coreJSONDecoder.decode(UiFieldVisibility.self, from: json)
 
@@ -293,9 +293,9 @@ final class ModelsTests: XCTestCase {
     }
 
     func testUiFieldVisibilityGroups() throws {
-        let json = """
+        let json = Data("""
         {"Groups": ["Family", "Friends"]}
-        """.data(using: .utf8)!
+        """.utf8)
 
         let visibility = try coreJSONDecoder.decode(UiFieldVisibility.self, from: json)
 
@@ -307,9 +307,9 @@ final class ModelsTests: XCTestCase {
     }
 
     func testUiFieldVisibilityGroupsSingleGroup() throws {
-        let json = """
+        let json = Data("""
         {"Groups": ["Family"]}
-        """.data(using: .utf8)!
+        """.utf8)
 
         let visibility = try coreJSONDecoder.decode(UiFieldVisibility.self, from: json)
 
@@ -323,7 +323,7 @@ final class ModelsTests: XCTestCase {
     // MARK: - ActionResult
 
     func testActionResultUpdateScreen() throws {
-        let json = """
+        let json = Data("""
         {
             "UpdateScreen": {
                 "screen_id": "step2",
@@ -332,7 +332,7 @@ final class ModelsTests: XCTestCase {
                 "actions": []
             }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
 
@@ -345,7 +345,7 @@ final class ModelsTests: XCTestCase {
     }
 
     func testActionResultNavigateTo() throws {
-        let json = """
+        let json = Data("""
         {
             "NavigateTo": {
                 "screen_id": "groups",
@@ -354,7 +354,7 @@ final class ModelsTests: XCTestCase {
                 "actions": []
             }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
 
@@ -367,14 +367,14 @@ final class ModelsTests: XCTestCase {
     }
 
     func testActionResultValidationError() throws {
-        let json = """
+        let json = Data("""
         {
             "ValidationError": {
                 "component_id": "name_input",
                 "message": "Name is required"
             }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
 
@@ -387,9 +387,9 @@ final class ModelsTests: XCTestCase {
     }
 
     func testActionResultComplete() throws {
-        let json = """
+        let json = Data("""
         "Complete"
-        """.data(using: .utf8)!
+        """.utf8)
 
         let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
 
@@ -499,9 +499,9 @@ final class ModelsTests: XCTestCase {
     // MARK: - Unknown Variant Handling
 
     func testUnknownComponentVariantThrows() {
-        let json = """
+        let json = Data("""
         {"UnknownWidget": {"id": "x"}}
-        """.data(using: .utf8)!
+        """.utf8)
 
         XCTAssertThrowsError(try coreJSONDecoder.decode(Component.self, from: json)) { error in
             guard case let DecodingError.dataCorrupted(context) = error else {
@@ -516,9 +516,9 @@ final class ModelsTests: XCTestCase {
     }
 
     func testUnknownActionResultVariantThrows() {
-        let json = """
+        let json = Data("""
         {"UnknownResult": {}}
-        """.data(using: .utf8)!
+        """.utf8)
 
         XCTAssertThrowsError(try coreJSONDecoder.decode(ActionResult.self, from: json)) { error in
             guard case let DecodingError.dataCorrupted(context) = error else {
@@ -533,9 +533,9 @@ final class ModelsTests: XCTestCase {
     }
 
     func testUnknownUiFieldVisibilityVariantThrows() {
-        let json = """
+        let json = Data("""
         "Unknown"
-        """.data(using: .utf8)!
+        """.utf8)
 
         XCTAssertThrowsError(
             try coreJSONDecoder.decode(UiFieldVisibility.self, from: json)
