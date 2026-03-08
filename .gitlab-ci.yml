@@ -336,6 +336,8 @@ build:debug:
     - rm -rf "${HOME}/Library/Caches/org.swift.swiftpm/repositories"
     - rm -rf .spm-packages
     - xcodegen generate
+    # Delete Package.resolved so SPM re-resolves from scratch (force-pushed tags change commit hashes)
+    - rm -f Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
   artifacts:
     paths:
