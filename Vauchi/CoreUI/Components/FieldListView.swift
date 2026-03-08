@@ -18,7 +18,7 @@ struct FieldListView: View {
                 emptyState
             } else {
                 ForEach(component.fields) { field in
-                    FieldRow(
+                    FieldListRow(
                         field: field,
                         visibilityMode: component.visibilityMode,
                         availableGroups: component.availableGroups,
@@ -50,7 +50,7 @@ struct FieldListView: View {
     }
 }
 
-struct FieldRow: View {
+struct FieldListRow: View {
     let field: FieldDisplay
     let visibilityMode: VisibilityMode
     let availableGroups: [String]
