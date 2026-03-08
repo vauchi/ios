@@ -17,12 +17,12 @@ let coreJSONDecoder: JSONDecoder = {
     return decoder
 }()
 
-/// Shared encoder configured for serde snake_case input.
-let coreJSONEncoder: JSONEncoder = {
-    let encoder = JSONEncoder()
-    encoder.keyEncodingStrategy = .convertToSnakeCase
-    return encoder
-}()
+/// Shared encoder for sending UserAction to core.
+/// Does NOT use `.convertToSnakeCase` because UserAction's custom `encode(to:)`
+/// already emits the correct keys (PascalCase variant names like "TextChanged",
+/// snake_case field names like "component_id"). Applying `.convertToSnakeCase`
+/// would corrupt variant keys to "text_changed", breaking serde deserialization.
+let coreJSONEncoder: JSONEncoder = .init()
 
 // MARK: - ScreenModel
 
