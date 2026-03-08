@@ -61,13 +61,14 @@ struct TextInputView: View {
         case .text: .default
         case .phone: .phonePad
         case .email: .emailAddress
+        case .password: .default
         }
     }
 
     private func autocapitalization(for inputType: InputType) -> UITextAutocapitalizationType {
         switch inputType {
         case .text: .words
-        case .phone, .email: .none
+        case .phone, .email, .password: .none
         }
     }
 }

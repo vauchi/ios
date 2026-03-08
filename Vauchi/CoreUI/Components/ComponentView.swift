@@ -32,6 +32,27 @@ struct ComponentView: View {
         case let .infoPanel(panelComponent):
             InfoPanelView(component: panelComponent)
 
+        case let .contactList(contactListComponent):
+            ContactListView(component: contactListComponent, onAction: onAction)
+
+        case let .settingsGroup(settingsGroupComponent):
+            SettingsGroupView(component: settingsGroupComponent, onAction: onAction)
+
+        case let .actionList(actionListComponent):
+            ActionListView(component: actionListComponent, onAction: onAction)
+
+        case let .statusIndicator(statusComponent):
+            StatusIndicatorView(component: statusComponent)
+
+        case let .pinInput(pinComponent):
+            PinInputView(component: pinComponent, onAction: onAction)
+
+        case let .qrCode(qrComponent):
+            QrCodeView(component: qrComponent, onAction: onAction)
+
+        case let .confirmationDialog(dialogComponent):
+            ConfirmationDialogView(component: dialogComponent, onAction: onAction)
+
         case .divider:
             Divider()
                 .padding(.vertical, 4)

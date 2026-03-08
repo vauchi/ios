@@ -76,6 +76,13 @@ enum Component: Decodable {
     case fieldList(FieldListComponent)
     case cardPreview(CardPreviewComponent)
     case infoPanel(InfoPanelComponent)
+    case contactList(ContactListComponent)
+    case settingsGroup(SettingsGroupComponent)
+    case actionList(ActionListComponent)
+    case statusIndicator(StatusIndicatorComponent)
+    case pinInput(PinInputComponent)
+    case qrCode(QrCodeComponent)
+    case confirmationDialog(ConfirmationDialogComponent)
     case divider
 
     init(from decoder: Decoder) throws {
@@ -102,6 +109,22 @@ enum Component: Decodable {
             self = try .cardPreview(container.decode(CardPreviewComponent.self, forKey: .cardPreview))
         } else if container.contains(.infoPanel) {
             self = try .infoPanel(container.decode(InfoPanelComponent.self, forKey: .infoPanel))
+        } else if container.contains(.contactList) {
+            self = try .contactList(container.decode(ContactListComponent.self, forKey: .contactList))
+        } else if container.contains(.settingsGroup) {
+            self = try .settingsGroup(container.decode(SettingsGroupComponent.self, forKey: .settingsGroup))
+        } else if container.contains(.actionList) {
+            self = try .actionList(container.decode(ActionListComponent.self, forKey: .actionList))
+        } else if container.contains(.statusIndicator) {
+            self = try .statusIndicator(container.decode(StatusIndicatorComponent.self, forKey: .statusIndicator))
+        } else if container.contains(.pinInput) {
+            self = try .pinInput(container.decode(PinInputComponent.self, forKey: .pinInput))
+        } else if container.contains(.qrCode) {
+            self = try .qrCode(container.decode(QrCodeComponent.self, forKey: .qrCode))
+        } else if container.contains(.confirmationDialog) {
+            self = try .confirmationDialog(
+                container.decode(ConfirmationDialogComponent.self, forKey: .confirmationDialog)
+            )
         } else {
             throw DecodingError.dataCorrupted(
                 DecodingError.Context(
@@ -119,6 +142,13 @@ enum Component: Decodable {
         case fieldList = "FieldList"
         case cardPreview = "CardPreview"
         case infoPanel = "InfoPanel"
+        case contactList = "ContactList"
+        case settingsGroup = "SettingsGroup"
+        case actionList = "ActionList"
+        case statusIndicator = "StatusIndicator"
+        case pinInput = "PinInput"
+        case qrCode = "QrCode"
+        case confirmationDialog = "ConfirmationDialog"
     }
 }
 
@@ -151,6 +181,7 @@ enum InputType: String, Decodable {
     case text = "Text"
     case phone = "Phone"
     case email = "Email"
+    case password = "Password"
 }
 
 struct ToggleListComponent: Decodable {
@@ -254,6 +285,146 @@ struct InfoItem: Decodable, Identifiable {
     }
 }
 
+// MARK: - ContactList Component
+
+struct ContactListComponent: Decodable {
+    let id: String
+    let contacts: [ContactItem]
+    let searchable: Bool
+}
+
+struct ContactItem: Decodable, Identifiable {
+    let id: String
+    let name: String
+    let subtitle: String?
+    let avatarInitials: String
+    let status: String?
+}
+
+// MARK: - SettingsGroup Component
+
+struct SettingsGroupComponent: Decodable {
+    let id: String
+    let label: String
+    let items: [SettingsItem]
+}
+
+struct SettingsItem: Decodable, Identifiable {
+    let id: String
+    let label: String
+    let kind: SettingsItemKind
+}
+
+enum SettingsItemKind: Decodable {
+    case toggle(enabled: Bool)
+    case value(value: String)
+    case link(detail: String?)
+    case destructive(label: String)
+
+    init(from decoder: Decoder) throws {
+        // Serde produces: {"Toggle": {"enabled": true}}, etc.
+        let container = try decoder.container(keyedBy: VariantKey.self)
+        if container.contains(.toggle) {
+            let data = try container.decode(ToggleData.self, forKey: .toggle)
+            self = .toggle(enabled: data.enabled)
+        } else if container.contains(.value) {
+            let data = try container.decode(ValueData.self, forKey: .value)
+            self = .value(value: data.value)
+        } else if container.contains(.link) {
+            let data = try container.decode(LinkData.self, forKey: .link)
+            self = .link(detail: data.detail)
+        } else if container.contains(.destructive) {
+            let data = try container.decode(DestructiveData.self, forKey: .destructive)
+            self = .destructive(label: data.label)
+        } else {
+            throw DecodingError.dataCorrupted(
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Unknown SettingsItemKind"
+                )
+            )
+        }
+    }
+
+    private enum VariantKey: String, CodingKey {
+        case toggle = "Toggle"
+        case value = "Value"
+        case link = "Link"
+        case destructive = "Destructive"
+    }
+
+    private struct ToggleData: Decodable { let enabled: Bool }
+    private struct ValueData: Decodable { let value: String }
+    private struct LinkData: Decodable { let detail: String? }
+    private struct DestructiveData: Decodable { let label: String }
+}
+
+// MARK: - ActionList Component
+
+struct ActionListComponent: Decodable {
+    let id: String
+    let items: [ActionListItem]
+}
+
+struct ActionListItem: Decodable, Identifiable {
+    let id: String
+    let label: String
+    let icon: String?
+    let detail: String?
+}
+
+// MARK: - StatusIndicator Component
+
+struct StatusIndicatorComponent: Decodable {
+    let id: String
+    let icon: String?
+    let title: String
+    let detail: String?
+    let status: Status
+}
+
+enum Status: String, Decodable {
+    case pending = "Pending"
+    case inProgress = "InProgress"
+    case success = "Success"
+    case failed = "Failed"
+    case warning = "Warning"
+}
+
+// MARK: - PinInput Component
+
+struct PinInputComponent: Decodable {
+    let id: String
+    let label: String
+    let length: Int
+    let masked: Bool
+    let validationError: String?
+}
+
+// MARK: - QrCode Component
+
+struct QrCodeComponent: Decodable {
+    let id: String
+    let data: String
+    let mode: QrMode
+    let label: String?
+}
+
+enum QrMode: String, Decodable {
+    case display = "Display"
+    case scan = "Scan"
+}
+
+// MARK: - ConfirmationDialog Component
+
+struct ConfirmationDialogComponent: Decodable {
+    let id: String
+    let title: String
+    let message: String
+    let confirmText: String
+    let destructive: Bool
+}
+
 // MARK: - UserAction (Encodable for sending to core)
 
 /// An action the user performed in the UI.
@@ -266,6 +437,9 @@ enum UserAction: Encodable {
     case actionPressed(actionId: String)
     case fieldVisibilityChanged(fieldId: String, groupId: String?, visible: Bool)
     case groupViewSelected(groupName: String?)
+    case searchChanged(componentId: String, query: String)
+    case listItemSelected(componentId: String, itemId: String)
+    case settingsToggled(componentId: String, itemId: String)
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: VariantKey.self)
@@ -298,6 +472,27 @@ enum UserAction: Encodable {
                 keyedBy: GroupViewSelectedKeys.self, forKey: .groupViewSelected
             )
             try nested.encodeIfPresent(groupName, forKey: .groupName)
+
+        case let .searchChanged(componentId, query):
+            var nested = container.nestedContainer(
+                keyedBy: SearchChangedKeys.self, forKey: .searchChanged
+            )
+            try nested.encode(componentId, forKey: .componentId)
+            try nested.encode(query, forKey: .query)
+
+        case let .listItemSelected(componentId, itemId):
+            var nested = container.nestedContainer(
+                keyedBy: ListItemSelectedKeys.self, forKey: .listItemSelected
+            )
+            try nested.encode(componentId, forKey: .componentId)
+            try nested.encode(itemId, forKey: .itemId)
+
+        case let .settingsToggled(componentId, itemId):
+            var nested = container.nestedContainer(
+                keyedBy: SettingsToggledKeys.self, forKey: .settingsToggled
+            )
+            try nested.encode(componentId, forKey: .componentId)
+            try nested.encode(itemId, forKey: .itemId)
         }
     }
 
@@ -307,6 +502,9 @@ enum UserAction: Encodable {
         case actionPressed = "ActionPressed"
         case fieldVisibilityChanged = "FieldVisibilityChanged"
         case groupViewSelected = "GroupViewSelected"
+        case searchChanged = "SearchChanged"
+        case listItemSelected = "ListItemSelected"
+        case settingsToggled = "SettingsToggled"
     }
 
     private enum TextChangedKeys: String, CodingKey {
@@ -332,6 +530,21 @@ enum UserAction: Encodable {
     private enum GroupViewSelectedKeys: String, CodingKey {
         case groupName = "group_name"
     }
+
+    private enum SearchChangedKeys: String, CodingKey {
+        case componentId = "component_id"
+        case query
+    }
+
+    private enum ListItemSelectedKeys: String, CodingKey {
+        case componentId = "component_id"
+        case itemId = "item_id"
+    }
+
+    private enum SettingsToggledKeys: String, CodingKey {
+        case componentId = "component_id"
+        case itemId = "item_id"
+    }
 }
 
 // MARK: - ActionResult
@@ -343,16 +556,36 @@ enum ActionResult: Decodable {
     case navigateTo(ScreenModel)
     case validationError(componentId: String, message: String)
     case complete
+    case startDeviceLink
+    case startBackupImport
+    case openContact(contactId: String)
+    case openUrl(url: String)
+    case showAlert(title: String, message: String)
+    case requestCamera
+    case wipeComplete
 
     init(from decoder: Decoder) throws {
-        // Unit variant: "Complete"
+        // Unit variants: "Complete", "StartDeviceLink", etc.
         if let container = try? decoder.singleValueContainer(),
-           let stringValue = try? container.decode(String.self),
-           stringValue == "Complete" {
-            self = .complete
+           let stringValue = try? container.decode(String.self) {
+            switch stringValue {
+            case "Complete": self = .complete
+            case "StartDeviceLink": self = .startDeviceLink
+            case "StartBackupImport": self = .startBackupImport
+            case "RequestCamera": self = .requestCamera
+            case "WipeComplete": self = .wipeComplete
+            default:
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(
+                        codingPath: decoder.codingPath,
+                        debugDescription: "Unknown ActionResult unit variant: \(stringValue)"
+                    )
+                )
+            }
             return
         }
 
+        // Struct variants: {"VariantName": {...}}
         let container = try decoder.container(keyedBy: VariantKey.self)
 
         if container.contains(.updateScreen) {
@@ -362,6 +595,15 @@ enum ActionResult: Decodable {
         } else if container.contains(.validationError) {
             let error = try container.decode(ValidationErrorData.self, forKey: .validationError)
             self = .validationError(componentId: error.componentId, message: error.message)
+        } else if container.contains(.openContact) {
+            let data = try container.decode(OpenContactData.self, forKey: .openContact)
+            self = .openContact(contactId: data.contactId)
+        } else if container.contains(.openUrl) {
+            let data = try container.decode(OpenUrlData.self, forKey: .openUrl)
+            self = .openUrl(url: data.url)
+        } else if container.contains(.showAlert) {
+            let data = try container.decode(ShowAlertData.self, forKey: .showAlert)
+            self = .showAlert(title: data.title, message: data.message)
         } else {
             throw DecodingError.dataCorrupted(
                 DecodingError.Context(
@@ -376,10 +618,26 @@ enum ActionResult: Decodable {
         case updateScreen = "UpdateScreen"
         case navigateTo = "NavigateTo"
         case validationError = "ValidationError"
+        case openContact = "OpenContact"
+        case openUrl = "OpenUrl"
+        case showAlert = "ShowAlert"
     }
 
     private struct ValidationErrorData: Decodable {
         let componentId: String
+        let message: String
+    }
+
+    private struct OpenContactData: Decodable {
+        let contactId: String
+    }
+
+    private struct OpenUrlData: Decodable {
+        let url: String
+    }
+
+    private struct ShowAlertData: Decodable {
+        let title: String
         let message: String
     }
 }
