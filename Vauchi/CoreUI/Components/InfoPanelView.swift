@@ -88,6 +88,7 @@ func sfSymbolForCoreIcon(_ name: String) -> String {
     case "group": "person.3.fill"
     case "card": "person.crop.rectangle"
     case "eye": "eye.fill"
+    case "visibility_off": "eye.slash.fill"
     default: "info.circle"
     }
 }
