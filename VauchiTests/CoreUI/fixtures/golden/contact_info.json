@@ -1,0 +1,34 @@
+{
+  "screen_id": "contact_info",
+  "title": "Add contact info",
+  "subtitle": "Add fields to your contact card.",
+  "components": [
+    {
+      "FieldList": {
+        "id": "fields",
+        "fields": [],
+        "visibility_mode": "ShowHide",
+        "available_groups": []
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "continue",
+      "label": "Continue",
+      "style": "Primary",
+      "enabled": true
+    },
+    {
+      "id": "skip",
+      "label": "Skip",
+      "style": "Secondary",
+      "enabled": true
+    }
+  ],
+  "progress": {
+    "current_step": 5,
+    "total_steps": 9,
+    "label": null
+  }
+}

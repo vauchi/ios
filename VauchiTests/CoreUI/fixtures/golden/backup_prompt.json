@@ -1,0 +1,45 @@
+{
+  "screen_id": "backup_prompt",
+  "title": "Back up your identity",
+  "subtitle": null,
+  "components": [
+    {
+      "InfoPanel": {
+        "id": "backup_info",
+        "icon": "backup",
+        "title": "Why back up?",
+        "items": [
+          {
+            "icon": "warning",
+            "title": "No account recovery",
+            "detail": "If you lose your device without a backup, your identity is lost."
+          },
+          {
+            "icon": "devices",
+            "title": "Multi-device",
+            "detail": "Backups let you use Vauchi on multiple devices."
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "setup_backup",
+      "label": "Set up backup",
+      "style": "Primary",
+      "enabled": true
+    },
+    {
+      "id": "skip",
+      "label": "Skip",
+      "style": "Secondary",
+      "enabled": true
+    }
+  ],
+  "progress": {
+    "current_step": 8,
+    "total_steps": 9,
+    "label": null
+  }
+}

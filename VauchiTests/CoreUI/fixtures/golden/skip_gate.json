@@ -1,0 +1,50 @@
+{
+  "screen_id": "skip_gate",
+  "title": "Set up your card",
+  "subtitle": "A few more steps to get the most out of Vauchi.",
+  "components": [
+    {
+      "InfoPanel": {
+        "id": "skip_info",
+        "icon": null,
+        "title": "What you'll set up next",
+        "items": [
+          {
+            "icon": "group",
+            "title": "Groups",
+            "detail": "Organize contacts into groups like Family, Friends, etc."
+          },
+          {
+            "icon": "card",
+            "title": "Contact info",
+            "detail": "Add phone, email, and other fields to your card."
+          },
+          {
+            "icon": "eye",
+            "title": "Visibility",
+            "detail": "Choose what each group can see."
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "continue_setup",
+      "label": "Continue setup",
+      "style": "Primary",
+      "enabled": true
+    },
+    {
+      "id": "skip_to_finish",
+      "label": "Skip to finish",
+      "style": "Secondary",
+      "enabled": true
+    }
+  ],
+  "progress": {
+    "current_step": 3,
+    "total_steps": 9,
+    "label": null
+  }
+}

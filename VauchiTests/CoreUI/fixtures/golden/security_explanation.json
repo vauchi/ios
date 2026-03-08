@@ -1,0 +1,44 @@
+{
+  "screen_id": "security_explanation",
+  "title": "Your data is secure",
+  "subtitle": null,
+  "components": [
+    {
+      "InfoPanel": {
+        "id": "security_features",
+        "icon": "shield",
+        "title": "How Vauchi protects you",
+        "items": [
+          {
+            "icon": "lock",
+            "title": "End-to-end encryption",
+            "detail": "Only you and your contacts can read your data."
+          },
+          {
+            "icon": "server",
+            "title": "Decentralized",
+            "detail": "No central server stores your contacts."
+          },
+          {
+            "icon": "key",
+            "title": "You own your keys",
+            "detail": "Your cryptographic keys never leave your device."
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "continue",
+      "label": "Continue",
+      "style": "Primary",
+      "enabled": true
+    }
+  ],
+  "progress": {
+    "current_step": 7,
+    "total_steps": 9,
+    "label": null
+  }
+}

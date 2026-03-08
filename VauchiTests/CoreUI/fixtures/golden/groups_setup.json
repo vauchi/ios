@@ -1,0 +1,58 @@
+{
+  "screen_id": "groups_setup",
+  "title": "Choose your groups",
+  "subtitle": "Groups let you share different info with different people.",
+  "components": [
+    {
+      "ToggleList": {
+        "id": "groups",
+        "label": "Suggested groups",
+        "items": [
+          {
+            "id": "Family",
+            "label": "Family",
+            "selected": false,
+            "subtitle": null
+          },
+          {
+            "id": "Friends",
+            "label": "Friends",
+            "selected": false,
+            "subtitle": null
+          },
+          {
+            "id": "Coworkers",
+            "label": "Coworkers",
+            "selected": false,
+            "subtitle": null
+          },
+          {
+            "id": "Business",
+            "label": "Business",
+            "selected": false,
+            "subtitle": null
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "continue",
+      "label": "Continue",
+      "style": "Primary",
+      "enabled": true
+    },
+    {
+      "id": "skip",
+      "label": "Skip",
+      "style": "Secondary",
+      "enabled": true
+    }
+  ],
+  "progress": {
+    "current_step": 4,
+    "total_steps": 9,
+    "label": null
+  }
+}

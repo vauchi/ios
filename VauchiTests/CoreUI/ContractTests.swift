@@ -10,14 +10,14 @@ import XCTest
 final class ContractTests: XCTestCase {
     // MARK: - Fixture Loading
 
-    /// Path to golden fixtures in the core repo, resolved relative to this source file.
+    /// Path to golden fixtures, co-located with contract tests.
+    /// These are copies of core's golden fixtures (core/vauchi-core/tests/fixtures/golden/).
+    /// If core changes the schema, regenerate with: cp core/.../golden/*.json here.
     private static let fixturesURL: URL = {
         let testFileURL = URL(fileURLWithPath: #filePath)
         return testFileURL
             .deletingLastPathComponent() // CoreUI/
-            .deletingLastPathComponent() // VauchiTests/
-            .deletingLastPathComponent() // ios/
-            .appendingPathComponent("core/vauchi-core/tests/fixtures/golden")
+            .appendingPathComponent("fixtures/golden")
             .standardized
     }()
 

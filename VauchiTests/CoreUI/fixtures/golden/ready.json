@@ -1,0 +1,39 @@
+{
+  "screen_id": "ready",
+  "title": "You're all set!",
+  "subtitle": "Your Vauchi identity is ready.",
+  "components": [
+    {
+      "InfoPanel": {
+        "id": "ready_info",
+        "icon": "check",
+        "title": "What's next",
+        "items": [
+          {
+            "icon": "share",
+            "title": "Share your card",
+            "detail": "Exchange contact cards in person."
+          },
+          {
+            "icon": "edit",
+            "title": "Edit anytime",
+            "detail": "Update your card whenever you like."
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "start",
+      "label": "Start using Vauchi",
+      "style": "Primary",
+      "enabled": true
+    }
+  ],
+  "progress": {
+    "current_step": 9,
+    "total_steps": 9,
+    "label": null
+  }
+}

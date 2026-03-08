@@ -1,0 +1,50 @@
+{
+  "screen_id": "welcome",
+  "title": "Welcome to Vauchi",
+  "subtitle": "Your contacts, your rules.",
+  "components": [
+    {
+      "InfoPanel": {
+        "id": "value_proposition",
+        "icon": null,
+        "title": "Why Vauchi?",
+        "items": [
+          {
+            "icon": "lock",
+            "title": "Private",
+            "detail": "End-to-end encrypted contact cards"
+          },
+          {
+            "icon": "refresh",
+            "title": "Always up to date",
+            "detail": "Update your card and contacts see changes automatically"
+          },
+          {
+            "icon": "people",
+            "title": "You decide who sees what",
+            "detail": "Share different info with different groups"
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "get_started",
+      "label": "Get Started",
+      "style": "Primary",
+      "enabled": true
+    },
+    {
+      "id": "restore_backup",
+      "label": "Restore Backup",
+      "style": "Secondary",
+      "enabled": true
+    }
+  ],
+  "progress": {
+    "current_step": 1,
+    "total_steps": 9,
+    "label": null
+  }
+}

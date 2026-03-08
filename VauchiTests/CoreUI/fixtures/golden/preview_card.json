@@ -1,0 +1,34 @@
+{
+  "screen_id": "preview_card",
+  "title": "Preview your card",
+  "subtitle": "This is how your card will look.",
+  "components": [
+    {
+      "CardPreview": {
+        "name": "Alice",
+        "fields": [],
+        "group_views": [],
+        "selected_group": null
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "continue",
+      "label": "Continue",
+      "style": "Primary",
+      "enabled": true
+    },
+    {
+      "id": "edit",
+      "label": "Edit",
+      "style": "Secondary",
+      "enabled": true
+    }
+  ],
+  "progress": {
+    "current_step": 6,
+    "total_steps": 9,
+    "label": null
+  }
+}
