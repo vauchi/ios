@@ -633,7 +633,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
-				DFBFF58311F6476C3FF1CCBB /* XCRemoteSwiftPackageReference "vauchi-mobile-swift" */,
+				DFBFF58311F6476C3FF1CCBB /* XCLocalSwiftPackageReference "vauchi-mobile-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
@@ -1155,20 +1155,16 @@
 				minimumVersion = 1.17.0;
 			};
 		};
-		DFBFF58311F6476C3FF1CCBB /* XCRemoteSwiftPackageReference "vauchi-mobile-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://gitlab.com/vauchi/vauchi-mobile-swift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = "0.4.1-dev.0";
-			};
+		DFBFF58311F6476C3FF1CCBB /* XCLocalSwiftPackageReference "vauchi-mobile-swift" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../vauchi-mobile-swift";
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		0F8A335546193F75655208E3 /* VauchiMobile */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = DFBFF58311F6476C3FF1CCBB /* XCRemoteSwiftPackageReference "vauchi-mobile-swift" */;
+			package = DFBFF58311F6476C3FF1CCBB /* XCLocalSwiftPackageReference "vauchi-mobile-swift" */;
 			productName = VauchiMobile;
 		};
 		584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */ = {
