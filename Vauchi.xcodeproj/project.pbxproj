@@ -130,7 +130,6 @@
 		EE06B8DCB941892BEACE00A0 /* testCreateIdentityStepFilled.1.png in Resources */ = {isa = PBXBuildFile; fileRef = BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */; };
 		EE61E717891162E1E64D6B6E /* SineWaveGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */; };
 		F12257ABB31E5D291BB7ADDE /* InfoPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153F4A124314CB426DB39375 /* InfoPanelView.swift */; };
-		F1607238A8523A2811B18B74 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */; };
 		F3096FD65BB8C411D32ACE99 /* QrCameraTunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E118373F3BD2F4E7FC20AB /* QrCameraTunerView.swift */; };
 		F6D31D935D519BD6C6821BE9 /* LabelDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F12B12FCE38D7CBAB15A8A0 /* LabelDetailView.swift */; };
 /* End PBXBuildFile section */
@@ -168,7 +167,6 @@
 		09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRScanner.swift; sourceTree = "<group>"; };
 		0D3497B12DDDF10370069F86 /* Vauchi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Vauchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0FC890F55872A927941111CE /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		153F4A124314CB426DB39375 /* InfoPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoPanelView.swift; sourceTree = "<group>"; };
 		15E6797B86856C4F432E265B /* testExchangeViewDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeViewDark.1.png; sourceTree = "<group>"; };
 		16ECAB2250253E9F51032786 /* ProximityVerificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityVerificationView.swift; sourceTree = "<group>"; };
@@ -408,7 +406,6 @@
 			isa = PBXGroup;
 			children = (
 				52D65C152771F552C641B6A1 /* Models.swift */,
-				140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */,
 				2BCD1112BEA2A776E27B15C3 /* ScreenRendererView.swift */,
 				CE42D30F93ED2ECE0C78FB70 /* Components */,
 			);
@@ -841,7 +838,6 @@
 				281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */,
 				E274DDDCD426344D25E204F7 /* NfcTestView.swift in Sources */,
 				33048DBF138B6D56FF2FAD0B /* OnboardingView.swift in Sources */,
-				F1607238A8523A2811B18B74 /* OnboardingViewModel.swift in Sources */,
 				857AF56DE7694784EA6A426B /* PreviewCardStepView.swift in Sources */,
 				7230742E816AC8FFCD0F3284 /* ProximityVerificationView.swift in Sources */,
 				655FCE4413340F3FF3F5E5CF /* QRDiagnosticView.swift in Sources */,
