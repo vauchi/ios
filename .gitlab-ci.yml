@@ -333,7 +333,7 @@ build:debug:
   script:
     # Clear DerivedData and stale binary target checkouts (force re-fetch after upstream force-push)
     - rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"
-    - rm -rf .spm-packages/checkouts/vauchi-mobile-swift
+    - rm -rf .spm-packages/workspace-state.json .spm-packages/repositories/vauchi-mobile-swift-*
     - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
   artifacts:
