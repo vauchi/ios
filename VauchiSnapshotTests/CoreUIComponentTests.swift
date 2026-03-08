@@ -38,7 +38,7 @@ final class CoreUIComponentTests: XCTestCase {
         line: UInt = #line
     ) {
         assertSnapshot(
-            of: UIHostingController(rootView: view.padding()),
+            of: view.padding(),
             as: .image(
                 layout: .fixed(width: width, height: height),
                 traits: UITraitCollection(displayScale: 2.0)
@@ -388,11 +388,26 @@ final class CoreUIComponentTests: XCTestCase {
 
     // MARK: - Dark Mode Variants
 
-    /// Helper to create a hosting controller with dark mode forced.
-    private func darkController<V: View>(_ view: V) -> UIHostingController<V> {
-        let controller = UIHostingController(rootView: view)
-        controller.overrideUserInterfaceStyle = .dark
-        return controller
+    /// Asserts a dark mode snapshot of a view.
+    private func assertDarkSnapshot(
+        of view: some View,
+        width: CGFloat = 390,
+        height: CGFloat = 200,
+        file: StaticString = #file,
+        testName: String = #function,
+        line: UInt = #line
+    ) {
+        assertSnapshot(
+            of: view.padding().environment(\.colorScheme, .dark),
+            as: .image(
+                layout: .fixed(width: width, height: height),
+                traits: UITraitCollection(displayScale: 2.0)
+            ),
+            record: isRecording,
+            file: file,
+            testName: testName,
+            line: line
+        )
     }
 
     func testTextInputDark() {
@@ -405,16 +420,7 @@ final class CoreUIComponentTests: XCTestCase {
             validationError: nil,
             inputType: .text
         )
-        let view = TextInputView(component: component, onAction: noOp).padding()
-
-        assertSnapshot(
-            of: darkController(view),
-            as: .image(
-                layout: .fixed(width: 390, height: 200),
-                traits: UITraitCollection(displayScale: 2.0)
-            ),
-            record: isRecording
-        )
+        assertDarkSnapshot(of: TextInputView(component: component, onAction: noOp))
     }
 
     func testToggleListDark() {
@@ -426,16 +432,7 @@ final class CoreUIComponentTests: XCTestCase {
                 ToggleItem(id: "friends", label: "Friends", selected: false, subtitle: "Personal contacts"),
             ]
         )
-        let view = ToggleListView(component: component, onAction: noOp).padding()
-
-        assertSnapshot(
-            of: darkController(view),
-            as: .image(
-                layout: .fixed(width: 390, height: 220),
-                traits: UITraitCollection(displayScale: 2.0)
-            ),
-            record: isRecording
-        )
+        assertDarkSnapshot(of: ToggleListView(component: component, onAction: noOp), height: 220)
     }
 
     func testCardPreviewDark() {
@@ -448,16 +445,7 @@ final class CoreUIComponentTests: XCTestCase {
             groupViews: [],
             selectedGroup: nil
         )
-        let view = CardPreviewView(component: component, onAction: noOp).padding()
-
-        assertSnapshot(
-            of: darkController(view),
-            as: .image(
-                layout: .fixed(width: 390, height: 400),
-                traits: UITraitCollection(displayScale: 2.0)
-            ),
-            record: isRecording
-        )
+        assertDarkSnapshot(of: CardPreviewView(component: component, onAction: noOp), height: 400)
     }
 
     func testInfoPanelDark() {
@@ -470,16 +458,7 @@ final class CoreUIComponentTests: XCTestCase {
                 InfoItem(icon: "shield", title: "Zero Knowledge", detail: "The relay server cannot read your contact data."),
             ]
         )
-        let view = InfoPanelView(component: component).padding()
-
-        assertSnapshot(
-            of: darkController(view),
-            as: .image(
-                layout: .fixed(width: 390, height: 250),
-                traits: UITraitCollection(displayScale: 2.0)
-            ),
-            record: isRecording
-        )
+        assertDarkSnapshot(of: InfoPanelView(component: component), height: 250)
     }
 
     func testFieldListDark() {
@@ -492,15 +471,6 @@ final class CoreUIComponentTests: XCTestCase {
             visibilityMode: .showHide,
             availableGroups: []
         )
-        let view = FieldListView(component: component, onAction: noOp).padding()
-
-        assertSnapshot(
-            of: darkController(view),
-            as: .image(
-                layout: .fixed(width: 390, height: 250),
-                traits: UITraitCollection(displayScale: 2.0)
-            ),
-            record: isRecording
-        )
+        assertDarkSnapshot(of: FieldListView(component: component, onAction: noOp), height: 250)
     }
 }
