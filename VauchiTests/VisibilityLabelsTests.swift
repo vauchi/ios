@@ -281,7 +281,8 @@ final class VisibilityLabelsTests: XCTestCase {
         XCTAssertFalse(suggestions.isEmpty, "Should have suggested labels")
         XCTAssertTrue(suggestions.contains("Family"))
         XCTAssertTrue(suggestions.contains("Friends"))
-        XCTAssertTrue(suggestions.contains("Professional"))
+        XCTAssertTrue(suggestions.contains("Coworkers"))
+        XCTAssertTrue(suggestions.contains("Business"))
     }
 
     // MARK: - Label Statistics Tests
