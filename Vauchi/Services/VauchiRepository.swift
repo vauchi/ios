@@ -1051,6 +1051,30 @@ class VauchiRepository {
         }
     }
 
+    // MARK: - Multi-Stage Exchange
+
+    /// Create a multi-stage exchange session with real identity + contact card.
+    func createMultistageSession() throws -> MobileMultiStageSession {
+        do {
+            return try vauchi.createMultistageSession()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Finalize a multi-stage exchange — persist the contact and init double ratchet.
+    func finalizeMultistageExchange(session: MobileMultiStageSession) throws -> MobileExchangeResult {
+        do {
+            return try vauchi.finalizeMultistageExchange(session: session)
+        } catch let error as MobileError {
+            NSLog("[Exchange] Failed: %@", "\(error)")
+            throw VauchiRepositoryError.from(error)
+        } catch {
+            NSLog("[Exchange] Failed: %@", "\(error)")
+            throw error
+        }
+    }
+
     // MARK: - NFC Exchange
 
     /// Create an NFC initiator (reader) handshake session.

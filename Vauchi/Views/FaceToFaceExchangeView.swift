@@ -55,6 +55,8 @@ struct FaceToFaceExchangeView: View {
     @State private var scanQualityTimer: Timer?
     @State private var previousBrightness: CGFloat = 0.5
     @State private var graceCompleted = false
+    @State private var finalizationResult: String?
+    @State private var finalizationError: String?
     @State private var lastScanTimestamp: Date?
     @State private var scanQuality: ScanQuality = .none
 
@@ -237,13 +239,33 @@ struct FaceToFaceExchangeView: View {
         VStack(spacing: 16) {
             Spacer()
 
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 64))
-                .foregroundColor(.green)
+            if let error = finalizationError {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 64))
+                    .foregroundColor(.orange)
 
-            Text("Contact exchanged!")
-                .font(.title2)
-                .fontWeight(.semibold)
+                Text("Exchange completed")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+
+                Text(error)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            } else {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 64))
+                    .foregroundColor(.green)
+
+                Text("Contact exchanged!")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+
+                if let contactName = finalizationResult {
+                    Text("\(contactName) has been added.")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                }
+            }
 
             Button(action: { cancelAndDismiss() }) {
                 Text(localizationService.t("action.done"))
@@ -294,11 +316,11 @@ struct FaceToFaceExchangeView: View {
     // MARK: - Multi-Stage Actions
 
     private func startMultiStageSession() {
-        // TODO: Replace placeholder with actual serialized contact card from identity
-        let localCard = Data("Vauchi User".utf8)
-        viewModel.startMultiStageExchange(localCard: localCard)
+        viewModel.startMultiStageExchange()
         protocolState = .idle
         graceCompleted = false
+        finalizationResult = nil
+        finalizationError = nil
         multiStageQrImage = nil
         startQrCycleTimer()
         startStatePollTimer()
@@ -310,6 +332,11 @@ struct FaceToFaceExchangeView: View {
             guard let payload = viewModel.getMultiStageDisplayQr() else {
                 // Core returned nil — grace period expired or not started.
                 if case .complete = protocolState {
+                    if let result = viewModel.finalizeMultiStageExchange() {
+                        finalizationResult = result.contactName
+                    } else {
+                        finalizationError = "Failed to save contact"
+                    }
                     graceCompleted = true
                 }
                 stopQrCycleTimer()

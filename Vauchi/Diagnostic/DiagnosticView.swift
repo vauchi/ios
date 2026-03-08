@@ -7,6 +7,10 @@
     import SwiftUI
 
     struct DiagnosticView: View {
+        /// Set to run a specific test on appear: "loopback", "noise", "sweep", "mode",
+        /// "emit", "listen", "all"
+        var autoTest: String?
+
         @State private var logLines: [String] = []
         @State private var running = false
 
@@ -75,6 +79,31 @@
             }
             .padding()
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                if let test = autoTest {
+                    runAsync { runAutoTest(test) }
+                }
+            }
+        }
+
+        // MARK: - Auto Test
+
+        private func runAutoTest(_ test: String) {
+            switch test {
+            case "loopback": testLoopback()
+            case "noise": testNoiseFloor()
+            case "sweep": testSweep()
+            case "mode": testModeComparison()
+            case "emit": testCrossDeviceEmit()
+            case "listen": testCrossDeviceListen()
+            case "all":
+                testLoopback()
+                testNoiseFloor()
+                testSweep()
+                testModeComparison()
+            default:
+                log("Unknown test: \(test)")
+            }
         }
 
         // MARK: - UI Helpers

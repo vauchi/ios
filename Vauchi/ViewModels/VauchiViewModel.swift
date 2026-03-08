@@ -980,8 +980,23 @@ class VauchiViewModel: ObservableObject {
     /// Multi-stage exchange session — drives the cycling QR protocol
     private(set) var multiStageSession: MobileMultiStageSession?
 
-    func startMultiStageExchange(localCard: Data) {
-        multiStageSession = MobileMultiStageSession(localCard: localCard)
+    func startMultiStageExchange() {
+        guard let repository else { return }
+        do {
+            multiStageSession = try repository.createMultistageSession()
+        } catch {
+            NSLog("[Exchange] Failed to create session: %@", "\(error)")
+        }
+    }
+
+    func finalizeMultiStageExchange() -> MobileExchangeResult? {
+        guard let repository, let session = multiStageSession else { return nil }
+        do {
+            return try repository.finalizeMultistageExchange(session: session)
+        } catch {
+            NSLog("[Exchange] Failed to finalize: %@", "\(error)")
+            return nil
+        }
     }
 
     func getMultiStageDisplayQr() -> MobileQrPayload? {

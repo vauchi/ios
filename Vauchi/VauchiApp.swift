@@ -24,6 +24,8 @@ struct VauchiApp: App {
         @State private var qrTunerAutoTest: String?
         @State private var showNfcDiagnostic = false
         @State private var nfcDiagAutoTest: String?
+        @State private var showUltrasonicDiagnostic = false
+        @State private var ultrasonicDiagAutoTest: String?
     #endif
 
     init() {
@@ -57,6 +59,10 @@ struct VauchiApp: App {
                 _nfcDiagAutoTest = State(initialValue: args[idx + 1])
                 _showNfcDiagnostic = State(initialValue: true)
                 NSLog("[Vauchi] Launch arg: --nfc-test %@", args[idx + 1])
+            } else if let idx = args.firstIndex(of: "--ultrasonic-test"), idx + 1 < args.count {
+                _ultrasonicDiagAutoTest = State(initialValue: args[idx + 1])
+                _showUltrasonicDiagnostic = State(initialValue: true)
+                NSLog("[Vauchi] Launch arg: --ultrasonic-test %@", args[idx + 1])
             }
         #endif
         // Register background tasks
@@ -183,6 +189,16 @@ struct VauchiApp: App {
                             .toolbar {
                                 ToolbarItem(placement: .navigationBarLeading) {
                                     Button("Close") { showNfcDiagnostic = false }
+                                }
+                            }
+                    }
+                }
+                .fullScreenCover(isPresented: $showUltrasonicDiagnostic) {
+                    NavigationView {
+                        DiagnosticView(autoTest: ultrasonicDiagAutoTest)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    Button("Close") { showUltrasonicDiagnostic = false }
                                 }
                             }
                     }
