@@ -331,9 +331,9 @@ build:debug:
   extends: [.macos-job, .spm-cache, .timeout-extended]
   stage: build
   script:
-    # Clear DerivedData and stale binary target checkouts (force re-fetch after upstream force-push)
+    # Clear DerivedData and system SPM caches (shell executor persists state between runs)
     - rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"
-    - rm -rf .spm-packages/workspace-state.json .spm-packages/repositories/vauchi-mobile-swift-*
+    - rm -rf "${HOME}/Library/Caches/org.swift.swiftpm/repositories"
     - xcodegen generate
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
   artifacts:
