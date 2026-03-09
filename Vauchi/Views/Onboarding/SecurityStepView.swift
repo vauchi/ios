@@ -88,6 +88,7 @@ struct SecurityStepView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                 }
+                .accessibilityIdentifier("onboarding.finish_setup")
                 .accessibilityLabel("Finish setup")
                 .accessibilityHint("Complete onboarding and start using Vauchi")
             }

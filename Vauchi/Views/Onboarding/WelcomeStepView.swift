@@ -80,6 +80,7 @@ struct WelcomeStepView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                 }
+                .accessibilityIdentifier("onboarding.get_started")
                 .accessibilityLabel("Get started")
                 .accessibilityHint("Begin creating your Vauchi identity")
 
@@ -89,6 +90,7 @@ struct WelcomeStepView: View {
                         .foregroundColor(.cyan)
                 }
                 .padding(.bottom, 8)
+                .accessibilityIdentifier("onboarding.restore")
                 .accessibilityLabel("Restore from backup")
                 .accessibilityHint("Recover your identity from an existing backup")
             }

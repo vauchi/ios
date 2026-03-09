@@ -68,7 +68,7 @@ struct CreateIdentityStepView: View {
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(12)
-                    .autocapitalization(.words)
+                    .textInputAutocapitalization(.words)
                     .focused($isNameFocused)
                     .submitLabel(.continue)
                     .onSubmit {
@@ -77,6 +77,7 @@ struct CreateIdentityStepView: View {
                         }
                     }
                     .padding(.horizontal, 32)
+                    .accessibilityIdentifier("onboarding.name_field")
                     .accessibilityLabel("Your name")
                     .accessibilityHint("Enter your display name for your contact card")
             }
@@ -95,6 +96,7 @@ struct CreateIdentityStepView: View {
                         .cornerRadius(12)
                 }
                 .disabled(!isValid)
+                .accessibilityIdentifier("onboarding.name_continue")
                 .accessibilityLabel("Continue")
                 .accessibilityHint("Proceed to add contact fields")
 

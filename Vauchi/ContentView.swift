@@ -107,24 +107,28 @@ struct MainTabView: View {
                     Label(localizationService.t("nav.home"), systemImage: "person.crop.rectangle")
                 }
                 .tag(0)
+                .accessibilityIdentifier("tab.home")
 
             ContactsView()
                 .tabItem {
                     Label(localizationService.t("nav.contacts"), systemImage: "person.2")
                 }
                 .tag(1)
+                .accessibilityIdentifier("tab.contacts")
 
             FaceToFaceExchangeView(switchToContacts: { selectedTab = 1 })
                 .tabItem {
                     Label(localizationService.t("nav.exchange"), systemImage: "qrcode")
                 }
                 .tag(2)
+                .accessibilityIdentifier("tab.exchange")
 
             SettingsView()
                 .tabItem {
                     Label(localizationService.t("nav.settings"), systemImage: "gear")
                 }
                 .tag(3)
+                .accessibilityIdentifier("tab.settings")
         }
         .accentColor(.cyan)
     }

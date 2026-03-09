@@ -117,6 +117,7 @@ struct PreviewCardStepView: View {
                     .foregroundColor(.white)
                     .cornerRadius(12)
                 }
+                .accessibilityIdentifier("onboarding.preview_confirm")
                 .accessibilityLabel("Looks good!")
                 .accessibilityHint("Confirm card and proceed to security information")
 
@@ -125,6 +126,7 @@ struct PreviewCardStepView: View {
                         .font(.subheadline)
                         .foregroundColor(.cyan)
                 }
+                .accessibilityIdentifier("onboarding.preview_edit")
                 .accessibilityLabel("Edit card")
                 .accessibilityHint("Go back to edit your contact information")
             }

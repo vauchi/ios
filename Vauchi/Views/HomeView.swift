@@ -115,6 +115,7 @@ struct HomeView: View {
                         Image(systemName: "arrow.triangle.2.circlepath")
                     }
                     .disabled(viewModel.syncState == .syncing)
+                    .accessibilityIdentifier("home.sync")
                     .accessibilityLabel("Sync")
                     .accessibilityHint("Synchronize your card and contacts with the relay server")
                 }

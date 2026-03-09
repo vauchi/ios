@@ -83,12 +83,14 @@ struct FaceToFaceExchangeView: View {
                     Button("Back") {
                         cancelAndDismiss()
                     }
+                    .accessibilityIdentifier("exchange.back")
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { useFrontCamera.toggle() }) {
                         Image(systemName: "camera.rotate")
                             .accessibilityLabel(useFrontCamera ? "Switch to rear camera" : "Switch to front camera")
                     }
+                    .accessibilityIdentifier("exchange.camera_toggle")
                 }
             }
             .onAppear {
@@ -275,6 +277,7 @@ struct FaceToFaceExchangeView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
+            .accessibilityIdentifier("exchange.done")
             .padding(.horizontal)
 
             Spacer()
@@ -307,6 +310,7 @@ struct FaceToFaceExchangeView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
+            .accessibilityIdentifier("exchange.retry")
             .padding(.horizontal)
 
             Spacer()
@@ -455,6 +459,7 @@ struct FaceToFaceExchangeView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
+            .accessibilityIdentifier("exchange.grant_permission")
             .padding(.horizontal)
 
             Spacer()

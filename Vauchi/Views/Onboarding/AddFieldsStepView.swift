@@ -75,6 +75,7 @@ struct AddFieldsStepView: View {
                                 .background(Color(.systemGray6))
                                 .cornerRadius(12)
                                 .focused($focusedField, equals: .phone)
+                                .accessibilityIdentifier("onboarding.phone_field")
                                 .accessibilityLabel("Phone number")
                                 .accessibilityHint("Enter your phone number for contacts to reach you")
                         }
@@ -88,11 +89,12 @@ struct AddFieldsStepView: View {
                             TextField("Your email address", text: $email)
                                 .textFieldStyle(.plain)
                                 .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
+                                .textInputAutocapitalization(.never)
                                 .padding()
                                 .background(Color(.systemGray6))
                                 .cornerRadius(12)
                                 .focused($focusedField, equals: .email)
+                                .accessibilityIdentifier("onboarding.email_field")
                                 .accessibilityLabel("Email address")
                                 .accessibilityHint("Enter your email address for contacts to reach you")
                         }
@@ -119,6 +121,7 @@ struct AddFieldsStepView: View {
                         .foregroundColor(.white)
                         .cornerRadius(12)
                 }
+                .accessibilityIdentifier("onboarding.info_continue")
                 .accessibilityLabel("Continue")
                 .accessibilityHint("Proceed to card preview")
 
@@ -127,6 +130,7 @@ struct AddFieldsStepView: View {
                         .font(.subheadline)
                         .foregroundColor(.cyan)
                 }
+                .accessibilityIdentifier("onboarding.info_skip")
                 .accessibilityLabel("Skip for now")
                 .accessibilityHint("Proceed to card preview without adding fields")
             }
