@@ -44,7 +44,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: app.vauchi.ios
         INFOPLIST_GENERATION_MODE: GeneratedFile
         GENERATE_INFOPLIST_FILE: YES
-        MARKETING_VERSION: "1.0.0"
+        MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"
         DEVELOPMENT_TEAM: L2853TNSJ4
         CODE_SIGN_IDENTITY: "Apple Development"
