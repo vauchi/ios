@@ -10,7 +10,7 @@
 import AVFoundation
 import CoreImage.CIFilterBuiltins
 import SwiftUI
-import VauchiMobile
+import VauchiPlatform
 
 /// QR code colors: gray reduces screen glare at close face-to-face distance.
 private let qrForegroundColor = CIColor(red: 64.0 / 255, green: 64.0 / 255, blue: 64.0 / 255) // #404040

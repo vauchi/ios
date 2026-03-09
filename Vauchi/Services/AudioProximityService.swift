@@ -4,11 +4,11 @@
 
 // AudioProximityService.swift
 // Ultrasonic audio proximity verification for Vauchi iOS
-// Implements PlatformAudioHandler callback interface for vauchi-mobile
+// Implements PlatformAudioHandler callback interface for vauchi-platform
 
 import Accelerate
 import AVFoundation
-import VauchiMobile
+import VauchiPlatform
 
 /// Service for ultrasonic audio proximity verification.
 /// Uses AVAudioEngine to emit and receive signals at 18-20 kHz.

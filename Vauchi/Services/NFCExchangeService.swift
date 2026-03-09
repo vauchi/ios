@@ -7,12 +7,12 @@
 // iOS is always the reader/initiator (no HCE support on iOS).
 
 import CoreNFC
-import VauchiMobile
+import VauchiPlatform
 
 /// Drives the three-phase NFC handshake as the reader (initiator).
 ///
 /// Usage:
-/// 1. Create a `MobileNfcHandshake` via `VauchiMobile.createNfcInitiator()`
+/// 1. Create a `MobileNfcHandshake` via `VauchiPlatform.createNfcInitiator()`
 /// 2. Call `startExchange(session:)` to begin scanning
 /// 3. Handle the result via the `onComplete` callback
 class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
@@ -41,7 +41,7 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
     /// Start NFC reader session for contact exchange.
     ///
     /// - Parameters:
-    ///   - session: The initiator handshake session from VauchiMobile
+    ///   - session: The initiator handshake session from VauchiPlatform
     ///   - completion: Called with the exchange result (on main thread)
     func startExchange(
         session: MobileNfcHandshake,

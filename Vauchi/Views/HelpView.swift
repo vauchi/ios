@@ -6,7 +6,7 @@
 // FAQ and help view
 
 import SwiftUI
-import VauchiMobile
+import VauchiPlatform
 
 struct HelpView: View {
     @State private var searchQuery = ""

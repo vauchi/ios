@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // LocalizationService.swift
-// Internationalization service using vauchi-mobile bindings
+// Internationalization service using vauchi-platform bindings
 
 import Combine
 import Foundation
-import VauchiMobile
+import VauchiPlatform
 
 /// Keys for locale-related UserDefaults storage
 private enum LocaleSettingsKey: String {

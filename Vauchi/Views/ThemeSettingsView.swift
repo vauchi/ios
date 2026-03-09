@@ -6,7 +6,7 @@
 // Theme selection view
 
 import SwiftUI
-import VauchiMobile
+import VauchiPlatform
 
 struct ThemeSettingsView: View {
     @ObservedObject private var themeService = ThemeService.shared

@@ -6,7 +6,7 @@
 // Main entry point for Vauchi iOS app
 
 import SwiftUI
-import VauchiMobile
+import VauchiPlatform
 
 @main
 struct VauchiApp: App {

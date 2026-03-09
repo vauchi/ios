@@ -6,7 +6,7 @@
 // Language selection view
 
 import SwiftUI
-import VauchiMobile
+import VauchiPlatform
 
 struct LanguageSettingsView: View {
     @ObservedObject private var localizationService = LocalizationService.shared

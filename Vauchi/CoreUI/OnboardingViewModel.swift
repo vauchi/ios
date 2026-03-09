@@ -8,8 +8,8 @@
 import Foundation
 import SwiftUI
 
-#if canImport(VauchiMobile)
-    import VauchiMobile
+#if canImport(VauchiPlatform)
+    import VauchiPlatform
 
     /// ViewModel that wraps the core `MobileOnboardingWorkflow` and drives
     /// a `ScreenRendererView` with decoded `ScreenModel` data.

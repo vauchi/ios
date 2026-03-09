@@ -6,7 +6,7 @@
 // Displays crowd-sourced field validation trust indicators
 
 import SwiftUI
-import VauchiMobile
+import VauchiPlatform
 
 /// Displays the validation trust level for a contact field.
 ///

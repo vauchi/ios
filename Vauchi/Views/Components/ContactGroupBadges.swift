@@ -7,7 +7,7 @@
 // Part of: SP-20 Social Network
 
 import SwiftUI
-import VauchiMobile
+import VauchiPlatform
 
 /// Displays small tappable badges showing group/label membership for a contact.
 ///

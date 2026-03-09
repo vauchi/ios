@@ -6,7 +6,7 @@
 // Minimal test view for NFC encrypted exchange (iOS reader only).
 
 import SwiftUI
-import VauchiMobile
+import VauchiPlatform
 
 struct NfcTestView: View {
     @EnvironmentObject var viewModel: VauchiViewModel

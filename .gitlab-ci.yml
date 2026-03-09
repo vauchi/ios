@@ -22,9 +22,9 @@
 #   - macOS runner with Xcode and SwiftLint
 #
 # Native bindings:
-#   Consumed from vauchi-mobile-swift via Swift Package Manager.
+#   Consumed from vauchi-platform-swift via Swift Package Manager.
 #   The vauchi/core release pipeline builds UniFFI bindings, packages an
-#   XCFramework, and publishes it. vauchi-mobile-swift wraps this as an
+#   XCFramework, and publishes it. vauchi-platform-swift wraps this as an
 #   SPM binary target that this app depends on.
 #
 # GitLab Ultimate Features:
@@ -161,7 +161,7 @@ auto-tag:version:
 # Update Stage (triggered by upstream distribution repo)
 # ============================================================
 
-# Automatically bump vauchi-mobile-swift dependency and create MR
+# Automatically bump vauchi-platform-swift dependency and create MR
 update:bindings-version:
   stage: update
   tags:
@@ -174,9 +174,9 @@ update:bindings-version:
     - |
       # Strip v prefix if present (upstream trigger passes v0.1.16 format)
       BINDINGS_VERSION="${BINDINGS_VERSION#v}"
-      echo "Bumping vauchi-mobile-swift to $BINDINGS_VERSION"
+      echo "Bumping vauchi-platform-swift to $BINDINGS_VERSION"
 
-      BRANCH="chore/bump-vauchi-mobile-${BINDINGS_VERSION}"
+      BRANCH="chore/bump-vauchi-platform-${BINDINGS_VERSION}"
 
       # Configure git
       git config user.email "ci@vauchi.com"
@@ -191,8 +191,8 @@ update:bindings-version:
 
       # Create branch and update version in project.yml
       git checkout -b "$BRANCH"
-      # Only update VauchiMobile version (not other SPM deps like SnapshotTesting)
-      LINE=$(grep -n "vauchi-mobile-swift" project.yml | head -1 | cut -d: -f1)
+      # Only update VauchiPlatform version (not other SPM deps like SnapshotTesting)
+      LINE=$(grep -n "vauchi-platform-swift" project.yml | head -1 | cut -d: -f1)
       NEXT=$((LINE + 1))
       sed -i "" "${NEXT}s/from: \"[^\"]*\"/from: \"${BINDINGS_VERSION}\"/" project.yml
 
@@ -207,7 +207,7 @@ update:bindings-version:
       xcodegen generate
 
       git add project.yml Vauchi.xcodeproj/
-      git commit -m "chore: Bump vauchi-mobile-swift to $BINDINGS_VERSION"
+      git commit -m "chore: Bump vauchi-platform-swift to $BINDINGS_VERSION"
       git push -u origin "$BRANCH"
 
       # Create MR via GitLab API
@@ -217,8 +217,8 @@ update:bindings-version:
         --data "{
           \"source_branch\": \"$BRANCH\",
           \"target_branch\": \"main\",
-          \"title\": \"chore: Bump vauchi-mobile-swift to $BINDINGS_VERSION\",
-          \"description\": \"Automated version bump triggered by vauchi-mobile-swift release.\\n\\nUpdates VauchiMobile SPM minimum version to \`$BINDINGS_VERSION\`.\\n\\n---\\n_This MR was created automatically by CI._\",
+          \"title\": \"chore: Bump vauchi-platform-swift to $BINDINGS_VERSION\",
+          \"description\": \"Automated version bump triggered by vauchi-platform-swift release.\\n\\nUpdates VauchiPlatform SPM minimum version to \`$BINDINGS_VERSION\`.\\n\\n---\\n_This MR was created automatically by CI._\",
           \"remove_source_branch\": true
         }" \
         "${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/merge_requests")

@@ -8,7 +8,7 @@
 // Part of: SP-20 Social Network
 
 import SwiftUI
-import VauchiMobile
+import VauchiPlatform
 
 /// Main view for managing contact groups (backed by visibility labels)
 ///

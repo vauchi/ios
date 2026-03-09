@@ -16,7 +16,7 @@ import SwiftUI
 /// to track which parts have been received. Once all parts are collected, the
 /// raw chunk strings are available for reassembly.
 ///
-/// Note: Once `MobileMultipartDecoder` is published in `vauchi-mobile-swift`,
+/// Note: Once `MobileMultipartDecoder` is published in `vauchi-platform-swift`,
 /// this tracker should be replaced with the Rust-backed decoder which also
 /// performs CRC32 verification and base64url decoding. See Task 11.
 final class MultipartChunkTracker: ObservableObject {

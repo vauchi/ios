@@ -10,7 +10,7 @@ import Foundation
 import LocalAuthentication
 import Security
 import SwiftUI
-import VauchiMobile
+import VauchiPlatform
 
 /// Contact field for display
 struct FieldInfo: Identifiable, Equatable {

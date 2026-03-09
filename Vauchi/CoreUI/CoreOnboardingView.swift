@@ -9,13 +9,13 @@
 // renderer driven by core's OnboardingEngine via MobileOnboardingWorkflow.
 //
 // Currently excluded from the build (see project.yml) because the published
-// VauchiMobile bindings don't contain MobileOnboardingWorkflow yet. When
+// VauchiPlatform bindings don't contain MobileOnboardingWorkflow yet. When
 // bindings are updated, swap OnboardingView for CoreOnboardingView in the app.
 
 import SwiftUI
 
-#if canImport(VauchiMobile)
-    import VauchiMobile
+#if canImport(VauchiPlatform)
+    import VauchiPlatform
 
     /// Core-driven onboarding flow.
     ///

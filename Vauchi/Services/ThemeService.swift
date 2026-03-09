@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // ThemeService.swift
-// Theme management using vauchi-mobile bindings
+// Theme management using vauchi-platform bindings
 
 import Combine
 import SwiftUI
 import UIKit
-import VauchiMobile
+import VauchiPlatform
 
 /// Keys for theme-related UserDefaults storage
 private enum ThemeSettingsKey: String {

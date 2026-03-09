@@ -17,7 +17,7 @@ build/
 *.dSYM.zip
 *.dSYM
 
-# UniFFI bindings (provided by vauchi-mobile-swift SPM package;
+# UniFFI bindings (provided by vauchi-platform-swift SPM package;
 # local copies created by `just bindings` for dev builds)
 Vauchi/Generated/
 Vauchi/Libs/

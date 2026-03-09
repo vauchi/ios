@@ -128,7 +128,7 @@ The iOS app follows MVVM architecture:
 - **ViewModels**: Business logic and state management
 - **Services**: Data access (VauchiRepository wraps UniFFI bindings)
 
-The app uses `vauchi-mobile` UniFFI bindings to call the Rust `vauchi-core` library for all cryptographic operations and data storage.
+The app uses `vauchi-platform` UniFFI bindings to call the Rust `vauchi-core` library for all cryptographic operations and data storage.
 
 ## Troubleshooting
 

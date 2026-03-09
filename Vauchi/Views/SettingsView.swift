@@ -9,7 +9,7 @@ import CoreImage.CIFilterBuiltins
 import LocalAuthentication
 import SwiftUI
 import UniformTypeIdentifiers
-import VauchiMobile
+import VauchiPlatform
 
 struct SettingsView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
@@ -2277,7 +2277,7 @@ struct UpdateStatusBadge: View {
 
 // MARK: - Password Strength Indicator
 
-/// Visual indicator for password strength using the vauchi-mobile checkPasswordStrength API
+/// Visual indicator for password strength using the vauchi-platform checkPasswordStrength API
 struct PasswordStrengthIndicator: View {
     let check: MobilePasswordCheck
 

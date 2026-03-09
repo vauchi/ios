@@ -119,7 +119,7 @@
 		B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */; };
 		C2AA1DC7FD7FA22C155F70BD /* ScreenRendererView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCD1112BEA2A776E27B15C3 /* ScreenRendererView.swift */; };
 		C2AB3CF694C96461836AADB2 /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */; };
-		C2BF1FC510A65D73DD722C95 /* VauchiMobile in Frameworks */ = {isa = PBXBuildFile; productRef = 0F8A335546193F75655208E3 /* VauchiMobile */; };
+		C2BF1FC510A65D73DD722C95 /* VauchiPlatform in Frameworks */ = {isa = PBXBuildFile; productRef = BE415B866BE8E26F05791810 /* VauchiPlatform */; };
 		C7267E367C96E3F2DC79A963 /* SettingsGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA11554E5C2DD27F7DABE4D /* SettingsGroupView.swift */; };
 		C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */; };
 		C93A0D7367B46594F457C13B /* GroupsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78FA47BD58BB7B71D2AC250D /* GroupsView.swift */; };
@@ -329,7 +329,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C2BF1FC510A65D73DD722C95 /* VauchiMobile in Frameworks */,
+				C2BF1FC510A65D73DD722C95 /* VauchiPlatform in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -682,7 +682,7 @@
 			);
 			name = Vauchi;
 			packageProductDependencies = (
-				0F8A335546193F75655208E3 /* VauchiMobile */,
+				BE415B866BE8E26F05791810 /* VauchiPlatform */,
 			);
 			productName = Vauchi;
 			productReference = 0D3497B12DDDF10370069F86 /* Vauchi.app */;
@@ -758,7 +758,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
-				DFBFF58311F6476C3FF1CCBB /* XCRemoteSwiftPackageReference "vauchi-mobile-swift" */,
+				8B834B486889A4518835FD33 /* XCRemoteSwiftPackageReference "vauchi-platform-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
@@ -1307,6 +1307,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		8B834B486889A4518835FD33 /* XCRemoteSwiftPackageReference "vauchi-platform-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://gitlab.com/vauchi/vauchi-platform-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = "0.5.0-rc.0";
+			};
+		};
 		D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing.git";
@@ -1315,26 +1323,18 @@
 				minimumVersion = 1.17.0;
 			};
 		};
-		DFBFF58311F6476C3FF1CCBB /* XCRemoteSwiftPackageReference "vauchi-mobile-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://gitlab.com/vauchi/vauchi-mobile-swift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = "0.5.0-rc.0";
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0F8A335546193F75655208E3 /* VauchiMobile */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DFBFF58311F6476C3FF1CCBB /* XCRemoteSwiftPackageReference "vauchi-mobile-swift" */;
-			productName = VauchiMobile;
-		};
 		584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
 			productName = SnapshotTesting;
+		};
+		BE415B866BE8E26F05791810 /* VauchiPlatform */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B834B486889A4518835FD33 /* XCRemoteSwiftPackageReference "vauchi-platform-swift" */;
+			productName = VauchiPlatform;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

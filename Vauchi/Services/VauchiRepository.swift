@@ -37,7 +37,7 @@
 // methods implemented. UI added to Settings under Security section.
 
 import Foundation
-import VauchiMobile
+import VauchiPlatform
 
 /// Repository error types
 enum VauchiRepositoryError: LocalizedError {
@@ -437,11 +437,11 @@ struct VauchiDeliverySummary {
     }
 }
 
-/// Repository class wrapping VauchiMobile UniFFI bindings
+/// Repository class wrapping VauchiPlatform UniFFI bindings
 class VauchiRepository {
     // MARK: - Properties
 
-    private let vauchi: VauchiMobile
+    private let vauchi: VauchiPlatform
     private let dataDir: String
     private let relayUrl: String
     private static let storageKeyLength = 32 // 256-bit key
@@ -465,9 +465,9 @@ class VauchiRepository {
         // Get storage key from Keychain (or migrate/generate)
         let storageKeyBytes = try VauchiRepository.getOrCreateStorageKey(dataDir: dir)
 
-        // Initialize VauchiMobile with secure key from Keychain
+        // Initialize VauchiPlatform with secure key from Keychain
         do {
-            vauchi = try VauchiMobile.newWithSecureKey(
+            vauchi = try VauchiPlatform.newWithSecureKey(
                 dataDir: dir,
                 relayUrl: relayUrl,
                 storageKeyBytes: storageKeyBytes
@@ -689,7 +689,7 @@ class VauchiRepository {
 
     // Based on: features/resistance.feature - R3 Hidden Contact UI
     // NOTE: These methods are stubs until vauchi-core hidden contact bindings
-    // are published via vauchi-mobile-swift. Once core MR !109 merges and
+    // are published via vauchi-platform-swift. Once core MR !109 merges and
     // bindings are updated, replace stubs with actual UniFFI calls.
 
     /// Hide a contact
@@ -714,7 +714,7 @@ class VauchiRepository {
 
     // Based on: features/duress_pin.feature - R1 Duress PIN
     // NOTE: These methods are stubs until vauchi-core duress bindings
-    // are published via vauchi-mobile-swift. Once core MR merges and
+    // are published via vauchi-platform-swift. Once core MR merges and
     // bindings are updated, replace stubs with actual UniFFI calls.
 
     /// Set up app password
@@ -796,7 +796,7 @@ class VauchiRepository {
 
     // Based on: features/tor_mode.feature - R4 Tor Mode
     // NOTE: These methods are stubs until vauchi-core tor bindings
-    // are published via vauchi-mobile-swift. Once core MR merges and
+    // are published via vauchi-platform-swift. Once core MR merges and
     // bindings are updated, replace stubs with actual UniFFI calls.
 
     /// Get Tor configuration
@@ -1362,7 +1362,7 @@ class VauchiRepository {
     }
 
     /// Listen for incoming device link request via relay.
-    /// NOTE: Stub until relay transport bindings are published in vauchi-mobile-swift.
+    /// NOTE: Stub until relay transport bindings are published in vauchi-platform-swift.
     /// Once core relay bindings merge, replace with:
     ///   `return try vauchi.listenForDeviceLinkRequest(timeoutSecs: timeoutSecs)`
     func listenForDeviceLinkRequest(timeoutSecs _: UInt64) throws -> DeviceLinkRequest {
@@ -1371,14 +1371,14 @@ class VauchiRepository {
     }
 
     /// Send device link response via relay.
-    /// NOTE: Stub until relay transport bindings are published in vauchi-mobile-swift.
+    /// NOTE: Stub until relay transport bindings are published in vauchi-platform-swift.
     func sendDeviceLinkResponse(senderToken _: String, encryptedResponse _: Data) throws {
         // TODO: Replace with actual UniFFI call once relay bindings are published
         throw VauchiRepositoryError.internalError("Relay transport not yet available in bindings")
     }
 
     /// Send device link request via relay and wait for response.
-    /// NOTE: Stub until relay transport bindings are published in vauchi-mobile-swift.
+    /// NOTE: Stub until relay transport bindings are published in vauchi-platform-swift.
     func sendDeviceLinkRequest(
         targetIdentity _: String,
         senderToken _: String,
