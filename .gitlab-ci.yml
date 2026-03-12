@@ -123,6 +123,7 @@ workflow:
 auto-tag:version:
   stage: auto-tag
   image: alpine:latest
+  resource_group: auto-tag
   needs: []
   variables:
     GIT_STRATEGY: clone
