@@ -69,7 +69,7 @@ struct ContentView: View {
                 } else if shouldShowOnboarding {
                     OnboardingView()
                 } else {
-                    MainTabView()
+                    MainTabView(hasContacts: !viewModel.contacts.isEmpty)
                 }
             }
         }
@@ -98,7 +98,12 @@ struct LoadingView: View {
 
 struct MainTabView: View {
     @ObservedObject private var localizationService = LocalizationService.shared
-    @State private var selectedTab = 0
+    /// Dynamic default: tab 1 (Contacts) when user has contacts, tab 0 (Home) otherwise
+    @State private var selectedTab: Int
+
+    init(hasContacts: Bool = false) {
+        _selectedTab = State(initialValue: hasContacts ? 1 : 0)
+    }
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -134,7 +139,11 @@ struct MainTabView: View {
     }
 }
 
-#Preview {
+#Preview("No contacts") {
     ContentView()
         .environmentObject(VauchiViewModel())
+}
+
+#Preview("With contacts") {
+    MainTabView(hasContacts: true)
 }
