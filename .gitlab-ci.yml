@@ -40,6 +40,7 @@ include:
     file:
       - '/ci-templates/timeouts.yml'
       - '/ci-templates/reuse.yml'
+      - '/ci-templates/design-drift.yml'
 
 stages:
   - auto-tag
@@ -322,6 +323,14 @@ lint:xcodegen:
         paths:
           - project.yml
           - "Vauchi/**/*.swift"
+
+# Design drift: verify all design-spec components are implemented
+check:design-drift:
+  extends: .design-drift-job
+  variables:
+    DESIGN_DRIFT_COMPONENT_DIR: "Vauchi/CoreUI/Components"
+    DESIGN_DRIFT_FILE_EXT: ".swift"
+    DESIGN_DRIFT_CASE: "pascal"
 
 # ============================================================
 # Build Stage (MR: debug, Tag: release)
