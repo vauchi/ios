@@ -41,6 +41,7 @@ include:
       - '/ci-templates/timeouts.yml'
       - '/ci-templates/reuse.yml'
       - '/ci-templates/design-drift.yml'
+      - '/ci-templates/badges.yml'
 
 stages:
   - auto-tag
@@ -600,3 +601,10 @@ deploy:testflight:
     expire_in: 1 week
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+
+# ============================================================
+# Deploy Stage — Badge Pages
+# ============================================================
+
+pages:
+  extends: .badges-pages
