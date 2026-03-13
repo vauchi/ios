@@ -386,6 +386,70 @@ final class CoreUIComponentTests: XCTestCase {
         assertComponentSnapshot(of: view, height: 60)
     }
 
+    // MARK: - InlineConfirmView
+
+    func testInlineConfirmDefault() {
+        let component = InlineConfirmComponent(
+            id: "confirm-delete",
+            warning: "Are you sure you want to delete this contact?",
+            confirmText: "Delete",
+            cancelText: "Cancel",
+            destructive: true
+        )
+        let view = InlineConfirmView(component: component, onAction: noOp)
+        assertComponentSnapshot(of: view, height: 150)
+    }
+
+    func testInlineConfirmNonDestructive() {
+        let component = InlineConfirmComponent(
+            id: "confirm-merge",
+            warning: "Merge these two contacts?",
+            confirmText: "Merge",
+            cancelText: "Keep Separate",
+            destructive: false
+        )
+        let view = InlineConfirmView(component: component, onAction: noOp)
+        assertComponentSnapshot(of: view, height: 150)
+    }
+
+    // MARK: - EditableTextView
+
+    func testEditableTextDisplay() {
+        let component = EditableTextComponent(
+            id: "display-name",
+            label: "Display Name",
+            value: "Alice",
+            editing: false,
+            validationError: nil
+        )
+        let view = EditableTextView(component: component, onAction: noOp)
+        assertComponentSnapshot(of: view, height: 100)
+    }
+
+    func testEditableTextEditing() {
+        let component = EditableTextComponent(
+            id: "display-name",
+            label: "Display Name",
+            value: "Alice",
+            editing: true,
+            validationError: nil
+        )
+        let view = EditableTextView(component: component, onAction: noOp)
+        assertComponentSnapshot(of: view, height: 120)
+    }
+
+    func testEditableTextWithValidationError() {
+        let component = EditableTextComponent(
+            id: "display-name",
+            label: "Display Name",
+            value: "",
+            editing: true,
+            validationError: "Name cannot be empty"
+        )
+        let view = EditableTextView(component: component, onAction: noOp)
+        assertComponentSnapshot(of: view, height: 140)
+    }
+
     // MARK: - Dark Mode Variants
 
     /// Asserts a dark mode snapshot of a view.
@@ -472,5 +536,27 @@ final class CoreUIComponentTests: XCTestCase {
             availableGroups: []
         )
         assertDarkSnapshot(of: FieldListView(component: component, onAction: noOp), height: 250)
+    }
+
+    func testInlineConfirmDark() {
+        let component = InlineConfirmComponent(
+            id: "confirm-delete",
+            warning: "Are you sure you want to delete this contact?",
+            confirmText: "Delete",
+            cancelText: "Cancel",
+            destructive: true
+        )
+        assertDarkSnapshot(of: InlineConfirmView(component: component, onAction: noOp), height: 150)
+    }
+
+    func testEditableTextDark() {
+        let component = EditableTextComponent(
+            id: "display-name",
+            label: "Display Name",
+            value: "Alice",
+            editing: false,
+            validationError: nil
+        )
+        assertDarkSnapshot(of: EditableTextView(component: component, onAction: noOp), height: 100)
     }
 }

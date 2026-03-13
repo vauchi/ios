@@ -83,6 +83,9 @@ enum Component: Decodable {
     case pinInput(PinInputComponent)
     case qrCode(QrCodeComponent)
     case confirmationDialog(ConfirmationDialogComponent)
+    case showToast(ShowToastComponent)
+    case inlineConfirm(InlineConfirmComponent)
+    case editableText(EditableTextComponent)
     case divider
 
     init(from decoder: Decoder) throws {
@@ -125,6 +128,12 @@ enum Component: Decodable {
             self = try .confirmationDialog(
                 container.decode(ConfirmationDialogComponent.self, forKey: .confirmationDialog)
             )
+        } else if container.contains(.showToast) {
+            self = try .showToast(container.decode(ShowToastComponent.self, forKey: .showToast))
+        } else if container.contains(.inlineConfirm) {
+            self = try .inlineConfirm(container.decode(InlineConfirmComponent.self, forKey: .inlineConfirm))
+        } else if container.contains(.editableText) {
+            self = try .editableText(container.decode(EditableTextComponent.self, forKey: .editableText))
         } else {
             throw DecodingError.dataCorrupted(
                 DecodingError.Context(
@@ -149,6 +158,9 @@ enum Component: Decodable {
         case pinInput = "PinInput"
         case qrCode = "QrCode"
         case confirmationDialog = "ConfirmationDialog"
+        case showToast = "ShowToast"
+        case inlineConfirm = "InlineConfirm"
+        case editableText = "EditableText"
     }
 }
 
@@ -423,6 +435,35 @@ struct ConfirmationDialogComponent: Decodable {
     let message: String
     let confirmText: String
     let destructive: Bool
+}
+
+// MARK: - ShowToast Component
+
+struct ShowToastComponent: Decodable {
+    let id: String
+    let message: String
+    let undoActionId: String?
+    let durationMs: UInt32
+}
+
+// MARK: - InlineConfirm Component
+
+struct InlineConfirmComponent: Decodable {
+    let id: String
+    let warning: String
+    let confirmText: String
+    let cancelText: String
+    let destructive: Bool
+}
+
+// MARK: - EditableText Component
+
+struct EditableTextComponent: Decodable {
+    let id: String
+    let label: String
+    let value: String
+    let editing: Bool
+    let validationError: String?
 }
 
 // MARK: - UserAction (Encodable for sending to core)
