@@ -134,6 +134,13 @@ struct MainTabView: View {
                 }
                 .tag(3)
                 .accessibilityIdentifier("tab.settings")
+
+            HelpView()
+                .tabItem {
+                    Label(localizationService.t("nav.help"), systemImage: "questionmark.circle")
+                }
+                .tag(4)
+                .accessibilityIdentifier("tab.help")
         }
         .accentColor(.cyan)
     }
