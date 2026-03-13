@@ -21,7 +21,7 @@ struct EditableTextView: View {
             if component.editing {
                 TextField(component.label, text: .constant(component.value))
                     .textFieldStyle(.roundedBorder)
-                    .onChange(of: component.value) { _, newValue in
+                    .onChange(of: component.value) { newValue in
                         onAction(.textChanged(componentId: component.id, value: newValue))
                     }
 

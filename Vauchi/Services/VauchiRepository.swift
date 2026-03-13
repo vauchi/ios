@@ -912,7 +912,7 @@ class VauchiRepository {
     /// Add contact to a label
     func addContactToLabel(labelId: String, contactId: String) throws {
         do {
-            try vauchi.addContactToLabel(labelId: labelId, contactId: contactId)
+            try vauchi.addContactToGroup(labelId: labelId, contactId: contactId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -921,7 +921,7 @@ class VauchiRepository {
     /// Remove contact from a label
     func removeContactFromLabel(labelId: String, contactId: String) throws {
         do {
-            try vauchi.removeContactFromLabel(labelId: labelId, contactId: contactId)
+            try vauchi.removeContactFromGroup(labelId: labelId, contactId: contactId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -930,7 +930,7 @@ class VauchiRepository {
     /// Get all labels for a contact
     func getLabelsForContact(contactId: String) throws -> [VauchiVisibilityLabel] {
         do {
-            return try vauchi.getLabelsForContact(contactId: contactId).map { VauchiVisibilityLabel(from: $0) }
+            return try vauchi.getGroupsForContact(contactId: contactId).map { VauchiVisibilityLabel(from: $0) }
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -939,7 +939,7 @@ class VauchiRepository {
     /// Set field visibility for a label
     func setLabelFieldVisibility(labelId: String, fieldLabel: String, isVisible: Bool) throws {
         do {
-            try vauchi.setLabelFieldVisibility(labelId: labelId, fieldLabel: fieldLabel, isVisible: isVisible)
+            try vauchi.setGroupFieldVisibility(labelId: labelId, fieldLabel: fieldLabel, isVisible: isVisible)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
