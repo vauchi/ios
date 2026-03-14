@@ -2,6 +2,7 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 
 [![Pipeline](https://vauchi.gitlab.io/ios/badges/pipeline.svg)](https://gitlab.com/vauchi/ios/-/pipelines)
+[![Coverage](https://vauchi.gitlab.io/ios/badges/coverage.svg)](https://gitlab.com/vauchi/ios/-/pipelines)
 [![REUSE](https://api.reuse.software/badge/gitlab.com/vauchi/ios)](https://api.reuse.software/info/gitlab.com/vauchi/ios)
 
 > [!WARNING]

@@ -442,7 +442,7 @@ coverage:unit:
         -o push-coverage.sh
       chmod +x push-coverage.sh
     - ./push-coverage.sh cobertura.xml ios || true
-  coverage: '/(?:line coverage:|Coverage:)\s*(\d+(?:\.\d+)?%)/'
+  coverage: '/Line Coverage:\s+(\d+(?:\.\d+)?%)/'
   artifacts:
     reports:
       coverage_report:
