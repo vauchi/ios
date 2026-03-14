@@ -1874,14 +1874,12 @@ struct VauchiGdprExport {
 enum VauchiConsentType: String, CaseIterable {
     case dataProcessing
     case contactSharing
-    case analytics
     case recoveryVouching
 
     var displayName: String {
         switch self {
         case .dataProcessing: "Data Processing"
         case .contactSharing: "Contact Sharing"
-        case .analytics: "Analytics"
         case .recoveryVouching: "Recovery Vouching"
         }
     }
@@ -1891,7 +1889,6 @@ enum VauchiConsentType: String, CaseIterable {
         switch self {
         case .dataProcessing: .dataProcessing
         case .contactSharing: .contactSharing
-        case .analytics: .analytics
         case .recoveryVouching: .recoveryVouching
         }
     }
@@ -1901,7 +1898,6 @@ enum VauchiConsentType: String, CaseIterable {
         switch mobile {
         case .dataProcessing: .dataProcessing
         case .contactSharing: .contactSharing
-        case .analytics: .analytics
         case .recoveryVouching: .recoveryVouching
         }
     }

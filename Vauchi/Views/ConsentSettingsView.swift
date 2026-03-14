@@ -135,8 +135,6 @@ struct ConsentToggleRow: View {
             "Allow processing of your contact data for core functionality."
         case .contactSharing:
             "Allow sharing your contact card with others via QR exchange."
-        case .analytics:
-            "Allow anonymous usage analytics to improve the app."
         case .recoveryVouching:
             "Allow participating in identity recovery vouching for contacts."
         }
@@ -146,7 +144,6 @@ struct ConsentToggleRow: View {
         switch consentType {
         case .dataProcessing: "gearshape.2"
         case .contactSharing: "person.2"
-        case .analytics: "chart.bar"
         case .recoveryVouching: "person.badge.key"
         }
     }
