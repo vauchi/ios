@@ -94,6 +94,11 @@ import SwiftUI
 
             case .complete:
                 isComplete = true
+
+            case .openEntryDetail, .showToast, .exchangeCommands,
+                 .startDeviceLink, .startBackupImport, .openContact,
+                 .openUrl, .showAlert, .requestCamera, .wipeComplete:
+                break
             }
         }
     }

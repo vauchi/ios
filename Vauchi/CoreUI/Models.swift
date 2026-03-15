@@ -603,7 +603,10 @@ enum ActionResult: Decodable {
     case openUrl(url: String)
     case showAlert(title: String, message: String)
     case requestCamera
+    case openEntryDetail(fieldId: String)
+    case showToast(message: String, undoActionId: String?)
     case wipeComplete
+    case exchangeCommands(commands: [ExchangeCommandDTO])
 
     init(from decoder: Decoder) throws {
         // Unit variants: "Complete", "StartDeviceLink", etc.
@@ -645,6 +648,15 @@ enum ActionResult: Decodable {
         } else if container.contains(.showAlert) {
             let data = try container.decode(ShowAlertData.self, forKey: .showAlert)
             self = .showAlert(title: data.title, message: data.message)
+        } else if container.contains(.openEntryDetail) {
+            let data = try container.decode(OpenEntryDetailData.self, forKey: .openEntryDetail)
+            self = .openEntryDetail(fieldId: data.fieldId)
+        } else if container.contains(.showToast) {
+            let data = try container.decode(ShowToastData.self, forKey: .showToast)
+            self = .showToast(message: data.message, undoActionId: data.undoActionId)
+        } else if container.contains(.exchangeCommands) {
+            let data = try container.decode(ExchangeCommandsData.self, forKey: .exchangeCommands)
+            self = .exchangeCommands(commands: data.commands)
         } else {
             throw DecodingError.dataCorrupted(
                 DecodingError.Context(
@@ -662,6 +674,9 @@ enum ActionResult: Decodable {
         case openContact = "OpenContact"
         case openUrl = "OpenUrl"
         case showAlert = "ShowAlert"
+        case openEntryDetail = "OpenEntryDetail"
+        case showToast = "ShowToast"
+        case exchangeCommands = "ExchangeCommands"
     }
 
     private struct ValidationErrorData: Decodable {
@@ -681,4 +696,84 @@ enum ActionResult: Decodable {
         let title: String
         let message: String
     }
+
+    private struct OpenEntryDetailData: Decodable {
+        let fieldId: String
+    }
+
+    private struct ShowToastData: Decodable {
+        let message: String
+        let undoActionId: String?
+    }
+
+    private struct ExchangeCommandsData: Decodable {
+        let commands: [ExchangeCommandDTO]
+    }
+}
+
+/// DTO for exchange commands from core (ADR-031).
+/// Maps to: `vauchi-core::exchange::command::ExchangeCommand`
+enum ExchangeCommandDTO: Decodable {
+    case qrDisplay(data: String)
+    case qrRequestScan
+    case bleStartAdvertising(serviceUuid: String, payload: [UInt8])
+    case bleStartScanning(serviceUuid: String)
+    case bleConnect(deviceId: String)
+    case bleDisconnect
+    case nfcActivate(payload: [UInt8])
+    case nfcDeactivate
+    case audioEmitChallenge(data: [UInt8])
+    case audioListenForResponse(timeoutMs: UInt64)
+    case audioStop
+    case unknown
+
+    init(from decoder: Decoder) throws {
+        if let container = try? decoder.singleValueContainer(),
+           let stringValue = try? container.decode(String.self) {
+            switch stringValue {
+            case "QrRequestScan": self = .qrRequestScan
+            case "BleDisconnect": self = .bleDisconnect
+            case "NfcDeactivate": self = .nfcDeactivate
+            case "AudioStop": self = .audioStop
+            default: self = .unknown
+            }
+            return
+        }
+
+        let container = try decoder.container(keyedBy: CommandKey.self)
+        if container.contains(.qrDisplay) {
+            let data = try container.decode(QrDisplayData.self, forKey: .qrDisplay)
+            self = .qrDisplay(data: data.data)
+        } else if container.contains(.bleStartScanning) {
+            let data = try container.decode(BleServiceData.self, forKey: .bleStartScanning)
+            self = .bleStartScanning(serviceUuid: data.serviceUuid)
+        } else if container.contains(.bleConnect) {
+            let data = try container.decode(BleConnectData.self, forKey: .bleConnect)
+            self = .bleConnect(deviceId: data.deviceId)
+        } else if container.contains(.audioEmitChallenge) {
+            let data = try container.decode(AudioChallengeData.self, forKey: .audioEmitChallenge)
+            self = .audioEmitChallenge(data: data.data)
+        } else if container.contains(.audioListenForResponse) {
+            let data = try container.decode(AudioListenData.self, forKey: .audioListenForResponse)
+            self = .audioListenForResponse(timeoutMs: data.timeoutMs)
+        } else {
+            self = .unknown
+        }
+    }
+
+    private enum CommandKey: String, CodingKey {
+        case qrDisplay = "QrDisplay"
+        case bleStartAdvertising = "BleStartAdvertising"
+        case bleStartScanning = "BleStartScanning"
+        case bleConnect = "BleConnect"
+        case nfcActivate = "NfcActivate"
+        case audioEmitChallenge = "AudioEmitChallenge"
+        case audioListenForResponse = "AudioListenForResponse"
+    }
+
+    private struct QrDisplayData: Decodable { let data: String }
+    private struct BleServiceData: Decodable { let serviceUuid: String }
+    private struct BleConnectData: Decodable { let deviceId: String }
+    private struct AudioChallengeData: Decodable { let data: [UInt8] }
+    private struct AudioListenData: Decodable { let timeoutMs: UInt64 }
 }

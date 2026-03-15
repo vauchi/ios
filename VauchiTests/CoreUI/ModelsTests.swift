@@ -399,6 +399,58 @@ final class ModelsTests: XCTestCase {
         }
     }
 
+    func testActionResultExchangeCommands() throws {
+        let json = Data("""
+        {"ExchangeCommands": {"commands": ["QrRequestScan", {"QrDisplay": {"data": "test-qr"}}]}}
+        """.utf8)
+
+        let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
+
+        guard case let .exchangeCommands(commands) = result else {
+            XCTFail("Expected .exchangeCommands, got \(result)")
+            return
+        }
+        XCTAssertEqual(commands.count, 2)
+        guard case .qrRequestScan = commands[0] else {
+            XCTFail("Expected .qrRequestScan, got \(commands[0])")
+            return
+        }
+        guard case let .qrDisplay(data) = commands[1] else {
+            XCTFail("Expected .qrDisplay, got \(commands[1])")
+            return
+        }
+        XCTAssertEqual(data, "test-qr")
+    }
+
+    func testActionResultShowToast() throws {
+        let json = Data("""
+        {"ShowToast": {"message": "Saved", "undo_action_id": "undo_1"}}
+        """.utf8)
+
+        let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
+
+        guard case let .showToast(message, undoActionId) = result else {
+            XCTFail("Expected .showToast, got \(result)")
+            return
+        }
+        XCTAssertEqual(message, "Saved")
+        XCTAssertEqual(undoActionId, "undo_1")
+    }
+
+    func testActionResultOpenEntryDetail() throws {
+        let json = Data("""
+        {"OpenEntryDetail": {"field_id": "phone_1"}}
+        """.utf8)
+
+        let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
+
+        guard case let .openEntryDetail(fieldId) = result else {
+            XCTFail("Expected .openEntryDetail, got \(result)")
+            return
+        }
+        XCTAssertEqual(fieldId, "phone_1")
+    }
+
     // MARK: - UserAction Encoding
 
     func testUserActionTextChangedEncoding() throws {
