@@ -608,6 +608,7 @@ enum ActionResult: Decodable {
     case showToast(message: String, undoActionId: String?)
     case wipeComplete
     case exchangeCommands(commands: [ExchangeCommandDTO])
+    case unknown
 
     init(from decoder: Decoder) throws {
         // Unit variants: "Complete", "StartDeviceLink", etc.
@@ -619,13 +620,7 @@ enum ActionResult: Decodable {
             case "StartBackupImport": self = .startBackupImport
             case "RequestCamera": self = .requestCamera
             case "WipeComplete": self = .wipeComplete
-            default:
-                throw DecodingError.dataCorrupted(
-                    DecodingError.Context(
-                        codingPath: decoder.codingPath,
-                        debugDescription: "Unknown ActionResult unit variant: \(stringValue)"
-                    )
-                )
+            default: self = .unknown
             }
             return
         }
@@ -662,12 +657,7 @@ enum ActionResult: Decodable {
             let data = try container.decode(ExchangeCommandsData.self, forKey: .exchangeCommands)
             self = .exchangeCommands(commands: data.commands)
         } else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(
-                    codingPath: decoder.codingPath,
-                    debugDescription: "Unknown ActionResult variant"
-                )
-            )
+            self = .unknown
         }
     }
 
