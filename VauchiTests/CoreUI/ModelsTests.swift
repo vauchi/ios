@@ -581,20 +581,27 @@ final class ModelsTests: XCTestCase {
         }
     }
 
-    func testUnknownActionResultVariantThrows() {
+    func testUnknownActionResultVariantDecodesAsUnknown() throws {
         let json = Data("""
         {"UnknownResult": {}}
         """.utf8)
 
-        XCTAssertThrowsError(try coreJSONDecoder.decode(ActionResult.self, from: json)) { error in
-            guard case let DecodingError.dataCorrupted(context) = error else {
-                XCTFail("Expected DecodingError.dataCorrupted, got \(error)")
-                return
-            }
-            XCTAssertTrue(
-                context.debugDescription.contains("Unknown ActionResult variant"),
-                "Expected 'Unknown ActionResult variant' in error, got: \(context.debugDescription)"
-            )
+        let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
+        guard case .unknown = result else {
+            XCTFail("Expected .unknown, got \(result)")
+            return
+        }
+    }
+
+    func testUnknownUnitActionResultVariantDecodesAsUnknown() throws {
+        let json = Data("""
+        "FutureUnitVariant"
+        """.utf8)
+
+        let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
+        guard case .unknown = result else {
+            XCTFail("Expected .unknown for unknown unit variant, got \(result)")
+            return
         }
     }
 
