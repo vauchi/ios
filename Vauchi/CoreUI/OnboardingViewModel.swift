@@ -97,7 +97,7 @@ import SwiftUI
 
             case .openEntryDetail, .showToast, .exchangeCommands,
                  .startDeviceLink, .startBackupImport, .openContact,
-                 .openUrl, .showAlert, .requestCamera, .wipeComplete:
+                 .editContact, .openUrl, .showAlert, .requestCamera, .wipeComplete:
                 break
             }
         }

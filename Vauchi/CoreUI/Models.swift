@@ -600,6 +600,7 @@ enum ActionResult: Decodable {
     case startDeviceLink
     case startBackupImport
     case openContact(contactId: String)
+    case editContact(contactId: String)
     case openUrl(url: String)
     case showAlert(title: String, message: String)
     case requestCamera
@@ -642,6 +643,9 @@ enum ActionResult: Decodable {
         } else if container.contains(.openContact) {
             let data = try container.decode(OpenContactData.self, forKey: .openContact)
             self = .openContact(contactId: data.contactId)
+        } else if container.contains(.editContact) {
+            let data = try container.decode(EditContactData.self, forKey: .editContact)
+            self = .editContact(contactId: data.contactId)
         } else if container.contains(.openUrl) {
             let data = try container.decode(OpenUrlData.self, forKey: .openUrl)
             self = .openUrl(url: data.url)
@@ -672,6 +676,7 @@ enum ActionResult: Decodable {
         case navigateTo = "NavigateTo"
         case validationError = "ValidationError"
         case openContact = "OpenContact"
+        case editContact = "EditContact"
         case openUrl = "OpenUrl"
         case showAlert = "ShowAlert"
         case openEntryDetail = "OpenEntryDetail"
@@ -685,6 +690,10 @@ enum ActionResult: Decodable {
     }
 
     private struct OpenContactData: Decodable {
+        let contactId: String
+    }
+
+    private struct EditContactData: Decodable {
         let contactId: String
     }
 
@@ -719,6 +728,8 @@ enum ExchangeCommandDTO: Decodable {
     case bleStartAdvertising(serviceUuid: String, payload: [UInt8])
     case bleStartScanning(serviceUuid: String)
     case bleConnect(deviceId: String)
+    case bleWriteCharacteristic(uuid: String, data: [UInt8])
+    case bleReadCharacteristic(uuid: String)
     case bleDisconnect
     case nfcActivate(payload: [UInt8])
     case nfcDeactivate
@@ -750,6 +761,18 @@ enum ExchangeCommandDTO: Decodable {
         } else if container.contains(.bleConnect) {
             let data = try container.decode(BleConnectData.self, forKey: .bleConnect)
             self = .bleConnect(deviceId: data.deviceId)
+        } else if container.contains(.bleStartAdvertising) {
+            let data = try container.decode(BleAdvertisingData.self, forKey: .bleStartAdvertising)
+            self = .bleStartAdvertising(serviceUuid: data.serviceUuid, payload: data.payload)
+        } else if container.contains(.bleWriteCharacteristic) {
+            let data = try container.decode(BleCharacteristicData.self, forKey: .bleWriteCharacteristic)
+            self = .bleWriteCharacteristic(uuid: data.uuid, data: data.data)
+        } else if container.contains(.bleReadCharacteristic) {
+            let data = try container.decode(BleReadData.self, forKey: .bleReadCharacteristic)
+            self = .bleReadCharacteristic(uuid: data.uuid)
+        } else if container.contains(.nfcActivate) {
+            let data = try container.decode(NfcActivateData.self, forKey: .nfcActivate)
+            self = .nfcActivate(payload: data.payload)
         } else if container.contains(.audioEmitChallenge) {
             let data = try container.decode(AudioChallengeData.self, forKey: .audioEmitChallenge)
             self = .audioEmitChallenge(data: data.data)
@@ -766,6 +789,8 @@ enum ExchangeCommandDTO: Decodable {
         case bleStartAdvertising = "BleStartAdvertising"
         case bleStartScanning = "BleStartScanning"
         case bleConnect = "BleConnect"
+        case bleWriteCharacteristic = "BleWriteCharacteristic"
+        case bleReadCharacteristic = "BleReadCharacteristic"
         case nfcActivate = "NfcActivate"
         case audioEmitChallenge = "AudioEmitChallenge"
         case audioListenForResponse = "AudioListenForResponse"
@@ -774,6 +799,10 @@ enum ExchangeCommandDTO: Decodable {
     private struct QrDisplayData: Decodable { let data: String }
     private struct BleServiceData: Decodable { let serviceUuid: String }
     private struct BleConnectData: Decodable { let deviceId: String }
+    private struct BleAdvertisingData: Decodable { let serviceUuid: String; let payload: [UInt8] }
+    private struct BleCharacteristicData: Decodable { let uuid: String; let data: [UInt8] }
+    private struct BleReadData: Decodable { let uuid: String }
+    private struct NfcActivateData: Decodable { let payload: [UInt8] }
     private struct AudioChallengeData: Decodable { let data: [UInt8] }
     private struct AudioListenData: Decodable { let timeoutMs: UInt64 }
 }

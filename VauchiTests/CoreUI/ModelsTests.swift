@@ -437,6 +437,20 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(undoActionId, "undo_1")
     }
 
+    func testActionResultEditContact() throws {
+        let json = Data("""
+        {"EditContact": {"contact_id": "c123"}}
+        """.utf8)
+
+        let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
+
+        guard case let .editContact(contactId) = result else {
+            XCTFail("Expected .editContact, got \(result)")
+            return
+        }
+        XCTAssertEqual(contactId, "c123")
+    }
+
     func testActionResultOpenEntryDetail() throws {
         let json = Data("""
         {"OpenEntryDetail": {"field_id": "phone_1"}}
