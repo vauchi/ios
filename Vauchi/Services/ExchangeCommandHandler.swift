@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import Foundation
+import VauchiPlatform
 
 /// Dispatches ADR-031 exchange commands from core to platform hardware.
 ///
@@ -92,37 +93,14 @@ final class ExchangeCommandHandler {
 
     // MARK: - Audio
 
-    private func emitAudioChallenge(data: [UInt8]) {
-        guard let service = AudioProximityService.shared else {
-            reportUnavailable(transport: "Audio")
-            return
-        }
-        let floatData = data.map { Float($0) / 255.0 }
-        service.emitSignal(samples: floatData, sampleRate: 44100) { [weak self] error in
-            if let error {
-                self?.reportError(transport: "Audio", error: error)
-            }
-        }
+    private func emitAudioChallenge(data _: Data) {
+        // Audio proximity not yet wired to command/event protocol.
+        // TODO: Wire when AudioProximityService supports raw sample emission.
     }
 
-    private func listenForAudioResponse(timeoutMs: UInt64) {
-        guard let service = AudioProximityService.shared else {
-            reportUnavailable(transport: "Audio")
-            return
-        }
-        service.receiveSignal(timeoutMs: timeoutMs, sampleRate: 44100) { [weak self] result in
-            guard let self, let session else { return }
-            switch result {
-            case let .success(samples):
-                let data = samples.map { UInt8(clamping: Int($0 * 255.0)) }
-                try? session.applyHardwareEvent(
-                    event: .audioResponseReceived(data: data)
-                )
-                drainAndDispatch()
-            case let .failure(error):
-                reportError(transport: "Audio", error: error.localizedDescription)
-            }
-        }
+    private func listenForAudioResponse(timeoutMs _: UInt64) {
+        // Audio proximity not yet wired to command/event protocol.
+        // TODO: Wire when AudioProximityService supports raw sample reception.
     }
 
     // MARK: - Feedback

@@ -3,6 +3,7 @@
 
 import CoreBluetooth
 import Foundation
+import VauchiPlatform
 
 /// CoreBluetooth BLE exchange service for the ADR-031 command/event protocol.
 ///
@@ -59,18 +60,17 @@ final class BleExchangeService: NSObject {
         centralManager?.connect(peripheral, options: nil)
     }
 
-    func writeCharacteristic(uuid: String, data: [UInt8]) {
+    func writeCharacteristic(uuid: String, data: Data) {
         guard let peripheral = connectedPeripheral else {
             eventCallback?(.hardwareError(transport: "BLE", error: "No connected device"))
             return
         }
         let normalizedUuid = uuid.lowercased()
         guard let characteristic = discoveredCharacteristics[normalizedUuid] else {
-            // Characteristic may not be discovered yet — queue the write
-            pendingWrite = (uuid: normalizedUuid, data: Data(data))
+            pendingWrite = (uuid: normalizedUuid, data: data)
             return
         }
-        peripheral.writeValue(Data(data), for: characteristic, type: .withResponse)
+        peripheral.writeValue(data, for: characteristic, type: .withResponse)
     }
 
     func readCharacteristic(uuid: String) {
@@ -136,11 +136,7 @@ extension BleExchangeService: CBCentralManagerDelegate {
         discoveredPeripherals[id] = peripheral
 
         // Extract manufacturer data if available
-        let advData: [UInt8] = if let mfgData = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data {
-            Array(mfgData)
-        } else {
-            []
-        }
+        let advData: Data = (advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data) ?? Data()
 
         eventCallback?(.bleDeviceDiscovered(
             id: id,
@@ -208,12 +204,11 @@ extension BleExchangeService: CBPeripheralDelegate {
     func peripheral(_: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         guard error == nil, let value = characteristic.value else { return }
         let uuid = characteristic.uuid.uuidString.lowercased()
-        let data = Array(value)
 
         if characteristic.isNotifying {
-            eventCallback?(.bleCharacteristicNotified(uuid: uuid, data: data))
+            eventCallback?(.bleCharacteristicNotified(uuid: uuid, data: value))
         } else {
-            eventCallback?(.bleCharacteristicRead(uuid: uuid, data: data))
+            eventCallback?(.bleCharacteristicRead(uuid: uuid, data: value))
         }
     }
 
