@@ -195,12 +195,12 @@ extension BleExchangeService: CBPeripheralDelegate {
         }
 
         // Execute any pending operations now that characteristics are available
-        if let pending = pendingWrite, let ch = discoveredCharacteristics[pending.uuid] {
-            peripheral.writeValue(pending.data, for: ch, type: .withResponse)
+        if let pending = pendingWrite, let char = discoveredCharacteristics[pending.uuid] {
+            peripheral.writeValue(pending.data, for: char, type: .withResponse)
             pendingWrite = nil
         }
-        if let uuid = pendingRead, let ch = discoveredCharacteristics[uuid] {
-            peripheral.readValue(for: ch)
+        if let uuid = pendingRead, let char = discoveredCharacteristics[uuid] {
+            peripheral.readValue(for: char)
             pendingRead = nil
         }
     }
