@@ -145,8 +145,8 @@ auto-tag:version:
 
       echo "Tag ${TAG} does not exist — creating it..."
 
-      git config user.name "vauchi-gitlab-runner"
-      git config user.email "noreply@vauchi.app"
+      git config user.name "${GITLAB_USER_NAME}"
+      git config user.email "${GITLAB_USER_EMAIL}"
 
       # Use project access token for push — CI_JOB_TOKEN cannot be used here
       # because pushes via CI_JOB_TOKEN do not trigger new pipelines, and the
@@ -182,8 +182,8 @@ update:bindings-version:
       BRANCH="chore/bump-vauchi-platform-${BINDINGS_VERSION}"
 
       # Configure git
-      git config user.email "ci@vauchi.com"
-      git config user.name "Vauchi CI"
+      git config user.email "${GITLAB_USER_EMAIL}"
+      git config user.name "${GITLAB_USER_NAME}"
       git remote set-url origin "https://ci:${PROJECT_ACCESS_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
 
       # Check if branch already exists on remote
@@ -194,10 +194,17 @@ update:bindings-version:
 
       # Create branch and update version in project.yml
       git checkout -b "$BRANCH"
-      # Only update VauchiPlatform version (not other SPM deps like SnapshotTesting)
+      # Update VauchiPlatform dependency: branch: main → from: "version"
+      # or from: "old_version" → from: "new_version"
       LINE=$(grep -n "vauchi-platform-swift" project.yml | head -1 | cut -d: -f1)
       NEXT=$((LINE + 1))
-      sed -i "" "${NEXT}s/from: \"[^\"]*\"/from: \"${BINDINGS_VERSION}\"/" project.yml
+      # Handle both branch-tracking (branch: main) and version-pinned (from: "x.y.z")
+      CURRENT=$(sed -n "${NEXT}p" project.yml)
+      if echo "$CURRENT" | grep -q 'branch:'; then
+        sed -i "" "${NEXT}s/branch: .*/from: \"${BINDINGS_VERSION}\"/" project.yml
+      else
+        sed -i "" "${NEXT}s/from: \"[^\"]*\"/from: \"${BINDINGS_VERSION}\"/" project.yml
+      fi
 
       # Verify the change was made
       if ! grep -q "from: \"${BINDINGS_VERSION}\"" project.yml; then
