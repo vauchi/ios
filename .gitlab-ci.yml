@@ -350,6 +350,11 @@ build:debug:
   script:
     - rm -rf Vauchi.xcodeproj
     - xcodegen generate
+    # SPM resolve/build never advances branch pins — it honors Package.resolved
+    # and workspace-state.json as lock files. Delete both so SPM re-resolves to
+    # the latest branch tip. The cached bare repos stay warm so this is fast.
+    - rm -f .spm-packages/workspace-state.json
+    - rm -f Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
   artifacts:
     paths:
@@ -378,6 +383,9 @@ build:release:
     - rm -rf "${HOME}/Library/Developer/Xcode/DerivedData"
     - ./scripts/setup-signing.sh
     - xcodegen generate
+    # Force SPM to re-resolve branch pins to latest (see build:debug comment)
+    - rm -f .spm-packages/workspace-state.json
+    - rm -f Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
     - xcodebuild archive
         -project Vauchi.xcodeproj
         -scheme Vauchi
