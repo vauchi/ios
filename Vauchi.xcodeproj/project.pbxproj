@@ -179,6 +179,7 @@
 		E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EBCAF628D08C167C0D9721 /* QRScannerView.swift */; };
 		EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */; };
 		EC26C5F66AE81B6841339A50 /* CardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC0C96CE81822B758A8E9B7 /* CardPreviewView.swift */; };
+		EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F950D6541F912A27DA57D /* BleExchangeService.swift */; };
 		EE06B8DCB941892BEACE00A0 /* testCreateIdentityStepFilled.1.png in Resources */ = {isa = PBXBuildFile; fileRef = BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */; };
 		EE2E45E26234B17B707ADED9 /* testInlineConfirmDefault.1.png in Resources */ = {isa = PBXBuildFile; fileRef = E919A41F13031155AC578B3E /* testInlineConfirmDefault.1.png */; };
 		EE61E717891162E1E64D6B6E /* SineWaveGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */; };
@@ -275,6 +276,7 @@
 		3F10CFAFFF2CD3F74871E914 /* DeepLinkConsentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkConsentTests.swift; sourceTree = "<group>"; };
 		3F12B12FCE38D7CBAB15A8A0 /* LabelDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelDetailView.swift; sourceTree = "<group>"; };
 		3FA79BEC85FC2E70D2E996D7 /* TextInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputView.swift; sourceTree = "<group>"; };
+		418F950D6541F912A27DA57D /* BleExchangeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleExchangeService.swift; sourceTree = "<group>"; };
 		423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
 		44506B768565C7F52A328D17 /* BackgroundSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncService.swift; sourceTree = "<group>"; };
 		46CE8156A15BD5428BE8514A /* ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContractTests.swift; sourceTree = "<group>"; };
@@ -758,6 +760,7 @@
 			children = (
 				49509AE0DF70B880F977B015 /* AudioProximityService.swift */,
 				44506B768565C7F52A328D17 /* BackgroundSyncService.swift */,
+				418F950D6541F912A27DA57D /* BleExchangeService.swift */,
 				180FA5B6237A3C3CE4ACB83B /* ContactActions.swift */,
 				E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */,
 				F3D6D0CAF371C529012A00BB /* DeepLinkHandler.swift */,
@@ -1048,6 +1051,7 @@
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
 				04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */,
 				7532FD4076FE6E6670E901E6 /* BleDiagnosticView.swift in Sources */,
+				EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */,
 				EC26C5F66AE81B6841339A50 /* CardPreviewView.swift in Sources */,
 				8F1D5438434B846475597477 /* ComponentView.swift in Sources */,
 				307654F6186C276FC27E761A /* ConfirmationDialogView.swift in Sources */,

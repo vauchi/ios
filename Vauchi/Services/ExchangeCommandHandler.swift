@@ -10,6 +10,15 @@ import Foundation
 /// `applyHardwareEvent()` on the session.
 final class ExchangeCommandHandler {
     private weak var session: MobileExchangeSession?
+    private lazy var bleService: BleExchangeService = {
+        let service = BleExchangeService()
+        service.activate { [weak self] event in
+            guard let self, let session else { return }
+            try? session.applyHardwareEvent(event: event)
+            drainAndDispatch()
+        }
+        return service
+    }()
 
     init(session: MobileExchangeSession) {
         self.session = session
@@ -50,24 +59,24 @@ final class ExchangeCommandHandler {
             // Audio operations are one-shot — no persistent state to stop.
             break
 
-        // ── BLE ─────────────────────────────────────────────────────
-        case .bleStartScanning:
-            reportUnavailable(transport: "BLE")
+        // ── BLE (CoreBluetooth) ─────────────────────────────────────
+        case let .bleStartScanning(serviceUuid):
+            bleService.startScanning(serviceUuid: serviceUuid)
 
-        case .bleStartAdvertising:
-            reportUnavailable(transport: "BLE")
+        case let .bleStartAdvertising(serviceUuid, _):
+            bleService.startAdvertising(serviceUuid: serviceUuid)
 
-        case .bleConnect:
-            reportUnavailable(transport: "BLE")
+        case let .bleConnect(deviceId):
+            bleService.connect(deviceId: deviceId)
 
-        case .bleWriteCharacteristic:
-            reportUnavailable(transport: "BLE")
+        case let .bleWriteCharacteristic(uuid, data):
+            bleService.writeCharacteristic(uuid: uuid, data: data)
 
-        case .bleReadCharacteristic:
-            reportUnavailable(transport: "BLE")
+        case let .bleReadCharacteristic(uuid):
+            bleService.readCharacteristic(uuid: uuid)
 
         case .bleDisconnect:
-            break
+            bleService.disconnect()
 
         // ── NFC ─────────────────────────────────────────────────────
         case .nfcActivate:
