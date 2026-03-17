@@ -138,7 +138,7 @@ struct FaceToFaceExchangeView: View {
             case .verifying, .confirming:
                 multiStageQrDisplay(statusText: "Verifying exchange...", showProgress: true)
 
-            case .complete:
+            case .complete, .finalized:
                 if !graceCompleted {
                     multiStageQrDisplay(statusText: "Completing exchange...", showProgress: true)
                 } else {
@@ -335,7 +335,7 @@ struct FaceToFaceExchangeView: View {
         qrCycleTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
             guard let payload = viewModel.getMultiStageDisplayQr() else {
                 // Core returned nil — grace period expired or not started.
-                if case .complete = protocolState {
+                if case .finalized = protocolState {
                     if let result = viewModel.finalizeMultiStageExchange() {
                         finalizationResult = result.contactName
                     } else {
