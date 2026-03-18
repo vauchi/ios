@@ -514,8 +514,8 @@ test:snapshots:
     - |
       if [ "$BASELINE_COUNT" -eq 0 ]; then
         echo "⚠️  SNAPSHOT BASELINES MISSING ($BASELINE_COUNT PNGs in __Snapshots__/)"
-        echo "    Run locally with SNAPSHOT_TESTING_RECORD=all to generate baselines,"
-        echo "    then commit the __Snapshots__/ directory."
+        echo "    Use the 'Record baselines' manual job in this pipeline to generate them."
+        echo "    CI is the single source of truth — do not record locally."
         echo "    Snapshot validation skipped — no baselines to compare against."
         exit 0
       fi
@@ -528,6 +528,59 @@ test:snapshots:
     paths:
       - VauchiSnapshotTests/__Snapshots__/
     expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - "*.xcodeproj/**/*"
+          - "project.yml"
+          - ".gitlab-ci.yml"
+
+# Manual job: record snapshot baselines on CI and commit them to the branch.
+# CI is the single source of truth for baselines — never record locally.
+# Click "Record baselines" in the pipeline UI after pushing view changes.
+test:snapshots:record:
+  extends: [.macos-job, .spm-cache-readonly, .timeout-long]
+  stage: test
+  needs:
+    - job: build:debug
+      artifacts: true
+  when: manual
+  allow_failure: true  # manual jobs should not block the pipeline
+  variables:
+    SNAPSHOT_TESTING_RECORD: "all"
+  script:
+    - echo "📸 Recording snapshot baselines..."
+    - >
+      xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug
+      -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+      -clonedSourcePackagesDirPath .spm-packages
+      ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO
+      test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
+      || true
+    # Configure git for push
+    - git config user.name "vauchi-ci-bot"
+    - git config user.email "ci@vauchi.app"
+    - git remote set-url origin "https://vauchi-gitlab-runner:${PROJECT_ACCESS_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
+    - git fetch origin "${CI_COMMIT_REF_NAME}"
+    - git checkout "${CI_COMMIT_REF_NAME}"
+    # Commit and push baselines (skip if unchanged)
+    - |
+      git add VauchiSnapshotTests/__Snapshots__/
+      if git diff --cached --quiet; then
+        echo "✅ No baseline changes — nothing to commit"
+        exit 0
+      fi
+      CHANGED=$(git diff --cached --stat | tail -1)
+      git commit -m "chore: record snapshot baselines [ci]
+
+      ${CHANGED}
+
+      Co-Authored-By: vauchi-ci-bot <ci@vauchi.app>"
+      git push origin HEAD:${CI_COMMIT_REF_NAME}
+      echo "✅ Baselines committed and pushed — validation pipeline will trigger"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
