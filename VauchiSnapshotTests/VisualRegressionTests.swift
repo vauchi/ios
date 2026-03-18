@@ -13,32 +13,42 @@ import XCTest
 
 /// Visual regression tests for all major views.
 ///
-/// Uses swift-snapshot-testing to capture reference images and compare
-/// against baselines. Run with `--update-snapshots` to regenerate baselines.
+/// Uses swift-snapshot-testing with View-based rendering (not UIHostingController)
+/// for simulator-independent snapshots. This ensures baselines match regardless
+/// of which iOS Simulator device CI uses.
 ///
-/// Device: iPhone 13 Pro logical size (390×844 pt) rendered at 2x scale.
-/// IMPORTANT: Must run on a 2x simulator (e.g. iPhone SE 3) for baselines to match.
-/// Renders at 780×1688 px — large enough to catch layout issues,
-/// small enough to keep baselines under 80 KB each (~45% smaller than 3x).
+/// Layout: 390x844 pt (iPhone Pro logical size) at 2x scale = 780x1688 px.
 @MainActor
 final class VisualRegressionTests: XCTestCase {
-    /// Consistent device for all snapshots.
-    /// Uses 2x scale instead of 3x to reduce baseline image size while
-    /// preserving the same logical layout (390×844 pt).
-    private let device = ViewImageConfig(
-        safeArea: UIEdgeInsets(top: 47, left: 0, bottom: 34, right: 0),
-        size: CGSize(width: 390, height: 844),
-        traits: UITraitCollection(displayScale: 2.0)
-    )
+    /// Fixed layout matching iPhone Pro logical size at 2x scale.
+    /// Simulator-independent: the snapshot library renders at the exact specified
+    /// dimensions regardless of the host simulator's native display scale.
+    private let screenLayout: SwiftUISnapshotLayout = .fixed(width: 390, height: 844)
+    private let screenTraits = UITraitCollection(displayScale: 2.0)
 
     /// Whether to record new baselines.
-    /// CI (no env var) → false → comparison mode.
-    /// Local dev (`SNAPSHOT_TESTING_RECORD=all xcodebuild test`) → true → recording mode.
+    /// CI (no env var) -> false -> comparison mode.
+    /// Local dev (`SNAPSHOT_TESTING_RECORD=all xcodebuild test`) -> true -> recording mode.
     private var isRecording: Bool {
         ProcessInfo.processInfo.environment["SNAPSHOT_TESTING_RECORD"] == "all"
     }
 
-    // setUp intentionally removed — no custom setup needed
+    /// Asserts a snapshot of a full-screen view at 390x844 pt / 2x scale.
+    private func assertScreenSnapshot(
+        of view: some View,
+        file: StaticString = #file,
+        testName: String = #function,
+        line: UInt = #line
+    ) {
+        assertSnapshot(
+            of: view,
+            as: .image(layout: screenLayout, traits: screenTraits),
+            record: isRecording,
+            file: file,
+            testName: testName,
+            line: line
+        )
+    }
 
     // MARK: - Setup / No Identity State
 
@@ -47,11 +57,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = SetupView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     // MARK: - Onboarding Steps
@@ -61,11 +67,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = WelcomeStepView(onContinue: {}, onRestore: {})
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testCreateIdentityStep() {
@@ -77,11 +79,7 @@ final class VisualRegressionTests: XCTestCase {
         )
         .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testCreateIdentityStepFilled() {
@@ -93,11 +91,7 @@ final class VisualRegressionTests: XCTestCase {
         )
         .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testAddFieldsStep() {
@@ -111,11 +105,7 @@ final class VisualRegressionTests: XCTestCase {
         )
         .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testPreviewCardStep() {
@@ -132,11 +122,7 @@ final class VisualRegressionTests: XCTestCase {
         )
         .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testSecurityStep() {
@@ -147,11 +133,7 @@ final class VisualRegressionTests: XCTestCase {
         )
         .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testReadyStep() {
@@ -159,11 +141,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = ReadyStepView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     // MARK: - Main App Views
@@ -173,11 +151,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = HomeView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testHomeViewWithFields() {
@@ -187,11 +161,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = HomeView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testContactsViewEmpty() {
@@ -199,11 +169,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = ContactsView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testContactsViewWithContacts() {
@@ -211,11 +177,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = ContactsView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testExchangeView() {
@@ -223,11 +185,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = ExchangeView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testSettingsView() {
@@ -235,11 +193,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = SettingsView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testHelpView() {
@@ -247,11 +201,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = HelpView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testThemeSettingsView() {
@@ -259,11 +209,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = ThemeSettingsView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testLanguageSettingsView() {
@@ -271,11 +217,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = LanguageSettingsView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testLabelsView() {
@@ -283,11 +225,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = LabelsView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     // MARK: - Detail Views
@@ -307,11 +245,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = ContactDetailView(contact: contact)
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testDeliveryStatusView() {
@@ -319,11 +253,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = DeliveryStatusView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testRecoveryView() {
@@ -331,11 +261,7 @@ final class VisualRegressionTests: XCTestCase {
         let view = RecoveryView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     // MARK: - Special States
@@ -343,11 +269,7 @@ final class VisualRegressionTests: XCTestCase {
     func testLoadingView() {
         let view = LoadingView()
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testSyncingState() {
@@ -355,32 +277,18 @@ final class VisualRegressionTests: XCTestCase {
         let view = HomeView()
             .environmentObject(vm)
 
-        assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     // MARK: - Dark Mode Variants
-
-    /// Helper to create a hosting controller with dark mode forced.
-    private func darkController<V: View>(_ view: V) -> UIHostingController<V> {
-        let controller = UIHostingController(rootView: view)
-        controller.overrideUserInterfaceStyle = .dark
-        return controller
-    }
 
     func testSetupViewDark() {
         let vm = makeViewModel(hasIdentity: false)
         let view = SetupView()
             .environmentObject(vm)
+            .environment(\.colorScheme, .dark)
 
-        assertSnapshot(
-            of: darkController(view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testHomeViewWithFieldsDark() {
@@ -389,48 +297,36 @@ final class VisualRegressionTests: XCTestCase {
         )
         let view = HomeView()
             .environmentObject(vm)
+            .environment(\.colorScheme, .dark)
 
-        assertSnapshot(
-            of: darkController(view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testContactsViewWithContactsDark() {
         let vm = makeViewModel(contacts: sampleContacts)
         let view = ContactsView()
             .environmentObject(vm)
+            .environment(\.colorScheme, .dark)
 
-        assertSnapshot(
-            of: darkController(view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testSettingsViewDark() {
         let vm = makeViewModel()
         let view = SettingsView()
             .environmentObject(vm)
+            .environment(\.colorScheme, .dark)
 
-        assertSnapshot(
-            of: darkController(view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     func testExchangeViewDark() {
         let vm = makeViewModel()
         let view = ExchangeView()
             .environmentObject(vm)
+            .environment(\.colorScheme, .dark)
 
-        assertSnapshot(
-            of: darkController(view),
-            as: .image(on: device),
-            record: isRecording
-        )
+        assertScreenSnapshot(of: view)
     }
 
     // MARK: - German Locale Variants
@@ -442,8 +338,8 @@ final class VisualRegressionTests: XCTestCase {
         LocalizationService.shared.selectLocale(code: code)
 
         assertSnapshot(
-            of: UIHostingController(rootView: view),
-            as: .image(on: device),
+            of: view,
+            as: .image(layout: screenLayout, traits: screenTraits),
             record: isRecording,
             file: file,
             testName: testName,
