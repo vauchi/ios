@@ -688,70 +688,112 @@ class VauchiRepository {
     // MARK: - Hidden Contacts Operations
 
     // Based on: features/resistance.feature - R3 Hidden Contact UI
-    // NOTE: These methods are stubs until vauchi-core hidden contact bindings
-    // are published via vauchi-platform-swift. Once core MR !109 merges and
-    // bindings are updated, replace stubs with actual UniFFI calls.
 
     /// Hide a contact
-    func hideContact(id _: String) throws {
-        // TODO: Replace with `try vauchi.hideContact(id: id)` once bindings are published
-        throw VauchiRepositoryError.internalError("Hidden contacts not yet available in bindings")
+    func hideContact(id: String) throws {
+        do {
+            try vauchi.hideContact(contactId: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Unhide a contact
-    func unhideContact(id _: String) throws {
-        // TODO: Replace with `try vauchi.unhideContact(id: id)` once bindings are published
-        throw VauchiRepositoryError.internalError("Hidden contacts not yet available in bindings")
+    func unhideContact(id: String) throws {
+        do {
+            try vauchi.unhideContact(contactId: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// List hidden contacts
     func listHiddenContacts() throws -> [VauchiContact] {
-        // TODO: Replace with `try vauchi.listHiddenContacts().map(convertContact)` once bindings are published
-        throw VauchiRepositoryError.internalError("Hidden contacts not yet available in bindings")
+        do {
+            return try vauchi.listHiddenContacts().map(convertContact)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     // MARK: - Duress PIN Operations
 
     // Based on: features/duress_pin.feature - R1 Duress PIN
-    // NOTE: These methods are stubs until vauchi-core duress bindings
-    // are published via vauchi-platform-swift. Once core MR merges and
-    // bindings are updated, replace stubs with actual UniFFI calls.
 
     /// Set up app password
-    func setupAppPassword(password _: String) throws {
-        // TODO: Replace with `try vauchi.setupAppPassword(password: password)` once bindings are published
-        throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
+    func setupAppPassword(password: String) throws {
+        do {
+            try vauchi.setupAppPassword(password: password)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Set up duress PIN (requires app password to be set first)
-    func setupDuressPassword(duressPassword _: String) throws {
-        // TODO: Replace with `try vauchi.setupDuressPassword(duressPassword: duressPassword)` once bindings are published
-        throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
+    func setupDuressPassword(duressPassword: String) throws {
+        do {
+            try vauchi.setupDuressPassword(duressPassword: duressPassword)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
-    /// Authenticate with password/PIN — returns "normal", "duress", or throws on invalid
-    func authenticate(password _: String) throws -> String {
-        // TODO: Replace with `try vauchi.authenticate(password: password)` once bindings are published
-        // Returns MobileAuthMode.normal or MobileAuthMode.duress
-        throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
+    /// Authenticate with password/PIN — returns "normal" or "duress", throws on invalid
+    func authenticate(password: String) throws -> String {
+        do {
+            let mode = try vauchi.authenticate(password: password)
+            switch mode {
+            case .normal: return "normal"
+            case .duress: return "duress"
+            }
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Check if app password is enabled
     func isPasswordEnabled() throws -> Bool {
-        // TODO: Replace with `try vauchi.isPasswordEnabled()` once bindings are published
-        false
+        do {
+            return try vauchi.isPasswordEnabled()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Check if duress PIN is enabled
     func isDuressEnabled() throws -> Bool {
-        // TODO: Replace with `try vauchi.isDuressEnabled()` once bindings are published
-        false
+        do {
+            return try vauchi.isDuressEnabled()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Disable duress PIN
     func disableDuress() throws {
-        // TODO: Replace with `try vauchi.disableDuress()` once bindings are published
-        throw VauchiRepositoryError.internalError("Duress PIN not yet available in bindings")
+        do {
+            try vauchi.disableDuress()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Configure duress alert contacts and message
+    func configureDuressAlerts(contactIds: [String], message: String) throws {
+        do {
+            try vauchi.configureDuressAlerts(contactIds: contactIds, message: message)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Get duress settings (alert contacts, message, location flag)
+    func getDuressSettings() throws -> MobileDuressSettings? {
+        do {
+            return try vauchi.getDuressSettings()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     // MARK: - Panic Shred Operations
@@ -759,9 +801,13 @@ class VauchiRepository {
     // Based on: features/panic_widget.feature - R2 Panic Widget
 
     /// Execute emergency panic shred — destroys all data
-    func panicShred() throws {
-        // TODO: Replace with `try vauchi.panicShred()` once bindings are published
-        throw VauchiRepositoryError.internalError("Panic shred not yet available in bindings")
+    @discardableResult
+    func panicShred() throws -> MobileShredReport {
+        do {
+            return try vauchi.panicShred()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     // MARK: - Emergency Broadcast Operations
@@ -769,27 +815,41 @@ class VauchiRepository {
     // Based on: features/emergency_broadcast.feature - R5 Emergency Broadcast
 
     /// Configure emergency broadcast
-    func configureEmergencyBroadcast(contactIds _: [String], message _: String, includeLocation _: Bool) throws {
-        // TODO: Replace with `try vauchi.configureEmergencyBroadcast(contactIds: contactIds, message: message, includeLocation: includeLocation)` once bindings are published
-        throw VauchiRepositoryError.internalError("Emergency broadcast not yet available in bindings")
+    func configureEmergencyBroadcast(contactIds: [String], message: String, includeLocation: Bool) throws {
+        do {
+            try vauchi.configureEmergencyBroadcast(contactIds: contactIds, message: message, includeLocation: includeLocation)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Get emergency broadcast config
     func getEmergencyConfig() throws -> (contactIds: [String], message: String, includeLocation: Bool)? {
-        // TODO: Replace with real UniFFI call once bindings are published
-        nil
+        do {
+            guard let config = try vauchi.getEmergencyConfig() else { return nil }
+            return (contactIds: config.trustedContactIds, message: config.message, includeLocation: config.includeLocation)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Send emergency broadcast
     func sendEmergencyBroadcast() throws -> (sent: Int, total: Int) {
-        // TODO: Replace with `try vauchi.sendEmergencyBroadcast()` once bindings are published
-        throw VauchiRepositoryError.internalError("Emergency broadcast not yet available in bindings")
+        do {
+            let result = try vauchi.sendEmergencyBroadcast()
+            return (sent: Int(result.sent), total: Int(result.total))
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Disable emergency broadcast
     func disableEmergencyBroadcast() throws {
-        // TODO: Replace with `try vauchi.disableEmergencyBroadcast()` once bindings are published
-        throw VauchiRepositoryError.internalError("Emergency broadcast not yet available in bindings")
+        do {
+            try vauchi.disableEmergencyBroadcast()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     // MARK: - Tor Mode Operations
@@ -801,14 +861,26 @@ class VauchiRepository {
 
     /// Get Tor configuration
     func getTorConfig() throws -> (enabled: Bool, bridges: [String], preferOnion: Bool) {
-        // TODO: Replace with actual UniFFI call once bindings are published
-        (enabled: false, bridges: [], preferOnion: true)
+        do {
+            let config = try vauchi.loadTorConfig()
+            return (enabled: config.enabled, bridges: config.bridges, preferOnion: config.preferOnion)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Save Tor configuration
-    func saveTorConfig(enabled _: Bool, bridges _: [String], preferOnion _: Bool) throws {
-        // TODO: Replace with actual UniFFI call once bindings are published
-        throw VauchiRepositoryError.internalError("Tor mode not yet available in bindings")
+    func saveTorConfig(enabled: Bool, bridges _: [String], preferOnion _: Bool) throws {
+        // TODO: Bridge-list and preferOnion persistence not yet available in bindings
+        do {
+            if enabled {
+                try vauchi.enableTor()
+            } else {
+                try vauchi.disableTor()
+            }
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Get own identity fingerprint for verification display.
@@ -1362,31 +1434,41 @@ class VauchiRepository {
     }
 
     /// Listen for incoming device link request via relay.
-    /// NOTE: Stub until relay transport bindings are published in vauchi-platform-swift.
-    /// Once core relay bindings merge, replace with:
-    ///   `return try vauchi.listenForDeviceLinkRequest(timeoutSecs: timeoutSecs)`
-    func listenForDeviceLinkRequest(timeoutSecs _: UInt64) throws -> DeviceLinkRequest {
-        // TODO: Replace with actual UniFFI call once relay bindings are published
-        throw VauchiRepositoryError.internalError("Relay transport not yet available in bindings")
+    func listenForDeviceLinkRequest(timeoutSecs: UInt64) throws -> DeviceLinkRequest {
+        do {
+            let request = try vauchi.listenForDeviceLinkRequest(timeoutSecs: timeoutSecs)
+            return DeviceLinkRequest(encryptedPayload: request.encryptedPayload, senderToken: request.senderToken)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Send device link response via relay.
-    /// NOTE: Stub until relay transport bindings are published in vauchi-platform-swift.
-    func sendDeviceLinkResponse(senderToken _: String, encryptedResponse _: Data) throws {
-        // TODO: Replace with actual UniFFI call once relay bindings are published
-        throw VauchiRepositoryError.internalError("Relay transport not yet available in bindings")
+    func sendDeviceLinkResponse(senderToken: String, encryptedResponse: Data) throws {
+        do {
+            try vauchi.sendDeviceLinkResponse(senderToken: senderToken, encryptedResponse: encryptedResponse)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Send device link request via relay and wait for response.
-    /// NOTE: Stub until relay transport bindings are published in vauchi-platform-swift.
     func sendDeviceLinkRequest(
-        targetIdentity _: String,
-        senderToken _: String,
-        encryptedRequest _: Data,
-        timeoutSecs _: UInt64
+        targetIdentity: String,
+        senderToken: String,
+        encryptedRequest: Data,
+        timeoutSecs: UInt64
     ) throws -> Data {
-        // TODO: Replace with actual UniFFI call once relay bindings are published
-        throw VauchiRepositoryError.internalError("Relay transport not yet available in bindings")
+        do {
+            return try vauchi.sendDeviceLinkRequest(
+                targetIdentity: targetIdentity,
+                senderToken: senderToken,
+                encryptedRequest: encryptedRequest,
+                timeoutSecs: timeoutSecs
+            )
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
     }
 
     /// Get the number of linked devices
