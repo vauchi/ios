@@ -332,6 +332,22 @@ lint:xcodegen:
           - project.yml
           - "Vauchi/**/*.swift"
 
+# Guard: block if isRecording is hardcoded instead of using environment variable
+check:snapshot-recording:
+  stage: lint
+  extends: .macos-job
+  script:
+    - |
+      if grep -rn 'isRecording.*{' VauchiSnapshotTests/ | grep -v 'environment\|ProcessInfo\|SNAPSHOT_TESTING_RECORD'; then
+        echo "❌ isRecording must use environment variable, not hardcoded value"
+        exit 1
+      fi
+    - echo "✅ isRecording uses environment variable"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "VauchiSnapshotTests/**"
+
 # Design drift: verify all design-spec components are implemented
 check:design-drift:
   extends: .design-drift-job
@@ -473,8 +489,7 @@ coverage:unit:
 
 # Visual regression snapshot tests (swift-snapshot-testing)
 # Captures reference images for all SwiftUI views and compares against baselines.
-# NOTE: Baselines must be generated locally first by running with isRecording = true.
-# Allowed to fail until initial baselines are committed.
+# Self-detecting: strict validation when baselines exist, advisory skip when missing.
 test:snapshots:
   extends: [.macos-job, .spm-cache-readonly, .timeout-long]
   stage: test
@@ -483,10 +498,21 @@ test:snapshots:
       artifacts: false
     - job: build:debug
       artifacts: true
-  allow_failure: true
   script:
+    # Self-detecting snapshot mode
+    - BASELINE_COUNT=$(find VauchiSnapshotTests/__Snapshots__ -name '*.png' 2>/dev/null | wc -l | tr -d ' ')
+    - |
+      if [ "$BASELINE_COUNT" -eq 0 ]; then
+        echo "⚠️  SNAPSHOT BASELINES MISSING ($BASELINE_COUNT PNGs in __Snapshots__/)"
+        echo "    Run locally with SNAPSHOT_TESTING_RECORD=all to generate baselines,"
+        echo "    then commit the __Snapshots__/ directory."
+        echo "    Snapshot validation skipped — no baselines to compare against."
+        exit 0
+      fi
+    - echo "✅ Found $BASELINE_COUNT snapshot baselines — running validation"
     # Reuse build:debug artifacts — skip xcodegen + SPM fetch
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -only-testing VauchiSnapshotTests
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
+  allow_failure: false
   artifacts:
     when: on_failure
     paths:

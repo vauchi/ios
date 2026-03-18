@@ -31,9 +31,11 @@ final class VisualRegressionTests: XCTestCase {
         traits: UITraitCollection(displayScale: 2.0)
     )
 
-    /// Whether to record new baselines. Always false in CI.
+    /// Whether to record new baselines.
+    /// CI (no env var) → false → comparison mode.
+    /// Local dev (`SNAPSHOT_TESTING_RECORD=all xcodebuild test`) → true → recording mode.
     private var isRecording: Bool {
-        false
+        ProcessInfo.processInfo.environment["SNAPSHOT_TESTING_RECORD"] == "all"
     }
 
     // setUp intentionally removed — no custom setup needed

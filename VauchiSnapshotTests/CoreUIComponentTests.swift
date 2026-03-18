@@ -18,9 +18,11 @@ import XCTest
 /// Rendered at 2x scale to match existing VRT baselines.
 @MainActor
 final class CoreUIComponentTests: XCTestCase {
-    /// Whether to record new baselines. Always false in CI.
+    /// Whether to record new baselines.
+    /// CI (no env var) → false → comparison mode.
+    /// Local dev (`SNAPSHOT_TESTING_RECORD=all xcodebuild test`) → true → recording mode.
     private var isRecording: Bool {
-        false
+        ProcessInfo.processInfo.environment["SNAPSHOT_TESTING_RECORD"] == "all"
     }
 
     /// No-op action handler for components that require one.
