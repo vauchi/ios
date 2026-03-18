@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: vauchi-ios
+Upstream-Contact: Mattia Egloff <mattia.egloff@pm.me>
+
+# Auto-generated files that cannot contain SPDX headers
+Files: Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+Copyright: 2026 Mattia Egloff <mattia.egloff@pm.me>
+License: GPL-3.0-or-later
