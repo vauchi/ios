@@ -340,15 +340,15 @@ check:snapshot-recording:
     - |
       MISSING=""
       for f in VauchiSnapshotTests/*.swift; do
-        if grep -q 'isRecording' "$f" && ! grep -q 'SNAPSHOT_TESTING_RECORD' "$f"; then
+        if grep -q 'var isRecording' "$f" && ! grep -q 'SNAPSHOT_TESTING_RECORD' "$f"; then
           MISSING="$MISSING $f"
         fi
       done
       if [ -n "$MISSING" ]; then
-        echo "❌ isRecording must use SNAPSHOT_TESTING_RECORD env var in:$MISSING"
+        echo "❌ isRecording property must use SNAPSHOT_TESTING_RECORD env var in:$MISSING"
         exit 1
       fi
-      echo "✅ all snapshot test files use SNAPSHOT_TESTING_RECORD env var"
+      echo "✅ all isRecording properties use SNAPSHOT_TESTING_RECORD env var"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
