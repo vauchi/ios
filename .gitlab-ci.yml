@@ -553,14 +553,28 @@ test:snapshots:record:
     - echo "📸 Recording snapshot baselines..."
     # SNAPSHOT_RECORD compilation condition forces isRecording=true in test binary.
     # Env vars don't reach the iOS Simulator process; build settings do.
-    - >
-      xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug
-      -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
-      -clonedSourcePackagesDirPath .spm-packages
-      ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO
-      SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) SNAPSHOT_RECORD'
-      test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
-      || true
+    # Reset simulator to avoid "Busy / preflight checks" transient failures.
+    - xcrun simctl shutdown all 2>/dev/null || true
+    - xcrun simctl erase all 2>/dev/null || true
+    - |
+      set +e
+      xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
+        -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+        -clonedSourcePackagesDirPath .spm-packages \
+        ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) SNAPSHOT_RECORD' \
+        test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1 \
+        2>&1 | tee /tmp/xcodebuild-record.log
+      XCODE_EXIT=$?
+      set -e
+      # Verify tests actually executed (not just a simulator launch failure)
+      if ! grep -q "Executed.*test" /tmp/xcodebuild-record.log; then
+        echo "❌ Tests never executed — infrastructure failure (simulator crash?)"
+        echo "   Check runner health: xcrun simctl list devices"
+        tail -20 /tmp/xcodebuild-record.log
+        exit 1
+      fi
+      echo "✅ Tests executed (exit code ${XCODE_EXIT} is expected in record mode)"
     # Preserve recorded snapshots across git checkout
     - cp -r VauchiSnapshotTests/__Snapshots__/ /tmp/__Snapshots__/
     # Configure git for push
