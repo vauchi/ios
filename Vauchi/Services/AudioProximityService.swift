@@ -87,11 +87,18 @@ class AudioProximityService: PlatformAudioHandler {
         do {
             try setupAudioSession()
 
-            let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1)!
-            let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(samples.count))!
+            guard let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1) else {
+                return "Failed to create audio format"
+            }
+            guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(samples.count)) else {
+                return "Failed to create audio buffer"
+            }
             buffer.frameLength = AVAudioFrameCount(samples.count)
 
-            let channelData = buffer.floatChannelData![0]
+            guard let floatChannelData = buffer.floatChannelData else {
+                return "Failed to access float channel data"
+            }
+            let channelData = floatChannelData[0]
             for (index, sample) in samples.enumerated() {
                 channelData[index] = sample
             }
