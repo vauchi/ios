@@ -560,12 +560,16 @@ test:snapshots:record:
       ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO
       test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
       || true
+    # Preserve recorded snapshots across git checkout
+    - cp -r VauchiSnapshotTests/__Snapshots__/ /tmp/__Snapshots__/
     # Configure git for push
     - git config user.name "vauchi-ci-bot"
     - git config user.email "ci@vauchi.app"
     - git remote set-url origin "https://vauchi-gitlab-runner:${PROJECT_ACCESS_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
     - git fetch origin "${CI_COMMIT_REF_NAME}"
     - git checkout "${CI_COMMIT_REF_NAME}"
+    # Restore recorded snapshots (git checkout above resets working directory)
+    - cp -r /tmp/__Snapshots__/ VauchiSnapshotTests/__Snapshots__/
     # Commit and push baselines (skip if unchanged)
     - |
       git add VauchiSnapshotTests/__Snapshots__/
