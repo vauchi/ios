@@ -521,11 +521,7 @@ test:snapshots:
       fi
     - echo "✅ Found $BASELINE_COUNT snapshot baselines — running validation"
     # Reuse build:debug artifacts — skip xcodegen + SPM fetch
-    # Note: VisualRegressionTests excluded until baselines are regenerated after
-    # migration from UIHostingController to View-based rendering (simulator-independent).
-    # To regenerate: SNAPSHOT_TESTING_RECORD=all xcodebuild test -only-testing VauchiSnapshotTests/VisualRegressionTests
-    # Then commit __Snapshots__/VisualRegressionTests/ and remove -skip-testing below.
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -only-testing VauchiSnapshotTests -skip-testing VauchiSnapshotTests/VisualRegressionTests -parallel-testing-worker-count 1
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
   allow_failure: false
   artifacts:
     when: on_failure
