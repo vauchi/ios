@@ -869,9 +869,15 @@ class VauchiRepository {
         }
     }
 
-    /// Save Tor configuration
-    func saveTorConfig(enabled: Bool, bridges _: [String], preferOnion _: Bool) throws {
-        // TODO: Bridge-list and preferOnion persistence not yet available in bindings
+    /// Save Tor configuration.
+    ///
+    /// Only the `enabled` toggle is persisted — `bridges` and `preferOnion` are
+    /// silently ignored until the binding exposes a save API for those fields.
+    func saveTorConfig(enabled: Bool, bridges: [String], preferOnion: Bool) throws {
+        if !bridges.isEmpty || preferOnion {
+            print("VauchiRepository: bridges (\(bridges.count)) and preferOnion (\(preferOnion)) "
+                + "not persisted — binding not yet available")
+        }
         do {
             if enabled {
                 try vauchi.enableTor()
