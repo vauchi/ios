@@ -338,11 +338,17 @@ check:snapshot-recording:
   extends: .macos-job
   script:
     - |
-      if grep -rn 'isRecording.*{' VauchiSnapshotTests/ | grep -v 'environment\|ProcessInfo\|SNAPSHOT_TESTING_RECORD'; then
-        echo "❌ isRecording must use environment variable, not hardcoded value"
+      MISSING=""
+      for f in VauchiSnapshotTests/*.swift; do
+        if grep -q 'isRecording' "$f" && ! grep -q 'SNAPSHOT_TESTING_RECORD' "$f"; then
+          MISSING="$MISSING $f"
+        fi
+      done
+      if [ -n "$MISSING" ]; then
+        echo "❌ isRecording must use SNAPSHOT_TESTING_RECORD env var in:$MISSING"
         exit 1
       fi
-    - echo "✅ isRecording uses environment variable"
+      echo "✅ all snapshot test files use SNAPSHOT_TESTING_RECORD env var"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
