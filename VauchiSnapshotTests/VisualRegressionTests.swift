@@ -27,10 +27,15 @@ final class VisualRegressionTests: XCTestCase {
     private let screenTraits = UITraitCollection(displayScale: 2.0)
 
     /// Whether to record new baselines.
-    /// CI (no env var) -> false -> comparison mode.
-    /// Local dev (`SNAPSHOT_TESTING_RECORD=all xcodebuild test`) -> true -> recording mode.
+    /// CI record job passes SWIFT_ACTIVE_COMPILATION_CONDITIONS=SNAPSHOT_RECORD
+    /// which compiles into the test binary (env vars don't reach the simulator).
+    /// Local dev: `SNAPSHOT_TESTING_RECORD=all` env var still works for native runs.
     private var isRecording: Bool {
-        ProcessInfo.processInfo.environment["SNAPSHOT_TESTING_RECORD"] == "all"
+        #if SNAPSHOT_RECORD
+            return true
+        #else
+            return ProcessInfo.processInfo.environment["SNAPSHOT_TESTING_RECORD"] == "all"
+        #endif
     }
 
     /// Asserts a snapshot of a full-screen view at 390x844 pt / 2x scale.

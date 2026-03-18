@@ -549,15 +549,16 @@ test:snapshots:record:
       artifacts: true
   when: manual
   allow_failure: true  # manual jobs should not block the pipeline
-  variables:
-    SNAPSHOT_TESTING_RECORD: "all"
   script:
     - echo "📸 Recording snapshot baselines..."
+    # SNAPSHOT_RECORD compilation condition forces isRecording=true in test binary.
+    # Env vars don't reach the iOS Simulator process; build settings do.
     - >
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug
       -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
       -clonedSourcePackagesDirPath .spm-packages
       ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) SNAPSHOT_RECORD'
       test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
       || true
     # Preserve recorded snapshots across git checkout
