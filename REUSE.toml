@@ -14,7 +14,7 @@ SPDX-License-Identifier = "GPL-3.0-or-later"
 
 # Lock files
 [[annotations]]
-path = ["**/Cargo.lock", "**/package-lock.json", "**/yarn.lock", "**/*.lock"]
+path = ["**/Cargo.lock", "**/package-lock.json", "**/yarn.lock", "**/*.lock", "**/Package.resolved"]
 SPDX-FileCopyrightText = "2026 Mattia Egloff <mattia.egloff@pm.me>"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
