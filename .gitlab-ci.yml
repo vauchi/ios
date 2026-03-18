@@ -553,9 +553,9 @@ test:snapshots:record:
     - echo "📸 Recording snapshot baselines..."
     # SNAPSHOT_RECORD compilation condition forces isRecording=true in test binary.
     # Env vars don't reach the iOS Simulator process; build settings do.
-    # Reset simulator to avoid "Busy / preflight checks" transient failures.
+    # Shutdown simulators to avoid "Busy / preflight checks" transient failures.
+    # Do NOT erase — that removes installed apps and breaks test launching.
     - xcrun simctl shutdown all 2>/dev/null || true
-    - xcrun simctl erase all 2>/dev/null || true
     - |
       set +e
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
