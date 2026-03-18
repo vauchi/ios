@@ -577,12 +577,13 @@ test:snapshots:record:
       echo "✅ Tests executed (exit code ${XCODE_EXIT} is expected in record mode)"
     # Preserve recorded snapshots across git checkout
     - cp -r VauchiSnapshotTests/__Snapshots__/ /tmp/__Snapshots__/
-    # Configure git for push (unset insteadOf so PROJECT_ACCESS_TOKEN isn't overridden by CI_JOB_TOKEN)
+    # Configure git for push — bypass credential helpers and insteadOf rewrites
     - git config --global --unset-all url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf 2>/dev/null || true
+    - git config --global --unset-all credential.helper 2>/dev/null || true
     - git config user.name "vauchi-ci-bot"
     - git config user.email "ci@vauchi.app"
-    - git remote set-url origin "https://vauchi-gitlab-runner:${PROJECT_ACCESS_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
-    - git fetch origin "${CI_COMMIT_REF_NAME}"
+    - PUSH_URL="https://vauchi-gitlab-runner:${PROJECT_ACCESS_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
+    - git fetch "$PUSH_URL" "${CI_COMMIT_REF_NAME}"
     - git checkout "${CI_COMMIT_REF_NAME}"
     # Restore recorded snapshots (git checkout above resets working directory)
     - cp -r /tmp/__Snapshots__/ VauchiSnapshotTests/__Snapshots__/
@@ -599,7 +600,7 @@ test:snapshots:record:
       ${CHANGED}
 
       Co-Authored-By: vauchi-ci-bot <ci@vauchi.app>"
-      git push origin HEAD:${CI_COMMIT_REF_NAME}
+      git push "$PUSH_URL" HEAD:${CI_COMMIT_REF_NAME}
       echo "✅ Baselines committed and pushed — validation pipeline will trigger"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
