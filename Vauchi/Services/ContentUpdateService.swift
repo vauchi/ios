@@ -86,7 +86,7 @@ final class ContentUpdateService: ObservableObject {
     }
 
     private enum Defaults {
-        static let contentUrl = "https://vauchi.app/app-files/"
+        static let contentUrl = "https://cdn.vauchi.app/v1/"
         static let checkInterval = 3600 // 1 hour
     }
 
