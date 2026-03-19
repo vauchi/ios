@@ -98,7 +98,7 @@ struct LoadingView: View {
 
 struct MainTabView: View {
     @ObservedObject private var localizationService = LocalizationService.shared
-    /// Dynamic default: tab 1 (Contacts) when user has contacts, tab 0 (Home) otherwise
+    /// Dynamic default: tab 1 (Contacts) when user has contacts, tab 0 (My Card) otherwise
     @State private var selectedTab: Int
 
     init(hasContacts: Bool = false) {
@@ -109,38 +109,55 @@ struct MainTabView: View {
         TabView(selection: $selectedTab) {
             HomeView()
                 .tabItem {
-                    Label(localizationService.t("nav.home"), systemImage: "person.crop.rectangle")
+                    Label(
+                        localizationService.t("nav.myCard"),
+                        systemImage: "person.crop.rectangle.fill"
+                    )
                 }
                 .tag(0)
-                .accessibilityIdentifier("tab.home")
+                .accessibilityIdentifier("tab.myCard")
 
             ContactsView()
                 .tabItem {
-                    Label(localizationService.t("nav.contacts"), systemImage: "person.2")
+                    Label(
+                        localizationService.t("nav.contacts"),
+                        systemImage: "person.2.fill"
+                    )
                 }
                 .tag(1)
                 .accessibilityIdentifier("tab.contacts")
 
             FaceToFaceExchangeView(switchToContacts: { selectedTab = 1 })
                 .tabItem {
-                    Label(localizationService.t("nav.exchange"), systemImage: "qrcode")
+                    Label(
+                        localizationService.t("nav.exchange"),
+                        systemImage: "qrcode"
+                    )
                 }
                 .tag(2)
                 .accessibilityIdentifier("tab.exchange")
 
-            SettingsView()
-                .tabItem {
-                    Label(localizationService.t("nav.settings"), systemImage: "gear")
-                }
-                .tag(3)
-                .accessibilityIdentifier("tab.settings")
+            NavigationStack {
+                GroupsView()
+            }
+            .tabItem {
+                Label(
+                    localizationService.t("nav.groups"),
+                    systemImage: "rectangle.3.group.fill"
+                )
+            }
+            .tag(3)
+            .accessibilityIdentifier("tab.groups")
 
-            HelpView()
+            MoreView()
                 .tabItem {
-                    Label(localizationService.t("nav.help"), systemImage: "questionmark.circle")
+                    Label(
+                        localizationService.t("nav.more"),
+                        systemImage: "ellipsis.circle.fill"
+                    )
                 }
                 .tag(4)
-                .accessibilityIdentifier("tab.help")
+                .accessibilityIdentifier("tab.more")
         }
         .accentColor(.cyan)
     }
