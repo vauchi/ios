@@ -137,6 +137,8 @@ struct SettingsView: View {
                         }
                     }
                     .disabled(viewModel.syncState == .syncing)
+                    .accessibilityLabel("Sync now")
+                    .accessibilityHint("Synchronize your card and contacts with the relay server")
 
                     if let lastSync = viewModel.lastSyncTime {
                         HStack {
@@ -193,6 +195,7 @@ struct SettingsView: View {
                             }
                         }
                     }
+                    .accessibilityHint("View the delivery status of your card updates")
                 }
 
                 // Privacy section
@@ -208,6 +211,7 @@ struct SettingsView: View {
                             }
                         }
                     }
+                    .accessibilityHint("Manage labels that control which fields contacts can see")
 
                     NavigationLink(destination: GroupsView()) {
                         HStack {
@@ -256,10 +260,12 @@ struct SettingsView: View {
                     NavigationLink(destination: LinkedDevicesView()) {
                         Label(localizationService.t("devices.linked"), systemImage: "laptopcomputer.and.iphone")
                     }
+                    .accessibilityHint("Manage devices linked to your identity")
 
                     NavigationLink(destination: RecoveryView()) {
                         Label(localizationService.t("recovery.title"), systemImage: "person.badge.key")
                     }
+                    .accessibilityHint("Set up or manage social recovery for your identity")
 
                     NavigationLink(destination: CertificatePinningView()) {
                         HStack {
@@ -272,6 +278,7 @@ struct SettingsView: View {
                             }
                         }
                     }
+                    .accessibilityHint("Pin a specific TLS certificate for the relay server")
 
                     NavigationLink(destination: DuressSettingsView()) {
                         HStack {
@@ -284,6 +291,7 @@ struct SettingsView: View {
                             }
                         }
                     }
+                    .accessibilityHint("Configure a duress PIN that wipes data when entered under threat")
 
                     NavigationLink(destination: EmergencyBroadcastView()) {
                         HStack {
@@ -296,6 +304,7 @@ struct SettingsView: View {
                             }
                         }
                     }
+                    .accessibilityHint("Configure emergency alerts sent to trusted contacts")
 
                     NavigationLink(destination: TorSettingsView()) {
                         HStack {
@@ -308,6 +317,7 @@ struct SettingsView: View {
                             }
                         }
                     }
+                    .accessibilityHint("Route relay traffic through Tor for enhanced anonymity")
                 }
 
                 // Content Updates section
@@ -329,6 +339,7 @@ struct SettingsView: View {
                         }
                     }
                     .accessibilityIdentifier("settings.appearance.theme")
+                    .accessibilityHint("Choose a visual theme for the app")
 
                     NavigationLink(destination: LanguageSettingsView()) {
                         HStack {
@@ -340,6 +351,7 @@ struct SettingsView: View {
                         }
                     }
                     .accessibilityIdentifier("settings.appearance.language")
+                    .accessibilityHint("Change the app display language")
                 }
 
                 // Accessibility section
@@ -409,6 +421,7 @@ struct SettingsView: View {
                             }
                         }
                         .accessibilityIdentifier("settings.help.restoreDemo")
+                        .accessibilityHint("Restores the demo contact to show how card updates work")
                     }
 
                     // Reset tips (aha moments)
@@ -427,6 +440,7 @@ struct SettingsView: View {
                         }
                     }
                     .accessibilityIdentifier("settings.help.resetTips")
+                    .accessibilityHint("Resets all in-app tips so you can see them again")
 
                     Link(destination: URL(string: "https://vauchi.app/user-guide")!) {
                         HStack {
@@ -437,11 +451,13 @@ struct SettingsView: View {
                                 .accessibilityHidden(true)
                         }
                     }
+                    .accessibilityHint("Opens the online user guide in your browser")
 
                     NavigationLink(destination: HelpView()) {
                         Label("Help & FAQ", systemImage: "questionmark.circle")
                     }
                     .accessibilityIdentifier("settings.help.faq")
+                    .accessibilityHint("View frequently asked questions and troubleshooting")
 
                     Link(destination: URL(string: "https://github.com/vauchi/issues")!) {
                         HStack {
@@ -452,6 +468,7 @@ struct SettingsView: View {
                                 .accessibilityHidden(true)
                         }
                     }
+                    .accessibilityHint("Opens the issue tracker in your browser to report a bug")
 
                     Link(destination: URL(string: "https://vauchi.app/privacy")!) {
                         HStack {
@@ -462,6 +479,7 @@ struct SettingsView: View {
                                 .accessibilityHidden(true)
                         }
                     }
+                    .accessibilityHint("Opens the privacy policy in your browser")
                 }
 
                 // Support section

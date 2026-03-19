@@ -285,11 +285,15 @@ struct RestoreIdentitySheet: View {
                         .font(.system(.caption, design: .monospaced))
                         .frame(minHeight: 120)
                         .accessibilityIdentifier("restore.backupData")
+                        .accessibilityLabel("Backup data")
+                        .accessibilityHint("Paste your exported backup string here")
                 }
 
                 Section("Password") {
                     SecureField("Backup password", text: $password)
                         .accessibilityIdentifier("restore.password")
+                        .accessibilityLabel("Backup password")
+                        .accessibilityHint("Enter the password used when creating the backup")
                 }
 
                 if let error = errorMessage {
