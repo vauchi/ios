@@ -84,6 +84,7 @@
 		585352762DF068CBD6CD1EE8 /* SettingsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852C63AD7ECE19A3177E137A /* SettingsServiceTests.swift */; };
 		5DB1F56C8F6BC86226B8180F /* VauchiViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */; };
 		60E5D23C6B32822C55E491C0 /* DeviceLinkingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E58D46C6249D7838AD9DE1CF /* DeviceLinkingTests.swift */; };
+		61A6ADF2FEA95610D52C9ACD /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C0558C6550E4B58C71798 /* AccessibilityUITests.swift */; };
 		65262CC8E09632011AB35DB5 /* testSyncingState.1.png in Resources */ = {isa = PBXBuildFile; fileRef = D42379D47C2AFA9F80BAAB6A /* testSyncingState.1.png */; };
 		652D44BD2148FA55AA835812 /* testInfoPanelSingleItem.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 8C9F616A82E64818C7D1BEB4 /* testInfoPanelSingleItem.1.png */; };
 		655FCE4413340F3FF3F5E5CF /* QRDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */; };
@@ -243,6 +244,7 @@
 		180FA5B6237A3C3CE4ACB83B /* ContactActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactActions.swift; sourceTree = "<group>"; };
 		19EC7C6A8625C6F0A1F5D307 /* testTextInputPhoneType.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextInputPhoneType.1.png; sourceTree = "<group>"; };
 		1A1C1FABFE041B08E41B4276 /* preview_card.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = preview_card.json; sourceTree = "<group>"; };
+		1A3C0558C6550E4B58C71798 /* AccessibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityUITests.swift; sourceTree = "<group>"; };
 		1A85B8272FE7B284D215644A /* testInfoPanelWithIcon.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInfoPanelWithIcon.1.png; sourceTree = "<group>"; };
 		1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModel.swift; sourceTree = "<group>"; };
 		1E9D757735447E71670611EA /* EditableTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableTextView.swift; sourceTree = "<group>"; };
@@ -660,6 +662,7 @@
 		C9DFA1127C049CB0C36BDF57 /* VauchiUITests */ = {
 			isa = PBXGroup;
 			children = (
+				1A3C0558C6550E4B58C71798 /* AccessibilityUITests.swift */,
 				773C796EDEEFF9B928C04229 /* VauchiUITests.swift */,
 			);
 			path = VauchiUITests;
@@ -1039,6 +1042,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61A6ADF2FEA95610D52C9ACD /* AccessibilityUITests.swift in Sources */,
 				DA673F09635BBBF9871092A8 /* VauchiUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
