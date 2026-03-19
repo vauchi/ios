@@ -48,7 +48,6 @@
 		2D0728F99D4DBB3C8491C25B /* ThemeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CF989EA84DBE8A9F43E05D /* ThemeService.swift */; };
 		2D0FA5FFF83AA630F89F99F4 /* testFieldListMultipleFieldTypes.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 5AAC9A42D453BD1CCD3905C7 /* testFieldListMultipleFieldTypes.1.png */; };
 		2E32911FDD537E5F664BF57C /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */; };
-		2F71EDC68125B9820A601CEB /* AccessibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F7822AFA66B14D7128C99D /* AccessibilityTests.swift */; };
 		2F7D817E60BDE6223F5E0484 /* VauchiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */; };
 		307654F6186C276FC27E761A /* ConfirmationDialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C3FB726E684074FF3A0B3DF /* ConfirmationDialogView.swift */; };
 		33048DBF138B6D56FF2FAD0B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7F414A334965B2F677686A6 /* OnboardingView.swift */; };
@@ -329,7 +328,6 @@
 		7D255A687EB281C01D297ED7 /* VauchiSnapshotTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E4A76E62A085CC5836324B5 /* ValidationBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationBadgeView.swift; sourceTree = "<group>"; };
 		7ECC96545C3966B83B1D1AC7 /* VauchiTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		83F7822AFA66B14D7128C99D /* AccessibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityTests.swift; sourceTree = "<group>"; };
 		84CF989EA84DBE8A9F43E05D /* ThemeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeService.swift; sourceTree = "<group>"; };
 		852C63AD7ECE19A3177E137A /* SettingsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsServiceTests.swift; sourceTree = "<group>"; };
 		87F097D48EF96B8E6440ACD9 /* ContactActionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactActionsTests.swift; sourceTree = "<group>"; };
@@ -498,7 +496,6 @@
 		5B9EAC8491A990983095623D /* VauchiTests */ = {
 			isa = PBXGroup;
 			children = (
-				83F7822AFA66B14D7128C99D /* AccessibilityTests.swift */,
 				05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */,
 				FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */,
 				87F097D48EF96B8E6440ACD9 /* ContactActionsTests.swift */,
@@ -1006,7 +1003,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2F71EDC68125B9820A601CEB /* AccessibilityTests.swift in Sources */,
 				10E60235A5FD647963680956 /* AudioProximityServiceTests.swift in Sources */,
 				76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */,
 				E4ABA23960463F55C2C3FB0D /* ContactActionsTests.swift in Sources */,

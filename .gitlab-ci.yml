@@ -538,6 +538,34 @@ test:snapshots:
           - "project.yml"
           - ".gitlab-ci.yml"
 
+# XCUITest accessibility tests — run on simulator, sequential (UI tests are not parallelizable)
+test:ui:
+  extends: [.macos-job, .spm-cache-readonly, .timeout-long]
+  stage: test
+  needs:
+    - job: test:unit
+      artifacts: false
+    - job: build:debug
+      artifacts: true
+  script:
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -only-testing VauchiUITests -resultBundlePath build/ui_test_result.xcresult
+    - command -v xcresultparser >/dev/null 2>&1 || brew install a7ex/formulae/xcresultparser
+    - mkdir -p build/reports
+    - xcresultparser --output-format junit build/ui_test_result.xcresult > build/reports/ui-junit.xml
+  artifacts:
+    reports:
+      junit: build/reports/ui-junit.xml
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - "*.xcodeproj/**/*"
+          - "project.yml"
+          - ".gitlab-ci.yml"
+
 # Manual job: record snapshot baselines on CI and commit them to the branch.
 # CI is the single source of truth for baselines — never record locally.
 # Click "Record baselines" in the pipeline UI after pushing view changes.

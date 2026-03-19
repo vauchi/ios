@@ -8,3 +8,7 @@ extend-exclude = [
     "*.xcworkspace/",
     "__Snapshots__/",
 ]
+
+[default.extend-words]
+# typos splits "PNGs" and flags "PN" as a typo for "ON"
+PN = "PN"
