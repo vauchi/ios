@@ -82,12 +82,17 @@ struct ScreenRendererView: View {
 
             // Toast overlay
             if let message = toastMessage {
-                ToastOverlayView(message: message, undoActionId: toastUndoActionId, onAction: onAction) {
-                    withAnimation {
-                        toastMessage = nil
-                        toastUndoActionId = nil
+                ToastOverlayView(
+                    message: message,
+                    undoActionId: toastUndoActionId,
+                    onAction: onAction,
+                    onDismiss: {
+                        withAnimation {
+                            toastMessage = nil
+                            toastUndoActionId = nil
+                        }
                     }
-                }
+                )
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .padding(.top, 8)
                 .padding(.horizontal, 24)
