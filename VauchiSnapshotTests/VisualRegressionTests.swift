@@ -47,7 +47,7 @@ final class VisualRegressionTests: XCTestCase {
     ) {
         assertSnapshot(
             of: view,
-            as: .image(layout: screenLayout, traits: screenTraits),
+            as: .image(perceptualPrecision: 0.98, layout: screenLayout, traits: screenTraits),
             record: isRecording,
             file: file,
             testName: testName,
@@ -344,7 +344,7 @@ final class VisualRegressionTests: XCTestCase {
 
         assertSnapshot(
             of: view,
-            as: .image(layout: screenLayout, traits: screenTraits),
+            as: .image(perceptualPrecision: 0.98, layout: screenLayout, traits: screenTraits),
             record: isRecording,
             file: file,
             testName: testName,

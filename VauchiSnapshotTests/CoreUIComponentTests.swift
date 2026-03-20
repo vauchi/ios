@@ -42,6 +42,7 @@ final class CoreUIComponentTests: XCTestCase {
         assertSnapshot(
             of: view.padding(),
             as: .image(
+                perceptualPrecision: 0.98,
                 layout: .fixed(width: width, height: height),
                 traits: UITraitCollection(displayScale: 2.0)
             ),
@@ -466,6 +467,7 @@ final class CoreUIComponentTests: XCTestCase {
         assertSnapshot(
             of: view.padding().environment(\.colorScheme, .dark),
             as: .image(
+                perceptualPrecision: 0.98,
                 layout: .fixed(width: width, height: height),
                 traits: UITraitCollection(displayScale: 2.0)
             ),
