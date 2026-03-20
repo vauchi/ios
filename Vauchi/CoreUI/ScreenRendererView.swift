@@ -22,9 +22,10 @@ struct ScreenRendererView: View {
     let onAction: (UserAction) -> Void
 
     @State private var toastMessage: String?
+    @State private var toastUndoActionId: String?
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             VStack(spacing: 0) {
                 // Progress bar
                 if let progress = screen.progress {
@@ -81,62 +82,85 @@ struct ScreenRendererView: View {
 
             // Toast overlay
             if let message = toastMessage {
-                VStack {
-                    Spacer()
-                    Text(message)
-                        .font(.subheadline)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(Color.black.opacity(0.8))
-                        .cornerRadius(8)
-                        .padding(.bottom, 80)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                        .accessibilityLabel(message)
+                ToastOverlayView(message: message, undoActionId: toastUndoActionId, onAction: onAction) {
+                    withAnimation {
+                        toastMessage = nil
+                        toastUndoActionId = nil
+                    }
                 }
-                .animation(.easeInOut(duration: 0.3), value: toastMessage)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .padding(.top, 8)
+                .padding(.horizontal, 24)
+                .zIndex(100)
             }
         }
-        .onChange(of: toastComponentMessage) { message in
-            if let message {
-                showToast(message, durationMs: toastComponentDurationMs)
-            }
+        .onChange(of: screen.screenId) { _ in
+            checkForToastComponent()
+        }
+        .onChange(of: screen.components.count) { _ in
+            checkForToastComponent()
         }
         .onAppear {
-            if let message = toastComponentMessage {
-                showToast(message, durationMs: toastComponentDurationMs)
-            }
+            checkForToastComponent()
         }
     }
 
-    /// Extract the first ShowToast component's message from the current screen.
-    private var toastComponentMessage: String? {
+    private func checkForToastComponent() {
         for component in screen.components {
             if case let .showToast(toast) = component {
-                return toast.message
+                let message = toast.message
+                withAnimation {
+                    toastMessage = message
+                    toastUndoActionId = toast.undoActionId
+                }
+                let dismissDelay = Double(toast.durationMs) / 1000.0
+                DispatchQueue.main.asyncAfter(deadline: .now() + dismissDelay) {
+                    // Only dismiss if this is still the same toast
+                    if toastMessage == message {
+                        withAnimation {
+                            toastMessage = nil
+                            toastUndoActionId = nil
+                        }
+                    }
+                }
+                break
             }
         }
-        return nil
     }
+}
 
-    /// Extract the first ShowToast component's duration from the current screen.
-    private var toastComponentDurationMs: UInt32 {
-        for component in screen.components {
-            if case let .showToast(toast) = component {
-                return toast.durationMs
+/// Toast overlay view shown at the top of the screen.
+struct ToastOverlayView: View {
+    let message: String
+    let undoActionId: String?
+    let onAction: (UserAction) -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(message)
+                .font(.subheadline)
+                .foregroundColor(.white)
+                .lineLimit(2)
+
+            if let undoId = undoActionId {
+                Button("Undo") {
+                    onAction(.undoPressed(actionId: undoId))
+                    onDismiss()
+                }
+                .font(.subheadline.bold())
+                .foregroundColor(.cyan)
+                .buttonStyle(.plain)
             }
         }
-        return 3000
-    }
-
-    private func showToast(_ message: String, durationMs: UInt32) {
-        toastMessage = message
-        let duration = max(Double(durationMs) / 1000.0, 1.0)
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            if toastMessage == message {
-                toastMessage = nil
-            }
-        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.black.opacity(0.85))
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Toast: \(message)")
     }
 }
 

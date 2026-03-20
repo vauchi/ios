@@ -481,6 +481,7 @@ enum UserAction: Encodable {
     case searchChanged(componentId: String, query: String)
     case listItemSelected(componentId: String, itemId: String)
     case settingsToggled(componentId: String, itemId: String)
+    case undoPressed(actionId: String)
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: VariantKey.self)
@@ -534,6 +535,12 @@ enum UserAction: Encodable {
             )
             try nested.encode(componentId, forKey: .componentId)
             try nested.encode(itemId, forKey: .itemId)
+
+        case let .undoPressed(actionId):
+            var nested = container.nestedContainer(
+                keyedBy: UndoPressedKeys.self, forKey: .undoPressed
+            )
+            try nested.encode(actionId, forKey: .actionId)
         }
     }
 
@@ -546,6 +553,7 @@ enum UserAction: Encodable {
         case searchChanged = "SearchChanged"
         case listItemSelected = "ListItemSelected"
         case settingsToggled = "SettingsToggled"
+        case undoPressed = "UndoPressed"
     }
 
     private enum TextChangedKeys: String, CodingKey {
@@ -585,6 +593,10 @@ enum UserAction: Encodable {
     private enum SettingsToggledKeys: String, CodingKey {
         case componentId = "component_id"
         case itemId = "item_id"
+    }
+
+    private enum UndoPressedKeys: String, CodingKey {
+        case actionId = "action_id"
     }
 }
 
