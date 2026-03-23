@@ -411,6 +411,7 @@ build:debug:
           - "Package.swift"
           - "project.yml"
           - ".gitlab-ci.yml"
+    - if: $CI_COMMIT_BRANCH == "main"  # seed SPM cache for MR fallback keys
 
 build:release:
   extends: [.macos-job, .spm-cache, .timeout-extended]
