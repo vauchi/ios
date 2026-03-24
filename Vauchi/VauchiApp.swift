@@ -98,112 +98,137 @@ struct VauchiApp: App {
         return fmt.string(from: date)
     }
 
+    // Screenshot/screen recording prevention (T1-5)
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var showPrivacyOverlay = false
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(viewModel)
-                .onAppear {
-                    // Schedule background sync if enabled
-                    if SettingsService.shared.autoSyncEnabled {
-                        BackgroundSyncService.shared.scheduleSyncTask()
-                    }
-                }
-                .onOpenURL { url in
-                    #if DEBUG
-                        // Handle diagnostic deep links: vauchi://diagnostic/ble?test=discovery&mode=server
-                        if url.host == "diagnostic" {
-                            let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-                            bleDiagAutoTest = components?.queryItems?.first(where: { $0.name == "test" })?.value
-                            bleDiagAutoMode = components?.queryItems?.first(where: { $0.name == "mode" })?.value
-                            showBleDiagnostic = true
-                            NSLog("[Vauchi] Diagnostic deep link: test=%@ mode=%@",
-                                  bleDiagAutoTest ?? "nil", bleDiagAutoMode ?? "nil")
-                            return
+            ZStack {
+                ContentView()
+                    .environmentObject(viewModel)
+                    .onAppear {
+                        // Schedule background sync if enabled
+                        if SettingsService.shared.autoSyncEnabled {
+                            BackgroundSyncService.shared.scheduleSyncTask()
                         }
-                    #endif
-                    // Deep link consent gate (SP-9)
-                    // NEVER auto-process — always ask the user first
-                    let result = deepLinkHandler.handleDeepLink(url: url)
-                    switch result {
-                    case let .exchangePending(payload):
-                        pendingDeepLinkPayload = payload
-                        showDeepLinkConsent = true
-                    case let .invalid(reason):
-                        print("VauchiApp: Invalid deep link: \(reason)")
-                        viewModel.showError("Invalid Link",
-                                            message: "The link could not be processed: \(reason)")
                     }
-                }
-                .alert("Exchange Request", isPresented: $showDeepLinkConsent) {
-                    Button("Accept Exchange") {
-                        deepLinkHandler.grantConsent()
-                        if let payload = pendingDeepLinkPayload {
-                            // Start the exchange flow with proximity verification
-                            viewModel.startExchangeWithDeepLink(payload: payload)
+                    .onOpenURL { url in
+                        #if DEBUG
+                            // Handle diagnostic deep links: vauchi://diagnostic/ble?test=discovery&mode=server
+                            if url.host == "diagnostic" {
+                                let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+                                bleDiagAutoTest = components?.queryItems?.first(where: { $0.name == "test" })?.value
+                                bleDiagAutoMode = components?.queryItems?.first(where: { $0.name == "mode" })?.value
+                                showBleDiagnostic = true
+                                NSLog("[Vauchi] Diagnostic deep link: test=%@ mode=%@",
+                                      bleDiagAutoTest ?? "nil", bleDiagAutoMode ?? "nil")
+                                return
+                            }
+                        #endif
+                        // Deep link consent gate (SP-9)
+                        // NEVER auto-process — always ask the user first
+                        let result = deepLinkHandler.handleDeepLink(url: url)
+                        switch result {
+                        case let .exchangePending(payload):
+                            pendingDeepLinkPayload = payload
+                            showDeepLinkConsent = true
+                        case let .invalid(reason):
+                            print("VauchiApp: Invalid deep link: \(reason)")
+                            viewModel.showError("Invalid Link",
+                                                message: "The link could not be processed: \(reason)")
                         }
-                        pendingDeepLinkPayload = nil
                     }
-                    Button("Decline", role: .cancel) {
-                        deepLinkHandler.denyConsent()
-                        pendingDeepLinkPayload = nil
-                    }
-                } message: {
-                    Text("Someone shared an exchange link with you. " +
-                        "Do you want to proceed with the contact exchange?\n\n" +
-                        "Only accept if you trust the source of this link.")
-                }
-            #if DEBUG
-                .fullScreenCover(isPresented: $showBleDiagnostic) {
-                    NavigationView {
-                        BleDiagnosticView(autoTest: bleDiagAutoTest, autoMode: bleDiagAutoMode)
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    Button("Close") { showBleDiagnostic = false }
-                                }
+                    .alert("Exchange Request", isPresented: $showDeepLinkConsent) {
+                        Button("Accept Exchange") {
+                            deepLinkHandler.grantConsent()
+                            if let payload = pendingDeepLinkPayload {
+                                // Start the exchange flow with proximity verification
+                                viewModel.startExchangeWithDeepLink(payload: payload)
                             }
+                            pendingDeepLinkPayload = nil
+                        }
+                        Button("Decline", role: .cancel) {
+                            deepLinkHandler.denyConsent()
+                            pendingDeepLinkPayload = nil
+                        }
+                    } message: {
+                        Text("Someone shared an exchange link with you. " +
+                            "Do you want to proceed with the contact exchange?\n\n" +
+                            "Only accept if you trust the source of this link.")
                     }
-                }
-                .fullScreenCover(isPresented: $showQrDiagnostic) {
-                    NavigationView {
-                        QRDiagnosticView(autoTest: qrDiagAutoTest)
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    Button("Close") { showQrDiagnostic = false }
+                #if DEBUG
+                    .fullScreenCover(isPresented: $showBleDiagnostic) {
+                        NavigationView {
+                            BleDiagnosticView(autoTest: bleDiagAutoTest, autoMode: bleDiagAutoMode)
+                                .toolbar {
+                                    ToolbarItem(placement: .navigationBarLeading) {
+                                        Button("Close") { showBleDiagnostic = false }
+                                    }
                                 }
-                            }
+                        }
                     }
-                }
-                .fullScreenCover(isPresented: $showQrTuner) {
-                    NavigationView {
-                        QrCameraTunerView(autoTest: qrTunerAutoTest)
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    Button("Close") { showQrTuner = false }
+                    .fullScreenCover(isPresented: $showQrDiagnostic) {
+                        NavigationView {
+                            QRDiagnosticView(autoTest: qrDiagAutoTest)
+                                .toolbar {
+                                    ToolbarItem(placement: .navigationBarLeading) {
+                                        Button("Close") { showQrDiagnostic = false }
+                                    }
                                 }
-                            }
+                        }
                     }
-                }
-                .fullScreenCover(isPresented: $showNfcDiagnostic) {
-                    NavigationView {
-                        NfcDiagnosticView(autoTest: nfcDiagAutoTest)
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    Button("Close") { showNfcDiagnostic = false }
+                    .fullScreenCover(isPresented: $showQrTuner) {
+                        NavigationView {
+                            QrCameraTunerView(autoTest: qrTunerAutoTest)
+                                .toolbar {
+                                    ToolbarItem(placement: .navigationBarLeading) {
+                                        Button("Close") { showQrTuner = false }
+                                    }
                                 }
-                            }
+                        }
                     }
-                }
-                .fullScreenCover(isPresented: $showUltrasonicDiagnostic) {
-                    NavigationView {
-                        DiagnosticView(autoTest: ultrasonicDiagAutoTest)
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    Button("Close") { showUltrasonicDiagnostic = false }
+                    .fullScreenCover(isPresented: $showNfcDiagnostic) {
+                        NavigationView {
+                            NfcDiagnosticView(autoTest: nfcDiagAutoTest)
+                                .toolbar {
+                                    ToolbarItem(placement: .navigationBarLeading) {
+                                        Button("Close") { showNfcDiagnostic = false }
+                                    }
                                 }
-                            }
+                        }
                     }
+                    .fullScreenCover(isPresented: $showUltrasonicDiagnostic) {
+                        NavigationView {
+                            DiagnosticView(autoTest: ultrasonicDiagAutoTest)
+                                .toolbar {
+                                    ToolbarItem(placement: .navigationBarLeading) {
+                                        Button("Close") { showUltrasonicDiagnostic = false }
+                                    }
+                                }
+                        }
+                    }
+                #endif
+
+                // Privacy overlay when app is in background or screen recording
+                if showPrivacyOverlay {
+                    Color(.systemBackground)
+                        .ignoresSafeArea()
+                        .overlay {
+                            Image(systemName: "lock.shield")
+                                .font(.system(size: 60))
+                                .foregroundStyle(.secondary)
+                        }
                 }
-            #endif
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                showPrivacyOverlay = newPhase != .active
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIScreen.capturedDidChangeNotification)) { _ in
+                if UIScreen.main.isCaptured {
+                    showPrivacyOverlay = true
+                }
+            }
         }
     }
 }
