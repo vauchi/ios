@@ -221,7 +221,7 @@ struct VauchiApp: App {
                         }
                 }
             }
-            .onChange(of: scenePhase) { _, newPhase in
+            .onChange(of: scenePhase) { newPhase in
                 showPrivacyOverlay = newPhase != .active
             }
             .onReceive(NotificationCenter.default.publisher(for: UIScreen.capturedDidChangeNotification)) { _ in
