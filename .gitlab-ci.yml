@@ -84,10 +84,7 @@ workflow:
   variables:
     GIT_DEPTH: "20"
   before_script:
-    # Use prebuilt swift-syntax binary instead of compiling from source.
-    # Requires Xcode 16.4+ (Swift 6.1.1). Reduces cold builds from ~1hr to seconds.
-    - defaults write com.apple.dt.Xcode IDEPackageEnablePrebuilts -bool YES
-    - echo "Xcode $(xcodebuild -version | head -1), prebuilts enabled"
+    - echo "Xcode $(xcodebuild -version | head -1)"
     - |
       if ! xcrun simctl list runtimes 2>/dev/null | grep -q "iOS.*SimRuntime"; then
         echo "ERROR: iOS Simulator runtime is not installed."
