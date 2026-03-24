@@ -625,7 +625,9 @@ test:snapshots:record:
     - git config user.name "vauchi-ci-bot"
     - git config user.email "ci@vauchi.app"
     - PUSH_URL="https://vauchi-gitlab-runner:${PROJECT_ACCESS_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
-    - git fetch "$PUSH_URL" "${CI_COMMIT_REF_NAME}"
+    # Fetch branch into a local ref (bare fetch stores in FETCH_HEAD only,
+    # which git-checkout can't resolve by name in a shallow/detached clone)
+    - git fetch "$PUSH_URL" "+refs/heads/${CI_COMMIT_REF_NAME}:refs/heads/${CI_COMMIT_REF_NAME}"
     - git checkout "${CI_COMMIT_REF_NAME}"
     # Restore recorded snapshots (git checkout above resets working directory)
     - cp -r /tmp/__Snapshots__/ VauchiSnapshotTests/__Snapshots__/
