@@ -622,8 +622,8 @@ test:snapshots:record:
     # Switch from detached merge-ref HEAD to the actual branch.
     # CI_JOB_TOKEN auth is auto-configured by GitLab (insteadOf rewrite).
     # Push permissions enabled via project setting (ci_push_repository_for_job_token_allowed).
-    - git config user.name "vauchi-ci-bot"
-    - git config user.email "ci@vauchi.app"
+    - git config user.name "${GITLAB_USER_NAME}"
+    - git config user.email "${GITLAB_USER_EMAIL}"
     - git fetch origin "+refs/heads/${CI_COMMIT_REF_NAME}:refs/heads/${CI_COMMIT_REF_NAME}"
     - git checkout "${CI_COMMIT_REF_NAME}"
     # Restore recorded snapshots (git checkout resets working directory)
@@ -640,7 +640,7 @@ test:snapshots:record:
 
       ${CHANGED}
 
-      Co-Authored-By: vauchi-ci-bot <ci@vauchi.app>"
+      Recorded-By: CI job #${CI_JOB_ID}"
       git push origin HEAD:${CI_COMMIT_REF_NAME}
       echo "✅ Baselines committed and pushed"
       echo "   NOTE: CI_JOB_TOKEN pushes do not trigger pipelines."
