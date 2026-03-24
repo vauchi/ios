@@ -91,6 +91,18 @@ workflow:
         exit 1
       fi
 
+# Simulator serialization — prevents "Busy / preflight checks" failures
+# from concurrent xcodebuild sessions targeting the same simulator device.
+# resource_group ensures only one simulator job runs at a time (across pipelines).
+# before/after scripts ensure clean simulator state between jobs.
+.simulator-job:
+  resource_group: ios-simulator
+  before_script:
+    - !reference [.macos-job, before_script]
+    - xcrun simctl shutdown all 2>/dev/null || true
+  after_script:
+    - xcrun simctl shutdown all 2>/dev/null || true
+
 # Cache SPM packages and DerivedData between pipeline runs.
 # This avoids re-downloading and re-compiling all dependencies on every job,
 # which is the primary source of slow iOS CI builds (PI-01).
@@ -433,7 +445,7 @@ build:release:
 # ============================================================
 
 test:unit:
-  extends: [.macos-job, .spm-cache-readonly, .timeout-long]
+  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
   stage: test
   needs:
     - job: build:debug
@@ -460,7 +472,7 @@ test:unit:
           - ".gitlab-ci.yml"
 
 coverage:unit:
-  extends: [.macos-job, .spm-cache-readonly, .timeout-long]
+  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
   stage: test
   needs:
     - job: build:debug
@@ -497,7 +509,7 @@ coverage:unit:
 # Captures reference images for all SwiftUI views and compares against baselines.
 # Self-detecting: strict validation when baselines exist, advisory skip when missing.
 test:snapshots:
-  extends: [.macos-job, .spm-cache-readonly, .timeout-long]
+  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
   stage: test
   needs:
     - job: test:unit
@@ -522,7 +534,7 @@ test:snapshots:
     - echo "✅ Found $BASELINE_COUNT snapshot baselines — running validation"
     # Reuse build:debug artifacts — skip xcodegen + SPM fetch
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
-  allow_failure: true  # TODO: set back to false once simulator preflight flake is resolved
+  # allow_failure removed: resource_group serialization prevents simulator contention
   artifacts:
     when: on_failure
     paths:
@@ -540,7 +552,7 @@ test:snapshots:
 
 # XCUITest accessibility tests — run on simulator, sequential (UI tests are not parallelizable)
 test:ui:
-  extends: [.macos-job, .spm-cache-readonly, .timeout-long]
+  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
   stage: test
   needs:
     - job: test:unit
@@ -570,7 +582,7 @@ test:ui:
 # CI is the single source of truth for baselines — never record locally.
 # Click "Record baselines" in the pipeline UI after pushing view changes.
 test:snapshots:record:
-  extends: [.macos-job, .spm-cache-readonly, .timeout-long]
+  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
   stage: test
   needs:
     - job: build:debug
@@ -581,13 +593,7 @@ test:snapshots:record:
     - echo "📸 Recording snapshot baselines..."
     # SNAPSHOT_RECORD compilation condition forces isRecording=true in test binary.
     # Env vars don't reach the iOS Simulator process; build settings do.
-    # Reset simulator to avoid "Busy / preflight checks" transient failures.
-    # Do NOT erase — that removes installed apps and breaks test launching.
-    # Boot+shutdown cycle forces a clean state when shutdown alone isn't enough.
-    - xcrun simctl shutdown all 2>/dev/null || true
-    - xcrun simctl boot "iPhone 17 Pro" 2>/dev/null || true
-    - sleep 2
-    - xcrun simctl shutdown "iPhone 17 Pro" 2>/dev/null || true
+    # Simulator cleanup handled by .simulator-job before_script/after_script.
     - |
       set +e
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
