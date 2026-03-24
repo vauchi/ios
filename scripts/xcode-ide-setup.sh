@@ -11,7 +11,7 @@
 # Usage: ./scripts/xcode-ide-setup.sh
 #
 
-set -e
+set -euo pipefail
 
 echo "=== Vauchi iOS Development Setup ==="
 echo ""
