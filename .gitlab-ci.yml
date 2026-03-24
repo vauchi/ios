@@ -92,23 +92,17 @@ workflow:
       fi
 
 # Simulator serialization — prevents "Busy / preflight checks" failures.
-# Two layers of protection:
 # 1. resource_group: only one simulator job runs at a time (across pipelines)
-# 2. Aggressive cleanup: shutdown + delete parallel-testing clones + boot cycle
-#    (simple shutdown isn't enough — parallel testing creates cloned simulators
-#    whose cleanup leaves SpringBoard in "Busy" state for ~5 seconds)
+# 2. Erase: wipes installed apps, keychain, and settings — gives xcodebuild
+#    a clean simulator with no stale app bundles or SpringBoard state.
+#    (shutdown+boot alone does NOT erase disk state — installed apps survive
+#    reboots and cause "Application failed preflight checks" on next launch.)
 .simulator-job:
   resource_group: ios-simulator
   before_script:
     - !reference [.macos-job, before_script]
     - xcrun simctl shutdown all 2>/dev/null || true
-    # Delete cloned simulators left by parallel testing (-parallel-testing-worker-count)
-    - xcrun simctl delete unavailable 2>/dev/null || true
-    - xcrun simctl list devices | grep -i clone | grep -oE '[A-F0-9-]{36}' | xargs -I{} xcrun simctl delete {} 2>/dev/null || true
-    # Boot+shutdown cycle forces SpringBoard into a clean state
-    - xcrun simctl boot "iPhone 17 Pro" 2>/dev/null || true
-    - sleep 3
-    - xcrun simctl shutdown "iPhone 17 Pro" 2>/dev/null || true
+    - xcrun simctl erase all
   after_script:
     - xcrun simctl shutdown all 2>/dev/null || true
 
@@ -488,6 +482,7 @@ coverage:unit:
       artifacts: true
       optional: true
   before_script:
+    - !reference [.simulator-job, before_script]
     - command -v xcresultparser >/dev/null 2>&1 || brew install a7ex/formulae/xcresultparser
   script:
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -enableCodeCoverage YES -resultBundlePath coverage_result -skip-testing VauchiSnapshotTests -skip-testing VauchiUITests -parallel-testing-enabled YES -parallel-testing-worker-count 4
