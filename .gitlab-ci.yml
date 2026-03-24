@@ -619,17 +619,14 @@ test:snapshots:record:
       echo "✅ Tests executed (exit code ${XCODE_EXIT} is expected in record mode)"
     # Preserve recorded snapshots across git checkout
     - cp -r VauchiSnapshotTests/__Snapshots__/ /tmp/__Snapshots__/
-    # Configure git for push — bypass credential helpers and insteadOf rewrites
-    - git config --global --unset-all url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/".insteadOf 2>/dev/null || true
-    - git config --global --unset-all credential.helper 2>/dev/null || true
+    # Switch from detached merge-ref HEAD to the actual branch.
+    # CI_JOB_TOKEN auth is auto-configured by GitLab (insteadOf rewrite).
+    # Push permissions enabled via project setting (ci_push_repository_for_job_token_allowed).
     - git config user.name "vauchi-ci-bot"
     - git config user.email "ci@vauchi.app"
-    - PUSH_URL="https://vauchi-gitlab-runner:${PROJECT_ACCESS_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
-    # Fetch branch into a local ref (bare fetch stores in FETCH_HEAD only,
-    # which git-checkout can't resolve by name in a shallow/detached clone)
-    - git fetch "$PUSH_URL" "+refs/heads/${CI_COMMIT_REF_NAME}:refs/heads/${CI_COMMIT_REF_NAME}"
+    - git fetch origin "+refs/heads/${CI_COMMIT_REF_NAME}:refs/heads/${CI_COMMIT_REF_NAME}"
     - git checkout "${CI_COMMIT_REF_NAME}"
-    # Restore recorded snapshots (git checkout above resets working directory)
+    # Restore recorded snapshots (git checkout resets working directory)
     - cp -r /tmp/__Snapshots__/ VauchiSnapshotTests/__Snapshots__/
     # Commit and push baselines (skip if unchanged)
     - |
@@ -644,8 +641,10 @@ test:snapshots:record:
       ${CHANGED}
 
       Co-Authored-By: vauchi-ci-bot <ci@vauchi.app>"
-      git push "$PUSH_URL" HEAD:${CI_COMMIT_REF_NAME}
-      echo "✅ Baselines committed and pushed — validation pipeline will trigger"
+      git push origin HEAD:${CI_COMMIT_REF_NAME}
+      echo "✅ Baselines committed and pushed"
+      echo "   NOTE: CI_JOB_TOKEN pushes do not trigger pipelines."
+      echo "   Push any change or run 'glab ci create' to validate baselines."
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
