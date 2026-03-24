@@ -142,7 +142,7 @@ workflow:
 # automatically create a v{version} tag to trigger the release pipeline.
 auto-tag:version:
   stage: auto-tag
-  image: alpine:latest
+  image: alpine:3.21
   resource_group: auto-tag
   needs: []
   variables:
