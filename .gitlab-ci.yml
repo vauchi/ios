@@ -91,15 +91,26 @@ workflow:
         exit 1
       fi
 
-# Simulator serialization — prevents "Busy / preflight checks" failures
-# from concurrent xcodebuild sessions targeting the same simulator device.
-# resource_group ensures only one simulator job runs at a time (across pipelines).
-# before/after scripts ensure clean simulator state between jobs.
+# Simulator serialization — prevents "Busy / preflight checks" failures.
+# Two layers of protection:
+# 1. resource_group: only one simulator job runs at a time (across pipelines)
+# 2. Aggressive cleanup: shutdown + delete parallel-testing clones + boot cycle
+#    (simple shutdown isn't enough — parallel testing creates cloned simulators
+#    whose cleanup leaves SpringBoard in "Busy" state for ~5 seconds)
 .simulator-job:
   resource_group: ios-simulator
   before_script:
     - !reference [.macos-job, before_script]
     - xcrun simctl shutdown all 2>/dev/null || true
+    # Delete cloned simulators left by parallel testing (-parallel-testing-worker-count)
+    - xcrun simctl delete unavailable 2>/dev/null || true
+    - >-
+      xcrun simctl list devices | grep -i clone | grep -oE '[A-F0-9-]{36}' |
+      while read uid; do xcrun simctl delete "$uid" 2>/dev/null || true; done
+    # Boot+shutdown cycle forces SpringBoard into a clean state
+    - xcrun simctl boot "iPhone 17 Pro" 2>/dev/null || true
+    - sleep 3
+    - xcrun simctl shutdown "iPhone 17 Pro" 2>/dev/null || true
   after_script:
     - xcrun simctl shutdown all 2>/dev/null || true
 
