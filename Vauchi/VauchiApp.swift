@@ -34,6 +34,11 @@ struct VauchiApp: App {
         let buildId = Self.binaryBuildDate() ?? "?"
         NSLog("[Vauchi] Build: v%@ (%@) core=%@ buildId=%@", v, b, coreVersion(), buildId)
 
+        // T2-8: Exclude app data from iCloud/iTunes backup.
+        // Vauchi stores encrypted identity keys and contact data locally —
+        // these must not leak into unencrypted cloud backups.
+        Self.excludeDataFromBackup()
+
         #if DEBUG
             // Check launch arguments for BLE diagnostic automation
             // Usage: devicectl device process launch ... app.vauchi.ios --ble-test discovery
@@ -96,6 +101,21 @@ struct VauchiApp: App {
         fmt.dateFormat = "yyyyMMdd-HHmmss"
         fmt.timeZone = TimeZone(identifier: "UTC")
         return fmt.string(from: date)
+    }
+
+    /// Exclude the app's Documents and Library directories from iCloud/iTunes backup.
+    private static func excludeDataFromBackup() {
+        let fileManager = FileManager.default
+        let urls = [
+            fileManager.urls(for: .documentDirectory, in: .userDomainMask).first,
+            fileManager.urls(for: .libraryDirectory, in: .userDomainMask).first,
+        ]
+        for case let url? in urls {
+            var resourceValues = URLResourceValues()
+            resourceValues.isExcludedFromBackup = true
+            var mutableURL = url
+            try? mutableURL.setResourceValues(resourceValues)
+        }
     }
 
     // Screenshot/screen recording prevention (T1-5)
