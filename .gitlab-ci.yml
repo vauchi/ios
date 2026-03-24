@@ -84,7 +84,10 @@ workflow:
   variables:
     GIT_DEPTH: "20"
   before_script:
-    - echo "Xcode $(xcodebuild -version | head -1)"
+    # Disable prebuilt binary downloads — SwiftPM's NetrcAuthorizationProvider
+    # deadlocks in non-interactive shells when no .netrc exists (Xcode 26.3 bug).
+    - defaults write com.apple.dt.Xcode IDEPackageEnablePrebuilts -bool NO
+    - echo "Xcode $(xcodebuild -version | head -1), prebuilts disabled (CI workaround)"
     - |
       if ! xcrun simctl list runtimes 2>/dev/null | grep -q "iOS.*SimRuntime"; then
         echo "ERROR: iOS Simulator runtime is not installed."
