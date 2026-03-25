@@ -85,14 +85,14 @@ struct ContactsView: View {
                                             Button {
                                                 Task { await unhideContact(contact) }
                                             } label: {
-                                                Label("Unhide", systemImage: "eye")
+                                                Label(localizationService.t("contacts.action_unhide"), systemImage: "eye")
                                             }
                                             .tint(.green)
                                         } else {
                                             Button {
                                                 Task { await hideContact(contact) }
                                             } label: {
-                                                Label("Hide", systemImage: "eye.slash")
+                                                Label(localizationService.t("contacts.action_hide"), systemImage: "eye.slash")
                                             }
                                             .tint(.orange)
                                         }
@@ -113,7 +113,7 @@ struct ContactsView: View {
                     }
                 }
             }
-            .navigationTitle(showHiddenContacts ? "Hidden Contacts" : localizationService.t("nav.contacts"))
+            .navigationTitle(showHiddenContacts ? localizationService.t("contacts.hidden_title") : localizationService.t("nav.contacts"))
             .searchable(text: $searchText, prompt: localizationService.t("contacts.search"))
             .onChange(of: searchText) { newValue in
                 performSearch(query: newValue)
@@ -159,7 +159,12 @@ struct ContactsView: View {
                 do {
                     try await viewModel.removeContact(id: contact.id)
                 } catch {
-                    viewModel.showError("Failed to Delete", message: "Could not remove \(contact.displayName): \(error.localizedDescription)")
+                    let title = localizationService.t("contacts.error_delete")
+                    let msg = localizationService.t(
+                        "contacts.error_delete_message",
+                        ["name": contact.displayName, "error": error.localizedDescription]
+                    )
+                    viewModel.showError(title, message: msg)
                 }
             }
         }
@@ -190,7 +195,12 @@ struct ContactsView: View {
         do {
             try await viewModel.hideContact(id: contact.id)
         } catch {
-            viewModel.showError("Failed to Hide", message: "Could not hide \(contact.displayName): \(error.localizedDescription)")
+            let title = localizationService.t("contacts.error_hide")
+            let msg = localizationService.t(
+                "contacts.error_hide_message",
+                ["name": contact.displayName, "error": error.localizedDescription]
+            )
+            viewModel.showError(title, message: msg)
         }
     }
 
@@ -198,7 +208,12 @@ struct ContactsView: View {
         do {
             try await viewModel.unhideContact(id: contact.id)
         } catch {
-            viewModel.showError("Failed to Unhide", message: "Could not unhide \(contact.displayName): \(error.localizedDescription)")
+            let title = localizationService.t("contacts.error_unhide")
+            let msg = localizationService.t(
+                "contacts.error_unhide_message",
+                ["name": contact.displayName, "error": error.localizedDescription]
+            )
+            viewModel.showError(title, message: msg)
         }
     }
 }
@@ -339,7 +354,7 @@ struct DemoContactCard: View {
                         Text(demo.displayName)
                             .font(.headline)
 
-                        Text("Demo")
+                        Text(localizationService.t("contacts.demo_badge"))
                             .font(.caption2)
                             .fontWeight(.medium)
                             .foregroundColor(.white)
