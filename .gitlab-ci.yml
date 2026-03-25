@@ -41,6 +41,7 @@ include:
       - '/ci-templates/timeouts.yml'
       - '/ci-templates/reuse.yml'
       - '/ci-templates/design-drift.yml'
+      - '/ci-templates/image-lint.yml'
       - '/ci-templates/badges.yml'
 
 stages:
@@ -279,6 +280,9 @@ update:bindings-version:
 # ============================================================
 # Lint Stage (MR only, change-based)
 # ============================================================
+
+lint:images:
+  extends: .image-lint
 
 lint:swiftlint:
   extends: [.macos-job, .timeout-quick]
