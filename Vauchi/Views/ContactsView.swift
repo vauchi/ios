@@ -162,7 +162,7 @@ struct ContactsView: View {
                     let title = localizationService.t("contacts.error_delete")
                     let msg = localizationService.t(
                         "contacts.error_delete_message",
-                        ["name": contact.displayName, "error": error.localizedDescription]
+                        args: ["name": contact.displayName, "error": error.localizedDescription]
                     )
                     viewModel.showError(title, message: msg)
                 }
@@ -333,6 +333,7 @@ struct EmptyContactsView: View {
 
 struct DemoContactCard: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @ObservedObject private var localizationService = LocalizationService.shared
     let demo: VauchiDemoContact
 
     var body: some View {
