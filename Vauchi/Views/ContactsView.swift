@@ -198,7 +198,7 @@ struct ContactsView: View {
             let title = localizationService.t("contacts.error_hide")
             let msg = localizationService.t(
                 "contacts.error_hide_message",
-                ["name": contact.displayName, "error": error.localizedDescription]
+                args: ["name": contact.displayName, "error": error.localizedDescription]
             )
             viewModel.showError(title, message: msg)
         }
@@ -211,7 +211,7 @@ struct ContactsView: View {
             let title = localizationService.t("contacts.error_unhide")
             let msg = localizationService.t(
                 "contacts.error_unhide_message",
-                ["name": contact.displayName, "error": error.localizedDescription]
+                args: ["name": contact.displayName, "error": error.localizedDescription]
             )
             viewModel.showError(title, message: msg)
         }
