@@ -61,6 +61,8 @@ lint:reuse:
   variables:
     GIT_DEPTH: "20"
   needs: []
+  script:
+    - reuse lint
 
 variables:
   # GitLab Ultimate Security Configuration
