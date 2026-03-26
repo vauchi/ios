@@ -44,6 +44,7 @@ include:
       - '/ci-templates/image-lint.yml'
       - '/ci-templates/removed-symbols.yml'
       - '/ci-templates/badges.yml'
+      - '/ci-templates/github-mirror.yml'
 
 stages:
   - auto-tag
@@ -791,3 +792,6 @@ deploy:testflight:
 
 pages:
   extends: .badges-pages
+
+github-mirror:
+  extends: .github-mirror
