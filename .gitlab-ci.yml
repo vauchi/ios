@@ -152,6 +152,7 @@ workflow:
 auto-tag:version:
   stage: auto-tag
   image: alpine:3.21
+  tags: [docker]
   resource_group: auto-tag
   needs: []
   variables:
