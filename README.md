@@ -1,6 +1,8 @@
 <!-- SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me> -->
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 
+> **Mirror:** This repo is a read-only mirror of [gitlab.com/vauchi/ios](https://gitlab.com/vauchi/ios). Please open issues and merge requests there.
+
 [![Pipeline](https://vauchi.gitlab.io/ios/badges/pipeline.svg)](https://gitlab.com/vauchi/ios/-/pipelines)
 [![Coverage](https://vauchi.gitlab.io/ios/badges/coverage.svg)](https://gitlab.com/vauchi/ios/-/pipelines)
 [![REUSE](https://api.reuse.software/badge/gitlab.com/vauchi/ios)](https://api.reuse.software/info/gitlab.com/vauchi/ios)
