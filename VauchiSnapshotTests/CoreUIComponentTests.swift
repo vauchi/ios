@@ -19,10 +19,15 @@ import XCTest
 @MainActor
 final class CoreUIComponentTests: XCTestCase {
     /// Whether to record new baselines.
-    /// CI (no env var) → false → comparison mode.
-    /// Local dev (`SNAPSHOT_TESTING_RECORD=all xcodebuild test`) → true → recording mode.
+    /// CI record job passes SWIFT_ACTIVE_COMPILATION_CONDITIONS=SNAPSHOT_RECORD
+    /// which compiles into the test binary (env vars don't reach the simulator).
+    /// Local dev: `SNAPSHOT_TESTING_RECORD=all` env var still works for native runs.
     private var isRecording: Bool {
-        ProcessInfo.processInfo.environment["SNAPSHOT_TESTING_RECORD"] == "all"
+        #if SNAPSHOT_RECORD
+            return true
+        #else
+            return ProcessInfo.processInfo.environment["SNAPSHOT_TESTING_RECORD"] == "all"
+        #endif
     }
 
     /// No-op action handler for components that require one.
