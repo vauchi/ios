@@ -26,20 +26,24 @@ final class AccessibilityUITests: XCTestCase {
 
     /// Fresh launch shows onboarding with accessible elements.
     func testOnboardingScreenHasAccessibleElements() {
-        // On fresh launch, the setup view should appear.
-        // Check for welcome title (marked as header via .accessibilityAddTraits(.isHeader))
-        let welcomeTitle = app.staticTexts["setup.welcome.title"]
-        XCTAssertTrue(welcomeTitle.waitForExistence(timeout: 5),
-                      "Welcome title should appear within 5s on fresh launch")
+        // On fresh launch, the multi-step onboarding starts with WelcomeStepView.
+        // If the user already completed onboarding (simulator state), the tab bar
+        // appears instead — skip the test in that case.
+        let getStarted = app.buttons["onboarding.get_started"]
+        let tabBar = app.tabBars.firstMatch
+        let onboardingVisible = getStarted.waitForExistence(timeout: 5)
 
-        // Name input field should be accessible and enabled
-        let nameField = app.textFields["setup.name.field"]
-        XCTAssertTrue(nameField.exists, "Name input field should exist in onboarding")
-        XCTAssertTrue(nameField.isEnabled, "Name field should be enabled")
+        if !onboardingVisible, tabBar.exists {
+            // Already onboarded — nothing to test
+            return
+        }
 
-        // Create button should exist in view hierarchy
-        let createButton = app.buttons["setup.create.button"]
-        XCTAssertTrue(createButton.exists, "Create button should exist in onboarding")
+        XCTAssertTrue(onboardingVisible,
+                      "Get Started button should appear on the welcome screen")
+
+        // "I have a backup" restore option should also be present
+        let restore = app.buttons["onboarding.restore"]
+        XCTAssertTrue(restore.exists, "Restore button should exist on welcome screen")
     }
 
     // MARK: - Tab Bar Navigation
@@ -55,7 +59,7 @@ final class AccessibilityUITests: XCTestCase {
                       "Tab bar should appear after onboarding")
 
         // The 5-tab model: verify each specific tab exists
-        for tab in ["My Card", "Contacts", "Exchange", "Activity", "More"] {
+        for tab in ["My Card", "Contacts", "Exchange", "Groups", "More"] {
             XCTAssertTrue(tabBar.buttons[tab].exists,
                           "Tab '\(tab)' should exist in the tab bar")
         }
@@ -96,15 +100,19 @@ final class AccessibilityUITests: XCTestCase {
 
     // MARK: - Exchange Screen
 
-    /// Exchange screen has accessible instructions and mode buttons.
+    /// Exchange screen has accessible elements for QR exchange.
     func testExchangeScreenAccessible() {
         completeOnboardingIfNeeded()
         navigateToTab("Exchange")
 
-        // Exchange instructions should be present
-        let instructions = app.staticTexts["exchange.instructions"]
-        XCTAssertTrue(instructions.waitForExistence(timeout: 5),
-                      "Exchange instructions should appear on Exchange screen")
+        // FaceToFaceExchangeView should render — look for the camera toggle
+        // or grant permission button (depending on camera permission state)
+        let cameraToggle = app.buttons["exchange.camera_toggle"]
+        let grantPermission = app.buttons["exchange.grant_permission"]
+        let found = cameraToggle.waitForExistence(timeout: 5)
+            || grantPermission.waitForExistence(timeout: 2)
+        XCTAssertTrue(found,
+                      "Exchange screen should show camera toggle or permission prompt")
     }
 
     // MARK: - Settings Screen
@@ -114,19 +122,20 @@ final class AccessibilityUITests: XCTestCase {
         completeOnboardingIfNeeded()
         navigateToTab("More")
 
-        // Look for settings-related elements
-        // Settings is inside the "More" tab
-        let settingsButton = app.buttons.matching(
-            NSPredicate(format: "label CONTAINS[c] 'Settings'")
-        ).firstMatch
-        if settingsButton.waitForExistence(timeout: 5) {
-            settingsButton.tap()
+        // Navigate into Settings via the NavigationLink
+        let settingsLink = app.buttons["more.settings"]
+        XCTAssertTrue(settingsLink.waitForExistence(timeout: 5),
+                      "Settings link should exist in More tab")
+        settingsLink.tap()
 
-            // Settings screen should have toggles — verify specific ones exist
-            let switches = app.switches
-            XCTAssertTrue(switches.firstMatch.waitForExistence(timeout: 3),
-                          "Settings should render toggles")
+        // Settings screen should have toggles (e.g. accessibility section).
+        // The toggles are below the fold — scroll until visible.
+        let reduceMotion = app.switches["settings.accessibility.reduceMotion"]
+        for _ in 0 ..< 5 where !reduceMotion.exists {
+            app.swipeUp()
         }
+        XCTAssertTrue(reduceMotion.exists,
+                      "Reduce Motion toggle should exist in Settings")
     }
 
     // MARK: - VoiceOver Element Ordering
@@ -148,21 +157,46 @@ final class AccessibilityUITests: XCTestCase {
     // MARK: - Helpers
 
     private func completeOnboardingIfNeeded() {
-        // If the create button exists, we're on the onboarding screen
-        let createButton = app.buttons["setup.create.button"]
-        if createButton.waitForExistence(timeout: 3) {
-            // Enter a name first if the field exists
-            let nameField = app.textFields["setup.name.field"]
-            if nameField.exists {
-                nameField.tap()
-                nameField.typeText("Test User")
-            }
-            if createButton.isEnabled {
-                createButton.tap()
-                // Wait for transition to main UI
-                _ = app.tabBars.firstMatch.waitForExistence(timeout: 5)
+        // New multi-step onboarding: Welcome → CreateIdentity → AddFields → Preview → Security
+        let getStarted = app.buttons["onboarding.get_started"]
+        guard getStarted.waitForExistence(timeout: 3) else {
+            // Already past onboarding
+            return
+        }
+        getStarted.tap()
+
+        // Step 2: Enter name
+        let nameField = app.textFields["onboarding.name_field"]
+        if nameField.waitForExistence(timeout: 3) {
+            nameField.tap()
+            nameField.typeText("Test User")
+
+            let continueButton = app.buttons["onboarding.name_continue"]
+            if continueButton.waitForExistence(timeout: 2), continueButton.isEnabled {
+                continueButton.tap()
             }
         }
+
+        // Step 3: Add fields (skip)
+        let skipButton = app.buttons["onboarding.info_skip"]
+        if skipButton.waitForExistence(timeout: 3) {
+            skipButton.tap()
+        }
+
+        // Step 4: Preview card (confirm)
+        let confirmButton = app.buttons["onboarding.preview_confirm"]
+        if confirmButton.waitForExistence(timeout: 3) {
+            confirmButton.tap()
+        }
+
+        // Step 5: Security (finish)
+        let finishButton = app.buttons["onboarding.finish_setup"]
+        if finishButton.waitForExistence(timeout: 3) {
+            finishButton.tap()
+        }
+
+        // Wait for main UI
+        _ = app.tabBars.firstMatch.waitForExistence(timeout: 5)
     }
 
     private func navigateToTab(_ label: String) {
