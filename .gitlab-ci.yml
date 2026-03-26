@@ -55,8 +55,8 @@ stages:
   - security
   - deploy
 
-# Override: serialize reuse-lint with other lint jobs on macOS shell executor
-reuse-lint:
+# Override: serialize lint:reuse with other lint jobs on macOS shell executor
+lint:reuse:
   tags: [macos, self-hosted]
   variables:
     GIT_DEPTH: "20"
@@ -289,7 +289,7 @@ lint:images:
 lint:swiftlint:
   extends: [.macos-job, .timeout-quick]
   stage: lint
-  needs: [reuse-lint]  # sequential: prevents shell executor git races
+  needs: [lint:reuse]  # sequential: prevents shell executor git races
   script:
     - |
       if command -v swiftlint &> /dev/null; then
