@@ -57,12 +57,16 @@ stages:
 
 # Override: serialize lint:reuse with other lint jobs on macOS shell executor
 lint:reuse:
+  stage: lint
   tags: [macos, self-hosted]
   variables:
     GIT_DEPTH: "20"
   needs: []
+  timeout: 2m
   script:
     - reuse lint
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 variables:
   # GitLab Ultimate Security Configuration
