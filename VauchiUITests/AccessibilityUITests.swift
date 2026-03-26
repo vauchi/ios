@@ -29,22 +29,17 @@ final class AccessibilityUITests: XCTestCase {
         // On fresh launch, the setup view should appear.
         // Check for welcome title (marked as header via .accessibilityAddTraits(.isHeader))
         let welcomeTitle = app.staticTexts["setup.welcome.title"]
-        if welcomeTitle.waitForExistence(timeout: 5) {
-            XCTAssertTrue(welcomeTitle.exists, "Welcome title should be in the view hierarchy")
-        }
+        XCTAssertTrue(welcomeTitle.waitForExistence(timeout: 5),
+                      "Welcome title should appear within 5s on fresh launch")
 
-        // Name input field should be accessible
+        // Name input field should be accessible and enabled
         let nameField = app.textFields["setup.name.field"]
-        if nameField.exists {
-            XCTAssertTrue(nameField.isEnabled, "Name field should be enabled")
-        }
+        XCTAssertTrue(nameField.exists, "Name input field should exist in onboarding")
+        XCTAssertTrue(nameField.isEnabled, "Name field should be enabled")
 
-        // Create button should exist
+        // Create button should exist in view hierarchy
         let createButton = app.buttons["setup.create.button"]
-        if createButton.exists {
-            XCTAssertTrue(createButton.isEnabled || !createButton.isEnabled,
-                          "Create button should be in the view hierarchy")
-        }
+        XCTAssertTrue(createButton.exists, "Create button should exist in onboarding")
     }
 
     // MARK: - Tab Bar Navigation
@@ -56,11 +51,13 @@ final class AccessibilityUITests: XCTestCase {
 
         // The 5-tab model should have accessible tab buttons
         let tabBar = app.tabBars.firstMatch
-        if tabBar.waitForExistence(timeout: 5) {
-            // Each tab should be a button with a label
-            let tabButtons = tabBar.buttons
-            XCTAssertGreaterThan(tabButtons.count, 0,
-                                 "Tab bar should contain at least one tab button")
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 5),
+                      "Tab bar should appear after onboarding")
+
+        // The 5-tab model: verify each specific tab exists
+        for tab in ["My Card", "Contacts", "Exchange", "Activity", "More"] {
+            XCTAssertTrue(tabBar.buttons[tab].exists,
+                          "Tab '\(tab)' should exist in the tab bar")
         }
     }
 
@@ -106,10 +103,8 @@ final class AccessibilityUITests: XCTestCase {
 
         // Exchange instructions should be present
         let instructions = app.staticTexts["exchange.instructions"]
-        if instructions.waitForExistence(timeout: 5) {
-            XCTAssertTrue(instructions.exists,
-                          "Exchange instructions should be in view hierarchy")
-        }
+        XCTAssertTrue(instructions.waitForExistence(timeout: 5),
+                      "Exchange instructions should appear on Exchange screen")
     }
 
     // MARK: - Settings Screen
@@ -127,13 +122,10 @@ final class AccessibilityUITests: XCTestCase {
         if settingsButton.waitForExistence(timeout: 5) {
             settingsButton.tap()
 
-            // Settings screen should have toggles and navigation rows
+            // Settings screen should have toggles — verify specific ones exist
             let switches = app.switches
-            // Settings typically has at least one toggle (e.g., proximity, theme)
-            if switches.firstMatch.waitForExistence(timeout: 3) {
-                XCTAssertGreaterThan(switches.count, 0,
-                                     "Settings should have at least one toggle")
-            }
+            XCTAssertTrue(switches.firstMatch.waitForExistence(timeout: 3),
+                          "Settings should render toggles")
         }
     }
 
