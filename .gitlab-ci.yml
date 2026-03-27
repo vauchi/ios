@@ -229,20 +229,21 @@ update:bindings-version:
 
       # Create branch and update version in project.yml
       git checkout -b "$BRANCH"
-      # Update VauchiPlatform dependency: branch: main → from: "version"
-      # or from: "old_version" → from: "new_version"
+      # Update VauchiPlatform dependency to exact version pin.
+      # Handles: branch: main, from: "x.y.z", or version: "x.y.z"
       LINE=$(grep -n "vauchi-platform-swift" project.yml | head -1 | cut -d: -f1)
       NEXT=$((LINE + 1))
-      # Handle both branch-tracking (branch: main) and version-pinned (from: "x.y.z")
       CURRENT=$(sed -n "${NEXT}p" project.yml)
       if echo "$CURRENT" | grep -q 'branch:'; then
-        sed -i "" "${NEXT}s/branch: .*/from: \"${BINDINGS_VERSION}\"/" project.yml
+        sed -i "" "${NEXT}s/branch: .*/version: \"${BINDINGS_VERSION}\"/" project.yml
+      elif echo "$CURRENT" | grep -q 'from:'; then
+        sed -i "" "${NEXT}s/from: \"[^\"]*\"/version: \"${BINDINGS_VERSION}\"/" project.yml
       else
-        sed -i "" "${NEXT}s/from: \"[^\"]*\"/from: \"${BINDINGS_VERSION}\"/" project.yml
+        sed -i "" "${NEXT}s/version: \"[^\"]*\"/version: \"${BINDINGS_VERSION}\"/" project.yml
       fi
 
       # Verify the change was made
-      if ! grep -q "from: \"${BINDINGS_VERSION}\"" project.yml; then
+      if ! grep -q "version: \"${BINDINGS_VERSION}\"" project.yml; then
         echo "ERROR: Version replacement failed"
         exit 1
       fi
