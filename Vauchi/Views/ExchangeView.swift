@@ -216,7 +216,7 @@ struct ExchangeView: View {
             ProgressView()
                 .scaleEffect(1.5)
 
-            Text("Completing exchange...")
+            Text("Keep pointing at other phone...")
                 .font(.body)
                 .foregroundColor(.secondary)
 

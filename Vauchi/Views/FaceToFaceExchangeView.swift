@@ -140,7 +140,7 @@ struct FaceToFaceExchangeView: View {
 
             case .complete, .finalized:
                 if !graceCompleted {
-                    multiStageQrDisplay(statusText: "Completing exchange...", showProgress: true)
+                    multiStageQrDisplay(statusText: "Keep pointing at other phone...", showProgress: true)
                 } else {
                     multiStageSuccessContent
                 }
