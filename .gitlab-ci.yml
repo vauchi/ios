@@ -90,6 +90,11 @@ workflow:
   tags:
     - macos
     - self-hosted
+  # Serialize all SPM-using jobs on the shared macOS runner.
+  # Multiple concurrent xcodebuild -resolvePackageDependencies deadlock
+  # on SPM's global package cache (~/.cache/org.swift.swiftpm/).
+  # Runner concurrent=1 is the primary fix; this is defense-in-depth.
+  resource_group: ios-spm
   variables:
     GIT_DEPTH: "20"
   before_script:
