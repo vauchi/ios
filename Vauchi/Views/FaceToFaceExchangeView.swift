@@ -332,10 +332,10 @@ struct FaceToFaceExchangeView: View {
 
     private func startQrCycleTimer() {
         qrCycleTimer?.invalidate()
-        qrCycleTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
+        qrCycleTimer = Timer.scheduledTimer(withTimeInterval: 0.15, repeats: true) { _ in
             guard let payload = viewModel.getMultiStageDisplayQr() else {
                 // Core returned nil — grace period expired or not started.
-                if case .finalized = protocolState {
+                if case .finalized = protocolState, !graceCompleted {
                     if let result = viewModel.finalizeMultiStageExchange() {
                         finalizationResult = result.contactName
                     } else {
@@ -356,9 +356,18 @@ struct FaceToFaceExchangeView: View {
             let newState = viewModel.getMultiStageState()
             protocolState = newState
 
-            // Only stop on Failed — Complete still needs the QR cycle timer
-            // running so core can display grace-period QR codes for the slower peer.
             switch newState {
+            case .finalized:
+                // Save contact immediately — don't wait for grace period expiry.
+                // QR cycle timer continues so peer can still scan our COMBO QR.
+                if !graceCompleted {
+                    if let result = viewModel.finalizeMultiStageExchange() {
+                        finalizationResult = result.contactName
+                    } else {
+                        finalizationError = "Failed to save contact"
+                    }
+                    graceCompleted = true
+                }
             case .failed:
                 stopQrCycleTimer()
                 stopStatePollTimer()
