@@ -859,34 +859,14 @@ class VauchiRepository {
     // are published via vauchi-platform-swift. Once core MR merges and
     // bindings are updated, replace stubs with actual UniFFI calls.
 
-    /// Get Tor configuration
+    /// Get Tor configuration (stub — returns defaults until core exposes Tor bindings).
     func getTorConfig() throws -> (enabled: Bool, bridges: [String], preferOnion: Bool) {
-        do {
-            let config = try vauchi.loadTorConfig()
-            return (enabled: config.enabled, bridges: config.bridges, preferOnion: config.preferOnion)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
+        (enabled: false, bridges: [], preferOnion: true)
     }
 
-    /// Save Tor configuration.
-    ///
-    /// Only the `enabled` toggle is persisted — `bridges` and `preferOnion` are
-    /// silently ignored until the binding exposes a save API for those fields.
-    func saveTorConfig(enabled: Bool, bridges: [String], preferOnion: Bool) throws {
-        if !bridges.isEmpty || preferOnion {
-            print("VauchiRepository: bridges (\(bridges.count)) and preferOnion (\(preferOnion)) "
-                + "not persisted — binding not yet available")
-        }
-        do {
-            if enabled {
-                try vauchi.enableTor()
-            } else {
-                try vauchi.disableTor()
-            }
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
+    /// Save Tor configuration (stub — no-op until core exposes Tor bindings).
+    func saveTorConfig(enabled _: Bool, bridges _: [String], preferOnion _: Bool) throws {
+        print("VauchiRepository: saveTorConfig is a stub — Tor bindings not yet available")
     }
 
     /// Get own identity fingerprint for verification display.
