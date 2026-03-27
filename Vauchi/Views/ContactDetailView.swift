@@ -380,10 +380,6 @@ struct ContactFieldRow: View {
             .accessibilityElement(children: .combine)
             .accessibilityLabel("\(field.fieldType.capitalized) field: \(field.label), \(field.value)")
 
-            if !contactId.isEmpty {
-                ValidationBadgeView(contactId: contactId, field: field)
-            }
-
             Spacer()
 
             // Quick action buttons using ContactActions

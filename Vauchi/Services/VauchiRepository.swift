@@ -15,9 +15,6 @@
 // DONE: Content updates - isContentUpdatesSupported(), checkContentUpdates(),
 // applyContentUpdates(), reloadSocialNetworks() methods implemented.
 //
-// DONE: Field validation - validateField(), getFieldValidationStatus(),
-// revokeFieldValidation(), listMyValidations(), hasValidatedField(),
-// getFieldValidationCount() methods implemented.
 //
 // DONE: Password strength indicator - checkPasswordStrength() integrated in ExportBackupSheet
 // with PasswordStrengthIndicator component showing real-time visual feedback.
@@ -1006,64 +1003,6 @@ class VauchiRepository {
     /// Get suggested label names
     func getSuggestedLabels() -> [String] {
         vauchi.getSuggestedLabels()
-    }
-
-    // MARK: - Field Validation Operations
-
-    // Based on: features/field_validation.feature
-
-    /// Validate a contact's field
-    func validateField(contactId: String, fieldId: String, fieldValue: String) throws -> MobileFieldValidation {
-        do {
-            return try vauchi.validateField(contactId: contactId, fieldId: fieldId, fieldValue: fieldValue)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get validation status for a contact's field
-    func getFieldValidationStatus(contactId: String, fieldId: String, fieldValue: String) throws -> MobileValidationStatus {
-        do {
-            return try vauchi.getFieldValidationStatus(contactId: contactId, fieldId: fieldId, fieldValue: fieldValue)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Revoke your validation of a contact's field
-    func revokeFieldValidation(contactId: String, fieldId: String) throws -> Bool {
-        do {
-            return try vauchi.revokeFieldValidation(contactId: contactId, fieldId: fieldId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// List all validations you have made
-    func listMyValidations() throws -> [MobileFieldValidation] {
-        do {
-            return try vauchi.listMyValidations()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Check if you have validated a specific field
-    func hasValidatedField(contactId: String, fieldId: String) throws -> Bool {
-        do {
-            return try vauchi.hasValidatedField(contactId: contactId, fieldId: fieldId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get the validation count for a field
-    func getFieldValidationCount(contactId: String, fieldId: String) throws -> UInt32 {
-        do {
-            return try vauchi.getFieldValidationCount(contactId: contactId, fieldId: fieldId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
     }
 
     // MARK: - Exchange Operations

@@ -94,7 +94,6 @@
 		6B88FFA2E0ED30C5C6BD724E /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D65C152771F552C641B6A1 /* Models.swift */; };
 		6C775CA748C7BDD8C00321F0 /* testHomeViewWithFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = AE391D2B30E4ECCA0C1161B7 /* testHomeViewWithFields.1.png */; };
 		6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C859B6215BADD6A45480D9F /* LocalizationService.swift */; };
-		6EB33DF7D6BD4A8CCC6A8075 /* ValidationBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4A76E62A085CC5836324B5 /* ValidationBadgeView.swift */; };
 		7017670F8C2EDE1BDBDDAA7B /* testHelpView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 367C77DA03F258D4B1D9C6FF /* testHelpView.1.png */; };
 		71CABD3B8764AE19DD69EE44 /* testInfoPanelWithoutIcon.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 32949B7AFAC3435ABA7D93FD /* testInfoPanelWithoutIcon.1.png */; };
 		7230742E816AC8FFCD0F3284 /* ProximityVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16ECAB2250253E9F51032786 /* ProximityVerificationView.swift */; };
@@ -326,7 +325,6 @@
 		79B16A2E56FA9B8FA0C9F628 /* testCardPreviewMinimal.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCardPreviewMinimal.1.png; sourceTree = "<group>"; };
 		7BDCD05EC305C6B51CC0DF9E /* testToggleListAllSelected.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testToggleListAllSelected.1.png; sourceTree = "<group>"; };
 		7D255A687EB281C01D297ED7 /* VauchiSnapshotTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		7E4A76E62A085CC5836324B5 /* ValidationBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationBadgeView.swift; sourceTree = "<group>"; };
 		7ECC96545C3966B83B1D1AC7 /* VauchiTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		84CF989EA84DBE8A9F43E05D /* ThemeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeService.swift; sourceTree = "<group>"; };
 		852C63AD7ECE19A3177E137A /* SettingsServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsServiceTests.swift; sourceTree = "<group>"; };
@@ -692,7 +690,6 @@
 				2C2D8422E9B837A1B336A071 /* SetupView.swift */,
 				6D4A1EE447C60A79208FE622 /* SocialGraphView.swift */,
 				63998AEE54EB0461450DE0AF /* ThemeSettingsView.swift */,
-				7E4A76E62A085CC5836324B5 /* ValidationBadgeView.swift */,
 				08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */,
 				E187C8E8E4D2A6C1CDA025AA /* Components */,
 				2CBD4B5D0F233D7B3EA59CED /* Onboarding */,
@@ -1121,7 +1118,6 @@
 				2D0728F99D4DBB3C8491C25B /* ThemeService.swift in Sources */,
 				C2AB3CF694C96461836AADB2 /* ThemeSettingsView.swift in Sources */,
 				7934FCCF6F474F903773F82C /* ToggleListView.swift in Sources */,
-				6EB33DF7D6BD4A8CCC6A8075 /* ValidationBadgeView.swift in Sources */,
 				2F7D817E60BDE6223F5E0484 /* VauchiApp.swift in Sources */,
 				AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */,
 				5DB1F56C8F6BC86226B8180F /* VauchiViewModel.swift in Sources */,
