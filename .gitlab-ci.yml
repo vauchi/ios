@@ -227,12 +227,16 @@ update:bindings-version:
         exit 0
       fi
 
-      # Create branch and update version in project.yml
-      git checkout -b "$BRANCH"
+      # Capture old version before updating.
       # Update VauchiPlatform dependency to exact version pin.
       # Handles: branch: main, from: "x.y.z", or version: "x.y.z"
       LINE=$(grep -n "vauchi-platform-swift" project.yml | head -1 | cut -d: -f1)
       NEXT=$((LINE + 1))
+      OLD_VERSION=$(sed -n "${NEXT}p" project.yml | sed 's/.*"\(.*\)"/\1/')
+      echo "Old version: $OLD_VERSION → New version: $BINDINGS_VERSION"
+
+      # Create branch and update version in project.yml
+      git checkout -b "$BRANCH"
       CURRENT=$(sed -n "${NEXT}p" project.yml)
       if echo "$CURRENT" | grep -q 'branch:'; then
         sed -i "" "${NEXT}s/branch: .*/version: \"${BINDINGS_VERSION}\"/" project.yml
@@ -252,19 +256,82 @@ update:bindings-version:
       command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
       xcodegen generate
 
+      # --- Removed-symbol check (advisory) ---
+      # Compare old and new binding source to detect removed functions.
+      # If consumer code still references removed symbols, mark MR as Draft.
+      REMOVED_WARNING=""
+      MARK_DRAFT=false
+      PLATFORM_REPO="https://gitlab.com/vauchi/vauchi-platform-swift.git"
+      BINDING_PATH="Sources/VauchiPlatform/vauchi_platform.swift"
+
+      if [ -n "$OLD_VERSION" ] && [ "$OLD_VERSION" != "$BINDINGS_VERSION" ]; then
+        echo "Checking for removed symbols between $OLD_VERSION and $BINDINGS_VERSION..."
+        mkdir -p /tmp/binding-check
+        OLD_BINDING="/tmp/binding-check/old.swift"
+        NEW_BINDING="/tmp/binding-check/new.swift"
+
+        # Fetch binding files from both versions (shallow, single-file)
+        curl -sf "${PLATFORM_REPO%.git}/-/raw/v${OLD_VERSION}/${BINDING_PATH}" > "$OLD_BINDING" 2>/dev/null || \
+          curl -sf "${PLATFORM_REPO%.git}/-/raw/${OLD_VERSION}/${BINDING_PATH}" > "$OLD_BINDING" 2>/dev/null || true
+        curl -sf "${PLATFORM_REPO%.git}/-/raw/v${BINDINGS_VERSION}/${BINDING_PATH}" > "$NEW_BINDING" 2>/dev/null || \
+          curl -sf "${PLATFORM_REPO%.git}/-/raw/${BINDINGS_VERSION}/${BINDING_PATH}" > "$NEW_BINDING" 2>/dev/null || true
+
+        if [ -s "$OLD_BINDING" ] && [ -s "$NEW_BINDING" ]; then
+          # Extract public func/var names from each version
+          grep -oE '(open |public )?func [a-zA-Z_][a-zA-Z0-9_]*' "$OLD_BINDING" | sed 's/.* //' | sort -u > /tmp/binding-check/old_funcs
+          grep -oE '(open |public )?func [a-zA-Z_][a-zA-Z0-9_]*' "$NEW_BINDING" | sed 's/.* //' | sort -u > /tmp/binding-check/new_funcs
+
+          # Find functions removed in the new version
+          REMOVED_FUNCS=$(comm -23 /tmp/binding-check/old_funcs /tmp/binding-check/new_funcs)
+
+          if [ -n "$REMOVED_FUNCS" ]; then
+            echo "Removed functions: $(echo "$REMOVED_FUNCS" | tr '\n' ', ')"
+            STALE_REFS=""
+            while IFS= read -r func_name; do
+              [ -z "$func_name" ] && continue
+              # Search consumer source (excluding build artifacts and tests)
+              if grep -rq "$func_name" Vauchi/ 2>/dev/null; then
+                STALE_REFS="${STALE_REFS}- \`${func_name}()\` — still referenced in consumer code\n"
+                echo "  STALE: $func_name found in consumer source"
+              fi
+            done <<< "$REMOVED_FUNCS"
+
+            if [ -n "$STALE_REFS" ]; then
+              MARK_DRAFT=true
+              REMOVED_WARNING="\\n\\n⚠️ **Removed symbols still referenced in consumer code:**\\n${STALE_REFS}\\nCallsite updates are needed before this MR can merge."
+              echo "WARNING: Stale callsites detected — MR will be created as Draft"
+            else
+              echo "No stale callsites found — all removed symbols are unused"
+            fi
+          else
+            echo "No functions were removed in this version"
+          fi
+        else
+          echo "Could not fetch binding files for comparison — skipping symbol check"
+        fi
+        rm -rf /tmp/binding-check
+      fi
+
       git add project.yml Vauchi.xcodeproj/
       git commit -m "chore: Bump vauchi-platform-swift to $BINDINGS_VERSION"
       git push -u origin "$BRANCH"
 
       # Create MR via GitLab API
+      MR_TITLE="chore: Bump vauchi-platform-swift to $BINDINGS_VERSION"
+      if [ "$MARK_DRAFT" = "true" ]; then
+        MR_TITLE="Draft: $MR_TITLE"
+      fi
+
+      MR_DESCRIPTION="Automated version bump triggered by vauchi-platform-swift release.\\n\\nUpdates VauchiPlatform SPM version to \`$BINDINGS_VERSION\` (from \`$OLD_VERSION\`).${REMOVED_WARNING}\\n\\n---\\n_This MR was created automatically by CI._"
+
       MR_RESPONSE=$(curl -s --request POST \
         --header "PRIVATE-TOKEN: ${PROJECT_ACCESS_TOKEN}" \
         --header "Content-Type: application/json" \
         --data "{
           \"source_branch\": \"$BRANCH\",
           \"target_branch\": \"main\",
-          \"title\": \"chore: Bump vauchi-platform-swift to $BINDINGS_VERSION\",
-          \"description\": \"Automated version bump triggered by vauchi-platform-swift release.\\n\\nUpdates VauchiPlatform SPM minimum version to \`$BINDINGS_VERSION\`.\\n\\n---\\n_This MR was created automatically by CI._\",
+          \"title\": \"$MR_TITLE\",
+          \"description\": \"$MR_DESCRIPTION\",
           \"remove_source_branch\": true
         }" \
         "${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/merge_requests")
@@ -274,17 +341,21 @@ update:bindings-version:
       if [ -n "$MR_URL" ] && [ -n "$MR_IID" ]; then
         echo "Created MR: $MR_URL"
 
-        # Enable auto-merge so the MR merges automatically when CI passes
-        echo "Enabling auto-merge..."
-        MERGE_RESPONSE=$(curl -s --request PUT \
-          --header "PRIVATE-TOKEN: ${PROJECT_ACCESS_TOKEN}" \
-          "${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${MR_IID}/merge?merge_when_pipeline_succeeds=true")
-        MERGE_STATUS=$(echo "$MERGE_RESPONSE" | jq -r '.merge_when_pipeline_succeeds // empty')
-        if [ "$MERGE_STATUS" = "true" ]; then
-          echo "Auto-merge enabled — MR will merge when pipeline succeeds"
+        # Only enable auto-merge if no stale callsites were detected
+        if [ "$MARK_DRAFT" = "true" ]; then
+          echo "Skipping auto-merge — MR created as Draft due to stale callsites"
         else
-          echo "WARNING: Could not enable auto-merge (may require maintainer token)"
-          echo "  Response: $(echo "$MERGE_RESPONSE" | jq -r '.message // .error // "unknown"')"
+          echo "Enabling auto-merge..."
+          MERGE_RESPONSE=$(curl -s --request PUT \
+            --header "PRIVATE-TOKEN: ${PROJECT_ACCESS_TOKEN}" \
+            "${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/merge_requests/${MR_IID}/merge?merge_when_pipeline_succeeds=true")
+          MERGE_STATUS=$(echo "$MERGE_RESPONSE" | jq -r '.merge_when_pipeline_succeeds // empty')
+          if [ "$MERGE_STATUS" = "true" ]; then
+            echo "Auto-merge enabled — MR will merge when pipeline succeeds"
+          else
+            echo "WARNING: Could not enable auto-merge (may require maintainer token)"
+            echo "  Response: $(echo "$MERGE_RESPONSE" | jq -r '.message // .error // "unknown"')"
+          fi
         fi
       else
         echo "MR creation response: $MR_RESPONSE"
