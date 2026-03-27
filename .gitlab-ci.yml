@@ -878,3 +878,5 @@ pages:
 
 github-mirror:
   extends: .github-mirror
+  variables:
+    GITHUB_MIRROR_LFS_INCLUDE: "*.a"
