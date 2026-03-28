@@ -496,8 +496,9 @@ build:debug:
     - rm -f Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
     # SPM's internal binary target downloader hangs silently on large
     # files from GitLab's package registry (post-mortem 2026-03-28).
-    # Strategy: pre-download with curl, let SPM resolve with timeout,
-    # if it hangs on binary download → rewrite Package.swift to file:// and retry.
+    # Strategy: run build with 120s timeout (portable bg+kill, macOS
+    # has no GNU timeout). If it hangs on binary download, kill it,
+    # rewrite the now-checked-out Package.swift to file:// URL, retry.
     - |
       PLATFORM_VERSION=$(sed -n '/VauchiPlatform:/{n;n;s/.*version: *"\([^"]*\)".*/\1/p;}' project.yml)
       if [ -z "$PLATFORM_VERSION" ]; then
@@ -508,19 +509,22 @@ build:debug:
       curl -fsSL --retry 3 "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${PLATFORM_VERSION}/VauchiPlatformFFI.xcframework.zip" -o "$ZIP_PATH"
       CHECKSUM=$(shasum -a 256 "$ZIP_PATH" | cut -d' ' -f1)
       echo "Downloaded $(du -h "$ZIP_PATH" | cut -f1), checksum: ${CHECKSUM}"
-    - |
-      PLATFORM_VERSION=$(sed -n '/VauchiPlatform:/{n;n;s/.*version: *"\([^"]*\)".*/\1/p;}' project.yml)
-      ZIP_PATH="/tmp/VauchiPlatformFFI-${PLATFORM_VERSION}.xcframework.zip"
-      CHECKSUM=$(shasum -a 256 "$ZIP_PATH" | cut -d' ' -f1)
-      if timeout 120 xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build; then
+      # Attempt build with 120s timeout (portable — no GNU timeout on macOS)
+      xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build &
+      BUILD_PID=$!
+      ( sleep 120 && kill $BUILD_PID 2>/dev/null ) &
+      WATCHDOG_PID=$!
+      if wait $BUILD_PID 2>/dev/null; then
+        kill $WATCHDOG_PID 2>/dev/null; wait $WATCHDOG_PID 2>/dev/null
         echo "Build succeeded"
       else
-        echo "Build timed out — rewriting Package.swift to file:// and retrying"
+        kill $WATCHDOG_PID 2>/dev/null; wait $WATCHDOG_PID 2>/dev/null
+        echo "Build timed out — rewriting Package.swift to file://"
         PKG_SWIFT=".spm-packages/checkouts/vauchi-platform-swift/Package.swift"
         sed -i.bak "s|url: \"https://.*xcframework.zip\"|url: \"file://${ZIP_PATH}\"|" "$PKG_SWIFT"
         sed -i.bak "s|checksum: checksum|checksum: \"${CHECKSUM}\"|" "$PKG_SWIFT"
         rm -f "${PKG_SWIFT}.bak"
-        echo "Rewrote Package.swift → file://${ZIP_PATH}"
+        echo "Rewrote → file://${ZIP_PATH}"
         xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
       fi
   artifacts:
