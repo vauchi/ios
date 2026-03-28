@@ -496,31 +496,33 @@ build:debug:
     - rm -f Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
     # SPM's internal binary target downloader hangs silently on large
     # files from GitLab's package registry (post-mortem 2026-03-28).
-    # Workaround: download with curl, then rewrite the checked-out
-    # Package.swift to use a file:// URL so SPM reads from local disk.
+    # Strategy: pre-download with curl, let SPM resolve with timeout,
+    # if it hangs on binary download → rewrite Package.swift to file:// and retry.
     - |
       PLATFORM_VERSION=$(sed -n '/VauchiPlatform:/{n;n;s/.*version: *"\([^"]*\)".*/\1/p;}' project.yml)
       if [ -z "$PLATFORM_VERSION" ]; then
         PLATFORM_VERSION=$(sed -n '/VauchiPlatform:/{n;n;s/.*from: *"\([^"]*\)".*/\1/p;}' project.yml)
       fi
-      if [ -n "$PLATFORM_VERSION" ]; then
-        ZIP_PATH="/tmp/VauchiPlatformFFI-${PLATFORM_VERSION}.xcframework.zip"
-        echo "Downloading VauchiPlatformFFI.xcframework v${PLATFORM_VERSION} with curl..."
-        curl -fsSL --retry 3 "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${PLATFORM_VERSION}/VauchiPlatformFFI.xcframework.zip" -o "$ZIP_PATH"
-        CHECKSUM=$(shasum -a 256 "$ZIP_PATH" | cut -d' ' -f1)
-        echo "Downloaded $(du -h "$ZIP_PATH" | cut -f1), checksum: ${CHECKSUM}"
-        # Rewrite Package.swift binary target to use local file
+      ZIP_PATH="/tmp/VauchiPlatformFFI-${PLATFORM_VERSION}.xcframework.zip"
+      echo "Downloading VauchiPlatformFFI.xcframework v${PLATFORM_VERSION}..."
+      curl -fsSL --retry 3 "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${PLATFORM_VERSION}/VauchiPlatformFFI.xcframework.zip" -o "$ZIP_PATH"
+      CHECKSUM=$(shasum -a 256 "$ZIP_PATH" | cut -d' ' -f1)
+      echo "Downloaded $(du -h "$ZIP_PATH" | cut -f1), checksum: ${CHECKSUM}"
+    - |
+      PLATFORM_VERSION=$(sed -n '/VauchiPlatform:/{n;n;s/.*version: *"\([^"]*\)".*/\1/p;}' project.yml)
+      ZIP_PATH="/tmp/VauchiPlatformFFI-${PLATFORM_VERSION}.xcframework.zip"
+      CHECKSUM=$(shasum -a 256 "$ZIP_PATH" | cut -d' ' -f1)
+      if timeout 120 xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build; then
+        echo "Build succeeded"
+      else
+        echo "Build timed out — rewriting Package.swift to file:// and retrying"
         PKG_SWIFT=".spm-packages/checkouts/vauchi-platform-swift/Package.swift"
-        if [ -f "$PKG_SWIFT" ]; then
-          sed -i.bak "s|url: \"https://.*xcframework.zip\"|url: \"file://${ZIP_PATH}\"|" "$PKG_SWIFT"
-          sed -i.bak "s|checksum: checksum|checksum: \"${CHECKSUM}\"|" "$PKG_SWIFT"
-          rm -f "${PKG_SWIFT}.bak"
-          echo "Rewrote Package.swift to use local file:// URL"
-        else
-          echo "WARNING: Package.swift not found at ${PKG_SWIFT} — SPM will download"
-        fi
+        sed -i.bak "s|url: \"https://.*xcframework.zip\"|url: \"file://${ZIP_PATH}\"|" "$PKG_SWIFT"
+        sed -i.bak "s|checksum: checksum|checksum: \"${CHECKSUM}\"|" "$PKG_SWIFT"
+        rm -f "${PKG_SWIFT}.bak"
+        echo "Rewrote Package.swift → file://${ZIP_PATH}"
+        xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
       fi
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
   artifacts:
     paths:
       - build/Build/Products/Debug-iphonesimulator/
