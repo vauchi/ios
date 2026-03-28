@@ -1554,24 +1554,24 @@ class VauchiViewModel: ObservableObject {
         return try repository.exportGdprData()
     }
 
-    /// Schedule account deletion with grace period
-    func scheduleAccountDeletion() async throws {
+    /// Schedule identity deletion with grace period
+    func scheduleIdentityDeletion() async throws {
         guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
-        let info = try repository.scheduleAccountDeletion()
+        let info = try repository.scheduleIdentityDeletion()
         deletionState = info.state
         deletionInfo = info
     }
 
-    /// Cancel a scheduled account deletion
-    func cancelAccountDeletion() async throws {
+    /// Cancel a scheduled identity deletion
+    func cancelIdentityDeletion() async throws {
         guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
-        try repository.cancelAccountDeletion()
+        try repository.cancelIdentityDeletion()
         deletionState = .none
         deletionInfo = nil
     }

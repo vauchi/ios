@@ -247,7 +247,7 @@ struct AccountDeletionView: View {
         errorMessage = nil
 
         do {
-            try await viewModel.scheduleAccountDeletion()
+            try await viewModel.scheduleIdentityDeletion()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -257,7 +257,7 @@ struct AccountDeletionView: View {
         errorMessage = nil
 
         do {
-            try await viewModel.cancelAccountDeletion()
+            try await viewModel.cancelIdentityDeletion()
         } catch {
             errorMessage = error.localizedDescription
         }

@@ -1773,20 +1773,20 @@ class VauchiRepository {
         }
     }
 
-    /// Schedule account deletion with grace period
-    func scheduleAccountDeletion() throws -> VauchiDeletionInfo {
+    /// Schedule identity deletion with grace period
+    func scheduleIdentityDeletion() throws -> VauchiDeletionInfo {
         do {
-            let info = try vauchi.scheduleAccountDeletion()
+            let info = try vauchi.scheduleIdentityDeletion()
             return VauchiDeletionInfo(from: info)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
     }
 
-    /// Cancel a scheduled account deletion
-    func cancelAccountDeletion() throws {
+    /// Cancel a scheduled identity deletion
+    func cancelIdentityDeletion() throws {
         do {
-            try vauchi.cancelAccountDeletion()
+            try vauchi.cancelIdentityDeletion()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
