@@ -494,6 +494,20 @@ build:debug:
     - rm -f .spm-packages/workspace-state.json
     - rm -rf .spm-packages/artifacts/
     - rm -f Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+    # Pre-download xcframework binary target with curl — SPM's internal
+    # downloader hangs silently on large binary targets from GitLab's
+    # package registry (post-mortem 2026-03-28). Curl is reliable.
+    - |
+      PLATFORM_VERSION=$(sed -n 's/.*version: "\([^"]*\)".*/\1/p' .spm-packages/checkouts/vauchi-platform-swift/Package.swift 2>/dev/null || echo "")
+      if [ -n "$PLATFORM_VERSION" ]; then
+        echo "Pre-downloading VauchiPlatformFFI.xcframework v${PLATFORM_VERSION}..."
+        ARTIFACT_DIR=".spm-packages/artifacts/vauchi-platform-swift/VauchiPlatformFFI"
+        mkdir -p "$ARTIFACT_DIR"
+        curl -fsSL "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${PLATFORM_VERSION}/VauchiPlatformFFI.xcframework.zip" -o /tmp/xcframework.zip
+        unzip -qo /tmp/xcframework.zip -d "$ARTIFACT_DIR"
+        rm -f /tmp/xcframework.zip
+        echo "Pre-download complete: $(du -sh "$ARTIFACT_DIR" | cut -f1)"
+      fi
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
   artifacts:
     paths:
