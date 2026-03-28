@@ -489,7 +489,10 @@ build:debug:
     # SPM resolve/build never advances branch pins — it honors Package.resolved
     # and workspace-state.json as lock files. Delete both so SPM re-resolves to
     # the latest branch tip. The cached bare repos stay warm so this is fast.
+    # Also clear extracted binary artifacts — stale xcframework binaries cause
+    # xcodebuild to hang silently when the checksum changes (post-mortem 2026-03-28).
     - rm -f .spm-packages/workspace-state.json
+    - rm -rf .spm-packages/artifacts/
     - rm -f Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
   artifacts:
