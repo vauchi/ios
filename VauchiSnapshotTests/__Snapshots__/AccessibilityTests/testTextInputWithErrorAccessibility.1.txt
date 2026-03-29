@@ -1,0 +1,2 @@
+[   AF    ! WLU ] h=--- v=--- _TtGC7SwiftUI13NSHostingViewV6Vauchi22TextInputComponentView_ f=(0,0,480,400) b=(-) => <NSViewBackingLayer>
+A=autoresizesSubviews, C=canDrawConcurrently, D=needsDisplay, F=flipped, G=gstate, H=hidden (h=by ancestor), L=needsLayout (l=child needsLayout), U=needsUpdateConstraints (u=child needsUpdateConstraints), O=opaque, P=preservesContentDuringLiveResize, S=scaled/rotated, W=wantsLayer (w=ancestor wantsLayer), V=needsVibrancy (v=allowsVibrancy), #=has surface
