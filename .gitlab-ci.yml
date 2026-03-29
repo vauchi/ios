@@ -563,7 +563,7 @@ build:debug:
       # Heartbeat: print elapsed time every 120s so CI log shows progress
       ( while true; do sleep 120; printf '  [build heartbeat] %s\n' "$(date +%H:%M:%S)"; done ) &
       HEARTBEAT=$!
-      trap 'kill $HEARTBEAT 2>/dev/null' EXIT
+      trap 'kill $HEARTBEAT 2>/dev/null || true' EXIT
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
         -configuration Debug \
         -destination 'generic/platform=iOS Simulator' \
