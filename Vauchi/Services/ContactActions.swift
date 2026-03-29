@@ -8,12 +8,13 @@
 
 import Foundation
 import UIKit
+import VauchiPlatform
 
 /// Bridge to vauchi-core's URL safety validator. Defined at file scope
-/// so the generated binding's isSafeUrl(url:) resolves unambiguously —
-/// inside ContactActions, the enum's own methods shadow module-level names.
+/// so the VauchiPlatform binding resolves unambiguously — inside
+/// ContactActions, the enum's own methods shadow the module-level name.
 private func coreIsSafeUrl(_ url: String) -> Bool {
-    isSafeUrl(url: url)
+    VauchiPlatform.isSafeUrl(url: url)
 }
 
 /// Service for handling contact field actions (call, email, open URL, etc.)
