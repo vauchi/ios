@@ -160,12 +160,14 @@ enum ContactActions {
 
     /// Check if a URL is safe to open (delegates to vauchi-core binding)
     static func isSafeUrl(_ urlString: String) -> Bool {
-        isSafeUrl(url: urlString)
+        // Module-qualify to bypass local name resolution — Swift resolves
+        // to this enum's own methods before checking module-level functions.
+        Vauchi.isSafeUrl(url: urlString)
     }
 
     /// Check if a URL is safe to open (delegates to vauchi-core binding)
     static func isSafeUrl(_ url: URL) -> Bool {
-        isSafeUrl(url: url.absoluteString)
+        Vauchi.isSafeUrl(url: url.absoluteString)
     }
 
     // MARK: - Available Actions
