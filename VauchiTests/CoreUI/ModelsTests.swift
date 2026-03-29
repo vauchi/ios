@@ -564,20 +564,15 @@ final class ModelsTests: XCTestCase {
 
     // MARK: - Unknown Variant Handling
 
-    func testUnknownComponentVariantThrows() {
+    func testUnknownComponentVariantDecodesAsUnknown() throws {
         let json = Data("""
         {"UnknownWidget": {"id": "x"}}
         """.utf8)
 
-        XCTAssertThrowsError(try coreJSONDecoder.decode(Component.self, from: json)) { error in
-            guard case let DecodingError.dataCorrupted(context) = error else {
-                XCTFail("Expected DecodingError.dataCorrupted, got \(error)")
-                return
-            }
-            XCTAssertTrue(
-                context.debugDescription.contains("Unknown Component variant"),
-                "Expected 'Unknown Component variant' in error, got: \(context.debugDescription)"
-            )
+        let component = try coreJSONDecoder.decode(Component.self, from: json)
+        guard case .unknown = component else {
+            XCTFail("Expected .unknown, got \(component)")
+            return
         }
     }
 
