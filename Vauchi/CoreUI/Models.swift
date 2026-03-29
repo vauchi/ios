@@ -337,6 +337,7 @@ enum SettingsItemKind: Decodable {
     case value(value: String)
     case link(detail: String?)
     case destructive(label: String)
+    case unknown
 
     init(from decoder: Decoder) throws {
         // Serde produces: {"Toggle": {"enabled": true}}, etc.
@@ -354,12 +355,8 @@ enum SettingsItemKind: Decodable {
             let data = try container.decode(DestructiveData.self, forKey: .destructive)
             self = .destructive(label: data.label)
         } else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(
-                    codingPath: decoder.codingPath,
-                    debugDescription: "Unknown SettingsItemKind"
-                )
-            )
+            // Unknown settings item kind from newer core — show as link
+            self = .unknown
         }
     }
 
