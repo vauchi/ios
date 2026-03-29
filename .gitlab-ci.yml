@@ -239,8 +239,9 @@ update:bindings-version:
       OLD_VERSION=$(sed -n "${NEXT}p" project.yml | sed 's/.*"\(.*\)"/\1/')
       echo "Old version: $OLD_VERSION → New version: $BINDINGS_VERSION"
 
-      # Create branch and update version in project.yml
-      git checkout -b "$BRANCH"
+      # Create branch and update version in project.yml (-B force-creates
+      # if stale local branch exists from a previous failed pipeline retry)
+      git checkout -B "$BRANCH"
       CURRENT=$(sed -n "${NEXT}p" project.yml)
       if echo "$CURRENT" | grep -q 'branch:'; then
         sed -i "" "${NEXT}s/branch: .*/version: \"${BINDINGS_VERSION}\"/" project.yml
