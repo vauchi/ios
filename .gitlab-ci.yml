@@ -219,8 +219,10 @@ update:bindings-version:
       # Configure git — use PROJECT_ACCESS_TOKEN for push (CI_JOB_TOKEN from
       # upstream triggers lacks write access to this repo).
       # PROJECT_ACCESS_TOKEN is set at group level in Settings > CI/CD > Variables.
-      git config user.email "${GITLAB_USER_EMAIL}"
-      git config user.name "${GITLAB_USER_NAME}"
+      # Use fixed CI identity — GITLAB_USER_EMAIL is the triggering user's
+      # personal email which the bot account cannot push commits for.
+      git config user.email "ci@vauchi.app"
+      git config user.name "Vauchi CI"
       git remote set-url origin "https://vauchi-gitlab-runner:${PROJECT_ACCESS_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
 
       # Check if branch already exists on remote
