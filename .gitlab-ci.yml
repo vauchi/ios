@@ -510,13 +510,51 @@ build:debug:
     - echo "── [$(date +%H:%M:%S)] xcodegen ──"
     - rm -rf Vauchi.xcodeproj
     - xcodegen generate
-    # SPM resolve/build never advances branch pins — it honors Package.resolved
-    # and workspace-state.json as lock files. Delete both so SPM re-resolves to
-    # the latest branch tip. The cached bare repos stay warm so this is fast.
+    # Delete lock files so SPM re-resolves to latest versions.
+    # Keep .spm-packages/artifacts/ — cached binary artifacts prevent
+    # re-download (SPM URLSession can't authenticate with GitLab).
     - rm -f .spm-packages/workspace-state.json
-    - rm -rf .spm-packages/artifacts/
     - rm -f Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
-    - echo "── [$(date +%H:%M:%S)] xcodebuild (SPM resolve + compile) ──"
+    - echo "── [$(date +%H:%M:%S)] SPM resolve ──"
+    - |
+      # SPM URLSession cannot authenticate with GitLab's package registry
+      # for binary target downloads (.netrc not used by URLSession).
+      # Resolve with timeout — if binary is cached, completes in <10s.
+      # If it hangs on download, fall back to authenticated curl.
+      xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
+        -clonedSourcePackagesDirPath .spm-packages \
+        -resolvePackageDependencies &
+      RESOLVE_PID=$!
+      ( sleep 30 && kill $RESOLVE_PID 2>/dev/null ) &
+      WATCHDOG=$!
+      if wait $RESOLVE_PID 2>/dev/null; then
+        kill $WATCHDOG 2>/dev/null; wait $WATCHDOG 2>/dev/null
+        echo "  SPM resolve OK"
+      else
+        kill $WATCHDOG 2>/dev/null; wait $WATCHDOG 2>/dev/null
+        echo "  SPM resolve timed out — downloading XCFramework with curl"
+        V=$(sed -n '/vauchi-platform-swift/{n;s/.*"\([^"]*\)".*/\1/p;}' project.yml)
+        if [ -n "$V" ]; then
+          ZIP="/tmp/VauchiPlatformFFI-${V}.xcframework.zip"
+          curl -fsSL --max-time 60 --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+            "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
+            -o "$ZIP"
+          CS=$(shasum -a 256 "$ZIP" | cut -d' ' -f1)
+          echo "  Downloaded $(du -h "$ZIP" | cut -f1), sha256: ${CS}"
+          PKG=".spm-packages/checkouts/vauchi-platform-swift/Package.swift"
+          sed -i.bak 's|url: "https://[^"]*xcframework.zip"|url: "file://'"${ZIP}"'"|' "$PKG"
+          sed -i.bak 's|checksum: "[^"]*"|checksum: "'"${CS}"'"|' "$PKG"
+          rm -f "${PKG}.bak"
+          xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
+            -clonedSourcePackagesDirPath .spm-packages \
+            -resolvePackageDependencies
+          echo "  SPM resolve OK (curl fallback)"
+        else
+          echo "  ERROR: Could not extract platform version from project.yml"
+          exit 1
+        fi
+      fi
+    - echo "── [$(date +%H:%M:%S)] xcodebuild compile ──"
     - |
       # Heartbeat: print elapsed time every 120s so CI log shows progress
       ( while true; do sleep 120; printf '  [build heartbeat] %s\n' "$(date +%H:%M:%S)"; done ) &
