@@ -9,6 +9,13 @@
 import Foundation
 import UIKit
 
+/// Bridge to vauchi-core's URL safety validator. Defined at file scope
+/// so the generated binding's isSafeUrl(url:) resolves unambiguously —
+/// inside ContactActions, the enum's own methods shadow module-level names.
+private func coreIsSafeUrl(_ url: String) -> Bool {
+    isSafeUrl(url: url)
+}
+
 /// Service for handling contact field actions (call, email, open URL, etc.)
 enum ContactActions {
     // MARK: - Action Types
@@ -160,14 +167,12 @@ enum ContactActions {
 
     /// Check if a URL is safe to open (delegates to vauchi-core binding)
     static func isSafeUrl(_ urlString: String) -> Bool {
-        // Module-qualify to bypass local name resolution — Swift resolves
-        // to this enum's own methods before checking module-level functions.
-        Vauchi.isSafeUrl(url: urlString)
+        coreIsSafeUrl(urlString)
     }
 
     /// Check if a URL is safe to open (delegates to vauchi-core binding)
     static func isSafeUrl(_ url: URL) -> Bool {
-        Vauchi.isSafeUrl(url: url.absoluteString)
+        coreIsSafeUrl(url.absoluteString)
     }
 
     // MARK: - Available Actions
