@@ -99,14 +99,13 @@ workflow:
     GIT_DEPTH: "20"
   before_script:
     - echo "Xcode $(xcodebuild -version | head -1)"
-    # Self-healing: remove stale keychain entries for gitlab.com.
-    # Duplicate/locked entries cause SPM binary target downloads to
-    # crash with "fatalError" (post-mortem 2026-03-28).
-    - security delete-internet-password -s gitlab.com 2>/dev/null || true
-    # Authenticate SPM binary target downloads from GitLab's private
-    # package registry. Without this, URLSession hangs indefinitely
-    # because CI_JOB_TOKEN only covers git, not HTTP downloads.
-    # Token is job-scoped and expires after the job completes.
+    # Authenticate SPM binary target downloads from GitLab's private package registry.
+    # URLSession uses the keychain (not .netrc) for HTTP auth challenges.
+    # 1. Delete ALL stale entries (duplicates cause fatalError — post-mortem 2026-03-28)
+    # 2. Add fresh entry with current CI_JOB_TOKEN (-A = allow all apps, incl. xcodebuild)
+    # 3. Keep .netrc as fallback for git operations
+    - while security delete-internet-password -s gitlab.com 2>/dev/null; do :; done
+    - security add-internet-password -s gitlab.com -a gitlab-ci-token -w "${CI_JOB_TOKEN}" -r htps -A 2>/dev/null || true
     - echo "machine gitlab.com login gitlab-ci-token password ${CI_JOB_TOKEN}" > ~/.netrc && chmod 600 ~/.netrc
     - |
       if ! xcrun simctl list runtimes 2>/dev/null | grep -q "iOS.*SimRuntime"; then
@@ -540,13 +539,14 @@ build:debug:
           curl -fsSL --max-time 60 --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
             "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
             -o "$ZIP"
-          CS=$(shasum -a 256 "$ZIP" | cut -d' ' -f1)
-          echo "  Downloaded $(du -h "$ZIP" | cut -f1), sha256: ${CS}"
-          # Patch Package.swift: replace URL with local file, replace checksum variable
-          # Package.swift uses: let checksum = "hex..." and checksum: checksum (bare var)
-          PKG=".spm-packages/checkouts/vauchi-platform-swift/Package.swift"
-          sed -i.bak 's|url: "https://[^"]*xcframework.zip"|url: "file://'"${ZIP}"'"|' "$PKG"
-          sed -i.bak 's|^let checksum = "[^"]*"|let checksum = "'"${CS}"'"|' "$PKG"
+          echo "  Downloaded $(du -h "$ZIP" | cut -f1)"
+          # Extract XCFramework and patch Package.swift to use local path
+          # (SPM rejects file:// URLs — only https allowed for binaryTarget url)
+          CHECKOUT=".spm-packages/checkouts/vauchi-platform-swift"
+          unzip -o "$ZIP" -d "$CHECKOUT" > /dev/null
+          PKG="$CHECKOUT/Package.swift"
+          sed -i.bak 's|url: "https://[^"]*xcframework.zip",|path: "VauchiPlatformFFI.xcframework"|' "$PKG"
+          sed -i.bak '/checksum: checksum/d' "$PKG"
           rm -f "${PKG}.bak"
           xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
             -clonedSourcePackagesDirPath .spm-packages \
