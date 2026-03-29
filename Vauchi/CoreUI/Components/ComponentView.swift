@@ -69,6 +69,12 @@ struct ComponentView: View {
         case .divider:
             Divider()
                 .padding(.vertical, 4)
+
+        case .unknown:
+            // Core sent a component type this shell doesn't know about.
+            // Render as invisible — the screen still works, just missing
+            // one component. User can update the app for full experience.
+            EmptyView()
         }
     }
 }
