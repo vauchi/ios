@@ -180,6 +180,9 @@ auto-tag:version:
 
       echo "Tag ${TAG} does not exist — creating it..."
 
+      # NOTE: GITLAB_USER_EMAIL is safe here — auto-tag runs on same-repo
+      # push (user's own email is verified). Cross-repo triggers use the
+      # API-discovered bot email in update:bindings-version instead.
       git config user.name "${GITLAB_USER_NAME}"
       git config user.email "${GITLAB_USER_EMAIL}"
 
@@ -734,6 +737,8 @@ test:snapshots:record:
     # Switch from detached merge-ref HEAD to the actual branch.
     # CI_JOB_TOKEN auth is auto-configured by GitLab (insteadOf rewrite).
     # Push permissions enabled via project setting (ci_push_repository_for_job_token_allowed).
+    # NOTE: GITLAB_USER_EMAIL is safe here — snapshot register pushes to
+    # the same repo via CI_JOB_TOKEN (user's own email is verified).
     - git config user.name "${GITLAB_USER_NAME}"
     - git config user.email "${GITLAB_USER_EMAIL}"
     - git fetch origin "+refs/heads/${CI_COMMIT_REF_NAME}:refs/heads/${CI_COMMIT_REF_NAME}"
