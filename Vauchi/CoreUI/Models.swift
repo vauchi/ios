@@ -87,13 +87,21 @@ enum Component: Decodable {
     case inlineConfirm(InlineConfirmComponent)
     case editableText(EditableTextComponent)
     case divider
+    /// Unknown component from a newer core version — render as empty space.
+    /// Prevents crash when core adds new component types that this shell
+    /// version doesn't know about. See: design-as-code-plan Phase 2b.
+    case unknown
 
     init(from decoder: Decoder) throws {
-        // Try unit variant first ("Divider")
+        // Try unit variant first ("Divider" or any unknown string)
         if let container = try? decoder.singleValueContainer(),
-           let stringValue = try? container.decode(String.self),
-           stringValue == "Divider" {
-            self = .divider
+           let stringValue = try? container.decode(String.self) {
+            if stringValue == "Divider" {
+                self = .divider
+            } else {
+                // Unknown unit variant — degrade gracefully
+                self = .unknown
+            }
             return
         }
 
@@ -135,12 +143,9 @@ enum Component: Decodable {
         } else if container.contains(.editableText) {
             self = try .editableText(container.decode(EditableTextComponent.self, forKey: .editableText))
         } else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(
-                    codingPath: decoder.codingPath,
-                    debugDescription: "Unknown Component variant"
-                )
-            )
+            // Unknown struct variant — core is newer than this shell.
+            // Degrade gracefully instead of crashing.
+            self = .unknown
         }
     }
 
@@ -332,6 +337,7 @@ enum SettingsItemKind: Decodable {
     case value(value: String)
     case link(detail: String?)
     case destructive(label: String)
+    case unknown
 
     init(from decoder: Decoder) throws {
         // Serde produces: {"Toggle": {"enabled": true}}, etc.
@@ -349,12 +355,8 @@ enum SettingsItemKind: Decodable {
             let data = try container.decode(DestructiveData.self, forKey: .destructive)
             self = .destructive(label: data.label)
         } else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(
-                    codingPath: decoder.codingPath,
-                    debugDescription: "Unknown SettingsItemKind"
-                )
-            )
+            // Unknown settings item kind from newer core — show as link
+            self = .unknown
         }
     }
 
