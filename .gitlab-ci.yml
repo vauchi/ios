@@ -523,6 +523,7 @@ build:debug:
       # If it hangs on download, fall back to authenticated curl.
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
         -clonedSourcePackagesDirPath .spm-packages \
+        -derivedDataPath .derived-data \
         -resolvePackageDependencies &
       RESOLVE_PID=$!
       ( sleep 30 && kill $RESOLVE_PID 2>/dev/null ) &
@@ -541,12 +542,15 @@ build:debug:
             -o "$ZIP"
           CS=$(shasum -a 256 "$ZIP" | cut -d' ' -f1)
           echo "  Downloaded $(du -h "$ZIP" | cut -f1), sha256: ${CS}"
+          # Patch Package.swift: replace URL with local file, replace checksum variable
+          # Package.swift uses: let checksum = "hex..." and checksum: checksum (bare var)
           PKG=".spm-packages/checkouts/vauchi-platform-swift/Package.swift"
           sed -i.bak 's|url: "https://[^"]*xcframework.zip"|url: "file://'"${ZIP}"'"|' "$PKG"
-          sed -i.bak 's|checksum: "[^"]*"|checksum: "'"${CS}"'"|' "$PKG"
+          sed -i.bak 's|^let checksum = "[^"]*"|let checksum = "'"${CS}"'"|' "$PKG"
           rm -f "${PKG}.bak"
           xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
             -clonedSourcePackagesDirPath .spm-packages \
+            -derivedDataPath .derived-data \
             -resolvePackageDependencies
           echo "  SPM resolve OK (curl fallback)"
         else
