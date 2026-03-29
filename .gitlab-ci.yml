@@ -529,10 +529,10 @@ build:debug:
       ( sleep 30 && kill $RESOLVE_PID 2>/dev/null ) &
       WATCHDOG=$!
       if wait $RESOLVE_PID 2>/dev/null; then
-        kill $WATCHDOG 2>/dev/null; wait $WATCHDOG 2>/dev/null
+        kill $WATCHDOG 2>/dev/null || true; wait $WATCHDOG 2>/dev/null || true
         echo "  SPM resolve OK"
       else
-        kill $WATCHDOG 2>/dev/null; wait $WATCHDOG 2>/dev/null
+        kill $WATCHDOG 2>/dev/null || true; wait $WATCHDOG 2>/dev/null || true
         echo "  SPM resolve timed out — downloading XCFramework with curl"
         V=$(sed -n '/vauchi-platform-swift/{n;s/.*"\([^"]*\)".*/\1/p;}' project.yml)
         if [ -n "$V" ]; then
