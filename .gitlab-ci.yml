@@ -98,9 +98,11 @@ workflow:
   variables:
     GIT_DEPTH: "20"
   before_script:
-    # Prebuilts enabled (default) — Xcode 26.4 fixed the
-    # NetrcAuthorizationProvider deadlock that required disabling them.
     - echo "Xcode $(xcodebuild -version | head -1)"
+    # Self-healing: remove stale keychain entries for gitlab.com.
+    # Duplicate/locked entries cause SPM binary target downloads to
+    # crash with "fatalError" (post-mortem 2026-03-28).
+    - security delete-internet-password -s gitlab.com 2>/dev/null || true
     - |
       if ! xcrun simctl list runtimes 2>/dev/null | grep -q "iOS.*SimRuntime"; then
         echo "ERROR: iOS Simulator runtime is not installed."
@@ -489,44 +491,10 @@ build:debug:
     # SPM resolve/build never advances branch pins — it honors Package.resolved
     # and workspace-state.json as lock files. Delete both so SPM re-resolves to
     # the latest branch tip. The cached bare repos stay warm so this is fast.
-    # Also clear extracted binary artifacts — stale xcframework binaries cause
-    # xcodebuild to hang silently when the checksum changes (post-mortem 2026-03-28).
     - rm -f .spm-packages/workspace-state.json
     - rm -rf .spm-packages/artifacts/
     - rm -f Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
-    # SPM's internal binary target downloader hangs silently on large
-    # files from GitLab's package registry (post-mortem 2026-03-28).
-    # Strategy: run build with 120s timeout (portable bg+kill, macOS
-    # has no GNU timeout). If it hangs on binary download, kill it,
-    # rewrite the now-checked-out Package.swift to file:// URL, retry.
-    - |
-      PLATFORM_VERSION=$(sed -n '/VauchiPlatform:/{n;n;s/.*version: *"\([^"]*\)".*/\1/p;}' project.yml)
-      if [ -z "$PLATFORM_VERSION" ]; then
-        PLATFORM_VERSION=$(sed -n '/VauchiPlatform:/{n;n;s/.*from: *"\([^"]*\)".*/\1/p;}' project.yml)
-      fi
-      ZIP_PATH="/tmp/VauchiPlatformFFI-${PLATFORM_VERSION}.xcframework.zip"
-      echo "Downloading VauchiPlatformFFI.xcframework v${PLATFORM_VERSION}..."
-      curl -fsSL --retry 3 "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${PLATFORM_VERSION}/VauchiPlatformFFI.xcframework.zip" -o "$ZIP_PATH"
-      CHECKSUM=$(shasum -a 256 "$ZIP_PATH" | cut -d' ' -f1)
-      echo "Downloaded $(du -h "$ZIP_PATH" | cut -f1), checksum: ${CHECKSUM}"
-      # Attempt build with 120s timeout (portable — no GNU timeout on macOS)
-      xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build &
-      BUILD_PID=$!
-      ( sleep 120 && kill $BUILD_PID 2>/dev/null ) &
-      WATCHDOG_PID=$!
-      if wait $BUILD_PID 2>/dev/null; then
-        kill $WATCHDOG_PID 2>/dev/null; wait $WATCHDOG_PID 2>/dev/null
-        echo "Build succeeded"
-      else
-        kill $WATCHDOG_PID 2>/dev/null; wait $WATCHDOG_PID 2>/dev/null
-        echo "Build timed out — rewriting Package.swift to file://"
-        PKG_SWIFT=".spm-packages/checkouts/vauchi-platform-swift/Package.swift"
-        sed -i.bak "s|url: \"https://.*xcframework.zip\"|url: \"file://${ZIP_PATH}\"|" "$PKG_SWIFT"
-        sed -i.bak "s|checksum: checksum|checksum: \"${CHECKSUM}\"|" "$PKG_SWIFT"
-        rm -f "${PKG_SWIFT}.bak"
-        echo "Rewrote → file://${ZIP_PATH}"
-        xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
-      fi
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'generic/platform=iOS Simulator' -clonedSourcePackagesDirPath .spm-packages ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO build
   artifacts:
     paths:
       - build/Build/Products/Debug-iphonesimulator/
