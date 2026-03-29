@@ -32,6 +32,7 @@ struct ContactInfo: Identifiable, Equatable {
     let displayName: String
     let verified: Bool
     let recoveryTrusted: Bool
+    let isHidden: Bool
     let fingerprint: String
     let card: CardInfo?
     let addedAt: Date?
@@ -41,6 +42,7 @@ struct ContactInfo: Identifiable, Equatable {
         displayName: String,
         verified: Bool,
         recoveryTrusted: Bool = false,
+        isHidden: Bool = false,
         fingerprint: String = "",
         card: CardInfo? = nil,
         addedAt: Date? = nil
@@ -49,6 +51,7 @@ struct ContactInfo: Identifiable, Equatable {
         self.displayName = displayName
         self.verified = verified
         self.recoveryTrusted = recoveryTrusted
+        self.isHidden = isHidden
         self.fingerprint = fingerprint
         self.card = card
         self.addedAt = addedAt
@@ -431,6 +434,7 @@ class VauchiViewModel: ObservableObject {
                     displayName: contact.displayName,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
+                    isHidden: contact.isHidden,
                     fingerprint: contact.fingerprint,
                     card: CardInfo(
                         displayName: contact.card.displayName,
@@ -465,6 +469,7 @@ class VauchiViewModel: ObservableObject {
                     displayName: contact.displayName,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
+                    isHidden: contact.isHidden,
                     fingerprint: contact.fingerprint,
                     card: CardInfo(
                         displayName: contact.card.displayName,
@@ -500,6 +505,7 @@ class VauchiViewModel: ObservableObject {
                 id: contact.id,
                 displayName: contact.displayName,
                 verified: contact.isVerified,
+                isHidden: contact.isHidden,
                 fingerprint: contact.fingerprint,
                 card: CardInfo(
                     displayName: contact.card.displayName,
@@ -554,6 +560,7 @@ class VauchiViewModel: ObservableObject {
                     displayName: contact.displayName,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
+                    isHidden: contact.isHidden,
                     fingerprint: contact.fingerprint,
                     card: CardInfo(
                         displayName: contact.card.displayName,

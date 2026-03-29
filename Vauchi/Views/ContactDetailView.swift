@@ -16,6 +16,7 @@ struct ContactDetailView: View {
     @State private var showVerifyAlert = false
     @State private var isVerifying = false
     @State private var isTogglingTrust = false
+    @State private var isTogglingHidden = false
     @State private var fieldVisibility: [String: Bool] = [:]
     @State private var isLoadingVisibility = true
     @State private var contactGroups: [VauchiVisibilityLabel] = []
@@ -124,6 +125,37 @@ struct ContactDetailView: View {
                     .disabled(isTogglingTrust)
                     .accessibilityLabel(contact.recoveryTrusted ? "Remove recovery trust" : "Trust for recovery")
                     .accessibilityHint(contact.recoveryTrusted ? "Remove this contact from your recovery helpers" : "Allow this contact to help you recover your account")
+
+                    // Hide/unhide toggle
+                    Button(action: {
+                        isTogglingHidden = true
+                        Task {
+                            do {
+                                if contact.isHidden {
+                                    try await viewModel.unhideContact(id: contact.id)
+                                } else {
+                                    try await viewModel.hideContact(id: contact.id)
+                                    dismiss()
+                                }
+                            } catch {
+                                viewModel.showError("Error", message: error.localizedDescription)
+                            }
+                            isTogglingHidden = false
+                        }
+                    }) {
+                        Label(
+                            contact.isHidden ? "Unhide Contact" : "Hide Contact",
+                            systemImage: contact.isHidden ? "eye.fill" : "eye.slash"
+                        )
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(contact.isHidden ? Color.gray.opacity(0.2) : Color.orange.opacity(0.2))
+                        .foregroundColor(contact.isHidden ? .gray : .orange)
+                        .cornerRadius(8)
+                    }
+                    .disabled(isTogglingHidden)
+                    .accessibilityLabel(contact.isHidden ? "Unhide contact" : "Hide contact")
+                    .accessibilityHint(contact.isHidden ? "Make this contact visible in your contact list" : "Hide this contact from your contact list")
                 }
                 .padding()
 
