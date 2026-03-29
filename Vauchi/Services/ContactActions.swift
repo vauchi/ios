@@ -14,7 +14,9 @@ import VauchiPlatform
 /// so the VauchiPlatform binding resolves unambiguously — inside
 /// ContactActions, the enum's own methods shadow the module-level name.
 private func coreIsSafeUrl(_ url: String) -> Bool {
-    VauchiPlatform.isSafeUrl(url: url)
+    // At file scope the VauchiPlatform free function resolves directly —
+    // no module prefix needed (Swift doesn't support qualifying free functions).
+    isSafeUrl(url: url)
 }
 
 /// Service for handling contact field actions (call, email, open URL, etc.)
