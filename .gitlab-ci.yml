@@ -103,6 +103,11 @@ workflow:
     # Duplicate/locked entries cause SPM binary target downloads to
     # crash with "fatalError" (post-mortem 2026-03-28).
     - security delete-internet-password -s gitlab.com 2>/dev/null || true
+    # Authenticate SPM binary target downloads from GitLab's private
+    # package registry. Without this, URLSession hangs indefinitely
+    # because CI_JOB_TOKEN only covers git, not HTTP downloads.
+    # Token is job-scoped and expires after the job completes.
+    - echo "machine gitlab.com login gitlab-ci-token password ${CI_JOB_TOKEN}" > ~/.netrc && chmod 600 ~/.netrc
     - |
       if ! xcrun simctl list runtimes 2>/dev/null | grep -q "iOS.*SimRuntime"; then
         echo "ERROR: iOS Simulator runtime is not installed."
