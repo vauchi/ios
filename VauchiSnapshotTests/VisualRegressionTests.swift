@@ -65,89 +65,13 @@ final class VisualRegressionTests: XCTestCase {
         assertScreenSnapshot(of: view)
     }
 
-    // MARK: - Onboarding Steps
+    // MARK: - Onboarding
 
-    func testWelcomeStep() {
-        let vm = makeViewModel(hasIdentity: false)
-        let view = WelcomeStepView(onContinue: {}, onRestore: {})
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
-    func testCreateIdentityStep() {
-        let vm = makeViewModel(hasIdentity: false)
-        let view = CreateIdentityStepView(
-            displayName: .constant(""),
-            onContinue: {},
-            onBack: {}
-        )
-        .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
-    func testCreateIdentityStepFilled() {
-        let vm = makeViewModel(hasIdentity: false)
-        let view = CreateIdentityStepView(
-            displayName: .constant("Alice"),
-            onContinue: {},
-            onBack: {}
-        )
-        .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
-    func testAddFieldsStep() {
-        let vm = makeViewModel(hasIdentity: false)
-        let view = AddFieldsStepView(
-            phone: .constant(""),
-            email: .constant(""),
-            onContinue: {},
-            onBack: {},
-            onSkip: {}
-        )
-        .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
-    func testPreviewCardStep() {
-        let data = OnboardingData()
-        data.displayName = "Alice"
-        data.email = "alice@example.com"
-        data.phone = "+41 79 123 45 67"
-
-        let vm = makeViewModel(hasIdentity: false)
-        let view = PreviewCardStepView(
-            onboardingData: data,
-            onContinue: {},
-            onBack: {}
-        )
-        .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
-    func testSecurityStep() {
-        let vm = makeViewModel(hasIdentity: false)
-        let view = SecurityStepView(
-            onContinue: {},
-            onBack: {}
-        )
-        .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
-    func testReadyStep() {
-        let vm = makeViewModel(hasIdentity: false)
-        let view = ReadyStepView()
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
+    // Onboarding screens are now rendered by core via CoreOnboardingView.
+    // Snapshot tests for individual step views were removed when the custom
+    // onboarding was replaced with the core-driven flow.
+    // TODO: Add CoreOnboardingView snapshot once MobileOnboardingWorkflow
+    // can be instantiated in the test harness.
 
     // MARK: - Main App Views
 

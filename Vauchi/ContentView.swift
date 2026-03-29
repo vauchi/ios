@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
+    @State private var showRestoreSheet = false
 
     /// Determines if we should show onboarding
     private var shouldShowOnboarding: Bool {
@@ -67,7 +68,21 @@ struct ContentView: View {
                 } else if viewModel.isLoading {
                     LoadingView()
                 } else if shouldShowOnboarding {
-                    OnboardingView()
+                    CoreOnboardingView(
+                        onComplete: { _ in
+                            SettingsService.shared.hasCompletedOnboarding = true
+                            viewModel.loadState()
+                        },
+                        onStartBackupImport: {
+                            showRestoreSheet = true
+                        }
+                    )
+                    .sheet(isPresented: $showRestoreSheet) {
+                        RestoreIdentitySheet(onRestoreComplete: {
+                            SettingsService.shared.hasCompletedOnboarding = true
+                            viewModel.loadState()
+                        })
+                    }
                 } else {
                     MainTabView(hasContacts: !viewModel.contacts.isEmpty)
                 }

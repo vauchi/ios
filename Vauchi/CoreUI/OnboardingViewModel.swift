@@ -27,6 +27,7 @@ import SwiftUI
         @Published var currentScreen: ScreenModel?
         @Published var validationErrors: [String: String] = [:]
         @Published var isComplete = false
+        @Published var requestBackupImport = false
 
         private let workflow: MobileOnboardingWorkflow
 
@@ -95,8 +96,11 @@ import SwiftUI
             case .complete:
                 isComplete = true
 
+            case .startBackupImport:
+                requestBackupImport = true
+
             case .openEntryDetail, .showToast, .exchangeCommands,
-                 .startDeviceLink, .startBackupImport, .openContact,
+                 .startDeviceLink, .openContact,
                  .editContact, .openUrl, .showAlert, .requestCamera,
                  .wipeComplete, .unknown:
                 break

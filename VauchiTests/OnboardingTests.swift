@@ -18,11 +18,6 @@ final class OnboardingTests: XCTestCase {
         testDefaults = UserDefaults(suiteName: "test_onboarding")!
         testDefaults.removePersistentDomain(forName: "test_onboarding")
         settingsService = SettingsService(defaults: testDefaults)
-
-        // Clear shared defaults so OnboardingData() starts clean
-        SettingsService.shared.onboardingDisplayName = ""
-        SettingsService.shared.onboardingPhone = ""
-        SettingsService.shared.onboardingEmail = ""
     }
 
     override func tearDownWithError() throws {
@@ -91,58 +86,7 @@ final class OnboardingTests: XCTestCase {
         XCTAssertTrue(settingsService.hasDismissedDemoContact)
     }
 
-    // MARK: - Onboarding Step Tests
-
-    /// Scenario: OnboardingStep enum has correct values
-    func testOnboardingStepValues() {
-        XCTAssertEqual(OnboardingStep.welcome.rawValue, 0)
-        XCTAssertEqual(OnboardingStep.createIdentity.rawValue, 1)
-        XCTAssertEqual(OnboardingStep.addFields.rawValue, 2)
-        XCTAssertEqual(OnboardingStep.preview.rawValue, 3)
-        XCTAssertEqual(OnboardingStep.security.rawValue, 4)
-        XCTAssertEqual(OnboardingStep.ready.rawValue, 5)
-    }
-
-    /// Scenario: User-visible step numbers are correct
-    func testUserVisibleStepNumbers() {
-        XCTAssertNil(OnboardingStep.welcome.userVisibleStepNumber,
-                     "Welcome should not show step number")
-        XCTAssertEqual(OnboardingStep.createIdentity.userVisibleStepNumber, 1)
-        XCTAssertEqual(OnboardingStep.addFields.userVisibleStepNumber, 2)
-        XCTAssertEqual(OnboardingStep.preview.userVisibleStepNumber, 3)
-        XCTAssertEqual(OnboardingStep.security.userVisibleStepNumber, 4)
-        XCTAssertNil(OnboardingStep.ready.userVisibleStepNumber,
-                     "Ready should not show step number")
-    }
-
-    /// Scenario: Total user-visible steps is 4
-    func testTotalUserVisibleSteps() {
-        XCTAssertEqual(OnboardingStep.userVisibleStepCount, 4)
-    }
-
-    // MARK: - Onboarding Data Tests
-
-    /// Scenario: OnboardingData has minimum data with name only
-    func testOnboardingDataMinimumWithName() {
-        let data = OnboardingData()
-        XCTAssertFalse(data.hasMinimumData, "Empty data should not have minimum")
-
-        data.displayName = "  "
-        XCTAssertFalse(data.hasMinimumData, "Whitespace-only name should not count")
-
-        data.displayName = "Alice"
-        XCTAssertTrue(data.hasMinimumData, "Name should satisfy minimum requirement")
-    }
-
-    /// Scenario: OnboardingData stores all fields
-    func testOnboardingDataFields() {
-        let data = OnboardingData()
-        data.displayName = "Bob"
-        data.phone = "+1234567890"
-        data.email = "bob@example.com"
-
-        XCTAssertEqual(data.displayName, "Bob")
-        XCTAssertEqual(data.phone, "+1234567890")
-        XCTAssertEqual(data.email, "bob@example.com")
-    }
+    // Onboarding step/data tests removed — custom OnboardingStep enum and
+    // OnboardingData class replaced by core-driven MobileOnboardingWorkflow.
+    // Core's onboarding state machine is tested in vauchi-core.
 }

@@ -5,8 +5,8 @@
 // VauchiRepository.swift
 // Repository layer wrapping UniFFI bindings for Vauchi iOS
 //
-// DONE: Restore feature - RestoreIdentitySheet in OnboardingView.swift allows users
-// to restore from backup during onboarding using importBackup().
+// DONE: Restore feature - RestoreIdentitySheet allows users to restore from
+// backup during onboarding using importBackup().
 //
 // DONE: Proximity verification - MobileProximityVerifier enabled in VauchiViewModel.swift
 // with AudioProximityService providing platform audio. Exposes emitProximityChallenge(),
@@ -223,6 +223,7 @@ struct VauchiContact: Identifiable {
     let fingerprint: String
     let isVerified: Bool
     let isRecoveryTrusted: Bool
+    let isHidden: Bool
     let card: VauchiContactCard
     let addedAt: UInt64
 }
@@ -539,6 +540,7 @@ class VauchiRepository {
             fingerprint: contact.fingerprint,
             isVerified: contact.isVerified,
             isRecoveryTrusted: contact.isRecoveryTrusted,
+            isHidden: contact.isHidden,
             card: convertCard(contact.card),
             addedAt: contact.addedAt
         )

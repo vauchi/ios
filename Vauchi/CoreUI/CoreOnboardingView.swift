@@ -4,13 +4,6 @@
 
 // CoreOnboardingView.swift
 // Core-driven onboarding flow using ScreenRendererView + OnboardingViewModel
-//
-// This view replaces the hardcoded OnboardingView step views with a generic
-// renderer driven by core's OnboardingEngine via MobileOnboardingWorkflow.
-//
-// Currently excluded from the build (see project.yml) because the published
-// VauchiPlatform bindings don't contain MobileOnboardingWorkflow yet. When
-// bindings are updated, swap OnboardingView for CoreOnboardingView in the app.
 
 import SwiftUI
 
@@ -25,6 +18,7 @@ import SwiftUI
     struct CoreOnboardingView: View {
         @StateObject private var viewModel = OnboardingViewModel()
         let onComplete: (_ onboardingDataJson: String?) -> Void
+        var onStartBackupImport: (() -> Void)?
 
         var body: some View {
             Group {
@@ -44,6 +38,12 @@ import SwiftUI
             .onChange(of: viewModel.isComplete) { complete in
                 if complete {
                     onComplete(viewModel.onboardingDataJson())
+                }
+            }
+            .onChange(of: viewModel.requestBackupImport) { requested in
+                if requested {
+                    viewModel.requestBackupImport = false
+                    onStartBackupImport?()
                 }
             }
         }
