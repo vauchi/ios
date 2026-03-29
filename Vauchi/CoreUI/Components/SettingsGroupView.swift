@@ -57,6 +57,9 @@ struct SettingsItemRow: View {
 
         case let .destructive(label):
             destructiveRow(label: label)
+
+        case .unknown:
+            EmptyView()
         }
     }
 
