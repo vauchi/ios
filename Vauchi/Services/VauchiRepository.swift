@@ -691,7 +691,7 @@ class VauchiRepository {
     /// Import contacts from vCard data.
     func importContactsFromVcf(_ data: Data) throws -> (imported: Int, skipped: Int, warnings: [String]) {
         do {
-            let result = try vauchi.importContactsFromVcf(data: Array(data))
+            let result = try vauchi.importContactsFromVcf(data: data)
             return (
                 imported: Int(result.imported),
                 skipped: Int(result.skipped),
