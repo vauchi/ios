@@ -45,6 +45,7 @@ include:
       - '/ci-templates/removed-symbols.yml'
       - '/ci-templates/badges.yml'
       - '/ci-templates/github-mirror.yml'
+      - '/ci-templates/vrt-upload.yml'
 
 stages:
   - auto-tag
@@ -702,6 +703,9 @@ test:snapshots:
       artifacts: false
     - job: build:debug
       artifacts: true
+  variables:
+    VRT_PLATFORM: ios
+    VRT_SCREENSHOT_DIR: VauchiSnapshotTests/__Snapshots__/VisualRegressionTests
   script:
     # Self-detecting snapshot mode (pipefail-safe: check dir exists before find)
     - |
@@ -720,9 +724,11 @@ test:snapshots:
     - echo "✅ Found $BASELINE_COUNT snapshot baselines — running validation"
     # Reuse build:debug artifacts — skip xcodegen + SPM fetch
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
+  after_script:
+    - !reference [.vrt-upload-script, script]
   # allow_failure removed: resource_group serialization prevents simulator contention
   artifacts:
-    when: on_failure
+    when: always
     paths:
       - VauchiSnapshotTests/__Snapshots__/
     expire_in: 7 days
