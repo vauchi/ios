@@ -66,9 +66,11 @@ struct ComponentView: View {
         case let .editableText(editableComponent):
             EditableTextView(component: editableComponent, onAction: onAction)
 
+        case let .banner(bannerComponent):
+            BannerView(component: bannerComponent, onAction: onAction)
+
         case .divider:
-            Divider()
-                .padding(.vertical, 4)
+            DividerView()
 
         case .unknown:
             // Core sent a component type this shell doesn't know about.

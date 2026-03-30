@@ -251,6 +251,22 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(panel.items[0].detail, "Your data is safe")
     }
 
+    func testComponentBannerDecoding() throws {
+        let json = Data("""
+        {"Banner": {"text": "Viewing as Bob", "action_label": "Exit", "action_id": "exit-preview"}}
+        """.utf8)
+
+        let component = try coreJSONDecoder.decode(Component.self, from: json)
+
+        guard case let .banner(banner) = component else {
+            XCTFail("Expected .banner variant, got \(component)")
+            return
+        }
+        XCTAssertEqual(banner.text, "Viewing as Bob")
+        XCTAssertEqual(banner.actionLabel, "Exit")
+        XCTAssertEqual(banner.actionId, "exit-preview")
+    }
+
     func testComponentDividerDecoding() throws {
         let json = Data("""
         "Divider"

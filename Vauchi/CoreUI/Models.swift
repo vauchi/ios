@@ -86,6 +86,7 @@ enum Component: Decodable {
     case showToast(ShowToastComponent)
     case inlineConfirm(InlineConfirmComponent)
     case editableText(EditableTextComponent)
+    case banner(BannerComponent)
     case divider
     /// Unknown component from a newer core version — render as empty space.
     /// Prevents crash when core adds new component types that this shell
@@ -142,6 +143,8 @@ enum Component: Decodable {
             self = try .inlineConfirm(container.decode(InlineConfirmComponent.self, forKey: .inlineConfirm))
         } else if container.contains(.editableText) {
             self = try .editableText(container.decode(EditableTextComponent.self, forKey: .editableText))
+        } else if container.contains(.banner) {
+            self = try .banner(container.decode(BannerComponent.self, forKey: .banner))
         } else {
             // Unknown struct variant — core is newer than this shell.
             // Degrade gracefully instead of crashing.
@@ -166,6 +169,7 @@ enum Component: Decodable {
         case showToast = "ShowToast"
         case inlineConfirm = "InlineConfirm"
         case editableText = "EditableText"
+        case banner = "Banner"
     }
 }
 
@@ -466,6 +470,14 @@ struct EditableTextComponent: Decodable {
     let value: String
     let editing: Bool
     let validationError: String?
+}
+
+// MARK: - Banner Component
+
+struct BannerComponent: Decodable {
+    let text: String
+    let actionLabel: String
+    let actionId: String
 }
 
 // MARK: - UserAction (Encodable for sending to core)
