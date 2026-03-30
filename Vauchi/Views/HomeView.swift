@@ -90,7 +90,7 @@ struct HomeView: View {
                                 .accessibilityHidden(true)
                             Text("\(viewModel.pendingUpdates) pending updates")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(themeService.textSecondary)
                         }
                         .padding(.horizontal)
                         .accessibilityElement(children: .combine)
@@ -99,11 +99,11 @@ struct HomeView: View {
                     if let lastSync = viewModel.lastSyncTime {
                         HStack {
                             Image(systemName: "clock")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(themeService.textSecondary)
                                 .accessibilityHidden(true)
                             Text("Last synced: \(lastSync, style: .relative) ago")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(themeService.textSecondary)
                         }
                         .padding(.horizontal)
                         .accessibilityElement(children: .combine)
@@ -192,6 +192,7 @@ struct FieldRow: View {
 
     @State private var showDeleteAlert = false
     @ObservedObject private var localizationService = LocalizationService.shared
+    @ObservedObject private var themeService = ThemeService.shared
 
     private func icon(for type: String) -> String {
         switch type.lowercased() {
@@ -214,7 +215,7 @@ struct FieldRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(field.label)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(themeService.textSecondary)
                 Text(field.value)
                     .font(.body)
             }
@@ -342,6 +343,7 @@ struct EditFieldSheet: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @ObservedObject private var localizationService = LocalizationService.shared
+    @ObservedObject private var themeService = ThemeService.shared
 
     var body: some View {
         NavigationView {
@@ -351,14 +353,14 @@ struct EditFieldSheet: View {
                         Text(localizationService.t("card.field_type"))
                         Spacer()
                         Text(field.fieldType.capitalized)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(themeService.textSecondary)
                     }
 
                     HStack {
                         Text(localizationService.t("card.label"))
                         Spacer()
                         Text(field.label)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(themeService.textSecondary)
                     }
                 }
 
