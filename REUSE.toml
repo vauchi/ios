@@ -66,6 +66,12 @@ path = ["**/*.webp"]
 SPDX-FileCopyrightText = "2026 Mattia Egloff <mattia.egloff@pm.me>"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
+# Snapshot test baselines (generated output)
+[[annotations]]
+path = ["VauchiSnapshotTests/__Snapshots__/**"]
+SPDX-FileCopyrightText = "2026 Mattia Egloff <mattia.egloff@pm.me>"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
 # Claude Code project instructions
 [[annotations]]
 path = ["**/CLAUDE.md"]
