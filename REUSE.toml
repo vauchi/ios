@@ -30,9 +30,9 @@ path = ["**/*.plist", "**/*.entitlements", "**/*.xcscheme", "**/*.modulemap", "*
 SPDX-FileCopyrightText = "2026 Mattia Egloff <mattia.egloff@pm.me>"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
-# JSON config files
+# JSON config files and version metadata
 [[annotations]]
-path = ["**/*.json"]
+path = ["**/*.json", "**/.version"]
 SPDX-FileCopyrightText = "2026 Mattia Egloff <mattia.egloff@pm.me>"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
