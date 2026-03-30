@@ -91,6 +91,8 @@ struct HomeView: View {
                             Text("\(viewModel.pendingUpdates) pending updates")
                                 .font(.caption)
                                 .foregroundColor(themeService.textSecondary)
+                                .lineLimit(nil)
+                                .minimumScaleFactor(0.8)
                         }
                         .padding(.horizontal)
                         .accessibilityElement(children: .combine)
@@ -104,6 +106,8 @@ struct HomeView: View {
                             Text("Last synced: \(lastSync, style: .relative) ago")
                                 .font(.caption)
                                 .foregroundColor(themeService.textSecondary)
+                                .lineLimit(nil)
+                                .minimumScaleFactor(0.8)
                         }
                         .padding(.horizontal)
                         .accessibilityElement(children: .combine)
