@@ -68,10 +68,10 @@ struct HomeView: View {
                             }
                         } else {
                             Text(localizationService.t("home.no_fields"))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(themeService.textSecondary)
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(Color(.systemGray6))
+                                .background(Color(.systemBackground))
                                 .cornerRadius(10)
                                 .accessibilityIdentifier("card.empty")
                                 .accessibilityHint("Use the add button above to create your first field")
