@@ -71,14 +71,14 @@ struct HomeView: View {
                                 .foregroundColor(themeService.textSecondary)
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(Color(.systemBackground))
+                                .background(themeService.bgPrimary)
                                 .cornerRadius(10)
                                 .accessibilityIdentifier("card.empty")
                                 .accessibilityHint("Use the add button above to create your first field")
                         }
                     }
                     .padding()
-                    .background(Color(.systemGray6))
+                    .background(themeService.bgSecondary)
                     .cornerRadius(12)
                     .padding(.horizontal)
 
