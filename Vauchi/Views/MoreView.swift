@@ -70,6 +70,13 @@ struct MoreView: View {
                 Label("Backup & Recovery", systemImage: "externaldrive.badge.shield")
             }
             .accessibilityIdentifier("more.backupRecovery")
+
+            NavigationLink {
+                ImportContactsView()
+            } label: {
+                Label("Import Contacts", systemImage: "person.crop.rectangle.stack")
+            }
+            .accessibilityIdentifier("more.importContacts")
         }
     }
 

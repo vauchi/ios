@@ -600,6 +600,22 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
+    /// Import contacts from vCard (.vcf) file data.
+    func importContactsFromVcf(_ data: Data) async throws -> ImportResult {
+        guard let repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        let result = try repository.importContactsFromVcf(data)
+        // Refresh contacts list after import
+        await loadContacts()
+        return ImportResult(
+            imported: result.imported,
+            skipped: result.skipped,
+            warnings: result.warnings
+        )
+    }
+
     /// Unhide a contact
     func unhideContact(id: String) async throws {
         guard let repository else {

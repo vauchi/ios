@@ -688,6 +688,20 @@ class VauchiRepository {
 
     // Based on: features/resistance.feature - R3 Hidden Contact UI
 
+    /// Import contacts from vCard data.
+    func importContactsFromVcf(_ data: Data) throws -> (imported: Int, skipped: Int, warnings: [String]) {
+        do {
+            let result = try vauchi.importContactsFromVcf(data: Array(data))
+            return (
+                imported: Int(result.imported),
+                skipped: Int(result.skipped),
+                warnings: result.warnings
+            )
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     /// Hide a contact
     func hideContact(id: String) throws {
         do {
