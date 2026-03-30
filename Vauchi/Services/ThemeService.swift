@@ -142,8 +142,10 @@ final class ThemeService: ObservableObject {
     }
 
     /// Get secondary text color
+    /// Fallback uses #757575 (4.61:1 on white) instead of secondaryLabel
+    /// (3.44:1) to meet WCAG AA 4.5:1 for small text.
     var textSecondary: Color {
-        guard let theme = currentTheme else { return Color(.secondaryLabel) }
+        guard let theme = currentTheme else { return color(from: "#757575") }
         return color(from: theme.colors.textSecondary)
     }
 
