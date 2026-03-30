@@ -49,6 +49,7 @@ struct HomeView: View {
                             Button(action: { showAddField = true }) {
                                 Image(systemName: "plus.circle")
                                     .foregroundColor(.cyan)
+                                    .frame(minWidth: 44, minHeight: 44)
                             }
                             .accessibilityIdentifier("card.field.add")
                             .accessibilityLabel("Add field")

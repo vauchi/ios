@@ -104,12 +104,9 @@ final class AccessibilityUITests: XCTestCase {
     // MARK: - Accessibility Audit
 
     /// Built-in accessibility audit (iOS 17+).
-    /// Excludes .hitRegion — pre-existing small touch targets tracked in
-    /// problem record 2026-03-18-cross-platform-accessibility-gaps.
     func testAccessibilityAudit() throws {
         if #available(iOS 17.0, *) {
-            try app.performAccessibilityAudit(for: .init(arrayLiteral:
-                .contrast, .dynamicType, .sufficientElementDescription))
+            try app.performAccessibilityAudit()
         } else {
             throw XCTSkip("Accessibility audit requires iOS 17+")
         }
