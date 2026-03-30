@@ -12,6 +12,7 @@ struct HomeView: View {
     @State private var showAddField = false
     @State private var editingField: FieldInfo?
     @ObservedObject private var localizationService = LocalizationService.shared
+    @ObservedObject private var themeService = ThemeService.shared
 
     var body: some View {
         NavigationView {
@@ -28,7 +29,7 @@ struct HomeView: View {
                             if let publicId = viewModel.identity?.publicId {
                                 Text("ID: \(String(publicId.prefix(16)))...")
                                     .font(.system(.caption, design: .monospaced))
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(themeService.textSecondary)
                             }
                         }
 
