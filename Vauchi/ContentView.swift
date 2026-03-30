@@ -69,9 +69,13 @@ struct ContentView: View {
                     LoadingView()
                 } else if shouldShowOnboarding {
                     CoreOnboardingView(
-                        onComplete: { _ in
-                            SettingsService.shared.hasCompletedOnboarding = true
-                            viewModel.loadState()
+                        onComplete: { onboardingDataJson in
+                            Task {
+                                let name = Self.displayName(from: onboardingDataJson)
+                                try? await viewModel.createIdentity(name: name)
+                                SettingsService.shared.hasCompletedOnboarding = true
+                                viewModel.loadState()
+                            }
                         },
                         onStartBackupImport: {
                             showRestoreSheet = true
@@ -97,6 +101,18 @@ struct ContentView: View {
         } message: {
             Text(viewModel.alertMessage)
         }
+    }
+
+    /// Extract `display_name` from the core onboarding JSON.
+    /// Falls back to empty string so identity creation still proceeds.
+    static func displayName(from json: String?) -> String {
+        guard let data = json?.data(using: .utf8),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let name = obj["display_name"] as? String
+        else {
+            return ""
+        }
+        return name
     }
 }
 

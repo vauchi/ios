@@ -746,11 +746,25 @@ test:ui:
     - job: build:debug
       artifacts: true
   script:
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -only-testing VauchiUITests -resultBundlePath build/ui_test_result.xcresult
+    # Capture exit code so JUnit conversion runs even when tests fail.
+    # Without this, xcodebuild exit 65 stops the script and the artifact
+    # is never generated (no JUnit report in the MR).
+    - |
+      XCODEBUILD_EXIT=0
+      xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
+        -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+        -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data \
+        -skipPackageUpdates \
+        ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
+        test -only-testing VauchiUITests \
+        -resultBundlePath build/ui_test_result.xcresult \
+        || XCODEBUILD_EXIT=$?
     - command -v xcresultparser >/dev/null 2>&1 || brew install a7ex/formulae/xcresultparser
     - mkdir -p build/reports
     - xcresultparser --output-format junit build/ui_test_result.xcresult > build/reports/ui-junit.xml
+    - exit $XCODEBUILD_EXIT
   artifacts:
+    when: always
     reports:
       junit: build/reports/ui-junit.xml
     expire_in: 1 week
