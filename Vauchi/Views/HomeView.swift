@@ -24,6 +24,7 @@ struct HomeView: View {
                             Text(localizationService.t("home.greeting", args: ["name": viewModel.card?.displayName ?? "User"]))
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
+                                .minimumScaleFactor(0.7)
                                 .accessibilityAddTraits(.isHeader)
 
                             if let publicId = viewModel.identity?.publicId {
