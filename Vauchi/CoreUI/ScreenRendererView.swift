@@ -186,6 +186,7 @@ struct ActionButton: View {
         }
         .disabled(!action.enabled)
         .opacity(action.enabled ? 1.0 : 0.6)
+        .accessibilityIdentifier(action.id)
         .accessibilityLabel(action.label)
     }
 

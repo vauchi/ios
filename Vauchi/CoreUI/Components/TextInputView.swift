@@ -41,6 +41,7 @@ struct TextInputView: View {
                 }
                 onAction(.textChanged(componentId: component.id, value: value))
             }
+            .accessibilityIdentifier(component.id)
             .accessibilityLabel(component.label)
             .accessibilityHint(component.placeholder ?? "")
 
