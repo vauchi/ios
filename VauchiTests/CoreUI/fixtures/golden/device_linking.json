@@ -1,46 +1,29 @@
 {
   "schema_version": 1,
-  "screen_id": "backup_prompt",
-  "title": "Back up your identity",
+  "screen_id": "link_show_qr",
+  "title": "Link Device",
   "subtitle": null,
   "components": [
     {
-      "InfoPanel": {
-        "id": "backup_info",
-        "icon": "backup",
-        "title": "Why back up?",
-        "items": [
-          {
-            "icon": "warning",
-            "title": "No identity recovery",
-            "detail": "If you lose your device without a backup, your identity is lost."
-          },
-          {
-            "icon": "devices",
-            "title": "Multi-device",
-            "detail": "Backups let you use Vauchi on multiple devices."
-          }
-        ]
+      "QrCode": {
+        "id": "qr",
+        "data": "vauchi://link?token=abc123",
+        "mode": "Display",
+        "label": "Scan on new device"
       }
     }
   ],
   "actions": [
     {
-      "id": "setup_backup",
-      "label": "Set up backup",
-      "style": "Primary",
-      "enabled": true
-    },
-    {
-      "id": "skip",
-      "label": "Skip",
+      "id": "cancel",
+      "label": "Cancel",
       "style": "Secondary",
       "enabled": true
     }
   ],
   "progress": {
-    "current_step": 8,
-    "total_steps": 9,
+    "current_step": 1,
+    "total_steps": 4,
     "label": null
   },
   "tokens": {

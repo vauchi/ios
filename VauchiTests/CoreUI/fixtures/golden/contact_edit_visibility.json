@@ -1,20 +1,39 @@
 {
   "schema_version": 1,
-  "screen_id": "groups_setup",
-  "title": "Choose your groups",
-  "subtitle": "Groups let you share different info with different people. Use [Space] to select.",
+  "screen_id": "edit_visibility",
+  "title": "Field Visibility",
+  "subtitle": null,
   "components": [
     {
-      "Text": {
-        "id": "groups_recommendation",
-        "content": "Groups are optional, but we strongly recommend them. They let you control exactly who sees what on your card.",
-        "style": "Body"
+      "ToggleList": {
+        "id": "vis_f1",
+        "label": "Mobile",
+        "items": [
+          {
+            "id": "Family",
+            "label": "Family",
+            "selected": true,
+            "subtitle": null
+          },
+          {
+            "id": "Friends",
+            "label": "Friends",
+            "selected": false,
+            "subtitle": null
+          },
+          {
+            "id": "Work",
+            "label": "Work",
+            "selected": false,
+            "subtitle": null
+          }
+        ]
       }
     },
     {
       "ToggleList": {
-        "id": "groups",
-        "label": "Suggested groups",
+        "id": "vis_f2",
+        "label": "Work",
         "items": [
           {
             "id": "Family",
@@ -25,53 +44,36 @@
           {
             "id": "Friends",
             "label": "Friends",
-            "selected": false,
+            "selected": true,
             "subtitle": null
           },
           {
-            "id": "Coworkers",
-            "label": "Coworkers",
-            "selected": false,
-            "subtitle": null
-          },
-          {
-            "id": "Business",
-            "label": "Business",
-            "selected": false,
+            "id": "Work",
+            "label": "Work",
+            "selected": true,
             "subtitle": null
           }
         ]
-      }
-    },
-    {
-      "TextInput": {
-        "id": "custom_group",
-        "label": "Add a custom group",
-        "value": "",
-        "placeholder": "Type a group name and press Enter",
-        "max_length": 50,
-        "validation_error": null,
-        "input_type": "Text"
       }
     }
   ],
   "actions": [
     {
-      "id": "continue",
-      "label": "Continue",
-      "style": "Primary",
+      "id": "back",
+      "label": "Back",
+      "style": "Secondary",
       "enabled": true
     },
     {
-      "id": "skip",
-      "label": "Skip",
-      "style": "Secondary",
+      "id": "continue",
+      "label": "Preview",
+      "style": "Primary",
       "enabled": true
     }
   ],
   "progress": {
-    "current_step": 4,
-    "total_steps": 9,
+    "current_step": 2,
+    "total_steps": 3,
     "label": null
   },
   "tokens": {

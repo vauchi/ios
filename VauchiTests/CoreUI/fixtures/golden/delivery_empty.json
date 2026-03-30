@@ -1,37 +1,20 @@
 {
   "schema_version": 1,
-  "screen_id": "preview_card",
-  "title": "Preview your card",
-  "subtitle": "This is how your card will look.",
+  "screen_id": "delivery_status",
+  "title": "Delivery Status",
+  "subtitle": null,
   "components": [
     {
-      "CardPreview": {
-        "name": "Alice",
-        "fields": [],
-        "group_views": [],
-        "selected_group": null
+      "InfoPanel": {
+        "id": "empty",
+        "icon": "checkmark",
+        "title": "All Delivered",
+        "items": []
       }
     }
   ],
-  "actions": [
-    {
-      "id": "continue",
-      "label": "Continue",
-      "style": "Primary",
-      "enabled": true
-    },
-    {
-      "id": "edit",
-      "label": "Edit",
-      "style": "Secondary",
-      "enabled": true
-    }
-  ],
-  "progress": {
-    "current_step": 6,
-    "total_steps": 9,
-    "label": null
-  },
+  "actions": [],
+  "progress": null,
   "tokens": {
     "spacing": {
       "xs": 4,

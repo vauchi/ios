@@ -1,48 +1,37 @@
 {
   "schema_version": 1,
-  "screen_id": "backup_prompt",
-  "title": "Back up your identity",
+  "screen_id": "delivery_status",
+  "title": "Delivery Status",
   "subtitle": null,
   "components": [
     {
-      "InfoPanel": {
-        "id": "backup_info",
-        "icon": "backup",
-        "title": "Why back up?",
-        "items": [
-          {
-            "icon": "warning",
-            "title": "No identity recovery",
-            "detail": "If you lose your device without a backup, your identity is lost."
-          },
-          {
-            "icon": "devices",
-            "title": "Multi-device",
-            "detail": "Backups let you use Vauchi on multiple devices."
-          }
-        ]
+      "StatusIndicator": {
+        "id": "c1",
+        "icon": null,
+        "title": "Alice",
+        "detail": "Delivered 2 min ago",
+        "status": "Success"
+      }
+    },
+    {
+      "StatusIndicator": {
+        "id": "c2",
+        "icon": null,
+        "title": "Bob",
+        "detail": "Relay unreachable",
+        "status": "Failed"
       }
     }
   ],
   "actions": [
     {
-      "id": "setup_backup",
-      "label": "Set up backup",
+      "id": "retry_all",
+      "label": "Retry Failed",
       "style": "Primary",
-      "enabled": true
-    },
-    {
-      "id": "skip",
-      "label": "Skip",
-      "style": "Secondary",
       "enabled": true
     }
   ],
-  "progress": {
-    "current_step": 8,
-    "total_steps": 9,
-    "label": null
-  },
+  "progress": null,
   "tokens": {
     "spacing": {
       "xs": 4,

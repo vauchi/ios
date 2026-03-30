@@ -1,24 +1,19 @@
 {
   "schema_version": 1,
-  "screen_id": "backup_prompt",
-  "title": "Back up your identity",
+  "screen_id": "backup_choose",
+  "title": "Backup & Recovery",
   "subtitle": null,
   "components": [
     {
       "InfoPanel": {
         "id": "backup_info",
         "icon": "backup",
-        "title": "Why back up?",
+        "title": "Protect your data",
         "items": [
           {
-            "icon": "warning",
-            "title": "No identity recovery",
-            "detail": "If you lose your device without a backup, your identity is lost."
-          },
-          {
-            "icon": "devices",
-            "title": "Multi-device",
-            "detail": "Backups let you use Vauchi on multiple devices."
+            "icon": null,
+            "title": "Backup",
+            "detail": "Create an encrypted backup of your identity. To preserve contacts, use device linking instead."
           }
         ]
       }
@@ -26,23 +21,19 @@
   ],
   "actions": [
     {
-      "id": "setup_backup",
-      "label": "Set up backup",
+      "id": "create",
+      "label": "Create Backup",
       "style": "Primary",
       "enabled": true
     },
     {
-      "id": "skip",
-      "label": "Skip",
+      "id": "restore",
+      "label": "Restore Backup",
       "style": "Secondary",
       "enabled": true
     }
   ],
-  "progress": {
-    "current_step": 8,
-    "total_steps": 9,
-    "label": null
-  },
+  "progress": null,
   "tokens": {
     "spacing": {
       "xs": 4,

@@ -1,41 +1,38 @@
 {
   "schema_version": 1,
-  "screen_id": "default_name",
-  "title": "What's your name?",
-  "subtitle": "This is how contacts will see you.",
+  "screen_id": "help",
+  "title": "Help & FAQ",
+  "subtitle": null,
   "components": [
     {
-      "Text": {
-        "id": "name_instruction",
-        "content": "Enter the name you'd like to show on your contact card.",
-        "style": "Body"
+      "ActionList": {
+        "id": "Getting Started",
+        "items": [
+          {
+            "id": "faq1",
+            "label": "How do I exchange contacts?",
+            "icon": null,
+            "detail": null
+          }
+        ]
       }
     },
     {
-      "TextInput": {
-        "id": "display_name",
-        "label": "Display name",
-        "value": "",
-        "placeholder": "Enter your name",
-        "max_length": 100,
-        "validation_error": null,
-        "input_type": "Text"
+      "ActionList": {
+        "id": "Security",
+        "items": [
+          {
+            "id": "faq2",
+            "label": "What is a duress PIN?",
+            "icon": null,
+            "detail": null
+          }
+        ]
       }
     }
   ],
-  "actions": [
-    {
-      "id": "continue",
-      "label": "Continue",
-      "style": "Primary",
-      "enabled": false
-    }
-  ],
-  "progress": {
-    "current_step": 2,
-    "total_steps": 9,
-    "label": null
-  },
+  "actions": [],
+  "progress": null,
   "tokens": {
     "spacing": {
       "xs": 4,

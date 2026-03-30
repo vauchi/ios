@@ -1,7 +1,8 @@
 {
+  "schema_version": 1,
   "screen_id": "contact_info",
   "title": "Add contact info",
-  "subtitle": "Add fields to your contact card.",
+  "subtitle": "Add phone, email, social profiles, and more to your card. You can always add or change entries later.",
   "components": [
     {
       "FieldList": {
@@ -14,9 +15,15 @@
   ],
   "actions": [
     {
+      "id": "add_entry",
+      "label": "Add Entry",
+      "style": "Primary",
+      "enabled": true
+    },
+    {
       "id": "continue",
       "label": "Continue",
-      "style": "Primary",
+      "style": "Secondary",
       "enabled": true
     },
     {
@@ -30,5 +37,40 @@
     "current_step": 5,
     "total_steps": 9,
     "label": null
+  },
+  "tokens": {
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 16,
+      "lg": 24,
+      "xl": 32
+    },
+    "spacing_direction": {
+      "content_start": 16,
+      "content_end": 16,
+      "list_item_start": 8,
+      "list_item_end": 8
+    },
+    "typography": {
+      "title_size": 24,
+      "subtitle_size": 18,
+      "body_size": 16,
+      "caption_size": 14
+    },
+    "border_radius": {
+      "sm": 4,
+      "md": 8,
+      "md_lg": 12,
+      "lg": 16
+    },
+    "touch_target": {
+      "minimum": 44
+    },
+    "motion": {
+      "enter_duration_ms": 200,
+      "exit_duration_ms": 150,
+      "emphasis_duration_ms": 300
+    }
   }
 }

@@ -1,41 +1,29 @@
 {
   "schema_version": 1,
-  "screen_id": "default_name",
-  "title": "What's your name?",
-  "subtitle": "This is how contacts will see you.",
+  "screen_id": "lock_screen",
+  "title": "Enter Password",
+  "subtitle": null,
   "components": [
     {
-      "Text": {
-        "id": "name_instruction",
-        "content": "Enter the name you'd like to show on your contact card.",
-        "style": "Body"
-      }
-    },
-    {
-      "TextInput": {
-        "id": "display_name",
-        "label": "Display name",
-        "value": "",
-        "placeholder": "Enter your name",
-        "max_length": 100,
-        "validation_error": null,
-        "input_type": "Text"
+      "PinInput": {
+        "id": "pin",
+        "label": "Password",
+        "length": 6,
+        "filled": 0,
+        "masked": true,
+        "validation_error": null
       }
     }
   ],
   "actions": [
     {
-      "id": "continue",
-      "label": "Continue",
+      "id": "unlock",
+      "label": "Unlock",
       "style": "Primary",
       "enabled": false
     }
   ],
-  "progress": {
-    "current_step": 2,
-    "total_steps": 9,
-    "label": null
-  },
+  "progress": null,
   "tokens": {
     "spacing": {
       "xs": 4,

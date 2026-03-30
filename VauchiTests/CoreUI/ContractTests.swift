@@ -21,18 +21,18 @@ final class ContractTests: XCTestCase {
             .standardized
     }()
 
-    /// All expected golden fixture filenames (without .json extension).
-    private static let expectedFixtures = [
-        "backup_prompt",
-        "contact_info",
-        "default_name",
-        "groups_setup",
-        "preview_card",
-        "ready",
-        "security_explanation",
-        "skip_gate",
-        "welcome",
-    ]
+    /// Dynamically discover all golden fixture files — no hardcoded list.
+    /// If core adds or removes fixtures, this list updates automatically.
+    private static var fixtureNames: [String] {
+        let contents = (try? FileManager.default.contentsOfDirectory(
+            at: fixturesURL,
+            includingPropertiesForKeys: nil
+        )) ?? []
+        return contents
+            .filter { $0.pathExtension == "json" }
+            .map { $0.deletingPathExtension().lastPathComponent }
+            .sorted()
+    }
 
     /// Load and decode a single golden fixture as ScreenModel.
     private func loadFixture(_ name: String) throws -> ScreenModel {
@@ -47,40 +47,22 @@ final class ContractTests: XCTestCase {
     /// This is the primary contract test: if core changes the JSON schema,
     /// this test fails and tells us exactly which fixture broke.
     func testAllGoldenFixturesDecodeAsScreenModel() throws {
-        for name in Self.expectedFixtures {
+        XCTAssertGreaterThanOrEqual(
+            Self.fixtureNames.count, 20,
+            "Expected at least 20 golden fixtures, found \(Self.fixtureNames.count)"
+        )
+        for name in Self.fixtureNames {
             let screen = try loadFixture(name)
-            // Verify it decoded to something meaningful (not just empty defaults)
             XCTAssertFalse(screen.screenId.isEmpty, "Fixture '\(name)': screen_id must not be empty")
-            XCTAssertFalse(screen.title.isEmpty, "Fixture '\(name)': title must not be empty")
+            // title may be empty for placeholder screens (e.g., home_empty)
         }
-    }
-
-    /// Verify that no golden fixtures are missing from our expected list.
-    /// If core adds a new onboarding step, this test catches it.
-    func testNoUnexpectedFixturesMissing() throws {
-        let contents = try FileManager.default.contentsOfDirectory(
-            at: Self.fixturesURL,
-            includingPropertiesForKeys: nil
-        )
-        let jsonFiles = contents
-            .filter { $0.pathExtension == "json" }
-            .map { $0.deletingPathExtension().lastPathComponent }
-            .sorted()
-
-        let expected = Self.expectedFixtures.sorted()
-        XCTAssertEqual(
-            jsonFiles, expected,
-            "Golden fixtures on disk don't match expected list. "
-                + "Added: \(Set(jsonFiles).subtracting(expected).sorted()). "
-                + "Removed: \(Set(expected).subtracting(jsonFiles).sorted())."
-        )
     }
 
     // MARK: - Field-Level Assertions
 
     /// Decode each fixture and verify critical fields are populated.
     func testScreenModelFieldsNotNil() throws {
-        for name in Self.expectedFixtures {
+        for name in Self.fixtureNames {
             let screen = try loadFixture(name)
 
             XCTAssertFalse(
@@ -147,7 +129,7 @@ final class ContractTests: XCTestCase {
 
     /// All fixtures should have progress with total_steps == 9 (onboarding has 9 steps).
     func testAllFixturesHaveConsistentProgress() throws {
-        for name in Self.expectedFixtures {
+        for name in Self.fixtureNames {
             let screen = try loadFixture(name)
             let progress = screen.progress
             XCTAssertNotNil(progress, "Fixture '\(name)': expected progress to be present")
@@ -258,5 +240,25 @@ final class ContractTests: XCTestCase {
                 "Expected exactly one top-level key for \(expectedKey)"
             )
         }
+    }
+
+    // MARK: - Version Linkage
+
+    /// Verify .version metadata file exists and fixture_count matches.
+    func testVersionMetadataMatchesFixtureCount() throws {
+        let versionURL = Self.fixturesURL.appendingPathComponent(".version")
+        let data = try Data(contentsOf: versionURL)
+        let meta = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+
+        XCTAssertNotNil(meta?["core_version"], ".version must have core_version")
+        let schemaVersion = meta?["schema_version"] as? Int
+        XCTAssertNotNil(schemaVersion, ".version must have schema_version")
+        XCTAssertGreaterThanOrEqual(schemaVersion ?? 0, 1)
+
+        let fixtureCount = meta?["fixture_count"] as? Int
+        XCTAssertEqual(
+            fixtureCount, Self.fixtureNames.count,
+            ".version fixture_count (\(fixtureCount ?? -1)) must match actual count (\(Self.fixtureNames.count))"
+        )
     }
 }

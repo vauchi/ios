@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "screen_id": "settings",
+  "title": "Settings",
+  "subtitle": null,
+  "components": [
+    {
+      "SettingsGroup": {
+        "id": "profile",
+        "label": "Profile",
+        "items": [
+          {
+            "id": "display_name",
+            "label": "Display Name",
+            "kind": {
+              "Value": {
+                "value": "Alice"
+              }
+            }
+          },
+          {
+            "id": "edit_profile",
+            "label": "Edit Profile",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "privacy",
+        "label": "Privacy",
+        "items": [
+          {
+            "id": "delivery_receipts",
+            "label": "Delivery Receipts",
+            "kind": {
+              "Toggle": {
+                "enabled": true
+              }
+            }
+          },
+          {
+            "id": "suppress_presence",
+            "label": "Suppress Presence",
+            "kind": {
+              "Toggle": {
+                "enabled": false
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "security",
+        "label": "Security",
+        "items": [
+          {
+            "id": "change_password",
+            "label": "Change Password",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            }
+          },
+          {
+            "id": "devices",
+            "label": "Devices",
+            "kind": {
+              "Link": {
+                "detail": "2 devices"
+              }
+            }
+          },
+          {
+            "id": "duress_pin",
+            "label": "Duress PIN",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "network",
+        "label": "Network",
+        "items": [
+          {
+            "id": "relay_url",
+            "label": "Relay URL",
+            "kind": {
+              "Value": {
+                "value": "wss://relay.vauchi.app"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "danger",
+        "label": "Danger Zone",
+        "items": [
+          {
+            "id": "emergency_wipe",
+            "label": "Emergency Wipe",
+            "kind": {
+              "Destructive": {
+                "label": "Wipe All Data"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [],
+  "progress": null,
+  "tokens": {
+    "spacing": {
+      "xs": 4,
+      "sm": 8,
+      "md": 16,
+      "lg": 24,
+      "xl": 32
+    },
+    "spacing_direction": {
+      "content_start": 16,
+      "content_end": 16,
+      "list_item_start": 8,
+      "list_item_end": 8
+    },
+    "typography": {
+      "title_size": 24,
+      "subtitle_size": 18,
+      "body_size": 16,
+      "caption_size": 14
+    },
+    "border_radius": {
+      "sm": 4,
+      "md": 8,
+      "md_lg": 12,
+      "lg": 16
+    },
+    "touch_target": {
+      "minimum": 44
+    },
+    "motion": {
+      "enter_duration_ms": 200,
+      "exit_duration_ms": 150,
+      "emphasis_duration_ms": 300
+    }
+  }
+}

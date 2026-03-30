@@ -1,48 +1,43 @@
 {
   "schema_version": 1,
-  "screen_id": "backup_prompt",
-  "title": "Back up your identity",
+  "screen_id": "contact_list",
+  "title": "Contacts",
   "subtitle": null,
   "components": [
     {
-      "InfoPanel": {
-        "id": "backup_info",
-        "icon": "backup",
-        "title": "Why back up?",
-        "items": [
+      "ContactList": {
+        "id": "contacts",
+        "contacts": [
           {
-            "icon": "warning",
-            "title": "No identity recovery",
-            "detail": "If you lose your device without a backup, your identity is lost."
+            "id": "c1",
+            "name": "Alice",
+            "subtitle": "Friend",
+            "avatar_initials": "A",
+            "status": null,
+            "searchable_fields": []
           },
           {
-            "icon": "devices",
-            "title": "Multi-device",
-            "detail": "Backups let you use Vauchi on multiple devices."
+            "id": "c2",
+            "name": "Bob",
+            "subtitle": null,
+            "avatar_initials": "B",
+            "status": "Updated",
+            "searchable_fields": []
           }
-        ]
+        ],
+        "searchable": true
       }
     }
   ],
   "actions": [
     {
-      "id": "setup_backup",
-      "label": "Set up backup",
+      "id": "add_contact",
+      "label": "Add Contact",
       "style": "Primary",
-      "enabled": true
-    },
-    {
-      "id": "skip",
-      "label": "Skip",
-      "style": "Secondary",
       "enabled": true
     }
   ],
-  "progress": {
-    "current_step": 8,
-    "total_steps": 9,
-    "label": null
-  },
+  "progress": null,
   "tokens": {
     "spacing": {
       "xs": 4,

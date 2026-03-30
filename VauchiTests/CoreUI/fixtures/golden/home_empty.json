@@ -1,48 +1,38 @@
 {
   "schema_version": 1,
-  "screen_id": "backup_prompt",
-  "title": "Back up your identity",
+  "screen_id": "my_info",
+  "title": "",
   "subtitle": null,
   "components": [
     {
-      "InfoPanel": {
-        "id": "backup_info",
-        "icon": "backup",
-        "title": "Why back up?",
-        "items": [
-          {
-            "icon": "warning",
-            "title": "No identity recovery",
-            "detail": "If you lose your device without a backup, your identity is lost."
-          },
-          {
-            "icon": "devices",
-            "title": "Multi-device",
-            "detail": "Backups let you use Vauchi on multiple devices."
-          }
-        ]
+      "Text": {
+        "id": "empty_hint",
+        "content": "No entries yet. Add your first entry to share with contacts.\n\nYou can add phone numbers, email addresses, websites, social profiles, and more. Tap \"Add Entry\" to get started.",
+        "style": "Caption"
       }
     }
   ],
   "actions": [
     {
-      "id": "setup_backup",
-      "label": "Set up backup",
+      "id": "add_field",
+      "label": "Add Entry",
       "style": "Primary",
       "enabled": true
     },
     {
-      "id": "skip",
-      "label": "Skip",
+      "id": "toggle_view",
+      "label": "Group View",
+      "style": "Secondary",
+      "enabled": true
+    },
+    {
+      "id": "preview-as-picker",
+      "label": "Preview as...",
       "style": "Secondary",
       "enabled": true
     }
   ],
-  "progress": {
-    "current_step": 8,
-    "total_steps": 9,
-    "label": null
-  },
+  "progress": null,
   "tokens": {
     "spacing": {
       "xs": 4,

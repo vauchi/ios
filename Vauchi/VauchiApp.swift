@@ -26,6 +26,7 @@ struct VauchiApp: App {
         @State private var nfcDiagAutoTest: String?
         @State private var showUltrasonicDiagnostic = false
         @State private var ultrasonicDiagAutoTest: String?
+        @State private var resetForTesting = false
     #endif
 
     init() {
@@ -68,6 +69,11 @@ struct VauchiApp: App {
                 _ultrasonicDiagAutoTest = State(initialValue: args[idx + 1])
                 _showUltrasonicDiagnostic = State(initialValue: true)
                 NSLog("[Vauchi] Launch arg: --ultrasonic-test %@", args[idx + 1])
+            }
+
+            if args.contains("--reset-for-testing") {
+                _resetForTesting = State(initialValue: true)
+                NSLog("[Vauchi] Launch arg: --reset-for-testing")
             }
         #endif
         // Register background tasks
@@ -133,6 +139,18 @@ struct VauchiApp: App {
                             BackgroundSyncService.shared.scheduleSyncTask()
                         }
                     }
+                #if DEBUG
+                    .task {
+                        if resetForTesting, !viewModel.hasIdentity {
+                            do {
+                                try await viewModel.createIdentity(name: "Test User")
+                                NSLog("[Vauchi] --reset-for-testing: identity created")
+                            } catch {
+                                NSLog("[Vauchi] --reset-for-testing: failed: %@", "\(error)")
+                            }
+                        }
+                    }
+                #endif
                     .onOpenURL { url in
                         #if DEBUG
                             // Handle diagnostic deep links: vauchi://diagnostic/ble?test=discovery&mode=server
