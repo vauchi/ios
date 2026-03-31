@@ -118,7 +118,7 @@ struct SocialGraphView: View {
     /// Trust levels in display order: cautious first (needs attention),
     /// then ascending trust (standard → high → verified).
     private let trustLevelOrder: [ContactTrustLevel] = [
-        .cautious, .standard, .high, .verified
+        .cautious, .standard, .high, .verified,
     ]
 
     var body: some View {
