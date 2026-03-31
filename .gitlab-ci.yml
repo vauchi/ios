@@ -546,14 +546,23 @@ build:debug:
             "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
             -o "$ZIP"
           echo "  Downloaded $(du -h "$ZIP" | cut -f1)"
-          # Extract XCFramework and patch Package.swift to use local path
-          # (SPM rejects file:// URLs — only https allowed for binaryTarget url)
+          # Pre-populate SPM artifact cache — when cached here, resolve
+          # uses the local artifact instead of re-downloading (401).
+          # Previous approach patched the checkout's Package.swift, but
+          # resolve re-clones from git and overwrites the patch.
+          ARTIFACTS=".spm-packages/artifacts/vauchi-platform-swift"
+          mkdir -p "$ARTIFACTS"
+          unzip -o "$ZIP" -d "$ARTIFACTS" > /dev/null
+          echo "  Placed in artifact cache: $ARTIFACTS/VauchiPlatformFFI.xcframework"
+          # Also patch checkout if it survived the killed first resolve
           CHECKOUT=".spm-packages/checkouts/vauchi-platform-swift"
-          unzip -o "$ZIP" -d "$CHECKOUT" > /dev/null
-          PKG="$CHECKOUT/Package.swift"
-          sed -i.bak 's|url: "https://[^"]*xcframework.zip",|path: "VauchiPlatformFFI.xcframework"|' "$PKG"
-          sed -i.bak '/checksum: checksum/d' "$PKG"
-          rm -f "${PKG}.bak"
+          if [ -d "$CHECKOUT" ]; then
+            cp -R "$ARTIFACTS/VauchiPlatformFFI.xcframework" "$CHECKOUT/"
+            PKG="$CHECKOUT/Package.swift"
+            sed -i.bak 's|url: "https://[^"]*xcframework.zip",|path: "VauchiPlatformFFI.xcframework"|' "$PKG"
+            sed -i.bak '/checksum: checksum/d' "$PKG"
+            rm -f "${PKG}.bak"
+          fi
           xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
             -clonedSourcePackagesDirPath .spm-packages \
             -derivedDataPath .derived-data \
