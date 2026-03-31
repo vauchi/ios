@@ -49,6 +49,8 @@ struct FaceToFaceExchangeView: View {
     // MARK: - Multi-stage exchange state
 
     @State private var multiStageQrImage: UIImage?
+    /// Track last QR data to avoid regenerating the same image every 150ms tick.
+    @State private var lastQrData: String?
     @State private var protocolState: MobileProtocolState = .idle
     @State private var qrCycleTimer: Timer?
     @State private var statePollTimer: Timer?
@@ -95,7 +97,10 @@ struct FaceToFaceExchangeView: View {
             }
             .onAppear {
                 previousBrightness = UIScreen.main.brightness
-                UIScreen.main.brightness = 1.0
+                // 65% brightness — matches Android. Higher values overexpose the
+                // device's own front camera, preventing it from scanning the peer's QR.
+                // Gray QR colors (#404040 on #E0E0E0) compensate for reduced luminance.
+                UIScreen.main.brightness = 0.65
                 requestPermissions()
                 startScannerIfReady()
                 startMultiStageSession()
@@ -346,7 +351,11 @@ struct FaceToFaceExchangeView: View {
                 stopQrCycleTimer()
                 return
             }
-            multiStageQrImage = generateQRCode(from: payload.data, correctionLevel: payload.errorCorrection)
+            // Only regenerate when data changes — avoids CIContext + CIFilter work every 150ms
+            if payload.data != lastQrData {
+                lastQrData = payload.data
+                multiStageQrImage = generateQRCode(from: payload.data, correctionLevel: payload.errorCorrection)
+            }
         }
     }
 
