@@ -7,41 +7,64 @@
 // Part of: SP-20 Social Network
 
 import SwiftUI
+import VauchiPlatform
 
 // MARK: - Trust Level
 
-/// Trust level for a contact, computed from verification status and group membership
-///
-/// NOTE: There is no dedicated "trust level" API in vauchi-core yet.
-/// This is computed client-side from existing data (verified status,
-/// recovery trust, group membership count). When core adds explicit
-/// trust-level or mutual-contact APIs, this should be updated to use them.
+/// Display properties for core's 4-tier trust level (ADR-021/034).
+/// Mapped from `MobileContactTrustLevel` — never re-derived from booleans.
 enum ContactTrustLevel: Comparable {
-    case unverified
+    case cautious
+    case standard
+    case high
     case verified
-    case trustedRecovery
+
+    init(from mobile: MobileContactTrustLevel) {
+        switch mobile {
+        case .cautious: self = .cautious
+        case .standard: self = .standard
+        case .high: self = .high
+        case .verified: self = .verified
+        }
+    }
 
     var displayName: String {
         switch self {
-        case .unverified: "Not Verified"
+        case .cautious: "Needs Re-verification"
+        case .standard: "Not Verified"
+        case .high: "High Trust"
         case .verified: "Verified"
-        case .trustedRecovery: "Recovery Trusted"
         }
     }
 
     var iconName: String {
         switch self {
-        case .unverified: "person.crop.circle.badge.questionmark"
+        case .cautious: "exclamationmark.triangle.fill"
+        case .standard: "person.crop.circle.badge.questionmark"
+        case .high: "checkmark.shield.fill"
         case .verified: "checkmark.seal.fill"
-        case .trustedRecovery: "shield.checkered"
         }
     }
 
     var color: Color {
         switch self {
-        case .unverified: .secondary
+        case .cautious: .orange
+        case .standard: .secondary
+        case .high: .blue
         case .verified: .green
-        case .trustedRecovery: .cyan
+        }
+    }
+
+    var sectionFooter: String {
+        switch self {
+        case .cautious:
+            "These contacts recovered their identity. Verify them again before trusting sensitive information."
+        case .standard:
+            "Consider verifying these contacts' fingerprints in person for stronger security."
+        case .high:
+            "These contacts were verified via proximity (NFC or Bluetooth)."
+        case .verified:
+            "You have verified these contacts' identities in person."
         }
     }
 }
@@ -60,31 +83,16 @@ struct SocialGraphView: View {
     @State private var isLoading = true
     @State private var filterTrustLevel: ContactTrustLevel?
 
-    /// Contacts grouped by trust level
-    private var recoveryTrustedContacts: [ContactInfo] {
-        filteredContacts.filter(\.recoveryTrusted)
-    }
-
-    private var verifiedContacts: [ContactInfo] {
-        filteredContacts.filter { $0.verified && !$0.recoveryTrusted }
-    }
-
-    private var unverifiedContacts: [ContactInfo] {
-        filteredContacts.filter { !$0.verified && !$0.recoveryTrusted }
+    /// Contacts grouped by core's authoritative trust level
+    private func contactsAt(_ level: ContactTrustLevel) -> [ContactInfo] {
+        filteredContacts.filter { ContactTrustLevel(from: $0.trustLevel) == level }
     }
 
     private var filteredContacts: [ContactInfo] {
         guard let filter = filterTrustLevel else {
             return viewModel.contacts
         }
-        switch filter {
-        case .trustedRecovery:
-            return viewModel.contacts.filter(\.recoveryTrusted)
-        case .verified:
-            return viewModel.contacts.filter { $0.verified && !$0.recoveryTrusted }
-        case .unverified:
-            return viewModel.contacts.filter { !$0.verified && !$0.recoveryTrusted }
-        }
+        return viewModel.contacts.filter { ContactTrustLevel(from: $0.trustLevel) == filter }
     }
 
     /// Summary statistics
@@ -93,16 +101,25 @@ struct SocialGraphView: View {
     }
 
     private var verifiedCount: Int {
-        viewModel.contacts.filter(\.verified).count
+        viewModel.contacts.filter {
+            let t = ContactTrustLevel(from: $0.trustLevel)
+            return t == .verified || t == .high
+        }.count
     }
 
-    private var recoveryTrustedCount: Int {
-        viewModel.contacts.filter(\.recoveryTrusted).count
+    private var cautionsCount: Int {
+        contactsAt(.cautious).count
     }
 
     private var groupCount: Int {
         viewModel.visibilityLabels.count
     }
+
+    /// Trust levels in display order: cautious first (needs attention),
+    /// then ascending trust (standard → high → verified).
+    private let trustLevelOrder: [ContactTrustLevel] = [
+        .cautious, .standard, .high, .verified
+    ]
 
     var body: some View {
         List {
@@ -111,7 +128,7 @@ struct SocialGraphView: View {
                 NetworkSummaryCard(
                     totalContacts: totalContacts,
                     verifiedCount: verifiedCount,
-                    recoveryTrustedCount: recoveryTrustedCount,
+                    cautionsCount: cautionsCount,
                     groupCount: groupCount
                 )
             }
@@ -129,31 +146,18 @@ struct SocialGraphView: View {
                             filterTrustLevel = nil
                         }
 
-                        TrustFilterChip(
-                            label: "Recovery Trusted",
-                            count: viewModel.contacts.filter(\.recoveryTrusted).count,
-                            color: .cyan,
-                            isSelected: filterTrustLevel == .trustedRecovery
-                        ) {
-                            filterTrustLevel = filterTrustLevel == .trustedRecovery ? nil : .trustedRecovery
-                        }
-
-                        TrustFilterChip(
-                            label: "Verified",
-                            count: viewModel.contacts.filter { $0.verified && !$0.recoveryTrusted }.count,
-                            color: .green,
-                            isSelected: filterTrustLevel == .verified
-                        ) {
-                            filterTrustLevel = filterTrustLevel == .verified ? nil : .verified
-                        }
-
-                        TrustFilterChip(
-                            label: "Unverified",
-                            count: viewModel.contacts.filter { !$0.verified && !$0.recoveryTrusted }.count,
-                            color: .secondary,
-                            isSelected: filterTrustLevel == .unverified
-                        ) {
-                            filterTrustLevel = filterTrustLevel == .unverified ? nil : .unverified
+                        ForEach(trustLevelOrder, id: \.self) { level in
+                            let count = contactsAt(level).count
+                            if count > 0 || filterTrustLevel == level {
+                                TrustFilterChip(
+                                    label: level.displayName,
+                                    count: count,
+                                    color: level.color,
+                                    isSelected: filterTrustLevel == level
+                                ) {
+                                    filterTrustLevel = filterTrustLevel == level ? nil : level
+                                }
+                            }
                         }
                     }
                     .padding(.horizontal, 4)
@@ -161,75 +165,30 @@ struct SocialGraphView: View {
                 .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
             }
 
-            // Recovery trusted contacts (highest trust)
-            if !recoveryTrustedContacts.isEmpty {
-                Section {
-                    ForEach(recoveryTrustedContacts) { contact in
-                        NavigationLink(destination: ContactDetailView(contact: contact)) {
-                            SocialContactRow(
-                                contact: contact,
-                                trustLevel: .trustedRecovery,
-                                groups: contactGroupMap[contact.id] ?? []
-                            )
+            // Contact sections by trust level
+            ForEach(trustLevelOrder, id: \.self) { level in
+                let contacts = contactsAt(level)
+                if !contacts.isEmpty {
+                    Section {
+                        ForEach(contacts) { contact in
+                            NavigationLink(destination: ContactDetailView(contact: contact)) {
+                                SocialContactRow(
+                                    contact: contact,
+                                    trustLevel: level,
+                                    groups: contactGroupMap[contact.id] ?? []
+                                )
+                            }
                         }
+                    } header: {
+                        TrustSectionHeader(
+                            title: level.displayName,
+                            icon: level.iconName,
+                            color: level.color,
+                            count: contacts.count
+                        )
+                    } footer: {
+                        Text(level.sectionFooter)
                     }
-                } header: {
-                    TrustSectionHeader(
-                        title: "Recovery Trusted",
-                        icon: "shield.checkered",
-                        color: .cyan,
-                        count: recoveryTrustedContacts.count
-                    )
-                } footer: {
-                    Text("These contacts can help you recover your account if you lose access.")
-                }
-            }
-
-            // Verified contacts
-            if !verifiedContacts.isEmpty {
-                Section {
-                    ForEach(verifiedContacts) { contact in
-                        NavigationLink(destination: ContactDetailView(contact: contact)) {
-                            SocialContactRow(
-                                contact: contact,
-                                trustLevel: .verified,
-                                groups: contactGroupMap[contact.id] ?? []
-                            )
-                        }
-                    }
-                } header: {
-                    TrustSectionHeader(
-                        title: "Verified",
-                        icon: "checkmark.seal.fill",
-                        color: .green,
-                        count: verifiedContacts.count
-                    )
-                } footer: {
-                    Text("You have verified these contacts' identities in person.")
-                }
-            }
-
-            // Unverified contacts
-            if !unverifiedContacts.isEmpty {
-                Section {
-                    ForEach(unverifiedContacts) { contact in
-                        NavigationLink(destination: ContactDetailView(contact: contact)) {
-                            SocialContactRow(
-                                contact: contact,
-                                trustLevel: .unverified,
-                                groups: contactGroupMap[contact.id] ?? []
-                            )
-                        }
-                    }
-                } header: {
-                    TrustSectionHeader(
-                        title: "Not Yet Verified",
-                        icon: "person.crop.circle.badge.questionmark",
-                        color: .secondary,
-                        count: unverifiedContacts.count
-                    )
-                } footer: {
-                    Text("Consider verifying these contacts' fingerprints in person for stronger security.")
                 }
             }
 
@@ -290,17 +249,16 @@ struct SocialGraphView: View {
 struct NetworkSummaryCard: View {
     let totalContacts: Int
     let verifiedCount: Int
-    let recoveryTrustedCount: Int
+    let cautionsCount: Int
     let groupCount: Int
 
     private var verificationPercentage: Int {
         guard totalContacts > 0 else { return 0 }
-        return Int(Double(verifiedCount + recoveryTrustedCount) / Double(totalContacts) * 100)
+        return Int(Double(verifiedCount) / Double(totalContacts) * 100)
     }
 
     var body: some View {
         VStack(spacing: 12) {
-            // Title
             HStack {
                 Image(systemName: "network")
                     .foregroundColor(.cyan)
@@ -310,7 +268,6 @@ struct NetworkSummaryCard: View {
                 Spacer()
             }
 
-            // Stats grid
             HStack(spacing: 0) {
                 NetworkStatItem(
                     value: "\(totalContacts)",
@@ -324,7 +281,7 @@ struct NetworkSummaryCard: View {
 
                 NetworkStatItem(
                     value: "\(verificationPercentage)%",
-                    label: "Verified",
+                    label: "Trusted",
                     icon: "checkmark.seal",
                     color: .green
                 )
@@ -332,15 +289,17 @@ struct NetworkSummaryCard: View {
                 Divider()
                     .frame(height: 40)
 
-                NetworkStatItem(
-                    value: "\(recoveryTrustedCount)",
-                    label: "Recovery",
-                    icon: "shield.checkered",
-                    color: .cyan
-                )
+                if cautionsCount > 0 {
+                    NetworkStatItem(
+                        value: "\(cautionsCount)",
+                        label: "Caution",
+                        icon: "exclamationmark.triangle",
+                        color: .orange
+                    )
 
-                Divider()
-                    .frame(height: 40)
+                    Divider()
+                        .frame(height: 40)
+                }
 
                 NetworkStatItem(
                     value: "\(groupCount)",
@@ -352,7 +311,7 @@ struct NetworkSummaryCard: View {
         }
         .padding(.vertical, 8)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Network summary: \(totalContacts) contacts, \(verificationPercentage) percent verified, \(recoveryTrustedCount) recovery trusted, \(groupCount) groups")
+        .accessibilityLabel("Network summary: \(totalContacts) contacts, \(verificationPercentage) percent trusted, \(cautionsCount) need re-verification, \(groupCount) groups")
     }
 }
 

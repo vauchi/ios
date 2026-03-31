@@ -36,6 +36,7 @@ struct ContactInfo: Identifiable, Equatable {
     let fingerprint: String
     let card: CardInfo?
     let addedAt: Date?
+    let trustLevel: MobileContactTrustLevel
 
     init(
         id: String,
@@ -45,7 +46,8 @@ struct ContactInfo: Identifiable, Equatable {
         isHidden: Bool = false,
         fingerprint: String = "",
         card: CardInfo? = nil,
-        addedAt: Date? = nil
+        addedAt: Date? = nil,
+        trustLevel: MobileContactTrustLevel = .standard
     ) {
         self.id = id
         self.displayName = displayName
@@ -55,6 +57,7 @@ struct ContactInfo: Identifiable, Equatable {
         self.fingerprint = fingerprint
         self.card = card
         self.addedAt = addedAt
+        self.trustLevel = trustLevel
     }
 }
 
@@ -447,7 +450,8 @@ class VauchiViewModel: ObservableObject {
                             )
                         }
                     ),
-                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt))
+                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
+                    trustLevel: contact.trustLevel
                 )
             }
             contactsOffset = UInt32(contacts.count)
@@ -482,7 +486,8 @@ class VauchiViewModel: ObservableObject {
                             )
                         }
                     ),
-                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt))
+                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
+                    trustLevel: contact.trustLevel
                 )
             }
             contacts.append(contentsOf: moreContacts)
@@ -518,7 +523,8 @@ class VauchiViewModel: ObservableObject {
                         )
                     }
                 ),
-                addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt))
+                addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
+                trustLevel: contact.trustLevel
             )
         } catch {
             return nil
@@ -536,7 +542,8 @@ class VauchiViewModel: ObservableObject {
                     displayName: contact.displayName,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
-                    fingerprint: contact.fingerprint
+                    fingerprint: contact.fingerprint,
+                    trustLevel: contact.trustLevel
                 )
             }
         } catch {
@@ -573,7 +580,8 @@ class VauchiViewModel: ObservableObject {
                             )
                         }
                     ),
-                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt))
+                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
+                    trustLevel: contact.trustLevel
                 )
             }
         } catch {
