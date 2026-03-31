@@ -51,29 +51,13 @@ final class OnboardingTests: XCTestCase {
                       "Onboarding completion state should persist")
     }
 
-    /// Scenario: Onboarding step tracking
-    func testOnboardingStepTracking() {
-        XCTAssertEqual(settingsService.onboardingStep, 0,
-                       "Initial onboarding step should be 0")
-
-        settingsService.onboardingStep = 3
-        XCTAssertEqual(settingsService.onboardingStep, 3)
-
-        // Create new service with same defaults
-        let newService = SettingsService(defaults: testDefaults)
-        XCTAssertEqual(newService.onboardingStep, 3,
-                       "Onboarding step should persist")
-    }
-
     /// Scenario: Reset onboarding
     func testResetOnboarding() {
         settingsService.hasCompletedOnboarding = true
-        settingsService.onboardingStep = 4
 
         settingsService.resetOnboarding()
 
         XCTAssertFalse(settingsService.hasCompletedOnboarding)
-        XCTAssertEqual(settingsService.onboardingStep, 0)
     }
 
     /// Scenario: Demo contact dismissal

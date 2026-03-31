@@ -16,13 +16,7 @@ private enum SettingsKey: String {
     case syncOnLaunch = "vauchi.syncOnLaunch"
     case notificationsEnabled = "vauchi.notificationsEnabled"
     case hasCompletedOnboarding = "vauchi.hasCompletedOnboarding"
-    case onboardingStep = "vauchi.onboardingStep"
     case hasDismissedDemoContact = "vauchi.hasDismissedDemoContact"
-
-    // Onboarding data (persisted across app restarts)
-    case onboardingDisplayName = "vauchi.onboarding.displayName"
-    case onboardingPhone = "vauchi.onboarding.phone"
-    case onboardingEmail = "vauchi.onboarding.email"
 
     // Accessibility settings
     case reduceMotion = "vauchi.accessibility.reduceMotion"
@@ -120,37 +114,10 @@ final class SettingsService {
         set { defaults.set(newValue, forKey: SettingsKey.hasCompletedOnboarding.rawValue) }
     }
 
-    /// Current onboarding step (for resume functionality)
-    /// 0 = welcome, 1 = identity, 2 = card wizard, 3 = preview, 4 = security, 5 = complete
-    var onboardingStep: Int {
-        get { defaults.integer(forKey: SettingsKey.onboardingStep.rawValue) }
-        set { defaults.set(newValue, forKey: SettingsKey.onboardingStep.rawValue) }
-    }
-
     /// Whether the user has dismissed the demo contact
     var hasDismissedDemoContact: Bool {
         get { defaults.bool(forKey: SettingsKey.hasDismissedDemoContact.rawValue) }
         set { defaults.set(newValue, forKey: SettingsKey.hasDismissedDemoContact.rawValue) }
-    }
-
-    // MARK: - Onboarding Data (persisted for resume)
-
-    /// Display name entered during onboarding (survives app restart)
-    var onboardingDisplayName: String {
-        get { defaults.string(forKey: SettingsKey.onboardingDisplayName.rawValue) ?? "" }
-        set { defaults.set(newValue, forKey: SettingsKey.onboardingDisplayName.rawValue) }
-    }
-
-    /// Phone entered during onboarding (survives app restart)
-    var onboardingPhone: String {
-        get { defaults.string(forKey: SettingsKey.onboardingPhone.rawValue) ?? "" }
-        set { defaults.set(newValue, forKey: SettingsKey.onboardingPhone.rawValue) }
-    }
-
-    /// Email entered during onboarding (survives app restart)
-    var onboardingEmail: String {
-        get { defaults.string(forKey: SettingsKey.onboardingEmail.rawValue) ?? "" }
-        set { defaults.set(newValue, forKey: SettingsKey.onboardingEmail.rawValue) }
     }
 
     // MARK: - Accessibility Settings
@@ -199,10 +166,6 @@ final class SettingsService {
             SettingsKey.syncOnLaunch,
             SettingsKey.notificationsEnabled,
             SettingsKey.hasCompletedOnboarding,
-            SettingsKey.onboardingStep,
-            SettingsKey.onboardingDisplayName,
-            SettingsKey.onboardingPhone,
-            SettingsKey.onboardingEmail,
             SettingsKey.hasDismissedDemoContact,
             SettingsKey.reduceMotion,
             SettingsKey.highContrast,
@@ -215,9 +178,5 @@ final class SettingsService {
     /// Reset onboarding state (for replay from settings)
     func resetOnboarding() {
         defaults.removeObject(forKey: SettingsKey.hasCompletedOnboarding.rawValue)
-        defaults.removeObject(forKey: SettingsKey.onboardingStep.rawValue)
-        defaults.removeObject(forKey: SettingsKey.onboardingDisplayName.rawValue)
-        defaults.removeObject(forKey: SettingsKey.onboardingPhone.rawValue)
-        defaults.removeObject(forKey: SettingsKey.onboardingEmail.rawValue)
     }
 }
