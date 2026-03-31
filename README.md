@@ -3,12 +3,13 @@
 
 > **Mirror:** This repo is a read-only mirror of [gitlab.com/vauchi/ios](https://gitlab.com/vauchi/ios). Please open issues and merge requests there.
 
-[![Pipeline](https://vauchi.gitlab.io/ios/badges/pipeline.svg)](https://gitlab.com/vauchi/ios/-/pipelines)
-[![Coverage](https://vauchi.gitlab.io/ios/badges/coverage.svg)](https://gitlab.com/vauchi/ios/-/pipelines)
+[![Pipeline](https://img.shields.io/endpoint?url=https://vauchi.gitlab.io/ios/badges/pipeline.json&label=pipeline)](https://gitlab.com/vauchi/ios/-/pipelines)
+[![Coverage](https://img.shields.io/endpoint?url=https://vauchi.gitlab.io/ios/badges/coverage.json&label=coverage)](https://gitlab.com/vauchi/ios/-/pipelines)
 [![REUSE](https://api.reuse.software/badge/gitlab.com/vauchi/ios)](https://api.reuse.software/info/gitlab.com/vauchi/ios)
 
 > [!WARNING]
-> **Pre-Alpha Software** - This project is under heavy development and not ready for production use.
+> **Pre-Alpha Software** - This project is under heavy
+> development and not ready for production use.
 > APIs may change without notice. Use at your own risk.
 
 # Vauchi iOS
@@ -30,6 +31,7 @@ Run the setup script to configure Xcode:
 ```
 
 This script will:
+
 1. Verify Xcode installation
 2. Accept the license agreement
 3. Run first launch setup (installs required components)
@@ -43,9 +45,11 @@ If you prefer manual setup or the script fails:
 ### 1. Install Xcode
 
 **Option A - App Store:**
+
 - Open App Store, search "Xcode", install
 
 **Option B - Developer Portal (specific versions):**
+
 1. Go to https://developer.apple.com/download/all/
 2. Sign in with Apple ID
 3. Download Xcode .xip file
@@ -99,7 +103,7 @@ Then use Cmd+B to build, Cmd+R to run.
 
 ## Project Structure
 
-```
+```text
 vauchi-ios/
 ├── Vauchi.xcodeproj      # Xcode project
 ├── Package.swift          # Swift Package Manager manifest
@@ -134,27 +138,34 @@ The iOS app follows MVVM architecture:
 - **ViewModels**: Business logic and state management
 - **Services**: Data access (VauchiRepository wraps UniFFI bindings)
 
-The app uses `vauchi-platform` UniFFI bindings to call the Rust `vauchi-core` library for all cryptographic operations and data storage.
+The app uses `vauchi-platform` UniFFI bindings to call
+the Rust `vauchi-core` library for all cryptographic
+operations and data storage.
 
 ## Troubleshooting
 
 ### "No available devices matched the request"
+
 Install iOS simulators:
+
 ```bash
 xcodebuild -downloadPlatform iOS
 ```
 
 ### "You have not agreed to the Xcode license"
+
 ```bash
 sudo xcodebuild -license accept
 ```
 
 ### "CoreSimulator.framework not found"
+
 ```bash
 xcodebuild -runFirstLaunch
 ```
 
 ### Rust targets missing
+
 ```bash
 rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim
 ```
