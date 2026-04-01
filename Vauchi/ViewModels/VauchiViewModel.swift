@@ -1089,6 +1089,9 @@ class VauchiViewModel: ObservableObject {
             SettingsService.shared.lastSyncTime = lastSyncTime
             await loadContacts()
             await loadPendingUpdates()
+        } catch let VauchiRepositoryError.rateLimited(retryAfterSecs) {
+            syncState = .error("Rate limited")
+            showError("Sync", message: "Please wait \(retryAfterSecs)s before syncing again")
         } catch {
             syncState = .error(error.localizedDescription)
         }

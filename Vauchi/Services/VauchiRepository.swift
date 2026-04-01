@@ -53,6 +53,7 @@ enum VauchiRepositoryError: LocalizedError {
     case gdprError(String)
     case deletionNotAllowed(String)
     case shredError(String)
+    case rateLimited(UInt64)
     case deviceLocked
 
     var errorDescription: String? {
@@ -87,6 +88,8 @@ enum VauchiRepositoryError: LocalizedError {
             "Deletion not allowed: \(msg)"
         case let .shredError(msg):
             "Shred error: \(msg)"
+        case let .rateLimited(retryAfterSecs):
+            "Rate limited — please wait \(retryAfterSecs)s before trying again"
         case .deviceLocked:
             "Device is locked — unlock your device to access Vauchi"
         }
@@ -131,6 +134,8 @@ enum VauchiRepositoryError: LocalizedError {
             return .internalError("Init: \(msg)")
         case let .BleNotAvailable(msg):
             return .internalError("BLE: \(msg)")
+        case let .RateLimited(retryAfterSecs):
+            return .rateLimited(retryAfterSecs)
         @unknown default:
             return .internalError("Unknown error")
         }
