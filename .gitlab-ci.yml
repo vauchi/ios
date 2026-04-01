@@ -493,6 +493,7 @@ check:snapshot-recording:
 # Design drift: verify all design-spec components are implemented
 check:design-drift:
   extends: .design-drift-job
+  allow_failure: false
   variables:
     DESIGN_DRIFT_COMPONENT_DIR: "Vauchi/CoreUI/Components"
     DESIGN_DRIFT_FILE_EXT: ".swift"
@@ -882,6 +883,8 @@ test:snapshots:record:
 
 semgrep-sast:
   tags: [docker]
+  interruptible: false
+  allow_failure: false
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -893,6 +896,8 @@ semgrep-sast:
 
 secret_detection:
   tags: [docker]
+  interruptible: false
+  allow_failure: false
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "schedule"
