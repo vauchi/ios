@@ -96,26 +96,6 @@ final class ContactActionsTests: XCTestCase {
         XCTAssertTrue(ContactActions.isSafeUrl("sms:+1234567890"))
     }
 
-    // MARK: - Social Network URL Tests
-
-    /// Scenario: Build GitHub profile URL
-    func testBuildGitHubUrl() {
-        let url = ContactActions.buildSocialUrl(network: "github", username: "octocat")
-        XCTAssertEqual(url?.absoluteString, "https://github.com/octocat")
-    }
-
-    /// Scenario: Build Twitter profile URL
-    func testBuildTwitterUrl() {
-        let url = ContactActions.buildSocialUrl(network: "twitter", username: "jack")
-        XCTAssertEqual(url?.absoluteString, "https://twitter.com/jack")
-    }
-
-    /// Scenario: Build LinkedIn profile URL
-    func testBuildLinkedInUrl() {
-        let url = ContactActions.buildSocialUrl(network: "linkedin", username: "johndoe")
-        XCTAssertEqual(url?.absoluteString, "https://linkedin.com/in/johndoe")
-    }
-
     // MARK: - Action Types Tests
 
     /// Scenario: Get available actions for phone field

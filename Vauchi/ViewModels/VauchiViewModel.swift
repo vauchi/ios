@@ -81,15 +81,6 @@ struct ExchangeDataInfo: Equatable {
     var timeRemaining: TimeInterval {
         max(0, expiresAt.timeIntervalSinceNow)
     }
-
-    /// Extract the 16-byte audio challenge from a wb:// QR data string.
-    /// QR binary layout: [MAGIC(4)][version(1)][pubkey(32)][exchkey(32)][token(32)][audio_challenge(16)][...]
-    /// Audio challenge = bytes 101..117 after base64 decode.
-    static func extractAudioChallenge(from qrData: String) -> Data? {
-        let b64 = qrData.hasPrefix("wb://") ? String(qrData.dropFirst(5)) : qrData
-        guard let bytes = Data(base64Encoded: b64), bytes.count >= 117 else { return nil }
-        return bytes[101 ..< 117]
-    }
 }
 
 /// Exchange result after scanning QR
