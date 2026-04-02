@@ -156,6 +156,7 @@ struct VauchiSyncResult {
     let updatesSent: UInt32
     let total: UInt32
     let hasChanges: Bool
+    let updatedContactNames: [String]
 }
 
 /// Field type enum matching Rust MobileFieldType
@@ -1127,7 +1128,8 @@ class VauchiRepository {
                 cardsUpdated: result.cardsUpdated,
                 updatesSent: result.updatesSent,
                 total: result.total,
-                hasChanges: result.hasChanges
+                hasChanges: result.hasChanges,
+                updatedContactNames: result.updatedContactNames
             )
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
