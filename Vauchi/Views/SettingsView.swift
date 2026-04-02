@@ -656,16 +656,15 @@ struct SyncStatusBadge: View {
             ProgressView()
                 .scaleEffect(0.7)
                 .accessibilityLabel("Syncing")
-        case let .success(added, updated, sent):
-            if added + updated + sent > 0 {
-                Text("\(added + updated + sent) changes")
-                    .font(.caption)
-                    .foregroundColor(.green)
+        case let .success(added, updated, sent, names):
+            let label = if !names.isEmpty {
+                LocalizationService.shared.t("sync.updated_contacts", args: ["names": names.joined(separator: ", ")])
+            } else if added + updated + sent > 0 {
+                "\(added + updated + sent) changes"
             } else {
-                Text("Up to date")
-                    .font(.caption)
-                    .foregroundColor(.green)
+                "Up to date"
             }
+            Text(label).font(.caption).foregroundColor(.green)
         case .error:
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.orange)

@@ -183,6 +183,8 @@ struct SyncStatusIndicator: View {
         switch syncState {
         case .idle: "Sync ready"
         case .syncing: "Syncing in progress"
+        case let .success(_, _, _, names) where !names.isEmpty:
+            "Sync completed, updated: \(names.joined(separator: ", "))"
         case .success: "Sync completed successfully"
         case .error: "Sync error occurred"
         }

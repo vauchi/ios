@@ -95,7 +95,7 @@ struct ExchangeResultInfo: Equatable {
 enum SyncState: Equatable {
     case idle
     case syncing
-    case success(contactsAdded: Int, cardsUpdated: Int, updatesSent: Int)
+    case success(contactsAdded: Int, cardsUpdated: Int, updatesSent: Int, updatedContactNames: [String])
     case error(String)
 }
 
@@ -1120,15 +1120,24 @@ class VauchiViewModel: ObservableObject {
 
         do {
             let result = try repository.sync()
+            let names = result.updatedContactNames
             syncState = .success(
                 contactsAdded: Int(result.contactsAdded),
                 cardsUpdated: Int(result.cardsUpdated),
-                updatesSent: Int(result.updatesSent)
+                updatesSent: Int(result.updatesSent),
+                updatedContactNames: names
             )
             lastSyncTime = Date()
             SettingsService.shared.lastSyncTime = lastSyncTime
             await loadContacts()
             await loadPendingUpdates()
+            if !names.isEmpty {
+                let loc = LocalizationService.shared
+                let msg = names.count == 1
+                    ? loc.t("sync.updated_single", args: ["name": names.first!])
+                    : loc.t("sync.updated_contacts", args: ["names": names.joined(separator: ", ")])
+                showSuccess("Sync", message: msg)
+            }
         } catch let VauchiRepositoryError.rateLimited(retryAfterSecs) {
             syncState = .error("Rate limited")
             showError("Sync", message: "Please wait \(retryAfterSecs)s before syncing again")
