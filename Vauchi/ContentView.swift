@@ -93,7 +93,9 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            print("ContentView: onAppear, appState=\(viewModel.appState), isLoading=\(viewModel.isLoading), hasIdentity=\(viewModel.hasIdentity), errorMessage=\(String(describing: viewModel.errorMessage))")
+            #if DEBUG
+                print("ContentView: onAppear, appState=\(viewModel.appState), isLoading=\(viewModel.isLoading), hasIdentity=\(viewModel.hasIdentity), errorMessage=\(String(describing: viewModel.errorMessage))")
+            #endif
             viewModel.loadState()
         }
         .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {

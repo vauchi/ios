@@ -179,7 +179,9 @@ enum ContactActions {
     @MainActor
     static func openUrl(_ url: URL) {
         guard isSafeUrl(url) else {
-            print("ContactActions: Blocked unsafe URL: \(url)")
+            #if DEBUG
+                print("ContactActions: Blocked unsafe URL: \(url)")
+            #endif
             return
         }
         UIApplication.shared.open(url)

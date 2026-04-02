@@ -45,7 +45,9 @@ class AudioProximityService: PlatformAudioHandler {
             try session.setPreferredSampleRate(targetSampleRate)
             try session.setActive(true)
         } catch {
-            print("AudioProximityService: Failed to setup audio session: \(error)")
+            #if DEBUG
+                print("AudioProximityService: Failed to setup audio session: \(error)")
+            #endif
         }
     }
 
@@ -187,7 +189,9 @@ class AudioProximityService: PlatformAudioHandler {
             return result
 
         } catch {
-            print("AudioProximityService: Recording failed: \(error)")
+            #if DEBUG
+                print("AudioProximityService: Recording failed: \(error)")
+            #endif
             isRecording = false
             return []
         }

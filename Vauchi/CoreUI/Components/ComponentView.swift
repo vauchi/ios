@@ -57,7 +57,9 @@ struct ComponentView: View {
             // Toast rendering is handled at the screen level, not inline
             EmptyView()
                 .onAppear {
-                    print("ComponentView: ShowToast should be handled at screen level: \(toastComponent.message)")
+                    #if DEBUG
+                        print("ComponentView: ShowToast should be handled at screen level: \(toastComponent.message)")
+                    #endif
                 }
 
         case let .inlineConfirm(confirmComponent):

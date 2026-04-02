@@ -192,26 +192,36 @@ class VauchiViewModel: ObservableObject {
     private func initializeRepository() {
         // Layer B: check if protected data is available before accessing Keychain
         guard UIApplication.shared.isProtectedDataAvailable else {
-            print("VauchiViewModel: protected data unavailable, waiting for unlock")
+            #if DEBUG
+                print("VauchiViewModel: protected data unavailable, waiting for unlock")
+            #endif
             appState = .waitingForUnlock
             subscribeToProtectedDataAvailable()
             return
         }
 
         do {
-            print("VauchiViewModel: initializing repository...")
+            #if DEBUG
+                print("VauchiViewModel: initializing repository...")
+            #endif
             repository = try VauchiRepository(
                 relayUrl: SettingsService.shared.relayUrl
             )
             appState = .ready
-            print("VauchiViewModel: repository initialized successfully")
+            #if DEBUG
+                print("VauchiViewModel: repository initialized successfully")
+            #endif
         } catch VauchiRepositoryError.deviceLocked {
             // Layer C: Keychain accessible but auth required
-            print("VauchiViewModel: device locked, authentication required")
+            #if DEBUG
+                print("VauchiViewModel: device locked, authentication required")
+            #endif
             appState = .authenticationRequired
         } catch {
             let msg = "Failed to initialize: \(error.localizedDescription) (\(String(describing: error)))"
-            print("VauchiViewModel: \(msg)")
+            #if DEBUG
+                print("VauchiViewModel: \(msg)")
+            #endif
             errorMessage = msg
         }
     }
@@ -254,7 +264,9 @@ class VauchiViewModel: ObservableObject {
                     }
                 } else {
                     // If cancelled/failed, stay on lock screen — user can tap again
-                    print("VauchiViewModel: authentication failed or cancelled: \(String(describing: error))")
+                    #if DEBUG
+                        print("VauchiViewModel: authentication failed or cancelled: \(String(describing: error))")
+                    #endif
                 }
             }
         }
@@ -577,7 +589,9 @@ class VauchiViewModel: ObservableObject {
             }
         } catch {
             // Gracefully handle if method not available yet in UniFFI bindings
-            print("VauchiViewModel: loadHiddenContacts not yet available: \(error)")
+            #if DEBUG
+                print("VauchiViewModel: loadHiddenContacts not yet available: \(error)")
+            #endif
             contacts = []
         }
     }
@@ -594,7 +608,9 @@ class VauchiViewModel: ObservableObject {
             contacts.removeAll { $0.id == id }
         } catch {
             // Gracefully handle if method not available yet
-            print("VauchiViewModel: hideContact not yet available: \(error)")
+            #if DEBUG
+                print("VauchiViewModel: hideContact not yet available: \(error)")
+            #endif
             throw VauchiRepositoryError.internalError("Hidden contacts feature not yet available")
         }
     }
@@ -627,7 +643,9 @@ class VauchiViewModel: ObservableObject {
             contacts.removeAll { $0.id == id }
         } catch {
             // Gracefully handle if method not available yet
-            print("VauchiViewModel: unhideContact not yet available: \(error)")
+            #if DEBUG
+                print("VauchiViewModel: unhideContact not yet available: \(error)")
+            #endif
             throw VauchiRepositoryError.internalError("Hidden contacts feature not yet available")
         }
     }
@@ -647,7 +665,9 @@ class VauchiViewModel: ObservableObject {
             isPasswordEnabled = try repository.isPasswordEnabled()
             isDuressEnabled = try repository.isDuressEnabled()
         } catch {
-            print("VauchiViewModel: loadDuressStatus not yet available: \(error)")
+            #if DEBUG
+                print("VauchiViewModel: loadDuressStatus not yet available: \(error)")
+            #endif
         }
     }
 
@@ -692,7 +712,9 @@ class VauchiViewModel: ObservableObject {
         do {
             try repository.panicShred()
         } catch {
-            print("VauchiViewModel: panicShred not yet available: \(error)")
+            #if DEBUG
+                print("VauchiViewModel: panicShred not yet available: \(error)")
+            #endif
         }
     }
 
@@ -712,7 +734,9 @@ class VauchiViewModel: ObservableObject {
             let config = try repository.getEmergencyConfig()
             emergencyConfigured = config != nil
         } catch {
-            print("VauchiViewModel: loadEmergencyConfig not yet available: \(error)")
+            #if DEBUG
+                print("VauchiViewModel: loadEmergencyConfig not yet available: \(error)")
+            #endif
         }
     }
 
@@ -749,7 +773,9 @@ class VauchiViewModel: ObservableObject {
                 self.torBridges = config.bridges
             }
         } catch {
-            print("Failed to load Tor config: \(error)")
+            #if DEBUG
+                print("Failed to load Tor config: \(error)")
+            #endif
         }
     }
 
@@ -763,7 +789,9 @@ class VauchiViewModel: ObservableObject {
                 self.torBridges = bridges
             }
         } catch {
-            print("Failed to save Tor config: \(error)")
+            #if DEBUG
+                print("Failed to save Tor config: \(error)")
+            #endif
         }
     }
 
@@ -830,7 +858,9 @@ class VauchiViewModel: ObservableObject {
             demoContact = try repository.initDemoContactIfNeeded()
             demoContactState = repository.getDemoContactState()
         } catch {
-            print("VauchiViewModel: Failed to init demo contact: \(error)")
+            #if DEBUG
+                print("VauchiViewModel: Failed to init demo contact: \(error)")
+            #endif
         }
     }
 
@@ -869,7 +899,9 @@ class VauchiViewModel: ObservableObject {
                 demoContactState = repository.getDemoContactState()
             }
         } catch {
-            print("VauchiViewModel: Failed to auto-remove demo contact: \(error)")
+            #if DEBUG
+                print("VauchiViewModel: Failed to auto-remove demo contact: \(error)")
+            #endif
         }
     }
 
@@ -891,7 +923,9 @@ class VauchiViewModel: ObservableObject {
             demoContact = try repository.triggerDemoUpdate()
             demoContactState = repository.getDemoContactState()
         } catch {
-            print("VauchiViewModel: Failed to trigger demo update: \(error)")
+            #if DEBUG
+                print("VauchiViewModel: Failed to trigger demo update: \(error)")
+            #endif
         }
     }
 
@@ -913,7 +947,9 @@ class VauchiViewModel: ObservableObject {
             visibilityLabels = try repository.listLabels()
             suggestedLabels = repository.getSuggestedLabels()
         } catch {
-            print("VauchiViewModel: Failed to load labels: \(error)")
+            #if DEBUG
+                print("VauchiViewModel: Failed to load labels: \(error)")
+            #endif
             visibilityLabels = []
         }
     }
@@ -1007,7 +1043,9 @@ class VauchiViewModel: ObservableObject {
         do {
             multiStageSession = try repository.createMultistageSession()
         } catch {
-            NSLog("[Exchange] Failed to create session: %@", "\(error)")
+            #if DEBUG
+                NSLog("[Exchange] Failed to create session: %@", "\(error)")
+            #endif
         }
     }
 
@@ -1016,7 +1054,9 @@ class VauchiViewModel: ObservableObject {
         do {
             return try repository.finalizeMultistageExchange(session: session)
         } catch {
-            NSLog("[Exchange] Failed to finalize: %@", "\(error)")
+            #if DEBUG
+                NSLog("[Exchange] Failed to finalize: %@", "\(error)")
+            #endif
             return nil
         }
     }

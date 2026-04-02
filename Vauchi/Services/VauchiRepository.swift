@@ -886,7 +886,9 @@ class VauchiRepository {
 
     /// Save Tor configuration (stub — no-op until core exposes Tor bindings).
     func saveTorConfig(enabled _: Bool, bridges _: [String], preferOnion _: Bool) throws {
-        print("VauchiRepository: saveTorConfig is a stub — Tor bindings not yet available")
+        #if DEBUG
+            print("VauchiRepository: saveTorConfig is a stub — Tor bindings not yet available")
+        #endif
     }
 
     /// Get own identity fingerprint for verification display.
@@ -1063,10 +1065,14 @@ class VauchiRepository {
                 errorMessage: result.errorMessage
             )
         } catch let error as MobileError {
-            NSLog("[Exchange] Failed: %@", "\(error)")
+            #if DEBUG
+                NSLog("[Exchange] Failed: %@", "\(error)")
+            #endif
             throw VauchiRepositoryError.from(error)
         } catch {
-            NSLog("[Exchange] Failed: %@", "\(error)")
+            #if DEBUG
+                NSLog("[Exchange] Failed: %@", "\(error)")
+            #endif
             throw error
         }
     }
@@ -1087,10 +1093,14 @@ class VauchiRepository {
         do {
             return try vauchi.finalizeMultistageExchange(session: session)
         } catch let error as MobileError {
-            NSLog("[Exchange] Failed: %@", "\(error)")
+            #if DEBUG
+                NSLog("[Exchange] Failed: %@", "\(error)")
+            #endif
             throw VauchiRepositoryError.from(error)
         } catch {
-            NSLog("[Exchange] Failed: %@", "\(error)")
+            #if DEBUG
+                NSLog("[Exchange] Failed: %@", "\(error)")
+            #endif
             throw error
         }
     }

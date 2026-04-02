@@ -62,7 +62,9 @@ final class BackgroundSyncService {
         } catch {
             // Log error but don't crash - background tasks may not be available
             // in all contexts (e.g., simulator, development)
-            print("BackgroundSyncService: Failed to schedule sync task: \(error)")
+            #if DEBUG
+                print("BackgroundSyncService: Failed to schedule sync task: \(error)")
+            #endif
         }
     }
 

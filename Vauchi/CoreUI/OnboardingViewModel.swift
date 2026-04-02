@@ -41,13 +41,17 @@ import SwiftUI
             do {
                 let json = try workflow.currentScreenJson()
                 guard let data = json.data(using: .utf8) else {
-                    print("OnboardingViewModel: failed to convert JSON to Data")
+                    #if DEBUG
+                        print("OnboardingViewModel: failed to convert JSON to Data")
+                    #endif
                     return
                 }
                 currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
                 validationErrors = [:]
             } catch {
-                print("OnboardingViewModel: failed to load screen: \(error)")
+                #if DEBUG
+                    print("OnboardingViewModel: failed to load screen: \(error)")
+                #endif
             }
         }
 
@@ -56,20 +60,26 @@ import SwiftUI
             do {
                 let actionData = try coreJSONEncoder.encode(action)
                 guard let actionJson = String(data: actionData, encoding: .utf8) else {
-                    print("OnboardingViewModel: failed to encode action to JSON string")
+                    #if DEBUG
+                        print("OnboardingViewModel: failed to encode action to JSON string")
+                    #endif
                     return
                 }
 
                 let resultJson = try workflow.handleActionJson(actionJson: actionJson)
                 guard let resultData = resultJson.data(using: .utf8) else {
-                    print("OnboardingViewModel: failed to convert result JSON to Data")
+                    #if DEBUG
+                        print("OnboardingViewModel: failed to convert result JSON to Data")
+                    #endif
                     return
                 }
 
                 let result = try coreJSONDecoder.decode(ActionResult.self, from: resultData)
                 applyResult(result)
             } catch {
-                print("OnboardingViewModel: failed to handle action: \(error)")
+                #if DEBUG
+                    print("OnboardingViewModel: failed to handle action: \(error)")
+                #endif
             }
         }
 
