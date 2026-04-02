@@ -612,7 +612,9 @@ struct SettingsView: View {
                 try await viewModel.setDisplayName(trimmed)
             } catch {
                 // Error handling - the view model will update on success
-                print("Failed to update display name: \(error)")
+                #if DEBUG
+                    print("Failed to update display name: \(error)")
+                #endif
             }
         }
     }

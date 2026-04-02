@@ -78,7 +78,9 @@ struct VauchiApp: App {
         #endif
         // Register background tasks
         BackgroundSyncService.shared.registerBackgroundTasks()
-        print("VauchiApp: background tasks registered")
+        #if DEBUG
+            print("VauchiApp: background tasks registered")
+        #endif
 
         // Set up the sync handler
         BackgroundSyncService.shared.setSyncHandler {
@@ -172,7 +174,9 @@ struct VauchiApp: App {
                             pendingDeepLinkPayload = payload
                             showDeepLinkConsent = true
                         case let .invalid(reason):
-                            print("VauchiApp: Invalid deep link: \(reason)")
+                            #if DEBUG
+                                print("VauchiApp: Invalid deep link: \(reason)")
+                            #endif
                             viewModel.showError("Invalid Link",
                                                 message: "The link could not be processed: \(reason)")
                         }
