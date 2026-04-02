@@ -149,7 +149,7 @@ extension View {
     }
     .ahaMomentOverlay(.constant(MobileAhaMoment(
         momentType: .cardCreationComplete,
-        title: "Your Card is Ready!",
+        title: "My Card is Ready!",
         message: "You've created your first Vauchi card. Share it with friends to stay connected.",
         hasAnimation: true
     )))

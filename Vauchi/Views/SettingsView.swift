@@ -237,7 +237,7 @@ struct SettingsView: View {
                     .accessibilityHint("Manage your data processing and sharing consent preferences")
 
                     NavigationLink(destination: AccountDeletionView()) {
-                        Label("Account Deletion", systemImage: "trash.circle")
+                        Label("Delete Identity", systemImage: "trash.circle")
                     }
                     .accessibilityHint("Schedule or cancel deletion of your account")
 

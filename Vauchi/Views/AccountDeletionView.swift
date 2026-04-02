@@ -70,7 +70,7 @@ struct AccountDeletionView: View {
                 Text("Information")
             }
         }
-        .navigationTitle("Account Deletion")
+        .navigationTitle("Delete Identity")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             Task {
@@ -124,7 +124,7 @@ struct AccountDeletionView: View {
             Button(role: .destructive, action: { showScheduleConfirmation = true }) {
                 HStack {
                     Spacer()
-                    Label("Schedule Account Deletion", systemImage: "trash")
+                    Label("Schedule Deletion", systemImage: "trash")
                     Spacer()
                 }
             }
