@@ -88,6 +88,13 @@ final class ExchangeCommandHandler {
 
         case .nfcDeactivate:
             break
+
+        // ── Tier 0 commands (active after bindings bump) ───────────
+        // AccelerometerStart/Stop, RelayEscrowDeposit/Check/Retrieve,
+        // ShowShareSheet — handled via @unknown default until
+        // vauchi-platform-swift is regenerated with new variants.
+        @unknown default:
+            break
         }
     }
 
@@ -101,6 +108,37 @@ final class ExchangeCommandHandler {
     private func listenForAudioResponse(timeoutMs _: UInt64) {
         // Audio proximity not yet wired to command/event protocol.
         // TODO: Wire when AudioProximityService supports raw sample reception.
+    }
+
+    // MARK: - Relay Escrow
+
+    private func depositToEscrow(gateHash _: Data, slotHash _: Data, blob _: Data, ttl _: UInt32) {
+        // TODO: POST to relay OHTTP endpoint with EscrowMessage::Put
+        // On success: no event needed (fire-and-forget deposit)
+        // On failure: report RelayEscrowFailed
+        reportError(transport: "RelayEscrow", error: "not yet implemented")
+    }
+
+    private func checkEscrow(gateHash _: Data) {
+        // TODO: POST to relay OHTTP endpoint with EscrowMessage::Count
+        // When count >= 2: report RelayEscrowReady
+        // Otherwise: schedule retry after delay
+        reportError(transport: "RelayEscrow", error: "not yet implemented")
+    }
+
+    private func retrieveFromEscrow(gateHash _: Data, slotHash _: Data) {
+        // TODO: POST to relay OHTTP endpoint with EscrowMessage::Get
+        // On Blob response: pass blob back to core for decryption
+        // On error: report RelayEscrowFailed
+        reportError(transport: "RelayEscrow", error: "not yet implemented")
+    }
+
+    // MARK: - Share Sheet
+
+    private func showShareSheet(url _: String) {
+        // TODO: Present UIActivityViewController with the exchange URL
+        // On completion: report LinkShared event
+        // On cancel: no event (user stays on share screen)
     }
 
     // MARK: - Feedback
