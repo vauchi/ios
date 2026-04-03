@@ -93,7 +93,14 @@ struct AppPasswordView: View {
             .padding(.horizontal, 48)
             .accessibilityLabel("Unlock with app password")
 
-            Spacer()
+            Button {
+                pin = ""
+                viewModel.appState = .authenticationRequired
+            } label: {
+                Text("Cancel")
+                    .foregroundColor(.secondary)
+            }
+
             Spacer()
         }
         .padding()

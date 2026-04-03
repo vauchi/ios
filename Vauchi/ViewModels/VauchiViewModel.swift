@@ -260,10 +260,13 @@ class VauchiViewModel: ObservableObject {
             DispatchQueue.main.async {
                 if success {
                     self?.initializeRepository()
-                    // Check duress on background thread, then
-                    // apply constant-time delay to prevent timing
-                    // side-channel (observer can't tell whether
-                    // duress is enabled based on transition speed).
+                    // Hold on loading state during duress check
+                    // to prevent real contacts from flashing if
+                    // initializeRepository() set .ready.
+                    self?.appState = .loading
+                    // Constant-time delay prevents timing
+                    // side-channel (observer can't infer
+                    // isDuressEnabled from transition speed).
                     let start = Date()
                     let duress = (try? self?.repository?
                         .isDuressEnabled()) == true
@@ -274,7 +277,8 @@ class VauchiViewModel: ObservableObject {
                     ) {
                         if duress {
                             self?.appState = .appPasswordRequired
-                        } else if self?.appState == .ready {
+                        } else {
+                            self?.appState = .ready
                             self?.loadState()
                         }
                     }
