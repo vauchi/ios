@@ -692,6 +692,62 @@ class VauchiRepository {
         }
     }
 
+    // MARK: - Contact Lifecycle (reversible deletion + archival)
+
+    /// Soft-delete an imported contact (reversible).
+    func softDeleteImportedContact(id: String) throws {
+        do {
+            try vauchi.softDeleteImportedContact(id: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Undo a soft-delete.
+    func undoDeleteImportedContact(id: String) throws {
+        do {
+            try vauchi.undoDeleteImportedContact(id: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Permanently delete an imported contact.
+    func hardDeleteImportedContact(id: String) throws {
+        do {
+            try vauchi.hardDeleteImportedContact(id: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Archive a contact (remove from main list, keep data).
+    func archiveContact(id: String) throws {
+        do {
+            try vauchi.archiveContact(id: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Unarchive a contact back to the main list.
+    func unarchiveContact(id: String) throws {
+        do {
+            try vauchi.unarchiveContact(id: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// List all archived contacts.
+    func listArchivedContacts() throws -> [MobileContact] {
+        do {
+            return try vauchi.listArchivedContacts()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     // MARK: - Hidden Contacts Operations
 
     // Based on: features/resistance.feature - R3 Hidden Contact UI
