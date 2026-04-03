@@ -151,6 +151,7 @@
 		9C356FC3005B310BF322001D /* testAddFieldsStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 268841458ED0C3A21E73ECA5 /* testAddFieldsStep.1.png */; };
 		9C9A5E8876CAFA84118E8DBF /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644F12D83413B334E234F4AC /* LockScreenView.swift */; };
 		9CF23C4022ADB5366AD67245 /* testActionButtonEnabledAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = D618628DDEAEBAD0CE3FB0EC /* testActionButtonEnabledAccessibility.1.txt */; };
+		9DA062B94245C7748637A619 /* CoreScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */; };
 		9DB670EF78DB7FBAEEF7696B /* DeliveryStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9F60104DE94274578CB08 /* DeliveryStatusTests.swift */; };
 		9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */; };
 		9ECAED5D4945C8D7669BD1CC /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2760186DEA7C9870633BA8E8 /* HelpView.swift */; };
@@ -434,6 +435,7 @@
 		95147D906B74EF746C328B63 /* testWelcomeStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testWelcomeStep.1.png; sourceTree = "<group>"; };
 		95373D9E6440FED4B532EBDD /* VauchiRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiRepository.swift; sourceTree = "<group>"; };
 		962C13D56F463655E00BA233 /* testWelcomeScreen.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testWelcomeScreen.1.png; sourceTree = "<group>"; };
+		9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreScreenView.swift; sourceTree = "<group>"; };
 		9B2136E121C827A50A107948 /* testContactsScreenWithContacts.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsScreenWithContacts.1.png; sourceTree = "<group>"; };
 		9C3FB726E684074FF3A0B3DF /* ConfirmationDialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationDialogView.swift; sourceTree = "<group>"; };
 		9C58EE1A7DE8486716704A8C /* testStatusIndicatorSuccess.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testStatusIndicatorSuccess.1.png; sourceTree = "<group>"; };
@@ -740,6 +742,7 @@
 				EAE944AB1C8F7C6AD17579C1 /* AppEngineService.swift */,
 				80D908420E7769CC3225282C /* AppViewModel.swift */,
 				8EC13750603D7C1EF84BACBC /* CoreOnboardingView.swift */,
+				9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */,
 				52D65C152771F552C641B6A1 /* Models.swift */,
 				140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */,
 				2BCD1112BEA2A776E27B15C3 /* ScreenRendererView.swift */,
@@ -1327,6 +1330,7 @@
 				9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */,
 				5680FAB9C220183B0BB3AC03 /* ContentView.swift in Sources */,
 				7268CABF6013A271BFD83C39 /* CoreOnboardingView.swift in Sources */,
+				9DA062B94245C7748637A619 /* CoreScreenView.swift in Sources */,
 				4D6C3EC272054F44F67201EE /* DeepLinkHandler.swift in Sources */,
 				4C52B33A572F7C4F2EB5D736 /* DeliveryStatusView.swift in Sources */,
 				C9C86FD0A30B8E8FBAD1245C /* DiagnosticLogger.swift in Sources */,
