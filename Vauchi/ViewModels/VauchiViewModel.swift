@@ -751,6 +751,38 @@ class VauchiViewModel: ObservableObject {
         isDuressEnabled = false
     }
 
+    // MARK: - Decoy Contacts
+
+    @Published var decoyContacts: [MobileDecoyContact] = []
+
+    func loadDecoyContacts() async {
+        guard let repository else { return }
+        do {
+            decoyContacts = try repository.listDecoyContacts()
+        } catch {
+            decoyContacts = []
+        }
+    }
+
+    func addDecoyContact(name: String) async throws {
+        guard let repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        let cardJson = """
+        {"id":"decoy","display_name":"\(name)","fields":[]}
+        """
+        _ = try repository.addDecoyContact(name: name, cardJson: cardJson)
+        await loadDecoyContacts()
+    }
+
+    func deleteDecoyContact(id: String) async throws {
+        guard let repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        try repository.deleteDecoyContact(id: id)
+        await loadDecoyContacts()
+    }
+
     // MARK: - Panic Shred
 
     // Based on: features/panic_widget.feature - R2 Panic Widget

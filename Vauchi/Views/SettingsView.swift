@@ -1342,6 +1342,8 @@ struct DuressSettingsView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @State private var showPasswordSetup = false
     @State private var showDuressSetup = false
+    @State private var showAddDecoy = false
+    @State private var decoyName = ""
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var duressPin = ""
@@ -1406,6 +1408,41 @@ struct DuressSettingsView: View {
                 }
             }
 
+            if viewModel.isDuressEnabled {
+                Section {
+                    if viewModel.decoyContacts.isEmpty {
+                        Text("No decoy contacts yet")
+                            .foregroundColor(.secondary)
+                    } else {
+                        ForEach(viewModel.decoyContacts, id: \.id) { contact in
+                            HStack {
+                                Text(contact.displayName)
+                                Spacer()
+                                Button(role: .destructive) {
+                                    Task {
+                                        do {
+                                            try await viewModel.deleteDecoyContact(id: contact.id)
+                                        } catch {
+                                            errorMessage = error.localizedDescription
+                                        }
+                                    }
+                                } label: {
+                                    Image(systemName: "trash")
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                        }
+                    }
+                    Button(action: { showAddDecoy = true }) {
+                        Label("Add Decoy Contact", systemImage: "person.badge.plus")
+                    }
+                } header: {
+                    Text("Decoy Contacts")
+                } footer: {
+                    Text("Fake contacts shown in duress mode. Add enough to look realistic.")
+                }
+            }
+
             if !successMessage.isEmpty {
                 Section {
                     Text(successMessage)
@@ -1422,6 +1459,7 @@ struct DuressSettingsView: View {
         .navigationTitle("Duress PIN")
         .task {
             await viewModel.loadDuressStatus()
+            await viewModel.loadDecoyContacts()
         }
         .alert("Set App Password", isPresented: $showPasswordSetup) {
             SecureField("Password", text: $password)
@@ -1477,6 +1515,26 @@ struct DuressSettingsView: View {
                         successMessage = "Duress PIN configured"
                         duressPin = ""
                         confirmDuressPin = ""
+                    } catch {
+                        errorMessage = error.localizedDescription
+                    }
+                }
+            }
+        }
+        .alert("Add Decoy Contact", isPresented: $showAddDecoy) {
+            TextField("Name", text: $decoyName)
+                .accessibilityLabel("Decoy contact name")
+            Button("Cancel", role: .cancel) {
+                decoyName = ""
+            }
+            Button("Add") {
+                let name = decoyName.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !name.isEmpty else { return }
+                Task {
+                    do {
+                        try await viewModel.addDecoyContact(name: name)
+                        successMessage = "Decoy contact added"
+                        decoyName = ""
                     } catch {
                         errorMessage = error.localizedDescription
                     }
