@@ -62,20 +62,10 @@ final class SettingsService {
         set { defaults.set(newValue, forKey: SettingsKey.relayUrl.rawValue) }
     }
 
-    /// Validates a relay URL
-    /// Only secure WebSocket (wss://) is allowed for remote servers.
-    /// Unencrypted ws:// is permitted for localhost/loopback only (development).
+    /// Validates a relay URL.
+    /// Delegates to core (ADR-021: core owns all validation logic).
     func isValidRelayUrl(_ url: String) -> Bool {
-        guard let urlObj = URL(string: url) else { return false }
-        let scheme = urlObj.scheme?.lowercased()
-        if scheme == "wss" {
-            return true
-        }
-        if scheme == "ws" {
-            let host = urlObj.host?.lowercased() ?? ""
-            return host == "localhost" || host == "127.0.0.1" || host == "::1"
-        }
-        return false
+        isValidRelayUrl(url: url)
     }
 
     // MARK: - Sync Settings
