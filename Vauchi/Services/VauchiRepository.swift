@@ -1153,6 +1153,28 @@ class VauchiRepository {
         }
     }
 
+    // MARK: - Privacy Toggles
+
+    /// Whether delivery receipts are enabled.
+    func isDeliveryReceiptsEnabled() -> Bool {
+        vauchi.isDeliveryReceiptsEnabled()
+    }
+
+    /// Toggle delivery receipts (read confirmations).
+    func setDeliveryReceiptsEnabled(_ enabled: Bool) {
+        vauchi.setDeliveryReceiptsEnabled(enabled: enabled)
+    }
+
+    /// Whether presence suppression is enabled.
+    func isSuppressPresenceEnabled() -> Bool {
+        vauchi.isSuppressPresenceEnabled()
+    }
+
+    /// Toggle presence suppression (hide online status).
+    func setSuppressPresenceEnabled(_ enabled: Bool) {
+        vauchi.setSuppressPresenceEnabled(enabled: enabled)
+    }
+
     // MARK: - Sync Operations
 
     /// Sync with relay server
