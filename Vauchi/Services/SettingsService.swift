@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import VauchiPlatform
 
 /// Keys for UserDefaults storage
 private enum SettingsKey: String {
@@ -65,7 +66,7 @@ final class SettingsService {
     /// Validates a relay URL.
     /// Delegates to core (ADR-021: core owns all validation logic).
     func isValidRelayUrl(_ url: String) -> Bool {
-        isValidRelayUrl(url: url)
+        VauchiPlatform.isValidRelayUrl(url: url)
     }
 
     // MARK: - Sync Settings
