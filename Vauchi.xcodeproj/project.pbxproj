@@ -122,6 +122,7 @@
 		7532FD4076FE6E6670E901E6 /* BleDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C33B31B7AACDDDA13430257D /* BleDiagnosticView.swift */; };
 		7596A973F4CBE39E516B5EBF /* testSettingsScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = EBA2E942944A9B0DF10E7D44 /* testSettingsScreen.1.png */; };
 		767BDC51FFC0FFA5A5131E0E /* testLabelsView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = A2E7533C698BC2DD14E881AD /* testLabelsView.1.png */; };
+		76CE62B95DC53A13516F7D80 /* AppPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */; };
 		76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */; };
 		7934FCCF6F474F903773F82C /* ToggleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DB1FD6C2BEE864FD4A566B /* ToggleListView.swift */; };
 		7C752A3331298ADB01A6DDF9 /* testCardPreviewWithGroups.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 9F9346F7C59019E0E90B13BF /* testCardPreviewWithGroups.1.png */; };
@@ -391,6 +392,7 @@
 		6994C561A843EE3A785246A5 /* testInlineConfirmDestructive.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInlineConfirmDestructive.1.png; sourceTree = "<group>"; };
 		6A4D772FACC8B2FEB3D60DA8 /* testEditableTextDisplay.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testEditableTextDisplay.1.png; sourceTree = "<group>"; };
 		6B1F349466E7039EA4F918FC /* NfcTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NfcTestView.swift; sourceTree = "<group>"; };
+		6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPasswordView.swift; sourceTree = "<group>"; };
 		6C859B6215BADD6A45480D9F /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationService.swift; sourceTree = "<group>"; };
 		6D4A1EE447C60A79208FE622 /* SocialGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialGraphView.swift; sourceTree = "<group>"; };
 		6FA83A41E3BAD133CD9929BD /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -834,6 +836,7 @@
 			children = (
 				DB5E7CFFD83945D91D395072 /* AccountDeletionView.swift */,
 				4A63B916A948A0A03F3F45B6 /* AhaMomentView.swift */,
+				6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */,
 				E454B8F698D68725F434338E /* ConsentSettingsView.swift */,
 				F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */,
 				773071C286EDA29BCB17B365 /* ContactsView.swift */,
@@ -1298,6 +1301,7 @@
 				E90014729E0D4394D5A26628 /* AccountDeletionView.swift in Sources */,
 				B105AF29B3E8B2E6AE0F3DFE /* ActionListView.swift in Sources */,
 				80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */,
+				76CE62B95DC53A13516F7D80 /* AppPasswordView.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
 				04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */,
 				6A3C10861679B93C3B320E98 /* BannerView.swift in Sources */,

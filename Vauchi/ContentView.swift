@@ -39,6 +39,9 @@ struct ContentView: View {
             case .authenticationRequired:
                 LockScreenView(onUnlock: { viewModel.authenticateAndRetry() })
 
+            case .appPasswordRequired:
+                AppPasswordView(viewModel: viewModel)
+
             default:
                 // Existing logic: error / loading / onboarding / ready
                 if let error = viewModel.errorMessage {

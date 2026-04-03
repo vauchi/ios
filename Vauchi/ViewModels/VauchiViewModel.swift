@@ -111,6 +111,7 @@ enum AppState: Equatable {
     case loading
     case waitingForUnlock // Layer B: protected data unavailable (prewarming)
     case authenticationRequired // Layer C: auth window expired
+    case appPasswordRequired // Biometric OK, duress enabled — show app PIN
     case ready // Normal operation
 }
 
@@ -259,7 +260,11 @@ class VauchiViewModel: ObservableObject {
             DispatchQueue.main.async {
                 if success {
                     self?.initializeRepository()
-                    if self?.appState == .ready {
+                    // If duress is enabled, gate behind app password
+                    if let repo = self?.repository,
+                       (try? repo.isDuressEnabled()) == true {
+                        self?.appState = .appPasswordRequired
+                    } else if self?.appState == .ready {
                         self?.loadState()
                     }
                 } else {
@@ -270,6 +275,23 @@ class VauchiViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    /// Authenticate with app password (duress-enabled flow).
+    /// Core decides Normal vs Duress based on which PIN matches.
+    func authenticateAppPassword(_ pin: String) throws {
+        guard let repo = repository else {
+            throw NSError(
+                domain: "Vauchi", code: -1,
+                userInfo: [
+                    NSLocalizedDescriptionKey:
+                        "Repository not initialized",
+                ]
+            )
+        }
+        _ = try repo.authenticate(password: pin)
+        loadState()
+        appState = .ready
     }
 
     private func setupNetworkMonitoring() {
