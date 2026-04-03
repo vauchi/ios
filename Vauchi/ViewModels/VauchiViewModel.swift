@@ -800,6 +800,46 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Scheduled Shred
+
+    @Published var shredStatus: MobileShredStatus = .none
+    private var shredToken: MobileShredToken?
+
+    func loadShredStatus() async {
+        guard let repository else { return }
+        do {
+            shredStatus = try repository.shredStatus()
+        } catch {
+            shredStatus = .none
+        }
+    }
+
+    func scheduleSoftShred() async throws {
+        guard let repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        let token = try repository.softShred()
+        shredToken = token
+        await loadShredStatus()
+    }
+
+    func cancelScheduledShred() async throws {
+        guard let repository, let token = shredToken else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        try repository.cancelShred(token: token)
+        shredToken = nil
+        await loadShredStatus()
+    }
+
+    func executeHardShred() async throws {
+        guard let repository, let token = shredToken else {
+            throw VauchiRepositoryError.notInitialized
+        }
+        try repository.hardShred(token: token)
+        shredToken = nil
+    }
+
     // MARK: - Tor Mode
 
     @Published var isTorEnabled: Bool = false

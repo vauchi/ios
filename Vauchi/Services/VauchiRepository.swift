@@ -925,6 +925,39 @@ class VauchiRepository {
         }
     }
 
+    func softShred() throws -> MobileShredToken {
+        do {
+            return try vauchi.softShred()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    func cancelShred(token: MobileShredToken) throws {
+        do {
+            try vauchi.cancelShred(token: token)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    @discardableResult
+    func hardShred(token: MobileShredToken) throws -> MobileShredReport {
+        do {
+            return try vauchi.hardShred(token: token)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    func shredStatus() throws -> MobileShredStatus {
+        do {
+            return try vauchi.shredStatus()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     // MARK: - Emergency Broadcast Operations
 
     // Based on: features/emergency_broadcast.feature - R5 Emergency Broadcast

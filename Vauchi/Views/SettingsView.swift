@@ -28,6 +28,8 @@ struct SettingsView: View {
     @State private var largeTouchTargets = SettingsService.shared.largeTouchTargets
 
     @State private var showPanicShredConfirm = false
+    @State private var showScheduleShredConfirm = false
+    @State private var showExecuteShredConfirm = false
     @State private var shredMessage = ""
 
     @ObservedObject private var localizationService = LocalizationService.shared
@@ -245,6 +247,39 @@ struct SettingsView: View {
                         Label("Export My Data", systemImage: "square.and.arrow.up.on.square")
                     }
                     .accessibilityHint("Download a copy of all your personal data")
+
+                    switch viewModel.shredStatus {
+                    case .none:
+                        Button(role: .destructive) {
+                            showScheduleShredConfirm = true
+                        } label: {
+                            Label("Schedule Deletion (7-day)", systemImage: "clock.badge.xmark")
+                        }
+                        .accessibilityHint("Schedule data destruction with a 7-day grace period")
+                    case let .scheduled(remainingSecs):
+                        let days = remainingSecs / 86400
+                        let hours = (remainingSecs % 86400) / 3600
+                        HStack {
+                            Label("Deletion in \(days)d \(hours)h", systemImage: "clock.badge.xmark")
+                                .foregroundColor(.red)
+                            Spacer()
+                        }
+                        Button("Cancel Deletion") {
+                            Task {
+                                try? await viewModel.cancelScheduledShred()
+                            }
+                        }
+                        if remainingSecs == 0 {
+                            Button(role: .destructive) {
+                                showExecuteShredConfirm = true
+                            } label: {
+                                Label("Execute Deletion Now", systemImage: "trash.fill")
+                            }
+                        }
+                    case .executed:
+                        Text("All data has been permanently destroyed.")
+                            .foregroundColor(.red)
+                    }
 
                     Button(role: .destructive) {
                         showPanicShredConfirm = true
@@ -582,6 +617,25 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("This will immediately and irreversibly destroy all data including contacts, identity, and encryption keys. This cannot be undone.")
+            }
+            .alert("Schedule Deletion", isPresented: $showScheduleShredConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Schedule", role: .destructive) {
+                    Task { try? await viewModel.scheduleSoftShred() }
+                }
+            } message: {
+                Text("This starts a 7-day countdown. After the grace period, all data will be irreversibly destroyed. You can cancel during the grace period.")
+            }
+            .alert("Execute Deletion", isPresented: $showExecuteShredConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Destroy Everything", role: .destructive) {
+                    Task { try? await viewModel.executeHardShred() }
+                }
+            } message: {
+                Text("This will permanently destroy ALL data including your identity, contacts, and encryption keys. This cannot be undone.")
+            }
+            .task {
+                await viewModel.loadShredStatus()
             }
             .onAppear {
                 relayUrl = SettingsService.shared.relayUrl
