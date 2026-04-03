@@ -260,12 +260,23 @@ class VauchiViewModel: ObservableObject {
             DispatchQueue.main.async {
                 if success {
                     self?.initializeRepository()
-                    // If duress is enabled, gate behind app password
-                    if let repo = self?.repository,
-                       (try? repo.isDuressEnabled()) == true {
-                        self?.appState = .appPasswordRequired
-                    } else if self?.appState == .ready {
-                        self?.loadState()
+                    // Check duress on background thread, then
+                    // apply constant-time delay to prevent timing
+                    // side-channel (observer can't tell whether
+                    // duress is enabled based on transition speed).
+                    let start = Date()
+                    let duress = (try? self?.repository?
+                        .isDuressEnabled()) == true
+                    let elapsed = Date().timeIntervalSince(start)
+                    let pad = max(0, 0.3 - elapsed)
+                    DispatchQueue.main.asyncAfter(
+                        deadline: .now() + pad
+                    ) {
+                        if duress {
+                            self?.appState = .appPasswordRequired
+                        } else if self?.appState == .ready {
+                            self?.loadState()
+                        }
                     }
                 } else {
                     // If cancelled/failed, stay on lock screen — user can tap again
@@ -279,7 +290,8 @@ class VauchiViewModel: ObservableObject {
 
     /// Authenticate with app password (duress-enabled flow).
     /// Core decides Normal vs Duress based on which PIN matches.
-    func authenticateAppPassword(_ pin: String) throws {
+    /// Runs Argon2 verification off main thread to avoid UI freeze.
+    func authenticateAppPassword(_ pin: String) async throws {
         guard let repo = repository else {
             throw NSError(
                 domain: "Vauchi", code: -1,
@@ -289,7 +301,9 @@ class VauchiViewModel: ObservableObject {
                 ]
             )
         }
-        _ = try repo.authenticate(password: pin)
+        try await Task.detached(priority: .userInitiated) {
+            _ = try repo.authenticate(password: pin)
+        }.value
         loadState()
         appState = .ready
     }

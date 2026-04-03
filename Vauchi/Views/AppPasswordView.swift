@@ -10,11 +10,18 @@ import SwiftUI
 ///
 /// Visually identical regardless of which PIN is entered — the
 /// observer cannot distinguish normal from duress authentication.
+///
+/// Note on PIN zeroization: Swift String is immutable/COW — we
+/// can't guarantee heap scrubbing. We clear the @State variable
+/// immediately after use and on background transitions. The Rust
+/// core zeroizes the password after hashing (ZeroizeOnDrop).
 struct AppPasswordView: View {
     @ObservedObject var viewModel: VauchiViewModel
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var pin = ""
     @State private var errorMessage: String?
+    @State private var isAuthenticating = false
     @FocusState private var pinFocused: Bool
 
     private let pinLength = 6
@@ -50,7 +57,6 @@ struct AppPasswordView: View {
                 )
                 .padding(.horizontal, 48)
                 .onChange(of: pin) { newValue in
-                    // Limit to digits and max length
                     let filtered = String(
                         newValue.filter(\.isNumber)
                             .prefix(pinLength)
@@ -60,6 +66,7 @@ struct AppPasswordView: View {
                     }
                     errorMessage = nil
                 }
+                .disabled(isAuthenticating)
                 .accessibilityLabel("App password input")
 
             if let error = errorMessage {
@@ -71,12 +78,18 @@ struct AppPasswordView: View {
             Button {
                 authenticate()
             } label: {
-                Text("Unlock")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
+                if isAuthenticating {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 4)
+                } else {
+                    Text("Unlock")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 4)
+                }
             }
             .buttonStyle(.borderedProminent)
-            .disabled(pin.count != pinLength)
+            .disabled(pin.count != pinLength || isAuthenticating)
             .padding(.horizontal, 48)
             .accessibilityLabel("Unlock with app password")
 
@@ -85,14 +98,26 @@ struct AppPasswordView: View {
         }
         .padding()
         .onAppear { pinFocused = true }
+        .onChange(of: scenePhase) { phase in
+            if phase != .active {
+                pin = ""
+                errorMessage = nil
+            }
+        }
     }
 
     private func authenticate() {
-        do {
-            try viewModel.authenticateAppPassword(pin)
-        } catch {
-            errorMessage = "Incorrect password"
-            pin = ""
+        let entered = pin
+        pin = ""
+        isAuthenticating = true
+        Task {
+            do {
+                try await viewModel.authenticateAppPassword(entered)
+            } catch {
+                errorMessage = "Incorrect password"
+                isAuthenticating = false
+                pinFocused = true
+            }
         }
     }
 }
