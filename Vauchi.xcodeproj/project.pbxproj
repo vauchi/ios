@@ -169,6 +169,7 @@
 		A71B3D9B635D86B0626C301F /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2D8422E9B837A1B336A071 /* SetupView.swift */; };
 		A757D6F0F4B6CCAE22001B5B /* testTextInputPhoneType.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 19EC7C6A8625C6F0A1F5D307 /* testTextInputPhoneType.1.png */; };
 		A9144CF4AB6167C5D8DEB9E1 /* delivery_status.json in Resources */ = {isa = PBXBuildFile; fileRef = 3FF0727A90972B41385E4C9B /* delivery_status.json */; };
+		AA1803AC528F3517D53EBC51 /* ResistanceSettingsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16AD04A9A68F3A24B1237430 /* ResistanceSettingsViews.swift */; };
 		AA3F337ED100BA98F8D5B5E3 /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A96FE811E67752C2D8F9079E /* SettingsService.swift */; };
 		AABC39234A780149080C84AB /* testSettingsViewGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 754BD6DA5325E71B6D09BAAB /* testSettingsViewGerman.1.png */; };
 		AC5905716421EF0493923556 /* testExchangeShowQrDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = D51F85BE507FC3741AFF9FE2 /* testExchangeShowQrDark.1.png */; };
@@ -304,6 +305,7 @@
 		153F4A124314CB426DB39375 /* InfoPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoPanelView.swift; sourceTree = "<group>"; };
 		15E6797B86856C4F432E265B /* testExchangeViewDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeViewDark.1.png; sourceTree = "<group>"; };
 		16817F15488300C5EAF304A8 /* testCardPreviewGroupSelected.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCardPreviewGroupSelected.1.png; sourceTree = "<group>"; };
+		16AD04A9A68F3A24B1237430 /* ResistanceSettingsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResistanceSettingsViews.swift; sourceTree = "<group>"; };
 		16ECAB2250253E9F51032786 /* ProximityVerificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProximityVerificationView.swift; sourceTree = "<group>"; };
 		1793C01FB5DEAE4C84AED7C8 /* ActionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionListView.swift; sourceTree = "<group>"; };
 		180FA5B6237A3C3CE4ACB83B /* ContactActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactActions.swift; sourceTree = "<group>"; };
@@ -865,6 +867,7 @@
 				AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */,
 				36EBCAF628D08C167C0D9721 /* QRScannerView.swift */,
 				F8736078E77840EDC8E0283A /* RecoveryView.swift */,
+				16AD04A9A68F3A24B1237430 /* ResistanceSettingsViews.swift */,
 				6FA83A41E3BAD133CD9929BD /* SettingsView.swift */,
 				2C2D8422E9B837A1B336A071 /* SetupView.swift */,
 				6D4A1EE447C60A79208FE622 /* SocialGraphView.swift */,
@@ -1371,6 +1374,7 @@
 				F3096FD65BB8C411D32ACE99 /* QrCameraTunerView.swift in Sources */,
 				A6AA2ED01F250DDE30A7D2F4 /* QrCodeView.swift in Sources */,
 				3D787C329E429BC3B8206837 /* RecoveryView.swift in Sources */,
+				AA1803AC528F3517D53EBC51 /* ResistanceSettingsViews.swift in Sources */,
 				D12A54D8D19EA3D447AAA3C9 /* RestoreIdentitySheet.swift in Sources */,
 				C2AA1DC7FD7FA22C155F70BD /* ScreenRendererView.swift in Sources */,
 				C7267E367C96E3F2DC79A963 /* SettingsGroupView.swift in Sources */,
