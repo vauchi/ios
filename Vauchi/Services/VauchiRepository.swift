@@ -817,6 +817,42 @@ class VauchiRepository {
         }
     }
 
+    // MARK: - Decoy Contacts (duress mode profile)
+
+    /// Add a decoy contact for the duress profile.
+    func addDecoyContact(
+        name: String,
+        cardJson: String
+    ) throws -> String {
+        do {
+            return try vauchi.addDecoyContact(
+                name: name,
+                cardJson: cardJson
+            )
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// List all decoy contacts.
+    func listDecoyContacts()
+        throws -> [MobileDecoyContact] {
+        do {
+            return try vauchi.listDecoyContacts()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Delete a decoy contact by ID.
+    func deleteDecoyContact(id: String) throws {
+        do {
+            try vauchi.deleteDecoyContact(id: id)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     // MARK: - Panic Shred Operations
 
     // Based on: features/panic_widget.feature - R2 Panic Widget
