@@ -264,22 +264,27 @@ class VauchiViewModel: ObservableObject {
                     // to prevent real contacts from flashing if
                     // initializeRepository() set .ready.
                     self?.appState = .loading
+                    // isDuressEnabled() reads SQLite — dispatch
+                    // off main thread (matches Android's
+                    // withContext(Dispatchers.IO) pattern).
                     // Constant-time delay prevents timing
                     // side-channel (observer can't infer
                     // isDuressEnabled from transition speed).
-                    let start = Date()
-                    let duress = (try? self?.repository?
-                        .isDuressEnabled()) == true
-                    let elapsed = Date().timeIntervalSince(start)
-                    let pad = max(0, 0.3 - elapsed)
-                    DispatchQueue.main.asyncAfter(
-                        deadline: .now() + pad
-                    ) {
-                        if duress {
-                            self?.appState = .appPasswordRequired
-                        } else {
-                            self?.appState = .ready
-                            self?.loadState()
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        let start = Date()
+                        let duress = (try? self?.repository?
+                            .isDuressEnabled()) == true
+                        let elapsed = Date().timeIntervalSince(start)
+                        let pad = max(0, 0.3 - elapsed)
+                        DispatchQueue.main.asyncAfter(
+                            deadline: .now() + pad
+                        ) {
+                            if duress {
+                                self?.appState = .appPasswordRequired
+                            } else {
+                                self?.appState = .ready
+                                self?.loadState()
+                            }
                         }
                     }
                 } else {
