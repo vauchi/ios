@@ -9,6 +9,14 @@ import Foundation
 import UIKit
 import VauchiPlatform
 
+/// Module-level trampoline: at file scope, `isValidRelayUrl(url:)` resolves
+/// to the module function (no instance-method shadowing). Inside the class
+/// the same call resolves to `self.isValidRelayUrl(_:)` instead — a Swift
+/// module/type name collision (`VauchiPlatform` is both module and class).
+private func coreIsValidRelayUrl(_ url: String) -> Bool {
+    isValidRelayUrl(url: url)
+}
+
 /// Keys for UserDefaults storage
 private enum SettingsKey: String {
     case relayUrl = "vauchi.relayUrl"
@@ -66,7 +74,7 @@ final class SettingsService {
     /// Validates a relay URL.
     /// Delegates to core (ADR-021: core owns all validation logic).
     func isValidRelayUrl(_ url: String) -> Bool {
-        VauchiPlatform.isValidRelayUrl(url: url)
+        coreIsValidRelayUrl(url)
     }
 
     // MARK: - Sync Settings
