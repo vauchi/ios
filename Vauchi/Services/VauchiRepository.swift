@@ -958,6 +958,56 @@ class VauchiRepository {
         }
     }
 
+    // MARK: - Contact Notes
+
+    func setContactNote(contactId: String, note: String) throws {
+        do {
+            try vauchi.setContactNote(contactId: contactId, note: note)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    func getContactNote(contactId: String) throws -> String? {
+        do {
+            return try vauchi.getContactNote(contactId: contactId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    func deleteContactNote(contactId: String) throws {
+        do {
+            try vauchi.deleteContactNote(contactId: contactId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    func setContactFieldNote(contactId: String, fieldId: String, note: String) throws {
+        do {
+            try vauchi.setContactFieldNote(contactId: contactId, fieldId: fieldId, note: note)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    func getContactFieldNotes(contactId: String) throws -> [MobileFieldNote] {
+        do {
+            return try vauchi.getContactFieldNotes(contactId: contactId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    func deleteContactFieldNote(contactId: String, fieldId: String) throws {
+        do {
+            try vauchi.deleteContactFieldNote(contactId: contactId, fieldId: fieldId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     // MARK: - Emergency Broadcast Operations
 
     // Based on: features/emergency_broadcast.feature - R5 Emergency Broadcast
