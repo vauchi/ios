@@ -1,0 +1,215 @@
+// SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+// AppViewModel.swift
+// Wraps PlatformAppEngine to drive ScreenRendererView for all core screens.
+// Ported from macOS — same pattern, iOS-specific adaptations.
+
+import Foundation
+import SwiftUI
+import UIKit
+
+#if canImport(VauchiPlatform)
+    import VauchiPlatform
+
+    @MainActor
+    class AppViewModel: ObservableObject {
+        @Published var currentScreen: ScreenModel?
+        @Published var validationErrors: [String: String] = [:]
+        @Published var alertMessage: AlertMessage?
+        @Published var toastMessage: String?
+        @Published var toastUndoActionId: String?
+        @Published var availableScreens: [String] = []
+        @Published var selectedScreen: String?
+
+        let appEngine: PlatformAppEngine
+
+        struct AlertMessage: Identifiable {
+            let id = UUID()
+            let title: String
+            let message: String
+        }
+
+        init(appEngine: PlatformAppEngine) {
+            self.appEngine = appEngine
+            loadAvailableScreens()
+            loadScreen()
+        }
+
+        // MARK: - Screen Loading
+
+        func loadAvailableScreens() {
+            do {
+                let json = try appEngine.availableScreensJson()
+                guard let data = json.data(using: .utf8) else { return }
+                availableScreens = try JSONDecoder().decode([String].self, from: data)
+            } catch {
+                #if DEBUG
+                    print("AppViewModel: failed to load available screens: \(error)")
+                #endif
+            }
+        }
+
+        func loadScreen() {
+            do {
+                let json = try appEngine.currentScreenJson()
+                guard let data = json.data(using: .utf8) else { return }
+                currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
+                validationErrors = [:]
+                updateSelectedScreen()
+            } catch {
+                #if DEBUG
+                    print("AppViewModel: failed to load screen: \(error)")
+                #endif
+            }
+        }
+
+        // MARK: - Action Handling
+
+        func handleAction(_ action: UserAction) {
+            do {
+                let actionData = try coreJSONEncoder.encode(action)
+                guard let actionJson = String(data: actionData, encoding: .utf8) else { return }
+                let resultJson = try appEngine.handleActionJson(actionJson: actionJson)
+                guard let resultData = resultJson.data(using: .utf8) else { return }
+                let result = try coreJSONDecoder.decode(ActionResult.self, from: resultData)
+                applyResult(result)
+            } catch {
+                #if DEBUG
+                    print("AppViewModel: failed to handle action: \(error)")
+                #endif
+            }
+        }
+
+        // MARK: - Navigation
+
+        func navigateTo(screenJson: String) {
+            do {
+                let json = try appEngine.navigateToJson(screenJson: screenJson)
+                guard let data = json.data(using: .utf8) else { return }
+                currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
+                validationErrors = [:]
+                loadAvailableScreens()
+                updateSelectedScreen()
+            } catch {
+                #if DEBUG
+                    print("AppViewModel: failed to navigate: \(error)")
+                #endif
+            }
+        }
+
+        func navigateBack() {
+            do {
+                let json = try appEngine.navigateBackJson()
+                guard let data = json.data(using: .utf8) else { return }
+                currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
+                validationErrors = [:]
+            } catch {
+                #if DEBUG
+                    print("AppViewModel: failed to navigate back: \(error)")
+                #endif
+            }
+        }
+
+        func invalidateAll() {
+            do {
+                try appEngine.invalidateAll()
+                loadAvailableScreens()
+                loadScreen()
+            } catch {
+                #if DEBUG
+                    print("AppViewModel: failed to invalidate: \(error)")
+                #endif
+            }
+        }
+
+        // MARK: - Toast
+
+        func showToast(_ message: String, undoActionId: String? = nil, durationMs: UInt32 = 3000) {
+            withAnimation {
+                toastMessage = message
+                toastUndoActionId = undoActionId
+            }
+            let duration = max(Double(durationMs) / 1000.0, 1.0)
+            DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
+                guard let self, toastMessage == message else { return }
+                withAnimation {
+                    self.toastMessage = nil
+                    self.toastUndoActionId = nil
+                }
+            }
+        }
+
+        // MARK: - Private
+
+        private static let screenIdPrefixToTab: [(prefix: String, tab: String)] = [
+            ("my_info", "MyInfo"),
+            ("contact", "Contacts"),
+            ("exchange", "Exchange"),
+            ("groups", "Groups"),
+            ("group_detail", "Groups"),
+            ("more", "More"),
+        ]
+
+        private func updateSelectedScreen() {
+            guard let screenId = currentScreen?.screenId else { return }
+            for mapping in Self.screenIdPrefixToTab where screenId.hasPrefix(mapping.prefix) {
+                selectedScreen = mapping.tab
+                return
+            }
+        }
+
+        private func navigateToScreen(_ screenObject: [String: Any]) {
+            do {
+                let payload = try JSONSerialization.data(withJSONObject: screenObject)
+                if let screenJson = String(data: payload, encoding: .utf8) {
+                    navigateTo(screenJson: screenJson)
+                }
+            } catch {
+                #if DEBUG
+                    print("AppViewModel: failed to encode screen navigation: \(error)")
+                #endif
+            }
+        }
+
+        private func applyResult(_ result: ActionResult) {
+            switch result {
+            case let .updateScreen(screen):
+                currentScreen = screen
+                validationErrors = [:]
+            case let .navigateTo(screen):
+                currentScreen = screen
+                validationErrors = [:]
+            case let .validationError(componentId, message):
+                validationErrors[componentId] = message
+            case .complete, .wipeComplete:
+                loadScreen()
+            case let .openUrl(url):
+                if let nsUrl = URL(string: url) {
+                    UIApplication.shared.open(nsUrl)
+                }
+            case let .showAlert(title, message):
+                alertMessage = AlertMessage(title: title, message: message)
+            case let .openContact(contactId):
+                navigateToScreen(["ContactDetail": ["contact_id": contactId]])
+            case let .editContact(contactId):
+                navigateToScreen(["ContactEdit": ["contact_id": contactId]])
+            case let .openEntryDetail(fieldId):
+                navigateToScreen(["EntryDetail": ["field_id": fieldId]])
+            case let .showToast(message, undoActionId):
+                showToast(message, undoActionId: undoActionId)
+            case .requestCamera:
+                loadScreen()
+            case .startDeviceLink, .startBackupImport:
+                // Handled by native iOS flows
+                break
+            case .exchangeCommands:
+                // ADR-031: hardware exchange commands handled by exchange session
+                break
+            case .unknown:
+                break
+            }
+        }
+    }
+#endif
