@@ -27,14 +27,14 @@ struct DuressSettingsView: View {
                     Label("App Password", systemImage: "lock.fill")
                     Spacer()
                     Text(viewModel.isPasswordEnabled ? "Enabled" : "Not set")
-                        .foregroundColor(viewModel.isPasswordEnabled ? .green : .secondary)
+                        .foregroundStyle(viewModel.isPasswordEnabled ? .primary : .secondary)
                 }
 
                 HStack {
                     Label("Duress PIN", systemImage: "shield.lefthalf.filled")
                     Spacer()
                     Text(viewModel.isDuressEnabled ? "Enabled" : "Not set")
-                        .foregroundColor(viewModel.isDuressEnabled ? .green : .secondary)
+                        .foregroundStyle(viewModel.isDuressEnabled ? .primary : .secondary)
                 }
             } header: {
                 Text("Status")
@@ -115,7 +115,7 @@ struct DuressSettingsView: View {
             if !successMessage.isEmpty {
                 Section {
                     Text(successMessage)
-                        .foregroundColor(.green)
+                        .foregroundStyle(.secondary)
                 }
             }
             if !errorMessage.isEmpty {
@@ -230,7 +230,7 @@ struct EmergencyBroadcastView: View {
                     Label("Status", systemImage: viewModel.emergencyConfigured ? "megaphone.fill" : "megaphone")
                     Spacer()
                     Text(viewModel.emergencyConfigured ? "Configured" : "Not configured")
-                        .foregroundColor(viewModel.emergencyConfigured ? .green : .secondary)
+                        .foregroundStyle(viewModel.emergencyConfigured ? .primary : .secondary)
                 }
             } header: {
                 Text("Emergency Broadcast")
@@ -285,7 +285,7 @@ struct EmergencyBroadcastView: View {
             }
 
             if !successMessage.isEmpty {
-                Section { Text(successMessage).foregroundColor(.green) }
+                Section { Text(successMessage).foregroundStyle(.secondary) }
             }
             if !errorMessage.isEmpty {
                 Section { Text(errorMessage).foregroundColor(.red) }

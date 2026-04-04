@@ -309,7 +309,7 @@ struct SettingsView: View {
                             if viewModel.isCertificatePinningEnabled() {
                                 Text("Enabled")
                                     .font(.caption)
-                                    .foregroundColor(.green)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
@@ -322,7 +322,7 @@ struct SettingsView: View {
                             if viewModel.isDuressEnabled {
                                 Text("Enabled")
                                     .font(.caption)
-                                    .foregroundColor(.green)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
@@ -335,7 +335,7 @@ struct SettingsView: View {
                             if viewModel.emergencyConfigured {
                                 Text("Configured")
                                     .font(.caption)
-                                    .foregroundColor(.green)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
@@ -348,7 +348,7 @@ struct SettingsView: View {
                             if viewModel.isTorEnabled {
                                 Text("Enabled")
                                     .font(.caption)
-                                    .foregroundColor(.green)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
@@ -718,7 +718,7 @@ struct SyncStatusBadge: View {
             } else {
                 "Up to date"
             }
-            Text(label).font(.caption).foregroundColor(.green)
+            Text(label).font(.caption).foregroundStyle(.secondary)
         case .error:
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.orange)
@@ -890,7 +890,7 @@ struct DeviceRow: View {
 
             if device.isCurrent {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
+                    .foregroundStyle(.secondary)
                     .accessibilityLabel("Current device")
             } else {
                 // Unlink button for non-current devices
@@ -1226,7 +1226,7 @@ struct DeviceLinkSheet: View {
         VStack(spacing: 20) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 56))
-                .foregroundColor(.green)
+                .foregroundStyle(.secondary)
                 .accessibilityHidden(true)
 
             Text("Device Linked Successfully")
@@ -1342,7 +1342,7 @@ struct CertificatePinningView: View {
                     Label("Status", systemImage: isPinningEnabled ? "lock.shield.fill" : "lock.shield")
                     Spacer()
                     Text(isPinningEnabled ? "Enabled" : "Disabled")
-                        .foregroundColor(isPinningEnabled ? .green : .secondary)
+                        .foregroundStyle(isPinningEnabled ? .primary : .secondary)
                 }
             } header: {
                 Text("Certificate Pinning")
@@ -1730,7 +1730,7 @@ struct ImportBackupSheet: View {
                         VStack(spacing: 16) {
                             HStack {
                                 Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
+                                    .foregroundStyle(.secondary)
                                     .accessibilityHidden(true)
                                 Text("Backup file loaded")
                             }
@@ -1964,7 +1964,7 @@ struct ContentUpdatesSection: View {
             if let success = successMessage {
                 Text(success)
                     .font(.caption)
-                    .foregroundColor(.green)
+                    .foregroundStyle(.secondary)
             }
         } header: {
             Text("Content Updates")
@@ -2079,10 +2079,10 @@ struct UpdateStatusBadge: View {
         case .upToDate:
             HStack(spacing: 4) {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
+                    .foregroundStyle(.secondary)
                     .accessibilityHidden(true)
                 Text("Up to date")
-                    .foregroundColor(.green)
+                    .foregroundStyle(.secondary)
             }
             .font(.caption)
             .accessibilityElement(children: .combine)
@@ -2172,10 +2172,10 @@ struct PasswordStrengthIndicator: View {
                 if check.isAcceptable {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundStyle(.secondary)
                             .accessibilityHidden(true)
                         Text("OK")
-                            .foregroundColor(.green)
+                            .foregroundStyle(.secondary)
                     }
                     .font(.caption)
                     .accessibilityLabel("Password strength acceptable")
@@ -2259,7 +2259,7 @@ struct TorSettingsView: View {
             }
 
             if !successMessage.isEmpty {
-                Section { Text(successMessage).foregroundColor(.green) }
+                Section { Text(successMessage).foregroundStyle(.secondary) }
             }
             if !errorMessage.isEmpty {
                 Section { Text(errorMessage).foregroundColor(.red) }
