@@ -177,6 +177,13 @@ class VauchiViewModel: ObservableObject {
     /// Aha moments (progressive onboarding)
     @Published var currentAhaMoment: MobileAhaMoment?
 
+    // MARK: - Core-Driven UI
+
+    /// Shared AppViewModel for core-driven screens (Groups, and future tabs).
+    /// Created once from VauchiRepository.appEngine — all CoreScreenViews share
+    /// this single engine instance (one DB connection, shared cache).
+    @Published var coreViewModel: AppViewModel?
+
     // MARK: - Private Properties
 
     private var repository: VauchiRepository?
@@ -205,9 +212,11 @@ class VauchiViewModel: ObservableObject {
             #if DEBUG
                 print("VauchiViewModel: initializing repository...")
             #endif
-            repository = try VauchiRepository(
+            let repo = try VauchiRepository(
                 relayUrl: SettingsService.shared.relayUrl
             )
+            repository = repo
+            coreViewModel = AppViewModel(appEngine: repo.appEngine)
             appState = .ready
             #if DEBUG
                 print("VauchiViewModel: repository initialized successfully")

@@ -447,6 +447,7 @@ class VauchiRepository {
     // MARK: - Properties
 
     private let vauchi: VauchiPlatform
+    let appEngine: PlatformAppEngine
     private let dataDir: String
     private let relayUrl: String
     private static let storageKeyLength = 32 // 256-bit key
@@ -470,9 +471,16 @@ class VauchiRepository {
         // Get storage key from Keychain (or migrate/generate)
         let storageKeyBytes = try VauchiRepository.getOrCreateStorageKey(dataDir: dir)
 
-        // Initialize VauchiPlatform with secure key from Keychain
+        // Initialize VauchiPlatform and PlatformAppEngine with the same credentials.
+        // Sharing credentials means one DB, one key — no divergence between legacy
+        // VauchiPlatform calls and core-driven AppEngine screens.
         do {
             vauchi = try VauchiPlatform.newWithSecureKey(
+                dataDir: dir,
+                relayUrl: relayUrl,
+                storageKeyBytes: storageKeyBytes
+            )
+            appEngine = try PlatformAppEngine(
                 dataDir: dir,
                 relayUrl: relayUrl,
                 storageKeyBytes: storageKeyBytes
@@ -492,8 +500,6 @@ class VauchiRepository {
     // MARK: - Secure Key Management
 
     /// Get or create storage key from Keychain.
-    /// Internal visibility for AppEngineService to create PlatformAppEngine
-    /// with the same credentials.
     static func getOrCreateStorageKey(dataDir _: String) throws -> Data {
         let keychain = KeychainService.shared
 

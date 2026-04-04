@@ -8,11 +8,14 @@
 import SwiftUI
 import VauchiPlatform
 
-/// Renders a core-driven screen by name using its own `AppViewModel`.
+/// Renders a core-driven screen by name using the shared `AppViewModel`.
 ///
-/// Each `CoreScreenView` creates and owns its own `PlatformAppEngine` instance.
-/// This prevents state collision when multiple tabs use ScreenModel rendering
-/// (tab A's navigation doesn't clobber tab B's screen).
+/// Uses the shared `coreViewModel` from `VauchiViewModel` (injected via
+/// `@EnvironmentObject`). All `CoreScreenView` instances share one
+/// `PlatformAppEngine` — one DB connection, one engine cache.
+///
+/// When this view appears, it navigates the shared engine to `screenName`.
+/// The engine's screen caching makes tab switches instant.
 ///
 /// Usage:
 /// ```swift
@@ -21,23 +24,22 @@ import VauchiPlatform
 /// ```
 struct CoreScreenView: View {
     let screenName: String
-    @StateObject private var viewModel = CoreScreenViewModel()
+    @EnvironmentObject var viewModel: VauchiViewModel
+    @State private var currentScreen: String?
 
     var body: some View {
         Group {
-            if let screen = viewModel.appViewModel?.currentScreen {
+            if let coreVM = viewModel.coreViewModel,
+               let screen = coreVM.currentScreen {
                 ScreenRendererView(screen: screen, onAction: { action in
-                    viewModel.appViewModel?.handleAction(action)
+                    coreVM.handleAction(action)
                 })
-            } else if viewModel.initError != nil {
-                // Engine creation failed — show nothing (tab falls back to native)
-                EmptyView()
             } else {
                 ProgressView("Loading...")
             }
         }
         .task(id: screenName) {
-            viewModel.navigateIfNeeded(to: screenName)
+            navigateIfNeeded(to: screenName)
         }
         .alert(item: alertBinding) { alert in
             Alert(
@@ -48,42 +50,16 @@ struct CoreScreenView: View {
         }
     }
 
+    private func navigateIfNeeded(to screen: String) {
+        guard currentScreen != screen else { return }
+        currentScreen = screen
+        viewModel.coreViewModel?.navigateTo(screenJson: "\"\(screen)\"")
+    }
+
     private var alertBinding: Binding<AppViewModel.AlertMessage?> {
         Binding(
-            get: { viewModel.appViewModel?.alertMessage },
-            set: { viewModel.appViewModel?.alertMessage = $0 }
+            get: { viewModel.coreViewModel?.alertMessage },
+            set: { viewModel.coreViewModel?.alertMessage = $0 }
         )
-    }
-}
-
-/// Owns a per-screen `AppViewModel` with lazy engine creation.
-///
-/// Uses `@MainActor` to match AppViewModel's actor isolation.
-/// The engine is created once and reused for the lifetime of this view.
-@MainActor
-private class CoreScreenViewModel: ObservableObject {
-    @Published var appViewModel: AppViewModel?
-    @Published var initError: String?
-    private var currentScreen: String?
-
-    func navigateIfNeeded(to screenName: String) {
-        // Lazy init: create engine on first navigation
-        if appViewModel == nil, initError == nil {
-            do {
-                let engine = try AppEngineService.createEngine()
-                appViewModel = AppViewModel(appEngine: engine)
-            } catch {
-                initError = error.localizedDescription
-                #if DEBUG
-                    print("CoreScreenViewModel: failed to create engine: \(error)")
-                #endif
-                return
-            }
-        }
-
-        // Skip re-navigation if already on the right screen
-        guard currentScreen != screenName else { return }
-        currentScreen = screenName
-        appViewModel?.navigateTo(screenJson: "\"\(screenName)\"")
     }
 }
