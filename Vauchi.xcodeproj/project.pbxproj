@@ -38,7 +38,6 @@
 		1ABCC26C203868ABD7EB9255 /* testCardPreviewDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 5A2DFACA328F9C9EBEF5C3A2 /* testCardPreviewDark.1.png */; };
 		1BDCB504628325339F237DBB /* CoreUIComponentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 273DE3DDCB1F1D595DEF1B92 /* CoreUIComponentTests.swift */; };
 		1D22C6DA15AF438F73F63C09 /* testExchangeView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = ABE3E2645901C7F1B2FAF813 /* testExchangeView.1.png */; };
-		1E08393FD5C6DAC811914739 /* AppEngineService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE944AB1C8F7C6AD17579C1 /* AppEngineService.swift */; };
 		1ECD2FDE78B2CD9672DDD697 /* testPreviewCardStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B8C613C7D55CF224BEE622D /* testPreviewCardStep.1.png */; };
 		1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */; };
 		210728BC90BEA9A5F3360DDF /* testExchangeShowQrScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = EF0789970BCC03D30F84E3D6 /* testExchangeShowQrScreen.1.png */; };
@@ -510,7 +509,6 @@
 		E9A9F60104DE94274578CB08 /* DeliveryStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeliveryStatusTests.swift; sourceTree = "<group>"; };
 		EA272578E81247FB65A5C145 /* ComponentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentView.swift; sourceTree = "<group>"; };
 		EA5E442564907FA7A15240F0 /* testEditableTextWithError.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testEditableTextWithError.1.png; sourceTree = "<group>"; };
-		EAE944AB1C8F7C6AD17579C1 /* AppEngineService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEngineService.swift; sourceTree = "<group>"; };
 		EB02FA7773C641BA05A1BF79 /* testHomeScreenWithFields.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testHomeScreenWithFields.1.png; sourceTree = "<group>"; };
 		EBA2E942944A9B0DF10E7D44 /* testSettingsScreen.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSettingsScreen.1.png; sourceTree = "<group>"; };
 		EDE8371E9A0D88B92DA2E683 /* testContactListWithContacts.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactListWithContacts.1.png; sourceTree = "<group>"; };
@@ -741,7 +739,6 @@
 		A9A5EC2572980F7E8930C6E3 /* CoreUI */ = {
 			isa = PBXGroup;
 			children = (
-				EAE944AB1C8F7C6AD17579C1 /* AppEngineService.swift */,
 				80D908420E7769CC3225282C /* AppViewModel.swift */,
 				8EC13750603D7C1EF84BACBC /* CoreOnboardingView.swift */,
 				9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */,
@@ -1082,6 +1079,7 @@
 				};
 			};
 			buildConfigurationList = BAFFDC71FBCC5FC569766377 /* Build configuration list for PBXProject "Vauchi" */;
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1095,7 +1093,6 @@
 				8B834B486889A4518835FD33 /* XCRemoteSwiftPackageReference "vauchi-platform-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 6044B0E63DE2F73C5FDC8885 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -1313,7 +1310,6 @@
 				E90014729E0D4394D5A26628 /* AccountDeletionView.swift in Sources */,
 				B105AF29B3E8B2E6AE0F3DFE /* ActionListView.swift in Sources */,
 				80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */,
-				1E08393FD5C6DAC811914739 /* AppEngineService.swift in Sources */,
 				76CE62B95DC53A13516F7D80 /* AppPasswordView.swift in Sources */,
 				0FC8C1248458C98DAE402799 /* AppViewModel.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
