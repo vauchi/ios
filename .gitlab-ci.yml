@@ -56,19 +56,6 @@ stages:
   - security
   - deploy
 
-# Override: serialize lint:reuse with other lint jobs on macOS shell executor
-lint:reuse:
-  stage: lint
-  tags: [macos, self-hosted]
-  variables:
-    GIT_DEPTH: "20"
-  needs: []
-  timeout: 2m
-  script:
-    - reuse lint
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-
 variables:
   # GitLab Ultimate Security Configuration
   SAST_EXCLUDED_PATHS: "build/, DerivedData/, Pods/"
@@ -400,7 +387,7 @@ lint:images:
 lint:swiftlint:
   extends: [.macos-job, .timeout-quick]
   stage: lint
-  needs: [lint:reuse]  # sequential: prevents shell executor git races
+  needs: [lint:reuse]  # sequential: lint headers before code
   script:
     - |
       if command -v swiftlint &> /dev/null; then
