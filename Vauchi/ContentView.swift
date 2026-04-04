@@ -133,7 +133,6 @@ struct LoadingView: View {
 }
 
 struct MainTabView: View {
-    @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
     /// Dynamic default: tab 1 (Contacts) when user has contacts, tab 0 (My Card) otherwise
     @State private var selectedTab: Int
@@ -174,21 +173,15 @@ struct MainTabView: View {
                 .tag(2)
                 .accessibilityIdentifier("tab.exchange")
 
-            Group {
-                if let appVM = viewModel.coreAppViewModel {
-                    CoreScreenView(screenName: "Groups", appViewModel: appVM)
-                } else {
-                    NavigationStack { GroupsView() }
+            CoreScreenView(screenName: "Groups")
+                .tabItem {
+                    Label(
+                        localizationService.t("nav.groups"),
+                        systemImage: "rectangle.3.group.fill"
+                    )
                 }
-            }
-            .tabItem {
-                Label(
-                    localizationService.t("nav.groups"),
-                    systemImage: "rectangle.3.group.fill"
-                )
-            }
-            .tag(3)
-            .accessibilityIdentifier("tab.groups")
+                .tag(3)
+                .accessibilityIdentifier("tab.groups")
 
             MoreView()
                 .tabItem {
