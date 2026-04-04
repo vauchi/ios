@@ -180,7 +180,6 @@ class VauchiViewModel: ObservableObject {
     // MARK: - Private Properties
 
     private var repository: VauchiRepository?
-    @Published var coreAppViewModel: AppViewModel?
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
@@ -209,10 +208,6 @@ class VauchiViewModel: ObservableObject {
             repository = try VauchiRepository(
                 relayUrl: SettingsService.shared.relayUrl
             )
-            // Create PlatformAppEngine for core-driven screen rendering
-            if let engine = try? AppEngineService.createEngine() {
-                coreAppViewModel = AppViewModel(appEngine: engine)
-            }
             appState = .ready
             #if DEBUG
                 print("VauchiViewModel: repository initialized successfully")
