@@ -844,12 +844,6 @@ class VauchiViewModel: ObservableObject {
         shredToken = nil
     }
 
-    // MARK: - Tor Mode
-
-    @Published var isTorEnabled: Bool = false
-    @Published var torPreferOnion: Bool = true
-    @Published var torBridges: [String] = []
-
     // MARK: - Emergency Broadcast
 
     @Published var emergencyConfigured = false
@@ -885,40 +879,6 @@ class VauchiViewModel: ObservableObject {
         guard let repository else { throw VauchiRepositoryError.notInitialized }
         try repository.disableEmergencyBroadcast()
         emergencyConfigured = false
-    }
-
-    // MARK: - Tor Mode
-
-    func loadTorConfig() {
-        guard let repository else { return }
-        do {
-            let config = try repository.getTorConfig()
-            DispatchQueue.main.async {
-                self.isTorEnabled = config.enabled
-                self.torPreferOnion = config.preferOnion
-                self.torBridges = config.bridges
-            }
-        } catch {
-            #if DEBUG
-                print("Failed to load Tor config: \(error)")
-            #endif
-        }
-    }
-
-    func saveTorConfig(enabled: Bool, bridges: [String], preferOnion: Bool) {
-        guard let repository else { return }
-        do {
-            try repository.saveTorConfig(enabled: enabled, bridges: bridges, preferOnion: preferOnion)
-            DispatchQueue.main.async {
-                self.isTorEnabled = enabled
-                self.torPreferOnion = preferOnion
-                self.torBridges = bridges
-            }
-        } catch {
-            #if DEBUG
-                print("Failed to save Tor config: \(error)")
-            #endif
-        }
     }
 
     func removeContact(id: String) async throws {

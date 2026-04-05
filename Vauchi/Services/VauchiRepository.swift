@@ -1056,25 +1056,6 @@ class VauchiRepository {
         }
     }
 
-    // MARK: - Tor Mode Operations
-
-    // Based on: features/tor_mode.feature - R4 Tor Mode
-    // NOTE: These methods are stubs until vauchi-core tor bindings
-    // are published via vauchi-platform-swift. Once core MR merges and
-    // bindings are updated, replace stubs with actual UniFFI calls.
-
-    /// Get Tor configuration (stub — returns defaults until core exposes Tor bindings).
-    func getTorConfig() throws -> (enabled: Bool, bridges: [String], preferOnion: Bool) {
-        (enabled: false, bridges: [], preferOnion: true)
-    }
-
-    /// Save Tor configuration (stub — no-op until core exposes Tor bindings).
-    func saveTorConfig(enabled _: Bool, bridges _: [String], preferOnion _: Bool) throws {
-        #if DEBUG
-            print("VauchiRepository: saveTorConfig is a stub — Tor bindings not yet available")
-        #endif
-    }
-
     /// Get own identity fingerprint for verification display.
     func getOwnFingerprint() throws -> String {
         do {

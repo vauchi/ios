@@ -340,19 +340,6 @@ struct SettingsView: View {
                         }
                     }
                     .accessibilityHint("Configure emergency alerts sent to trusted contacts")
-
-                    NavigationLink(destination: TorSettingsView()) {
-                        HStack {
-                            Label("Tor Mode", systemImage: "network.badge.shield.half.filled")
-                            Spacer()
-                            if viewModel.isTorEnabled {
-                                Text("Enabled")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                    .accessibilityHint("Route relay traffic through Tor for enhanced anonymity")
                 }
 
                 // Content Updates section
@@ -2188,110 +2175,6 @@ struct PasswordStrengthIndicator: View {
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
-        }
-    }
-}
-
-// MARK: - Tor Settings View
-
-struct TorSettingsView: View {
-    @EnvironmentObject var viewModel: VauchiViewModel
-    @State private var torEnabled: Bool = false
-    @State private var preferOnion: Bool = true
-    @State private var bridgeText: String = ""
-    @State private var showAddBridge: Bool = false
-    @State private var newBridge: String = ""
-    @State private var errorMessage: String = ""
-    @State private var successMessage: String = ""
-
-    var body: some View {
-        List {
-            Section {
-                Toggle("Enable Tor", isOn: $torEnabled)
-                    .onChange(of: torEnabled) { newValue in
-                        let bridges = bridgeText.split(separator: "\n").map(String.init)
-                        viewModel.saveTorConfig(enabled: newValue, bridges: bridges, preferOnion: preferOnion)
-                    }
-                    .accessibilityLabel("Enable Tor")
-                    .accessibilityHint("Routes all relay traffic through the Tor network for enhanced anonymity")
-
-                Toggle("Prefer .onion Addresses", isOn: $preferOnion)
-                    .onChange(of: preferOnion) { newValue in
-                        let bridges = bridgeText.split(separator: "\n").map(String.init)
-                        viewModel.saveTorConfig(enabled: torEnabled, bridges: bridges, preferOnion: newValue)
-                    }
-                    .accessibilityLabel("Prefer onion addresses")
-                    .accessibilityHint("When enabled, connects to onion service addresses when available")
-            } header: {
-                Text("Connection")
-            } footer: {
-                Text("Route all relay traffic through Tor for enhanced anonymity.")
-            }
-
-            Section {
-                if bridgeText.isEmpty {
-                    Text("No bridges configured")
-                        .foregroundColor(.secondary)
-                } else {
-                    ForEach(bridgeText.split(separator: "\n").map(String.init), id: \.self) { bridge in
-                        Text(bridge)
-                            .font(.caption)
-                            .lineLimit(1)
-                    }
-                }
-
-                Button("Add Bridge") {
-                    showAddBridge = true
-                }
-
-                if !bridgeText.isEmpty {
-                    Button("Clear All Bridges", role: .destructive) {
-                        bridgeText = ""
-                        let bridges: [String] = []
-                        viewModel.saveTorConfig(enabled: torEnabled, bridges: bridges, preferOnion: preferOnion)
-                        successMessage = "Bridges cleared"
-                    }
-                }
-            } header: {
-                Text("Bridges")
-            } footer: {
-                Text("Add obfs4 bridge addresses for censored networks.")
-            }
-
-            if !successMessage.isEmpty {
-                Section { Text(successMessage).foregroundStyle(.secondary) }
-            }
-            if !errorMessage.isEmpty {
-                Section { Text(errorMessage).foregroundColor(.red) }
-            }
-        }
-        .navigationTitle("Tor Mode")
-        .onAppear {
-            torEnabled = viewModel.isTorEnabled
-            preferOnion = viewModel.torPreferOnion
-            bridgeText = viewModel.torBridges.joined(separator: "\n")
-        }
-        .alert("Add Bridge", isPresented: $showAddBridge) {
-            TextField("obfs4 address...", text: $newBridge)
-            Button("Add") {
-                let trimmed = newBridge.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !trimmed.isEmpty {
-                    if bridgeText.isEmpty {
-                        bridgeText = trimmed
-                    } else {
-                        bridgeText += "\n" + trimmed
-                    }
-                    let bridges = bridgeText.split(separator: "\n").map(String.init)
-                    viewModel.saveTorConfig(enabled: torEnabled, bridges: bridges, preferOnion: preferOnion)
-                    newBridge = ""
-                    successMessage = "Bridge added"
-                }
-            }
-            Button("Cancel", role: .cancel) {
-                newBridge = ""
-            }
-        } message: {
-            Text("Enter an obfs4 bridge address")
         }
     }
 }
