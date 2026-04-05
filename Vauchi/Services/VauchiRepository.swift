@@ -233,6 +233,7 @@ struct VauchiContact: Identifiable {
     let card: VauchiContactCard
     let addedAt: UInt64
     let trustLevel: MobileContactTrustLevel
+    let reciprocity: MobileReciprocity
 }
 
 /// Exchange data for QR code generation
@@ -558,7 +559,8 @@ class VauchiRepository {
             isHidden: contact.isHidden,
             card: convertCard(contact.card),
             addedAt: contact.addedAt,
-            trustLevel: contact.trustLevel
+            trustLevel: contact.trustLevel,
+            reciprocity: contact.reciprocity
         )
     }
 
