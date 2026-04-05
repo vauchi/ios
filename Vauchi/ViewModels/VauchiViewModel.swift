@@ -37,6 +37,7 @@ struct ContactInfo: Identifiable, Equatable {
     let card: CardInfo?
     let addedAt: Date?
     let trustLevel: MobileContactTrustLevel
+    let reciprocity: MobileReciprocity
 
     init(
         id: String,
@@ -47,7 +48,8 @@ struct ContactInfo: Identifiable, Equatable {
         fingerprint: String = "",
         card: CardInfo? = nil,
         addedAt: Date? = nil,
-        trustLevel: MobileContactTrustLevel = .standard
+        trustLevel: MobileContactTrustLevel = .standard,
+        reciprocity: MobileReciprocity = .unknown
     ) {
         self.id = id
         self.displayName = displayName
@@ -58,6 +60,7 @@ struct ContactInfo: Identifiable, Equatable {
         self.card = card
         self.addedAt = addedAt
         self.trustLevel = trustLevel
+        self.reciprocity = reciprocity
     }
 }
 
@@ -508,7 +511,8 @@ class VauchiViewModel: ObservableObject {
                         }
                     ),
                     addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
-                    trustLevel: contact.trustLevel
+                    trustLevel: contact.trustLevel,
+                    reciprocity: contact.reciprocity
                 )
             }
             contactsOffset = UInt32(contacts.count)
@@ -544,7 +548,8 @@ class VauchiViewModel: ObservableObject {
                         }
                     ),
                     addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
-                    trustLevel: contact.trustLevel
+                    trustLevel: contact.trustLevel,
+                    reciprocity: contact.reciprocity
                 )
             }
             contacts.append(contentsOf: moreContacts)
@@ -581,7 +586,8 @@ class VauchiViewModel: ObservableObject {
                     }
                 ),
                 addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
-                trustLevel: contact.trustLevel
+                trustLevel: contact.trustLevel,
+                reciprocity: contact.reciprocity
             )
         } catch {
             return nil
@@ -600,7 +606,8 @@ class VauchiViewModel: ObservableObject {
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     fingerprint: contact.fingerprint,
-                    trustLevel: contact.trustLevel
+                    trustLevel: contact.trustLevel,
+                    reciprocity: contact.reciprocity
                 )
             }
         } catch {

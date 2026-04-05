@@ -6,6 +6,7 @@
 // Contact detail view with visibility controls
 
 import SwiftUI
+import VauchiPlatform
 
 struct ContactDetailView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
@@ -94,6 +95,11 @@ struct ContactDetailView: View {
                         }
                         .accessibilityElement(children: .combine)
                         .accessibilityLabel("Recovery trusted contact")
+                    }
+
+                    // Exchange status (reciprocity)
+                    if contact.reciprocity == .pending || contact.reciprocity == .unreciprocated {
+                        ExchangeStatusBanner(reciprocity: contact.reciprocity)
                     }
 
                     // Recovery trust toggle
@@ -730,6 +736,61 @@ struct ManageContactGroupsSheet: View {
             }
             isSaving = false
         }
+    }
+}
+
+struct ExchangeStatusBanner: View {
+    let reciprocity: MobileReciprocity
+
+    private var title: String {
+        switch reciprocity {
+        case .pending: "Awaiting confirmation"
+        case .unreciprocated: "May not have your card"
+        default: ""
+        }
+    }
+
+    private var subtitle: String {
+        switch reciprocity {
+        case .pending: "Verifying that both sides completed the exchange"
+        case .unreciprocated: "The other party may not have completed the exchange"
+        default: ""
+        }
+    }
+
+    private var icon: String {
+        switch reciprocity {
+        case .pending: "clock.arrow.circlepath"
+        case .unreciprocated: "exclamationmark.triangle"
+        default: "questionmark.circle"
+        }
+    }
+
+    private var color: Color {
+        switch reciprocity {
+        case .pending: .orange
+        case .unreciprocated: .red
+        default: .secondary
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(color)
+                Text(subtitle)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Exchange status: \(title)")
     }
 }
 
