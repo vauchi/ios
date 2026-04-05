@@ -705,8 +705,6 @@ test:snapshots:
   extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
   stage: test
   needs:
-    - job: test:unit
-      artifacts: false
     - job: build:debug
       artifacts: true
   variables:
@@ -753,8 +751,6 @@ test:ui:
   extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
   stage: test
   needs:
-    - job: test:unit
-      artifacts: false
     - job: build:debug
       artifacts: true
   script:
@@ -897,13 +893,7 @@ secret_detection:
 security:swift-analysis:
   extends: [.macos-job, .timeout-quick]
   stage: security
-  needs:
-    - job: test:snapshots
-      optional: true
-      artifacts: false
-    - job: test:unit
-      optional: true
-      artifacts: false
+  needs: []
   script:
     # Check for common iOS security issues
     - 'grep -r "NSAllowsArbitraryLoads" . && echo "WARNING: App Transport Security disabled" || true'
