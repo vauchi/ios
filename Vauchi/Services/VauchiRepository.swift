@@ -481,6 +481,7 @@ class VauchiRepository {
                 relayUrl: relayUrl,
                 storageKeyBytes: storageKeyBytes
             )
+            vauchi.setPlatformKeychain(keychain: VauchiKeychainBridge())
             appEngine = try PlatformAppEngine(
                 dataDir: dir,
                 relayUrl: relayUrl,
@@ -2221,5 +2222,39 @@ struct VauchiDemoContactState {
         wasDismissed = mobile.wasDismissed
         autoRemoved = mobile.autoRemoved
         updateCount = mobile.updateCount
+    }
+}
+
+// MARK: - Platform Keychain Bridge
+
+/// Adapts `KeychainService` to the `MobilePlatformKeychain` callback interface
+/// expected by core's crypto-shredding operations (SMK management).
+class VauchiKeychainBridge: MobilePlatformKeychain {
+    private let keychain = KeychainService.shared
+
+    func saveKey(name: String, key: Data) throws {
+        do {
+            try keychain.save(key: name, data: key)
+        } catch {
+            throw VauchiPlatform.KeychainError.OperationFailed(msg: "saveKey(\(name)): \(error)")
+        }
+    }
+
+    func loadKey(name: String) throws -> Data? {
+        do {
+            return try keychain.load(key: name)
+        } catch KeychainError.notFound {
+            return nil
+        } catch {
+            throw VauchiPlatform.KeychainError.OperationFailed(msg: "loadKey(\(name)): \(error)")
+        }
+    }
+
+    func deleteKey(name: String) throws {
+        do {
+            try keychain.delete(key: name)
+        } catch {
+            throw VauchiPlatform.KeychainError.OperationFailed(msg: "deleteKey(\(name)): \(error)")
+        }
     }
 }
