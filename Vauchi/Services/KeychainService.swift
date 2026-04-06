@@ -8,7 +8,7 @@
 import Foundation
 import Security
 
-enum KeychainError: Error {
+enum KeychainServiceError: Error {
     case duplicateEntry
     case unknown(OSStatus)
     case notFound
@@ -106,9 +106,9 @@ class KeychainService {
 
         guard status == errSecSuccess else {
             if status == errSecInteractionNotAllowed {
-                throw KeychainError.deviceLocked
+                throw KeychainServiceError.deviceLocked
             }
-            throw KeychainError.unknown(status)
+            throw KeychainServiceError.unknown(status)
         }
     }
 
@@ -126,16 +126,16 @@ class KeychainService {
 
         guard status == errSecSuccess else {
             if status == errSecItemNotFound {
-                throw KeychainError.notFound
+                throw KeychainServiceError.notFound
             }
             if status == errSecInteractionNotAllowed {
-                throw KeychainError.deviceLocked
+                throw KeychainServiceError.deviceLocked
             }
-            throw KeychainError.unknown(status)
+            throw KeychainServiceError.unknown(status)
         }
 
         guard let data = result as? Data else {
-            throw KeychainError.invalidData
+            throw KeychainServiceError.invalidData
         }
 
         return data
@@ -151,7 +151,7 @@ class KeychainService {
         let status = SecItemDelete(query as CFDictionary)
 
         guard status == errSecSuccess || status == errSecItemNotFound else {
-            throw KeychainError.unknown(status)
+            throw KeychainServiceError.unknown(status)
         }
     }
 
@@ -163,24 +163,24 @@ class KeychainService {
 
     private func saveToFile(key: String, data: Data) throws {
         guard let url = fileURL(for: key) else {
-            throw KeychainError.unknown(-1)
+            throw KeychainServiceError.unknown(-1)
         }
         try data.write(to: url, options: .completeFileProtection)
     }
 
     private func loadFromFile(key: String) throws -> Data {
         guard let url = fileURL(for: key) else {
-            throw KeychainError.unknown(-1)
+            throw KeychainServiceError.unknown(-1)
         }
         guard FileManager.default.fileExists(atPath: url.path) else {
-            throw KeychainError.notFound
+            throw KeychainServiceError.notFound
         }
         return try Data(contentsOf: url)
     }
 
     private func deleteFromFile(key: String) throws {
         guard let url = fileURL(for: key) else {
-            throw KeychainError.unknown(-1)
+            throw KeychainServiceError.unknown(-1)
         }
         if FileManager.default.fileExists(atPath: url.path) {
             try FileManager.default.removeItem(at: url)
@@ -191,7 +191,7 @@ class KeychainService {
 
     func saveString(_ value: String, forKey key: String) throws {
         guard let data = value.data(using: .utf8) else {
-            throw KeychainError.invalidData
+            throw KeychainServiceError.invalidData
         }
         try save(key: key, data: data)
     }
@@ -199,7 +199,7 @@ class KeychainService {
     func loadString(forKey key: String) throws -> String {
         let data = try load(key: key)
         guard let string = String(data: data, encoding: .utf8) else {
-            throw KeychainError.invalidData
+            throw KeychainServiceError.invalidData
         }
         return string
     }

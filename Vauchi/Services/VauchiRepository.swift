@@ -511,13 +511,13 @@ class VauchiRepository {
                 return keyData
             }
             // Key exists but wrong length — regenerate (migration scenario)
-        } catch KeychainError.notFound {
+        } catch KeychainServiceError.notFound {
             // No key exists yet — first launch, generate below
-        } catch KeychainError.deviceLocked {
+        } catch KeychainServiceError.deviceLocked {
             // Device locked — DO NOT generate a new key, propagate the error
             throw VauchiRepositoryError.deviceLocked
         }
-        // Other KeychainError variants re-throw automatically
+        // Other KeychainServiceError variants re-throw automatically
 
         // Generate new key and store in Keychain
         let newKeyData = generateStorageKey()
@@ -2236,17 +2236,17 @@ class VauchiKeychainBridge: MobilePlatformKeychain {
         do {
             try keychain.save(key: name, data: key)
         } catch {
-            throw VauchiPlatform.KeychainError.OperationFailed(msg: "saveKey(\(name)): \(error)")
+            throw KeychainError.OperationFailed(msg: "saveKey(\(name)): \(error)")
         }
     }
 
     func loadKey(name: String) throws -> Data? {
         do {
             return try keychain.load(key: name)
-        } catch KeychainError.notFound {
+        } catch KeychainServiceError.notFound {
             return nil
         } catch {
-            throw VauchiPlatform.KeychainError.OperationFailed(msg: "loadKey(\(name)): \(error)")
+            throw KeychainError.OperationFailed(msg: "loadKey(\(name)): \(error)")
         }
     }
 
@@ -2254,7 +2254,7 @@ class VauchiKeychainBridge: MobilePlatformKeychain {
         do {
             try keychain.delete(key: name)
         } catch {
-            throw VauchiPlatform.KeychainError.OperationFailed(msg: "deleteKey(\(name)): \(error)")
+            throw KeychainError.OperationFailed(msg: "deleteKey(\(name)): \(error)")
         }
     }
 }

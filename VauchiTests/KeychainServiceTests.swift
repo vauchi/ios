@@ -42,7 +42,7 @@ final class KeychainServiceTests: XCTestCase {
     /// Scenario: Load non-existent key returns error
     func testLoadNonExistentKeyThrowsNotFound() throws {
         XCTAssertThrowsError(try keychainService.load(key: "non_existent_key")) { error in
-            guard case KeychainError.notFound = error else {
+            guard case KeychainServiceError.notFound = error else {
                 XCTFail("Expected notFound error, got \(error)")
                 return
             }
@@ -69,7 +69,7 @@ final class KeychainServiceTests: XCTestCase {
         try keychainService.delete(key: "test_key")
 
         XCTAssertThrowsError(try keychainService.load(key: "test_key")) { error in
-            guard case KeychainError.notFound = error else {
+            guard case KeychainServiceError.notFound = error else {
                 XCTFail("Expected notFound error after delete")
                 return
             }
@@ -175,12 +175,12 @@ final class KeychainServiceTests: XCTestCase {
 
     // MARK: - Device Locked Error Tests
 
-    /// Scenario: KeychainError.deviceLocked maps to errSecInteractionNotAllowed
+    /// Scenario: KeychainServiceError.deviceLocked maps to errSecInteractionNotAllowed
     /// Verifies that the error enum case exists and is distinct from other errors
     func testDeviceLockedErrorIsDistinctFromOtherErrors() {
-        let deviceLockedError = KeychainError.deviceLocked
-        let notFoundError = KeychainError.notFound
-        let unknownError = KeychainError.unknown(-25308)
+        let deviceLockedError = KeychainServiceError.deviceLocked
+        let notFoundError = KeychainServiceError.notFound
+        let unknownError = KeychainServiceError.unknown(-25308)
 
         // deviceLocked should be a distinct case, not conflated with unknown(-25308)
         switch deviceLockedError {
