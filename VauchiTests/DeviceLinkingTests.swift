@@ -89,8 +89,8 @@ final class DeviceLinkingTests: XCTestCase {
         let now = UInt64(Date().timeIntervalSince1970)
         let expiryDuration = linkData.expiresAt - linkData.timestamp
 
-        // Should expire within 10 minutes (600 seconds) as per core implementation
-        XCTAssertEqual(expiryDuration, 600, "Should expire in 10 minutes")
+        // Should expire within 5 minutes (300 seconds) as per ADR-035
+        XCTAssertEqual(expiryDuration, 300, "Should expire in 5 minutes")
 
         // Expiry should be in the future
         XCTAssertGreaterThan(linkData.expiresAt, now, "Expiry should be in the future")
