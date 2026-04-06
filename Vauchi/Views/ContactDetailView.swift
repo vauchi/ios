@@ -197,7 +197,11 @@ struct ContactDetailView: View {
                     }
                     .disabled(isTogglingProposalTrust)
                     .accessibilityLabel(proposalTrusted ? "Remove proposal trust" : "Trust for proposals")
-                    .accessibilityHint(proposalTrusted ? "Stop allowing this contact to propose new contacts to you" : "Allow this contact to propose new contacts to you")
+                    .accessibilityHint(
+                        proposalTrusted
+                            ? "Stop allowing this contact to propose new contacts to you"
+                            : "Allow this contact to propose new contacts to you"
+                    )
                 }
                 .padding()
 
@@ -222,7 +226,7 @@ struct ContactDetailView: View {
                                     isEditingNote = false
                                     // Reload original note
                                     Task {
-                                        personalNote = (try? await viewModel.getContactNote(contactId: contact.id)) ?? ""
+                                        personalNote = await (try? viewModel.getContactNote(contactId: contact.id)) ?? ""
                                     }
                                 }
                                 .foregroundColor(.secondary)
@@ -450,7 +454,7 @@ struct ContactDetailView: View {
 
     private func loadNotes() {
         Task {
-            personalNote = (try? await viewModel.getContactNote(contactId: contact.id)) ?? ""
+            personalNote = await (try? viewModel.getContactNote(contactId: contact.id)) ?? ""
             if let notes = try? await viewModel.getContactFieldNotes(contactId: contact.id) {
                 var map: [String: String] = [:]
                 for note in notes {

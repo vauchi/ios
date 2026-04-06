@@ -26,6 +26,7 @@
 		10B3D5481A8E17F07E439629 /* testContactsViewWithContactsGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 2708AF0FE3066AC85A5EAF63 /* testContactsViewWithContactsGerman.1.png */; };
 		10BCAB3BFF0E6F665B519A1F /* WaitingForUnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */; };
 		10E60235A5FD647963680956 /* AudioProximityServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */; };
+		11134171C628F66156FF29AD /* ContactDetailComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEBDEA9304696A8DAE86642 /* ContactDetailComponents.swift */; };
 		112FC393D24528EF7DC572D1 /* testEditableTextWithValidationError.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 4E1E46D84F357AADC686DF8A /* testEditableTextWithValidationError.1.png */; };
 		12582E8F80C463B7C877A8A9 /* testFieldListPerGroup.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E71A86E87D901D3FF80D72 /* testFieldListPerGroup.1.png */; };
 		12BC56BA1BF270125C3DADB6 /* testTextInputAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 677E67E216D48E378A773CD8 /* testTextInputAccessibility.1.txt */; };
@@ -349,6 +350,7 @@
 		39F6474DA682103308EE2BFF /* testCardPreviewNoVisibleFields.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCardPreviewNoVisibleFields.1.png; sourceTree = "<group>"; };
 		3CCDAF85FAFC1F03E0E5EF5D /* testSettingsGroupDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSettingsGroupDark.1.png; sourceTree = "<group>"; };
 		3E7B642257C4005F82A40BCF /* delivery_empty.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = delivery_empty.json; sourceTree = "<group>"; };
+		3EEBDEA9304696A8DAE86642 /* ContactDetailComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailComponents.swift; sourceTree = "<group>"; };
 		3F10CFAFFF2CD3F74871E914 /* DeepLinkConsentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkConsentTests.swift; sourceTree = "<group>"; };
 		3F12B12FCE38D7CBAB15A8A0 /* LabelDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelDetailView.swift; sourceTree = "<group>"; };
 		3FA79BEC85FC2E70D2E996D7 /* TextInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputView.swift; sourceTree = "<group>"; };
@@ -849,6 +851,7 @@
 				4A63B916A948A0A03F3F45B6 /* AhaMomentView.swift */,
 				6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */,
 				E454B8F698D68725F434338E /* ConsentSettingsView.swift */,
+				3EEBDEA9304696A8DAE86642 /* ContactDetailComponents.swift */,
 				F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */,
 				773071C286EDA29BCB17B365 /* ContactsView.swift */,
 				30C91B081CDC3A250428A644 /* DeliveryStatusView.swift */,
@@ -1326,6 +1329,7 @@
 				307654F6186C276FC27E761A /* ConfirmationDialogView.swift in Sources */,
 				08512AFB915670B874B58220 /* ConsentSettingsView.swift in Sources */,
 				02DD49946382C26E78CE06C9 /* ContactActions.swift in Sources */,
+				11134171C628F66156FF29AD /* ContactDetailComponents.swift in Sources */,
 				CA32F697BDD3346B24319D5E /* ContactDetailView.swift in Sources */,
 				975814A17842850E5538C6EF /* ContactGroupBadges.swift in Sources */,
 				AF71B5181C8D4924DCF36C1B /* ContactListView.swift in Sources */,
