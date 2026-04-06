@@ -233,6 +233,7 @@ struct VauchiContact: Identifiable {
     let card: VauchiContactCard
     let addedAt: UInt64
     let trustLevel: MobileContactTrustLevel
+    let proposalTrusted: Bool
     let reciprocity: MobileReciprocity
 }
 
@@ -561,6 +562,7 @@ class VauchiRepository {
             card: convertCard(contact.card),
             addedAt: contact.addedAt,
             trustLevel: contact.trustLevel,
+            proposalTrusted: contact.proposalTrusted,
             reciprocity: contact.reciprocity
         )
     }
