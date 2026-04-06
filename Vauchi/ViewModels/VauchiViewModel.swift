@@ -37,6 +37,7 @@ struct ContactInfo: Identifiable, Equatable {
     let card: CardInfo?
     let addedAt: Date?
     let trustLevel: MobileContactTrustLevel
+    let proposalTrusted: Bool
     let reciprocity: MobileReciprocity
 
     init(
@@ -49,6 +50,7 @@ struct ContactInfo: Identifiable, Equatable {
         card: CardInfo? = nil,
         addedAt: Date? = nil,
         trustLevel: MobileContactTrustLevel = .standard,
+        proposalTrusted: Bool = false,
         reciprocity: MobileReciprocity = .unknown
     ) {
         self.id = id
@@ -60,6 +62,7 @@ struct ContactInfo: Identifiable, Equatable {
         self.card = card
         self.addedAt = addedAt
         self.trustLevel = trustLevel
+        self.proposalTrusted = proposalTrusted
         self.reciprocity = reciprocity
     }
 }
@@ -512,6 +515,7 @@ class VauchiViewModel: ObservableObject {
                     ),
                     addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
                     trustLevel: contact.trustLevel,
+                    proposalTrusted: contact.proposalTrusted,
                     reciprocity: contact.reciprocity
                 )
             }
@@ -549,6 +553,7 @@ class VauchiViewModel: ObservableObject {
                     ),
                     addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
                     trustLevel: contact.trustLevel,
+                    proposalTrusted: contact.proposalTrusted,
                     reciprocity: contact.reciprocity
                 )
             }
@@ -587,6 +592,7 @@ class VauchiViewModel: ObservableObject {
                 ),
                 addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
                 trustLevel: contact.trustLevel,
+                proposalTrusted: contact.proposalTrusted,
                 reciprocity: contact.reciprocity
             )
         } catch {
@@ -607,6 +613,7 @@ class VauchiViewModel: ObservableObject {
                     recoveryTrusted: contact.isRecoveryTrusted,
                     fingerprint: contact.fingerprint,
                     trustLevel: contact.trustLevel,
+                    proposalTrusted: contact.proposalTrusted,
                     reciprocity: contact.reciprocity
                 )
             }
@@ -645,7 +652,8 @@ class VauchiViewModel: ObservableObject {
                         }
                     ),
                     addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
-                    trustLevel: contact.trustLevel
+                    trustLevel: contact.trustLevel,
+                    proposalTrusted: contact.proposalTrusted
                 )
             }
         } catch {
@@ -709,6 +717,44 @@ class VauchiViewModel: ObservableObject {
             #endif
             throw VauchiRepositoryError.internalError("Hidden contacts feature not yet available")
         }
+    }
+
+    // MARK: - Contact Notes & Proposal Trust
+
+    /// Save a private note for a contact (never shared).
+    func setContactNote(contactId: String, note: String) async throws {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.setContactNote(contactId: contactId, note: note)
+    }
+
+    /// Load the private note for a contact.
+    func getContactNote(contactId: String) async throws -> String? {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        return try repository.getContactNote(contactId: contactId)
+    }
+
+    /// Save a private note on a specific field of a contact.
+    func setContactFieldNote(contactId: String, fieldId: String, note: String) async throws {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.setContactFieldNote(contactId: contactId, fieldId: fieldId, note: note)
+    }
+
+    /// Load all private field notes for a contact.
+    func getContactFieldNotes(contactId: String) async throws -> [MobileFieldNote] {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        return try repository.getContactFieldNotes(contactId: contactId)
+    }
+
+    /// Delete a private note on a specific field of a contact.
+    func deleteContactFieldNote(contactId: String, fieldId: String) async throws {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.deleteContactFieldNote(contactId: contactId, fieldId: fieldId)
+    }
+
+    /// Toggle proposal trust for a contact (local-only flag).
+    func setProposalTrusted(contactId: String, trusted: Bool) async throws {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.setProposalTrusted(contactId: contactId, trusted: trusted)
     }
 
     // MARK: - Duress PIN
