@@ -101,6 +101,8 @@ struct FaceToFaceExchangeView: View {
                 // device's own front camera, preventing it from scanning the peer's QR.
                 // Gray QR colors (#404040 on #E0E0E0) compensate for reduced luminance.
                 UIScreen.main.brightness = 0.65
+                // Prevent screen lock during exchange — QR must stay visible.
+                UIApplication.shared.isIdleTimerDisabled = true
                 requestPermissions()
                 startScannerIfReady()
                 startMultiStageSession()
@@ -108,6 +110,7 @@ struct FaceToFaceExchangeView: View {
             }
             .onDisappear {
                 UIScreen.main.brightness = previousBrightness
+                UIApplication.shared.isIdleTimerDisabled = false
                 qrScanner.stop()
                 stopAllTimers()
                 viewModel.cancelMultiStageExchange()
