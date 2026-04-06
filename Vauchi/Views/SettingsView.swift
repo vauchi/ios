@@ -1055,8 +1055,11 @@ struct DeviceLinkSheet: View {
                     ProgressView("Generating link...")
                 }
 
-            case .waitingForRequest:
-                waitingForRequestView
+            case let .waitingForRequest(expiresAt):
+                waitingForRequestView(expiresAt: expiresAt)
+
+            case .expired:
+                expiredQRView
 
             case let .confirmingDevice(name, code, challenge):
                 confirmingDeviceView(name: name, code: code, challenge: challenge)
@@ -1111,39 +1114,45 @@ struct DeviceLinkSheet: View {
 
     // MARK: - Subviews
 
-    private var waitingForRequestView: some View {
+    private func waitingForRequestView(expiresAt: UInt64) -> some View {
+        QRCountdownView(
+            qrData: qrData,
+            expiresAt: expiresAt,
+            generateQRCode: generateQRCode,
+            onExpired: { viewModel.deviceLinkState = .expired }
+        )
+    }
+
+    private var expiredQRView: some View {
         VStack(spacing: 20) {
-            if let qrData, let qrImage = generateQRCode(from: qrData) {
-                Text("Scan this QR code on your new device")
-                    .font(.headline)
-                    .multilineTextAlignment(.center)
+            Image(systemName: "clock.badge.exclamationmark")
+                .font(.system(size: 56))
+                .foregroundColor(.orange)
 
-                Image(uiImage: qrImage)
-                    .interpolation(.none)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 250, height: 250)
+            Text("QR Code Expired")
+                .font(.title2)
+                .fontWeight(.semibold)
+
+            Text("The device link QR code has expired for security reasons. Generate a new one to continue.")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            Button(action: {
+                viewModel.cancelDeviceLink()
+                startLinkFlow()
+            }) {
+                Text("Generate New QR")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .accessibilityLabel("Device link QR code")
-
-                HStack(spacing: 8) {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                    Text("Waiting for new device...")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                Text("Open Vauchi on your new device and select \"Join Existing Identity\" to scan this code.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-            } else {
-                ProgressView("Preparing...")
+                    .background(Color.cyan)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
             }
+            .accessibilityHint("Generates a new device link QR code")
+            .padding(.horizontal)
         }
     }
 

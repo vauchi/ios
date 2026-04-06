@@ -1652,11 +1652,12 @@ class VauchiViewModel: ObservableObject {
     enum DeviceLinkState {
         case idle
         case generatingQR
-        case waitingForRequest
+        case waitingForRequest(expiresAt: UInt64)
         case confirmingDevice(name: String, code: String, challenge: Data)
         case verifyingProximity(challenge: Data, confirmationCode: String)
         case completing
         case success
+        case expired
         case failed(String)
     }
 
@@ -1674,7 +1675,9 @@ class VauchiViewModel: ObservableObject {
         let initiator = try repository.startDeviceLink()
         currentInitiator = initiator
         let qrData = initiator.qrData()
-        deviceLinkState = .waitingForRequest
+        // TODO: use initiator.expiresAt() once core 0.18.5 bindings are published
+        let expiresAt = UInt64(Date().timeIntervalSince1970) + 300
+        deviceLinkState = .waitingForRequest(expiresAt: expiresAt)
         return qrData
     }
 
