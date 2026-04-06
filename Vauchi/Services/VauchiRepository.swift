@@ -1019,6 +1019,14 @@ class VauchiRepository {
         }
     }
 
+    func setProposalTrusted(contactId: String, trusted: Bool) throws {
+        do {
+            try vauchi.setProposalTrusted(contactId: contactId, trusted: trusted)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     // MARK: - Emergency Broadcast Operations
 
     // Based on: features/emergency_broadcast.feature - R5 Emergency Broadcast
