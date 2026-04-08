@@ -3,9 +3,6 @@
 
 # SwiftFormat configuration — aligned with project conventions
 
-# Project uses trailing commas (Swift standard style)
---trailingcommas always
-
 # Disable wrapMultilineStatementBraces to match SwiftLint opening_brace rule
 --disable wrapMultilineStatementBraces
 

@@ -129,12 +129,18 @@ struct VauchiApp: App {
     // Screenshot/screen recording prevention (T1-5)
     @Environment(\.scenePhase) private var scenePhase
     @State private var showPrivacyOverlay = false
+    private let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
     var body: some Scene {
         WindowGroup {
             ZStack {
                 ContentView()
                     .environmentObject(viewModel)
+                    .onReceive(timer) { _ in
+                        if scenePhase == .active {
+                            viewModel.pollNotifications()
+                        }
+                    }
                     .onAppear {
                         // Schedule background sync if enabled
                         if SettingsService.shared.autoSyncEnabled {
@@ -265,6 +271,9 @@ struct VauchiApp: App {
             }
             .onChange(of: scenePhase) { newPhase in
                 showPrivacyOverlay = newPhase != .active
+                if newPhase == .background {
+                    viewModel.handleAppBackgrounded()
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIScreen.capturedDidChangeNotification)) { _ in
                 if UIScreen.main.isCaptured {

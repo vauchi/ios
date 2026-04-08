@@ -483,6 +483,36 @@ class VauchiViewModel: ObservableObject {
         await loadCard()
     }
 
+    /// Triggers auto-lock if enabled when app goes to background (C1)
+    func handleAppBackgrounded() {
+        _ = repository?.handleAppBackgrounded()
+    }
+
+    /// Poll for and display OS notifications (E)
+    func pollNotifications() {
+        guard let notifications = repository?.pollNotifications(), !notifications.isEmpty else { return }
+
+        for notification in notifications {
+            let content = UNMutableNotificationContent()
+            content.title = notification.title
+            content.body = notification.body
+            content.sound = .default
+            content.categoryIdentifier = notification.category.rawValue
+
+            let request = UNNotificationRequest(
+                identifier: notification.id,
+                content: content,
+                trigger: nil // Deliver immediately
+            )
+
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error {
+                    print("VauchiViewModel: Notification error: \(error)")
+                }
+            }
+        }
+    }
+
     // MARK: - Contacts
 
     func loadContacts() async {
