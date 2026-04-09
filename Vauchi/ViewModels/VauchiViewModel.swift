@@ -485,7 +485,9 @@ class VauchiViewModel: ObservableObject {
 
     /// Triggers auto-lock if enabled when app goes to background (C1)
     func handleAppBackgrounded() {
-        _ = repository?.handleAppBackgrounded()
+        guard repository?.handleAppBackgrounded() != nil else { return }
+        // Core navigated to Lock screen — require re-authentication
+        appState = .authenticationRequired
     }
 
     /// Poll for and display OS notifications (E)
