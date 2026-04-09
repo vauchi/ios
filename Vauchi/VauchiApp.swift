@@ -96,7 +96,7 @@ struct VauchiApp: App {
 
             // Perform sync
             _ = try? repository.sync()
-            
+
             // Poll for notifications (E)
             NotificationService.shared.pollAndDisplayNotifications(repository: repository)
         }
