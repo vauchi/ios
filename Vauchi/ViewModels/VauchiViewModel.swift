@@ -497,10 +497,15 @@ class VauchiViewModel: ObservableObject {
             content.title = notification.title
             content.body = notification.body
             content.sound = .default
-            content.categoryIdentifier = notification.category.rawValue
+            switch notification.category {
+            case .emergencyAlert:
+                content.categoryIdentifier = "emergencyAlert"
+            case .contactAdded:
+                content.categoryIdentifier = "contactAdded"
+            }
 
             let request = UNNotificationRequest(
-                identifier: notification.id,
+                identifier: notification.eventKey,
                 content: content,
                 trigger: nil // Deliver immediately
             )
