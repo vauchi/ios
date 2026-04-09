@@ -82,7 +82,7 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         switch notification.category {
         case .emergencyAlert:
             content.categoryIdentifier = "emergencyAlert"
-            content.sound = .defaultCritical // Use critical sound if permitted
+            content.sound = .default
         case .contactAdded:
             content.categoryIdentifier = "contactAdded"
         }
