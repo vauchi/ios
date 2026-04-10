@@ -101,7 +101,7 @@
             "label": "Relay URL",
             "kind": {
               "Value": {
-                "value": "wss://relay.vauchi.app"
+                "value": "https://relay.vauchi.app"
               }
             }
           }

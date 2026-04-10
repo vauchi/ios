@@ -29,21 +29,20 @@ final class SettingsServiceTests: XCTestCase {
 
     /// Scenario: Default relay URL is set
     func testDefaultRelayUrl() {
-        XCTAssertEqual(SettingsService.defaultRelayUrl, "wss://relay.vauchi.app")
+        XCTAssertEqual(SettingsService.defaultRelayUrl, "https://relay.vauchi.app")
         XCTAssertEqual(service.relayUrl, SettingsService.defaultRelayUrl)
     }
 
     /// Scenario: Validate valid WebSocket URLs
     func testValidRelayUrls() {
-        XCTAssertTrue(service.isValidRelayUrl("ws://localhost:8080"))
-        XCTAssertTrue(service.isValidRelayUrl("wss://relay.vauchi.app"))
-        XCTAssertTrue(service.isValidRelayUrl("wss://relay.example.com:443/path"))
+        XCTAssertTrue(service.isValidRelayUrl("http://localhost:8080"))
+        XCTAssertTrue(service.isValidRelayUrl("https://relay.vauchi.app"))
+        XCTAssertTrue(service.isValidRelayUrl("https://relay.example.com:443/path"))
     }
 
     /// Scenario: Reject invalid relay URLs
     func testInvalidRelayUrls() {
-        XCTAssertFalse(service.isValidRelayUrl("http://localhost:8080"))
-        XCTAssertFalse(service.isValidRelayUrl("https://relay.vauchi.app"))
+        XCTAssertFalse(service.isValidRelayUrl("http://remote.example.com"))
         XCTAssertFalse(service.isValidRelayUrl("not-a-url"))
         XCTAssertFalse(service.isValidRelayUrl(""))
         XCTAssertFalse(service.isValidRelayUrl("ftp://files.example.com"))
@@ -51,7 +50,7 @@ final class SettingsServiceTests: XCTestCase {
 
     /// Scenario: Relay URL persists
     func testRelayUrlPersistence() {
-        let testUrl = "wss://custom-relay.example.com:8080"
+        let testUrl = "https://custom-relay.example.com:8080"
 
         service.relayUrl = testUrl
         XCTAssertEqual(service.relayUrl, testUrl)
@@ -137,7 +136,7 @@ final class SettingsServiceTests: XCTestCase {
     /// Scenario: Reset restores default values
     func testResetRestoresDefaults() {
         // Change all settings
-        service.relayUrl = "wss://custom.example.com"
+        service.relayUrl = "https://custom.example.com"
         service.autoSyncEnabled = false
         service.syncOnLaunch = false
         service.notificationsEnabled = false

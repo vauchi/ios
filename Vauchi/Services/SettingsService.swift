@@ -40,7 +40,7 @@ final class SettingsService {
     private let defaults: UserDefaults
 
     /// Default relay server URL
-    static let defaultRelayUrl = "wss://relay.vauchi.app"
+    static let defaultRelayUrl = "https://relay.vauchi.app"
 
     /// Initialize with default UserDefaults
     private convenience init() {

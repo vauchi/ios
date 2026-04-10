@@ -577,12 +577,12 @@ struct SettingsView: View {
                     saveRelayUrl()
                 }
             } message: {
-                Text("Enter the secure WebSocket URL of your relay server (wss://).")
+                Text("Enter the URL of your relay server (https://).")
             }
             .alert("Invalid URL", isPresented: $showInvalidUrlAlert) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text("Please enter a valid secure WebSocket URL starting with wss://. Unencrypted connections (ws://) are not allowed for security.")
+                Text("Please enter a valid relay URL starting with https://. Unencrypted connections (http://) are only allowed for localhost.")
             }
             .alert("Edit Display Name", isPresented: $showEditNameAlert) {
                 TextField("Display Name", text: $editingDisplayName)

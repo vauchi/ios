@@ -15,7 +15,7 @@ final class VauchiRepositoryTests: XCTestCase {
     var tempDir: URL!
 
     /// Local dev relay URL for integration tests (started via `just dev-relay`)
-    private static let localRelayUrl = "ws://127.0.0.1:8080"
+    private static let localRelayUrl = "http://127.0.0.1:8080"
 
     /// Skip test if local relay is not running.
     /// Uses a quick TCP connect check to port 8080.

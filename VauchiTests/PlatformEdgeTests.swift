@@ -216,32 +216,32 @@ final class PlatformEdgeTests: XCTestCase {
 
         // Valid secure URLs
         XCTAssertTrue(
-            settings.isValidRelayUrl("wss://relay.vauchi.app"),
-            "Should accept wss:// URLs"
+            settings.isValidRelayUrl("https://relay.vauchi.app"),
+            "Should accept https:// URLs"
         )
         XCTAssertTrue(
-            settings.isValidRelayUrl("wss://custom.relay.com:8080"),
-            "Should accept wss:// URLs with port"
+            settings.isValidRelayUrl("https://custom.relay.com:8080"),
+            "Should accept https:// URLs with port"
         )
 
-        // localhost allowed with ws:// for development
+        // localhost allowed with http:// for development
         XCTAssertTrue(
-            settings.isValidRelayUrl("ws://localhost:8080"),
-            "Should accept ws://localhost for dev"
+            settings.isValidRelayUrl("http://localhost:8080"),
+            "Should accept http://localhost for dev"
         )
         XCTAssertTrue(
-            settings.isValidRelayUrl("ws://127.0.0.1:8080"),
-            "Should accept ws://127.0.0.1 for dev"
+            settings.isValidRelayUrl("http://127.0.0.1:8080"),
+            "Should accept http://127.0.0.1 for dev"
         )
 
         // Invalid URLs
         XCTAssertFalse(
-            settings.isValidRelayUrl("ws://remote.server.com"),
-            "Should reject ws:// for remote servers"
+            settings.isValidRelayUrl("http://remote.server.com"),
+            "Should reject http:// for remote servers"
         )
         XCTAssertFalse(
-            settings.isValidRelayUrl("http://relay.vauchi.app"),
-            "Should reject http:// URLs"
+            settings.isValidRelayUrl("ftp://relay.vauchi.app"),
+            "Should reject ftp:// URLs"
         )
         XCTAssertFalse(
             settings.isValidRelayUrl("not-a-url"),

@@ -458,7 +458,7 @@ class VauchiRepository {
 
     /// Initialize repository with data directory and relay URL
     /// Uses iOS Keychain for secure storage key management
-    init(dataDir: String? = nil, relayUrl: String = "wss://relay.vauchi.app") throws {
+    init(dataDir: String? = nil, relayUrl: String = "https://relay.vauchi.app") throws {
         let dir = dataDir ?? VauchiRepository.defaultDataDir()
         self.dataDir = dir
         self.relayUrl = relayUrl
