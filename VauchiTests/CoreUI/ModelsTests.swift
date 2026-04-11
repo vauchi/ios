@@ -634,4 +634,75 @@ final class ModelsTests: XCTestCase {
             )
         }
     }
+
+    // MARK: - Dropdown Component Decoding
+
+    func testDropdownComponentDecodes() throws {
+        let json = Data("""
+        {"Dropdown": {"id": "theme", "label": "Theme", "selected": "dark", "options": [{"id": "dark", "label": "Dark"}, {"id": "light", "label": "Light"}]}}
+        """.utf8)
+        let component = try coreJSONDecoder.decode(Component.self, from: json)
+        if case let .dropdown(dropdown) = component {
+            XCTAssertEqual(dropdown.id, "theme")
+            XCTAssertEqual(dropdown.label, "Theme")
+            XCTAssertEqual(dropdown.selected, "dark")
+            XCTAssertEqual(dropdown.options.count, 2)
+            XCTAssertEqual(dropdown.options[0].id, "dark")
+            XCTAssertEqual(dropdown.options[0].label, "Dark")
+        } else {
+            XCTFail("Expected .dropdown, got \(component)")
+        }
+    }
+
+    func testDropdownComponentDecodesNullSelected() throws {
+        let json = Data("""
+        {"Dropdown": {"id": "lang", "label": "Language", "selected": null, "options": [{"id": "en", "label": "English"}]}}
+        """.utf8)
+        let component = try coreJSONDecoder.decode(Component.self, from: json)
+        if case let .dropdown(dropdown) = component {
+            XCTAssertNil(dropdown.selected)
+            XCTAssertEqual(dropdown.options.count, 1)
+        } else {
+            XCTFail("Expected .dropdown")
+        }
+    }
+
+    // MARK: - ShowFormDialog / PreviewAs Decoding
+
+    func testShowFormDialogDecodes() throws {
+        let json = Data("""
+        {"ShowFormDialog": {"dialog_type": "create_group", "context_id": "grp-1"}}
+        """.utf8)
+        let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
+        if case let .showFormDialog(dialogType, contextId) = result {
+            XCTAssertEqual(dialogType, "create_group")
+            XCTAssertEqual(contextId, "grp-1")
+        } else {
+            XCTFail("Expected .showFormDialog, got \(result)")
+        }
+    }
+
+    func testShowFormDialogDecodesNullContextId() throws {
+        let json = Data("""
+        {"ShowFormDialog": {"dialog_type": "create_group", "context_id": null}}
+        """.utf8)
+        let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
+        if case let .showFormDialog(_, contextId) = result {
+            XCTAssertNil(contextId)
+        } else {
+            XCTFail("Expected .showFormDialog")
+        }
+    }
+
+    func testPreviewAsDecodes() throws {
+        let json = Data("""
+        {"PreviewAs": {"contact_id": "c42"}}
+        """.utf8)
+        let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
+        if case let .previewAs(contactId) = result {
+            XCTAssertEqual(contactId, "c42")
+        } else {
+            XCTFail("Expected .previewAs, got \(result)")
+        }
+    }
 }

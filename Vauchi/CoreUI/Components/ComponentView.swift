@@ -71,6 +71,9 @@ struct ComponentView: View {
         case let .banner(bannerComponent):
             BannerView(component: bannerComponent, onAction: onAction)
 
+        case let .dropdown(dropdownComponent):
+            DropdownView(component: dropdownComponent, onAction: onAction)
+
         case .divider:
             DividerView()
 

@@ -112,7 +112,7 @@ import SwiftUI
             case .openEntryDetail, .showToast, .exchangeCommands,
                  .startDeviceLink, .openContact,
                  .editContact, .openUrl, .showAlert, .requestCamera,
-                 .wipeComplete, .unknown:
+                 .wipeComplete, .showFormDialog, .previewAs, .unknown:
                 break
             }
         }

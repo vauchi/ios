@@ -205,6 +205,12 @@ class AppViewModel: ObservableObject {
         case .exchangeCommands:
             // ADR-031: hardware exchange commands handled by exchange session
             break
+        case .showFormDialog:
+            // Dialog presentation handled by NavigateTo — no separate action needed
+            break
+        case .previewAs:
+            // Card preview handled by NavigateTo — no separate action needed
+            break
         case .unknown:
             break
         }

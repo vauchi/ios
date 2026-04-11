@@ -87,6 +87,7 @@ enum Component: Decodable {
     case inlineConfirm(InlineConfirmComponent)
     case editableText(EditableTextComponent)
     case banner(BannerComponent)
+    case dropdown(DropdownComponent)
     case divider
     /// Unknown component from a newer core version — render as empty space.
     /// Prevents crash when core adds new component types that this shell
@@ -145,6 +146,8 @@ enum Component: Decodable {
             self = try .editableText(container.decode(EditableTextComponent.self, forKey: .editableText))
         } else if container.contains(.banner) {
             self = try .banner(container.decode(BannerComponent.self, forKey: .banner))
+        } else if container.contains(.dropdown) {
+            self = try .dropdown(container.decode(DropdownComponent.self, forKey: .dropdown))
         } else {
             // Unknown struct variant — core is newer than this shell.
             // Degrade gracefully instead of crashing.
@@ -170,6 +173,7 @@ enum Component: Decodable {
         case inlineConfirm = "InlineConfirm"
         case editableText = "EditableText"
         case banner = "Banner"
+        case dropdown = "Dropdown"
     }
 }
 
@@ -480,6 +484,20 @@ struct BannerComponent: Decodable {
     let actionId: String
 }
 
+// MARK: - Dropdown Component
+
+struct DropdownComponent: Decodable {
+    let id: String
+    let label: String
+    let selected: String?
+    let options: [DropdownOption]
+}
+
+struct DropdownOption: Decodable, Identifiable {
+    let id: String
+    let label: String
+}
+
 // MARK: - UserAction (Encodable for sending to core)
 
 /// An action the user performed in the UI.
@@ -634,6 +652,8 @@ enum ActionResult: Decodable {
     case showToast(message: String, undoActionId: String?)
     case wipeComplete
     case exchangeCommands(commands: [ExchangeCommandDTO])
+    case showFormDialog(dialogType: String, contextId: String?)
+    case previewAs(contactId: String)
     case unknown
 
     init(from decoder: Decoder) throws {
@@ -682,6 +702,12 @@ enum ActionResult: Decodable {
         } else if container.contains(.exchangeCommands) {
             let data = try container.decode(ExchangeCommandsData.self, forKey: .exchangeCommands)
             self = .exchangeCommands(commands: data.commands)
+        } else if container.contains(.showFormDialog) {
+            let data = try container.decode(ShowFormDialogData.self, forKey: .showFormDialog)
+            self = .showFormDialog(dialogType: data.dialogType, contextId: data.contextId)
+        } else if container.contains(.previewAs) {
+            let data = try container.decode(PreviewAsData.self, forKey: .previewAs)
+            self = .previewAs(contactId: data.contactId)
         } else {
             self = .unknown
         }
@@ -698,6 +724,8 @@ enum ActionResult: Decodable {
         case openEntryDetail = "OpenEntryDetail"
         case showToast = "ShowToast"
         case exchangeCommands = "ExchangeCommands"
+        case showFormDialog = "ShowFormDialog"
+        case previewAs = "PreviewAs"
     }
 
     private struct ValidationErrorData: Decodable {
@@ -733,6 +761,15 @@ enum ActionResult: Decodable {
 
     private struct ExchangeCommandsData: Decodable {
         let commands: [ExchangeCommandDTO]
+    }
+
+    private struct ShowFormDialogData: Decodable {
+        let dialogType: String
+        let contextId: String?
+    }
+
+    private struct PreviewAsData: Decodable {
+        let contactId: String
     }
 }
 
