@@ -27,7 +27,7 @@ struct MoreView: View {
     private var primarySection: some View {
         Section {
             NavigationLink {
-                SettingsView()
+                CoreScreenView(screenName: "Settings")
             } label: {
                 Label(
                     localizationService.t("nav.settings"),
