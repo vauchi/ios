@@ -109,14 +109,6 @@ final class VisualRegressionTests: XCTestCase {
         assertScreenSnapshot(of: view)
     }
 
-    func testExchangeView() {
-        let vm = makeViewModel()
-        let view = ExchangeView()
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
     func testSettingsView() {
         let vm = makeViewModel()
         let view = SettingsView()
@@ -249,15 +241,6 @@ final class VisualRegressionTests: XCTestCase {
         assertScreenSnapshot(of: view)
     }
 
-    func testExchangeViewDark() {
-        let vm = makeViewModel()
-        let view = ExchangeView()
-            .environmentObject(vm)
-            .environment(\.colorScheme, .dark)
-
-        assertScreenSnapshot(of: view)
-    }
-
     // MARK: - German Locale Variants
 
     /// Helper to switch locale, run a snapshot, then restore.
@@ -312,14 +295,6 @@ final class VisualRegressionTests: XCTestCase {
     func testSettingsViewGerman() {
         let vm = makeViewModel()
         let view = SettingsView()
-            .environmentObject(vm)
-
-        withLocale("de", view: view)
-    }
-
-    func testExchangeViewGerman() {
-        let vm = makeViewModel()
-        let view = ExchangeView()
             .environmentObject(vm)
 
         withLocale("de", view: view)
