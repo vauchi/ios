@@ -158,4 +158,12 @@ final class ExchangeCommandHandler {
         )
         drainAndDispatch()
     }
+
+    func reportPermissionDenied(transport: String) {
+        guard let session else { return }
+        try? session.applyHardwareEvent(
+            event: .permissionDenied(transport: transport)
+        )
+        drainAndDispatch()
+    }
 }
