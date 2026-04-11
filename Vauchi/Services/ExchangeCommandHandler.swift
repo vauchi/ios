@@ -159,11 +159,15 @@ final class ExchangeCommandHandler {
         drainAndDispatch()
     }
 
-    func reportPermissionDenied(transport: String) {
+    private func reportPermissionDenied(transport: String) {
         guard let session else { return }
-        try? session.applyHardwareEvent(
-            event: .permissionDenied(transport: transport)
-        )
+        do {
+            try session.applyHardwareEvent(
+                event: .permissionDenied(transport: transport)
+            )
+        } catch {
+            NSLog("[Vauchi] Failed to report permission denied: \(error)")
+        }
         drainAndDispatch()
     }
 }

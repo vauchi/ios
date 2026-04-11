@@ -120,6 +120,8 @@ extension BleExchangeService: CBCentralManagerDelegate {
                 central.scanForPeripherals(withServices: [uuid], options: nil)
             }
         case .unauthorized:
+            targetServiceUuid = nil
+            cleanup()
             eventCallback?(.permissionDenied(transport: "BLE"))
         case .poweredOff, .unsupported:
             eventCallback?(.hardwareUnavailable(transport: "BLE"))
