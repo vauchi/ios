@@ -163,7 +163,7 @@ struct MainTabView: View {
                 .tag(1)
                 .accessibilityIdentifier("tab.contacts")
 
-            FaceToFaceExchangeView(switchToContacts: { selectedTab = 1 })
+            ExchangeModePicker(switchToContacts: { selectedTab = 1 })
                 .tabItem {
                     Label(
                         localizationService.t("nav.exchange"),

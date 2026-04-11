@@ -41,6 +41,7 @@
 		1BDCB504628325339F237DBB /* CoreUIComponentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 273DE3DDCB1F1D595DEF1B92 /* CoreUIComponentTests.swift */; };
 		1ECD2FDE78B2CD9672DDD697 /* testPreviewCardStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B8C613C7D55CF224BEE622D /* testPreviewCardStep.1.png */; };
 		1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */; };
+		202472C7B53FC0BE508D0CD8 /* NfcExchangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B001A2CBC5F0C8943926DA04 /* NfcExchangeView.swift */; };
 		210728BC90BEA9A5F3360DDF /* testExchangeShowQrScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = EF0789970BCC03D30F84E3D6 /* testExchangeShowQrScreen.1.png */; };
 		212AB32D3E869C855E9C8B39 /* testInfoPanelDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = D6E1FE2EE5B0C2CC821F5397 /* testInfoPanelDark.1.png */; };
 		2183BF09BDD4F4226A01DA1B /* testStatusIndicatorAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 444EB6E932C6BF9631AEE4D3 /* testStatusIndicatorAccessibility.1.txt */; };
@@ -62,6 +63,7 @@
 		2F7D817E60BDE6223F5E0484 /* VauchiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */; };
 		2F880F6CCE185990EACF77B9 /* identity_check.json in Resources */ = {isa = PBXBuildFile; fileRef = AF2AD205AD1B75A514B7C2D9 /* identity_check.json */; };
 		307654F6186C276FC27E761A /* ConfirmationDialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C3FB726E684074FF3A0B3DF /* ConfirmationDialogView.swift */; };
+		3105B0C544B84F0DAF3A1E1F /* ExchangeModePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D188A68C0567059D98640C5 /* ExchangeModePicker.swift */; };
 		32FBE38BDB7CA389EEDAD910 /* testStatusIndicatorDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = FA5DBF1C3713F1E055BA292C /* testStatusIndicatorDark.1.png */; };
 		345A6E8CFA128DEE17B47EAF /* NfcDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EDBF8DCF3784366CBDEDEF6 /* NfcDiagnosticView.swift */; };
 		34E2C9FC8A075320B7F7ACF5 /* testFieldListWithFieldsPerGroup.1.png in Resources */ = {isa = PBXBuildFile; fileRef = F94CFFC17D772290645209B3 /* testFieldListWithFieldsPerGroup.1.png */; };
@@ -72,6 +74,7 @@
 		3EE222C1CDE5AA17773953B3 /* testLoadingView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */; };
 		40CA0D251A7EE2861DB81ADE /* testCardPreviewGroupSelected.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 16817F15488300C5EAF304A8 /* testCardPreviewGroupSelected.1.png */; };
 		4235EDCB7DC3862C3F48F194 /* testInfoPanelWithIcon.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1A85B8272FE7B284D215644A /* testInfoPanelWithIcon.1.png */; };
+		424288A6F9E8D746208AF20B /* BleExchangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A790D4D87DA66E3C3C93253D /* BleExchangeView.swift */; };
 		431503ADA7BCDB0CA94FBDEE /* testWelcomeScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 962C13D56F463655E00BA233 /* testWelcomeScreen.1.png */; };
 		4342D012B76952454E5D89B9 /* SocialGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4A1EE447C60A79208FE622 /* SocialGraphView.swift */; };
 		43631E8778F64B024498C964 /* testTextComponentBody.1.png in Resources */ = {isa = PBXBuildFile; fileRef = BF21CF300C61D81BBA57F040 /* testTextComponentBody.1.png */; };
@@ -378,6 +381,7 @@
 		5AAC9A42D453BD1CCD3905C7 /* testFieldListMultipleFieldTypes.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testFieldListMultipleFieldTypes.1.png; sourceTree = "<group>"; };
 		5C08923CE347C900704BB61D /* groups_setup.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = groups_setup.json; sourceTree = "<group>"; };
 		5CAC3D107CAB9E9674E9BF31 /* QrCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrCodeView.swift; sourceTree = "<group>"; };
+		5D188A68C0567059D98640C5 /* ExchangeModePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeModePicker.swift; sourceTree = "<group>"; };
 		5F315425F795BD9D8DB6CCA1 /* testExchangeSuccessScreen.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeSuccessScreen.1.png; sourceTree = "<group>"; };
 		5F3DDDAC4A378A70C4B2EFFC /* ContactListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactListView.swift; sourceTree = "<group>"; };
 		5FC0C96CE81822B758A8E9B7 /* CardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPreviewView.swift; sourceTree = "<group>"; };
@@ -452,6 +456,7 @@
 		A3A0DA0F1F9BF466F1D07D6E /* testTextComponentSubtitle.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextComponentSubtitle.1.png; sourceTree = "<group>"; };
 		A5E222C3D79E971771915FC6 /* testInlineConfirmAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testInlineConfirmAccessibility.1.txt; sourceTree = "<group>"; };
 		A75DABB058471CE8E0587E20 /* home_empty.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = home_empty.json; sourceTree = "<group>"; };
+		A790D4D87DA66E3C3C93253D /* BleExchangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleExchangeView.swift; sourceTree = "<group>"; };
 		A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testLoadingView.1.png; sourceTree = "<group>"; };
 		A96F7230AD994FA18A53A544 /* testWelcomeScreenDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testWelcomeScreenDark.1.png; sourceTree = "<group>"; };
 		A96FE811E67752C2D8F9079E /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
@@ -463,6 +468,7 @@
 		AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualRegressionTests.swift; sourceTree = "<group>"; };
 		AF0F088CC55F4D96F34D113B /* testStatusIndicatorFailed.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testStatusIndicatorFailed.1.png; sourceTree = "<group>"; };
 		AF2AD205AD1B75A514B7C2D9 /* identity_check.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = identity_check.json; sourceTree = "<group>"; };
+		B001A2CBC5F0C8943926DA04 /* NfcExchangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NfcExchangeView.swift; sourceTree = "<group>"; };
 		B0F87ACCDE28EC2B24B9A518 /* exchange_show_qr.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = exchange_show_qr.json; sourceTree = "<group>"; };
 		B105C9E0FF90D826631320D7 /* testSettingsGroupAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testSettingsGroupAccessibility.1.txt; sourceTree = "<group>"; };
 		B1075C1A497CE28C82672E93 /* Vauchi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Vauchi.entitlements; sourceTree = "<group>"; };
@@ -843,11 +849,13 @@
 				DB5E7CFFD83945D91D395072 /* AccountDeletionView.swift */,
 				4A63B916A948A0A03F3F45B6 /* AhaMomentView.swift */,
 				6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */,
+				A790D4D87DA66E3C3C93253D /* BleExchangeView.swift */,
 				E454B8F698D68725F434338E /* ConsentSettingsView.swift */,
 				3EEBDEA9304696A8DAE86642 /* ContactDetailComponents.swift */,
 				F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */,
 				773071C286EDA29BCB17B365 /* ContactsView.swift */,
 				30C91B081CDC3A250428A644 /* DeliveryStatusView.swift */,
+				5D188A68C0567059D98640C5 /* ExchangeModePicker.swift */,
 				A34F01BD07BC1A3FF39429C8 /* FaceToFaceExchangeView.swift */,
 				78FA47BD58BB7B71D2AC250D /* GroupsView.swift */,
 				2760186DEA7C9870633BA8E8 /* HelpView.swift */,
@@ -858,6 +866,7 @@
 				5846280A9FFC79FBBBCF600D /* LanguageSettingsView.swift */,
 				644F12D83413B334E234F4AC /* LockScreenView.swift */,
 				BCB872C64B7220D3BEEFACED /* MoreView.swift */,
+				B001A2CBC5F0C8943926DA04 /* NfcExchangeView.swift */,
 				6B1F349466E7039EA4F918FC /* NfcTestView.swift */,
 				AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */,
 				36EBCAF628D08C167C0D9721 /* QRScannerView.swift */,
@@ -1315,6 +1324,7 @@
 				6A3C10861679B93C3B320E98 /* BannerView.swift in Sources */,
 				7532FD4076FE6E6670E901E6 /* BleDiagnosticView.swift in Sources */,
 				EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */,
+				424288A6F9E8D746208AF20B /* BleExchangeView.swift in Sources */,
 				EC26C5F66AE81B6841339A50 /* CardPreviewView.swift in Sources */,
 				8F1D5438434B846475597477 /* ComponentView.swift in Sources */,
 				307654F6186C276FC27E761A /* ConfirmationDialogView.swift in Sources */,
@@ -1336,6 +1346,7 @@
 				8F26A26B96E4272DD1DD0EBE /* DividerView.swift in Sources */,
 				D708F1E5547134FC3A984FD5 /* EditableTextView.swift in Sources */,
 				51B03694B5149D7722B73BCC /* ExchangeCommandHandler.swift in Sources */,
+				3105B0C544B84F0DAF3A1E1F /* ExchangeModePicker.swift in Sources */,
 				D6F192EAAFA4D534AC285A8E /* ExistingCodeDiagnostic.swift in Sources */,
 				105F980BB187FE89CD24B5D0 /* FaceToFaceExchangeView.swift in Sources */,
 				1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */,
@@ -1359,6 +1370,7 @@
 				ACB1FE30772E1BEAF475FAD3 /* NFCExchangeService.swift in Sources */,
 				281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */,
 				345A6E8CFA128DEE17B47EAF /* NfcDiagnosticView.swift in Sources */,
+				202472C7B53FC0BE508D0CD8 /* NfcExchangeView.swift in Sources */,
 				E274DDDCD426344D25E204F7 /* NfcTestView.swift in Sources */,
 				138BEFDCC908871EDE97D333 /* NotificationService.swift in Sources */,
 				F1607238A8523A2811B18B74 /* OnboardingViewModel.swift in Sources */,
