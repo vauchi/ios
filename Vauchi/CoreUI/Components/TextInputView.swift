@@ -42,8 +42,8 @@ struct TextInputView: View {
                 onAction(.textChanged(componentId: component.id, value: value))
             }
             .accessibilityIdentifier(component.id)
-            .accessibilityLabel(component.label)
-            .accessibilityHint(component.placeholder ?? "")
+            .accessibilityLabel(component.a11y?.label ?? component.label)
+            .accessibilityHint(component.a11y?.hint ?? component.placeholder ?? "")
 
             if let error = component.validationError {
                 Text(error)

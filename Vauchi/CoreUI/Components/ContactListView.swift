@@ -92,8 +92,8 @@ struct ContactItemRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(contact.name)
-        .accessibilityHint(contact.subtitle ?? "")
+        .accessibilityLabel(contact.a11y?.label ?? contact.name)
+        .accessibilityHint(contact.a11y?.hint ?? contact.subtitle ?? "")
         .accessibilityAddTraits(.isButton)
     }
 }

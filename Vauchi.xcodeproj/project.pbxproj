@@ -1095,6 +1095,7 @@
 				};
 			};
 			buildConfigurationList = BAFFDC71FBCC5FC569766377 /* Build configuration list for PBXProject "Vauchi" */;
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1108,7 +1109,6 @@
 				8B834B486889A4518835FD33 /* XCRemoteSwiftPackageReference "vauchi-platform-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 6044B0E63DE2F73C5FDC8885 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (

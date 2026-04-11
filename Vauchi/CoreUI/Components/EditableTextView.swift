@@ -49,5 +49,7 @@ struct EditableTextView: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityLabel(component.a11y?.label ?? component.label)
+        .accessibilityHint(component.a11y?.hint ?? "")
     }
 }

@@ -44,6 +44,8 @@ struct StatusIndicatorView: View {
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         .accessibilityElement(children: .combine)
+        .accessibilityLabel(component.a11y?.label ?? component.title)
+        .accessibilityHint(component.a11y?.hint ?? "")
     }
 
     private func statusColor(for status: Status) -> Color {

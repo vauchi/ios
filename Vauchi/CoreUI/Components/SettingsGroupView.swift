@@ -82,7 +82,8 @@ struct SettingsItemRow: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(item.label)
+        .accessibilityLabel(item.a11y?.label ?? item.label)
+        .accessibilityHint(item.a11y?.hint ?? "")
         .accessibilityValue(enabled ? "On" : "Off")
     }
 
@@ -101,7 +102,8 @@ struct SettingsItemRow: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(item.label): \(value)")
+        .accessibilityLabel(item.a11y?.label ?? "\(item.label): \(value)")
+        .accessibilityHint(item.a11y?.hint ?? "")
     }
 
     private func linkRow(detail: String?) -> some View {
@@ -131,8 +133,8 @@ struct SettingsItemRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(item.label)
-        .accessibilityHint(detail ?? "")
+        .accessibilityLabel(item.a11y?.label ?? item.label)
+        .accessibilityHint(item.a11y?.hint ?? detail ?? "")
         .accessibilityAddTraits(.isButton)
     }
 
@@ -153,7 +155,8 @@ struct SettingsItemRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(label)
+        .accessibilityLabel(item.a11y?.label ?? label)
+        .accessibilityHint(item.a11y?.hint ?? "")
         .accessibilityAddTraits(.isButton)
     }
 }

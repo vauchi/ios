@@ -26,6 +26,8 @@ struct DropdownView: View {
                 }
             }
             .pickerStyle(.menu)
+            .accessibilityLabel(component.a11y?.label ?? component.label)
+            .accessibilityHint(component.a11y?.hint ?? "")
         }
     }
 }
