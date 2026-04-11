@@ -1203,12 +1203,35 @@ class VauchiViewModel: ObservableObject {
     func finalizeMultiStageExchange() -> MobileExchangeResult? {
         guard let repository, let session = multiStageSession else { return nil }
         do {
-            return try repository.finalizeMultistageExchange(session: session)
+            let result = try repository.finalizeMultistageExchange(session: session)
+            // Run audio proximity as trust boost (non-blocking, best-effort)
+            Task.detached(priority: .userInitiated) { [weak self] in
+                self?.runAudioProximity()
+            }
+            return result
         } catch {
             #if DEBUG
                 NSLog("[Exchange] Failed to finalize: %@", "\(error)")
             #endif
             return nil
+        }
+    }
+
+    private func runAudioProximity() {
+        let verifier = MobileProximityVerifier.new(handler: AudioProximityService.shared)
+        guard verifier.isSupported() else { return }
+
+        var challenge = [UInt8](repeating: 0, count: 16)
+        _ = SecRandomCopyBytes(kSecRandomDefault, 16, &challenge)
+
+        let emitResult = verifier.emitChallenge(challenge: challenge)
+        guard emitResult.success else { return }
+
+        let response = verifier.listenForResponse(timeoutMs: 5000)
+        if !response.isEmpty {
+            #if DEBUG
+                NSLog("[Exchange] Audio proximity verified (%d bytes)", response.count)
+            #endif
         }
     }
 
@@ -1234,21 +1257,30 @@ class VauchiViewModel: ObservableObject {
         multiStageSession = nil
     }
 
-    // Proximity stubs — ultrasonic removed from exchange. Kept for device linking views.
-    @Published var proximitySupported = false
+    /// Proximity — used by device linking views and audio trust boost.
+    @Published var proximitySupported: Bool = {
+        let verifier = MobileProximityVerifier.new(handler: AudioProximityService.shared)
+        return verifier.isSupported()
+    }()
+
     var proximityCapability: String {
-        "none"
+        AudioProximityService.shared.checkCapability()
     }
 
-    func emitProximityChallenge(_: Data) -> Bool {
-        false
+    func emitProximityChallenge(_ data: Data) -> Bool {
+        let verifier = MobileProximityVerifier.new(handler: AudioProximityService.shared)
+        return verifier.emitChallenge(challenge: Array(data)).success
     }
 
-    func listenForProximityResponse(timeoutMs _: UInt64 = 5000) -> Data? {
-        nil
+    func listenForProximityResponse(timeoutMs: UInt64 = 5000) -> Data? {
+        let verifier = MobileProximityVerifier.new(handler: AudioProximityService.shared)
+        let response = verifier.listenForResponse(timeoutMs: timeoutMs)
+        return response.isEmpty ? nil : Data(response)
     }
 
-    func stopProximityVerification() {}
+    func stopProximityVerification() {
+        AudioProximityService.shared.stop()
+    }
 
     /// Start an exchange from a deep link payload.
     /// Called after the user grants consent in the deep link consent gate (SP-9).
