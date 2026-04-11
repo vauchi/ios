@@ -100,14 +100,26 @@ final class ExchangeCommandHandler {
 
     // MARK: - Audio
 
-    private func emitAudioChallenge(data _: Data) {
-        // Audio proximity not yet wired to command/event protocol.
-        // TODO: Wire when AudioProximityService supports raw sample emission.
+    private func emitAudioChallenge(data: Data) {
+        let verifier = MobileProximityVerifier.new(handler: AudioProximityService.shared)
+        let result = verifier.emitChallenge(challenge: Array(data))
+        if !result.success {
+            reportError(transport: "Audio", error: result.error)
+        }
     }
 
-    private func listenForAudioResponse(timeoutMs _: UInt64) {
-        // Audio proximity not yet wired to command/event protocol.
-        // TODO: Wire when AudioProximityService supports raw sample reception.
+    private func listenForAudioResponse(timeoutMs: UInt64) {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self, let session else { return }
+            let verifier = MobileProximityVerifier.new(handler: AudioProximityService.shared)
+            let received = verifier.listenForResponse(timeoutMs: timeoutMs)
+            DispatchQueue.main.async {
+                try? session.applyHardwareEvent(
+                    event: .audioResponseReceived(data: Data(received))
+                )
+                self.drainAndDispatch()
+            }
+        }
     }
 
     // MARK: - Relay Escrow
