@@ -1218,13 +1218,15 @@ class VauchiViewModel: ObservableObject {
     }
 
     private func runAudioProximity() {
-        let verifier = MobileProximityVerifier.new(handler: AudioProximityService.shared)
+        let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
         guard verifier.isSupported() else { return }
 
-        var challenge = [UInt8](repeating: 0, count: 16)
-        _ = SecRandomCopyBytes(kSecRandomDefault, 16, &challenge)
+        var challengeBytes = Data(count: 16)
+        challengeBytes.withUnsafeMutableBytes { ptr in
+            _ = SecRandomCopyBytes(kSecRandomDefault, 16, ptr.baseAddress!)
+        }
 
-        let emitResult = verifier.emitChallenge(challenge: challenge)
+        let emitResult = verifier.emitChallenge(challenge: challengeBytes)
         guard emitResult.success else { return }
 
         let response = verifier.listenForResponse(timeoutMs: 5000)
@@ -1259,7 +1261,7 @@ class VauchiViewModel: ObservableObject {
 
     /// Proximity — used by device linking views and audio trust boost.
     @Published var proximitySupported: Bool = {
-        let verifier = MobileProximityVerifier.new(handler: AudioProximityService.shared)
+        let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
         return verifier.isSupported()
     }()
 
@@ -1268,14 +1270,14 @@ class VauchiViewModel: ObservableObject {
     }
 
     func emitProximityChallenge(_ data: Data) -> Bool {
-        let verifier = MobileProximityVerifier.new(handler: AudioProximityService.shared)
-        return verifier.emitChallenge(challenge: Array(data)).success
+        let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
+        return verifier.emitChallenge(challenge: data).success
     }
 
     func listenForProximityResponse(timeoutMs: UInt64 = 5000) -> Data? {
-        let verifier = MobileProximityVerifier.new(handler: AudioProximityService.shared)
+        let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
         let response = verifier.listenForResponse(timeoutMs: timeoutMs)
-        return response.isEmpty ? nil : Data(response)
+        return response.isEmpty ? nil : response
     }
 
     func stopProximityVerification() {
