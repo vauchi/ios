@@ -1217,7 +1217,7 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
-    private func runAudioProximity() {
+    private nonisolated func runAudioProximity() {
         let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
         guard verifier.isSupported() else { return }
 
