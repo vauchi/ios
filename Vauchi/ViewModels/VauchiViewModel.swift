@@ -162,6 +162,9 @@ class VauchiViewModel: ObservableObject {
     @Published var deletionInfo: VauchiDeletionInfo?
     @Published var consentRecords: [VauchiConsentRecord] = []
 
+    /// Archived contacts
+    @Published var archivedContacts: [ContactInfo] = []
+
     // Visibility labels (for organizing contacts)
     // Based on: features/visibility_labels.feature
     @Published var visibilityLabels: [VauchiVisibilityLabel] = []
@@ -1079,6 +1082,41 @@ class VauchiViewModel: ObservableObject {
             toastMessage = nil
             toastUndoActionId = nil
             toastUndoHandler = nil
+        }
+    }
+
+    func loadArchivedContacts() async {
+        guard let repository else { return }
+
+        do {
+            let archivedData = try repository.listArchivedContacts()
+            archivedContacts = archivedData.map { contact in
+                ContactInfo(
+                    id: contact.id,
+                    displayName: contact.displayName,
+                    verified: contact.isVerified,
+                    recoveryTrusted: contact.isRecoveryTrusted,
+                    isHidden: contact.isHidden,
+                    isImported: false, // archived contacts were always exchanged
+                    fingerprint: contact.fingerprint,
+                    card: CardInfo(
+                        displayName: contact.card.displayName,
+                        fields: contact.card.fields.map { field in
+                            FieldInfo(
+                                id: field.id,
+                                fieldType: field.fieldType.rawValue,
+                                label: field.label,
+                                value: field.value
+                            )
+                        }
+                    ),
+                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
+                    trustLevel: contact.trustLevel,
+                    proposalTrusted: contact.proposalTrusted
+                )
+            }
+        } catch {
+            archivedContacts = []
         }
     }
 

@@ -128,6 +128,21 @@ struct ContactsView: View {
                 }
             }
             .navigationTitle(showHiddenContacts ? localizationService.t("contacts.hidden_title") : localizationService.t("nav.contacts"))
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        NavigationLink(destination: ArchivedContactsView()) {
+                            Label("Archived Contacts", systemImage: "archivebox")
+                        }
+                        NavigationLink(destination: ContactMergeView()) {
+                            Label("Find Duplicates", systemImage: "person.2.badge.gearshape")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .accessibilityLabel("More contact options")
+                    }
+                }
+            }
             .searchable(text: $searchText, prompt: localizationService.t("contacts.search"))
             .onChange(of: searchText) { newValue in
                 performSearch(query: newValue)

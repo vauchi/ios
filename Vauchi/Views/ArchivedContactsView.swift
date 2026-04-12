@@ -25,14 +25,15 @@ struct ArchivedContactsView: View {
                         .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .accessibilityIdentifier("archived_contacts.empty")
             } else {
                 List {
                     ForEach(viewModel.archivedContacts) { contact in
-                        HStack {
+                        HStack(spacing: 12) {
                             // Avatar
                             ZStack {
                                 Circle()
-                                    .fill(Color.cyan)
+                                    .fill(Color.gray.opacity(0.4))
                                     .frame(width: 44, height: 44)
 
                                 Text(String(contact.displayName.prefix(1)).uppercased())
@@ -58,8 +59,10 @@ struct ArchivedContactsView: View {
                             Button {
                                 Task {
                                     do {
+                                        let name = contact.displayName
                                         try await viewModel.unarchiveContact(id: contact.id)
                                         await viewModel.loadArchivedContacts()
+                                        viewModel.showToast(localizationService.t("contacts.toast_unarchived"))
                                     } catch {
                                         viewModel.showError(
                                             "Unarchive Failed",
@@ -80,7 +83,10 @@ struct ArchivedContactsView: View {
                             .accessibilityHint("Move this contact back to your main contact list")
                         }
                         .padding(.vertical, 4)
+                        .accessibilityIdentifier("archived_contacts.row")
                         .accessibilityElement(children: .combine)
+                        .accessibilityLabel("\(contact.displayName), \(contact.verified ? "verified" : "not verified")")
+                        .accessibilityHint("Double tap to unarchive this contact")
                     }
                 }
                 .listStyle(.plain)
