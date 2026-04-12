@@ -34,6 +34,8 @@ struct ToggleListView: View {
             .cornerRadius(12)
             .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         }
+        .accessibilityLabel(component.a11y?.label ?? component.label)
+        .accessibilityHint(component.a11y?.hint ?? "")
     }
 }
 
@@ -68,8 +70,8 @@ struct ToggleItemRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(item.label)
-        .accessibilityValue(item.selected ? "Selected" : "Not selected")
+        .accessibilityLabel(item.a11y?.label ?? "\(item.label), \(item.selected ? "selected" : "not selected")")
+        .accessibilityHint(item.a11y?.hint ?? "")
         .accessibilityAddTraits(.isButton)
     }
 }

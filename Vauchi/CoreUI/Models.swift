@@ -224,6 +224,7 @@ struct ToggleListComponent: Decodable {
     let id: String
     let label: String
     let items: [ToggleItem]
+    var a11y: A11y?
 }
 
 struct ToggleItem: Decodable, Identifiable {
@@ -231,6 +232,7 @@ struct ToggleItem: Decodable, Identifiable {
     let label: String
     let selected: Bool
     let subtitle: String?
+    var a11y: A11y?
 }
 
 struct FieldListComponent: Decodable {
@@ -238,6 +240,7 @@ struct FieldListComponent: Decodable {
     let fields: [FieldDisplay]
     let visibilityMode: VisibilityMode
     let availableGroups: [String]
+    var a11y: A11y?
 }
 
 enum VisibilityMode: String, Decodable {
@@ -251,6 +254,7 @@ struct FieldDisplay: Decodable, Identifiable {
     let label: String
     let value: String
     let visibility: UiFieldVisibility
+    var a11y: A11y?
 }
 
 /// UI-level field visibility state.
@@ -292,6 +296,7 @@ struct CardPreviewComponent: Decodable {
     let fields: [FieldDisplay]
     let groupViews: [GroupCardView]
     let selectedGroup: String?
+    var a11y: A11y?
 }
 
 struct GroupCardView: Decodable, Identifiable {
@@ -309,6 +314,7 @@ struct InfoPanelComponent: Decodable {
     let icon: String?
     let title: String
     let items: [InfoItem]
+    var a11y: A11y?
 }
 
 struct InfoItem: Decodable, Identifiable {
@@ -501,6 +507,7 @@ struct BannerComponent: Decodable {
     let text: String
     let actionLabel: String
     let actionId: String
+    var a11y: A11y?
 }
 
 // MARK: - Dropdown Component

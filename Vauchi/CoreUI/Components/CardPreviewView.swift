@@ -107,6 +107,8 @@ struct CardPreviewView: View {
         .background(Color(.systemBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
+        .accessibilityLabel(component.a11y?.label ?? "Card preview: \(component.name)")
+        .accessibilityHint(component.a11y?.hint ?? "")
     }
 
     private var currentDisplayName: String {

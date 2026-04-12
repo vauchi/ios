@@ -30,5 +30,7 @@ struct BannerView: View {
         .background(Color(.secondarySystemBackground))
         .cornerRadius(8)
         .accessibilityElement(children: .combine)
+        .accessibilityLabel(component.a11y?.label ?? component.text)
+        .accessibilityHint(component.a11y?.hint ?? "")
     }
 }

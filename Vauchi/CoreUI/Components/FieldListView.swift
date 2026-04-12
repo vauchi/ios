@@ -27,6 +27,8 @@ struct FieldListView: View {
                 }
             }
         }
+        .accessibilityLabel(component.a11y?.label ?? "Contact fields")
+        .accessibilityHint(component.a11y?.hint ?? "")
     }
 
     private var emptyState: some View {
@@ -87,7 +89,8 @@ struct FieldListRow: View {
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(field.label): \(field.value)")
+        .accessibilityLabel(field.a11y?.label ?? "\(field.label): \(field.value)")
+        .accessibilityHint(field.a11y?.hint ?? "")
     }
 
     @ViewBuilder
