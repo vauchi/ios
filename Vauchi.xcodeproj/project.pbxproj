@@ -160,6 +160,7 @@
 		9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */; };
 		9ECAED5D4945C8D7669BD1CC /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2760186DEA7C9870633BA8E8 /* HelpView.swift */; };
 		A08A872D7E8A41B36C908DD3 /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB872C64B7220D3BEEFACED /* MoreView.swift */; };
+		A20441612CDA08A586DADCC0 /* DirectSendService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A701A0C348B6758EED1D949 /* DirectSendService.swift */; };
 		A2C2F1EA2AE9566A3880EA6E /* testCreateIdentityScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7DE23F7F336DC77627DE3D0E /* testCreateIdentityScreen.1.png */; };
 		A31D3B2C12974FDE021C599E /* testWelcomeScreenDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = A96F7230AD994FA18A53A544 /* testWelcomeScreenDark.1.png */; };
 		A387A34BD2E5E95169ADB6B7 /* testCardPreviewWithFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 011D4844DB2996A933073BC0 /* testCardPreviewWithFields.1.png */; };
@@ -420,6 +421,7 @@
 		78FA47BD58BB7B71D2AC250D /* GroupsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsView.swift; sourceTree = "<group>"; };
 		794858315D56910FBB0F9531 /* ContactGroupBadges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactGroupBadges.swift; sourceTree = "<group>"; };
 		79B16A2E56FA9B8FA0C9F628 /* testCardPreviewMinimal.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCardPreviewMinimal.1.png; sourceTree = "<group>"; };
+		7A701A0C348B6758EED1D949 /* DirectSendService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectSendService.swift; sourceTree = "<group>"; };
 		7BDCD05EC305C6B51CC0DF9E /* testToggleListAllSelected.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testToggleListAllSelected.1.png; sourceTree = "<group>"; };
 		7D255A687EB281C01D297ED7 /* VauchiSnapshotTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DE23F7F336DC77627DE3D0E /* testCreateIdentityScreen.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCreateIdentityScreen.1.png; sourceTree = "<group>"; };
@@ -982,6 +984,7 @@
 				180FA5B6237A3C3CE4ACB83B /* ContactActions.swift */,
 				E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */,
 				F3D6D0CAF371C529012A00BB /* DeepLinkHandler.swift */,
+				7A701A0C348B6758EED1D949 /* DirectSendService.swift */,
 				BFEFA0373F92D41AE00637B0 /* ExchangeCommandHandler.swift */,
 				B31DFE6F23CEA01F0437957B /* KeychainService.swift */,
 				6C859B6215BADD6A45480D9F /* LocalizationService.swift */,
@@ -1358,6 +1361,7 @@
 				4C52B33A572F7C4F2EB5D736 /* DeliveryStatusView.swift in Sources */,
 				C9C86FD0A30B8E8FBAD1245C /* DiagnosticLogger.swift in Sources */,
 				AD01F0575CCEB6301F6F7834 /* DiagnosticView.swift in Sources */,
+				A20441612CDA08A586DADCC0 /* DirectSendService.swift in Sources */,
 				8F26A26B96E4272DD1DD0EBE /* DividerView.swift in Sources */,
 				4322A5CEDF0F187C9BB72186 /* DropdownView.swift in Sources */,
 				D708F1E5547134FC3A984FD5 /* EditableTextView.swift in Sources */,

@@ -57,69 +57,17 @@ final class DirectSendService {
             return
         }
 
-        // Create listening socket.
-        let listenFd = socket(AF_INET, SOCK_STREAM, 0)
-        guard listenFd >= 0 else {
-            reportError("socket() failed: \(errno)")
-            return
-        }
-        listenerSocket = listenFd
+        guard let listenFd = createListenerSocket() else { return }
         defer {
-            if listenerSocket == listenFd {
-                listenerSocket = -1
-            }
+            if listenerSocket == listenFd { listenerSocket = -1 }
             close(listenFd)
         }
 
-        // SO_REUSEADDR for quick rebind after previous session.
-        var reuseAddr: Int32 = 1
-        setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, &reuseAddr, socklen_t(MemoryLayout<Int32>.size))
-
-        // Bind to any interface on the exchange port.
-        var addr = sockaddr_in()
-        addr.sin_family = sa_family_t(AF_INET)
-        addr.sin_port = Self.defaultPort.bigEndian
-        addr.sin_addr = in_addr(s_addr: INADDR_ANY)
-
-        let bindResult = withUnsafePointer(to: &addr) {
-            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                bind(listenFd, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
-            }
-        }
-        guard bindResult == 0 else {
-            reportError("bind() failed: \(errno)")
-            return
-        }
-
-        guard Darwin.listen(listenFd, 1) == 0 else {
-            reportError("listen() failed: \(errno)")
-            return
-        }
-
-        // Block until desktop connects (or cancel() closes the fd).
-        var clientAddr = sockaddr_in()
-        var clientAddrLen = socklen_t(MemoryLayout<sockaddr_in>.size)
-        let clientFd = withUnsafeMutablePointer(to: &clientAddr) {
-            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                accept(listenFd, $0, &clientAddrLen)
-            }
-        }
-        guard clientFd >= 0 else {
-            // accept() returns EBADF / EINVAL when cancel() closes the fd.
-            if errno == EBADF || errno == EINVAL {
-                return // silently cancelled
-            }
-            reportError("accept() failed: \(errno)")
-            return
-        }
+        guard let clientFd = acceptConnection(listenFd: listenFd) else { return }
         defer { close(clientFd) }
 
-        // 10-second I/O timeout -- prevents hanging on a stalled desktop.
-        var timeout = timeval(tv_sec: 10, tv_usec: 0)
-        setsockopt(clientFd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
-        setsockopt(clientFd, SOL_SOCKET, SO_SNDTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+        configureTimeout(sock: clientFd)
 
-        // VXCH framing: recv desktop payload first, then send ours.
         do {
             let theirPayload = try recvVxch(sock: clientFd)
             try sendVxch(sock: clientFd, payload: payload)
@@ -132,11 +80,68 @@ final class DirectSendService {
         }
     }
 
+    private func createListenerSocket() -> Int32? {
+        let listenFd = socket(AF_INET, SOCK_STREAM, 0)
+        guard listenFd >= 0 else {
+            reportError("socket() failed: \(errno)")
+            return nil
+        }
+        listenerSocket = listenFd
+
+        var reuseAddr: Int32 = 1
+        setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, &reuseAddr, socklen_t(MemoryLayout<Int32>.size))
+
+        var addr = sockaddr_in()
+        addr.sin_family = sa_family_t(AF_INET)
+        addr.sin_port = Self.defaultPort.bigEndian
+        addr.sin_addr = in_addr(s_addr: INADDR_ANY)
+
+        let bindResult = withUnsafePointer(to: &addr) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                bind(listenFd, $0, socklen_t(MemoryLayout<sockaddr_in>.size))
+            }
+        }
+        guard bindResult == 0 else {
+            reportError("bind() failed: \(errno)")
+            close(listenFd)
+            return nil
+        }
+
+        guard Darwin.listen(listenFd, 1) == 0 else {
+            reportError("listen() failed: \(errno)")
+            close(listenFd)
+            return nil
+        }
+        return listenFd
+    }
+
+    private func acceptConnection(listenFd: Int32) -> Int32? {
+        var clientAddr = sockaddr_in()
+        var clientAddrLen = socklen_t(MemoryLayout<sockaddr_in>.size)
+        let clientFd = withUnsafeMutablePointer(to: &clientAddr) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                accept(listenFd, $0, &clientAddrLen)
+            }
+        }
+        guard clientFd >= 0 else {
+            if errno == EBADF || errno == EINVAL { return nil }
+            reportError("accept() failed: \(errno)")
+            return nil
+        }
+        return clientFd
+    }
+
+    private func configureTimeout(sock: Int32) {
+        var timeout = timeval(tv_sec: 10, tv_usec: 0)
+        setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+        setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+    }
+
     // MARK: - VXCH framing
 
     private static let magic: [UInt8] = [0x56, 0x58, 0x43, 0x48] // "VXCH"
     private static let version: UInt8 = 1
-    private static let maxPayload: UInt32 = 65_536
+    private static let maxPayload: UInt32 = 65536
 
     private func sendVxch(sock: Int32, payload: [UInt8]) throws {
         guard !payload.isEmpty else { throw VxchError.emptyPayload }
