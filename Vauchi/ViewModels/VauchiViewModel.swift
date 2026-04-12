@@ -33,6 +33,7 @@ struct ContactInfo: Identifiable, Equatable {
     let verified: Bool
     let recoveryTrusted: Bool
     let isHidden: Bool
+    let isImported: Bool
     let fingerprint: String
     let card: CardInfo?
     let addedAt: Date?
@@ -46,6 +47,7 @@ struct ContactInfo: Identifiable, Equatable {
         verified: Bool,
         recoveryTrusted: Bool = false,
         isHidden: Bool = false,
+        isImported: Bool = false,
         fingerprint: String = "",
         card: CardInfo? = nil,
         addedAt: Date? = nil,
@@ -58,6 +60,7 @@ struct ContactInfo: Identifiable, Equatable {
         self.verified = verified
         self.recoveryTrusted = recoveryTrusted
         self.isHidden = isHidden
+        self.isImported = isImported
         self.fingerprint = fingerprint
         self.card = card
         self.addedAt = addedAt
@@ -179,6 +182,14 @@ class VauchiViewModel: ObservableObject {
         alertMessage = message
         showAlert = true
     }
+
+    // Toast state (for undo-able actions like archive/delete)
+    @Published var toastMessage: String?
+    @Published var toastUndoActionId: String?
+    private var toastUndoHandler: (() async throws -> Void)?
+
+    /// Archived contacts
+    @Published var archivedContacts: [ContactInfo] = []
 
     /// Aha moments (progressive onboarding)
     @Published var currentAhaMoment: MobileAhaMoment?
@@ -513,6 +524,7 @@ class VauchiViewModel: ObservableObject {
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     isHidden: contact.isHidden,
+                    isImported: contact.isImported,
                     fingerprint: contact.fingerprint,
                     card: CardInfo(
                         displayName: contact.card.displayName,
@@ -551,6 +563,7 @@ class VauchiViewModel: ObservableObject {
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     isHidden: contact.isHidden,
+                    isImported: contact.isImported,
                     fingerprint: contact.fingerprint,
                     card: CardInfo(
                         displayName: contact.card.displayName,
@@ -590,6 +603,7 @@ class VauchiViewModel: ObservableObject {
                 displayName: contact.displayName,
                 verified: contact.isVerified,
                 isHidden: contact.isHidden,
+                isImported: contact.isImported,
                 fingerprint: contact.fingerprint,
                 card: CardInfo(
                     displayName: contact.card.displayName,
@@ -623,6 +637,7 @@ class VauchiViewModel: ObservableObject {
                     displayName: contact.displayName,
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
+                    isImported: contact.isImported,
                     fingerprint: contact.fingerprint,
                     trustLevel: contact.trustLevel,
                     proposalTrusted: contact.proposalTrusted,
@@ -651,6 +666,7 @@ class VauchiViewModel: ObservableObject {
                     verified: contact.isVerified,
                     recoveryTrusted: contact.isRecoveryTrusted,
                     isHidden: contact.isHidden,
+                    isImported: contact.isImported,
                     fingerprint: contact.fingerprint,
                     card: CardInfo(
                         displayName: contact.card.displayName,
@@ -953,6 +969,114 @@ class VauchiViewModel: ObservableObject {
 
         _ = try repository.removeContact(id: id)
         contacts.removeAll { $0.id == id }
+    }
+
+    // MARK: - Contact Lifecycle (archive / soft-delete)
+
+    /// Soft-delete an imported contact (reversible via undo toast).
+    func softDeleteImportedContact(id: String) async throws {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.softDeleteImportedContact(id: id)
+        contacts.removeAll { $0.id == id }
+    }
+
+    /// Undo a soft-delete of an imported contact.
+    func undoDeleteImportedContact(id: String) async throws {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.undoDeleteImportedContact(id: id)
+        await loadContacts()
+    }
+
+    /// Archive a contact (exchanged contacts — reversible).
+    func archiveContact(id: String) async throws {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.archiveContact(id: id)
+        contacts.removeAll { $0.id == id }
+    }
+
+    /// Unarchive a contact back to the main list.
+    func unarchiveContact(id: String) async throws {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.unarchiveContact(id: id)
+        archivedContacts.removeAll { $0.id == id }
+    }
+
+    /// Load archived contacts.
+    func loadArchivedContacts() async {
+        guard let repository else { return }
+
+        do {
+            let archivedData = try repository.listArchivedContacts()
+            archivedContacts = archivedData.map { contact in
+                ContactInfo(
+                    id: contact.id,
+                    displayName: contact.displayName,
+                    verified: contact.isVerified,
+                    recoveryTrusted: contact.isRecoveryTrusted,
+                    isHidden: contact.isHidden,
+                    isImported: contact.isImported,
+                    fingerprint: contact.fingerprint,
+                    card: CardInfo(
+                        displayName: contact.card.displayName,
+                        fields: contact.card.fields.map { field in
+                            FieldInfo(
+                                id: field.id,
+                                fieldType: field.fieldType.rawValue,
+                                label: field.label,
+                                value: field.value
+                            )
+                        }
+                    ),
+                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
+                    trustLevel: contact.trustLevel,
+                    proposalTrusted: contact.proposalTrusted
+                )
+            }
+        } catch {
+            #if DEBUG
+                print("VauchiViewModel: loadArchivedContacts failed: \(error)")
+            #endif
+            archivedContacts = []
+        }
+    }
+
+    // MARK: - Toast
+
+    /// Show a toast message with an optional undo handler.
+    func showToast(_ message: String, undoHandler: (() async throws -> Void)? = nil) {
+        withAnimation {
+            toastMessage = message
+            toastUndoActionId = undoHandler != nil ? UUID().uuidString : nil
+            toastUndoHandler = undoHandler
+        }
+        let currentMessage = message
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) { [weak self] in
+            guard let self, toastMessage == currentMessage else { return }
+            dismissToast()
+        }
+    }
+
+    /// Handle undo action from toast.
+    func handleUndo() {
+        guard let handler = toastUndoHandler else { return }
+        let undoHandler = handler
+        dismissToast()
+        Task {
+            do {
+                try await undoHandler()
+            } catch {
+                showError("Undo Failed", message: error.localizedDescription)
+            }
+        }
+    }
+
+    /// Dismiss the current toast.
+    func dismissToast() {
+        withAnimation {
+            toastMessage = nil
+            toastUndoActionId = nil
+            toastUndoHandler = nil
+        }
     }
 
     func verifyContact(id: String) async throws {

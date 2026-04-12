@@ -230,6 +230,7 @@ struct VauchiContact: Identifiable {
     let isVerified: Bool
     let isRecoveryTrusted: Bool
     let isHidden: Bool
+    let isImported: Bool
     let card: VauchiContactCard
     let addedAt: UInt64
     let trustLevel: MobileContactTrustLevel
@@ -583,6 +584,7 @@ class VauchiRepository {
             isVerified: contact.isVerified,
             isRecoveryTrusted: contact.isRecoveryTrusted,
             isHidden: contact.isHidden,
+            isImported: contact.isImported,
             card: convertCard(contact.card),
             addedAt: contact.addedAt,
             trustLevel: contact.trustLevel,
@@ -777,9 +779,9 @@ class VauchiRepository {
     }
 
     /// List all archived contacts.
-    func listArchivedContacts() throws -> [MobileContact] {
+    func listArchivedContacts() throws -> [VauchiContact] {
         do {
-            return try vauchi.listArchivedContacts()
+            return try vauchi.listArchivedContacts().map(convertContact)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
