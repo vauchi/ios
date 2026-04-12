@@ -107,6 +107,20 @@ struct ContactsView: View {
                                         Spacer()
                                     }
                                 }
+
+                                // Archived contacts link
+                                if !showHiddenContacts {
+                                    Section {
+                                        NavigationLink(destination: ArchivedContactsView()) {
+                                            Label(
+                                                localizationService.t("contacts.archived_title"),
+                                                systemImage: "archivebox"
+                                            )
+                                            .foregroundColor(.secondary)
+                                        }
+                                        .accessibilityIdentifier("contacts.archivedLink")
+                                    }
+                                }
                             }
                             .listStyle(.plain)
                         }
@@ -157,7 +171,27 @@ struct ContactsView: View {
         for contact in contactsToDelete {
             Task {
                 do {
-                    try await viewModel.removeContact(id: contact.id)
+                    if contact.isImported {
+                        try await viewModel.softDeleteImportedContact(id: contact.id)
+                        let contactId = contact.id
+                        viewModel.showToast(
+                            localizationService.t("contacts.toast_deleted"),
+                            undoHandler: {
+                                try await viewModel.undoDeleteImportedContact(id: contactId)
+                            }
+                        )
+                    } else {
+                        try await viewModel.archiveContact(id: contact.id)
+                        await viewModel.loadContacts()
+                        let contactId = contact.id
+                        viewModel.showToast(
+                            localizationService.t("contacts.toast_archived"),
+                            undoHandler: {
+                                try await viewModel.unarchiveContact(id: contactId)
+                                await viewModel.loadContacts()
+                            }
+                        )
+                    }
                 } catch {
                     let title = localizationService.t("contacts.error_delete")
                     let msg = localizationService.t(
