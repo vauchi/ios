@@ -197,6 +197,25 @@ struct MainTabView: View {
             }
             .accentColor(.cyan)
 
+            // Offline banner
+            if !viewModel.isOnline {
+                HStack(spacing: 6) {
+                    Image(systemName: "wifi.slash")
+                        .font(.subheadline)
+                        .accessibilityHidden(true)
+                    Text(localizationService.t("sync.offline_banner"))
+                        .font(.subheadline.weight(.medium))
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(Color.orange)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .zIndex(99)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Offline")
+            }
+
             // Toast overlay for archive/delete undo
             if let message = viewModel.toastMessage {
                 HStack(spacing: 12) {
