@@ -21,6 +21,10 @@ final class ExchangeCommandHandler {
         return service
     }()
 
+    /// directSendService is instantiated on first DirectSend command.
+    /// Kept alive so that cancel() can interrupt a pending accept().
+    private var directSendService: DirectSendService?
+
     init(session: MobileExchangeSession) {
         self.session = session
     }
@@ -89,13 +93,34 @@ final class ExchangeCommandHandler {
         case .nfcDeactivate:
             break
 
+        // ── DirectSend (USB cable) ──────────────────────────────────
+        // BINDINGS_BUMP: uncomment when vauchi-platform-swift gains the
+        // .directSend(payload:isInitiator:) variant. Until then the command
+        // falls through to @unknown default.
+        //
+        // case let .directSend(payload, isInitiator):
+        //     startDirectSend(payload: Array(payload), isInitiator: isInitiator)
+
         // ── Tier 0 commands (active after bindings bump) ───────────
         // AccelerometerStart/Stop, RelayEscrowDeposit/Check/Retrieve,
-        // ShowShareSheet — handled via @unknown default until
+        // ShowShareSheet, DirectSend — handled via @unknown default until
         // vauchi-platform-swift is regenerated with new variants.
         @unknown default:
             break
         }
+    }
+
+    // MARK: - DirectSend
+
+    private func startDirectSend(payload: [UInt8], isInitiator: Bool) {
+        let service = DirectSendService()
+        directSendService = service
+        service.setEventCallback { [weak self] event in
+            guard let self, let session else { return }
+            try? session.applyHardwareEvent(event: event)
+            drainAndDispatch()
+        }
+        service.exchange(payload: payload, isInitiator: isInitiator)
     }
 
     // MARK: - Audio
