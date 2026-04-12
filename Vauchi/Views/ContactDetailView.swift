@@ -13,7 +13,6 @@ struct ContactDetailView: View {
     @Environment(\.dismiss) var dismiss
     let contact: ContactInfo
 
-    @State private var showRemoveAlert = false
     @State private var showVerifyAlert = false
     @State private var isVerifying = false
     @State private var isTogglingTrust = false
@@ -375,19 +374,65 @@ struct ContactDetailView: View {
 
                 Spacer(minLength: 40)
 
-                // Remove button
-                Button(role: .destructive) {
-                    showRemoveAlert = true
-                } label: {
-                    Label(localizationService.t("action.delete"), systemImage: "trash")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
+                // Archive / Delete button
+                if contact.isImported {
+                    Button(role: .destructive) {
+                        Task {
+                            do {
+                                try await viewModel.softDeleteImportedContact(id: contact.id)
+                                let contactId = contact.id
+                                viewModel.showToast(
+                                    localizationService.t("contacts.toast_deleted"),
+                                    undoHandler: {
+                                        try await viewModel.undoDeleteImportedContact(id: contactId)
+                                    }
+                                )
+                                dismiss()
+                            } catch {
+                                viewModel.showError("Delete Failed", message: error.localizedDescription)
+                            }
+                        }
+                    } label: {
+                        Label(localizationService.t("action.delete"), systemImage: "trash")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
+                    .accessibilityLabel("Delete contact")
+                    .accessibilityHint("Delete this imported contact with undo option")
+                } else {
+                    Button {
+                        Task {
+                            do {
+                                try await viewModel.archiveContact(id: contact.id)
+                                await viewModel.loadContacts()
+                                let contactId = contact.id
+                                viewModel.showToast(
+                                    localizationService.t("contacts.toast_archived"),
+                                    undoHandler: {
+                                        try await viewModel.unarchiveContact(id: contactId)
+                                        await viewModel.loadContacts()
+                                    }
+                                )
+                                dismiss()
+                            } catch {
+                                viewModel.showError("Archive Failed", message: error.localizedDescription)
+                            }
+                        }
+                    } label: {
+                        Label(localizationService.t("contacts.action_archive"), systemImage: "archivebox")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                    }
+                    .foregroundColor(.orange)
+                    .padding(.horizontal)
+                    .accessibilityLabel("Archive contact")
+                    .accessibilityHint("Move this contact to the archive with undo option")
                 }
-                .padding(.horizontal)
-                .accessibilityLabel("Remove contact")
-                .accessibilityHint("Permanently delete this contact from your list")
             }
             .padding(.vertical)
         }
@@ -405,21 +450,6 @@ struct ContactDetailView: View {
                 isPresented: $showManageGroupsSheet,
                 onUpdated: { loadContactGroups() }
             )
-        }
-        .alert("Remove Contact", isPresented: $showRemoveAlert) {
-            Button("Cancel", role: .cancel) {}
-            Button("Remove", role: .destructive) {
-                Task {
-                    do {
-                        try await viewModel.removeContact(id: contact.id)
-                        dismiss()
-                    } catch {
-                        viewModel.showError("Failed to Remove", message: error.localizedDescription)
-                    }
-                }
-            }
-        } message: {
-            Text("Are you sure you want to remove \(contact.displayName)?")
         }
         .alert("Verify Contact", isPresented: $showVerifyAlert) {
             Button("Cancel", role: .cancel) {}
