@@ -194,9 +194,6 @@ class VauchiViewModel: ObservableObject {
     @Published var toastUndoActionId: String?
     private var toastUndoHandler: (() async throws -> Void)?
 
-    /// Archived contacts
-    @Published var archivedContacts: [ContactInfo] = []
-
     /// Aha moments (progressive onboarding)
     @Published var currentAhaMoment: MobileAhaMoment?
 
@@ -1082,41 +1079,6 @@ class VauchiViewModel: ObservableObject {
             toastMessage = nil
             toastUndoActionId = nil
             toastUndoHandler = nil
-        }
-    }
-
-    func loadArchivedContacts() async {
-        guard let repository else { return }
-
-        do {
-            let archivedData = try repository.listArchivedContacts()
-            archivedContacts = archivedData.map { contact in
-                ContactInfo(
-                    id: contact.id,
-                    displayName: contact.displayName,
-                    verified: contact.isVerified,
-                    recoveryTrusted: contact.isRecoveryTrusted,
-                    isHidden: contact.isHidden,
-                    isImported: false, // archived contacts were always exchanged
-                    fingerprint: contact.fingerprint,
-                    card: CardInfo(
-                        displayName: contact.card.displayName,
-                        fields: contact.card.fields.map { field in
-                            FieldInfo(
-                                id: field.id,
-                                fieldType: field.fieldType.rawValue,
-                                label: field.label,
-                                value: field.value
-                            )
-                        }
-                    ),
-                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
-                    trustLevel: contact.trustLevel,
-                    proposalTrusted: contact.proposalTrusted
-                )
-            }
-        } catch {
-            archivedContacts = []
         }
     }
 
