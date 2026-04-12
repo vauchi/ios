@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import Foundation
+import Network
 import VauchiPlatform
 
 /// TCP server for USB cable exchange (ADR-031).
@@ -21,6 +22,7 @@ final class DirectSendService {
 
     private var eventCallback: EventCallback?
     private var listenerSocket: Int32 = -1
+    private var bonjourListener: NWListener?
 
     func setEventCallback(_ callback: @escaping EventCallback) {
         eventCallback = callback
@@ -47,6 +49,7 @@ final class DirectSendService {
             listenerSocket = -1
             close(fd)
         }
+        stopAdvertising()
     }
 
     // MARK: - Responder (TCP server)
@@ -56,6 +59,9 @@ final class DirectSendService {
             reportError("empty payload")
             return
         }
+
+        advertiseService()
+        defer { stopAdvertising() }
 
         guard let listenFd = createListenerSocket() else { return }
         defer {
@@ -135,6 +141,34 @@ final class DirectSendService {
         var timeout = timeval(tv_sec: 10, tv_usec: 0)
         setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+    }
+
+    // MARK: - Bonjour advertisement
+
+    private func advertiseService() {
+        do {
+            let listener = try NWListener(using: .tcp, on: NWEndpoint.Port(integerLiteral: Self.defaultPort))
+            listener.service = NWListener.Service(
+                name: "Vauchi Exchange",
+                type: "_vauchi-exchange._tcp."
+            )
+            listener.stateUpdateHandler = { _ in }
+            listener.newConnectionHandler = { connection in
+                // We don't use this listener for actual connections —
+                // our BSD socket server handles that. This is only for
+                // Bonjour advertisement.
+                connection.cancel()
+            }
+            listener.start(queue: .global(qos: .utility))
+            bonjourListener = listener
+        } catch {
+            // Non-fatal — exchange works without mDNS
+        }
+    }
+
+    private func stopAdvertising() {
+        bonjourListener?.cancel()
+        bonjourListener = nil
     }
 
     // MARK: - VXCH framing
