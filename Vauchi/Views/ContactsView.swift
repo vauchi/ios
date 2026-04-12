@@ -169,6 +169,9 @@ struct ContactsView: View {
     private func deleteContacts(at offsets: IndexSet) {
         let contactsToDelete = offsets.map { displayedContacts[$0] }
         for contact in contactsToDelete {
+            let contactId = contact.id
+            let contactName = contact.displayName
+            let isImported = contact.isImported
             Task {
                 do {
                     if contact.isImported {
@@ -196,7 +199,7 @@ struct ContactsView: View {
                     let title = localizationService.t("contacts.error_delete")
                     let msg = localizationService.t(
                         "contacts.error_delete_message",
-                        args: ["name": contact.displayName, "error": error.localizedDescription]
+                        args: ["name": contactName, "error": error.localizedDescription]
                     )
                     viewModel.showError(title, message: msg)
                 }

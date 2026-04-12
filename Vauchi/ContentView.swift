@@ -228,6 +228,7 @@ struct MainTabView: View {
                 .accessibilityLabel("Toast: \(message)")
             }
         }
+        .animation(.easeInOut(duration: 0.3), value: viewModel.toastMessage)
     }
 }
 
@@ -238,4 +239,5 @@ struct MainTabView: View {
 
 #Preview("With contacts") {
     MainTabView(hasContacts: true)
+        .environmentObject(VauchiViewModel())
 }

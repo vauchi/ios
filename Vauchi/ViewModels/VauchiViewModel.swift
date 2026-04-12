@@ -33,6 +33,9 @@ struct ContactInfo: Identifiable, Equatable {
     let verified: Bool
     let recoveryTrusted: Bool
     let isHidden: Bool
+    /// True for contacts imported via vCard (.vcf) — they were never exchanged
+    /// and support soft-delete (reversible). False for exchanged contacts, which
+    /// support archive instead.
     let isImported: Bool
     let fingerprint: String
     let card: CardInfo?
