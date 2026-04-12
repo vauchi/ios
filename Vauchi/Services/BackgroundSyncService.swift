@@ -40,8 +40,8 @@ final class BackgroundSyncService {
             forTaskWithIdentifier: Self.syncTaskIdentifier,
             using: nil
         ) { [weak self] task in
-            guard let processingTask = task as? BGProcessingTask else { return }
-            self?.handleSyncTask(processingTask)
+            guard let refreshTask = task as? BGAppRefreshTask else { return }
+            self?.handleSyncTask(refreshTask)
         }
     }
 
@@ -52,9 +52,7 @@ final class BackgroundSyncService {
 
     /// Schedule the next sync task
     func scheduleSyncTask() {
-        let request = BGProcessingTaskRequest(identifier: Self.syncTaskIdentifier)
-        request.requiresNetworkConnectivity = true
-        request.requiresExternalPower = false
+        let request = BGAppRefreshTaskRequest(identifier: Self.syncTaskIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: Self.syncInterval)
 
         do {
@@ -75,7 +73,7 @@ final class BackgroundSyncService {
 
     // MARK: - Private Methods
 
-    private func handleSyncTask(_ task: BGProcessingTask) {
+    private func handleSyncTask(_ task: BGAppRefreshTask) {
         // Schedule the next sync task before handling this one
         scheduleSyncTask()
 
