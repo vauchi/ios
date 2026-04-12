@@ -133,6 +133,7 @@ struct LoadingView: View {
 }
 
 struct MainTabView: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
     /// Dynamic default: tab 1 (Contacts) when user has contacts, tab 0 (My Card) otherwise
     @State private var selectedTab: Int
@@ -142,58 +143,91 @@ struct MainTabView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView()
-                .tabItem {
-                    Label(
-                        localizationService.t("nav.myCard"),
-                        systemImage: "person.crop.rectangle.fill"
-                    )
-                }
-                .tag(0)
-                .accessibilityIdentifier("tab.myCard")
+        ZStack(alignment: .top) {
+            TabView(selection: $selectedTab) {
+                HomeView()
+                    .tabItem {
+                        Label(
+                            localizationService.t("nav.myCard"),
+                            systemImage: "person.crop.rectangle.fill"
+                        )
+                    }
+                    .tag(0)
+                    .accessibilityIdentifier("tab.myCard")
 
-            ContactsView()
-                .tabItem {
-                    Label(
-                        localizationService.t("nav.contacts"),
-                        systemImage: "person.2.fill"
-                    )
-                }
-                .tag(1)
-                .accessibilityIdentifier("tab.contacts")
+                ContactsView()
+                    .tabItem {
+                        Label(
+                            localizationService.t("nav.contacts"),
+                            systemImage: "person.2.fill"
+                        )
+                    }
+                    .tag(1)
+                    .accessibilityIdentifier("tab.contacts")
 
-            ExchangeModePicker(switchToContacts: { selectedTab = 1 })
-                .tabItem {
-                    Label(
-                        localizationService.t("nav.exchange"),
-                        systemImage: "qrcode"
-                    )
-                }
-                .tag(2)
-                .accessibilityIdentifier("tab.exchange")
+                ExchangeModePicker(switchToContacts: { selectedTab = 1 })
+                    .tabItem {
+                        Label(
+                            localizationService.t("nav.exchange"),
+                            systemImage: "qrcode"
+                        )
+                    }
+                    .tag(2)
+                    .accessibilityIdentifier("tab.exchange")
 
-            CoreScreenView(screenName: "Groups")
-                .tabItem {
-                    Label(
-                        localizationService.t("nav.groups"),
-                        systemImage: "rectangle.3.group.fill"
-                    )
-                }
-                .tag(3)
-                .accessibilityIdentifier("tab.groups")
+                CoreScreenView(screenName: "Groups")
+                    .tabItem {
+                        Label(
+                            localizationService.t("nav.groups"),
+                            systemImage: "rectangle.3.group.fill"
+                        )
+                    }
+                    .tag(3)
+                    .accessibilityIdentifier("tab.groups")
 
-            MoreView()
-                .tabItem {
-                    Label(
-                        localizationService.t("nav.more"),
-                        systemImage: "ellipsis.circle.fill"
-                    )
+                MoreView()
+                    .tabItem {
+                        Label(
+                            localizationService.t("nav.more"),
+                            systemImage: "ellipsis.circle.fill"
+                        )
+                    }
+                    .tag(4)
+                    .accessibilityIdentifier("tab.more")
+            }
+            .accentColor(.cyan)
+
+            // Toast overlay for archive/delete undo
+            if let message = viewModel.toastMessage {
+                HStack(spacing: 12) {
+                    Text(message)
+                        .font(.subheadline)
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+
+                    if viewModel.toastUndoActionId != nil {
+                        Button("Undo") {
+                            viewModel.handleUndo()
+                        }
+                        .font(.subheadline.bold())
+                        .foregroundColor(.cyan)
+                        .buttonStyle(.plain)
+                    }
                 }
-                .tag(4)
-                .accessibilityIdentifier("tab.more")
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.black.opacity(0.85))
+                )
+                .padding(.top, 8)
+                .padding(.horizontal, 24)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .zIndex(100)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Toast: \(message)")
+            }
         }
-        .accentColor(.cyan)
     }
 }
 
