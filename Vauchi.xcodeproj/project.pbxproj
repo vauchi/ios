@@ -75,6 +75,7 @@
 		40CA0D251A7EE2861DB81ADE /* testCardPreviewGroupSelected.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 16817F15488300C5EAF304A8 /* testCardPreviewGroupSelected.1.png */; };
 		4235EDCB7DC3862C3F48F194 /* testInfoPanelWithIcon.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1A85B8272FE7B284D215644A /* testInfoPanelWithIcon.1.png */; };
 		424288A6F9E8D746208AF20B /* BleExchangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A790D4D87DA66E3C3C93253D /* BleExchangeView.swift */; };
+		430E1B6EF06E6E8E0FB149DD /* ArchivedContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0960DACC4E92268E1A00F28E /* ArchivedContactsView.swift */; };
 		431503ADA7BCDB0CA94FBDEE /* testWelcomeScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 962C13D56F463655E00BA233 /* testWelcomeScreen.1.png */; };
 		4322A5CEDF0F187C9BB72186 /* DropdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A73A60BF23E98F506D8E5A8D /* DropdownView.swift */; };
 		4342D012B76952454E5D89B9 /* SocialGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4A1EE447C60A79208FE622 /* SocialGraphView.swift */; };
@@ -298,6 +299,7 @@
 		075A43D13266E824544C1089 /* ready.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ready.json; sourceTree = "<group>"; };
 		07F69D47DBE79635FE185938 /* contact_edit_fields.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contact_edit_fields.json; sourceTree = "<group>"; };
 		08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitingForUnlockView.swift; sourceTree = "<group>"; };
+		0960DACC4E92268E1A00F28E /* ArchivedContactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchivedContactsView.swift; sourceTree = "<group>"; };
 		09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRScanner.swift; sourceTree = "<group>"; };
 		09D79E0645FD89F4223BD160 /* testEditableTextDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testEditableTextDark.1.png; sourceTree = "<group>"; };
 		0B50587B7EC6319B106FB462 /* testToggleListSingleItem.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testToggleListSingleItem.1.png; sourceTree = "<group>"; };
@@ -855,6 +857,7 @@
 				DB5E7CFFD83945D91D395072 /* AccountDeletionView.swift */,
 				4A63B916A948A0A03F3F45B6 /* AhaMomentView.swift */,
 				6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */,
+				0960DACC4E92268E1A00F28E /* ArchivedContactsView.swift */,
 				A790D4D87DA66E3C3C93253D /* BleExchangeView.swift */,
 				E454B8F698D68725F434338E /* ConsentSettingsView.swift */,
 				3EEBDEA9304696A8DAE86642 /* ContactDetailComponents.swift */,
@@ -1337,6 +1340,7 @@
 				80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */,
 				76CE62B95DC53A13516F7D80 /* AppPasswordView.swift in Sources */,
 				0FC8C1248458C98DAE402799 /* AppViewModel.swift in Sources */,
+				430E1B6EF06E6E8E0FB149DD /* ArchivedContactsView.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
 				04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */,
 				6A3C10861679B93C3B320E98 /* BannerView.swift in Sources */,
