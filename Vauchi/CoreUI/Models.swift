@@ -210,7 +210,7 @@ struct TextInputComponent: Decodable {
     let maxLength: Int?
     let validationError: String?
     let inputType: InputType
-    let a11y: A11y?
+    let a11y: A11y? = nil
 }
 
 enum InputType: String, Decodable {
@@ -335,7 +335,7 @@ struct ContactItem: Decodable, Identifiable {
     let subtitle: String?
     let avatarInitials: String
     let status: String?
-    let a11y: A11y?
+    let a11y: A11y? = nil
 }
 
 // MARK: - SettingsGroup Component
@@ -350,7 +350,7 @@ struct SettingsItem: Decodable, Identifiable {
     let id: String
     let label: String
     let kind: SettingsItemKind
-    let a11y: A11y?
+    let a11y: A11y? = nil
 }
 
 enum SettingsItemKind: Decodable {
@@ -406,7 +406,7 @@ struct ActionListItem: Decodable, Identifiable {
     let label: String
     let icon: String?
     let detail: String?
-    let a11y: A11y?
+    let a11y: A11y? = nil
 }
 
 // MARK: - StatusIndicator Component
@@ -417,7 +417,7 @@ struct StatusIndicatorComponent: Decodable {
     let title: String
     let detail: String?
     let status: Status
-    let a11y: A11y?
+    let a11y: A11y? = nil
 }
 
 enum Status: String, Decodable {
@@ -436,7 +436,7 @@ struct PinInputComponent: Decodable {
     let length: Int
     let masked: Bool
     let validationError: String?
-    let a11y: A11y?
+    let a11y: A11y? = nil
 }
 
 // MARK: - QrCode Component
@@ -446,7 +446,7 @@ struct QrCodeComponent: Decodable {
     let data: String
     let mode: QrMode
     let label: String?
-    let a11y: A11y?
+    let a11y: A11y? = nil
 }
 
 enum QrMode: String, Decodable {
@@ -481,7 +481,7 @@ struct InlineConfirmComponent: Decodable {
     let confirmText: String
     let cancelText: String
     let destructive: Bool
-    let a11y: A11y?
+    let a11y: A11y? = nil
 }
 
 // MARK: - EditableText Component
@@ -492,7 +492,7 @@ struct EditableTextComponent: Decodable {
     let value: String
     let editing: Bool
     let validationError: String?
-    let a11y: A11y?
+    let a11y: A11y? = nil
 }
 
 // MARK: - Banner Component
@@ -510,7 +510,7 @@ struct DropdownComponent: Decodable {
     let label: String
     let selected: String?
     let options: [DropdownOption]
-    let a11y: A11y?
+    let a11y: A11y? = nil
 }
 
 struct DropdownOption: Decodable, Identifiable {
