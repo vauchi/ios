@@ -196,6 +196,10 @@ class AppViewModel: ObservableObject {
         case let .openEntryDetail(fieldId):
             navigateToScreen(["EntryDetail": ["field_id": fieldId]])
         case let .showToast(message, undoActionId):
+            // Reload screen — core may have navigated internally
+            // (e.g. archive_contact intercept calls navigate_back()
+            // before returning ShowToast).
+            loadScreen()
             showToast(message, undoActionId: undoActionId)
         case .requestCamera:
             loadScreen()
