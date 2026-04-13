@@ -28,7 +28,7 @@ struct ContactMergeView: View {
                 .accessibilityIdentifier("contact_merge.empty")
             } else {
                 List {
-                    ForEach(Array(viewModel.duplicatePairs.enumerated()), id: \.offset) { _, entry in
+                    ForEach(viewModel.duplicatePairs, id: \.pair.id1) { entry in
                         DuplicatePairRow(
                             pair: entry.pair,
                             contact1: entry.contact1,
@@ -61,68 +61,122 @@ private struct DuplicatePairRow: View {
 
     @State private var swapped = false
 
-    private var exchangedLocked: Bool {
-        (!contact1.isImported && contact2.isImported) || (contact1.isImported && !contact2.isImported)
+    private var crossKind: Bool {
+        contact1.isImported != contact2.isImported
+    }
+
+    private var importedContact: ContactInfo {
+        contact1.isImported ? contact1 : contact2
+    }
+
+    private var exchangedContact: ContactInfo {
+        !contact1.isImported ? contact1 : contact2
     }
 
     private var primary: ContactInfo {
-        if exchangedLocked {
-            return !contact1.isImported ? contact1 : contact2
-        }
-        return swapped ? contact2 : contact1
+        swapped ? contact2 : contact1
     }
 
     private var secondary: ContactInfo {
-        if exchangedLocked {
-            return !contact1.isImported ? contact2 : contact1
-        }
-        return swapped ? contact1 : contact2
+        swapped ? contact1 : contact2
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                Text(localizationService.t("contacts.merge_similarity")
-                    .replacingOccurrences(of: "{percent}", with: "\(Int(pair.similarity * 100))"))
-                    .font(.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(Color.orange.opacity(0.2))
-                    .cornerRadius(8)
-                    .accessibilityIdentifier("contact_merge.similarity_badge")
-            }
+            Text(localizationService.t("contacts.merge_similarity")
+                .replacingOccurrences(of: "{percent}", with: "\(Int(pair.similarity * 100))"))
+                .font(.caption)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .background(Color.orange.opacity(0.2))
+                .cornerRadius(8)
+                .accessibilityIdentifier("contact_merge.similarity_badge")
 
+            if crossKind {
+                crossKindSection
+            } else {
+                sameKindSection
+            }
+        }
+        .padding(.vertical, 6)
+        .accessibilityElement(children: .contain)
+    }
+
+    // MARK: - Cross-kind (exchanged + imported)
+
+    private var crossKindSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            contactRow(contact: exchangedContact, isPrimary: false)
+            contactRow(contact: importedContact, isPrimary: false)
+
+            Text(localizationService.t("contacts.merge_cross_kind_hint"))
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .accessibilityIdentifier("contact_merge.cross_kind_hint")
+
+            HStack(spacing: 12) {
+                Button {
+                    Task {
+                        do {
+                            try await viewModel.softDeleteImportedContact(id: importedContact.id)
+                            viewModel.showToast(localizationService.t("contacts.toast_deleted"))
+                            await viewModel.loadDuplicates()
+                        } catch {
+                            viewModel.showError(
+                                localizationService.t("contacts.merge_error"),
+                                message: error.localizedDescription
+                            )
+                        }
+                    }
+                } label: {
+                    Label(localizationService.t("contacts.merge_delete_imported"),
+                          systemImage: "trash")
+                        .font(.subheadline)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .accessibilityIdentifier("contact_merge.delete_imported_button")
+
+                Button {
+                    Task {
+                        do {
+                            try await viewModel.dismissDuplicate(id1: pair.id1, id2: pair.id2)
+                            await viewModel.loadDuplicates()
+                        } catch {
+                            viewModel.showError(
+                                localizationService.t("contacts.merge_error"),
+                                message: error.localizedDescription
+                            )
+                        }
+                    }
+                } label: {
+                    Text(localizationService.t("contacts.merge_dismiss"))
+                        .font(.subheadline)
+                }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("contact_merge.dismiss_button")
+            }
+        }
+    }
+
+    // MARK: - Same-kind (both imported)
+
+    private var sameKindSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
             contactRow(contact: primary, isPrimary: true)
             contactRow(contact: secondary, isPrimary: false)
 
-            if exchangedLocked {
-                Text(localizationService.t("contacts.merge_exchanged_primary"))
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .accessibilityIdentifier("contact_merge.exchanged_hint")
-            } else if !swapped {
-                Button {
-                    swapped.toggle()
-                } label: {
-                    Label("Swap", systemImage: "arrow.up.arrow.down")
-                        .font(.caption)
-                }
-                .buttonStyle(.plain)
-                .foregroundColor(.cyan)
-                .accessibilityLabel("Swap primary and secondary contact")
-                .accessibilityIdentifier("contact_merge.swap_button")
-            } else {
-                Button {
-                    swapped.toggle()
-                } label: {
-                    Label("Swap back", systemImage: "arrow.up.arrow.down")
-                        .font(.caption)
-                }
-                .buttonStyle(.plain)
-                .foregroundColor(.cyan)
-                .accessibilityLabel("Swap primary and secondary contact back")
-                .accessibilityIdentifier("contact_merge.swap_button")
+            Button {
+                swapped.toggle()
+            } label: {
+                Label(localizationService.t("contacts.merge_swap"),
+                      systemImage: "arrow.up.arrow.down")
+                    .font(.caption)
             }
+            .buttonStyle(.plain)
+            .foregroundColor(.cyan)
+            .accessibilityLabel(localizationService.t("contacts.merge_swap"))
+            .accessibilityIdentifier("contact_merge.swap_button")
 
             HStack(spacing: 12) {
                 Button {
@@ -134,11 +188,15 @@ private struct DuplicatePairRow: View {
                             viewModel.showToast(localizationService.t("contacts.toast_merged"))
                             await viewModel.loadDuplicates()
                         } catch {
-                            viewModel.showError("Merge Failed", message: error.localizedDescription)
+                            viewModel.showError(
+                                localizationService.t("contacts.merge_error"),
+                                message: error.localizedDescription
+                            )
                         }
                     }
                 } label: {
-                    Label(localizationService.t("contacts.merge_confirm"), systemImage: "arrow.triangle.merge")
+                    Label(localizationService.t("contacts.merge_confirm"),
+                          systemImage: "arrow.triangle.merge")
                         .font(.subheadline)
                         .fontWeight(.medium)
                 }
@@ -151,7 +209,10 @@ private struct DuplicatePairRow: View {
                             try await viewModel.dismissDuplicate(id1: pair.id1, id2: pair.id2)
                             await viewModel.loadDuplicates()
                         } catch {
-                            viewModel.showError("Dismiss Failed", message: error.localizedDescription)
+                            viewModel.showError(
+                                localizationService.t("contacts.merge_error"),
+                                message: error.localizedDescription
+                            )
                         }
                     }
                 } label: {
@@ -162,8 +223,6 @@ private struct DuplicatePairRow: View {
                 .accessibilityIdentifier("contact_merge.dismiss_button")
             }
         }
-        .padding(.vertical, 6)
-        .accessibilityElement(children: .contain)
     }
 
     private func contactRow(contact: ContactInfo, isPrimary: Bool) -> some View {
