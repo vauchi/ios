@@ -6,6 +6,7 @@
 // Duplicate contact detection and merge UI.
 
 import SwiftUI
+import VauchiPlatform
 
 struct ContactMergeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
