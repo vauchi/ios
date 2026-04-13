@@ -165,6 +165,9 @@ class VauchiViewModel: ObservableObject {
     /// Archived contacts
     @Published var archivedContacts: [ContactInfo] = []
 
+    /// Duplicate contact pairs with resolved contact info
+    @Published var duplicatePairs: [(pair: MobileDuplicatePair, contact1: ContactInfo, contact2: ContactInfo)] = []
+
     // Visibility labels (for organizing contacts)
     // Based on: features/visibility_labels.feature
     @Published var visibilityLabels: [VauchiVisibilityLabel] = []
@@ -1041,6 +1044,51 @@ class VauchiViewModel: ObservableObject {
             #endif
             archivedContacts = []
         }
+    }
+
+    // MARK: - Duplicate Detection
+
+    /// Load duplicate contact pairs with display info.
+    func loadDuplicates() async {
+        guard let repository else { return }
+
+        do {
+            let pairs = try repository.findDuplicates()
+            var resolved: [(pair: MobileDuplicatePair, contact1: ContactInfo, contact2: ContactInfo)] = []
+            for pair in pairs {
+                guard let c1 = try repository.getContact(id: pair.id1),
+                      let c2 = try repository.getContact(id: pair.id2) else { continue }
+                let info1 = ContactInfo(
+                    id: c1.id, displayName: c1.displayName,
+                    verified: c1.isVerified, isImported: c1.isImported,
+                    addedAt: Date(timeIntervalSince1970: TimeInterval(c1.addedAt))
+                )
+                let info2 = ContactInfo(
+                    id: c2.id, displayName: c2.displayName,
+                    verified: c2.isVerified, isImported: c2.isImported,
+                    addedAt: Date(timeIntervalSince1970: TimeInterval(c2.addedAt))
+                )
+                resolved.append((pair: pair, contact1: info1, contact2: info2))
+            }
+            duplicatePairs = resolved
+        } catch {
+            #if DEBUG
+                print("VauchiViewModel: loadDuplicates failed: \(error)")
+            #endif
+            duplicatePairs = []
+        }
+    }
+
+    /// Merge two contacts, keeping the primary.
+    func mergeContacts(primaryId: String, secondaryId: String) async throws {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        _ = try repository.mergeContacts(primaryId: primaryId, secondaryId: secondaryId)
+    }
+
+    /// Dismiss a duplicate pair.
+    func dismissDuplicate(id1: String, id2: String) async throws {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        try repository.dismissDuplicate(id1: id1, id2: id2)
     }
 
     // MARK: - Toast

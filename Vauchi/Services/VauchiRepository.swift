@@ -787,6 +787,35 @@ class VauchiRepository {
         }
     }
 
+    // MARK: - Duplicate Detection
+
+    /// Find duplicate contact pairs.
+    func findDuplicates() throws -> [MobileDuplicatePair] {
+        do {
+            return try vauchi.findDuplicates()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Merge two contacts, keeping the primary.
+    func mergeContacts(primaryId: String, secondaryId: String) throws -> MobileContact {
+        do {
+            return try vauchi.mergeContacts(primaryId: primaryId, secondaryId: secondaryId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Dismiss a duplicate pair so it won't be suggested again.
+    func dismissDuplicate(id1: String, id2: String) throws {
+        do {
+            try vauchi.dismissDuplicate(id1: id1, id2: id2)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     // MARK: - Hidden Contacts Operations
 
     // Based on: features/resistance.feature - R3 Hidden Contact UI
