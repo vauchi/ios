@@ -66,6 +66,13 @@ struct MoreView: View {
             .accessibilityIdentifier("more.linkedDevices")
 
             NavigationLink {
+                CoreScreenView(screenName: "DeviceReplacement")
+            } label: {
+                Label("Replace Device", systemImage: "iphone.and.arrow.forward")
+            }
+            .accessibilityIdentifier("more.deviceReplacement")
+
+            NavigationLink {
                 BackupRecoveryPlaceholderView()
             } label: {
                 Label("Backup & Recovery", systemImage: "externaldrive.badge.shield")

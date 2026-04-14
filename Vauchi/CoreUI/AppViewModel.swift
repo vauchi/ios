@@ -150,6 +150,7 @@ class AppViewModel: ObservableObject {
         ("exchange", "Exchange"),
         ("groups", "Groups"),
         ("group_detail", "Groups"),
+        ("device_replacement", "More"),
         ("more", "More"),
     ]
 
