@@ -243,7 +243,7 @@ class AppViewModel: ObservableObject {
 
     /// Send selected image bytes back to core as an ImageReceived hardware event.
     func sendImageReceived(data: [UInt8]) {
-        sendHardwareEvent(.imageReceived(data: data))
+        sendHardwareEvent(.imageReceived(data: Data(data)))
     }
 
     /// Notify core that the user cancelled image picking.
