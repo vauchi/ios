@@ -64,20 +64,7 @@ struct CardPreviewView: View {
         VStack(spacing: 0) {
             // Card header
             VStack(spacing: 8) {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [.cyan, .blue],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 80, height: 80)
-                    .overlay(
-                        Text(currentDisplayName.prefix(1).uppercased())
-                            .font(.system(size: 36, weight: .bold))
-                            .foregroundColor(.white)
-                    )
+                avatarCircle
                     .accessibilityHidden(true)
 
                 Text(currentDisplayName)
@@ -109,6 +96,33 @@ struct CardPreviewView: View {
         .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
         .accessibilityLabel(component.a11y?.label ?? "Card preview: \(component.name)")
         .accessibilityHint(component.a11y?.hint ?? "")
+    }
+
+    @ViewBuilder
+    private var avatarCircle: some View {
+        if let avatarData = component.avatarData,
+           let uiImage = UIImage(data: Data(avatarData)) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 80, height: 80)
+                .clipShape(Circle())
+        } else {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [.cyan, .blue],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 80, height: 80)
+                .overlay(
+                    Text(currentDisplayName.prefix(1).uppercased())
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(.white)
+                )
+        }
     }
 
     private var currentDisplayName: String {
