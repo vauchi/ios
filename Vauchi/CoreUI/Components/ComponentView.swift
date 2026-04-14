@@ -74,6 +74,12 @@ struct ComponentView: View {
         case let .dropdown(dropdownComponent):
             DropdownView(component: dropdownComponent, onAction: onAction)
 
+        case let .avatarPreview(avatarComponent):
+            AvatarPreviewView(component: avatarComponent, onAction: onAction)
+
+        case let .slider(sliderComponent):
+            SliderComponentView(component: sliderComponent, onAction: onAction)
+
         case .divider:
             DividerView()
 
