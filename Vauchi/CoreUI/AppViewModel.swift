@@ -7,6 +7,7 @@
 // Ported from macOS — same pattern, iOS-specific adaptations.
 
 import Foundation
+import PhotosUI
 import SwiftUI
 import UIKit
 import VauchiPlatform
@@ -20,6 +21,8 @@ class AppViewModel: ObservableObject {
     @Published var toastUndoActionId: String?
     @Published var availableScreens: [String] = []
     @Published var selectedScreen: String?
+    @Published var showImagePicker = false
+    @Published var showCameraPicker = false
 
     let appEngine: PlatformAppEngine
 
@@ -206,9 +209,8 @@ class AppViewModel: ObservableObject {
         case .startDeviceLink, .startBackupImport:
             // Handled by native iOS flows
             break
-        case .exchangeCommands:
-            // ADR-031: hardware exchange commands handled by exchange session
-            break
+        case let .exchangeCommands(commands):
+            handleExchangeCommands(commands)
         case .showFormDialog:
             // Dialog presentation handled by NavigateTo — no separate action needed
             break
@@ -217,6 +219,51 @@ class AppViewModel: ObservableObject {
             break
         case .unknown:
             break
+        }
+    }
+
+    // MARK: - Exchange Command Handling
+
+    private func handleExchangeCommands(_ commands: [ExchangeCommandDTO]) {
+        for command in commands {
+            switch command {
+            case .imagePickFromLibrary:
+                showImagePicker = true
+            case .imageCaptureFromCamera:
+                showCameraPicker = true
+            case .imagePickFromFile:
+                // iOS uses photo library instead of file picker for images
+                sendImagePickCancelled()
+            default:
+                // Other exchange commands handled by ExchangeCommandHandler
+                break
+            }
+        }
+    }
+
+    /// Send selected image bytes back to core as an ImageReceived hardware event.
+    func sendImageReceived(data: [UInt8]) {
+        let payload: [String: Any] = ["ImageReceived": ["data": data]]
+        sendHardwareEventJson(payload)
+    }
+
+    /// Notify core that the user cancelled image picking.
+    func sendImagePickCancelled() {
+        sendHardwareEventJson("ImagePickCancelled")
+    }
+
+    private func sendHardwareEventJson(_ event: Any) {
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: event)
+            guard let eventJson = String(data: jsonData, encoding: .utf8) else { return }
+            let resultJson = try appEngine.handleHardwareEventJson(eventJson: eventJson)
+            guard let resultData = resultJson.data(using: .utf8) else { return }
+            let result = try coreJSONDecoder.decode(ActionResult.self, from: resultData)
+            applyResult(result)
+        } catch {
+            #if DEBUG
+                print("AppViewModel: failed to send hardware event: \(error)")
+            #endif
         }
     }
 }

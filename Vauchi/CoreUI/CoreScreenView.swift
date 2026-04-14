@@ -5,6 +5,7 @@
 // CoreScreenView.swift
 // Generic wrapper that renders any core-driven screen via PlatformAppEngine.
 
+import PhotosUI
 import SwiftUI
 import VauchiPlatform
 
@@ -48,6 +49,20 @@ struct CoreScreenView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
+        .sheet(isPresented: imagePickerBinding) {
+            ImagePickerSheet { imageData in
+                viewModel.coreViewModel?.sendImageReceived(data: imageData)
+            } onCancel: {
+                viewModel.coreViewModel?.sendImagePickCancelled()
+            }
+        }
+        .sheet(isPresented: cameraPickerBinding) {
+            CameraPickerSheet { imageData in
+                viewModel.coreViewModel?.sendImageReceived(data: imageData)
+            } onCancel: {
+                viewModel.coreViewModel?.sendImagePickCancelled()
+            }
+        }
     }
 
     private func navigateIfNeeded(to screen: String) {
@@ -61,5 +76,122 @@ struct CoreScreenView: View {
             get: { viewModel.coreViewModel?.alertMessage },
             set: { viewModel.coreViewModel?.alertMessage = $0 }
         )
+    }
+
+    private var imagePickerBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.coreViewModel?.showImagePicker ?? false },
+            set: { viewModel.coreViewModel?.showImagePicker = $0 }
+        )
+    }
+
+    private var cameraPickerBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.coreViewModel?.showCameraPicker ?? false },
+            set: { viewModel.coreViewModel?.showCameraPicker = $0 }
+        )
+    }
+}
+
+// MARK: - Image Picker (PHPicker)
+
+/// Wraps PHPickerViewController to select an image from the photo library.
+struct ImagePickerSheet: UIViewControllerRepresentable {
+    let onImageSelected: ([UInt8]) -> Void
+    let onCancel: () -> Void
+
+    func makeUIViewController(context: Context) -> PHPickerViewController {
+        var config = PHPickerConfiguration()
+        config.selectionLimit = 1
+        config.filter = .images
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_: PHPickerViewController, context _: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onImageSelected: onImageSelected, onCancel: onCancel)
+    }
+
+    class Coordinator: NSObject, PHPickerViewControllerDelegate {
+        let onImageSelected: ([UInt8]) -> Void
+        let onCancel: () -> Void
+
+        init(onImageSelected: @escaping ([UInt8]) -> Void, onCancel: @escaping () -> Void) {
+            self.onImageSelected = onImageSelected
+            self.onCancel = onCancel
+        }
+
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            picker.dismiss(animated: true)
+
+            guard let provider = results.first?.itemProvider,
+                  provider.canLoadObject(ofClass: UIImage.self) else {
+                onCancel()
+                return
+            }
+
+            provider.loadObject(ofClass: UIImage.self) { [weak self] object, _ in
+                guard let image = object as? UIImage,
+                      let data = image.jpegData(compressionQuality: 0.9) else {
+                    DispatchQueue.main.async { self?.onCancel() }
+                    return
+                }
+                let bytes = [UInt8] (data)
+                DispatchQueue.main.async { self?.onImageSelected(bytes) }
+            }
+        }
+    }
+}
+
+// MARK: - Camera Picker
+
+/// Wraps UIImagePickerController with camera source for capturing a photo.
+struct CameraPickerSheet: UIViewControllerRepresentable {
+    let onImageSelected: ([UInt8]) -> Void
+    let onCancel: () -> Void
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_: UIImagePickerController, context _: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onImageSelected: onImageSelected, onCancel: onCancel)
+    }
+
+    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let onImageSelected: ([UInt8]) -> Void
+        let onCancel: () -> Void
+
+        init(onImageSelected: @escaping ([UInt8]) -> Void, onCancel: @escaping () -> Void) {
+            self.onImageSelected = onImageSelected
+            self.onCancel = onCancel
+        }
+
+        func imagePickerController(
+            _ picker: UIImagePickerController,
+            didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
+        ) {
+            picker.dismiss(animated: true)
+            guard let image = info[.originalImage] as? UIImage,
+                  let data = image.jpegData(compressionQuality: 0.9) else {
+                onCancel()
+                return
+            }
+            let bytes = [UInt8](data)
+            onImageSelected(bytes)
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            picker.dismiss(animated: true)
+            onCancel()
+        }
     }
 }
