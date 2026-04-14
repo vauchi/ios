@@ -139,7 +139,7 @@ struct ImagePickerSheet: UIViewControllerRepresentable {
                     DispatchQueue.main.async { self?.onCancel() }
                     return
                 }
-                let bytes = [UInt8] (data)
+                let bytes = Array(data)
                 DispatchQueue.main.async { self?.onImageSelected(bytes) }
             }
         }

@@ -96,6 +96,7 @@ enum Component: Decodable {
     /// version doesn't know about. See: design-as-code-plan Phase 2b.
     case unknown
 
+    // swiftlint:disable:next cyclomatic_complexity
     init(from decoder: Decoder) throws {
         // Try unit variant first ("Divider" or any unknown string)
         if let container = try? decoder.singleValueContainer(),
