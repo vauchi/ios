@@ -234,6 +234,7 @@ final class CoreUIComponentTests: XCTestCase {
     func testCardPreviewMinimal() {
         let component = CardPreviewComponent(
             name: "Alice",
+            avatarData: nil,
             fields: [],
             groupViews: [],
             selectedGroup: nil
@@ -245,6 +246,7 @@ final class CoreUIComponentTests: XCTestCase {
     func testCardPreviewWithFields() {
         let component = CardPreviewComponent(
             name: "Alice",
+            avatarData: nil,
             fields: [
                 FieldDisplay(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", visibility: .shown),
                 FieldDisplay(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .shown),
@@ -259,6 +261,7 @@ final class CoreUIComponentTests: XCTestCase {
     func testCardPreviewWithGroups() {
         let component = CardPreviewComponent(
             name: "Alice",
+            avatarData: nil,
             fields: [
                 FieldDisplay(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", visibility: .groups(["Family", "Friends"])),
                 FieldDisplay(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .groups(["Family"])),
@@ -289,6 +292,7 @@ final class CoreUIComponentTests: XCTestCase {
     func testCardPreviewGroupSelected() {
         let component = CardPreviewComponent(
             name: "Alice",
+            avatarData: nil,
             fields: [
                 FieldDisplay(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", visibility: .groups(["Friends"])),
             ],
@@ -310,6 +314,7 @@ final class CoreUIComponentTests: XCTestCase {
     func testCardPreviewNoVisibleFields() {
         let component = CardPreviewComponent(
             name: "Alice",
+            avatarData: nil,
             fields: [
                 FieldDisplay(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", visibility: .hidden),
             ],
@@ -511,6 +516,7 @@ final class CoreUIComponentTests: XCTestCase {
     func testCardPreviewDark() {
         let component = CardPreviewComponent(
             name: "Alice",
+            avatarData: nil,
             fields: [
                 FieldDisplay(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", visibility: .shown),
                 FieldDisplay(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .shown),
