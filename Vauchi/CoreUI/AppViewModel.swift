@@ -243,23 +243,21 @@ class AppViewModel: ObservableObject {
 
     /// Send selected image bytes back to core as an ImageReceived hardware event.
     func sendImageReceived(data: [UInt8]) {
-        let payload: [String: Any] = ["ImageReceived": ["data": data]]
-        sendHardwareEventJson(payload)
+        sendHardwareEvent(.imageReceived(data: data))
     }
 
     /// Notify core that the user cancelled image picking.
     func sendImagePickCancelled() {
-        sendHardwareEventJson("ImagePickCancelled")
+        sendHardwareEvent(.imagePickCancelled)
     }
 
-    private func sendHardwareEventJson(_ event: Any) {
+    private func sendHardwareEvent(_ event: MobileExchangeHardwareEvent) {
         do {
-            let jsonData = try JSONSerialization.data(withJSONObject: event)
-            guard let eventJson = String(data: jsonData, encoding: .utf8) else { return }
-            let resultJson = try appEngine.handleHardwareEventJson(eventJson: eventJson)
-            guard let resultData = resultJson.data(using: .utf8) else { return }
-            let result = try coreJSONDecoder.decode(ActionResult.self, from: resultData)
-            applyResult(result)
+            if let resultJson = try appEngine.handleHardwareEvent(event: event) {
+                guard let resultData = resultJson.data(using: .utf8) else { return }
+                let result = try coreJSONDecoder.decode(ActionResult.self, from: resultData)
+                applyResult(result)
+            }
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to send hardware event: \(error)")
