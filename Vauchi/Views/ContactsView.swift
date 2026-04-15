@@ -337,6 +337,7 @@ struct ContactRow: View {
 
 struct EmptyContactsView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
@@ -370,7 +371,7 @@ struct EmptyContactsView: View {
                     .padding()
                     .background(Color.cyan)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             }
             .accessibilityLabel("Start Exchange")
             .accessibilityHint("Opens the QR code exchange screen to add your first contact")
@@ -385,6 +386,7 @@ struct EmptyContactsView: View {
 
 struct DemoContactCard: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @ObservedObject private var localizationService = LocalizationService.shared
     let demo: VauchiDemoContact
 
@@ -414,7 +416,7 @@ struct DemoContactCard: View {
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(Color.purple)
-                            .cornerRadius(4)
+                            .cornerRadius(CGFloat(tokens.borderRadius.sm))
                     }
 
                     Text(demo.tipCategory)
@@ -451,7 +453,7 @@ struct DemoContactCard: View {
             }
             .padding()
             .background(Color(.systemGray6))
-            .cornerRadius(8)
+            .cornerRadius(CGFloat(tokens.borderRadius.md))
 
             // Info text
             HStack {
@@ -468,7 +470,7 @@ struct DemoContactCard: View {
         }
         .padding()
         .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
         .accessibilityIdentifier("contacts.demo")
     }

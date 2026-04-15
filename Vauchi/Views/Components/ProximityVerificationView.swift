@@ -51,6 +51,7 @@ enum ProximityVerificationResult {
 /// if ultrasonic is unsupported or fails. Used by both device linking and contact exchange flows.
 struct ProximityVerificationView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
 
     /// The proximity challenge bytes to verify.
     let challenge: Data
@@ -201,7 +202,7 @@ struct ProximityVerificationView: View {
                             .padding()
                             .background(Color.cyan)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     }
                 )
                 .accessibilityLabel("Confirm nearby")
@@ -229,7 +230,7 @@ struct ProximityVerificationView: View {
                             .padding()
                             .background(Color.cyan)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     }
                 )
                 .accessibilityLabel("Retry verification")
@@ -253,7 +254,7 @@ struct ProximityVerificationView: View {
                     .padding()
                     .background(Color(.systemGray5))
                     .foregroundColor(.primary)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             }
         )
         .accessibilityLabel("Cancel verification")

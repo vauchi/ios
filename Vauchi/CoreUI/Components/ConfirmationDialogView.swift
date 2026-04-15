@@ -11,6 +11,7 @@ import SwiftUI
 struct ConfirmationDialogView: View {
     let component: ConfirmationDialogComponent
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
         VStack(spacing: 16) {
@@ -34,7 +35,7 @@ struct ConfirmationDialogView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(Color(.systemGray5))
-                        .cornerRadius(10)
+                        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 }
                 .accessibilityLabel("Cancel")
 
@@ -47,14 +48,14 @@ struct ConfirmationDialogView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
                         .background(component.destructive ? Color.red : Color.cyan)
-                        .cornerRadius(10)
+                        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 }
                 .accessibilityLabel(component.confirmText)
             }
         }
-        .padding(16)
+        .padding(CGFloat(tokens.spacing.md))
         .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 }

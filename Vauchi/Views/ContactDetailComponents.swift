@@ -194,6 +194,7 @@ struct VisibilityToggleRow: View {
 
 /// Section showing a contact's group memberships with manage button
 struct ContactGroupsSection: View {
+    @Environment(\.designTokens) private var tokens
     let contactGroups: [VauchiVisibilityLabel]
     let onManageGroups: () -> Void
 
@@ -232,7 +233,7 @@ struct ContactGroupsSection: View {
                 }
                 .padding()
                 .background(Color(.systemGray6))
-                .cornerRadius(10)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 .padding(.horizontal)
             } else {
                 ContactGroupBadges(
@@ -422,6 +423,7 @@ struct ExchangeStatusBanner: View {
 
 /// Compact trust level badge for ContactDetail header.
 struct TrustLevelBadge: View {
+    @Environment(\.designTokens) private var tokens
     let trustLevel: ContactTrustLevel
 
     var body: some View {
@@ -434,10 +436,10 @@ struct TrustLevelBadge: View {
                 .fontWeight(.medium)
                 .foregroundColor(trustLevel.color)
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, CGFloat(tokens.borderRadius.mdLg))
         .padding(.vertical, 4)
         .background(trustLevel.color.opacity(0.15))
-        .cornerRadius(12)
+        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Trust level: \(trustLevel.displayName)")
     }

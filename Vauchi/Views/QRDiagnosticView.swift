@@ -174,6 +174,7 @@
     struct QRDiagnosticView: View {
         /// Set to "all" or "generation" to auto-run tests on appear
         var autoTest: String?
+        @Environment(\.designTokens) private var tokens
 
         @State private var qrTestLevel: QrTestLevel = .initStage
         @State private var ecLevel: String = "M"
@@ -439,7 +440,7 @@
             }
             .padding()
             .background(Color(.systemGray6))
-            .cornerRadius(12)
+            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         }
 
         private func statRow(_ label: String, _ value: String) -> some View {

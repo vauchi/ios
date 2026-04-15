@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @State private var showAddField = false
     @State private var editingField: FieldInfo?
     @ObservedObject private var localizationService = LocalizationService.shared
@@ -72,14 +73,14 @@ struct HomeView: View {
                                 .padding()
                                 .frame(maxWidth: .infinity)
                                 .background(themeService.bgPrimary)
-                                .cornerRadius(10)
+                                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                                 .accessibilityIdentifier("card.empty")
                                 .accessibilityHint("Use the add button above to create your first field")
                         }
                     }
                     .padding()
                     .background(themeService.bgSecondary)
-                    .cornerRadius(12)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     .padding(.horizontal)
 
                     // Sync info

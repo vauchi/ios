@@ -12,6 +12,7 @@ import SwiftUI
 /// Used by the device link flow to show remaining validity time and
 /// automatically transition to an expired state when the QR expires.
 struct QRCountdownView: View {
+    @Environment(\.designTokens) private var tokens
     let qrData: String?
     let expiresAt: UInt64
     let generateQRCode: (String) -> UIImage?
@@ -34,7 +35,7 @@ struct QRCountdownView: View {
                     .frame(width: 250, height: 250)
                     .padding()
                     .background(Color.white)
-                    .cornerRadius(12)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     .accessibilityLabel("Device link QR code")
 
                 // Countdown timer

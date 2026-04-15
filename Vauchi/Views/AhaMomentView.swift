@@ -10,6 +10,7 @@ import VauchiPlatform
 
 /// Displays an "Aha moment" - a progressive onboarding hint at key milestones
 struct AhaMomentView: View {
+    @Environment(\.designTokens) private var tokens
     let moment: MobileAhaMoment
     let onDismiss: () -> Void
 
@@ -52,7 +53,7 @@ struct AhaMomentView: View {
                     .padding()
                     .background(Color.cyan)
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             }
             .padding(.horizontal, 24)
             .padding(.top, 8)
@@ -61,7 +62,7 @@ struct AhaMomentView: View {
         }
         .padding(24)
         .background(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.lg))
                 .fill(Color(UIColor.systemBackground))
                 .shadow(radius: 20)
         )

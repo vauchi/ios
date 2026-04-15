@@ -149,6 +149,7 @@ struct ToastOverlayView: View {
     let undoActionId: String?
     let onAction: (UserAction) -> Void
     let onDismiss: () -> Void
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
         HStack(spacing: 12) {
@@ -170,7 +171,7 @@ struct ToastOverlayView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.mdLg))
                 .fill(Color.black.opacity(0.85))
         )
         .accessibilityElement(children: .combine)
@@ -182,6 +183,7 @@ struct ToastOverlayView: View {
 struct ActionButton: View {
     let action: ScreenAction
     let onTap: () -> Void
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
         Button(action: onTap) {
@@ -191,7 +193,7 @@ struct ActionButton: View {
                 .padding(isPrimary ? 16 : 8)
                 .background(background)
                 .foregroundColor(foregroundColor)
-                .cornerRadius(12)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         }
         .disabled(!action.enabled)
         .opacity(action.enabled ? 1.0 : 0.6)

@@ -10,6 +10,7 @@ import VauchiPlatform
 
 struct ContactDetailView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @Environment(\.dismiss) var dismiss
     let contact: ContactInfo
 
@@ -285,7 +286,7 @@ struct ContactDetailView: View {
                                 .padding()
                                 .frame(maxWidth: .infinity)
                                 .background(Color(.systemGray6))
-                                .cornerRadius(10)
+                                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                                 .padding(.horizontal)
                         } else {
                             VStack(spacing: 8) {
@@ -344,7 +345,7 @@ struct ContactDetailView: View {
                                 .padding()
                                 .frame(maxWidth: .infinity)
                                 .background(Color(.systemGray6))
-                                .cornerRadius(10)
+                                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                                 .padding(.horizontal)
                         } else {
                             VStack(spacing: 8) {
@@ -397,7 +398,7 @@ struct ContactDetailView: View {
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color(.systemGray6))
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     }
                     .padding(.horizontal)
                     .accessibilityLabel("Delete contact")
@@ -426,7 +427,7 @@ struct ContactDetailView: View {
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color(.systemGray6))
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     }
                     .foregroundColor(.orange)
                     .padding(.horizontal)

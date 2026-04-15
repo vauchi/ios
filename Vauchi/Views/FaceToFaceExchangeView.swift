@@ -43,6 +43,7 @@ private enum ScanQuality {
 
 struct FaceToFaceExchangeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @ObservedObject private var localizationService = LocalizationService.shared
     var switchToContacts: (() -> Void)?
 
@@ -186,11 +187,11 @@ struct FaceToFaceExchangeView: View {
                 .scaledToFit()
                 .padding(8)
                 .background(Color(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255))
-                .cornerRadius(12)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 .frame(maxWidth: UIScreen.main.bounds.width * 0.98)
                 .accessibilityLabel("Exchange QR code")
         } else {
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.mdLg))
                 .fill(Color(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255))
                 .aspectRatio(1, contentMode: .fit)
                 .frame(maxWidth: UIScreen.main.bounds.width * 0.98)
@@ -203,9 +204,9 @@ struct FaceToFaceExchangeView: View {
             if cameraGranted {
                 CameraPreviewView(previewLayer: qrScanner.previewLayer)
                     .frame(width: 100, height: 100)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .clipShape(RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.mdLg)))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.mdLg))
                             .stroke(Color(white: 0.6), lineWidth: 2)
                     )
             }
@@ -283,7 +284,7 @@ struct FaceToFaceExchangeView: View {
                     .padding()
                     .background(Color.accentColor)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             }
             .accessibilityIdentifier("exchange.done")
             .padding(.horizontal)
@@ -316,7 +317,7 @@ struct FaceToFaceExchangeView: View {
                     .padding()
                     .background(Color.accentColor)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             }
             .accessibilityIdentifier("exchange.retry")
             .padding(.horizontal)
@@ -478,7 +479,7 @@ struct FaceToFaceExchangeView: View {
                     .padding()
                     .background(Color.accentColor)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             }
             .accessibilityIdentifier("exchange.grant_permission")
             .padding(.horizontal)

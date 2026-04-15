@@ -43,6 +43,7 @@ struct RecoveryView: View {
 
 struct RecoverIdentityTab: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @State private var showClaimSheet = false
     @State private var showAddVoucherSheet = false
     @State private var showStatusSheet = false
@@ -51,9 +52,9 @@ struct RecoverIdentityTab: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: CGFloat(tokens.spacing.lg)) {
                 // Info card
-                VStack(spacing: 12) {
+                VStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
                     Image(systemName: "lock.shield")
                         .font(.system(size: 48))
                         .foregroundColor(.cyan)
@@ -71,7 +72,7 @@ struct RecoverIdentityTab: View {
                 .padding()
                 .frame(maxWidth: .infinity)
                 .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
 
                 // Recovery settings
                 VStack(alignment: .leading, spacing: 8) {
@@ -104,7 +105,7 @@ struct RecoverIdentityTab: View {
                 }
                 .padding()
                 .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 .task {
                     do {
                         trustedCount = try await viewModel.trustedContactCount()
@@ -125,17 +126,17 @@ struct RecoverIdentityTab: View {
                 }
                 .padding()
                 .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
 
                 // Action buttons
-                VStack(spacing: 12) {
+                VStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
                     Button(action: { showClaimSheet = true }) {
                         Text("Start Recovery Process")
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.cyan)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     }
                     .accessibilityLabel("Start recovery process")
                     .accessibilityHint("Begin recovering your identity using social vouching")
@@ -146,7 +147,7 @@ struct RecoverIdentityTab: View {
                             .padding()
                             .background(Color.blue)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     }
                     .accessibilityLabel("Add received voucher")
                     .accessibilityHint("Submit a voucher received from a trusted contact")
@@ -157,7 +158,7 @@ struct RecoverIdentityTab: View {
                             .padding()
                             .background(Color(.systemGray5))
                             .foregroundColor(.primary)
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     }
                     .accessibilityLabel("Check recovery status")
                     .accessibilityHint("View progress of your current recovery attempt")
@@ -181,13 +182,14 @@ struct RecoverIdentityTab: View {
 
 struct HelpOthersTab: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @State private var showVouchSheet = false
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: CGFloat(tokens.spacing.lg)) {
                 // Info card
-                VStack(spacing: 12) {
+                VStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
                     Image(systemName: "checkmark.shield")
                         .font(.system(size: 48))
                         .foregroundColor(.green)
@@ -205,10 +207,10 @@ struct HelpOthersTab: View {
                 .padding()
                 .frame(maxWidth: .infinity)
                 .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
 
                 // Warning
-                HStack(spacing: 12) {
+                HStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.orange)
                         .accessibilityHidden(true)
@@ -218,7 +220,7 @@ struct HelpOthersTab: View {
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.orange.opacity(0.1))
-                .cornerRadius(12)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 .accessibilityElement(children: .combine)
 
                 // Steps
@@ -233,7 +235,7 @@ struct HelpOthersTab: View {
                 }
                 .padding()
                 .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
 
                 // Action button
                 Button(action: { showVouchSheet = true }) {
@@ -242,7 +244,7 @@ struct HelpOthersTab: View {
                         .padding()
                         .background(Color.green)
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 }
                 .accessibilityLabel("Vouch for someone")
                 .accessibilityHint("Help a contact recover their identity by vouching for them")
@@ -259,6 +261,7 @@ struct HelpOthersTab: View {
 
 struct CreateClaimSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @Environment(\.dismiss) var dismiss
     @State private var oldPublicKey = ""
     @State private var isCreating = false
@@ -299,7 +302,7 @@ struct CreateClaimSheet: View {
                                 .padding()
                                 .background(Color.cyan)
                                 .foregroundColor(.white)
-                                .cornerRadius(10)
+                                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                         }
                         .accessibilityLabel("Copy claim data")
                         .accessibilityHint("Copies claim data to clipboard to share with trusted contacts")
@@ -338,7 +341,7 @@ struct CreateClaimSheet: View {
                             .padding()
                             .background(oldPublicKey.count >= 64 && !isCreating ? Color.cyan : Color.gray)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                         }
                         .disabled(oldPublicKey.count < 64 || isCreating)
                         .accessibilityLabel("Create claim")
@@ -381,6 +384,7 @@ struct CreateClaimSheet: View {
 
 struct CreateVoucherSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @Environment(\.dismiss) var dismiss
     @State private var claimData = ""
     @State private var isParsing = false
@@ -422,7 +426,7 @@ struct CreateVoucherSheet: View {
                                 .padding()
                                 .background(Color.green)
                                 .foregroundColor(.white)
-                                .cornerRadius(10)
+                                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                         }
                         .accessibilityLabel("Copy voucher data")
                         .accessibilityHint("Copies voucher data to clipboard to share with the recovering contact")
@@ -486,7 +490,7 @@ struct CreateVoucherSheet: View {
                                 .padding()
                                 .background(!isCreatingVoucher ? Color.green : Color.gray)
                                 .foregroundColor(.white)
-                                .cornerRadius(10)
+                                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                             }
                             .disabled(isCreatingVoucher)
                             .accessibilityLabel("Create voucher")
@@ -538,7 +542,7 @@ struct CreateVoucherSheet: View {
                             .padding()
                             .background(claimData.count >= 20 && !isParsing ? Color.cyan : Color.gray)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                         }
                         .disabled(claimData.count < 20 || isParsing)
                         .accessibilityLabel("Verify claim")
@@ -603,6 +607,7 @@ struct CreateVoucherSheet: View {
 
 struct AddVoucherSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @Environment(\.dismiss) var dismiss
     @State private var voucherData = ""
     @State private var isAdding = false
@@ -657,7 +662,7 @@ struct AddVoucherSheet: View {
                                     .padding()
                                     .background(Color.green)
                                     .foregroundColor(.white)
-                                    .cornerRadius(10)
+                                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                             }
                         } else {
                             Text("Collect \(progress.vouchersNeeded - progress.vouchersCollected) more voucher(s) from trusted contacts.")
@@ -697,7 +702,7 @@ struct AddVoucherSheet: View {
                             .padding()
                             .background(voucherData.count >= 20 && !isAdding ? Color.blue : Color.gray)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                         }
                         .disabled(voucherData.count < 20 || isAdding)
                         .accessibilityLabel("Add voucher")
@@ -739,6 +744,7 @@ struct AddVoucherSheet: View {
 
 struct RecoveryStatusSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @Environment(\.dismiss) var dismiss
     @State private var isLoading = true
     @State private var status: VauchiRepository.RecoveryProgressInfo?
@@ -788,7 +794,7 @@ struct RecoveryStatusSheet: View {
                         }
                         .padding()
                         .background(Color(.systemGray6))
-                        .cornerRadius(12)
+                        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
 
                         if status.isComplete {
                             Button(action: copyProof) {
@@ -797,7 +803,7 @@ struct RecoveryStatusSheet: View {
                                     .padding()
                                     .background(Color.green)
                                     .foregroundColor(.white)
-                                    .cornerRadius(10)
+                                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                             }
 
                             Text("Share this proof with your contacts to restore your relationships.")
@@ -870,19 +876,20 @@ struct RecoveryStatusSheet: View {
 // MARK: - Recovery Step Row
 
 struct RecoveryStepRow: View {
+    @Environment(\.designTokens) private var tokens
     let number: Int
     let title: String
     let description: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: CGFloat(tokens.borderRadius.mdLg)) {
             Text("\(number)")
                 .font(.caption)
                 .fontWeight(.bold)
                 .frame(width: 24, height: 24)
                 .background(Color.cyan.opacity(0.2))
                 .foregroundColor(.cyan)
-                .cornerRadius(12)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)

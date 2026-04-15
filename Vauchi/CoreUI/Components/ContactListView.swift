@@ -20,9 +20,9 @@ struct ContactListView: View {
             if component.searchable {
                 TextField("Search", text: $searchQuery)
                     .textFieldStyle(.plain)
-                    .padding(10)
+                    .padding(CGFloat(tokens.spacing.sm))
                     .background(Color(.systemGray6))
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     .onChange(of: searchQuery) { newValue in
                         onAction(.searchChanged(componentId: component.id, query: newValue))
                     }

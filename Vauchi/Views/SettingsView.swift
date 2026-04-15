@@ -917,6 +917,7 @@ enum DeviceLinkTransport {
 struct DeviceLinkSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @Environment(\.dismiss) var dismiss
+    @Environment(\.designTokens) private var tokens
     @State private var qrData: String?
     @State private var isListening = false
     @State private var transport: DeviceLinkTransport = .notSelected
@@ -987,7 +988,7 @@ struct DeviceLinkSheet: View {
                         .padding()
                         .background(Color.cyan)
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 }
                 .accessibilityHint("Links devices using the relay server over the internet")
 
@@ -1000,7 +1001,7 @@ struct DeviceLinkSheet: View {
                         .padding()
                         .background(Color(.systemGray5))
                         .foregroundColor(.primary)
-                        .cornerRadius(10)
+                        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 }
                 .accessibilityHint("Links devices using animated QR codes without internet")
             }
@@ -1040,7 +1041,7 @@ struct DeviceLinkSheet: View {
                     .padding()
                     .background(Color(.systemGray5))
                     .foregroundColor(.primary)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             }
         }
     }
@@ -1149,7 +1150,7 @@ struct DeviceLinkSheet: View {
                     .padding()
                     .background(Color.cyan)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             }
             .accessibilityHint("Generates a new device link QR code")
             .padding(.horizontal)
@@ -1199,7 +1200,7 @@ struct DeviceLinkSheet: View {
                     .padding()
                     .background(Color.cyan)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             }
             .accessibilityHint("Proceeds to proximity verification step")
 
@@ -1212,7 +1213,7 @@ struct DeviceLinkSheet: View {
                     .padding()
                     .background(Color(.systemGray5))
                     .foregroundColor(.primary)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             }
             .accessibilityHint("Rejects the device link request")
         }
@@ -1244,7 +1245,7 @@ struct DeviceLinkSheet: View {
             .padding()
             .background(Color.cyan)
             .foregroundColor(.white)
-            .cornerRadius(10)
+            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         }
     }
 
@@ -1274,7 +1275,7 @@ struct DeviceLinkSheet: View {
             .padding()
             .background(Color.cyan)
             .foregroundColor(.white)
-            .cornerRadius(10)
+            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
 
             Button("Cancel") {
                 viewModel.cancelDeviceLink()
@@ -1284,7 +1285,7 @@ struct DeviceLinkSheet: View {
             .padding()
             .background(Color(.systemGray5))
             .foregroundColor(.primary)
-            .cornerRadius(10)
+            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         }
     }
 
@@ -1450,6 +1451,7 @@ struct SetCertificateSheet: View {
 struct ExportBackupSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @Environment(\.dismiss) var dismiss
+    @Environment(\.designTokens) private var tokens
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var isExporting = false
@@ -1492,7 +1494,7 @@ struct ExportBackupSheet: View {
                             .padding()
                             .background(Color.cyan)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     }
                     .padding(.horizontal)
                     .accessibilityHint("Use Face ID or Touch ID to verify your identity before exporting")
@@ -1648,6 +1650,7 @@ struct ShareSheet: UIViewControllerRepresentable {
 struct ImportBackupSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @Environment(\.dismiss) var dismiss
+    @Environment(\.designTokens) private var tokens
     @State private var showFilePicker = false
     @State private var backupData: String?
     @State private var password = ""
@@ -1681,7 +1684,7 @@ struct ImportBackupSheet: View {
                             .padding()
                             .background(Color.cyan)
                             .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                     }
                     .padding(.horizontal)
                     .accessibilityHint("Use Face ID or Touch ID to verify your identity before importing")
@@ -1755,7 +1758,7 @@ struct ImportBackupSheet: View {
                                 .padding()
                                 .background(password.isEmpty ? Color.gray : Color.cyan)
                                 .foregroundColor(.white)
-                                .cornerRadius(10)
+                                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                             }
                             .disabled(password.isEmpty || isImporting)
                             .padding(.horizontal)
@@ -1771,7 +1774,7 @@ struct ImportBackupSheet: View {
                                 .padding()
                                 .background(Color.cyan)
                                 .foregroundColor(.white)
-                                .cornerRadius(10)
+                                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                         }
                         .padding(.horizontal)
                     }

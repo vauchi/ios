@@ -11,6 +11,7 @@ import SwiftUI
 struct CardPreviewView: View {
     let component: CardPreviewComponent
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
         VStack(spacing: 16) {
@@ -53,7 +54,7 @@ struct CardPreviewView: View {
                 .padding(.vertical, 8)
                 .background(isSelected ? Color.cyan : Color(.systemGray5))
                 .foregroundColor(isSelected ? .white : .primary)
-                .cornerRadius(20)
+                .cornerRadius(CGFloat(tokens.borderRadius.lg))
         }
         .accessibilityLabel(name)
         .accessibilityValue(isSelected ? "Selected" : "Not selected")
@@ -92,7 +93,7 @@ struct CardPreviewView: View {
             }
         }
         .background(Color(.systemBackground))
-        .cornerRadius(16)
+        .cornerRadius(CGFloat(tokens.borderRadius.lg))
         .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
         .accessibilityLabel(component.a11y?.label ?? "Card preview: \(component.name)")
         .accessibilityHint(component.a11y?.hint ?? "")

@@ -530,6 +530,7 @@ struct GroupMemberRow: View {
 /// Sheet to add contacts to a group
 struct AddContactToGroupSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     let groupId: String
     let existingContactIds: [String]
     @Binding var isPresented: Bool
@@ -561,9 +562,9 @@ struct AddContactToGroupSheet: View {
                         .autocapitalization(.none)
                         .accessibilityLabel("Search contacts to add")
                 }
-                .padding(10)
+                .padding(CGFloat(tokens.spacing.sm))
                 .background(Color(.systemGray6))
-                .cornerRadius(8)
+                .cornerRadius(CGFloat(tokens.borderRadius.md))
                 .padding()
 
                 if availableContacts.isEmpty {

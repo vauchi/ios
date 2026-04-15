@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SetupView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+    @Environment(\.designTokens) private var tokens
     @State private var name = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -74,7 +75,7 @@ struct SetupView: View {
                     .padding()
                     .background(name.isEmpty ? Color.gray : Color.cyan)
                     .foregroundColor(.white)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 }
                 .disabled(name.isEmpty || isLoading)
                 .accessibilityIdentifier("setup.create.button")

@@ -14,6 +14,7 @@ import SwiftUI
 /// Displays each chunk as a QR code image, cycling at approximately 3 frames per second,
 /// with a progress indicator showing the current part.
 struct MultipartQRView: View {
+    @Environment(\.designTokens) private var tokens
     /// The encoded chunk strings to display as QR codes.
     let chunks: [String]
 
@@ -48,10 +49,10 @@ struct MultipartQRView: View {
                 .scaledToFit()
                 .frame(width: 250, height: 250)
                 .background(Color.white)
-                .cornerRadius(12)
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                 .accessibilityLabel("Animated QR code part \(currentIndex + 1) of \(chunks.count)")
         } else {
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.mdLg))
                 .fill(Color(.systemGray5))
                 .frame(width: 250, height: 250)
                 .overlay(

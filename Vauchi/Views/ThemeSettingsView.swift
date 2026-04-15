@@ -132,6 +132,7 @@ struct ColorSwatch: View {
 
 /// Preview card showing theme colors
 struct ThemePreviewCard: View {
+    @Environment(\.designTokens) private var tokens
     let theme: MobileTheme
 
     private var themeService: ThemeService {
@@ -173,9 +174,9 @@ struct ThemePreviewCard: View {
         }
         .padding()
         .background(themeService.color(from: theme.colors.bgPrimary))
-        .cornerRadius(12)
+        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.mdLg))
                 .stroke(themeService.color(from: theme.colors.border), lineWidth: 1)
         )
         .accessibilityElement(children: .ignore)
