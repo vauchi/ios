@@ -334,7 +334,7 @@ final class CoreUIComponentTests: XCTestCase {
             title: "End-to-End Encryption",
             items: [
                 InfoItem(icon: "key", title: "Your Keys", detail: "Keys are generated on your device and never leave it."),
-                InfoItem(icon: "shield", title: "Zero Knowledge", detail: "The relay server cannot read your contact data."),
+                InfoItem(icon: "shield", title: "Oblivious Relay", detail: "The relay server cannot read your contact data."),
             ]
         )
         let view = InfoPanelView(component: component)
@@ -534,7 +534,7 @@ final class CoreUIComponentTests: XCTestCase {
             title: "End-to-End Encryption",
             items: [
                 InfoItem(icon: "key", title: "Your Keys", detail: "Keys are generated on your device and never leave it."),
-                InfoItem(icon: "shield", title: "Zero Knowledge", detail: "The relay server cannot read your contact data."),
+                InfoItem(icon: "shield", title: "Oblivious Relay", detail: "The relay server cannot read your contact data."),
             ]
         )
         assertDarkSnapshot(of: InfoPanelView(component: component), height: 250)
