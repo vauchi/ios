@@ -10,11 +10,12 @@ import SwiftUI
 /// Renders a core `Component::InfoPanel` as a styled list of info items.
 struct InfoPanelView: View {
     let component: InfoPanelComponent
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.md)) {
             // Panel header
-            HStack(spacing: 12) {
+            HStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
                 if let icon = component.icon {
                     Image(systemName: sfSymbolForCoreIcon(icon))
                         .font(.system(size: 24))
@@ -28,15 +29,15 @@ struct InfoPanelView: View {
             }
 
             // Items
-            VStack(spacing: 12) {
+            VStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
                 ForEach(component.items) { item in
                     InfoItemRow(item: item)
                 }
             }
         }
-        .padding(16)
+        .padding(CGFloat(tokens.spacing.md))
         .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         .accessibilityLabel(component.a11y?.label ?? component.title)
         .accessibilityHint(component.a11y?.hint ?? "")
@@ -47,8 +48,10 @@ struct InfoPanelView: View {
 struct InfoItemRow: View {
     let item: InfoItem
 
+    @Environment(\.designTokens) private var tokens
+
     var body: some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .top, spacing: CGFloat(tokens.spacing.md)) {
             if let icon = item.icon {
                 Image(systemName: sfSymbolForCoreIcon(icon))
                     .font(.system(size: 20))

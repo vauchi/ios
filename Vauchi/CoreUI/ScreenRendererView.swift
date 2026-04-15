@@ -24,6 +24,14 @@ struct ScreenRendererView: View {
     @State private var toastMessage: String?
     @State private var toastUndoActionId: String?
 
+    private var spacing: SpacingTokens {
+        screen.tokens.spacing
+    }
+
+    private var radius: BorderRadiusTokens {
+        screen.tokens.borderRadius
+    }
+
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
@@ -35,15 +43,15 @@ struct ScreenRendererView: View {
                     )
                     .tint(.cyan)
                     .padding(.horizontal)
-                    .padding(.top, 8)
+                    .padding(.top, CGFloat(spacing.sm))
                     .accessibilityLabel("Step \(progress.currentStep) of \(progress.totalSteps)")
                     .accessibilityValue(progress.label ?? "\(progress.currentStep) of \(progress.totalSteps)")
                 }
 
                 ScrollView {
-                    VStack(spacing: 24) {
+                    VStack(spacing: CGFloat(spacing.lg)) {
                         // Header
-                        VStack(spacing: 8) {
+                        VStack(spacing: CGFloat(spacing.sm)) {
                             Text(screen.title)
                                 .font(.title2.bold())
                                 .multilineTextAlignment(.center)
@@ -56,28 +64,28 @@ struct ScreenRendererView: View {
                                     .multilineTextAlignment(.center)
                             }
                         }
-                        .padding(.top, 24)
+                        .padding(.top, CGFloat(spacing.lg))
 
                         // Components
                         ForEach(Array(screen.components.enumerated()), id: \.offset) { _, component in
                             ComponentView(component: component, onAction: onAction)
                         }
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, CGFloat(spacing.lg))
                 }
 
                 Spacer()
 
                 // Action buttons
-                VStack(spacing: 12) {
+                VStack(spacing: CGFloat(radius.mdLg)) {
                     ForEach(screen.actions) { action in
                         ActionButton(action: action) {
                             onAction(.actionPressed(actionId: action.id))
                         }
                     }
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
+                .padding(.horizontal, CGFloat(spacing.lg))
+                .padding(.bottom, CGFloat(spacing.lg))
             }
 
             // Toast overlay
@@ -94,8 +102,8 @@ struct ScreenRendererView: View {
                     }
                 )
                 .transition(.move(edge: .top).combined(with: .opacity))
-                .padding(.top, 8)
-                .padding(.horizontal, 24)
+                .padding(.top, CGFloat(spacing.sm))
+                .padding(.horizontal, CGFloat(spacing.lg))
                 .zIndex(100)
             }
         }
@@ -108,6 +116,7 @@ struct ScreenRendererView: View {
         .onAppear {
             checkForToastComponent()
         }
+        .environment(\.designTokens, screen.tokens)
     }
 
     private func checkForToastComponent() {

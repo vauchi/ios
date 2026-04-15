@@ -7,6 +7,21 @@
 // Maps to: vauchi-core/src/ui/screen.rs, component.rs, action.rs
 
 import Foundation
+import SwiftUI
+
+// MARK: - Design Token Environment
+
+/// SwiftUI environment key for injecting design tokens into the view hierarchy.
+private struct DesignTokensKey: EnvironmentKey {
+    static let defaultValue: DesignTokens = .defaults
+}
+
+extension EnvironmentValues {
+    var designTokens: DesignTokens {
+        get { self[DesignTokensKey.self] }
+        set { self[DesignTokensKey.self] = newValue }
+    }
+}
 
 // MARK: - JSON Decoding Strategy
 
@@ -24,6 +39,69 @@ let coreJSONDecoder: JSONDecoder = {
 /// would corrupt variant keys to "text_changed", breaking serde deserialization.
 let coreJSONEncoder: JSONEncoder = .init()
 
+// MARK: - Design Tokens
+
+/// Layout tokens for consistent cross-platform rendering.
+/// Maps to: `vauchi-core::theme::DesignTokens`
+struct DesignTokens: Decodable {
+    let spacing: SpacingTokens
+    let spacingDirection: SpacingDirectionTokens
+    let typography: TypographyTokens
+    let borderRadius: BorderRadiusTokens
+    let touchTarget: TouchTargetTokens
+    let motion: MotionTokens
+
+    static let `default` = DesignTokens(
+        spacing: SpacingTokens(xs: 4, sm: 8, md: 16, lg: 24, xl: 32),
+        spacingDirection: SpacingDirectionTokens(contentStart: 16, contentEnd: 16, listItemStart: 8, listItemEnd: 8, listItemInlineStart: 12, listItemInlineEnd: 12),
+        typography: TypographyTokens(titleSize: 24, subtitleSize: 18, bodySize: 16, captionSize: 14),
+        borderRadius: BorderRadiusTokens(sm: 4, md: 8, mdLg: 12, lg: 16),
+        touchTarget: TouchTargetTokens(minimum: 44),
+        motion: MotionTokens(enterDurationMs: 200, exitDurationMs: 150, emphasisDurationMs: 300)
+    )
+}
+
+struct SpacingTokens: Decodable {
+    let xs: UInt16
+    let sm: UInt16
+    let md: UInt16
+    let lg: UInt16
+    let xl: UInt16
+}
+
+struct SpacingDirectionTokens: Decodable {
+    let contentStart: UInt16
+    let contentEnd: UInt16
+    let listItemStart: UInt16
+    let listItemEnd: UInt16
+    let listItemInlineStart: UInt16
+    let listItemInlineEnd: UInt16
+}
+
+struct TypographyTokens: Decodable {
+    let titleSize: UInt16
+    let subtitleSize: UInt16
+    let bodySize: UInt16
+    let captionSize: UInt16
+}
+
+struct BorderRadiusTokens: Decodable {
+    let sm: UInt16
+    let md: UInt16
+    let mdLg: UInt16
+    let lg: UInt16
+}
+
+struct TouchTargetTokens: Decodable {
+    let minimum: UInt16
+}
+
+struct MotionTokens: Decodable {
+    let enterDurationMs: UInt16
+    let exitDurationMs: UInt16
+    let emphasisDurationMs: UInt16
+}
+
 // MARK: - ScreenModel
 
 /// Describes a full screen to render.
@@ -35,6 +113,22 @@ struct ScreenModel: Decodable {
     let components: [Component]
     let actions: [ScreenAction]
     let progress: Progress?
+    let tokens: DesignTokens
+
+    private enum CodingKeys: String, CodingKey {
+        case screenId, title, subtitle, components, actions, progress, tokens
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        screenId = try container.decode(String.self, forKey: .screenId)
+        title = try container.decode(String.self, forKey: .title)
+        subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle)
+        components = try container.decode([Component].self, forKey: .components)
+        actions = try container.decode([ScreenAction].self, forKey: .actions)
+        progress = try container.decodeIfPresent(Progress.self, forKey: .progress)
+        tokens = try container.decodeIfPresent(DesignTokens.self, forKey: .tokens) ?? .defaults
+    }
 }
 
 /// Step progress indicator.

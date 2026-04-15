@@ -11,11 +11,12 @@ import SwiftUI
 struct PinInputView: View {
     let component: PinInputComponent
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     @State private var localValue: String = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.sm)) {
             Text(component.label)
                 .font(.headline)
                 .foregroundColor(.secondary)
@@ -31,7 +32,7 @@ struct PinInputView: View {
             .font(.title3.monospaced())
             .padding()
             .background(Color(.systemGray6))
-            .cornerRadius(12)
+            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             .keyboardType(.numberPad)
             .onChange(of: localValue) { newValue in
                 let value: String

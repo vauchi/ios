@@ -11,9 +11,10 @@ import SwiftUI
 struct SettingsGroupView: View {
     let component: SettingsGroupComponent
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: CGFloat(tokens.borderRadius.mdLg)) {
             Text(component.label)
                 .font(.headline)
                 .foregroundColor(.secondary)
@@ -33,7 +34,7 @@ struct SettingsGroupView: View {
                 }
             }
             .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         }
     }

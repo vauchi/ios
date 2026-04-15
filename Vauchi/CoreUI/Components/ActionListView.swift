@@ -11,6 +11,7 @@ import SwiftUI
 struct ActionListView: View {
     let component: ActionListComponent
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,7 +27,7 @@ struct ActionListView: View {
             }
         }
         .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 }

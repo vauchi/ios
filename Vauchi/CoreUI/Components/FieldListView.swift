@@ -11,9 +11,10 @@ import SwiftUI
 struct FieldListView: View {
     let component: FieldListComponent
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: CGFloat(tokens.borderRadius.mdLg)) {
             if component.fields.isEmpty {
                 emptyState
             } else {
@@ -57,6 +58,7 @@ struct FieldListRow: View {
     let visibilityMode: VisibilityMode
     let availableGroups: [String]
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -86,7 +88,7 @@ struct FieldListRow: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(field.a11y?.label ?? "\(field.label): \(field.value)")

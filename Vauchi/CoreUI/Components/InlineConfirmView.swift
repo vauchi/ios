@@ -11,15 +11,16 @@ import SwiftUI
 struct InlineConfirmView: View {
     let component: InlineConfirmComponent
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
             Text(component.warning)
                 .font(.callout)
                 .foregroundColor(component.destructive ? .red : .primary)
                 .multilineTextAlignment(.center)
 
-            HStack(spacing: 12) {
+            HStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
                 Button {
                     onAction(.actionPressed(actionId: "\(component.id):cancel"))
                 } label: {
@@ -29,7 +30,7 @@ struct InlineConfirmView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .background(Color(.systemGray5))
-                        .cornerRadius(8)
+                        .cornerRadius(CGFloat(tokens.borderRadius.md))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(component.cancelText)
@@ -43,15 +44,15 @@ struct InlineConfirmView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .background(component.destructive ? Color.red : Color.cyan)
-                        .cornerRadius(8)
+                        .cornerRadius(CGFloat(tokens.borderRadius.md))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(component.confirmText)
             }
         }
-        .padding(12)
+        .padding(CGFloat(tokens.borderRadius.mdLg))
         .background(Color(.systemBackground))
-        .cornerRadius(10)
+        .cornerRadius(CGFloat(tokens.borderRadius.md))
         .accessibilityLabel(component.a11y?.label ?? component.warning)
         .accessibilityHint(component.a11y?.hint ?? "")
     }

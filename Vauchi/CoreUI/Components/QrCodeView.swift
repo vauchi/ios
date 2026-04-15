@@ -12,9 +12,10 @@ import SwiftUI
 struct QrCodeView: View {
     let component: QrCodeComponent
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: CGFloat(tokens.spacing.md)) {
             switch component.mode {
             case .display:
                 qrDisplayView()
@@ -30,9 +31,9 @@ struct QrCodeView: View {
                     .multilineTextAlignment(.center)
             }
         }
-        .padding(16)
+        .padding(CGFloat(tokens.spacing.md))
         .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         .accessibilityLabel(component.a11y?.label ?? component.label ?? "QR code")
         .accessibilityHint(component.a11y?.hint ?? "")
@@ -55,7 +56,7 @@ struct QrCodeView: View {
     }
 
     private func qrScanPlaceholder() -> some View {
-        VStack(spacing: 16) {
+        VStack(spacing: CGFloat(tokens.spacing.md)) {
             Image(systemName: "qrcode.viewfinder")
                 .font(.system(size: 64))
                 .foregroundColor(.cyan)
@@ -67,10 +68,10 @@ struct QrCodeView: View {
                 Text("Tap to Scan")
                     .font(.headline)
                     .foregroundColor(.white)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, CGFloat(tokens.spacing.lg))
+                    .padding(.vertical, CGFloat(tokens.borderRadius.mdLg))
                     .background(Color.cyan)
-                    .cornerRadius(10)
+                    .cornerRadius(CGFloat(tokens.borderRadius.md))
             }
             .accessibilityLabel("Tap to scan QR code")
         }

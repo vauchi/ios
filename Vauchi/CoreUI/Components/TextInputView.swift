@@ -11,11 +11,12 @@ import SwiftUI
 struct TextInputView: View {
     let component: TextInputComponent
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     @State private var localValue: String = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.sm)) {
             Text(component.label)
                 .font(.headline)
                 .foregroundColor(.secondary)
@@ -28,7 +29,7 @@ struct TextInputView: View {
             .font(.title3)
             .padding()
             .background(Color(.systemGray6))
-            .cornerRadius(12)
+            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             .keyboardType(keyboardType(for: component.inputType))
             .autocapitalization(autocapitalization(for: component.inputType))
             .onChange(of: localValue) { newValue in

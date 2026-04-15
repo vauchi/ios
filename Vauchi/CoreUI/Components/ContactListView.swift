@@ -11,11 +11,12 @@ import SwiftUI
 struct ContactListView: View {
     let component: ContactListComponent
     let onAction: (UserAction) -> Void
+    @Environment(\.designTokens) private var tokens
 
     @State private var searchQuery: String = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: CGFloat(tokens.borderRadius.mdLg)) {
             if component.searchable {
                 TextField("Search", text: $searchQuery)
                     .textFieldStyle(.plain)
@@ -41,7 +42,7 @@ struct ContactListView: View {
                 }
             }
             .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
             .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         }
     }
