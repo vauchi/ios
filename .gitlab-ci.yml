@@ -48,6 +48,11 @@ include:
       - '/ci-templates/vrt-upload.yml'
       - '/ci-templates/perf.yml'
 
+# Stub anchor required by perf.yml templates (defined in rust-base.yml for Rust repos)
+.self-hosted:
+  before_script:
+    - export PATH="$HOME/.cargo/bin:${PATH}"
+
 stages:
   - auto-tag
   - update
