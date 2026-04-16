@@ -181,7 +181,7 @@ struct SettingsView: View {
                 } header: {
                     Text(localizationService.t("backup.title"))
                 } footer: {
-                    Text("Back up your identity to restore it on another device or after reinstalling.")
+                    Text("Back up your identity, contacts, and labels to restore on another device or after reinstalling.")
                 }
 
                 // Sync section - Delivery Status
@@ -1543,7 +1543,7 @@ struct ExportBackupSheet: View {
                     } header: {
                         Text("Encrypt Backup")
                     } footer: {
-                        Text("Your backup will be encrypted with this password. Store it safely - you'll need it to restore your identity.")
+                        Text("Your backup will be encrypted with this password. It includes your identity, contacts, and labels. Store it safely.")
                     }
 
                     if let error = errorMessage {
@@ -1626,7 +1626,7 @@ struct ExportBackupSheet: View {
 
         Task {
             do {
-                let backup = try await viewModel.exportBackup(password: password)
+                let backup = try await viewModel.exportFullBackup(password: password)
                 exportedData = backup
                 showShareSheet = true
             } catch {
@@ -1881,7 +1881,7 @@ struct ImportBackupSheet: View {
 
         Task {
             do {
-                try await viewModel.importBackup(data: data, password: password)
+                try await viewModel.importFullBackup(data: data, password: password)
                 dismiss()
             } catch {
                 if error.localizedDescription.contains("decrypt") ||

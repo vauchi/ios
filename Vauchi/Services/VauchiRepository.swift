@@ -1428,6 +1428,24 @@ class VauchiRepository {
         }
     }
 
+    /// Export full backup (identity + contacts + own card + labels)
+    func exportFullBackup(password: String) throws -> String {
+        do {
+            return try vauchi.exportFullBackup(password: password)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
+    /// Import full backup (identity + contacts + own card + labels)
+    func importFullBackup(data: String, password: String) throws {
+        do {
+            try vauchi.importFullBackup(backupData: data, password: password)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     // MARK: - Social Networks
 
     /// List available social networks

@@ -1613,6 +1613,26 @@ class VauchiViewModel: ObservableObject {
         await loadContacts()
     }
 
+    func exportFullBackup(password: String) async throws -> String {
+        guard let repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        return try repository.exportFullBackup(password: password)
+    }
+
+    func importFullBackup(data: String, password: String) async throws {
+        guard let repository else {
+            throw VauchiRepositoryError.notInitialized
+        }
+
+        try repository.importFullBackup(data: data, password: password)
+        hasIdentity = true
+        await loadIdentity()
+        await loadCard()
+        await loadContacts()
+    }
+
     // MARK: - Visibility
 
     func hideFieldFromContact(contactId: String, fieldLabel: String) async throws {
