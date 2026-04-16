@@ -51,7 +51,7 @@ struct DesignTokens: Decodable {
     let touchTarget: TouchTargetTokens
     let motion: MotionTokens
 
-    static let `default` = DesignTokens(
+    static let defaults = DesignTokens(
         spacing: SpacingTokens(xs: 4, sm: 8, md: 16, lg: 24, xl: 32),
         spacingDirection: SpacingDirectionTokens(contentStart: 16, contentEnd: 16, listItemStart: 8, listItemEnd: 8, listItemInlineStart: 12, listItemInlineEnd: 12),
         typography: TypographyTokens(titleSize: 24, subtitleSize: 18, bodySize: 16, captionSize: 14),
