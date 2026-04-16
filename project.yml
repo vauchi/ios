@@ -6,13 +6,13 @@ name: Vauchi
 options:
   bundleIdPrefix: app.vauchi
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "15.0"
   xcodeVersion: "15.0"
   generateEmptyDirectories: true
 
 settings:
   SWIFT_VERSION: "5.9"
-  IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+  IPHONEOS_DEPLOYMENT_TARGET: "15.0"
 
 packages:
   VauchiPlatform:
