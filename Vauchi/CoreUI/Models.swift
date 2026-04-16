@@ -52,7 +52,7 @@ struct DesignTokens: Decodable {
     let motion: MotionTokens
 
     static let defaults = DesignTokens(
-        spacing: SpacingTokens(xs: 4, sm: 8, md: 16, lg: 24, xl: 32),
+        spacing: SpacingTokens(xs: 4, sm: 8, smMd: 12, md: 16, lg: 24, xl: 32),
         spacingDirection: SpacingDirectionTokens(contentStart: 16, contentEnd: 16, listItemStart: 8, listItemEnd: 8, listItemInlineStart: 12, listItemInlineEnd: 12),
         typography: TypographyTokens(titleSize: 24, subtitleSize: 18, bodySize: 16, captionSize: 14),
         borderRadius: BorderRadiusTokens(sm: 4, md: 8, mdLg: 12, lg: 16),
@@ -64,9 +64,33 @@ struct DesignTokens: Decodable {
 struct SpacingTokens: Decodable {
     let xs: UInt16
     let sm: UInt16
+    let smMd: UInt16
     let md: UInt16
     let lg: UInt16
     let xl: UInt16
+
+    init(xs: UInt16, sm: UInt16, smMd: UInt16 = 12, md: UInt16, lg: UInt16, xl: UInt16) {
+        self.xs = xs
+        self.sm = sm
+        self.smMd = smMd
+        self.md = md
+        self.lg = lg
+        self.xl = xl
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        xs = try container.decode(UInt16.self, forKey: .xs)
+        sm = try container.decode(UInt16.self, forKey: .sm)
+        smMd = try container.decodeIfPresent(UInt16.self, forKey: .smMd) ?? 12
+        md = try container.decode(UInt16.self, forKey: .md)
+        lg = try container.decode(UInt16.self, forKey: .lg)
+        xl = try container.decode(UInt16.self, forKey: .xl)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case xs, sm, smMd, md, lg, xl
+    }
 }
 
 struct SpacingDirectionTokens: Decodable {

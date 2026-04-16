@@ -54,7 +54,7 @@ struct RecoverIdentityTab: View {
         ScrollView {
             VStack(spacing: CGFloat(tokens.spacing.lg)) {
                 // Info card
-                VStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
+                VStack(spacing: CGFloat(tokens.spacing.smMd)) {
                     Image(systemName: "lock.shield")
                         .font(.system(size: 48))
                         .foregroundColor(.cyan)
@@ -129,7 +129,7 @@ struct RecoverIdentityTab: View {
                 .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
 
                 // Action buttons
-                VStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
+                VStack(spacing: CGFloat(tokens.spacing.smMd)) {
                     Button(action: { showClaimSheet = true }) {
                         Text("Start Recovery Process")
                             .frame(maxWidth: .infinity)
@@ -189,7 +189,7 @@ struct HelpOthersTab: View {
         ScrollView {
             VStack(spacing: CGFloat(tokens.spacing.lg)) {
                 // Info card
-                VStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
+                VStack(spacing: CGFloat(tokens.spacing.smMd)) {
                     Image(systemName: "checkmark.shield")
                         .font(.system(size: 48))
                         .foregroundColor(.green)
@@ -210,7 +210,7 @@ struct HelpOthersTab: View {
                 .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
 
                 // Warning
-                HStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
+                HStack(spacing: CGFloat(tokens.spacing.smMd)) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.orange)
                         .accessibilityHidden(true)
@@ -882,7 +882,7 @@ struct RecoveryStepRow: View {
     let description: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: CGFloat(tokens.borderRadius.mdLg)) {
+        HStack(alignment: .top, spacing: CGFloat(tokens.spacing.smMd)) {
             Text("\(number)")
                 .font(.caption)
                 .fontWeight(.bold)

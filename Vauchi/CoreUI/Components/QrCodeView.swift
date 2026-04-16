@@ -69,7 +69,7 @@ struct QrCodeView: View {
                     .font(.headline)
                     .foregroundColor(.white)
                     .padding(.horizontal, CGFloat(tokens.spacing.lg))
-                    .padding(.vertical, CGFloat(tokens.borderRadius.mdLg))
+                    .padding(.vertical, CGFloat(tokens.spacing.smMd))
                     .background(Color.cyan)
                     .cornerRadius(CGFloat(tokens.borderRadius.md))
             }

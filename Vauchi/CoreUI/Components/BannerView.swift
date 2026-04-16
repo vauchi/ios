@@ -27,7 +27,7 @@ struct BannerView: View {
             .font(.subheadline.weight(.semibold))
             .foregroundColor(.accentColor)
         }
-        .padding(CGFloat(tokens.borderRadius.mdLg))
+        .padding(CGFloat(tokens.spacing.smMd))
         .background(Color(.secondarySystemBackground))
         .cornerRadius(CGFloat(tokens.borderRadius.md))
         .accessibilityElement(children: .combine)

@@ -14,13 +14,13 @@ struct InlineConfirmView: View {
     @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        VStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
+        VStack(spacing: CGFloat(tokens.spacing.smMd)) {
             Text(component.warning)
                 .font(.callout)
                 .foregroundColor(component.destructive ? .red : .primary)
                 .multilineTextAlignment(.center)
 
-            HStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
+            HStack(spacing: CGFloat(tokens.spacing.smMd)) {
                 Button {
                     onAction(.actionPressed(actionId: "\(component.id):cancel"))
                 } label: {
@@ -50,7 +50,7 @@ struct InlineConfirmView: View {
                 .accessibilityLabel(component.confirmText)
             }
         }
-        .padding(CGFloat(tokens.borderRadius.mdLg))
+        .padding(CGFloat(tokens.spacing.smMd))
         .background(Color(.systemBackground))
         .cornerRadius(CGFloat(tokens.borderRadius.md))
         .accessibilityLabel(component.a11y?.label ?? component.warning)

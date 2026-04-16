@@ -14,7 +14,7 @@ struct FieldListView: View {
     @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        VStack(alignment: .leading, spacing: CGFloat(tokens.borderRadius.mdLg)) {
+        VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.smMd)) {
             if component.fields.isEmpty {
                 emptyState
             } else {

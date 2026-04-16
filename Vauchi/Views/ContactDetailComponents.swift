@@ -436,7 +436,7 @@ struct TrustLevelBadge: View {
                 .fontWeight(.medium)
                 .foregroundColor(trustLevel.color)
         }
-        .padding(.horizontal, CGFloat(tokens.borderRadius.mdLg))
+        .padding(.horizontal, CGFloat(tokens.spacing.smMd))
         .padding(.vertical, 4)
         .background(trustLevel.color.opacity(0.15))
         .cornerRadius(CGFloat(tokens.borderRadius.mdLg))

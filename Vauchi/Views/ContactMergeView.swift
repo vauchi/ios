@@ -84,7 +84,7 @@ private struct DuplicatePairRow: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: CGFloat(tokens.borderRadius.mdLg)) {
+        VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.smMd)) {
             Text(localizationService.t("contacts.merge_similarity")
                 .replacingOccurrences(of: "{percent}", with: "\(Int(pair.similarity * 100))"))
                 .font(.caption)
@@ -228,7 +228,7 @@ private struct DuplicatePairRow: View {
     }
 
     private func contactRow(contact: ContactInfo, isPrimary: Bool) -> some View {
-        HStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
+        HStack(spacing: CGFloat(tokens.spacing.smMd)) {
             ZStack {
                 Circle()
                     .fill(Color.gray.opacity(0.4))

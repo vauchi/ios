@@ -13,7 +13,7 @@ struct StatusIndicatorView: View {
     @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        HStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
+        HStack(spacing: CGFloat(tokens.spacing.smMd)) {
             if let icon = component.icon {
                 Image(systemName: sfSymbolForCoreIcon(icon))
                     .font(.system(size: 24))

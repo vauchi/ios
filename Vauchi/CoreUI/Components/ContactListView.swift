@@ -16,7 +16,7 @@ struct ContactListView: View {
     @State private var searchQuery: String = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: CGFloat(tokens.borderRadius.mdLg)) {
+        VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.smMd)) {
             if component.searchable {
                 TextField("Search", text: $searchQuery)
                     .textFieldStyle(.plain)

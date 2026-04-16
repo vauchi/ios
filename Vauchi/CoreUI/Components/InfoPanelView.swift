@@ -15,7 +15,7 @@ struct InfoPanelView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.md)) {
             // Panel header
-            HStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
+            HStack(spacing: CGFloat(tokens.spacing.smMd)) {
                 if let icon = component.icon {
                     Image(systemName: sfSymbolForCoreIcon(icon))
                         .font(.system(size: 24))
@@ -29,7 +29,7 @@ struct InfoPanelView: View {
             }
 
             // Items
-            VStack(spacing: CGFloat(tokens.borderRadius.mdLg)) {
+            VStack(spacing: CGFloat(tokens.spacing.smMd)) {
                 ForEach(component.items) { item in
                     InfoItemRow(item: item)
                 }

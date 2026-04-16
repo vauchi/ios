@@ -14,7 +14,7 @@ struct ToggleListView: View {
     @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        VStack(alignment: .leading, spacing: CGFloat(tokens.borderRadius.mdLg)) {
+        VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.smMd)) {
             Text(component.label)
                 .font(.headline)
                 .foregroundColor(.secondary)
