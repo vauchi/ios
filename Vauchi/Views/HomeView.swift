@@ -23,8 +23,7 @@ struct HomeView: View {
                     HStack(alignment: .top) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(localizationService.t("home.greeting", args: ["name": viewModel.card?.displayName ?? "User"]))
-                                .font(.largeTitle)
-                                .fontWeight(.bold)
+                                .font(Font.largeTitle.weight(.bold))
                                 .minimumScaleFactor(0.7)
                                 .accessibilityAddTraits(.isHeader)
 

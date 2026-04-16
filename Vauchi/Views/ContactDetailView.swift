@@ -47,8 +47,7 @@ struct ContactDetailView: View {
                     .accessibilityLabel("Profile picture for \(contact.displayName)")
 
                     Text(contact.displayName)
-                        .font(.title)
-                        .fontWeight(.bold)
+                        .font(Font.title.weight(.bold))
                         .accessibilityAddTraits(.isHeader)
 
                     HStack(spacing: 4) {

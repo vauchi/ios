@@ -21,8 +21,7 @@
         var body: some View {
             VStack(spacing: 16) {
                 Text(autoMode == "server" ? "BLE Server Mode" : "BLE Diagnostic")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(Font.title2.weight(.bold))
 
                 if autoMode != "server" {
                     HStack(spacing: 12) {

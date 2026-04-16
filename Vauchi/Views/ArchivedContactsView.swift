@@ -44,8 +44,7 @@ struct ArchivedContactsView: View {
 
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(contact.displayName)
-                                    .font(.body)
-                                    .fontWeight(.medium)
+                                    .font(Font.body.weight(.medium))
 
                                 if let addedAt = contact.addedAt {
                                     Text("Added \(addedAt, style: .relative) ago")

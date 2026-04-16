@@ -292,8 +292,7 @@ struct ContactRow: View {
             // Info
             VStack(alignment: .leading, spacing: 2) {
                 Text(contact.displayName)
-                    .font(.body)
-                    .fontWeight(.medium)
+                    .font(Font.body.weight(.medium))
 
                 HStack(spacing: 4) {
                     if contact.verified {
@@ -357,8 +356,7 @@ struct EmptyContactsView: View {
                 .accessibilityHidden(true)
 
             Text(localizationService.t("contacts.empty"))
-                .font(.title2)
-                .fontWeight(.medium)
+                .font(Font.title2.weight(.medium))
                 .accessibilityAddTraits(.isHeader)
 
             Text("Exchange with someone to add them as a contact")
@@ -410,8 +408,7 @@ struct DemoContactCard: View {
                             .font(.headline)
 
                         Text(localizationService.t("contacts.demo_badge"))
-                            .font(.caption2)
-                            .fontWeight(.medium)
+                            .font(Font.caption2.weight(.medium))
                             .foregroundColor(.white)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
@@ -443,8 +440,7 @@ struct DemoContactCard: View {
             // Tip content
             VStack(alignment: .leading, spacing: 8) {
                 Text(demo.tipTitle)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(Font.subheadline.weight(.medium))
 
                 Text(demo.tipContent)
                     .font(.caption)

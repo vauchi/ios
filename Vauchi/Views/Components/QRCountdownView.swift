@@ -43,8 +43,7 @@ struct QRCountdownView: View {
                     Image(systemName: "clock")
                         .foregroundColor(remainingSeconds <= 60 ? .orange : .secondary)
                     Text("Expires in \(formattedTime)")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                        .font(Font.subheadline.weight(.medium))
                         .foregroundColor(remainingSeconds <= 60 ? .orange : .secondary)
                 }
                 .accessibilityLabel("QR code expires in \(remainingSeconds) seconds")

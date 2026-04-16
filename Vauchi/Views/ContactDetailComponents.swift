@@ -408,8 +408,7 @@ struct ExchangeStatusBanner: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.caption)
-                    .fontWeight(.semibold)
+                    .font(Font.caption.weight(.semibold))
                     .foregroundColor(color)
                 Text(subtitle)
                     .font(.caption2)
@@ -432,8 +431,7 @@ struct TrustLevelBadge: View {
                 .foregroundColor(trustLevel.color)
                 .accessibilityHidden(true)
             Text(trustLevel.displayName)
-                .font(.caption)
-                .fontWeight(.medium)
+                .font(Font.caption.weight(.medium))
                 .foregroundColor(trustLevel.color)
         }
         .padding(.horizontal, CGFloat(tokens.spacing.smMd))

@@ -61,8 +61,7 @@ struct RecoverIdentityTab: View {
                         .accessibilityHidden(true)
 
                     Text("Lost Your Device?")
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                        .font(Font.title2.weight(.semibold))
 
                     Text("You can recover your contact relationships through social vouching.")
                         .font(.body)
@@ -196,8 +195,7 @@ struct HelpOthersTab: View {
                         .accessibilityHidden(true)
 
                     Text("Help a Contact Recover")
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                        .font(Font.title2.weight(.semibold))
 
                     Text("If a contact lost their device, you can vouch for their identity.")
                         .font(.body)
@@ -280,8 +278,7 @@ struct CreateClaimSheet: View {
                             .accessibilityHidden(true)
 
                         Text("Claim Created!")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                            .font(Font.title2.weight(.semibold))
                             .accessibilityAddTraits(.isHeader)
 
                         Text("Share this claim with your trusted contacts:")
@@ -405,8 +402,7 @@ struct CreateVoucherSheet: View {
                             .accessibilityHidden(true)
 
                         Text("Voucher Created!")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                            .font(Font.title2.weight(.semibold))
                             .accessibilityAddTraits(.isHeader)
 
                         Text("Give this voucher to your contact:")
@@ -626,8 +622,7 @@ struct AddVoucherSheet: View {
                             .accessibilityHidden(true)
 
                         Text(progress.isComplete ? "Recovery Complete!" : "Voucher Added!")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                            .font(Font.title2.weight(.semibold))
                             .accessibilityAddTraits(.isHeader)
 
                         VStack(spacing: 8) {
@@ -635,7 +630,7 @@ struct AddVoucherSheet: View {
                                 Text("Vouchers collected:")
                                 Spacer()
                                 Text("\(progress.vouchersCollected) / \(progress.vouchersNeeded)")
-                                    .fontWeight(.semibold)
+                                    .font(Font.body.weight(.semibold))
                             }
 
                             ProgressView(value: Double(progress.vouchersCollected), total: Double(progress.vouchersNeeded))
@@ -763,8 +758,7 @@ struct RecoveryStatusSheet: View {
                             .accessibilityHidden(true)
 
                         Text(status.isComplete ? "Recovery Complete" : "Recovery In Progress")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                            .font(Font.title2.weight(.semibold))
                             .accessibilityAddTraits(.isHeader)
 
                         VStack(alignment: .leading, spacing: 12) {
@@ -785,7 +779,7 @@ struct RecoveryStatusSheet: View {
                                 Text("Vouchers:")
                                 Spacer()
                                 Text("\(status.vouchersCollected) / \(status.vouchersNeeded)")
-                                    .fontWeight(.semibold)
+                                    .font(Font.body.weight(.semibold))
                                     .foregroundColor(status.isComplete ? .green : .primary)
                             }
 
@@ -825,8 +819,7 @@ struct RecoveryStatusSheet: View {
                             .accessibilityHidden(true)
 
                         Text("No Active Recovery")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                            .font(Font.title2.weight(.semibold))
                             .accessibilityAddTraits(.isHeader)
 
                         Text("You don't have an active recovery claim. Start a new recovery process if you need to recover a lost identity.")
@@ -884,8 +877,7 @@ struct RecoveryStepRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: CGFloat(tokens.spacing.smMd)) {
             Text("\(number)")
-                .font(.caption)
-                .fontWeight(.bold)
+                .font(Font.caption.weight(.bold))
                 .frame(width: 24, height: 24)
                 .background(Color.cyan.opacity(0.2))
                 .foregroundColor(.cyan)
@@ -893,8 +885,7 @@ struct RecoveryStepRow: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(Font.subheadline.weight(.medium))
                 Text(description)
                     .font(.caption)
                     .foregroundColor(.secondary)

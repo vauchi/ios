@@ -969,8 +969,7 @@ struct DeviceLinkSheet: View {
                 .accessibilityHidden(true)
 
             Text("How would you like to link?")
-                .font(.title3)
-                .fontWeight(.semibold)
+                .font(Font.title3.weight(.semibold))
 
             Text("Choose how to connect with your new device.")
                 .font(.body)
@@ -983,7 +982,7 @@ struct DeviceLinkSheet: View {
                     startLinkFlow()
                 }) {
                     Label("Link via Internet", systemImage: "wifi")
-                        .fontWeight(.semibold)
+                        .font(Font.body.weight(.semibold))
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.cyan)
@@ -996,7 +995,7 @@ struct DeviceLinkSheet: View {
                     transport = .offline
                 }) {
                     Label("Link Offline (QR)", systemImage: "qrcode")
-                        .fontWeight(.semibold)
+                        .font(Font.body.weight(.semibold))
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color(.systemGray5))
@@ -1018,8 +1017,7 @@ struct DeviceLinkSheet: View {
                 .accessibilityHidden(true)
 
             Text("Offline Device Linking")
-                .font(.title3)
-                .fontWeight(.semibold)
+                .font(Font.title3.weight(.semibold))
 
             Text("Coming soon — offline device linking requires protocol updates.")
                 .font(.body)
@@ -1131,8 +1129,7 @@ struct DeviceLinkSheet: View {
                 .foregroundColor(.orange)
 
             Text("QR Code Expired")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(Font.title2.weight(.semibold))
 
             Text("The device link QR code has expired for security reasons. Generate a new one to continue.")
                 .font(.body)
@@ -1145,7 +1142,7 @@ struct DeviceLinkSheet: View {
                 startLinkFlow()
             }) {
                 Text("Generate New QR")
-                    .fontWeight(.semibold)
+                    .font(Font.body.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.cyan)
@@ -1165,8 +1162,7 @@ struct DeviceLinkSheet: View {
                 .accessibilityHidden(true)
 
             Text("Device Wants to Link")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(Font.title2.weight(.semibold))
 
             VStack(spacing: 8) {
                 Text("Device: **\(name)**")
@@ -1177,8 +1173,7 @@ struct DeviceLinkSheet: View {
                     .foregroundColor(.secondary)
 
                 Text(code)
-                    .font(.system(.title, design: .monospaced))
-                    .fontWeight(.bold)
+                    .font(Font.system(.title, design: .monospaced).weight(.bold))
                     .foregroundColor(.cyan)
                     .accessibilityLabel("Confirmation code: \(code)")
             }
@@ -1195,7 +1190,7 @@ struct DeviceLinkSheet: View {
                 viewModel.deviceLinkState = .verifyingProximity(challenge: challenge, confirmationCode: code)
             }) {
                 Text("Codes Match — Verify Proximity")
-                    .fontWeight(.semibold)
+                    .font(Font.body.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.cyan)
@@ -1227,8 +1222,7 @@ struct DeviceLinkSheet: View {
                 .accessibilityHidden(true)
 
             Text("Device Linked Successfully")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(Font.title2.weight(.semibold))
 
             Text("The new device now has access to your identity. You can manage linked devices in Settings.")
                 .font(.body)
@@ -1240,7 +1234,7 @@ struct DeviceLinkSheet: View {
                 viewModel.cancelDeviceLink()
                 dismiss()
             }
-            .fontWeight(.semibold)
+            .font(Font.body.weight(.semibold))
             .frame(maxWidth: .infinity)
             .padding()
             .background(Color.cyan)
@@ -1257,8 +1251,7 @@ struct DeviceLinkSheet: View {
                 .accessibilityHidden(true)
 
             Text("Linking Failed")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(Font.title2.weight(.semibold))
 
             Text(message)
                 .font(.body)
@@ -1270,7 +1263,7 @@ struct DeviceLinkSheet: View {
                 viewModel.cancelDeviceLink()
                 startLinkFlow()
             }
-            .fontWeight(.semibold)
+            .font(Font.body.weight(.semibold))
             .frame(maxWidth: .infinity)
             .padding()
             .background(Color.cyan)

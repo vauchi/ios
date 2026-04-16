@@ -329,8 +329,7 @@ struct NetworkStatItem: View {
                 .font(.caption)
                 .accessibilityHidden(true)
             Text(value)
-                .font(.title3)
-                .fontWeight(.bold)
+                .font(Font.title3.weight(.bold))
             Text(label)
                 .font(.caption2)
                 .foregroundColor(.secondary)
@@ -351,8 +350,7 @@ struct TrustFilterChip: View {
         Button(action: action) {
             HStack(spacing: 4) {
                 Text(label)
-                    .font(.caption)
-                    .fontWeight(isSelected ? .semibold : .regular)
+                    .font(Font.caption.weight(isSelected ? .semibold : .regular))
                 Text("\(count)")
                     .font(.caption2)
                     .padding(.horizontal, 6)
@@ -431,8 +429,7 @@ struct SocialContactRow: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(contact.displayName)
-                    .font(.body)
-                    .fontWeight(.medium)
+                    .font(Font.body.weight(.medium))
 
                 HStack(spacing: 4) {
                     Image(systemName: trustLevel.iconName)

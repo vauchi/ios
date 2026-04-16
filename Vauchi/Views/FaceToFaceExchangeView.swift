@@ -236,8 +236,7 @@ struct FaceToFaceExchangeView: View {
                 .fill(scanQuality.color)
                 .frame(width: 10, height: 10)
             Text(scanQuality.label)
-                .font(.caption2)
-                .fontWeight(.medium)
+                .font(Font.caption2.weight(.medium))
                 .foregroundColor(Color(white: 0.27))
             Spacer()
         }
@@ -256,8 +255,7 @@ struct FaceToFaceExchangeView: View {
                     .foregroundColor(.orange)
 
                 Text("Exchange completed")
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(Font.title2.weight(.semibold))
 
                 Text(error)
                     .font(.body)
@@ -268,8 +266,7 @@ struct FaceToFaceExchangeView: View {
                     .foregroundColor(.green)
 
                 Text("Contact exchanged!")
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(Font.title2.weight(.semibold))
 
                 if let contactName = finalizationResult {
                     Text("\(contactName) has been added.")
@@ -302,8 +299,7 @@ struct FaceToFaceExchangeView: View {
                 .foregroundColor(.red)
 
             Text("Exchange failed")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(Font.title2.weight(.semibold))
                 .foregroundColor(.red)
 
             Text(reason)
@@ -464,8 +460,7 @@ struct FaceToFaceExchangeView: View {
                 .foregroundColor(.secondary)
 
             Text("Camera Required")
-                .font(.title3)
-                .fontWeight(.semibold)
+                .font(Font.title3.weight(.semibold))
 
             Text("Camera is needed to scan QR codes for contact exchange.")
                 .font(.body)

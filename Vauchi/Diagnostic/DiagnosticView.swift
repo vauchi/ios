@@ -20,8 +20,7 @@
         var body: some View {
             VStack(spacing: 16) {
                 Text("Ultrasonic Diagnostic")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(Font.title2.weight(.bold))
 
                 HStack(spacing: 12) {
                     diagButton("A: Loopback") { testLoopback() }

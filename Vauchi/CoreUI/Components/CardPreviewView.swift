@@ -69,8 +69,7 @@ struct CardPreviewView: View {
                     .accessibilityHidden(true)
 
                 Text(currentDisplayName)
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(Font.title2.weight(.semibold))
                     .accessibilityLabel("Display name: \(currentDisplayName)")
             }
             .padding(.vertical, 24)

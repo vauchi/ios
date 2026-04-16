@@ -196,7 +196,7 @@ struct ProximityVerificationView: View {
                     },
                     label: {
                         Text("Confirm Nearby")
-                            .fontWeight(.semibold)
+                            .font(Font.body.weight(.semibold))
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.cyan)
@@ -224,7 +224,7 @@ struct ProximityVerificationView: View {
                     },
                     label: {
                         Text("Retry")
-                            .fontWeight(.semibold)
+                            .font(Font.body.weight(.semibold))
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.cyan)

@@ -36,8 +36,7 @@ struct AppPasswordView: View {
                 .accessibilityHidden(true)
 
             Text("Enter Password")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(Font.title2.weight(.semibold))
 
             Text("Enter your app password to continue")
                 .font(.subheadline)

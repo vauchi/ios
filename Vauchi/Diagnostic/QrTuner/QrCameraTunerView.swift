@@ -262,8 +262,7 @@
         var body: some View {
             VStack(spacing: 16) {
                 Text("QR Camera Tuner")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(Font.title2.weight(.bold))
 
                 if let error = errorMessage {
                     Text(error)

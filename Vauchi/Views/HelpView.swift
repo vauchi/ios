@@ -217,8 +217,7 @@ struct FaqRow: View {
                 if !faq.related.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Related:")
-                            .font(.caption)
-                            .fontWeight(.semibold)
+                            .font(Font.caption.weight(.semibold))
                             .foregroundColor(.secondary)
 
                         ForEach(faq.related, id: \.self) { relatedId in

@@ -27,8 +27,7 @@ struct SetupView: View {
                     .accessibilityHidden(true)
 
                 Text(localizationService.t("welcome.title"))
-                    .font(.title)
-                    .fontWeight(.bold)
+                    .font(Font.title.weight(.bold))
                     .accessibilityIdentifier("setup.welcome.title")
                     .accessibilityAddTraits(.isHeader)
 

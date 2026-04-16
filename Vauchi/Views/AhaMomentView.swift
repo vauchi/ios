@@ -33,8 +33,7 @@ struct AhaMomentView: View {
 
             // Title
             Text(moment.title)
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(Font.title2.weight(.bold))
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
 
@@ -48,7 +47,7 @@ struct AhaMomentView: View {
             // Dismiss button
             Button(action: onDismiss) {
                 Text("Got it!")
-                    .fontWeight(.semibold)
+                    .font(Font.body.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.cyan)

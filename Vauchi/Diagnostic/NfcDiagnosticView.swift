@@ -28,8 +28,7 @@
         var body: some View {
             VStack(spacing: 16) {
                 Text("NFC Diagnostic")
-                    .font(.title2)
-                    .fontWeight(.bold)
+                    .font(Font.title2.weight(.bold))
 
                 Text("iOS Reader → Android HCE")
                     .font(.caption)

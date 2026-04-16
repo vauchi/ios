@@ -25,8 +25,7 @@ struct LockScreenView: View {
                 .accessibilityHidden(true)
 
             Text("Vauchi is Locked")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(Font.title2.weight(.semibold))
                 .accessibilityAddTraits(.isHeader)
 
             Text("Authenticate to access your contacts")

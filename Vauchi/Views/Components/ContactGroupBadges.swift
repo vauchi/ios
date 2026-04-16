@@ -54,8 +54,7 @@ struct ContactGroupBadges: View {
 
                 if overflowCount > 0 {
                     Text("+\(overflowCount)")
-                        .font(.caption2)
-                        .fontWeight(.medium)
+                        .font(Font.caption2.weight(.medium))
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
@@ -95,8 +94,7 @@ struct GroupBadge: View {
                 .font(.system(size: 8))
                 .accessibilityHidden(true)
             Text(name)
-                .font(.caption2)
-                .fontWeight(.medium)
+                .font(Font.caption2.weight(.medium))
                 .lineLimit(1)
         }
         .foregroundColor(.cyan)
