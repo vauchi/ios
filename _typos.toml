@@ -14,3 +14,5 @@ extend-exclude = [
 PN = "PN"
 UDID = "UDID"
 mappin = "mappin"
+# CBAttributePermissions.writeable is the Apple API spelling
+writeable = "writeable"
