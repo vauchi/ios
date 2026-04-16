@@ -62,6 +62,10 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
+        UIBackgroundModes:
+          - fetch
+        BGTaskSchedulerPermittedIdentifiers:
+          - app.vauchi.sync
         CFBundleURLTypes:
           - CFBundleURLSchemes:
               - vauchi

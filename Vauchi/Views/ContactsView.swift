@@ -41,6 +41,7 @@ struct ContactsView: View {
                                     .font(.caption)
                                     .foregroundColor(showHiddenContacts ? .purple : .secondary)
                                 Spacer()
+                                SyncStatusBadge(state: viewModel.syncState)
                                 if showHiddenContacts {
                                     Image(systemName: "eye.slash.fill")
                                         .font(.caption)
