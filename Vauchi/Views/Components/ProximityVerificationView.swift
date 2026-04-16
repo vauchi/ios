@@ -77,8 +77,7 @@ struct ProximityVerificationView: View {
 
             // Status text
             stateTitle
-                .font(.title2)
-                .fontWeight(.semibold)
+                .font(Font.title2.weight(.semibold))
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
 
