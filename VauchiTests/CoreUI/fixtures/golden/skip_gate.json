@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "skip_gate",
   "title": "Set up your card",
   "subtitle": "A few more steps to get the most out of Vauchi.",
@@ -25,7 +25,12 @@
             "title": "Visibility",
             "detail": "Choose what each group can see."
           }
-        ]
+        ],
+        "a11y": {
+          "label": "What you'll set up next",
+          "hint": null,
+          "role": "Heading"
+        }
       }
     }
   ],
@@ -60,7 +65,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

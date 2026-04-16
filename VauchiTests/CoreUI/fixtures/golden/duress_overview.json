@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "duress_overview",
   "title": "Duress PIN",
   "subtitle": null,
@@ -15,7 +15,8 @@
             "title": "What is a Duress PIN?",
             "detail": "A secondary PIN that, when entered, silently alerts your chosen contacts while appearing to unlock normally."
           }
-        ]
+        ],
+        "a11y": null
       }
     },
     {
@@ -27,9 +28,11 @@
             "id": "enabled",
             "label": "Duress PIN enabled",
             "selected": false,
-            "subtitle": null
+            "subtitle": null,
+            "a11y": null
           }
-        ]
+        ],
+        "a11y": null
       }
     }
   ],
@@ -58,7 +61,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "groups_setup",
   "title": "Choose your groups",
   "subtitle": "Groups let you share different info with different people. Use [Space] to select.",
@@ -20,27 +20,52 @@
             "id": "Family",
             "label": "Family",
             "selected": false,
-            "subtitle": null
+            "subtitle": null,
+            "a11y": {
+              "label": "Family, not selected",
+              "hint": "Double tap to toggle",
+              "role": "Toggle"
+            }
           },
           {
             "id": "Friends",
             "label": "Friends",
             "selected": false,
-            "subtitle": null
+            "subtitle": null,
+            "a11y": {
+              "label": "Friends, not selected",
+              "hint": "Double tap to toggle",
+              "role": "Toggle"
+            }
           },
           {
             "id": "Coworkers",
             "label": "Coworkers",
             "selected": false,
-            "subtitle": null
+            "subtitle": null,
+            "a11y": {
+              "label": "Coworkers, not selected",
+              "hint": "Double tap to toggle",
+              "role": "Toggle"
+            }
           },
           {
             "id": "Business",
             "label": "Business",
             "selected": false,
-            "subtitle": null
+            "subtitle": null,
+            "a11y": {
+              "label": "Business, not selected",
+              "hint": "Double tap to toggle",
+              "role": "Toggle"
+            }
           }
-        ]
+        ],
+        "a11y": {
+          "label": "Suggested groups options",
+          "hint": "Select items to include",
+          "role": null
+        }
       }
     },
     {
@@ -51,7 +76,12 @@
         "placeholder": "Type a group name and press Enter",
         "max_length": 50,
         "validation_error": null,
-        "input_type": "Text"
+        "input_type": "Text",
+        "a11y": {
+          "label": "Custom group name input",
+          "hint": "Enter a name for a custom contact group",
+          "role": null
+        }
       }
     }
   ],
@@ -86,7 +116,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

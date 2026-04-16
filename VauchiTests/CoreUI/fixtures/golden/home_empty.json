@@ -1,9 +1,22 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "my_info",
   "title": "",
   "subtitle": null,
   "components": [
+    {
+      "AvatarPreview": {
+        "id": "avatar",
+        "initials": "",
+        "brightness": 0.0,
+        "editable": true,
+        "a11y": {
+          "label": "Your avatar",
+          "hint": "Tap to edit avatar",
+          "role": "Button"
+        }
+      }
+    },
     {
       "Text": {
         "id": "empty_hint",
@@ -45,7 +58,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "edit_preview",
   "title": "Preview Card",
   "subtitle": null,
@@ -17,6 +17,11 @@
               "Groups": [
                 "Family"
               ]
+            },
+            "a11y": {
+              "label": "Mobile: +1-555-0100",
+              "hint": "Visible to specific groups",
+              "role": null
             }
           },
           {
@@ -29,6 +34,11 @@
                 "Friends",
                 "Work"
               ]
+            },
+            "a11y": {
+              "label": "Work: alice@example.com",
+              "hint": "Visible to specific groups",
+              "role": null
             }
           }
         ],
@@ -46,6 +56,11 @@
                   "Groups": [
                     "Family"
                   ]
+                },
+                "a11y": {
+                  "label": "Mobile: +1-555-0100",
+                  "hint": "Visible to specific groups",
+                  "role": null
                 }
               }
             ]
@@ -64,6 +79,11 @@
                     "Friends",
                     "Work"
                   ]
+                },
+                "a11y": {
+                  "label": "Work: alice@example.com",
+                  "hint": "Visible to specific groups",
+                  "role": null
                 }
               }
             ]
@@ -82,12 +102,22 @@
                     "Friends",
                     "Work"
                   ]
+                },
+                "a11y": {
+                  "label": "Work: alice@example.com",
+                  "hint": "Visible to specific groups",
+                  "role": null
                 }
               }
             ]
           }
         ],
-        "selected_group": null
+        "selected_group": null,
+        "a11y": {
+          "label": "Card preview: Alice",
+          "hint": "Shows how your card appears to others",
+          "role": null
+        }
       }
     }
   ],
@@ -122,7 +152,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

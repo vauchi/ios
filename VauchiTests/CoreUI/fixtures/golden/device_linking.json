@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "link_show_qr",
   "title": "Link Device",
   "subtitle": null,
@@ -9,7 +9,19 @@
         "id": "qr",
         "data": "vauchi://link?token=abc123",
         "mode": "Display",
-        "label": "Scan on new device"
+        "label": "Scan on new device",
+        "a11y": {
+          "label": "Device link QR code",
+          "hint": "Scan this code on your new device to begin linking.",
+          "role": "Image"
+        }
+      }
+    },
+    {
+      "Text": {
+        "id": "join_hint",
+        "content": "To join from another device, use: vauchi device join <qr_data>",
+        "style": "Caption"
       }
     }
   ],
@@ -38,7 +50,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

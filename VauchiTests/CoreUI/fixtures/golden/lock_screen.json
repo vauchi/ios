@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "lock_screen",
   "title": "Enter Password",
   "subtitle": null,
@@ -11,7 +11,12 @@
         "length": 6,
         "filled": 0,
         "masked": true,
-        "validation_error": null
+        "validation_error": null,
+        "a11y": {
+          "label": "PIN entry",
+          "hint": "Enter your PIN to unlock",
+          "role": null
+        }
       }
     }
   ],
@@ -36,7 +41,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

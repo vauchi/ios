@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "delivery_status",
   "title": "Delivery Status",
   "subtitle": null,
@@ -10,7 +10,8 @@
         "icon": null,
         "title": "Alice",
         "detail": "Delivered 2 min ago",
-        "status": "Success"
+        "status": "Success",
+        "a11y": null
       }
     },
     {
@@ -19,7 +20,8 @@
         "icon": null,
         "title": "Bob",
         "detail": "Relay unreachable",
-        "status": "Failed"
+        "status": "Failed",
+        "a11y": null
       }
     }
   ],
@@ -44,7 +46,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

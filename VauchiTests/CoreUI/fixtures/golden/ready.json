@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "ready",
   "title": "You're all set!",
   "subtitle": "Your Vauchi identity is ready.",
@@ -20,7 +20,8 @@
             "title": "Edit anytime",
             "detail": "Update your card whenever you like."
           }
-        ]
+        ],
+        "a11y": null
       }
     }
   ],
@@ -49,7 +50,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

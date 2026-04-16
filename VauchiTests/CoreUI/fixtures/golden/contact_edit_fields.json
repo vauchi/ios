@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "edit_fields",
   "title": "Edit Contact",
   "subtitle": null,
@@ -12,7 +12,8 @@
         "placeholder": "Enter name",
         "max_length": null,
         "validation_error": null,
-        "input_type": "Text"
+        "input_type": "Text",
+        "a11y": null
       }
     },
     "Divider",
@@ -29,6 +30,11 @@
               "Groups": [
                 "Family"
               ]
+            },
+            "a11y": {
+              "label": "Mobile: +1-555-0100",
+              "hint": "Visible to specific groups",
+              "role": null
             }
           },
           {
@@ -41,6 +47,11 @@
                 "Friends",
                 "Work"
               ]
+            },
+            "a11y": {
+              "label": "Work: alice@example.com",
+              "hint": "Visible to specific groups",
+              "role": null
             }
           }
         ],
@@ -49,7 +60,12 @@
           "Family",
           "Friends",
           "Work"
-        ]
+        ],
+        "a11y": {
+          "label": "Contact fields",
+          "hint": "Toggle field visibility",
+          "role": null
+        }
       }
     }
   ],
@@ -78,7 +94,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

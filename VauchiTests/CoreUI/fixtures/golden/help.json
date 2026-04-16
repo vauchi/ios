@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "help",
   "title": "Help & FAQ",
   "subtitle": null,
@@ -12,7 +12,8 @@
             "id": "faq1",
             "label": "How do I exchange contacts?",
             "icon": null,
-            "detail": null
+            "detail": null,
+            "a11y": null
           }
         ]
       }
@@ -25,7 +26,8 @@
             "id": "faq2",
             "label": "What is a duress PIN?",
             "icon": null,
-            "detail": null
+            "detail": null,
+            "a11y": null
           }
         ]
       }
@@ -45,7 +47,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

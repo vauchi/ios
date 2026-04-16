@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "shred_warning",
   "title": "Emergency Data Wipe",
   "subtitle": null,
@@ -25,7 +25,8 @@
             "title": "This action is irreversible",
             "detail": "There is no way to undo this operation."
           }
-        ]
+        ],
+        "a11y": null
       }
     }
   ],
@@ -60,7 +61,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "contact_list",
   "title": "Contacts",
   "subtitle": null,
@@ -14,7 +14,8 @@
             "subtitle": "Friend",
             "avatar_initials": "A",
             "status": null,
-            "searchable_fields": []
+            "searchable_fields": [],
+            "a11y": null
           },
           {
             "id": "c2",
@@ -22,7 +23,8 @@
             "subtitle": null,
             "avatar_initials": "B",
             "status": "Updated",
-            "searchable_fields": []
+            "searchable_fields": [],
+            "a11y": null
           }
         ],
         "searchable": true
@@ -34,6 +36,18 @@
       "id": "add_contact",
       "label": "Add Contact",
       "style": "Primary",
+      "enabled": true
+    },
+    {
+      "id": "view_archived",
+      "label": "Archived Contacts",
+      "style": "Secondary",
+      "enabled": true
+    },
+    {
+      "id": "find_duplicates",
+      "label": "Find Duplicates",
+      "style": "Secondary",
       "enabled": true
     }
   ],
@@ -50,7 +64,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

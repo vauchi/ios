@@ -1,5 +1,5 @@
 {
-  "core_version": "0.11.2",
+  "core_version": "0.19.18",
   "fixture_count": 27,
-  "schema_version": 1
+  "schema_version": 3
 }

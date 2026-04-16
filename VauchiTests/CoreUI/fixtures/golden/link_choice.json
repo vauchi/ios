@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "link_choice",
   "title": "Restore your identity",
   "subtitle": "Choose how to restore your existing identity.",
@@ -11,6 +11,11 @@
         "title": "",
         "items": [
           {
+            "icon": "devices",
+            "title": "Transfer from another device",
+            "detail": "Move all contacts and data from your old device via QR code."
+          },
+          {
             "icon": "link",
             "title": "Link from another device",
             "detail": "Scan a QR code on your other device to link this one."
@@ -18,17 +23,28 @@
           {
             "icon": "backup",
             "title": "Restore from backup",
-            "detail": "Import your identity from a backup file."
+            "detail": "Import identity only. Contacts will need to be re-established."
           }
-        ]
+        ],
+        "a11y": {
+          "label": "Restore your identity",
+          "hint": null,
+          "role": "Heading"
+        }
       }
     }
   ],
   "actions": [
     {
+      "id": "transfer_device",
+      "label": "Transfer from another device",
+      "style": "Primary",
+      "enabled": true
+    },
+    {
       "id": "link_device",
       "label": "Link from another device",
-      "style": "Primary",
+      "style": "Secondary",
       "enabled": true
     },
     {
@@ -57,7 +73,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

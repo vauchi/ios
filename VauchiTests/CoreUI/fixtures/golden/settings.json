@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "settings",
   "title": "Settings",
   "subtitle": null,
@@ -16,6 +16,11 @@
               "Value": {
                 "value": "Alice"
               }
+            },
+            "a11y": {
+              "label": "Display Name",
+              "hint": "Your visible name shown to contacts",
+              "role": null
             }
           },
           {
@@ -25,6 +30,11 @@
               "Link": {
                 "detail": null
               }
+            },
+            "a11y": {
+              "label": "Edit Profile",
+              "hint": "Opens the profile editor",
+              "role": null
             }
           }
         ]
@@ -42,6 +52,11 @@
               "Toggle": {
                 "enabled": true
               }
+            },
+            "a11y": {
+              "label": "Delivery Receipts toggle",
+              "hint": "When enabled, notifies senders when their messages are delivered",
+              "role": null
             }
           },
           {
@@ -51,6 +66,119 @@
               "Toggle": {
                 "enabled": false
               }
+            },
+            "a11y": {
+              "label": "Suppress Presence toggle",
+              "hint": "When enabled, hides your online status from contacts",
+              "role": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "notifications",
+        "label": "Notifications",
+        "items": [
+          {
+            "id": "contact_added",
+            "label": "New Contact Added",
+            "kind": {
+              "Toggle": {
+                "enabled": false
+              }
+            },
+            "a11y": {
+              "label": "New Contact Added toggle",
+              "hint": "When enabled, sends a notification when a new contact is added",
+              "role": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "appearance",
+        "label": "Appearance",
+        "items": [
+          {
+            "id": "theme",
+            "label": "Theme",
+            "kind": {
+              "Value": {
+                "value": ""
+              }
+            },
+            "a11y": {
+              "label": "Theme",
+              "hint": "The current color theme of the app",
+              "role": null
+            }
+          },
+          {
+            "id": "language",
+            "label": "Language",
+            "kind": {
+              "Value": {
+                "value": ""
+              }
+            },
+            "a11y": {
+              "label": "Language",
+              "hint": "The current display language of the app",
+              "role": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "accessibility",
+        "label": "Accessibility",
+        "items": [
+          {
+            "id": "reduce_motion",
+            "label": "Reduce Motion",
+            "kind": {
+              "Toggle": {
+                "enabled": false
+              }
+            },
+            "a11y": {
+              "label": "Reduce Motion toggle",
+              "hint": "When enabled, minimizes animations and motion effects",
+              "role": null
+            }
+          },
+          {
+            "id": "high_contrast",
+            "label": "High Contrast",
+            "kind": {
+              "Toggle": {
+                "enabled": false
+              }
+            },
+            "a11y": {
+              "label": "High Contrast toggle",
+              "hint": "When enabled, increases color contrast for better visibility",
+              "role": null
+            }
+          },
+          {
+            "id": "large_touch",
+            "label": "Large Touch Targets",
+            "kind": {
+              "Toggle": {
+                "enabled": false
+              }
+            },
+            "a11y": {
+              "label": "Large Touch Targets toggle",
+              "hint": "When enabled, increases the size of interactive elements",
+              "role": null
             }
           }
         ]
@@ -68,6 +196,11 @@
               "Link": {
                 "detail": null
               }
+            },
+            "a11y": {
+              "label": "Change Password",
+              "hint": "Opens the password change screen",
+              "role": null
             }
           },
           {
@@ -77,6 +210,11 @@
               "Link": {
                 "detail": "2 devices"
               }
+            },
+            "a11y": {
+              "label": "Devices",
+              "hint": "Opens the list of linked devices",
+              "role": null
             }
           },
           {
@@ -86,6 +224,61 @@
               "Link": {
                 "detail": null
               }
+            },
+            "a11y": {
+              "label": "Duress PIN",
+              "hint": "Opens the duress PIN configuration screen",
+              "role": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "backup",
+        "label": "Backup & Recovery",
+        "items": [
+          {
+            "id": "backup_export",
+            "label": "Create Backup",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            },
+            "a11y": {
+              "label": "Create Backup",
+              "hint": "Opens the backup export screen",
+              "role": null
+            }
+          },
+          {
+            "id": "backup_import",
+            "label": "Restore Backup",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            },
+            "a11y": {
+              "label": "Restore Backup",
+              "hint": "Opens the backup restore screen",
+              "role": null
+            }
+          },
+          {
+            "id": "setup_new_device",
+            "label": "Set Up New Device",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            },
+            "a11y": {
+              "label": "Set Up New Device",
+              "hint": "Transfer your contacts to a new device via QR code",
+              "role": null
             }
           }
         ]
@@ -103,6 +296,147 @@
               "Value": {
                 "value": "https://relay.vauchi.app"
               }
+            },
+            "a11y": {
+              "label": "Relay URL",
+              "hint": "The relay server used for message delivery",
+              "role": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "delivery",
+        "label": "Message Delivery",
+        "items": [
+          {
+            "id": "sync",
+            "label": "Sync Status",
+            "kind": {
+              "Link": {
+                "detail": ""
+              }
+            },
+            "a11y": {
+              "label": "Sync Status",
+              "hint": "Opens the sync status detail screen",
+              "role": null
+            }
+          },
+          {
+            "id": "pending_updates",
+            "label": "Pending Updates",
+            "kind": {
+              "Value": {
+                "value": "0"
+              }
+            },
+            "a11y": {
+              "label": "Pending Updates",
+              "hint": "Number of contact updates waiting to be delivered",
+              "role": null
+            }
+          },
+          {
+            "id": "failed_deliveries",
+            "label": "Failed Deliveries",
+            "kind": {
+              "Value": {
+                "value": "0"
+              }
+            },
+            "a11y": {
+              "label": "Failed Deliveries",
+              "hint": "Number of updates that failed to deliver",
+              "role": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "help",
+        "label": "Help & Support",
+        "items": [
+          {
+            "id": "help_center",
+            "label": "Help Center",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            },
+            "a11y": {
+              "label": "Help Center",
+              "hint": "Opens the help center",
+              "role": null
+            }
+          },
+          {
+            "id": "funding",
+            "label": "Support Development",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            },
+            "a11y": {
+              "label": "Support Development",
+              "hint": "Opens the funding and support page",
+              "role": null
+            }
+          },
+          {
+            "id": "privacy_policy",
+            "label": "Privacy Policy",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            },
+            "a11y": {
+              "label": "Privacy Policy",
+              "hint": "Opens the privacy policy",
+              "role": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "SettingsGroup": {
+        "id": "about",
+        "label": "About",
+        "items": [
+          {
+            "id": "version",
+            "label": "Version",
+            "kind": {
+              "Value": {
+                "value": ""
+              }
+            },
+            "a11y": {
+              "label": "Version",
+              "hint": "The current app version and build number",
+              "role": null
+            }
+          },
+          {
+            "id": "debug_mode",
+            "label": "Debug Mode",
+            "kind": {
+              "Toggle": {
+                "enabled": false
+              }
+            },
+            "a11y": {
+              "label": "Debug Mode toggle",
+              "hint": "When enabled, shows developer diagnostic information",
+              "role": null
             }
           }
         ]
@@ -120,6 +454,11 @@
               "Destructive": {
                 "label": "Wipe All Data"
               }
+            },
+            "a11y": {
+              "label": "Emergency Wipe",
+              "hint": "Permanently deletes all app data. This action cannot be undone",
+              "role": null
             }
           }
         ]
@@ -140,7 +479,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

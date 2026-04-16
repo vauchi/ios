@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "exchange_show_qr",
   "title": "Share Your Code",
   "subtitle": null,
@@ -9,7 +9,12 @@
         "id": "own_qr",
         "data": "vauchi://exchange?token=abc123",
         "mode": "Display",
-        "label": "Alice"
+        "label": "Alice",
+        "a11y": {
+          "label": "Your exchange QR code",
+          "hint": "Show this code to the other person to scan",
+          "role": "Image"
+        }
       }
     }
   ],
@@ -22,8 +27,8 @@
     }
   ],
   "progress": {
-    "current_step": 2,
-    "total_steps": 6,
+    "current_step": 4,
+    "total_steps": 8,
     "label": null
   },
   "tokens": {
@@ -38,7 +43,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,

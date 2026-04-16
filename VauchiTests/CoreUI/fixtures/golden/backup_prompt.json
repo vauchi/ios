@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 3,
   "screen_id": "backup_prompt",
   "title": "Back up your identity",
   "subtitle": null,
@@ -20,7 +20,8 @@
             "title": "Multi-device",
             "detail": "Backups let you use Vauchi on multiple devices."
           }
-        ]
+        ],
+        "a11y": null
       }
     }
   ],
@@ -55,7 +56,9 @@
       "content_start": 16,
       "content_end": 16,
       "list_item_start": 8,
-      "list_item_end": 8
+      "list_item_end": 8,
+      "list_item_inline_start": 12,
+      "list_item_inline_end": 12
     },
     "typography": {
       "title_size": 24,
