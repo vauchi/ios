@@ -199,8 +199,7 @@ private struct DuplicatePairRow: View {
                 } label: {
                     Label(localizationService.t("contacts.merge_confirm"),
                           systemImage: "arrow.triangle.merge")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                        .font(Font.subheadline.weight(.medium))
                 }
                 .buttonStyle(.borderedProminent)
                 .accessibilityIdentifier("contact_merge.merge_button")
