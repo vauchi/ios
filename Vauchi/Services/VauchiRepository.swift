@@ -8,9 +8,9 @@
 // DONE: Restore feature - RestoreIdentitySheet allows users to restore from
 // backup during onboarding using importBackup().
 //
-// DONE: Proximity verification - MobileProximityVerifier enabled in VauchiViewModel.swift
-// with AudioProximityService providing platform audio. Exposes emitProximityChallenge(),
-// listenForProximityResponse(), stopProximityVerification(), proximitySupported, proximityCapability.
+// DONE: Proximity verification - MobileProximityVerifier removed in core 0.19.21 (ADR-031).
+// AudioProximityService retained with inherent methods; proximity API stubbed until
+// command/event proximity protocol lands.
 //
 // DONE: Content updates - isContentUpdatesSupported(), checkContentUpdates(),
 // applyContentUpdates(), reloadSocialNetworks() methods implemented.

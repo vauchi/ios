@@ -1392,24 +1392,10 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
+    // TODO: Re-implement via command/event proximity protocol (ADR-031)
     private nonisolated func runAudioProximity() {
-        let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
-        guard verifier.isSupported() else { return }
-
-        var challengeBytes = Data(count: 16)
-        challengeBytes.withUnsafeMutableBytes { ptr in
-            _ = SecRandomCopyBytes(kSecRandomDefault, 16, ptr.baseAddress!)
-        }
-
-        let emitResult = verifier.emitChallenge(challenge: challengeBytes)
-        guard emitResult.success else { return }
-
-        let response = verifier.listenForResponse(timeoutMs: 5000)
-        if !response.isEmpty {
-            #if DEBUG
-                NSLog("[Exchange] Audio proximity verified (%d bytes)", response.count)
-            #endif
-        }
+        // MobileProximityVerifier removed in core 0.19.21.
+        // Audio proximity will use the command/event pattern when re-enabled.
     }
 
     func getMultiStageDisplayQr() -> MobileQrPayload? {
@@ -1435,24 +1421,22 @@ class VauchiViewModel: ObservableObject {
     }
 
     /// Proximity — used by device linking views and audio trust boost.
-    @Published var proximitySupported: Bool = {
-        let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
-        return verifier.isSupported()
-    }()
+    /// MobileProximityVerifier removed in core 0.19.21; stubbed until command/event protocol lands.
+    @Published var proximitySupported: Bool = false
 
     var proximityCapability: String {
         AudioProximityService.shared.checkCapability()
     }
 
-    func emitProximityChallenge(_ data: Data) -> Bool {
-        let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
-        return verifier.emitChallenge(challenge: data).success
+    // TODO: Re-implement via command/event proximity protocol (ADR-031)
+    func emitProximityChallenge(_: Data) -> Bool {
+        // MobileProximityVerifier removed in core 0.19.21.
+        false
     }
 
-    func listenForProximityResponse(timeoutMs: UInt64 = 5000) -> Data? {
-        let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
-        let response = verifier.listenForResponse(timeoutMs: timeoutMs)
-        return response.isEmpty ? nil : response
+    func listenForProximityResponse(timeoutMs _: UInt64 = 5000) -> Data? {
+        // MobileProximityVerifier removed in core 0.19.21.
+        nil
     }
 
     func stopProximityVerification() {

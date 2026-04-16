@@ -125,26 +125,15 @@ final class ExchangeCommandHandler {
 
     // MARK: - Audio
 
-    private func emitAudioChallenge(data: Data) {
-        let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
-        let result = verifier.emitChallenge(challenge: data)
-        if !result.success {
-            reportError(transport: "Audio", error: result.error)
-        }
+    // TODO: Re-implement via command/event proximity protocol (ADR-031)
+    private func emitAudioChallenge(data _: Data) {
+        // MobileProximityVerifier removed in core 0.19.21.
+        // Audio proximity will use the command/event pattern when re-enabled.
     }
 
-    private func listenForAudioResponse(timeoutMs: UInt64) {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self, let session else { return }
-            let verifier = MobileProximityVerifier(handler: AudioProximityService.shared)
-            let received = verifier.listenForResponse(timeoutMs: timeoutMs)
-            DispatchQueue.main.async {
-                try? session.applyHardwareEvent(
-                    event: .audioResponseReceived(data: received)
-                )
-                self.drainAndDispatch()
-            }
-        }
+    private func listenForAudioResponse(timeoutMs _: UInt64) {
+        // MobileProximityVerifier removed in core 0.19.21.
+        // Audio proximity will use the command/event pattern when re-enabled.
     }
 
     // MARK: - Relay Escrow
