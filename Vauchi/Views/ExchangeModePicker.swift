@@ -28,7 +28,7 @@ struct ExchangeModePicker: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             VStack(spacing: 16) {
                 Text(localizationService.t("exchange.choose_method"))
                     .font(.title2)
@@ -39,7 +39,7 @@ struct ExchangeModePicker: View {
                     title: localizationService.t("exchange.mode.qr"),
                     subtitle: localizationService.t("exchange.mode.qr_description"),
                     enabled: true,
-                    mode: .qr
+                    destination: FaceToFaceExchangeView(switchToContacts: switchToContacts)
                 )
 
                 modeCard(
@@ -47,7 +47,7 @@ struct ExchangeModePicker: View {
                     title: localizationService.t("exchange.mode.nfc"),
                     subtitle: localizationService.t("exchange.mode.nfc_description"),
                     enabled: hasNfc,
-                    mode: .nfc
+                    destination: NfcExchangeView(switchToContacts: switchToContacts)
                 )
 
                 modeCard(
@@ -55,31 +55,22 @@ struct ExchangeModePicker: View {
                     title: localizationService.t("exchange.mode.ble"),
                     subtitle: localizationService.t("exchange.mode.ble_description"),
                     enabled: true,
-                    mode: .ble
+                    destination: BleExchangeView(switchToContacts: switchToContacts)
                 )
 
                 Spacer()
             }
             .padding(24)
             .navigationTitle(localizationService.t("nav.exchange"))
-            .navigationDestination(for: ExchangeMode.self) { mode in
-                switch mode {
-                case .qr:
-                    FaceToFaceExchangeView(switchToContacts: switchToContacts)
-                case .nfc:
-                    NfcExchangeView(switchToContacts: switchToContacts)
-                case .ble:
-                    BleExchangeView(switchToContacts: switchToContacts)
-                }
-            }
         }
+        .navigationViewStyle(.stack)
     }
 
     private func modeCard(
         icon: String, title: String, subtitle: String,
-        enabled: Bool, mode: ExchangeMode
+        enabled: Bool, destination: some View
     ) -> some View {
-        NavigationLink(value: mode) {
+        NavigationLink(destination: destination) {
             HStack(spacing: 16) {
                 Image(systemName: icon)
                     .font(.system(size: 28))

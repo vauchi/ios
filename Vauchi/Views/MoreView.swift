@@ -11,7 +11,7 @@ struct MoreView: View {
     @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             List {
                 primarySection
                 secondarySection
@@ -20,6 +20,7 @@ struct MoreView: View {
             .navigationTitle(localizationService.t("nav.more"))
             .navigationBarTitleDisplayMode(.large)
         }
+        .navigationViewStyle(.stack)
     }
 
     // MARK: - Sections
