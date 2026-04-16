@@ -46,6 +46,7 @@ include:
       - '/ci-templates/badges.yml'
       - '/ci-templates/github-mirror.yml'
       - '/ci-templates/vrt-upload.yml'
+      - '/ci-templates/perf.yml'
 
 stages:
   - auto-tag
@@ -1022,6 +1023,21 @@ deploy:testflight:
     paths:
       - build/export/
     expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+
+# ============================================================
+# Performance — App Size Tracking
+# ============================================================
+
+perf:app-size:
+  extends: .mobile-size-tracking-job
+  tags: [macos, self-hosted]
+  needs: ["build:release"]
+  variables:
+    MOBILE_SIZE_ARTIFACT_DIR: "build/export"
+    MOBILE_SIZE_PLATFORM: "ios"
+    MOBILE_SIZE_FORMAT: "ipa"
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
 
