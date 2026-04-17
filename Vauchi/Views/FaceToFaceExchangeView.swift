@@ -184,7 +184,7 @@ struct FaceToFaceExchangeView: View {
             Image(uiImage: image)
                 .interpolation(.none)
                 .resizable()
-                .scaledToFit()
+                .aspectRatio(1, contentMode: .fit)
                 .padding(8)
                 .background(Color(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255))
                 .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
