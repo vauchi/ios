@@ -501,6 +501,32 @@ check:removed-symbols:
   variables:
     SEARCH_DIRS: "Vauchi/"
 
+# Design token drift: warn on hardcoded colors/spacing that bypass tokens.json.
+# Script lives in vauchi/scripts — fetched via API to avoid duplicating it here.
+# allow_failure: true makes this a visibility gate, not a merge blocker.
+check:design-tokens:
+  stage: lint
+  image: alpine:3.21
+  tags: [docker]
+  needs: []
+  allow_failure: true
+  before_script:
+    - apk add --no-cache bash findutils grep curl
+  script:
+    - |
+      curl --silent --fail \
+        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fcheck-design-tokens.sh/raw?ref=main" \
+        -o check-design-tokens.sh
+      chmod +x check-design-tokens.sh
+    - ./check-design-tokens.sh Vauchi/
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - ".gitlab-ci.yml"
+
 # ============================================================
 # Build Stage (MR: debug, Tag: release)
 # ============================================================
