@@ -660,8 +660,8 @@
 
                     #if VAUCHI_DIAGNOSTIC_SCANNER
                         if useRustScanner, let rustDelegate = rustScanner {
-                            // Rust scanner: use video data output for both frame
-                            // counting and QR decoding (no metadata output needed)
+                            // Rust scanner: video data output for both frame
+                            // counting and QR decoding (no metadata output)
                             let videoOutput = AVCaptureVideoDataOutput()
                             videoOutput.videoSettings = [
                                 kCVPixelBufferPixelFormatTypeKey as String:
@@ -677,8 +677,10 @@
                                 )
                                 videoOutput.alwaysDiscardsLateVideoFrames = true
                             }
-                        } else
-                    #endif {
+                        }
+                    #endif
+
+                    if !useRustScanner {
                         // AVFoundation: metadata output for QR + video for frame count
                         let metadataOutput = AVCaptureMetadataOutput()
                         let metadataQueue = DispatchQueue(
@@ -703,7 +705,6 @@
                             metadataDelegate, queue: metadataQueue
                         )
 
-                        // Frame counter for AVFoundation path
                         let videoOutput = AVCaptureVideoDataOutput()
                         let videoQueue = DispatchQueue(
                             label: "com.vauchi.qrtuner.video.\(config.id)"
@@ -785,10 +786,11 @@
                     Thread.sleep(forTimeInterval: Self.testDurationSeconds)
 
                     // Collect results
-                    let frameCount: Int
-                    let detectionCount: Int
-                    let avgIntervalMs: Double
+                    var frameCount = 0
+                    var detectionCount = 0
+                    var avgIntervalMs: Double = 0
 
+                    var didCollectRust = false
                     #if VAUCHI_DIAGNOSTIC_SCANNER
                         if useRustScanner, let rs = rustScanner {
                             let snap = rs.snapshot()
@@ -798,13 +800,16 @@
                                 ? Double(snap.decodeUs) / Double(snap.frames) / 1000.0
                                 : 0
                             avgIntervalMs = avgDecodeMs
+                            didCollectRust = true
                             NSLog(
                                 "[Vauchi] [QR Tuner] Config %d (rust): frames=%d detections=%d skipped=%d avgDecode=%.1fms preproc=%lluµs",
                                 config.id, frameCount, detectionCount,
                                 snap.skipped, avgDecodeMs, snap.preprocessUs
                             )
-                        } else
-                    #endif {
+                        }
+                    #endif
+
+                    if !didCollectRust {
                         let detectionSnapshot = metadataDelegate.snapshot()
                         frameCount = frameCounter.snapshot()
                         detectionCount = detectionSnapshot.count
