@@ -7,6 +7,18 @@
     import CoreImage.CIFilterBuiltins
     import SwiftUI
 
+    // MARK: - Scanner Mode
+
+    /// Scanner backend selection for benchmark comparison.
+    enum QrTunerScannerMode: String, CaseIterable {
+        /// AVFoundation metadata output (default iOS scanner).
+        case avFoundation = "avfoundation"
+        /// rqrr in Rust via UniFFI, no preprocessing.
+        case rqrrRaw = "rqrr_raw"
+        /// rqrr in Rust via UniFFI, with Tier 1 preprocessing.
+        case rqrrPreprocessed = "rqrr_preprocessed"
+    }
+
     // MARK: - Camera Config
 
     /// A single camera configuration to test during the sweep.
@@ -221,6 +233,99 @@
         }
     }
 
+    #if VAUCHI_DIAGNOSTIC_SCANNER
+        /// Processes video frames through the Rust rqrr scanner via UniFFI.
+        /// Replaces AVCaptureMetadataOutput when using rqrr backends.
+        /// Only compiled when VAUCHI_DIAGNOSTIC_SCANNER is defined in build settings.
+        private final class QrTunerRustScannerDelegate: NSObject,
+            AVCaptureVideoDataOutputSampleBufferDelegate {
+            private let lock = NSLock()
+            private(set) var frameCount: Int = 0
+            private(set) var detectionCount: Int = 0
+            private(set) var totalDecodeUs: UInt64 = 0
+            private(set) var totalPreprocessUs: UInt64 = 0
+            private(set) var skippedFrames: Int = 0
+            let backend: MobileScannerBackend
+
+            init(mode: QrTunerScannerMode) {
+                backend = mode == .rqrrRaw
+                    ? .rqrrRaw
+                    : .rqrrPreprocessed
+            }
+
+            func reset() {
+                lock.lock()
+                frameCount = 0
+                detectionCount = 0
+                totalDecodeUs = 0
+                totalPreprocessUs = 0
+                skippedFrames = 0
+                lock.unlock()
+            }
+
+            func snapshot() -> (frames: Int, detections: Int, decodeUs: UInt64, preprocessUs: UInt64, skipped: Int) {
+                lock.lock()
+                defer { lock.unlock() }
+                return (frameCount, detectionCount, totalDecodeUs, totalPreprocessUs, skippedFrames)
+            }
+
+            func captureOutput(
+                _: AVCaptureOutput,
+                didOutput sampleBuffer: CMSampleBuffer,
+                from _: AVCaptureConnection
+            ) {
+                guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
+                CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+                defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
+
+                let width = CVPixelBufferGetWidth(pixelBuffer)
+                let height = CVPixelBufferGetHeight(pixelBuffer)
+
+                guard let baseAddress = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0) else { return }
+                let bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0)
+
+                var lumaData = [UInt8](repeating: 0, count: width * height)
+                if bytesPerRow == width {
+                    lumaData.withUnsafeMutableBufferPointer { buf in
+                        buf.baseAddress!.initialize(
+                            from: baseAddress.assumingMemoryBound(to: UInt8.self),
+                            count: width * height
+                        )
+                    }
+                } else {
+                    for row in 0 ..< height {
+                        let src = baseAddress.advanced(by: row * bytesPerRow)
+                        lumaData.withUnsafeMutableBufferPointer { buf in
+                            buf.baseAddress!.advanced(by: row * width).initialize(
+                                from: src.assumingMemoryBound(to: UInt8.self),
+                                count: width
+                            )
+                        }
+                    }
+                }
+
+                let result = diagnosticScanQr(
+                    backend: backend,
+                    lumaData: lumaData,
+                    width: UInt32(width),
+                    height: UInt32(height)
+                )
+
+                lock.lock()
+                frameCount += 1
+                if result.frameSkipped {
+                    skippedFrames += 1
+                } else if result.decoded != nil {
+                    detectionCount += 1
+                }
+                totalDecodeUs += result.decodeUs
+                totalPreprocessUs += result.preprocessingUs
+                lock.unlock()
+            }
+        }
+    #endif
+
     // MARK: - QrCameraTunerView
 
     /// Automatable QR camera tuner that sweeps camera configurations and measures
@@ -235,6 +340,9 @@
         /// Auto-test mode: "sweep", "front", "quick", or nil for interactive.
         /// Append "-dual" for dual mode (e.g. "front-dual").
         var autoTest: String?
+
+        /// Scanner backend: avfoundation (default), rqrr_raw, rqrr_preprocessed.
+        var scannerMode: QrTunerScannerMode = .avFoundation
 
         @State private var logLines: [String] = []
         @State private var running = false
@@ -513,11 +621,21 @@
                 )
             }
 
+            #if VAUCHI_DIAGNOSTIC_SCANNER
+                let useRustScanner = scannerMode == .rqrrRaw || scannerMode == .rqrrPreprocessed
+            #else
+                let useRustScanner = false
+            #endif
             let metadataDelegate = QrTunerMetadataDelegate()
             metadataDelegate.setLogCallback { [self] message in
                 log(message)
             }
             let frameCounter = QrTunerFrameCounter()
+            #if VAUCHI_DIAGNOSTIC_SCANNER
+                let rustScanner: QrTunerRustScannerDelegate? = useRustScanner
+                    ? QrTunerRustScannerDelegate(mode: scannerMode)
+                    : nil
+            #endif
 
             // Set up and run capture session on the dedicated session queue
             return await withCheckedContinuation { continuation in
@@ -540,46 +658,83 @@
                     }
                     session.addInput(input)
 
-                    // Add metadata output for QR detection
-                    let metadataOutput = AVCaptureMetadataOutput()
-                    let metadataQueue = DispatchQueue(label: "com.vauchi.qrtuner.metadata.\(config.id)")
+                    #if VAUCHI_DIAGNOSTIC_SCANNER
+                        if useRustScanner, let rustDelegate = rustScanner {
+                            // Rust scanner: use video data output for both frame
+                            // counting and QR decoding (no metadata output needed)
+                            let videoOutput = AVCaptureVideoDataOutput()
+                            videoOutput.videoSettings = [
+                                kCVPixelBufferPixelFormatTypeKey as String:
+                                    kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+                            ]
+                            let videoQueue = DispatchQueue(
+                                label: "com.vauchi.qrtuner.rustscan.\(config.id)"
+                            )
+                            if session.canAddOutput(videoOutput) {
+                                session.addOutput(videoOutput)
+                                videoOutput.setSampleBufferDelegate(
+                                    rustDelegate, queue: videoQueue
+                                )
+                                videoOutput.alwaysDiscardsLateVideoFrames = true
+                            }
+                        } else
+                    #endif {
+                        // AVFoundation: metadata output for QR + video for frame count
+                        let metadataOutput = AVCaptureMetadataOutput()
+                        let metadataQueue = DispatchQueue(
+                            label: "com.vauchi.qrtuner.metadata.\(config.id)"
+                        )
 
-                    guard session.canAddOutput(metadataOutput) else {
-                        NSLog("[Vauchi] [QR Tuner] WARN: Cannot add metadata output for config %d", config.id)
-                        session.commitConfiguration()
-                        continuation.resume(returning: QrTunerConfigResult(
-                            id: config.id, config: config,
-                            framesProcessed: 0, qrDetections: 0,
-                            avgDetectionIntervalMs: 0, score: 0
-                        ))
-                        return
-                    }
-                    session.addOutput(metadataOutput)
-                    metadataOutput.setMetadataObjectsDelegate(metadataDelegate, queue: metadataQueue)
+                        guard session.canAddOutput(metadataOutput) else {
+                            NSLog(
+                                "[Vauchi] [QR Tuner] WARN: Cannot add metadata output for config %d",
+                                config.id
+                            )
+                            session.commitConfiguration()
+                            continuation.resume(returning: QrTunerConfigResult(
+                                id: config.id, config: config,
+                                framesProcessed: 0, qrDetections: 0,
+                                avgDetectionIntervalMs: 0, score: 0
+                            ))
+                            return
+                        }
+                        session.addOutput(metadataOutput)
+                        metadataOutput.setMetadataObjectsDelegate(
+                            metadataDelegate, queue: metadataQueue
+                        )
 
-                    // Add video data output for frame counting
-                    let videoOutput = AVCaptureVideoDataOutput()
-                    let videoQueue = DispatchQueue(label: "com.vauchi.qrtuner.video.\(config.id)")
-
-                    if session.canAddOutput(videoOutput) {
-                        session.addOutput(videoOutput)
-                        videoOutput.setSampleBufferDelegate(frameCounter, queue: videoQueue)
-                        videoOutput.alwaysDiscardsLateVideoFrames = true
+                        // Frame counter for AVFoundation path
+                        let videoOutput = AVCaptureVideoDataOutput()
+                        let videoQueue = DispatchQueue(
+                            label: "com.vauchi.qrtuner.video.\(config.id)"
+                        )
+                        if session.canAddOutput(videoOutput) {
+                            session.addOutput(videoOutput)
+                            videoOutput.setSampleBufferDelegate(
+                                frameCounter, queue: videoQueue
+                            )
+                            videoOutput.alwaysDiscardsLateVideoFrames = true
+                        }
                     }
 
                     // CRITICAL: Commit configuration BEFORE setting metadataObjectTypes.
                     // availableMetadataObjectTypes is empty until the session config is committed.
                     session.commitConfiguration()
 
-                    // Now set QR type after commit
-                    let availableTypes = metadataOutput.availableMetadataObjectTypes
-                    if availableTypes.contains(.qr) {
-                        metadataOutput.metadataObjectTypes = [.qr]
-                        NSLog("[Vauchi] [QR Tuner] Config %d: QR metadata type set successfully (available: %d types)",
-                              config.id, availableTypes.count)
-                    } else {
-                        NSLog("[Vauchi] [QR Tuner] WARN: Config %d: .qr NOT in availableMetadataObjectTypes! Available: %@",
-                              config.id, availableTypes.map(\.rawValue).description)
+                    // Set QR metadata type (AVFoundation path only)
+                    if !useRustScanner {
+                        // Find the metadata output we just added
+                        if let metaOut = session.outputs.compactMap({ $0 as? AVCaptureMetadataOutput }).first {
+                            let availableTypes = metaOut.availableMetadataObjectTypes
+                            if availableTypes.contains(.qr) {
+                                metaOut.metadataObjectTypes = [.qr]
+                                NSLog("[Vauchi] [QR Tuner] Config %d: QR metadata type set (available: %d types)",
+                                      config.id, availableTypes.count)
+                            } else {
+                                NSLog("[Vauchi] [QR Tuner] WARN: Config %d: .qr NOT available! Types: %@",
+                                      config.id, availableTypes.map(\.rawValue).description)
+                            }
+                        }
                     }
 
                     // Apply zoom and exposure bias
@@ -619,6 +774,9 @@
                     // Reset counters after stabilization
                     metadataDelegate.reset()
                     frameCounter.reset()
+                    #if VAUCHI_DIAGNOSTIC_SCANNER
+                        rustScanner?.reset()
+                    #endif
 
                     NSLog("[Vauchi] [QR Tuner] Config %d: stabilized (%dms), starting %0.1fs measurement",
                           config.id, stabMs, Self.testDurationSeconds)
@@ -627,31 +785,53 @@
                     Thread.sleep(forTimeInterval: Self.testDurationSeconds)
 
                     // Collect results
-                    let detectionSnapshot = metadataDelegate.snapshot()
-                    let frameCount = frameCounter.snapshot()
+                    let frameCount: Int
+                    let detectionCount: Int
+                    let avgIntervalMs: Double
+
+                    #if VAUCHI_DIAGNOSTIC_SCANNER
+                        if useRustScanner, let rs = rustScanner {
+                            let snap = rs.snapshot()
+                            frameCount = snap.frames
+                            detectionCount = snap.detections
+                            let avgDecodeMs = snap.frames > 0
+                                ? Double(snap.decodeUs) / Double(snap.frames) / 1000.0
+                                : 0
+                            avgIntervalMs = avgDecodeMs
+                            NSLog(
+                                "[Vauchi] [QR Tuner] Config %d (rust): frames=%d detections=%d skipped=%d avgDecode=%.1fms preproc=%lluµs",
+                                config.id, frameCount, detectionCount,
+                                snap.skipped, avgDecodeMs, snap.preprocessUs
+                            )
+                        } else
+                    #endif {
+                        let detectionSnapshot = metadataDelegate.snapshot()
+                        frameCount = frameCounter.snapshot()
+                        detectionCount = detectionSnapshot.count
+
+                        NSLog(
+                            "[Vauchi] [QR Tuner] Config %d: frames=%d detections=%d firstContent=%@",
+                            config.id, frameCount, detectionSnapshot.count,
+                            detectionSnapshot.firstContent != nil ? "yes" : "no"
+                        )
+
+                        if detectionSnapshot.timestamps.count > 1 {
+                            var intervals: [Double] = []
+                            for i in 1 ..< detectionSnapshot.timestamps.count {
+                                intervals.append(
+                                    (detectionSnapshot.timestamps[i] - detectionSnapshot.timestamps[i - 1]) * 1000.0
+                                )
+                            }
+                            avgIntervalMs = intervals.reduce(0, +) / Double(intervals.count)
+                        } else {
+                            avgIntervalMs = 0
+                        }
+                    }
 
                     session.stopRunning()
 
-                    NSLog("[Vauchi] [QR Tuner] Config %d: frames=%d detections=%d firstContent=%@",
-                          config.id, frameCount, detectionSnapshot.count,
-                          detectionSnapshot.firstContent != nil ? "yes" : "no")
-
-                    // Calculate average detection interval
-                    let avgIntervalMs: Double
-                    if detectionSnapshot.timestamps.count > 1 {
-                        var intervals: [Double] = []
-                        for i in 1 ..< detectionSnapshot.timestamps.count {
-                            intervals.append(
-                                (detectionSnapshot.timestamps[i] - detectionSnapshot.timestamps[i - 1]) * 1000.0
-                            )
-                        }
-                        avgIntervalMs = intervals.reduce(0, +) / Double(intervals.count)
-                    } else {
-                        avgIntervalMs = 0
-                    }
-
                     // Score: decodeRate * 0.7 + (1 - normalizedLatency) * 0.3
-                    let decodeRate = frameCount > 0 ? Double(detectionSnapshot.count) / Double(frameCount) : 0
+                    let decodeRate = frameCount > 0 ? Double(detectionCount) / Double(frameCount) : 0
                     let normalizedLatency = min(avgIntervalMs / 200.0, 1.0)
                     let score = decodeRate * 0.7 + (1.0 - normalizedLatency) * 0.3
 
@@ -659,7 +839,7 @@
                         id: config.id,
                         config: config,
                         framesProcessed: frameCount,
-                        qrDetections: detectionSnapshot.count,
+                        qrDetections: detectionCount,
                         avgDetectionIntervalMs: avgIntervalMs,
                         score: score
                     ))
