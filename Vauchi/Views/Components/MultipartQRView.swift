@@ -94,22 +94,12 @@ struct MultipartQRView: View {
     // MARK: - QR Code Generation
 
     private func generateQRCode(from string: String) -> UIImage? {
-        guard let qr = try? generateQrModules(data: string, errorCorrection: .l) else { return nil }
-        let width = Int(qr.width)
-        let scale = 10
-        let imageSize = width * scale
-        var pixels = [UInt8](repeating: 255, count: imageSize * imageSize)
-        for (index, isDark) in qr.modules.enumerated() where isDark {
-            let row = index / width
-            let col = index % width
-            for py in (row * scale) ..< ((row + 1) * scale) {
-                for px in (col * scale) ..< ((col + 1) * scale) {
-                    pixels[py * imageSize + px] = 0
-                }
-            }
-        }
+        guard let qr = try? generateQrBitmap(
+            data: string, size: 512, ecc: .low, dark: 0, light: 255, margin: 4
+        ) else { return nil }
+        let imageSize = Int(qr.size)
         let colorSpace = CGColorSpaceCreateDeviceGray()
-        guard let provider = CGDataProvider(data: Data(pixels) as CFData),
+        guard let provider = CGDataProvider(data: Data(qr.pixels) as CFData),
               let cgImage = CGImage(
                   width: imageSize, height: imageSize,
                   bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: imageSize,

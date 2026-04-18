@@ -514,32 +514,20 @@ struct FaceToFaceExchangeView: View {
 
     /// Generate a gray QR code image. Gray reduces screen glare at close face-to-face distance.
     private func generateQRCode(from string: String, correctionLevel: String = "L") -> UIImage? {
-        let ecLevel: MobileErrorCorrectionLevel = switch correctionLevel.uppercased() {
-        case "L": .l
-        case "Q": .q
-        case "H": .h
-        default: .m
+        let ecc: MobileQrEccLevel = switch correctionLevel.uppercased() {
+        case "L": .low
+        case "Q": .quartile
+        case "H": .high
+        default: .medium
         }
-        guard let qr = try? generateQrModules(data: string, errorCorrection: ecLevel) else { return nil }
-        let width = Int(qr.width)
-        let scale = 10
-        let imageSize = width * scale
         // Gray foreground (#404040 ≈ 64) on light gray background (#E0E0E0 ≈ 224)
         // reduces screen glare at close face-to-face distance.
-        let darkValue: UInt8 = 64
-        let lightValue: UInt8 = 224
-        var pixels = [UInt8](repeating: lightValue, count: imageSize * imageSize)
-        for (index, isDark) in qr.modules.enumerated() where isDark {
-            let row = index / width
-            let col = index % width
-            for py in (row * scale) ..< ((row + 1) * scale) {
-                for px in (col * scale) ..< ((col + 1) * scale) {
-                    pixels[py * imageSize + px] = darkValue
-                }
-            }
-        }
+        guard let qr = try? generateQrBitmap(
+            data: string, size: 512, ecc: ecc, dark: 64, light: 224, margin: 4
+        ) else { return nil }
+        let imageSize = Int(qr.size)
         let colorSpace = CGColorSpaceCreateDeviceGray()
-        guard let provider = CGDataProvider(data: Data(pixels) as CFData),
+        guard let provider = CGDataProvider(data: Data(qr.pixels) as CFData),
               let cgImage = CGImage(
                   width: imageSize, height: imageSize,
                   bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: imageSize,
