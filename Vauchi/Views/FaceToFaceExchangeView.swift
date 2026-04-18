@@ -8,13 +8,8 @@
 // The core Rust library drives the multi-stage protocol — this view is a pure display shell.
 
 import AVFoundation
-import CoreImage.CIFilterBuiltins
 import SwiftUI
 import VauchiPlatform
-
-/// QR code colors: gray reduces screen glare at close face-to-face distance.
-private let qrForegroundColor = CIColor(red: 64.0 / 255, green: 64.0 / 255, blue: 64.0 / 255) // #404040
-private let qrBackgroundColor = CIColor(red: 224.0 / 255, green: 224.0 / 255, blue: 224.0 / 255) // #E0E0E0
 
 /// Warm beige background: soft, non-reflective.
 private let exchangeBackgroundColor = Color(red: 0.96, green: 0.94, blue: 0.92) // #F5F0EB
@@ -351,7 +346,7 @@ struct FaceToFaceExchangeView: View {
                 stopQrCycleTimer()
                 return
             }
-            // Only regenerate when data changes — avoids CIContext + CIFilter work every 150ms
+            // Only regenerate when data changes — avoids QR generation work every 150ms
             if payload.data != lastQrData {
                 lastQrData = payload.data
                 multiStageQrImage = generateQRCode(from: payload.data, correctionLevel: payload.errorCorrection)
@@ -519,26 +514,39 @@ struct FaceToFaceExchangeView: View {
 
     /// Generate a gray QR code image. Gray reduces screen glare at close face-to-face distance.
     private func generateQRCode(from string: String, correctionLevel: String = "L") -> UIImage? {
-        let context = CIContext()
-        let filter = CIFilter.qrCodeGenerator()
-        filter.message = Data(string.utf8)
-        filter.correctionLevel = correctionLevel
-
-        guard let qrImage = filter.outputImage else { return nil }
-
-        // Apply gray colors using CIFalseColor filter
-        let colorFilter = CIFilter.falseColor()
-        colorFilter.inputImage = qrImage
-        colorFilter.color0 = qrForegroundColor // Dark gray for QR modules
-        colorFilter.color1 = qrBackgroundColor // Light gray for background
-
-        guard let coloredImage = colorFilter.outputImage else { return nil }
-        let transform = CGAffineTransform(scaleX: 10, y: 10)
-        let scaledImage = coloredImage.transformed(by: transform)
-
-        guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else {
-            return nil
+        let ecLevel: MobileErrorCorrectionLevel = switch correctionLevel.uppercased() {
+        case "L": .l
+        case "Q": .q
+        case "H": .h
+        default: .m
         }
+        guard let qr = try? generateQrModules(data: string, errorCorrection: ecLevel) else { return nil }
+        let width = Int(qr.width)
+        let scale = 10
+        let imageSize = width * scale
+        // Gray foreground (#404040 ≈ 64) on light gray background (#E0E0E0 ≈ 224)
+        // reduces screen glare at close face-to-face distance.
+        let darkValue: UInt8 = 64
+        let lightValue: UInt8 = 224
+        var pixels = [UInt8](repeating: lightValue, count: imageSize * imageSize)
+        for (index, isDark) in qr.modules.enumerated() where isDark {
+            let row = index / width
+            let col = index % width
+            for py in (row * scale) ..< ((row + 1) * scale) {
+                for px in (col * scale) ..< ((col + 1) * scale) {
+                    pixels[py * imageSize + px] = darkValue
+                }
+            }
+        }
+        let colorSpace = CGColorSpaceCreateDeviceGray()
+        guard let provider = CGDataProvider(data: Data(pixels) as CFData),
+              let cgImage = CGImage(
+                  width: imageSize, height: imageSize,
+                  bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: imageSize,
+                  space: colorSpace, bitmapInfo: CGBitmapInfo(rawValue: 0),
+                  provider: provider, decode: nil, shouldInterpolate: false,
+                  intent: .defaultIntent
+              ) else { return nil }
         return UIImage(cgImage: cgImage)
     }
 }

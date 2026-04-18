@@ -9,8 +9,8 @@
 
 #if DEBUG
     import AVFoundation
-    import CoreImage.CIFilterBuiltins
     import SwiftUI
+    import VauchiPlatform
 
     // MARK: - Test QR Complexity Levels
 
@@ -515,18 +515,35 @@
         // MARK: - QR Generation
 
         private func generateQRCode(from string: String, correctionLevel: String = "M") -> UIImage? {
-            let context = CIContext()
-            let filter = CIFilter.qrCodeGenerator()
-            filter.message = Data(string.utf8)
-            filter.correctionLevel = correctionLevel
-
-            guard let outputImage = filter.outputImage else { return nil }
-            let transform = CGAffineTransform(scaleX: 10, y: 10)
-            let scaledImage = outputImage.transformed(by: transform)
-
-            guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else {
-                return nil
+            let ecLevel: MobileErrorCorrectionLevel = switch correctionLevel.uppercased() {
+            case "L": .l
+            case "Q": .q
+            case "H": .h
+            default: .m
             }
+            guard let qr = try? generateQrModules(data: string, errorCorrection: ecLevel) else { return nil }
+            let width = Int(qr.width)
+            let scale = 10
+            let imageSize = width * scale
+            var pixels = [UInt8](repeating: 255, count: imageSize * imageSize)
+            for (index, isDark) in qr.modules.enumerated() where isDark {
+                let row = index / width
+                let col = index % width
+                for py in (row * scale) ..< ((row + 1) * scale) {
+                    for px in (col * scale) ..< ((col + 1) * scale) {
+                        pixels[py * imageSize + px] = 0
+                    }
+                }
+            }
+            let colorSpace = CGColorSpaceCreateDeviceGray()
+            guard let provider = CGDataProvider(data: Data(pixels) as CFData),
+                  let cgImage = CGImage(
+                      width: imageSize, height: imageSize,
+                      bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: imageSize,
+                      space: colorSpace, bitmapInfo: CGBitmapInfo(rawValue: 0),
+                      provider: provider, decode: nil, shouldInterpolate: false,
+                      intent: .defaultIntent
+                  ) else { return nil }
             return UIImage(cgImage: cgImage)
         }
     }

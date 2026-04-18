@@ -5,8 +5,8 @@
 // MultipartQRView.swift
 // Animated QR display that cycles through multipart QR chunks at ~3fps.
 
-import CoreImage.CIFilterBuiltins
 import SwiftUI
+import VauchiPlatform
 
 /// Animated QR display that cycles through multipart QR chunks.
 ///
@@ -94,13 +94,30 @@ struct MultipartQRView: View {
     // MARK: - QR Code Generation
 
     private func generateQRCode(from string: String) -> UIImage? {
-        guard let data = string.data(using: .utf8) else { return nil }
-        let filter = CIFilter.qrCodeGenerator()
-        filter.setValue(data, forKey: "inputMessage")
-        filter.setValue("L", forKey: "inputCorrectionLevel")
-        guard let output = filter.outputImage else { return nil }
-        let transform = CGAffineTransform(scaleX: 10, y: 10)
-        return UIImage(ciImage: output.transformed(by: transform))
+        guard let qr = try? generateQrModules(data: string, errorCorrection: .l) else { return nil }
+        let width = Int(qr.width)
+        let scale = 10
+        let imageSize = width * scale
+        var pixels = [UInt8](repeating: 255, count: imageSize * imageSize)
+        for (index, isDark) in qr.modules.enumerated() where isDark {
+            let row = index / width
+            let col = index % width
+            for py in (row * scale) ..< ((row + 1) * scale) {
+                for px in (col * scale) ..< ((col + 1) * scale) {
+                    pixels[py * imageSize + px] = 0
+                }
+            }
+        }
+        let colorSpace = CGColorSpaceCreateDeviceGray()
+        guard let provider = CGDataProvider(data: Data(pixels) as CFData),
+              let cgImage = CGImage(
+                  width: imageSize, height: imageSize,
+                  bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: imageSize,
+                  space: colorSpace, bitmapInfo: CGBitmapInfo(rawValue: 0),
+                  provider: provider, decode: nil, shouldInterpolate: false,
+                  intent: .defaultIntent
+              ) else { return nil }
+        return UIImage(cgImage: cgImage)
     }
 }
 

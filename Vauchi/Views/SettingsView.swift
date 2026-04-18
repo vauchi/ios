@@ -5,7 +5,6 @@
 // SettingsView.swift
 // Settings and backup view
 
-import CoreImage.CIFilterBuiltins
 import LocalAuthentication
 import SwiftUI
 import UniformTypeIdentifiers
@@ -1299,19 +1298,30 @@ struct DeviceLinkSheet: View {
     }
 
     private func generateQRCode(from string: String) -> UIImage? {
-        guard let data = string.data(using: .ascii) else { return nil }
-
-        if let filter = CIFilter(name: "CIQRCodeGenerator") {
-            filter.setValue(data, forKey: "inputMessage")
-            filter.setValue("H", forKey: "inputCorrectionLevel")
-
-            if let output = filter.outputImage {
-                let transform = CGAffineTransform(scaleX: 10, y: 10)
-                let scaled = output.transformed(by: transform)
-                return UIImage(ciImage: scaled)
+        guard let qr = try? generateQrModules(data: string, errorCorrection: .h) else { return nil }
+        let width = Int(qr.width)
+        let scale = 10
+        let imageSize = width * scale
+        var pixels = [UInt8](repeating: 255, count: imageSize * imageSize)
+        for (index, isDark) in qr.modules.enumerated() where isDark {
+            let row = index / width
+            let col = index % width
+            for py in (row * scale) ..< ((row + 1) * scale) {
+                for px in (col * scale) ..< ((col + 1) * scale) {
+                    pixels[py * imageSize + px] = 0
+                }
             }
         }
-        return nil
+        let colorSpace = CGColorSpaceCreateDeviceGray()
+        guard let provider = CGDataProvider(data: Data(pixels) as CFData),
+              let cgImage = CGImage(
+                  width: imageSize, height: imageSize,
+                  bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: imageSize,
+                  space: colorSpace, bitmapInfo: CGBitmapInfo(rawValue: 0),
+                  provider: provider, decode: nil, shouldInterpolate: false,
+                  intent: .defaultIntent
+              ) else { return nil }
+        return UIImage(cgImage: cgImage)
     }
 }
 
