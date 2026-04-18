@@ -434,7 +434,7 @@ struct FaceToFaceExchangeView: View {
         }
     }
 
-    private func transferProgressText(received: UInt8, total: UInt8) -> String {
+    private func transferProgressText(received: UInt16, total: UInt16) -> String {
         if total > 0 {
             return "Receiving \(received)/\(total) chunks..."
         }
