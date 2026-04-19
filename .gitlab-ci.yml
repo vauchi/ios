@@ -631,9 +631,20 @@ build:debug:
           LAST_MOD=$(stat -f %m build.log 2>/dev/null || echo 0)
           IDLE=$(( $(date +%s) - LAST_MOD ))
           if [ $IDLE -gt 600 ]; then
-            echo "── Fast-fail: xcodebuild idle for ${IDLE}s (>10 min) — killing ──"
+            echo "── Fast-fail: xcodebuild idle for ${IDLE}s (>10 min) — SIGTERM ──"
             pkill -P $BUILD_PID 2>/dev/null || true
             kill $BUILD_PID 2>/dev/null || true
+            # 10s SIGTERM grace; escalate to SIGKILL if xcodebuild ignores it
+            # (plugin-server hangs are routinely SIGTERM-immune on macOS).
+            for _ in 1 2 3 4 5 6 7 8 9 10; do
+              sleep 1
+              kill -0 $BUILD_PID 2>/dev/null || break
+            done
+            if kill -0 $BUILD_PID 2>/dev/null; then
+              echo "── SIGTERM ignored — escalating to SIGKILL ──"
+              pkill -9 -P $BUILD_PID 2>/dev/null || true
+              kill -9 $BUILD_PID 2>/dev/null || true
+            fi
             break
           fi
         done
