@@ -32,6 +32,13 @@ class AppViewModel: ObservableObject {
     /// `currentScreen?.screenId`.
     private var qrFrameTimer: Timer?
 
+    /// Count of consecutive decode failures. When the count hits
+    /// `maxConsecutiveQrDecodeFailures` the timer self-stops to avoid
+    /// infinite retry on a persistent decode mismatch (e.g. core
+    /// ScreenModel format drift); the frozen QR is itself the user signal.
+    private var qrFrameDecodeFailures = 0
+    private static let maxConsecutiveQrDecodeFailures = 10 // ~1s at 10 fps
+
     struct AlertMessage: Identifiable {
         let id = UUID()
         let title: String
@@ -157,14 +164,33 @@ class AppViewModel: ObservableObject {
 
     private func advanceQrFrame() {
         do {
-            guard let frameJson = try appEngine.advanceQrFrameJson() else { return }
-            guard let data = frameJson.data(using: .utf8) else { return }
+            guard let frameJson = try appEngine.advanceQrFrameJson() else {
+                qrFrameDecodeFailures = 0
+                return
+            }
+            guard let data = frameJson.data(using: .utf8) else {
+                recordQrFrameFailure()
+                return
+            }
             let frame = try coreJSONDecoder.decode(ScreenModel.self, from: data)
             currentScreen = frame
+            qrFrameDecodeFailures = 0
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to advance QR frame: \(error)")
             #endif
+            recordQrFrameFailure()
+        }
+    }
+
+    /// Record a decode failure and stop the timer once the consecutive-
+    /// failure threshold is crossed. Prevents runaway retries when core's
+    /// ScreenModel format drifts; the frozen QR is itself the visible signal.
+    private func recordQrFrameFailure() {
+        qrFrameDecodeFailures += 1
+        if qrFrameDecodeFailures >= Self.maxConsecutiveQrDecodeFailures {
+            stopQrFrameTimer()
+            qrFrameDecodeFailures = 0
         }
     }
 
