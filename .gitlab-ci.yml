@@ -608,7 +608,8 @@ build:debug:
       # Heartbeat: print elapsed time every 120s so CI log shows progress
       ( while true; do sleep 120; printf '  [build heartbeat] %s\n' "$(date +%H:%M:%S)"; done ) &
       HEARTBEAT=$!
-      trap 'kill $HEARTBEAT 2>/dev/null || true' EXIT
+      WATCHDOG=""  # populated after xcodebuild starts; covered by EXIT trap
+      trap 'kill $HEARTBEAT $WATCHDOG 2>/dev/null || true' EXIT
       # Run xcodebuild in background; stream output live AND capture to
       # build.log for failure-summary extraction.
       : > build.log
