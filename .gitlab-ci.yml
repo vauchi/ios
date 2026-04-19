@@ -662,9 +662,9 @@ build:debug:
         echo "=========================================="
         echo "  BUILD FAILED (exit ${BUILD_EXIT}) — error summary"
         echo "=========================================="
-        grep -E "(error:|fatal error:|Undefined symbols|xcodebuild: error:|Testing cancelled)" build.log \
+        grep -E "(error:|fatal error:|ld: error|Undefined symbols|xcodebuild: error:|Testing cancelled|\*\* BUILD FAILED \*\*|The following build commands failed)" build.log \
           | head -30 \
-          || echo "  (no lines matched common error patterns — full log above)"
+          || echo "  (no lines matched common error patterns — full log above, build.log artifact preserved)"
         echo "=========================================="
         exit $BUILD_EXIT
       fi
