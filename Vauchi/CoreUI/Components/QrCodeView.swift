@@ -6,6 +6,7 @@
 // Renders a QrCode component from core UI
 
 import SwiftUI
+import VauchiPlatform
 
 /// Renders a core `Component::QrCode` as a QR code display or scan placeholder.
 struct QrCodeView: View {
