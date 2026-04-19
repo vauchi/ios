@@ -89,9 +89,9 @@ workflow:
   # on SPM's global package cache (~/.cache/org.swift.swiftpm/).
   # NOTE: If jobs get stuck in waiting_for_resource due to a poisoned lock
   # (GitLab bug: cancelled jobs don't release resource_group), rename the
-  # group (e.g. ios-spm-v4) to create a fresh lock. See incidents
-  # 2026-04-11 and 2026-04-19.
-  resource_group: ios-spm-v3
+  # group (e.g. ios-spm-v5) to create a fresh lock. See incidents
+  # 2026-04-11 and 2026-04-19 (twice — v2→v3 and v3→v4).
+  resource_group: ios-spm-v4
   variables:
     GIT_DEPTH: "20"
     CI_JOB_KEYCHAIN: ci-spm-${CI_JOB_ID}.keychain-db
