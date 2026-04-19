@@ -670,10 +670,12 @@ build:debug:
       fi
     - echo "── [$(date +%H:%M:%S)] build:debug complete ──"
   artifacts:
+    when: always  # preserve build.log on failure for post-mortem triage
     paths:
       - build/Build/Products/Debug-iphonesimulator/
       - Vauchi.xcodeproj/
       - .spm-packages/
+      - build.log
     expire_in: 1 hour
   rules:
     # Skip on upstream triggers — update:bindings-version handles the bump,
