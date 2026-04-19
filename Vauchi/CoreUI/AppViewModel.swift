@@ -162,6 +162,13 @@ class AppViewModel: ObservableObject {
         qrFrameTimer = nil
     }
 
+    /// Test-only accessor — true while the QR frame timer is active.
+    /// Exposed at `internal` visibility so `@testable` imports can assert
+    /// idempotent start/stop without reaching into the private Timer.
+    var hasActiveQrFrameTimer: Bool {
+        qrFrameTimer != nil
+    }
+
     private func advanceQrFrame() {
         do {
             guard let frameJson = try appEngine.advanceQrFrameJson() else {
