@@ -42,6 +42,15 @@ struct CoreScreenView: View {
         .task(id: screenName) {
             navigateIfNeeded(to: screenName)
         }
+        .onChange(of: viewModel.coreViewModel?.currentScreen?.screenId) { newId in
+            syncQrFrameTimer(for: newId)
+        }
+        .onAppear {
+            syncQrFrameTimer(for: viewModel.coreViewModel?.currentScreen?.screenId)
+        }
+        .onDisappear {
+            viewModel.coreViewModel?.stopQrFrameTimer()
+        }
         .alert(item: alertBinding) { alert in
             Alert(
                 title: Text(alert.title),
@@ -69,6 +78,18 @@ struct CoreScreenView: View {
         guard currentScreen != screen else { return }
         currentScreen = screen
         viewModel.coreViewModel?.navigateTo(screenJson: "\"\(screen)\"")
+    }
+
+    /// Start the animated-QR timer while the ShowQr screen is visible; stop
+    /// it everywhere else. Cheap to call unconditionally — both methods are
+    /// idempotent.
+    private func syncQrFrameTimer(for screenId: String?) {
+        guard let coreVM = viewModel.coreViewModel else { return }
+        if screenId == "exchange_show_qr" {
+            coreVM.startQrFrameTimer()
+        } else {
+            coreVM.stopQrFrameTimer()
+        }
     }
 
     private var alertBinding: Binding<AppViewModel.AlertMessage?> {
