@@ -95,47 +95,31 @@ enum VauchiRepositoryError: LocalizedError {
         }
     }
 
-    /// Convert from MobileError to VauchiRepositoryError
+    /// Convert from MobileError to VauchiRepositoryError.
+    ///
+    /// `MobileError` was collapsed to 8 variants in vauchi-platform 0.20.3.
+    /// We preserve the richer `VauchiRepositoryError` surface because several
+    /// call sites and tests still discriminate on specific cases
+    /// (`.alreadyInitialized`, `.deviceLocked`). The extra cases simply stay
+    /// reachable via other code paths (local guards, not the FFI).
     static func from(_ error: MobileError) -> VauchiRepositoryError {
         switch error {
-        case .NotInitialized:
-            return .notInitialized
-        case .AlreadyInitialized:
-            return .alreadyInitialized
-        case .IdentityNotFound:
-            return .identityNotFound
-        case let .ContactNotFound(id):
-            return .contactNotFound(id)
-        case .InvalidQrCode:
-            return .invalidQrCode
-        case let .ExchangeFailed(msg):
-            return .exchangeFailed(msg)
-        case let .SyncFailed(msg):
-            return .syncFailed(msg)
-        case let .StorageError(msg):
-            return .storageError(msg)
-        case let .CryptoError(msg):
-            return .cryptoError(msg)
-        case let .NetworkError(msg):
-            return .networkError(msg)
-        case let .InvalidInput(msg):
-            return .invalidInput(msg)
-        case let .SerializationError(msg):
-            return .internalError("Serialization: \(msg)")
-        case let .Internal(msg):
-            return .internalError(msg)
-        case let .GdprError(msg):
-            return .gdprError(msg)
-        case let .DeletionNotAllowed(msg):
-            return .deletionNotAllowed(msg)
-        case let .ShredError(msg):
-            return .shredError(msg)
-        case let .InitError(msg):
-            return .internalError("Init: \(msg)")
-        case let .BleNotAvailable(msg):
-            return .internalError("BLE: \(msg)")
+        case .WrongPassword:
+            return .cryptoError("Wrong password")
+        case .DecryptFailed:
+            return .cryptoError("Failed to decrypt — data may be corrupt or key mismatch")
+        case let .InvalidInput(field, detail):
+            return .invalidInput(field.isEmpty ? detail : "\(field): \(detail)")
+        case .NetworkUnavailable:
+            return .networkError("Network unavailable")
+        case let .RelayError(status, detail):
+            return .networkError("Relay error \(status): \(detail)")
         case let .RateLimited(retryAfterSecs):
             return .rateLimited(retryAfterSecs)
+        case let .StorageError(detail):
+            return .storageError(detail)
+        case let .Other(detail):
+            return .internalError(detail)
         @unknown default:
             return .internalError("Unknown error")
         }
@@ -821,13 +805,17 @@ class VauchiRepository {
     // Based on: features/resistance.feature - R3 Hidden Contact UI
 
     /// Import contacts from vCard data.
+    ///
+    /// Warnings are flattened to English strings (`legacyText`) because the
+    /// consumer UI renders them verbatim. Once we add localization for
+    /// `MobileImportWarning.key`, pass the struct through instead.
     func importContactsFromVcf(_ data: Data) throws -> (imported: Int, skipped: Int, warnings: [String]) {
         do {
             let result = try vauchi.importContactsFromVcf(data: data)
             return (
                 imported: Int(result.imported),
                 skipped: Int(result.skipped),
-                warnings: result.warnings
+                warnings: result.warnings.map(\.legacyText)
             )
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
