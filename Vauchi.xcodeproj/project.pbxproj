@@ -130,6 +130,7 @@
 		72989B5EB5FC96F172CB1C49 /* testAddFieldsScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 22CBF2E4029854CB3051D98A /* testAddFieldsScreen.1.png */; };
 		7532FD4076FE6E6670E901E6 /* BleDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C33B31B7AACDDDA13430257D /* BleDiagnosticView.swift */; };
 		7596A973F4CBE39E516B5EBF /* testSettingsScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = EBA2E942944A9B0DF10E7D44 /* testSettingsScreen.1.png */; };
+		764FA757EB16C597120D1E93 /* PasscodePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9581C53B23B46E50E35837 /* PasscodePolicyTests.swift */; };
 		767BDC51FFC0FFA5A5131E0E /* testLabelsView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = A2E7533C698BC2DD14E881AD /* testLabelsView.1.png */; };
 		76CE62B95DC53A13516F7D80 /* AppPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */; };
 		76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */; };
@@ -156,6 +157,7 @@
 		9B12926FA62EF78944BBD659 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */; };
 		9B37E421D497D0041517566A /* testDivider.1.png in Resources */ = {isa = PBXBuildFile; fileRef = EE36127CE5C1D4AC425BF1D5 /* testDivider.1.png */; };
 		9C356FC3005B310BF322001D /* testAddFieldsStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 268841458ED0C3A21E73ECA5 /* testAddFieldsStep.1.png */; };
+		9C89BE4773D3F64FB89BFE9B /* PasscodePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E1798719172168B0EBBBD3 /* PasscodePolicy.swift */; };
 		9C9A5E8876CAFA84118E8DBF /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644F12D83413B334E234F4AC /* LockScreenView.swift */; };
 		9CF23C4022ADB5366AD67245 /* testActionButtonEnabledAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = D618628DDEAEBAD0CE3FB0EC /* testActionButtonEnabledAccessibility.1.txt */; };
 		9DA062B94245C7748637A619 /* CoreScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */; };
@@ -511,6 +513,7 @@
 		CB4B0784606C0D57CC2593CE /* testSetupViewGerman.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSetupViewGerman.1.png; sourceTree = "<group>"; };
 		CC0264A403A8FF8004269E87 /* testTextInputPassword.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextInputPassword.1.png; sourceTree = "<group>"; };
 		CE69227779252FAF163BCC07 /* ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsTests.swift; sourceTree = "<group>"; };
+		CE9581C53B23B46E50E35837 /* PasscodePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodePolicyTests.swift; sourceTree = "<group>"; };
 		CEA6AABBC0A3101980DD8C37 /* ImportContactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportContactsView.swift; sourceTree = "<group>"; };
 		D00EF6554B76A106ACC1A18A /* testThemeSettingsView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testThemeSettingsView.1.png; sourceTree = "<group>"; };
 		D42379D47C2AFA9F80BAAB6A /* testSyncingState.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSyncingState.1.png; sourceTree = "<group>"; };
@@ -518,6 +521,7 @@
 		D591A9D83EA84F2E2EBCE827 /* testTextComponentTitle.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextComponentTitle.1.png; sourceTree = "<group>"; };
 		D618628DDEAEBAD0CE3FB0EC /* testActionButtonEnabledAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testActionButtonEnabledAccessibility.1.txt; sourceTree = "<group>"; };
 		D6E1FE2EE5B0C2CC821F5397 /* testInfoPanelDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInfoPanelDark.1.png; sourceTree = "<group>"; };
+		D7E1798719172168B0EBBBD3 /* PasscodePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodePolicy.swift; sourceTree = "<group>"; };
 		D95AE616E6EB683927F6A57E /* testRecoveryView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testRecoveryView.1.png; sourceTree = "<group>"; };
 		D98D690995A0DF8546684FA8 /* testSetupViewDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSetupViewDark.1.png; sourceTree = "<group>"; };
 		DB5E7CFFD83945D91D395072 /* AccountDeletionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletionView.swift; sourceTree = "<group>"; };
@@ -666,6 +670,7 @@
 				423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */,
 				5484CED84D0E33E917230C9A /* NetworkMonitorTests.swift */,
 				E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */,
+				CE9581C53B23B46E50E35837 /* PasscodePolicyTests.swift */,
 				F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */,
 				852C63AD7ECE19A3177E137A /* SettingsServiceTests.swift */,
 				BE32C32136CEB8811C89778C /* VauchiKeychainBridgeTests.swift */,
@@ -1006,6 +1011,7 @@
 				CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */,
 				B2D34EC3AF2AE35F80A5354A /* NFCExchangeService.swift */,
 				BDB1CEDFBA5AE37F12D5BE39 /* NotificationService.swift */,
+				D7E1798719172168B0EBBBD3 /* PasscodePolicy.swift */,
 				A96FE811E67752C2D8F9079E /* SettingsService.swift */,
 				84CF989EA84DBE8A9F43E05D /* ThemeService.swift */,
 				95373D9E6440FED4B532EBDD /* VauchiRepository.swift */,
@@ -1316,6 +1322,7 @@
 				222E89071C885A441E27F978 /* ModelsTests.swift in Sources */,
 				3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */,
 				B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */,
+				764FA757EB16C597120D1E93 /* PasscodePolicyTests.swift in Sources */,
 				1552B5F6D02172C2BA2C691D /* PlatformEdgeTests.swift in Sources */,
 				585352762DF068CBD6CD1EE8 /* SettingsServiceTests.swift in Sources */,
 				ACB5D66C9DC53BB3DEC7044E /* VauchiKeychainBridgeTests.swift in Sources */,
@@ -1413,6 +1420,7 @@
 				E274DDDCD426344D25E204F7 /* NfcTestView.swift in Sources */,
 				138BEFDCC908871EDE97D333 /* NotificationService.swift in Sources */,
 				F1607238A8523A2811B18B74 /* OnboardingViewModel.swift in Sources */,
+				9C89BE4773D3F64FB89BFE9B /* PasscodePolicy.swift in Sources */,
 				A63F23AF79BBFFCD1DF2992E /* PinInputView.swift in Sources */,
 				7230742E816AC8FFCD0F3284 /* ProximityVerificationView.swift in Sources */,
 				4BB0A6529259EFEFD5747480 /* QRCountdownView.swift in Sources */,
