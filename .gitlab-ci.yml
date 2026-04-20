@@ -297,9 +297,12 @@ update:bindings-version:
 
       if [ -n "$OLD_VERSION" ] && [ "$OLD_VERSION" != "$BINDINGS_VERSION" ]; then
         echo "Checking for removed symbols between $OLD_VERSION and $BINDINGS_VERSION..."
-        mkdir -p /tmp/binding-check
-        OLD_BINDING="/tmp/binding-check/old.swift"
-        NEW_BINDING="/tmp/binding-check/new.swift"
+        # Use mktemp -d so each run gets its own dir. A shared fixed path like
+        # /tmp/binding-check persists across jobs on the gitlab-runner host and
+        # can end up owned by a different user, causing EACCES on write.
+        BINDING_CHECK_DIR=$(mktemp -d -t binding-check.XXXXXX)
+        OLD_BINDING="$BINDING_CHECK_DIR/old.swift"
+        NEW_BINDING="$BINDING_CHECK_DIR/new.swift"
 
         # Fetch binding files from both versions (shallow, single-file)
         curl -sf "${PLATFORM_REPO%.git}/-/raw/v${OLD_VERSION}/${BINDING_PATH}" > "$OLD_BINDING" 2>/dev/null || \
@@ -309,11 +312,11 @@ update:bindings-version:
 
         if [ -s "$OLD_BINDING" ] && [ -s "$NEW_BINDING" ]; then
           # Extract public func/var names from each version
-          grep -oE '(open |public )?func [a-zA-Z_][a-zA-Z0-9_]*' "$OLD_BINDING" | sed 's/.* //' | sort -u > /tmp/binding-check/old_funcs
-          grep -oE '(open |public )?func [a-zA-Z_][a-zA-Z0-9_]*' "$NEW_BINDING" | sed 's/.* //' | sort -u > /tmp/binding-check/new_funcs
+          grep -oE '(open |public )?func [a-zA-Z_][a-zA-Z0-9_]*' "$OLD_BINDING" | sed 's/.* //' | sort -u > "$BINDING_CHECK_DIR/old_funcs"
+          grep -oE '(open |public )?func [a-zA-Z_][a-zA-Z0-9_]*' "$NEW_BINDING" | sed 's/.* //' | sort -u > "$BINDING_CHECK_DIR/new_funcs"
 
           # Find functions removed in the new version
-          REMOVED_FUNCS=$(comm -23 /tmp/binding-check/old_funcs /tmp/binding-check/new_funcs)
+          REMOVED_FUNCS=$(comm -23 "$BINDING_CHECK_DIR/old_funcs" "$BINDING_CHECK_DIR/new_funcs")
 
           if [ -n "$REMOVED_FUNCS" ]; then
             echo "Removed functions: $(echo "$REMOVED_FUNCS" | tr '\n' ', ')"
@@ -340,7 +343,7 @@ update:bindings-version:
         else
           echo "Could not fetch binding files for comparison — skipping symbol check"
         fi
-        rm -rf /tmp/binding-check
+        rm -rf "$BINDING_CHECK_DIR"
       fi
 
       git add project.yml Vauchi.xcodeproj/
