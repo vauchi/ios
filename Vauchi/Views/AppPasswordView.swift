@@ -4,17 +4,18 @@
 
 import SwiftUI
 
-/// App password screen shown after biometric auth when duress mode
-/// is configured. Collects a 6-digit PIN and routes it through
-/// core.authenticate() which determines Normal vs Duress mode.
+/// Unified passcode entry shown after biometric auth. Accepts either
+/// the app password or the duress PIN (4–64 chars, any character set);
+/// `core.authenticate()` decides Normal vs Duress mode based on which
+/// secret matched.
 ///
-/// Visually identical regardless of which PIN is entered — the
+/// Visually identical regardless of which secret is entered — the
 /// observer cannot distinguish normal from duress authentication.
 ///
-/// Note on PIN zeroization: Swift String is immutable/COW — we
-/// can't guarantee heap scrubbing. We clear the @State variable
-/// immediately after use and on background transitions. The Rust
-/// core zeroizes the password after hashing (ZeroizeOnDrop).
+/// Note on zeroization: Swift String is immutable/COW — we can't
+/// guarantee heap scrubbing. We clear the @State variable immediately
+/// after use and on background transitions. The Rust core zeroizes
+/// the password after hashing (ZeroizeOnDrop).
 struct AppPasswordView: View {
     @ObservedObject var viewModel: VauchiViewModel
     @Environment(\.scenePhase) private var scenePhase
@@ -23,8 +24,6 @@ struct AppPasswordView: View {
     @State private var errorMessage: String?
     @State private var isAuthenticating = false
     @FocusState private var pinFocused: Bool
-
-    private let pinLength = 6
 
     var body: some View {
         VStack(spacing: 24) {
@@ -44,7 +43,6 @@ struct AppPasswordView: View {
                 .multilineTextAlignment(.center)
 
             SecureField("Password", text: $pin)
-                .keyboardType(.numberPad)
                 .textContentType(.password)
                 .focused($pinFocused)
                 .multilineTextAlignment(.center)
@@ -56,12 +54,9 @@ struct AppPasswordView: View {
                 )
                 .padding(.horizontal, 48)
                 .onChange(of: pin) { newValue in
-                    let filtered = String(
-                        newValue.filter(\.isNumber)
-                            .prefix(pinLength)
-                    )
-                    if filtered != newValue {
-                        pin = filtered
+                    let clamped = PasscodePolicy.clamp(newValue)
+                    if clamped != newValue {
+                        pin = clamped
                     }
                     errorMessage = nil
                 }
@@ -88,7 +83,7 @@ struct AppPasswordView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
-            .disabled(pin.count != pinLength || isAuthenticating)
+            .disabled(!PasscodePolicy.isValid(pin) || isAuthenticating)
             .padding(.horizontal, 48)
             .accessibilityLabel("Unlock with app password")
 

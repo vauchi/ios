@@ -140,8 +140,9 @@ struct DuressSettingsView: View {
                 confirmPassword = ""
             }
             Button("Set") {
-                guard password.count >= 4 else {
-                    errorMessage = "Password must be at least 4 characters"
+                guard PasscodePolicy.isValid(password) else {
+                    errorMessage =
+                        "Password must be \(PasscodePolicy.minLength)–\(PasscodePolicy.maxLength) characters"
                     return
                 }
                 guard password == confirmPassword else {
@@ -170,8 +171,9 @@ struct DuressSettingsView: View {
                 confirmDuressPin = ""
             }
             Button("Set") {
-                guard duressPin.count >= 4 else {
-                    errorMessage = "PIN must be at least 4 characters"
+                guard PasscodePolicy.isValid(duressPin) else {
+                    errorMessage =
+                        "PIN must be \(PasscodePolicy.minLength)–\(PasscodePolicy.maxLength) characters"
                     return
                 }
                 guard duressPin == confirmDuressPin else {
