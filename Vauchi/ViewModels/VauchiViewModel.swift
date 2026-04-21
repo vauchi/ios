@@ -79,30 +79,6 @@ struct IdentityInfo: Equatable {
     let publicId: String
 }
 
-/// Exchange data for QR code display
-struct ExchangeDataInfo: Equatable {
-    let qrData: String
-    let publicId: String
-    let expiresAt: Date
-    let audioChallenge: Data?
-
-    var isExpired: Bool {
-        Date() > expiresAt
-    }
-
-    var timeRemaining: TimeInterval {
-        max(0, expiresAt.timeIntervalSinceNow)
-    }
-}
-
-/// Exchange result after scanning QR
-struct ExchangeResultInfo: Equatable {
-    let contactId: String
-    let contactName: String
-    let success: Bool
-    let errorMessage: String?
-}
-
 /// Sync state enum
 enum SyncState: Equatable {
     case idle
