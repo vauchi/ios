@@ -3,7 +3,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // MoreView.swift
-// Aggregated menu for Settings, Help, and secondary features
+// Phase 1A.4 (core-gui-architecture-alignment): every row that used to
+// navigate to a placeholder view now links to a `CoreScreenView`. Core
+// already ships `sync`, `device_management`, `backup`, and `privacy`
+// screens — the iOS shell only provides the list + NavigationLinks.
 
 import SwiftUI
 
@@ -52,14 +55,14 @@ struct MoreView: View {
     private var secondarySection: some View {
         Section {
             NavigationLink {
-                SyncStatusPlaceholderView()
+                CoreScreenView(screenName: "Sync")
             } label: {
                 Label("Sync Status", systemImage: "arrow.triangle.2.circlepath")
             }
             .accessibilityIdentifier("more.syncStatus")
 
             NavigationLink {
-                LinkedDevicesPlaceholderView()
+                CoreScreenView(screenName: "DeviceManagement")
             } label: {
                 Label("Linked Devices", systemImage: "laptopcomputer.and.iphone")
             }
@@ -73,7 +76,7 @@ struct MoreView: View {
             .accessibilityIdentifier("more.deviceReplacement")
 
             NavigationLink {
-                BackupRecoveryPlaceholderView()
+                CoreScreenView(screenName: "Backup")
             } label: {
                 Label("Backup & Recovery", systemImage: "externaldrive.badge.shield")
             }
@@ -91,81 +94,13 @@ struct MoreView: View {
     private var legalSection: some View {
         Section {
             NavigationLink {
-                PrivacyPolicyPlaceholderView()
+                CoreScreenView(screenName: "Privacy")
             } label: {
                 Label("Privacy Policy", systemImage: "hand.raised.fill")
             }
             .accessibilityIdentifier("more.privacyPolicy")
         }
     }
-}
-
-// MARK: - Placeholder Views
-
-/// Placeholder for Sync Status (to be replaced with real implementation)
-private struct SyncStatusPlaceholderView: View {
-    var body: some View {
-        placeholderContent(
-            title: "Sync Status",
-            icon: "arrow.triangle.2.circlepath",
-            message: "Sync status details will appear here."
-        )
-    }
-}
-
-/// Placeholder for Linked Devices (to be replaced with real implementation)
-private struct LinkedDevicesPlaceholderView: View {
-    var body: some View {
-        placeholderContent(
-            title: "Linked Devices",
-            icon: "laptopcomputer.and.iphone",
-            message: "Manage your linked devices here."
-        )
-    }
-}
-
-/// Placeholder for Backup & Recovery (to be replaced with real implementation)
-private struct BackupRecoveryPlaceholderView: View {
-    var body: some View {
-        placeholderContent(
-            title: "Backup & Recovery",
-            icon: "externaldrive.badge.shield",
-            message: "Backup and recovery options will appear here."
-        )
-    }
-}
-
-/// Placeholder for Privacy Policy (to be replaced with real implementation)
-private struct PrivacyPolicyPlaceholderView: View {
-    var body: some View {
-        placeholderContent(
-            title: "Privacy Policy",
-            icon: "hand.raised.fill",
-            message: "Privacy policy details will appear here."
-        )
-    }
-}
-
-/// Reusable placeholder layout for coming-soon screens
-private func placeholderContent(
-    title: String,
-    icon: String,
-    message: String
-) -> some View {
-    VStack(spacing: 16) {
-        Image(systemName: icon)
-            .font(.system(size: 48))
-            .foregroundColor(.secondary)
-            .accessibilityHidden(true)
-        Text(message)
-            .font(.body)
-            .foregroundColor(.secondary)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal)
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .navigationTitle(title)
-    .navigationBarTitleDisplayMode(.inline)
 }
 
 #Preview {
