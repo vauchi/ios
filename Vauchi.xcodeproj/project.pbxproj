@@ -21,6 +21,7 @@
 		08FE2DB74EB09F3226F6371C /* testCreateIdentityStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = FE7FAFE456A1F513CADD0631 /* testCreateIdentityStep.1.png */; };
 		096B891F7A059A83D77D46FB /* testHomeViewWithFieldsDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = CACA1754B8EE1F6D0FC0A04D /* testHomeViewWithFieldsDark.1.png */; };
 		0BF3BAD91800C40DD1EE0501 /* testToggleListDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 04898F36EF605FB293E24A7A /* testToggleListDark.1.png */; };
+		0DDA36A34D79308F42591BA3 /* PlatformEventListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */; };
 		0FC8C1248458C98DAE402799 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80D908420E7769CC3225282C /* AppViewModel.swift */; };
 		105F980BB187FE89CD24B5D0 /* FaceToFaceExchangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A34F01BD07BC1A3FF39429C8 /* FaceToFaceExchangeView.swift */; };
 		10B3D5481A8E17F07E439629 /* testContactsViewWithContactsGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 2708AF0FE3066AC85A5EAF63 /* testContactsViewWithContactsGerman.1.png */; };
@@ -374,6 +375,7 @@
 		3FF0727A90972B41385E4C9B /* delivery_status.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = delivery_status.json; sourceTree = "<group>"; };
 		418F950D6541F912A27DA57D /* BleExchangeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleExchangeService.swift; sourceTree = "<group>"; };
 		423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
+		42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEventListenerTests.swift; sourceTree = "<group>"; };
 		444EB6E932C6BF9631AEE4D3 /* testStatusIndicatorAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testStatusIndicatorAccessibility.1.txt; sourceTree = "<group>"; };
 		44506B768565C7F52A328D17 /* BackgroundSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncService.swift; sourceTree = "<group>"; };
 		46CE8156A15BD5428BE8514A /* ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContractTests.swift; sourceTree = "<group>"; };
@@ -592,6 +594,7 @@
 				21B33063ADD1C9CDC8C4186B /* AnimatedQrTimerTests.swift */,
 				46CE8156A15BD5428BE8514A /* ContractTests.swift */,
 				CE69227779252FAF163BCC07 /* ModelsTests.swift */,
+				42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */,
 				0795D7BA553D151750EFD399 /* fixtures */,
 			);
 			path = CoreUI;
@@ -1324,6 +1327,7 @@
 				B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */,
 				764FA757EB16C597120D1E93 /* PasscodePolicyTests.swift in Sources */,
 				1552B5F6D02172C2BA2C691D /* PlatformEdgeTests.swift in Sources */,
+				0DDA36A34D79308F42591BA3 /* PlatformEventListenerTests.swift in Sources */,
 				585352762DF068CBD6CD1EE8 /* SettingsServiceTests.swift in Sources */,
 				ACB5D66C9DC53BB3DEC7044E /* VauchiKeychainBridgeTests.swift in Sources */,
 				C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */,

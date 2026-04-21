@@ -26,6 +26,13 @@ class AppViewModel: ObservableObject {
 
     let appEngine: PlatformAppEngine
 
+    /// Phase 2A (core-gui-architecture-alignment): listener registered with
+    /// `PlatformAppEngine.setEventListener`. Core invokes
+    /// `onScreensInvalidated` off-thread on background sync, delivery
+    /// receipts, device-link completion, etc. Kept as a property so the
+    /// UniFFI callback interface's lifetime is bound to the view model.
+    private var eventListener: InvalidationListener?
+
     /// Timer that drives animated-QR frame advancement (~10fps) while the
     /// "Share Your Code" screen is visible. See `startQrFrameTimer` /
     /// `stopQrFrameTimer`; the view layer toggles it via `onChange` of
@@ -49,6 +56,41 @@ class AppViewModel: ObservableObject {
         self.appEngine = appEngine
         loadAvailableScreens()
         loadScreen()
+        attachEventListener()
+    }
+
+    private func attachEventListener() {
+        let listener = InvalidationListener { [weak self] screenIds in
+            // Core calls this on whatever thread it dispatched the event
+            // on (often the thread that handled a user action). The
+            // UniFFI Mutex guarding `PlatformAppEngine` will deadlock if
+            // we touch the engine on the same stack — hop to main first.
+            DispatchQueue.main.async {
+                guard let self else { return }
+                for id in screenIds {
+                    let quoted = "\"\(id)\""
+                    _ = try? self.appEngine.invalidateScreenJson(screenJson: quoted)
+                }
+                self.loadScreen()
+            }
+        }
+        do {
+            try appEngine.setEventListener(listener: listener)
+            eventListener = listener
+        } catch {
+            #if DEBUG
+                print("AppViewModel: failed to attach event listener: \(error)")
+            #endif
+        }
+    }
+
+    /// Test-only accessors for `PlatformEventListenerTests`.
+    var hasEventListener: Bool {
+        eventListener != nil
+    }
+
+    var eventListenerForTesting: PlatformEventListener? {
+        eventListener
     }
 
     // MARK: - Screen Loading
@@ -345,5 +387,21 @@ class AppViewModel: ObservableObject {
                 print("AppViewModel: failed to send hardware event: \(error)")
             #endif
         }
+    }
+}
+
+/// UniFFI callback target for core screen invalidations. Declared as a
+/// `final class` (not a struct) because the binding protocol requires
+/// `AnyObject`. The view model owns the instance so the FFI-held
+/// reference stays alive as long as the engine is in use.
+private final class InvalidationListener: PlatformEventListener {
+    private let handler: ([String]) -> Void
+
+    init(handler: @escaping ([String]) -> Void) {
+        self.handler = handler
+    }
+
+    func onScreensInvalidated(screenIds: [String]) {
+        handler(screenIds)
     }
 }
