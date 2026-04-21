@@ -469,7 +469,71 @@ struct ContactItem: Decodable, Identifiable {
     let subtitle: String?
     let avatarInitials: String
     let status: String?
+    var searchableFields: [String] = []
+    var actions: [ListItemAction] = []
     var a11y: A11y?
+
+    /// Default Decodable synthesis matches: `coreJSONDecoder` above sets
+    /// `.convertFromSnakeCase`, so wire keys like `avatar_initials` and
+    /// `searchable_fields` are mapped automatically to their camelCase
+    /// property names here. The custom init only exists so new fields
+    /// (`searchableFields`, `actions`) default to empty when absent
+    /// from legacy fixtures or older engine versions.
+    private enum CodingKeys: String, CodingKey {
+        case id, name, subtitle, avatarInitials, status, searchableFields, actions, a11y
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        subtitle = try c.decodeIfPresent(String.self, forKey: .subtitle)
+        avatarInitials = try c.decode(String.self, forKey: .avatarInitials)
+        status = try c.decodeIfPresent(String.self, forKey: .status)
+        searchableFields = (try? c.decode([String].self, forKey: .searchableFields)) ?? []
+        actions = (try? c.decode([ListItemAction].self, forKey: .actions)) ?? []
+        a11y = try? c.decode(A11y.self, forKey: .a11y)
+    }
+}
+
+/// Semantic classification for a per-row action. Mirrors
+/// `vauchi-core::ui::component::ListItemActionKind`. Serialized snake_case.
+enum ListItemActionKind: String, Decodable {
+    case archive
+    case unarchive
+    case hide
+    case unhide
+    case delete
+    case undelete
+    case custom
+    /// Forward-compat fallback for kinds added in a newer core.
+    case unknown
+
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        self = ListItemActionKind(rawValue: raw) ?? .unknown
+    }
+}
+
+/// A per-row swipe/context-menu action produced by core. Mirrors
+/// `vauchi-core::ui::component::ListItemAction`.
+struct ListItemAction: Decodable, Identifiable {
+    let id: String
+    let label: String
+    let kind: ListItemActionKind
+    let destructive: Bool
+
+    private enum CodingKeys: String, CodingKey {
+        case id, label, kind, destructive
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        label = try c.decode(String.self, forKey: .label)
+        kind = try c.decode(ListItemActionKind.self, forKey: .kind)
+        destructive = (try? c.decode(Bool.self, forKey: .destructive)) ?? false
+    }
 }
 
 // MARK: - SettingsGroup Component
@@ -693,6 +757,7 @@ enum UserAction: Encodable {
     case groupViewSelected(groupName: String?)
     case searchChanged(componentId: String, query: String)
     case listItemSelected(componentId: String, itemId: String)
+    case listItemAction(componentId: String, itemId: String, actionId: String)
     case settingsToggled(componentId: String, itemId: String)
     case undoPressed(actionId: String)
     case sliderChanged(componentId: String, valueMilli: Int32)
@@ -716,50 +781,42 @@ enum UserAction: Encodable {
             try nested.encode(actionId, forKey: .actionId)
 
         case let .fieldVisibilityChanged(fieldId, groupId, visible):
-            var nested = container.nestedContainer(
-                keyedBy: FieldVisibilityKeys.self, forKey: .fieldVisibilityChanged
-            )
+            var nested = container.nestedContainer(keyedBy: FieldVisibilityKeys.self, forKey: .fieldVisibilityChanged)
             try nested.encode(fieldId, forKey: .fieldId)
             try nested.encodeIfPresent(groupId, forKey: .groupId)
             try nested.encode(visible, forKey: .visible)
 
         case let .groupViewSelected(groupName):
-            var nested = container.nestedContainer(
-                keyedBy: GroupViewSelectedKeys.self, forKey: .groupViewSelected
-            )
+            var nested = container.nestedContainer(keyedBy: GroupViewSelectedKeys.self, forKey: .groupViewSelected)
             try nested.encodeIfPresent(groupName, forKey: .groupName)
 
         case let .searchChanged(componentId, query):
-            var nested = container.nestedContainer(
-                keyedBy: SearchChangedKeys.self, forKey: .searchChanged
-            )
+            var nested = container.nestedContainer(keyedBy: SearchChangedKeys.self, forKey: .searchChanged)
             try nested.encode(componentId, forKey: .componentId)
             try nested.encode(query, forKey: .query)
 
         case let .listItemSelected(componentId, itemId):
-            var nested = container.nestedContainer(
-                keyedBy: ListItemSelectedKeys.self, forKey: .listItemSelected
-            )
+            var nested = container.nestedContainer(keyedBy: ListItemSelectedKeys.self, forKey: .listItemSelected)
             try nested.encode(componentId, forKey: .componentId)
             try nested.encode(itemId, forKey: .itemId)
 
+        case let .listItemAction(componentId, itemId, actionId):
+            var nested = container.nestedContainer(keyedBy: ListItemActionKeys.self, forKey: .listItemAction)
+            try nested.encode(componentId, forKey: .componentId)
+            try nested.encode(itemId, forKey: .itemId)
+            try nested.encode(actionId, forKey: .actionId)
+
         case let .settingsToggled(componentId, itemId):
-            var nested = container.nestedContainer(
-                keyedBy: SettingsToggledKeys.self, forKey: .settingsToggled
-            )
+            var nested = container.nestedContainer(keyedBy: SettingsToggledKeys.self, forKey: .settingsToggled)
             try nested.encode(componentId, forKey: .componentId)
             try nested.encode(itemId, forKey: .itemId)
 
         case let .undoPressed(actionId):
-            var nested = container.nestedContainer(
-                keyedBy: UndoPressedKeys.self, forKey: .undoPressed
-            )
+            var nested = container.nestedContainer(keyedBy: UndoPressedKeys.self, forKey: .undoPressed)
             try nested.encode(actionId, forKey: .actionId)
 
         case let .sliderChanged(componentId, valueMilli):
-            var nested = container.nestedContainer(
-                keyedBy: SliderChangedKeys.self, forKey: .sliderChanged
-            )
+            var nested = container.nestedContainer(keyedBy: SliderChangedKeys.self, forKey: .sliderChanged)
             try nested.encode(componentId, forKey: .componentId)
             try nested.encode(valueMilli, forKey: .valueMilli)
         }
@@ -773,6 +830,7 @@ enum UserAction: Encodable {
         case groupViewSelected = "GroupViewSelected"
         case searchChanged = "SearchChanged"
         case listItemSelected = "ListItemSelected"
+        case listItemAction = "ListItemAction"
         case settingsToggled = "SettingsToggled"
         case undoPressed = "UndoPressed"
         case sliderChanged = "SliderChanged"
@@ -810,6 +868,12 @@ enum UserAction: Encodable {
     private enum ListItemSelectedKeys: String, CodingKey {
         case componentId = "component_id"
         case itemId = "item_id"
+    }
+
+    private enum ListItemActionKeys: String, CodingKey {
+        case componentId = "component_id"
+        case itemId = "item_id"
+        case actionId = "action_id"
     }
 
     private enum SettingsToggledKeys: String, CodingKey {

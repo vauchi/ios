@@ -705,4 +705,71 @@ final class ModelsTests: XCTestCase {
             XCTFail("Expected .previewAs, got \(result)")
         }
     }
+
+    // MARK: - ContactItem + ListItemAction wire format (core!637)
+
+    func testContactItemDecodesWithActions() throws {
+        let json = Data("""
+        {
+            "id": "c1",
+            "name": "Alice",
+            "subtitle": "alice@example.org",
+            "avatar_initials": "A",
+            "status": null,
+            "searchable_fields": ["alice@example.org", "+41 79 123 45 67"],
+            "actions": [
+                {"id": "archive", "label": "Archive", "kind": "archive", "destructive": false},
+                {"id": "delete", "label": "Delete", "kind": "delete", "destructive": true}
+            ]
+        }
+        """.utf8)
+        let contact = try coreJSONDecoder.decode(ContactItem.self, from: json)
+        XCTAssertEqual(contact.id, "c1")
+        XCTAssertEqual(contact.name, "Alice")
+        XCTAssertEqual(contact.avatarInitials, "A")
+        XCTAssertEqual(contact.searchableFields, ["alice@example.org", "+41 79 123 45 67"])
+        XCTAssertEqual(contact.actions.count, 2)
+        XCTAssertEqual(contact.actions[0].id, "archive")
+        XCTAssertEqual(contact.actions[0].kind, .archive)
+        XCTAssertFalse(contact.actions[0].destructive)
+        XCTAssertEqual(contact.actions[1].kind, .delete)
+        XCTAssertTrue(contact.actions[1].destructive)
+    }
+
+    func testContactItemLegacyFixtureWithoutNewFields() throws {
+        // Fixtures written before core!637 omit `actions` + `searchable_fields`.
+        // Decoding must still succeed — the ContactItem init provides [] defaults.
+        let json = Data("""
+        {"id": "c1", "name": "Bob", "avatar_initials": "B"}
+        """.utf8)
+        let contact = try coreJSONDecoder.decode(ContactItem.self, from: json)
+        XCTAssertEqual(contact.id, "c1")
+        XCTAssertTrue(contact.actions.isEmpty)
+        XCTAssertTrue(contact.searchableFields.isEmpty)
+    }
+
+    func testListItemActionKindForwardCompatFallsBackToUnknown() throws {
+        // A newer core ships an unrecognised kind. Decoding must not throw —
+        // we degrade to `.unknown` so the UI can render a generic affordance.
+        let json = Data("""
+        {"id": "x", "label": "Future", "kind": "promote_to_vip", "destructive": false}
+        """.utf8)
+        let action = try coreJSONDecoder.decode(ListItemAction.self, from: json)
+        XCTAssertEqual(action.kind, .unknown)
+    }
+
+    func testUserActionListItemActionEncodesSerdeWireFormat() throws {
+        let action: UserAction = .listItemAction(
+            componentId: "contacts",
+            itemId: "c1",
+            actionId: "archive"
+        )
+        let encoded = try JSONEncoder().encode(action)
+        let decoded = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        let payload = decoded?["ListItemAction"] as? [String: Any]
+        XCTAssertNotNil(payload, "expected outer serde variant key ListItemAction")
+        XCTAssertEqual(payload?["component_id"] as? String, "contacts")
+        XCTAssertEqual(payload?["item_id"] as? String, "c1")
+        XCTAssertEqual(payload?["action_id"] as? String, "archive")
+    }
 }
