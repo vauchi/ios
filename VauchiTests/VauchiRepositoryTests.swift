@@ -102,15 +102,25 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     /// Scenario: Cannot create identity twice
+    ///
+    /// Per ADR-044, `MobileError` no longer distinguishes
+    /// "already initialized" — core returns `MobileError.Other { detail:
+    /// "Already initialized" }`, which the repository maps to
+    /// `.internalError(detail)`. The observable contract is that the second
+    /// `createIdentity` throws with an explanatory message.
     func testCannotCreateIdentityTwice() throws {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
         XCTAssertThrowsError(try repo.createIdentity(displayName: "Bob")) { error in
-            guard case VauchiRepositoryError.alreadyInitialized = error else {
-                XCTFail("Expected alreadyInitialized error, got \(error)")
+            guard case let VauchiRepositoryError.internalError(detail) = error else {
+                XCTFail("Expected internalError, got \(error)")
                 return
             }
+            XCTAssertTrue(
+                detail.localizedCaseInsensitiveContains("already"),
+                "Expected detail to mention 'already', got \(detail)"
+            )
         }
     }
 
