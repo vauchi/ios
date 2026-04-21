@@ -87,13 +87,6 @@ enum SyncState: Equatable {
     case error(String)
 }
 
-/// Sync result
-struct SyncResultInfo: Equatable {
-    let contactsAdded: Int
-    let cardsUpdated: Int
-    let updatesSent: Int
-}
-
 /// App-level state for device lock handling
 enum AppState: Equatable {
     case loading
