@@ -52,12 +52,17 @@ struct ContactItemRow: View {
     let contact: ContactItem
     let onTap: () -> Void
 
+    /// Dynamic-Type-aware avatar-initial font size, tied to `.body` so it
+    /// tracks the row's general text scaling.
+    @ScaledMetric(relativeTo: .body) private var avatarInitialSize: CGFloat = 16
+
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 // Avatar circle with initials
                 Text(contact.avatarInitials)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: avatarInitialSize, weight: .semibold))
+                    .minimumScaleFactor(0.5)
                     .foregroundColor(.white)
                     .frame(width: 40, height: 40)
                     .background(Color.cyan)

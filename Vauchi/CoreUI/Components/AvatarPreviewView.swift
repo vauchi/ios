@@ -12,6 +12,11 @@ struct AvatarPreviewView: View {
     let component: AvatarPreviewComponent
     let onAction: (UserAction) -> Void
 
+    /// Scales the initials text with the user's Dynamic Type setting. Tied
+    /// to `.largeTitle` so it tracks the accessibility audit's expectations
+    /// for a title-sized element.
+    @ScaledMetric(relativeTo: .largeTitle) private var initialsFontSize: CGFloat = 40
+
     var body: some View {
         ZStack {
             avatarContent
@@ -48,7 +53,8 @@ struct AvatarPreviewView: View {
                 .fill(backgroundGradient)
                 .overlay(
                     Text(component.initials)
-                        .font(.system(size: 40, weight: .bold))
+                        .font(.system(size: initialsFontSize, weight: .bold))
+                        .minimumScaleFactor(0.5)
                         .foregroundColor(.white)
                 )
         }

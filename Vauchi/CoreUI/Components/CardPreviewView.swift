@@ -13,6 +13,10 @@ struct CardPreviewView: View {
     let onAction: (UserAction) -> Void
     @Environment(\.designTokens) private var tokens
 
+    /// Dynamic-Type-aware avatar-initial font size, tied to `.title` since
+    /// the contact-card avatar circle is smaller than `AvatarPreviewView`'s.
+    @ScaledMetric(relativeTo: .title) private var avatarInitialSize: CGFloat = 36
+
     var body: some View {
         VStack(spacing: 16) {
             // Group selector (if groups exist)
@@ -119,7 +123,8 @@ struct CardPreviewView: View {
                 .frame(width: 80, height: 80)
                 .overlay(
                     Text(currentDisplayName.prefix(1).uppercased())
-                        .font(.system(size: 36, weight: .bold))
+                        .font(.system(size: avatarInitialSize, weight: .bold))
+                        .minimumScaleFactor(0.5)
                         .foregroundColor(.white)
                 )
         }
