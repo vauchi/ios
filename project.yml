@@ -35,6 +35,8 @@ targets:
     dependencies:
       - package: VauchiPlatform
         product: VauchiPlatform
+      - package: VauchiPlatform
+        product: CoreUIModels
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.vauchi.ios

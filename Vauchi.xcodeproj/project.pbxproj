@@ -36,6 +36,7 @@
 		1552B5F6D02172C2BA2C691D /* PlatformEdgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */; };
 		161D92EC11DFF0CDAE7B0F29 /* DemoContactTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */; };
 		17ACE0E08EFAC15CC31E8DC4 /* help.json in Resources */ = {isa = PBXBuildFile; fileRef = 50561F5946E3F79CA66C0BDE /* help.json */; };
+		18DFBC47BE88310909350859 /* CoreUIModels in Frameworks */ = {isa = PBXBuildFile; productRef = B2C60C8C920018E8C7CF99BE /* CoreUIModels */; };
 		191B895266678FE7D88D7FF1 /* testContactsViewWithContacts.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 73C57002D4EAE39D0378F9F4 /* testContactsViewWithContacts.1.png */; };
 		1AA3266DB9FF1423DCFE7514 /* testContactsViewEmpty.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */; };
 		1ABCC26C203868ABD7EB9255 /* testCardPreviewDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 5A2DFACA328F9C9EBEF5C3A2 /* testCardPreviewDark.1.png */; };
@@ -563,6 +564,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C2BF1FC510A65D73DD722C95 /* VauchiPlatform in Frameworks */,
+				18DFBC47BE88310909350859 /* CoreUIModels in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1058,6 +1060,7 @@
 			name = Vauchi;
 			packageProductDependencies = (
 				BE415B866BE8E26F05791810 /* VauchiPlatform */,
+				B2C60C8C920018E8C7CF99BE /* CoreUIModels */,
 			);
 			productName = Vauchi;
 			productReference = 0D3497B12DDDF10370069F86 /* Vauchi.app */;
@@ -1828,6 +1831,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
 			productName = SnapshotTesting;
+		};
+		B2C60C8C920018E8C7CF99BE /* CoreUIModels */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B834B486889A4518835FD33 /* XCRemoteSwiftPackageReference "vauchi-platform-swift" */;
+			productName = CoreUIModels;
 		};
 		BE415B866BE8E26F05791810 /* VauchiPlatform */ = {
 			isa = XCSwiftPackageProductDependency;
