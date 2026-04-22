@@ -5,6 +5,7 @@
 // EditableTextView.swift
 // Renders an EditableText component from core UI (iOS)
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::EditableText` that toggles between display and edit mode.

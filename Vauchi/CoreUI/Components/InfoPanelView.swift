@@ -5,6 +5,7 @@
 // InfoPanelView.swift
 // Renders an InfoPanel component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::InfoPanel` as a styled list of info items.

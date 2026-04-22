@@ -16,6 +16,7 @@
 // contact" banner (which is frontend-only today; moving it into core
 // is tracked as a follow-up).
 
+import CoreUIModels
 import SwiftUI
 
 struct ContactsView: View {

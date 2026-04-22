@@ -5,6 +5,7 @@
 // ContactDetailComponents.swift
 // Reusable subviews for ContactDetailView
 
+import CoreUIModels
 import SwiftUI
 import VauchiPlatform
 

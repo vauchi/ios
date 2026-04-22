@@ -5,6 +5,7 @@
 // CoreOnboardingView.swift
 // Core-driven onboarding flow using ScreenRendererView + OnboardingViewModel
 
+import CoreUIModels
 import SwiftUI
 
 #if canImport(VauchiPlatform)

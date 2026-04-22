@@ -5,6 +5,7 @@
 // ScreenRendererView.swift
 // Generic view that renders any ScreenModel from core
 
+import CoreUIModels
 import SwiftUI
 
 /// Generic view that renders any core `ScreenModel`.

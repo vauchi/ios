@@ -5,6 +5,7 @@
 // ToggleListView.swift
 // Renders a ToggleList component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::ToggleList` as a list of toggleable items.

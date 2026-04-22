@@ -5,6 +5,7 @@
 // PinInputView.swift
 // Renders a PinInput component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::PinInput` as a PIN entry field.

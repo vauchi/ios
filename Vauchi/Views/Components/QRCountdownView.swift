@@ -5,6 +5,7 @@
 // QRCountdownView.swift
 // Shows a QR code with a countdown timer. Calls onExpired when time runs out.
 
+import CoreUIModels
 import SwiftUI
 
 /// Displays a QR code image with a live countdown to expiry.

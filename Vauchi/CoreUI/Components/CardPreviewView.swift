@@ -5,6 +5,7 @@
 // CardPreviewView.swift
 // Renders a CardPreview component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::CardPreview` as a styled card with group views.

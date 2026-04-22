@@ -5,6 +5,7 @@
 // AvatarPreviewView.swift
 // Renders an AvatarPreview component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::AvatarPreview` as a circular avatar with optional edit overlay.

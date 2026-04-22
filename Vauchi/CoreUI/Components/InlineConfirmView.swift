@@ -5,6 +5,7 @@
 // InlineConfirmView.swift
 // Renders an InlineConfirm component from core UI (iOS)
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::InlineConfirm` as an inline warning with confirm/cancel buttons.

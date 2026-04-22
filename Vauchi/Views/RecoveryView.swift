@@ -5,6 +5,7 @@
 // RecoveryView.swift
 // Recovery claim and vouching UI for Vauchi iOS
 
+import CoreUIModels
 import SwiftUI
 
 struct RecoveryView: View {

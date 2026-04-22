@@ -5,6 +5,7 @@
 // MultipartQRView.swift
 // Animated QR display that cycles through multipart QR chunks at ~3fps.
 
+import CoreUIModels
 import SwiftUI
 import VauchiPlatform
 

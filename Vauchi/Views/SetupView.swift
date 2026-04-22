@@ -5,6 +5,7 @@
 // SetupView.swift
 // Identity creation view
 
+import CoreUIModels
 import SwiftUI
 
 struct SetupView: View {

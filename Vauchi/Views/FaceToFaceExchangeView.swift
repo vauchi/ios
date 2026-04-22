@@ -8,6 +8,7 @@
 // The core Rust library drives the multi-stage protocol — this view is a pure display shell.
 
 import AVFoundation
+import CoreUIModels
 import SwiftUI
 import VauchiPlatform
 

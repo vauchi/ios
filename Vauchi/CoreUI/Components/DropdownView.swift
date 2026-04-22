@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `DropdownComponent` as a SwiftUI Picker.

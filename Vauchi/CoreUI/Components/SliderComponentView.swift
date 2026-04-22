@@ -5,6 +5,7 @@
 // SliderComponentView.swift
 // Renders a Slider component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::Slider` as a SwiftUI Slider with optional min/max icons.

@@ -6,6 +6,7 @@
 // Wraps PlatformAppEngine to drive ScreenRendererView for all core screens.
 // Ported from macOS — same pattern, iOS-specific adaptations.
 
+import CoreUIModels
 import Foundation
 import PhotosUI
 import SwiftUI

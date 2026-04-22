@@ -5,6 +5,7 @@
 // TextInputView.swift
 // Renders a TextInput component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::TextInput` as a styled TextField with validation.

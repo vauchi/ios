@@ -5,6 +5,7 @@
 // ComponentView.swift
 // Routes a Component enum to the appropriate SwiftUI view
 
+import CoreUIModels
 import SwiftUI
 
 /// Routes a core `Component` to the appropriate SwiftUI view.

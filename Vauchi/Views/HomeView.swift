@@ -11,6 +11,7 @@
 // caption, sync footer captions) that isn't part of the cross-platform
 // ScreenModel.
 
+import CoreUIModels
 import SwiftUI
 
 struct HomeView: View {

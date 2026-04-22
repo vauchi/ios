@@ -5,6 +5,7 @@
 // ActionListView.swift
 // Renders an ActionList component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::ActionList` as a list of tappable action rows.

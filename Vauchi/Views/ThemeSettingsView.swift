@@ -5,6 +5,7 @@
 // ThemeSettingsView.swift
 // Theme selection view
 
+import CoreUIModels
 import SwiftUI
 import VauchiPlatform
 

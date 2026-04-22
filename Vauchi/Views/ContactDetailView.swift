@@ -5,6 +5,7 @@
 // ContactDetailView.swift
 // Contact detail view with visibility controls
 
+import CoreUIModels
 import SwiftUI
 import VauchiPlatform
 

@@ -5,6 +5,7 @@
 // OnboardingViewModel.swift
 // Swift wrapper around MobileOnboardingWorkflow (core-driven onboarding)
 
+import CoreUIModels
 import Foundation
 import SwiftUI
 

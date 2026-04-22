@@ -5,6 +5,7 @@
 // ConfirmationDialogView.swift
 // Renders a ConfirmationDialog component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::ConfirmationDialog` as a title, message, and action buttons.

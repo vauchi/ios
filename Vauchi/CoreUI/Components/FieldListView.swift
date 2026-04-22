@@ -5,6 +5,7 @@
 // FieldListView.swift
 // Renders a FieldList component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::FieldList` with field rows and visibility controls.

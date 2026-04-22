@@ -5,6 +5,7 @@
 // ContactListView.swift
 // Renders a ContactList component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::ContactList` as a searchable list of contacts.

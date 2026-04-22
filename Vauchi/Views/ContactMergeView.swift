@@ -5,6 +5,7 @@
 // ContactMergeView.swift
 // Duplicate contact detection and merge UI.
 
+import CoreUIModels
 import SwiftUI
 import VauchiPlatform
 

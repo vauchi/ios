@@ -6,6 +6,7 @@
 // Shared proximity verification component for device linking and contact exchange.
 // Attempts ultrasonic audio first, falls back to manual confirmation.
 
+import CoreUIModels
 import SwiftUI
 
 // MARK: - Verification State

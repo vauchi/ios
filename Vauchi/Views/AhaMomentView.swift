@@ -5,6 +5,7 @@
 // AhaMomentView.swift
 // Progressive onboarding hint display
 
+import CoreUIModels
 import SwiftUI
 import VauchiPlatform
 

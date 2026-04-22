@@ -5,6 +5,7 @@
 // SettingsView.swift
 // Settings and backup view
 
+import CoreUIModels
 import LocalAuthentication
 import SwiftUI
 import UniformTypeIdentifiers

@@ -9,6 +9,7 @@
 
 #if DEBUG
     import AVFoundation
+    import CoreUIModels
     import SwiftUI
     import VauchiPlatform
 
