@@ -616,12 +616,20 @@ build:debug:
       # Run xcodebuild in background; stream output live AND capture to
       # build.log for failure-summary extraction.
       : > build.log
+      # Disable code signing for simulator builds: simulator .app bundles
+      # don't need signing, and GatherProvisioningInputs occasionally hangs
+      # for 10+ min on a fresh derived-data signature (project.yml enables
+      # automatic signing for device builds, which the CI doesn't need).
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
         -configuration Debug \
         -destination 'generic/platform=iOS Simulator' \
         -clonedSourcePackagesDirPath .spm-packages \
         -derivedDataPath .derived-data \
         ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
+        CODE_SIGNING_ALLOWED=NO \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGN_IDENTITY="" \
+        CODE_SIGN_ENTITLEMENTS="" \
         -showBuildTimingSummary \
         build > >(tee -a build.log) 2>&1 &
       BUILD_PID=$!
@@ -752,6 +760,8 @@ test:unit:
         -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
         -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data \
         ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
+        CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" \
         test -skip-testing VauchiSnapshotTests -skip-testing VauchiUITests \
         -parallel-testing-enabled YES -parallel-testing-worker-count 4 \
         -resultBundlePath build/test_result.xcresult \
@@ -786,7 +796,7 @@ coverage:unit:
     - !reference [.simulator-job, before_script]
     - command -v xcresultparser >/dev/null 2>&1 || brew install a7ex/formulae/xcresultparser
   script:
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -enableCodeCoverage YES -resultBundlePath coverage_result -skip-testing VauchiSnapshotTests -skip-testing VauchiUITests -parallel-testing-enabled YES -parallel-testing-worker-count 4
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" test -enableCodeCoverage YES -resultBundlePath coverage_result -skip-testing VauchiSnapshotTests -skip-testing VauchiUITests -parallel-testing-enabled YES -parallel-testing-worker-count 4
     - xcrun xccov view --report coverage_result.xcresult
     - xcresultparser --output-format cobertura coverage_result.xcresult > cobertura.xml
     - |
@@ -839,7 +849,7 @@ test:snapshots:
       fi
     - echo "✅ Found $BASELINE_COUNT snapshot baselines — running validation"
     # Reuse build:debug artifacts — skip xcodegen + SPM fetch
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
   after_script:
     - !reference [.vrt-upload-script, script]
     - !reference [.macos-job, after_script]
@@ -877,6 +887,8 @@ test:ui:
         -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data \
         -skipPackageUpdates \
         ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
+        CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" \
         test -only-testing VauchiUITests \
         -resultBundlePath build/ui_test_result.xcresult \
         || XCODEBUILD_EXIT=$?
@@ -921,6 +933,8 @@ test:snapshots:record:
         -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
         -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data \
         ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
+        CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" \
         SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) SNAPSHOT_RECORD' \
         test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1 \
         2>&1 | tee /tmp/xcodebuild-record-${CI_JOB_ID}.log
