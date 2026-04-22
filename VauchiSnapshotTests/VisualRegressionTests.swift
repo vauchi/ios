@@ -85,7 +85,7 @@ final class VisualRegressionTests: XCTestCase {
 
     func testHomeViewWithFields() {
         let vm = makeViewModel(
-            card: CardInfo(displayName: "Alice", fields: sampleFields)
+            card: VauchiContactCard(displayName: "Alice", fields: sampleFields)
         )
         let view = HomeView()
             .environmentObject(vm)
@@ -152,15 +152,22 @@ final class VisualRegressionTests: XCTestCase {
     // MARK: - Detail Views
 
     func testContactDetailView() {
-        let contact = ContactInfo(
+        let contact = VauchiContact(
             id: "c1",
             displayName: "Bob",
-            verified: true,
-            card: CardInfo(displayName: "Bob", fields: [
-                FieldInfo(id: "bf1", fieldType: .email, label: "Work", value: "bob@work.com"),
-                FieldInfo(id: "bf2", fieldType: .phone, label: "Mobile", value: "+41 78 987 65 43"),
+            fingerprint: "",
+            isVerified: true,
+            isRecoveryTrusted: false,
+            isHidden: false,
+            isImported: false,
+            card: VauchiContactCard(displayName: "Bob", fields: [
+                VauchiContactField(id: "bf1", fieldType: .email, label: "Work", value: "bob@work.com"),
+                VauchiContactField(id: "bf2", fieldType: .phone, label: "Mobile", value: "+41 78 987 65 43"),
             ]),
-            addedAt: Date()
+            addedAt: UInt64(Date().timeIntervalSince1970),
+            trustLevel: .standard,
+            proposalTrusted: false,
+            reciprocity: .unknown
         )
         let vm = makeViewModel(contacts: [contact])
         let view = ContactDetailView(contact: contact)
@@ -214,7 +221,7 @@ final class VisualRegressionTests: XCTestCase {
 
     func testHomeViewWithFieldsDark() {
         let vm = makeViewModel(
-            card: CardInfo(displayName: "Alice", fields: sampleFields)
+            card: VauchiContactCard(displayName: "Alice", fields: sampleFields)
         )
         let view = HomeView()
             .environmentObject(vm)
@@ -276,7 +283,7 @@ final class VisualRegressionTests: XCTestCase {
 
     func testHomeViewWithFieldsGerman() {
         let vm = makeViewModel(
-            card: CardInfo(displayName: "Alice", fields: sampleFields)
+            card: VauchiContactCard(displayName: "Alice", fields: sampleFields)
         )
         let view = HomeView()
             .environmentObject(vm)

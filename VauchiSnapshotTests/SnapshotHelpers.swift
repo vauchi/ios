@@ -7,6 +7,7 @@
 
 import SwiftUI
 @testable import Vauchi
+import VauchiPlatform
 
 /// Creates a VauchiViewModel configured with the given state.
 ///
@@ -17,8 +18,8 @@ func makeViewModel(
     hasIdentity: Bool = true,
     displayName: String = "Alice",
     publicId: String = "abc123def456",
-    card: CardInfo? = nil,
-    contacts: [ContactInfo] = [],
+    card: VauchiContactCard? = nil,
+    contacts: [VauchiContact] = [],
     syncState: SyncState = .idle,
     isOnline: Bool = true,
     errorMessage: String? = nil
@@ -31,7 +32,7 @@ func makeViewModel(
     if hasIdentity {
         vm.displayName = displayName
         vm.publicId = publicId
-        vm.card = card ?? CardInfo(displayName: displayName, fields: [])
+        vm.card = card ?? VauchiContactCard(displayName: displayName, fields: [])
     }
 
     vm.contacts = contacts
@@ -42,15 +43,32 @@ func makeViewModel(
 }
 
 /// Sample fields for testing card display
-let sampleFields: [FieldInfo] = [
-    FieldInfo(id: "f1", fieldType: .email, label: "Personal Email", value: "alice@example.com"),
-    FieldInfo(id: "f2", fieldType: .phone, label: "Mobile", value: "+41 79 123 45 67"),
-    FieldInfo(id: "f3", fieldType: .website, label: "Website", value: "https://alice.example.com"),
+let sampleFields: [VauchiContactField] = [
+    VauchiContactField(id: "f1", fieldType: .email, label: "Personal Email", value: "alice@example.com"),
+    VauchiContactField(id: "f2", fieldType: .phone, label: "Mobile", value: "+41 79 123 45 67"),
+    VauchiContactField(id: "f3", fieldType: .website, label: "Website", value: "https://alice.example.com"),
 ]
 
 /// Sample contacts for testing contact list
-let sampleContacts: [ContactInfo] = [
-    ContactInfo(id: "c1", displayName: "Bob", verified: true, addedAt: Date()),
-    ContactInfo(id: "c2", displayName: "Charlie", verified: true, addedAt: Date()),
-    ContactInfo(id: "c3", displayName: "Diana", verified: false, addedAt: Date()),
+private func sampleContact(id: String, name: String, verified: Bool) -> VauchiContact {
+    VauchiContact(
+        id: id,
+        displayName: name,
+        fingerprint: "",
+        isVerified: verified,
+        isRecoveryTrusted: false,
+        isHidden: false,
+        isImported: false,
+        card: VauchiContactCard(displayName: name, fields: []),
+        addedAt: UInt64(Date().timeIntervalSince1970),
+        trustLevel: .standard,
+        proposalTrusted: false,
+        reciprocity: .unknown
+    )
+}
+
+let sampleContacts: [VauchiContact] = [
+    sampleContact(id: "c1", name: "Bob", verified: true),
+    sampleContact(id: "c2", name: "Charlie", verified: true),
+    sampleContact(id: "c3", name: "Diana", verified: false),
 ]
