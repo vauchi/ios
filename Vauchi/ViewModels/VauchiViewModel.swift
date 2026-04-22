@@ -73,12 +73,6 @@ struct ContactInfo: Identifiable, Equatable {
     }
 }
 
-/// Identity information
-struct IdentityInfo: Equatable {
-    let displayName: String
-    let publicId: String
-}
-
 /// Sync state enum
 enum SyncState: Equatable {
     case idle
@@ -103,7 +97,8 @@ class VauchiViewModel: ObservableObject {
     @Published var appState: AppState = .loading
     @Published var isLoading = true
     @Published var hasIdentity = false
-    @Published var identity: IdentityInfo?
+    @Published var displayName: String?
+    @Published var publicId: String?
     @Published var card: CardInfo?
     @Published var contacts: [ContactInfo] = []
     private let contactsPageSize: UInt32 = 20
@@ -393,12 +388,12 @@ class VauchiViewModel: ObservableObject {
         guard let repository else { return }
 
         do {
-            let displayName = try repository.getDisplayName()
-            let publicId = try repository.getPublicId()
-            identity = IdentityInfo(displayName: displayName, publicId: publicId)
+            displayName = try repository.getDisplayName()
+            publicId = try repository.getPublicId()
         } catch {
             // Identity not found is expected if not created yet
-            identity = nil
+            displayName = nil
+            publicId = nil
         }
     }
 

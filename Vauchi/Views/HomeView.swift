@@ -47,7 +47,7 @@ struct HomeView: View {
     private var header: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
-                if let publicId = viewModel.identity?.publicId {
+                if let publicId = viewModel.publicId {
                     Text("ID: \(String(publicId.prefix(16)))...")
                         .font(.system(.caption, design: .monospaced))
                         .foregroundColor(themeService.textSecondary)

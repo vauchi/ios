@@ -79,7 +79,7 @@ struct SettingsView: View {
                     HStack {
                         Text(localizationService.t("settings.display_name"))
                         Spacer()
-                        Text(viewModel.identity?.displayName ?? "Unknown")
+                        Text(viewModel.displayName ?? "Unknown")
                             .foregroundColor(.secondary)
                         Text(localizationService.t("action.edit"))
                             .font(.caption)
@@ -87,19 +87,19 @@ struct SettingsView: View {
                     }
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        editingDisplayName = viewModel.identity?.displayName ?? ""
+                        editingDisplayName = viewModel.displayName ?? ""
                         showEditNameAlert = true
                     }
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel(localizationService.t("settings.display_name"))
-                    .accessibilityValue(viewModel.identity?.displayName ?? "Unknown")
+                    .accessibilityValue(viewModel.displayName ?? "Unknown")
                     .accessibilityHint("Double tap to edit your display name")
                     .accessibilityAddTraits(.isButton)
 
                     HStack {
                         Text(localizationService.t("home.public_id"))
                         Spacer()
-                        if let publicId = viewModel.identity?.publicId {
+                        if let publicId = viewModel.publicId {
                             Text(String(publicId.prefix(16)) + "...")
                                 .font(.system(.caption, design: .monospaced))
                                 .foregroundColor(.secondary)
@@ -110,10 +110,10 @@ struct SettingsView: View {
                     }
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel(localizationService.t("home.public_id"))
-                    .accessibilityValue(viewModel.identity?.publicId ?? "Unknown")
+                    .accessibilityValue(viewModel.publicId ?? "Unknown")
                     .accessibilityHint("Long press to copy full public ID")
                     .contextMenu {
-                        if let publicId = viewModel.identity?.publicId {
+                        if let publicId = viewModel.publicId {
                             Button(action: {
                                 UIPasteboard.general.string = publicId
                             }) {
@@ -659,7 +659,7 @@ struct SettingsView: View {
     private func saveDisplayName() {
         let trimmed = editingDisplayName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
-        guard trimmed != viewModel.identity?.displayName else { return }
+        guard trimmed != viewModel.displayName else { return }
 
         Task {
             do {
