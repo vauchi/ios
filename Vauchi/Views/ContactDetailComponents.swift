@@ -12,19 +12,19 @@ struct ContactFieldRow: View {
     let field: FieldInfo
     var contactId: String = ""
 
-    private func icon(for type: String) -> String {
-        switch type.lowercased() {
-        case "email": "envelope"
-        case "phone": "phone"
-        case "website": "globe"
-        case "address": "house"
-        case "social": "at"
+    private func icon(for type: VauchiFieldType) -> String {
+        switch type {
+        case .email: "envelope"
+        case .phone: "phone"
+        case .website: "globe"
+        case .address: "house"
+        case .social: "at"
         default: "note.text"
         }
     }
 
     private var fieldType: VauchiFieldType {
-        VauchiFieldType(rawValue: field.fieldType) ?? .custom
+        field.fieldType
     }
 
     var body: some View {
@@ -42,7 +42,7 @@ struct ContactFieldRow: View {
                     .font(.body)
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(field.fieldType.capitalized) field: \(field.label), \(field.value)")
+            .accessibilityLabel("\(field.fieldType.displayName) field: \(field.label), \(field.value)")
 
             Spacer()
 
@@ -149,13 +149,13 @@ struct VisibilityToggleRow: View {
     let isVisible: Bool
     let onToggle: (Bool) -> Void
 
-    private func icon(for type: String) -> String {
-        switch type.lowercased() {
-        case "email": "envelope"
-        case "phone": "phone"
-        case "website": "globe"
-        case "address": "house"
-        case "social": "at"
+    private func icon(for type: VauchiFieldType) -> String {
+        switch type {
+        case .email: "envelope"
+        case .phone: "phone"
+        case .website: "globe"
+        case .address: "house"
+        case .social: "at"
         default: "note.text"
         }
     }

@@ -15,7 +15,7 @@ import VauchiPlatform
 /// Contact field for display
 struct FieldInfo: Identifiable, Equatable {
     let id: String
-    let fieldType: String
+    let fieldType: VauchiFieldType
     let label: String
     let value: String
 }
@@ -409,7 +409,7 @@ class VauchiViewModel: ObservableObject {
                 fields: cardData.fields.map { field in
                     FieldInfo(
                         id: field.id,
-                        fieldType: field.fieldType.rawValue,
+                        fieldType: field.fieldType,
                         label: field.label,
                         value: field.value
                     )
@@ -501,7 +501,7 @@ class VauchiViewModel: ObservableObject {
                         fields: contact.card.fields.map { field in
                             FieldInfo(
                                 id: field.id,
-                                fieldType: field.fieldType.rawValue,
+                                fieldType: field.fieldType,
                                 label: field.label,
                                 value: field.value
                             )
@@ -540,7 +540,7 @@ class VauchiViewModel: ObservableObject {
                         fields: contact.card.fields.map { field in
                             FieldInfo(
                                 id: field.id,
-                                fieldType: field.fieldType.rawValue,
+                                fieldType: field.fieldType,
                                 label: field.label,
                                 value: field.value
                             )
@@ -580,7 +580,7 @@ class VauchiViewModel: ObservableObject {
                     fields: contact.card.fields.map { field in
                         FieldInfo(
                             id: field.id,
-                            fieldType: field.fieldType.rawValue,
+                            fieldType: field.fieldType,
                             label: field.label,
                             value: field.value
                         )
@@ -643,7 +643,7 @@ class VauchiViewModel: ObservableObject {
                         fields: contact.card.fields.map { field in
                             FieldInfo(
                                 id: field.id,
-                                fieldType: field.fieldType.rawValue,
+                                fieldType: field.fieldType,
                                 label: field.label,
                                 value: field.value
                             )
@@ -991,7 +991,7 @@ class VauchiViewModel: ObservableObject {
                         fields: contact.card.fields.map { field in
                             FieldInfo(
                                 id: field.id,
-                                fieldType: field.fieldType.rawValue,
+                                fieldType: field.fieldType,
                                 label: field.label,
                                 value: field.value
                             )
