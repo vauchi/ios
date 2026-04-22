@@ -29,7 +29,8 @@ func makeViewModel(
     vm.errorMessage = errorMessage
 
     if hasIdentity {
-        vm.identity = IdentityInfo(displayName: displayName, publicId: publicId)
+        vm.displayName = displayName
+        vm.publicId = publicId
         vm.card = card ?? CardInfo(displayName: displayName, fields: [])
     }
 

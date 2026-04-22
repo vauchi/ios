@@ -21,7 +21,8 @@ final class VauchiViewModelTests: XCTestCase {
         // Before loadState, should be in loading state
         XCTAssertTrue(viewModel.isLoading)
         XCTAssertFalse(viewModel.hasIdentity)
-        XCTAssertNil(viewModel.identity)
+        XCTAssertNil(viewModel.displayName)
+        XCTAssertNil(viewModel.publicId)
         XCTAssertNil(viewModel.card)
         XCTAssertTrue(viewModel.contacts.isEmpty)
     }
@@ -37,7 +38,7 @@ final class VauchiViewModelTests: XCTestCase {
         try await viewModel.createIdentity(name: "Alice")
 
         XCTAssertTrue(viewModel.hasIdentity)
-        XCTAssertEqual(viewModel.identity?.displayName, "Alice")
+        XCTAssertEqual(viewModel.displayName, "Alice")
         XCTAssertNotNil(viewModel.card)
     }
 
