@@ -13,16 +13,16 @@ import VauchiPlatform
 
 /// Classify a backup-import failure.
 ///
-/// TODO(ADR-044): Once the UniFFI bindings ship the new `MobileError`
-/// variants (`wrongPassword`, `decryptFailed`, `invalidInput`, `other`,
-/// etc.), replace this substring match with a `switch` on the variant.
-/// See `_private/docs/decisions/2026-04-20-adr-044-mobile-error-typing.md`.
+/// Driven by the ADR-044 `MobileError` variants (`WrongPassword`,
+/// `DecryptFailed`) which the repository layer funnels into
+/// `VauchiRepositoryError.cryptoError`. Other repository errors fall
+/// through to their own `errorDescription`.
 private func classifyBackupImportError(_ error: Error) -> String {
-    let description = error.localizedDescription
-    if description.contains("decrypt") || description.contains("password") {
-        return "Incorrect password"
+    if let repoError = error as? VauchiRepositoryError,
+       case .cryptoError = repoError {
+        return LocalizationService.shared.t("backup.error_incorrect_password")
     }
-    return description
+    return error.localizedDescription
 }
 
 struct SettingsView: View {
