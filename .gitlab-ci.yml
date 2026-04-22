@@ -94,28 +94,17 @@ workflow:
   resource_group: ios-spm-v5
   variables:
     GIT_DEPTH: "20"
-    CI_JOB_KEYCHAIN: ci-spm-${CI_JOB_ID}.keychain-db
   before_script:
     - echo "Xcode $(xcodebuild -version | head -1)"
-    # Per-job keychain for SPM binary target downloads from GitLab's package registry.
-    # URLSession uses the keychain (not .netrc) for HTTP auth challenges.
-    # Each concurrent job gets its own keychain to avoid cross-job credential races
-    # (post-mortem 2026-03-28: duplicates in shared keychain cause fatalError).
-    - security create-keychain -p "" "$CI_JOB_KEYCHAIN"
-    - security set-keychain-settings -lut 3600 "$CI_JOB_KEYCHAIN"
-    - security unlock-keychain -p "" "$CI_JOB_KEYCHAIN"
-    - security list-keychains -d user -s "$CI_JOB_KEYCHAIN" $(security list-keychains -d user | tr -d '"')
-    - security add-internet-password -s gitlab.com -a gitlab-ci-token -w "${CI_JOB_TOKEN}" -r htps -A -k "$CI_JOB_KEYCHAIN" 2>/dev/null || true
-    - echo "machine gitlab.com login gitlab-ci-token password ${CI_JOB_TOKEN}" > ~/.netrc && chmod 600 ~/.netrc
     - |
       if ! xcrun simctl list runtimes 2>/dev/null | grep -q "iOS.*SimRuntime"; then
         echo "ERROR: iOS Simulator runtime is not installed."
         echo "Run on the runner machine: xcodebuild -downloadPlatform iOS"
         exit 1
       fi
-  after_script:
-    # Clean up per-job keychain (best-effort — after_script runs even on failure)
-    - security delete-keychain "$CI_JOB_KEYCHAIN" 2>/dev/null || true
+  # Empty after_script kept as an anchor target for
+  # !reference [.macos-job, after_script] in extending jobs.
+  after_script: []
 
 # Simulator serialization — prevents "Busy / preflight checks" failures.
 # 1. resource_group: only one simulator job runs at a time (across pipelines)
