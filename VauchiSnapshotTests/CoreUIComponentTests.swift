@@ -6,6 +6,7 @@
 // Component-level snapshot tests for CoreUI views in isolation.
 // Uses smaller fixed-size layouts (390×200 pt) instead of full-screen device configs.
 
+import CoreUIModels
 import SnapshotTesting
 import SwiftUI
 @testable import Vauchi

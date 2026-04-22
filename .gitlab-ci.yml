@@ -515,6 +515,29 @@ check:removed-symbols:
   variables:
     SEARCH_DIRS: "Vauchi/"
 
+# CoreUIModels drift guard — fails if anyone re-introduces a local
+# `Vauchi/CoreUI/Models.swift` file. The canonical types moved to the
+# `CoreUIModels` SPM product in `vauchi-platform-swift v0.21.11+`
+# (problem: 2026-04-22-shared-coreui-models-package). A local copy would
+# silently shadow the shared package and drift on every core release.
+check:coreuimodels-drift:
+  stage: lint
+  image: alpine:3.21
+  tags: [docker]
+  needs: []
+  script:
+    - |
+      if [ -e Vauchi/CoreUI/Models.swift ]; then
+        echo "ERROR: Vauchi/CoreUI/Models.swift re-introduced."
+        echo "Shared CoreUIModels types live in vauchi-platform-swift."
+        echo "See _private/docs/problems/2026-04-22-shared-coreui-models-package/"
+        exit 1
+      fi
+      echo "OK: no local Vauchi/CoreUI/Models.swift present."
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
 # Design token drift: warn on hardcoded colors/spacing that bypass tokens.json.
 # Script lives in vauchi/scripts — fetched via API to avoid duplicating it here.
 # allow_failure: true makes this a visibility gate, not a merge blocker.

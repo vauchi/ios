@@ -5,6 +5,7 @@
 // TextComponentView.swift
 // Renders a Text component from core UI
 
+import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::Text` with the appropriate style.
