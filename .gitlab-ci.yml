@@ -575,11 +575,17 @@ build:debug:
     - echo "── [$(date +%H:%M:%S)] xcodegen ──"
     - rm -rf Vauchi.xcodeproj
     - xcodegen generate
-    # Delete lock files so SPM re-resolves to latest versions.
-    # Keep .spm-packages/artifacts/ — cached binary artifacts prevent
-    # re-download (SPM URLSession can't authenticate with GitLab).
-    - rm -f .spm-packages/workspace-state.json
-    - rm -f Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+    # EXPERIMENT (Fix B, problem 2026-04-22-ci-spm-watchdog-robustness):
+    # Previously deleted .spm-packages/workspace-state.json and
+    # Package.resolved before every resolve, citing "URLSession can't
+    # authenticate with GitLab". That premise is wrong — the artifact
+    # URL is public (verified 2026-04-22). Hypothesis: the deletions
+    # force SPM into a URLSession code path that hangs against the
+    # cached artifact, which is why the 30 s watchdog fires on every
+    # CI run. With the state files preserved, SPM should reuse the
+    # artifact cache without re-downloading.
+    # If this pipeline is healthy, proceed to Fix A (promote
+    # curl-then-path-patch to primary, drop the watchdog).
     - echo "── [$(date +%H:%M:%S)] SPM resolve ──"
     - |
       # SPM URLSession cannot authenticate with GitLab's package registry
