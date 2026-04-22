@@ -157,8 +157,8 @@ final class VisualRegressionTests: XCTestCase {
             displayName: "Bob",
             verified: true,
             card: CardInfo(displayName: "Bob", fields: [
-                FieldInfo(id: "bf1", fieldType: "email", label: "Work", value: "bob@work.com"),
-                FieldInfo(id: "bf2", fieldType: "phone", label: "Mobile", value: "+41 78 987 65 43"),
+                FieldInfo(id: "bf1", fieldType: .email, label: "Work", value: "bob@work.com"),
+                FieldInfo(id: "bf2", fieldType: .phone, label: "Mobile", value: "+41 78 987 65 43"),
             ]),
             addedAt: Date()
         )

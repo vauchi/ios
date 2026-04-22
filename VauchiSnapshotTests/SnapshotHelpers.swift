@@ -43,9 +43,9 @@ func makeViewModel(
 
 /// Sample fields for testing card display
 let sampleFields: [FieldInfo] = [
-    FieldInfo(id: "f1", fieldType: "email", label: "Personal Email", value: "alice@example.com"),
-    FieldInfo(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67"),
-    FieldInfo(id: "f3", fieldType: "website", label: "Website", value: "https://alice.example.com"),
+    FieldInfo(id: "f1", fieldType: .email, label: "Personal Email", value: "alice@example.com"),
+    FieldInfo(id: "f2", fieldType: .phone, label: "Mobile", value: "+41 79 123 45 67"),
+    FieldInfo(id: "f3", fieldType: .website, label: "Website", value: "https://alice.example.com"),
 ]
 
 /// Sample contacts for testing contact list
