@@ -196,17 +196,19 @@ enum ContactActions {
         openUrl(url)
     }
 
-    /// Copy a value to the clipboard with automatic expiration
-    /// For security, clipboard data expires after 30 seconds
+    /// Copy a value to the clipboard. Auto-clear timing is owned by core
+    /// via `mobileClipboardPolicy()`; `autoClearSeconds == 0` disables
+    /// the timer (used for debug builds or user opt-out).
     @MainActor
     static func copyToClipboard(_ value: String) {
         UIPasteboard.general.string = value
 
-        // Clear clipboard after 30 seconds for security
-        // This prevents sensitive data from lingering
+        let autoClearSeconds = mobileClipboardPolicy().autoClearSeconds
+        guard autoClearSeconds > 0 else { return }
+
+        let nanoseconds = UInt64(autoClearSeconds) * 1_000_000_000
         Task {
-            try? await Task.sleep(nanoseconds: 30_000_000_000) // 30 seconds
-            // Only clear if the value is still what we copied
+            try? await Task.sleep(nanoseconds: nanoseconds)
             if UIPasteboard.general.string == value {
                 UIPasteboard.general.string = ""
             }

@@ -437,7 +437,6 @@ class VauchiRepository {
     let appEngine: PlatformAppEngine
     private let dataDir: String
     private let relayUrl: String
-    private static let storageKeyLength = 32 // 256-bit key
 
     // MARK: - Initialization
 
@@ -488,12 +487,18 @@ class VauchiRepository {
     // MARK: - Secure Key Management
 
     /// Get or create storage key from Keychain.
+    ///
+    /// Key length and generation are owned by core via
+    /// `mobileStorageKeyByteLength()` / `mobileGenerateStorageKey()` —
+    /// both frontends share core's audited CSPRNG so key derivation
+    /// stays consistent across platforms.
     static func getOrCreateStorageKey(dataDir _: String) throws -> Data {
         let keychain = KeychainService.shared
+        let expectedKeyLength = Int(mobileStorageKeyByteLength())
 
         do {
             let keyData = try keychain.loadStorageKey()
-            if keyData.count == storageKeyLength {
+            if keyData.count == expectedKeyLength {
                 return keyData
             }
             // Key exists but wrong length — regenerate (migration scenario)
@@ -506,7 +511,7 @@ class VauchiRepository {
         // Other KeychainServiceError variants re-throw automatically
 
         // Generate new key and store in Keychain
-        let newKeyData = generateStorageKey()
+        let newKeyData = mobileGenerateStorageKey()
         try keychain.saveStorageKey(newKeyData)
 
         return newKeyData
