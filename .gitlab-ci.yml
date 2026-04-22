@@ -305,10 +305,14 @@ update:bindings-version:
         NEW_BINDING="$BINDING_CHECK_DIR/new.swift"
 
         # Fetch binding files from both versions (shallow, single-file)
-        curl -sf "${PLATFORM_REPO%.git}/-/raw/v${OLD_VERSION}/${BINDING_PATH}" > "$OLD_BINDING" 2>/dev/null || \
-          curl -sf "${PLATFORM_REPO%.git}/-/raw/${OLD_VERSION}/${BINDING_PATH}" > "$OLD_BINDING" 2>/dev/null || true
-        curl -sf "${PLATFORM_REPO%.git}/-/raw/v${BINDINGS_VERSION}/${BINDING_PATH}" > "$NEW_BINDING" 2>/dev/null || \
-          curl -sf "${PLATFORM_REPO%.git}/-/raw/${BINDINGS_VERSION}/${BINDING_PATH}" > "$NEW_BINDING" 2>/dev/null || true
+        # --retry handles transient 5xx / dependency-proxy HTML-404 on the
+        # GitLab raw endpoint. --max-time bounds each attempt so a hung
+        # TLS handshake doesn't burn the whole job timeout silently.
+        CURL_FETCH="curl -sf --retry 3 --retry-max-time 60 --max-time 30"
+        $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/v${OLD_VERSION}/${BINDING_PATH}" > "$OLD_BINDING" 2>/dev/null || \
+          $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/${OLD_VERSION}/${BINDING_PATH}" > "$OLD_BINDING" 2>/dev/null || true
+        $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/v${BINDINGS_VERSION}/${BINDING_PATH}" > "$NEW_BINDING" 2>/dev/null || \
+          $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/${BINDINGS_VERSION}/${BINDING_PATH}" > "$NEW_BINDING" 2>/dev/null || true
 
         if [ -s "$OLD_BINDING" ] && [ -s "$NEW_BINDING" ]; then
           # Extract public func/var names from each version
