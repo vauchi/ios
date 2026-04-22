@@ -12,7 +12,7 @@ struct ContactDetailView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @Environment(\.designTokens) private var tokens
     @Environment(\.dismiss) var dismiss
-    let contact: ContactInfo
+    let contact: VauchiContact
 
     @State private var showVerifyAlert = false
     @State private var isVerifying = false
@@ -51,12 +51,12 @@ struct ContactDetailView: View {
                         .accessibilityAddTraits(.isHeader)
 
                     HStack(spacing: 4) {
-                        if contact.verified {
+                        if contact.isVerified {
                             Image(systemName: "checkmark.seal.fill")
                                 .foregroundColor(.green)
                                 .accessibilityHidden(true)
                         }
-                        Text(contact.verified ? localizationService.t("contacts.verified") : localizationService.t("contacts.not_verified"))
+                        Text(contact.isVerified ? localizationService.t("contacts.verified") : localizationService.t("contacts.not_verified"))
                             .foregroundColor(.secondary)
                     }
                     .accessibilityElement(children: .combine)
@@ -67,14 +67,15 @@ struct ContactDetailView: View {
                         .lineLimit(2)
                         .accessibilityLabel("Contact fingerprint: \(contact.fingerprint)")
 
-                    if let addedAt = contact.addedAt {
+                    if contact.addedAt > 0 {
+                        let addedAt = Date(timeIntervalSince1970: TimeInterval(contact.addedAt))
                         Text("Added \(addedAt, style: .relative) ago")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
 
                     // Verify button
-                    if !contact.verified {
+                    if !contact.isVerified {
                         Button(action: { showVerifyAlert = true }) {
                             Label("Verify Contact", systemImage: "checkmark.seal")
                                 .padding(.horizontal, 16)
@@ -92,7 +93,7 @@ struct ContactDetailView: View {
                     TrustLevelBadge(trustLevel: ContactTrustLevel(from: contact.trustLevel))
 
                     // Recovery trust indicator
-                    if contact.recoveryTrusted {
+                    if contact.isRecoveryTrusted {
                         HStack(spacing: 4) {
                             Image(systemName: "shield.checkered")
                                 .foregroundColor(.cyan)
@@ -114,7 +115,7 @@ struct ContactDetailView: View {
                         isTogglingTrust = true
                         Task {
                             do {
-                                if contact.recoveryTrusted {
+                                if contact.isRecoveryTrusted {
                                     try await viewModel.untrustContactForRecovery(id: contact.id)
                                 } else {
                                     try await viewModel.trustContactForRecovery(id: contact.id)
@@ -126,18 +127,22 @@ struct ContactDetailView: View {
                         }
                     }) {
                         Label(
-                            contact.recoveryTrusted ? "Remove Recovery Trust" : "Trust for Recovery",
-                            systemImage: contact.recoveryTrusted ? "shield.slash" : "shield.checkered"
+                            contact.isRecoveryTrusted ? "Remove Recovery Trust" : "Trust for Recovery",
+                            systemImage: contact.isRecoveryTrusted ? "shield.slash" : "shield.checkered"
                         )
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(contact.recoveryTrusted ? Color.gray.opacity(0.2) : Color.cyan.opacity(0.2))
-                        .foregroundColor(contact.recoveryTrusted ? .gray : .cyan)
+                        .background(contact.isRecoveryTrusted ? Color.gray.opacity(0.2) : Color.cyan.opacity(0.2))
+                        .foregroundColor(contact.isRecoveryTrusted ? .gray : .cyan)
                         .cornerRadius(8)
                     }
                     .disabled(isTogglingTrust)
-                    .accessibilityLabel(contact.recoveryTrusted ? "Remove recovery trust" : "Trust for recovery")
-                    .accessibilityHint(contact.recoveryTrusted ? "Remove this contact from your recovery helpers" : "Allow this contact to help you recover your account")
+                    .accessibilityLabel(contact.isRecoveryTrusted ? "Remove recovery trust" : "Trust for recovery")
+                    .accessibilityHint(
+                        contact.isRecoveryTrusted
+                            ? "Remove this contact from your recovery helpers"
+                            : "Allow this contact to help you recover your account"
+                    )
 
                     // Hide/unhide toggle
                     Button(action: {
@@ -271,8 +276,10 @@ struct ContactDetailView: View {
                         .padding(.horizontal)
                 }
 
-                // Contact's card info section
-                if let card = contact.card {
+                // Contact's card info section — `VauchiContact.card` is
+                // non-optional (always present, possibly with empty fields).
+                do {
+                    let card = contact.card
                     VStack(alignment: .leading, spacing: 12) {
                         Text(localizationService.t("contacts.info"))
                             .font(.headline)
@@ -522,7 +529,7 @@ struct ContactDetailView: View {
         }
     }
 
-    private func toggleVisibility(field: FieldInfo, visible: Bool) {
+    private func toggleVisibility(field: VauchiContactField, visible: Bool) {
         fieldVisibility[field.label] = visible
 
         Task {
@@ -557,7 +564,20 @@ struct ContactDetailView: View {
 
 #Preview {
     NavigationView {
-        ContactDetailView(contact: ContactInfo(id: "test", displayName: "Alice", verified: true))
-            .environmentObject(VauchiViewModel())
+        ContactDetailView(contact: VauchiContact(
+            id: "test",
+            displayName: "Alice",
+            fingerprint: "",
+            isVerified: true,
+            isRecoveryTrusted: false,
+            isHidden: false,
+            isImported: false,
+            card: VauchiContactCard(displayName: "Alice", fields: []),
+            addedAt: 0,
+            trustLevel: .standard,
+            proposalTrusted: false,
+            reciprocity: .unknown
+        ))
+        .environmentObject(VauchiViewModel())
     }
 }

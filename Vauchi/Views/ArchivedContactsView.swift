@@ -46,7 +46,8 @@ struct ArchivedContactsView: View {
                                 Text(contact.displayName)
                                     .font(Font.body.weight(.medium))
 
-                                if let addedAt = contact.addedAt {
+                                if contact.addedAt > 0 {
+                                    let addedAt = Date(timeIntervalSince1970: TimeInterval(contact.addedAt))
                                     Text("Added \(addedAt, style: .relative) ago")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
@@ -84,7 +85,7 @@ struct ArchivedContactsView: View {
                         .padding(.vertical, 4)
                         .accessibilityIdentifier("archived_contacts.row")
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(contact.displayName), \(contact.verified ? "verified" : "not verified")")
+                        .accessibilityLabel("\(contact.displayName), \(contact.isVerified ? "verified" : "not verified")")
                         .accessibilityHint("Double tap to unarchive this contact")
                     }
                 }

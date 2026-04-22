@@ -56,8 +56,8 @@ struct ContactMergeView: View {
 private struct DuplicatePairRow: View {
     @Environment(\.designTokens) private var tokens
     let pair: MobileDuplicatePair
-    let contact1: ContactInfo
-    let contact2: ContactInfo
+    let contact1: VauchiContact
+    let contact2: VauchiContact
     @ObservedObject var localizationService: LocalizationService
     @ObservedObject var viewModel: VauchiViewModel
 
@@ -67,19 +67,19 @@ private struct DuplicatePairRow: View {
         contact1.isImported != contact2.isImported
     }
 
-    private var importedContact: ContactInfo {
+    private var importedContact: VauchiContact {
         contact1.isImported ? contact1 : contact2
     }
 
-    private var exchangedContact: ContactInfo {
+    private var exchangedContact: VauchiContact {
         !contact1.isImported ? contact1 : contact2
     }
 
-    private var primary: ContactInfo {
+    private var primary: VauchiContact {
         swapped ? contact2 : contact1
     }
 
-    private var secondary: ContactInfo {
+    private var secondary: VauchiContact {
         swapped ? contact1 : contact2
     }
 
@@ -226,7 +226,7 @@ private struct DuplicatePairRow: View {
         }
     }
 
-    private func contactRow(contact: ContactInfo, isPrimary: Bool) -> some View {
+    private func contactRow(contact: VauchiContact, isPrimary: Bool) -> some View {
         HStack(spacing: CGFloat(tokens.spacing.smMd)) {
             ZStack {
                 Circle()

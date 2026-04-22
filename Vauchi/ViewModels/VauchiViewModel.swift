@@ -12,66 +12,11 @@ import Security
 import SwiftUI
 import VauchiPlatform
 
-/// Contact field for display
-struct FieldInfo: Identifiable, Equatable {
-    let id: String
-    let fieldType: VauchiFieldType
-    let label: String
-    let value: String
-}
-
-/// Contact card for display
-struct CardInfo: Equatable {
-    let displayName: String
-    let fields: [FieldInfo]
-}
-
-/// Contact for display
-struct ContactInfo: Identifiable, Equatable {
-    let id: String
-    let displayName: String
-    let verified: Bool
-    let recoveryTrusted: Bool
-    let isHidden: Bool
-    /// True for contacts imported via vCard (.vcf) — they were never exchanged
-    /// and support soft-delete (reversible). False for exchanged contacts, which
-    /// support archive instead.
-    let isImported: Bool
-    let fingerprint: String
-    let card: CardInfo?
-    let addedAt: Date?
-    let trustLevel: MobileContactTrustLevel
-    let proposalTrusted: Bool
-    let reciprocity: MobileReciprocity
-
-    init(
-        id: String,
-        displayName: String,
-        verified: Bool,
-        recoveryTrusted: Bool = false,
-        isHidden: Bool = false,
-        isImported: Bool = false,
-        fingerprint: String = "",
-        card: CardInfo? = nil,
-        addedAt: Date? = nil,
-        trustLevel: MobileContactTrustLevel = .standard,
-        proposalTrusted: Bool = false,
-        reciprocity: MobileReciprocity = .unknown
-    ) {
-        self.id = id
-        self.displayName = displayName
-        self.verified = verified
-        self.recoveryTrusted = recoveryTrusted
-        self.isHidden = isHidden
-        self.isImported = isImported
-        self.fingerprint = fingerprint
-        self.card = card
-        self.addedAt = addedAt
-        self.trustLevel = trustLevel
-        self.proposalTrusted = proposalTrusted
-        self.reciprocity = reciprocity
-    }
-}
+// `FieldInfo`, `CardInfo`, and `ContactInfo` struct wrappers were removed
+// in Phase 1A.5 (core-gui-architecture-alignment) — consumers now use
+// the repository-layer types (`VauchiContact`, `VauchiContactCard`,
+// `VauchiContactField`) directly, eliminating the parallel-type round-trip
+// that was flagged as an ADR-021 violation.
 
 /// Sync state enum
 enum SyncState: Equatable {
@@ -99,8 +44,8 @@ class VauchiViewModel: ObservableObject {
     @Published var hasIdentity = false
     @Published var displayName: String?
     @Published var publicId: String?
-    @Published var card: CardInfo?
-    @Published var contacts: [ContactInfo] = []
+    @Published var card: VauchiContactCard?
+    @Published var contacts: [VauchiContact] = []
     private let contactsPageSize: UInt32 = 20
     @Published var hasMoreContacts = true
     private var contactsOffset: UInt32 = 0
@@ -127,10 +72,10 @@ class VauchiViewModel: ObservableObject {
     @Published var consentRecords: [VauchiConsentRecord] = []
 
     /// Archived contacts
-    @Published var archivedContacts: [ContactInfo] = []
+    @Published var archivedContacts: [VauchiContact] = []
 
     /// Duplicate contact pairs with resolved contact info
-    @Published var duplicatePairs: [(pair: MobileDuplicatePair, contact1: ContactInfo, contact2: ContactInfo)] = []
+    @Published var duplicatePairs: [(pair: MobileDuplicatePair, contact1: VauchiContact, contact2: VauchiContact)] = []
 
     // Visibility labels (for organizing contacts)
     // Based on: features/visibility_labels.feature
@@ -403,18 +348,7 @@ class VauchiViewModel: ObservableObject {
         guard let repository else { return }
 
         do {
-            let cardData = try repository.getOwnCard()
-            card = CardInfo(
-                displayName: cardData.displayName,
-                fields: cardData.fields.map { field in
-                    FieldInfo(
-                        id: field.id,
-                        fieldType: field.fieldType,
-                        label: field.label,
-                        value: field.value
-                    )
-                }
-            )
+            card = try repository.getOwnCard()
         } catch {
             // Card not found is expected if identity not created
             card = nil
@@ -487,32 +421,7 @@ class VauchiViewModel: ObservableObject {
 
         do {
             let contactsData = try repository.listContactsPaginated(offset: 0, limit: contactsPageSize)
-            contacts = contactsData.map { contact in
-                ContactInfo(
-                    id: contact.id,
-                    displayName: contact.displayName,
-                    verified: contact.isVerified,
-                    recoveryTrusted: contact.isRecoveryTrusted,
-                    isHidden: contact.isHidden,
-                    isImported: contact.isImported,
-                    fingerprint: contact.fingerprint,
-                    card: CardInfo(
-                        displayName: contact.card.displayName,
-                        fields: contact.card.fields.map { field in
-                            FieldInfo(
-                                id: field.id,
-                                fieldType: field.fieldType,
-                                label: field.label,
-                                value: field.value
-                            )
-                        }
-                    ),
-                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
-                    trustLevel: contact.trustLevel,
-                    proposalTrusted: contact.proposalTrusted,
-                    reciprocity: contact.reciprocity
-                )
-            }
+            contacts = contactsData
             contactsOffset = UInt32(contacts.count)
             hasMoreContacts = contactsData.count == Int(contactsPageSize)
         } catch {
@@ -526,94 +435,29 @@ class VauchiViewModel: ObservableObject {
 
         do {
             let moreData = try repository.listContactsPaginated(offset: contactsOffset, limit: contactsPageSize)
-            let moreContacts = moreData.map { contact in
-                ContactInfo(
-                    id: contact.id,
-                    displayName: contact.displayName,
-                    verified: contact.isVerified,
-                    recoveryTrusted: contact.isRecoveryTrusted,
-                    isHidden: contact.isHidden,
-                    isImported: contact.isImported,
-                    fingerprint: contact.fingerprint,
-                    card: CardInfo(
-                        displayName: contact.card.displayName,
-                        fields: contact.card.fields.map { field in
-                            FieldInfo(
-                                id: field.id,
-                                fieldType: field.fieldType,
-                                label: field.label,
-                                value: field.value
-                            )
-                        }
-                    ),
-                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
-                    trustLevel: contact.trustLevel,
-                    proposalTrusted: contact.proposalTrusted,
-                    reciprocity: contact.reciprocity
-                )
-            }
-            contacts.append(contentsOf: moreContacts)
-            contactsOffset += UInt32(moreContacts.count)
+            contacts.append(contentsOf: moreData)
+            contactsOffset += UInt32(moreData.count)
             hasMoreContacts = moreData.count == Int(contactsPageSize)
         } catch {
             hasMoreContacts = false
         }
     }
 
-    func getContact(id: String) async -> ContactInfo? {
+    func getContact(id: String) async -> VauchiContact? {
         guard let repository else { return nil }
 
         do {
-            guard let contact = try repository.getContact(id: id) else {
-                return nil
-            }
-
-            return ContactInfo(
-                id: contact.id,
-                displayName: contact.displayName,
-                verified: contact.isVerified,
-                isHidden: contact.isHidden,
-                isImported: contact.isImported,
-                fingerprint: contact.fingerprint,
-                card: CardInfo(
-                    displayName: contact.card.displayName,
-                    fields: contact.card.fields.map { field in
-                        FieldInfo(
-                            id: field.id,
-                            fieldType: field.fieldType,
-                            label: field.label,
-                            value: field.value
-                        )
-                    }
-                ),
-                addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
-                trustLevel: contact.trustLevel,
-                proposalTrusted: contact.proposalTrusted,
-                reciprocity: contact.reciprocity
-            )
+            return try repository.getContact(id: id)
         } catch {
             return nil
         }
     }
 
-    func searchContacts(query: String) async -> [ContactInfo] {
+    func searchContacts(query: String) async -> [VauchiContact] {
         guard let repository else { return [] }
 
         do {
-            let results = try repository.searchContacts(query: query)
-            return results.map { contact in
-                ContactInfo(
-                    id: contact.id,
-                    displayName: contact.displayName,
-                    verified: contact.isVerified,
-                    recoveryTrusted: contact.isRecoveryTrusted,
-                    isImported: contact.isImported,
-                    fingerprint: contact.fingerprint,
-                    trustLevel: contact.trustLevel,
-                    proposalTrusted: contact.proposalTrusted,
-                    reciprocity: contact.reciprocity
-                )
-            }
+            return try repository.searchContacts(query: query)
         } catch {
             return []
         }
@@ -628,32 +472,7 @@ class VauchiViewModel: ObservableObject {
         guard let repository else { return }
 
         do {
-            let hiddenData = try repository.listHiddenContacts()
-            contacts = hiddenData.map { contact in
-                ContactInfo(
-                    id: contact.id,
-                    displayName: contact.displayName,
-                    verified: contact.isVerified,
-                    recoveryTrusted: contact.isRecoveryTrusted,
-                    isHidden: contact.isHidden,
-                    isImported: contact.isImported,
-                    fingerprint: contact.fingerprint,
-                    card: CardInfo(
-                        displayName: contact.card.displayName,
-                        fields: contact.card.fields.map { field in
-                            FieldInfo(
-                                id: field.id,
-                                fieldType: field.fieldType,
-                                label: field.label,
-                                value: field.value
-                            )
-                        }
-                    ),
-                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
-                    trustLevel: contact.trustLevel,
-                    proposalTrusted: contact.proposalTrusted
-                )
-            }
+            contacts = try repository.listHiddenContacts()
         } catch {
             // Gracefully handle if method not available yet in UniFFI bindings
             #if DEBUG
@@ -976,32 +795,7 @@ class VauchiViewModel: ObservableObject {
         guard let repository else { return }
 
         do {
-            let archivedData = try repository.listArchivedContacts()
-            archivedContacts = archivedData.map { contact in
-                ContactInfo(
-                    id: contact.id,
-                    displayName: contact.displayName,
-                    verified: contact.isVerified,
-                    recoveryTrusted: contact.isRecoveryTrusted,
-                    isHidden: contact.isHidden,
-                    isImported: contact.isImported,
-                    fingerprint: contact.fingerprint,
-                    card: CardInfo(
-                        displayName: contact.card.displayName,
-                        fields: contact.card.fields.map { field in
-                            FieldInfo(
-                                id: field.id,
-                                fieldType: field.fieldType,
-                                label: field.label,
-                                value: field.value
-                            )
-                        }
-                    ),
-                    addedAt: Date(timeIntervalSince1970: TimeInterval(contact.addedAt)),
-                    trustLevel: contact.trustLevel,
-                    proposalTrusted: contact.proposalTrusted
-                )
-            }
+            archivedContacts = try repository.listArchivedContacts()
         } catch {
             #if DEBUG
                 print("VauchiViewModel: loadArchivedContacts failed: \(error)")
@@ -1018,21 +812,11 @@ class VauchiViewModel: ObservableObject {
 
         do {
             let pairs = try repository.findDuplicates()
-            var resolved: [(pair: MobileDuplicatePair, contact1: ContactInfo, contact2: ContactInfo)] = []
+            var resolved: [(pair: MobileDuplicatePair, contact1: VauchiContact, contact2: VauchiContact)] = []
             for pair in pairs {
                 guard let c1 = try repository.getContact(id: pair.id1),
                       let c2 = try repository.getContact(id: pair.id2) else { continue }
-                let info1 = ContactInfo(
-                    id: c1.id, displayName: c1.displayName,
-                    verified: c1.isVerified, isImported: c1.isImported,
-                    addedAt: Date(timeIntervalSince1970: TimeInterval(c1.addedAt))
-                )
-                let info2 = ContactInfo(
-                    id: c2.id, displayName: c2.displayName,
-                    verified: c2.isVerified, isImported: c2.isImported,
-                    addedAt: Date(timeIntervalSince1970: TimeInterval(c2.addedAt))
-                )
-                resolved.append((pair: pair, contact1: info1, contact2: info2))
+                resolved.append((pair: pair, contact1: c1, contact2: c2))
             }
             duplicatePairs = resolved
         } catch {

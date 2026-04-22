@@ -211,7 +211,7 @@ struct LabelDetailContent: View {
                             HStack {
                                 Text(contact.displayName)
                                 Spacer()
-                                if contact.verified {
+                                if contact.isVerified {
                                     Image(systemName: "checkmark.seal.fill")
                                         .foregroundColor(.green)
                                         .font(.caption)
@@ -219,7 +219,7 @@ struct LabelDetailContent: View {
                                 }
                             }
                             .accessibilityElement(children: .combine)
-                            .accessibilityLabel("\(contact.displayName)\(contact.verified ? ", verified" : "")")
+                            .accessibilityLabel("\(contact.displayName)\(contact.isVerified ? ", verified" : "")")
                         } else {
                             Text(contactId)
                                 .font(.caption)

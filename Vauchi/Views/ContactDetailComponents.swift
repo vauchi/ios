@@ -9,7 +9,7 @@ import SwiftUI
 import VauchiPlatform
 
 struct ContactFieldRow: View {
-    let field: FieldInfo
+    let field: VauchiContactField
     var contactId: String = ""
 
     private func icon(for type: VauchiFieldType) -> String {
@@ -145,7 +145,7 @@ struct ContactFieldRow: View {
 }
 
 struct VisibilityToggleRow: View {
-    let field: FieldInfo
+    let field: VauchiContactField
     let isVisible: Bool
     let onToggle: (Bool) -> Void
 
