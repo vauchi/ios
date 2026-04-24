@@ -5,7 +5,9 @@
 // FaceToFaceExchangeView.swift
 // Split-screen exchange: cycling QR codes on top, front camera scanner on bottom.
 // Both users hold phones face-to-face for simultaneous contact exchange.
-// The core Rust library drives the multi-stage protocol — this view is a pure display shell.
+// Core drives the multi-stage protocol via the G4 event API — this view is a
+// pure renderer that forwards scanned QRs and reflects `MultiStageSessionListener`
+// callbacks.
 
 import AVFoundation
 import CoreUIModels
@@ -37,25 +39,67 @@ private enum ScanQuality {
     }
 }
 
+/// Observable bridge for the core multi-stage event API. Core invokes
+/// `MultiStageSessionListener` methods on the `vauchi-exchange-cycle`
+/// thread; each callback hops to the main actor before mutating
+/// `@Published` state so SwiftUI observes a coherent snapshot.
+@MainActor
+final class MultiStageExchangeState: ObservableObject {
+    @Published var protocolState: MobileProtocolState = .idle
+    @Published var qrPayload: MobileQrPayload?
+    @Published var finalizedContactName: String?
+    @Published var sessionEnded: Bool = false
+}
+
+/// UniFFI callback target. A final class (not a struct) because the binding
+/// protocol requires `AnyObject`. The view owns this via `@StateObject` so
+/// the reference stays alive for the FFI vtable.
+private final class MultiStageListener: MultiStageSessionListener {
+    private let state: MultiStageExchangeState
+
+    init(state: MultiStageExchangeState) {
+        self.state = state
+    }
+
+    func onQrPayload(payload: MobileQrPayload) {
+        Task { @MainActor [state] in state.qrPayload = payload }
+    }
+
+    func onStateChanged(state newState: MobileProtocolState) {
+        Task { @MainActor [state] in state.protocolState = newState }
+    }
+
+    func onFinalized(contactName: String) {
+        Task { @MainActor [state] in state.finalizedContactName = contactName }
+    }
+
+    func onSessionEnded() {
+        Task { @MainActor [state] in state.sessionEnded = true }
+    }
+}
+
 struct FaceToFaceExchangeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @Environment(\.designTokens) private var tokens
     @ObservedObject private var localizationService = LocalizationService.shared
     var switchToContacts: (() -> Void)?
 
-    // MARK: - Multi-stage exchange state
+    // MARK: - Multi-stage exchange state (listener-driven)
 
+    @StateObject private var exchange = MultiStageExchangeState()
     @State private var multiStageQrImage: UIImage?
-    /// Track last QR data to avoid regenerating the same image every 150ms tick.
+    /// Track last QR data so we only regenerate the bitmap when bytes change.
     @State private var lastQrData: String?
-    @State private var protocolState: MobileProtocolState = .idle
-    @State private var qrCycleTimer: Timer?
-    @State private var statePollTimer: Timer?
-    @State private var scanQualityTimer: Timer?
     @State private var previousBrightness: CGFloat = 0.5
-    @State private var graceCompleted = false
-    @State private var finalizationResult: String?
-    @State private var finalizationError: String?
+
+    /// Retained so the FFI vtable keeps pointing at a live listener. Dropped
+    /// in `cancelAndDismiss` / `retryMultiStageExchange` after
+    /// `session.cancel()` joins the cycle thread.
+    @State private var listener: MultiStageSessionListener?
+
+    // MARK: - Scan-quality timer (presentational only, not exchange clock)
+
+    @State private var scanQualityTimer: Timer?
     @State private var lastScanTimestamp: Date?
     @State private var scanQuality: ScanQuality = .none
 
@@ -109,8 +153,19 @@ struct FaceToFaceExchangeView: View {
                 UIScreen.main.brightness = previousBrightness
                 UIApplication.shared.isIdleTimerDisabled = false
                 qrScanner.stop()
-                stopAllTimers()
+                stopScanQualityTimer()
                 viewModel.cancelMultiStageExchange()
+                listener = nil
+            }
+            .onChange(of: exchange.qrPayload?.data) { _ in
+                guard let payload = exchange.qrPayload else { return }
+                if payload.data != lastQrData {
+                    lastQrData = payload.data
+                    multiStageQrImage = generateQRCode(
+                        from: payload.data,
+                        correctionLevel: payload.errorCorrection
+                    )
+                }
             }
             .onChange(of: cameraGranted) { _ in
                 startScannerIfReady()
@@ -127,7 +182,7 @@ struct FaceToFaceExchangeView: View {
 
     private var multiStageContent: some View {
         VStack(spacing: 0) {
-            switch protocolState {
+            switch exchange.protocolState {
             case .idle, .advertising:
                 multiStageQrDisplay(statusText: "Waiting for peer...", showProgress: false)
 
@@ -144,10 +199,13 @@ struct FaceToFaceExchangeView: View {
                 multiStageQrDisplay(statusText: "Verifying exchange...", showProgress: true)
 
             case .complete, .finalized:
-                if !graceCompleted {
-                    multiStageQrDisplay(statusText: "Keep pointing at other phone...", showProgress: true)
-                } else {
+                // Stay on the QR while core keeps broadcasting the COMBO frame
+                // for the grace window. Once the cycle thread signals
+                // `on_session_ended`, flip to the success screen.
+                if exchange.sessionEnded {
                     multiStageSuccessContent
+                } else {
+                    multiStageQrDisplay(statusText: "Keep pointing at other phone...", showProgress: true)
                 }
 
             case let .failed(reason):
@@ -245,30 +303,17 @@ struct FaceToFaceExchangeView: View {
         VStack(spacing: 16) {
             Spacer()
 
-            if let error = finalizationError {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 64))
-                    .foregroundColor(.orange)
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 64))
+                .foregroundColor(.green)
 
-                Text("Exchange completed")
-                    .font(Font.title2.weight(.semibold))
+            Text("Contact exchanged!")
+                .font(Font.title2.weight(.semibold))
 
-                Text(error)
+            if let contactName = exchange.finalizedContactName {
+                Text("\(contactName) has been added.")
                     .font(.body)
                     .foregroundColor(.secondary)
-            } else {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 64))
-                    .foregroundColor(.green)
-
-                Text("Contact exchanged!")
-                    .font(Font.title2.weight(.semibold))
-
-                if let contactName = finalizationResult {
-                    Text("\(contactName) has been added.")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                }
             }
 
             Button(action: { cancelAndDismiss() }) {
@@ -320,71 +365,26 @@ struct FaceToFaceExchangeView: View {
 
     // MARK: - Multi-Stage Actions
 
+    /// Spin up a new session, register the listener, and hand control to
+    /// core's cycle thread. No frontend timers — state updates arrive via
+    /// `MultiStageExchangeState`.
     private func startMultiStageSession() {
-        viewModel.startMultiStageExchange()
-        protocolState = .idle
-        graceCompleted = false
-        finalizationResult = nil
-        finalizationError = nil
+        // Reset per-session view state.
+        exchange.protocolState = .idle
+        exchange.qrPayload = nil
+        exchange.finalizedContactName = nil
+        exchange.sessionEnded = false
         multiStageQrImage = nil
-        startQrCycleTimer()
-        startStatePollTimer()
-    }
+        lastQrData = nil
 
-    private func startQrCycleTimer() {
-        qrCycleTimer?.invalidate()
-        qrCycleTimer = Timer.scheduledTimer(withTimeInterval: 0.15, repeats: true) { _ in
-            guard let payload = viewModel.getMultiStageDisplayQr() else {
-                // Core returned nil — grace period expired or not started.
-                if case .finalized = protocolState, !graceCompleted {
-                    if let result = viewModel.finalizeMultiStageExchange() {
-                        finalizationResult = result.contactName
-                    } else {
-                        finalizationError = "Failed to save contact"
-                    }
-                    graceCompleted = true
-                }
-                stopQrCycleTimer()
-                return
-            }
-            // Only regenerate when data changes — avoids QR generation work every 150ms
-            if payload.data != lastQrData {
-                lastQrData = payload.data
-                multiStageQrImage = generateQRCode(from: payload.data, correctionLevel: payload.errorCorrection)
-            }
-        }
-    }
-
-    private func startStatePollTimer() {
-        statePollTimer?.invalidate()
-        statePollTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
-            let newState = viewModel.getMultiStageState()
-            protocolState = newState
-
-            switch newState {
-            case .finalized:
-                // Save contact immediately — don't wait for grace period expiry.
-                // QR cycle timer continues so peer can still scan our COMBO QR.
-                if !graceCompleted {
-                    if let result = viewModel.finalizeMultiStageExchange() {
-                        finalizationResult = result.contactName
-                    } else {
-                        finalizationError = "Failed to save contact"
-                    }
-                    graceCompleted = true
-                }
-            case .failed:
-                stopQrCycleTimer()
-                stopStatePollTimer()
-            default:
-                break
-            }
-        }
+        let newListener = MultiStageListener(state: exchange)
+        listener = newListener
+        _ = viewModel.startMultiStageExchange(listener: newListener)
     }
 
     private func retryMultiStageExchange() {
         viewModel.cancelMultiStageExchange()
-        stopAllTimers()
+        listener = nil
         qrScanner.stop()
         startMultiStageSession()
         startScannerIfReady()
@@ -392,26 +392,18 @@ struct FaceToFaceExchangeView: View {
 
     private func cancelAndDismiss() {
         viewModel.cancelMultiStageExchange()
+        listener = nil
         switchToContacts?()
     }
 
-    private func stopQrCycleTimer() {
-        qrCycleTimer?.invalidate()
-        qrCycleTimer = nil
-    }
-
-    private func stopStatePollTimer() {
-        statePollTimer?.invalidate()
-        statePollTimer = nil
-    }
-
-    private func stopAllTimers() {
-        stopQrCycleTimer()
-        stopStatePollTimer()
+    private func stopScanQualityTimer() {
         scanQualityTimer?.invalidate()
         scanQualityTimer = nil
     }
 
+    /// Presentational scan-quality indicator — unrelated to the exchange
+    /// clock. Stays a frontend timer per ADR-031 §Hardware: the camera
+    /// pipeline is a platform concern.
     private func startScanQualityTimer() {
         scanQualityTimer?.invalidate()
         scanQualityTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
@@ -441,8 +433,9 @@ struct FaceToFaceExchangeView: View {
 
     private func handleMultiStageScannedCode(_ code: String) {
         lastScanTimestamp = Date()
-        let newState = viewModel.processMultiStageQr(raw: code)
-        protocolState = newState
+        // Core applies the scan to its state machine; subsequent state and
+        // QR updates arrive via the listener callbacks.
+        _ = viewModel.processMultiStageQr(raw: code)
     }
 
     // MARK: - Permission Needed State

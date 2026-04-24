@@ -1109,32 +1109,36 @@ class VauchiViewModel: ObservableObject {
 
     // MARK: - Multi-Stage Exchange
 
-    /// Multi-stage exchange session — drives the cycling QR protocol
+    //
+    // Core drives the protocol clock via the G4 event API (vauchi-platform
+    // 0.22.0). The frontend registers a `MultiStageSessionListener`, calls
+    // `start()`, and then only forwards scanned QRs via `processScannedQr`.
+    // No timers, no state polling, no manual finalize call.
+
+    /// Multi-stage exchange session — core owns the cycle thread.
     private(set) var multiStageSession: MobileMultiStageSession?
 
-    func startMultiStageExchange() {
-        guard let repository else { return }
+    /// Create a session, register `listener`, and start the cycle thread.
+    /// Returns the session so callers can feed scanned QRs; returns `nil`
+    /// if session creation fails.
+    func startMultiStageExchange(listener: MultiStageSessionListener) -> MobileMultiStageSession? {
+        guard let repository else { return nil }
         do {
-            multiStageSession = try repository.createMultistageSession()
-        } catch {
-            #if DEBUG
-                NSLog("[Exchange] Failed to create session: %@", "\(error)")
-            #endif
-        }
-    }
+            let session = try repository.createMultistageSession()
+            session.setListener(listener: listener)
+            session.start()
+            multiStageSession = session
 
-    func finalizeMultiStageExchange() -> MobileExchangeResult? {
-        guard let repository, let session = multiStageSession else { return nil }
-        do {
-            let result = try repository.finalizeMultistageExchange(session: session)
-            // Run audio proximity as trust boost (non-blocking, best-effort)
+            // Run audio proximity as trust boost (non-blocking, best-effort).
+            // Fires once per session start; tied to the exchange lifecycle
+            // rather than the Finalized callback.
             Task.detached(priority: .userInitiated) { [weak self] in
                 self?.runAudioProximity()
             }
-            return result
+            return session
         } catch {
             #if DEBUG
-                NSLog("[Exchange] Failed to finalize: %@", "\(error)")
+                NSLog("[Exchange] Failed to create session: %@", "\(error)")
             #endif
             return nil
         }
@@ -1146,21 +1150,9 @@ class VauchiViewModel: ObservableObject {
         // Audio proximity will use the command/event pattern when re-enabled.
     }
 
-    func getMultiStageDisplayQr() -> MobileQrPayload? {
-        multiStageSession?.getDisplayQr()
-    }
-
     func processMultiStageQr(raw: String) -> MobileProtocolState {
         guard let session = multiStageSession else { return .failed(reason: "No session") }
         return session.processScannedQr(raw: raw)
-    }
-
-    func getMultiStageState() -> MobileProtocolState {
-        multiStageSession?.getState() ?? .idle
-    }
-
-    func getMultiStageReceivedData() -> Data? {
-        multiStageSession?.getReceivedData()
     }
 
     func cancelMultiStageExchange() {
