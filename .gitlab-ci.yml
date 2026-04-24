@@ -605,6 +605,17 @@ build:debug:
       else
         kill $WATCHDOG 2>/dev/null || true; wait $WATCHDOG 2>/dev/null || true
         echo "  SPM resolve timed out — downloading XCFramework with curl"
+        # Cached `.derived-data` holds a `VauchiPlatformFFI.swiftmodule`
+        # compiled against the previous xcframework's C header. After
+        # we swap the xcframework bytes on-disk, Xcode still reuses
+        # that stale swiftmodule — so new types in the refreshed C
+        # header (e.g. UniffiVTableCallbackInterfaceMultiStageSessionListener
+        # added in vauchi-platform-swift 0.22.0) appear absent to
+        # Swift and the VauchiPlatform target fails to build with
+        # `cannot find type ... in scope`. Drop the cached derived
+        # data so Xcode re-emits the FFI swiftmodule from the fresh
+        # headers.
+        rm -rf .derived-data
         V=$(sed -n '/vauchi-platform-swift/{n;s/.*"\([^"]*\)".*/\1/p;}' project.yml)
         if [ -n "$V" ]; then
           ZIP="/tmp/VauchiPlatformFFI-${CI_JOB_ID}-${V}.xcframework.zip"
