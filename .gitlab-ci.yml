@@ -614,8 +614,12 @@ build:debug:
         # Swift and the VauchiPlatform target fails to build with
         # `cannot find type ... in scope`. Drop the cached derived
         # data so Xcode re-emits the FFI swiftmodule from the fresh
-        # headers.
+        # headers. Also drop Xcode's shared Clang module cache — that
+        # lives outside `-derivedDataPath` and retains the previous
+        # module import of `vauchi_platformFFI` across jobs / branches,
+        # defeating the per-job derived-data reset.
         rm -rf .derived-data
+        rm -rf ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
         V=$(sed -n '/vauchi-platform-swift/{n;s/.*"\([^"]*\)".*/\1/p;}' project.yml)
         if [ -n "$V" ]; then
           ZIP="/tmp/VauchiPlatformFFI-${CI_JOB_ID}-${V}.xcframework.zip"
