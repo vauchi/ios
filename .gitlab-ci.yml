@@ -620,7 +620,22 @@ build:debug:
         # defeating the per-job derived-data reset.
         rm -rf .derived-data
         rm -rf ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
-        V=$(sed -n '/vauchi-platform-swift/{n;s/.*"\([^"]*\)".*/\1/p;}' project.yml)
+        # Version must come from the resolved package's Package.swift
+        # (`let version = "0.22.0"`), NOT project.yml. project.yml
+        # carries the SPM `from:` lower bound (e.g. "0.21.12") — SPM
+        # resolves to the latest matching tag, which can be a later
+        # minor (0.22.0). Using the lower bound here downloads the
+        # wrong xcframework, which then fails to match the resolved
+        # Swift source's type set and produces
+        # `cannot find type 'UniffiVTableCallbackInterface...' in scope`.
+        V=$(sed -n 's/^let version = "\([^"]*\)".*/\1/p' \
+              .spm-packages/checkouts/vauchi-platform-swift/Package.swift 2>/dev/null)
+        # Fallback to project.yml if checkout hasn't been created yet
+        # (e.g. first-ever run with no cache — rare but possible).
+        if [ -z "$V" ]; then
+          V=$(sed -n '/vauchi-platform-swift/{n;s/.*"\([^"]*\)".*/\1/p;}' project.yml)
+          echo "  WARNING: extracted version $V from project.yml (lower bound); resolved tag may differ"
+        fi
         if [ -n "$V" ]; then
           ZIP="/tmp/VauchiPlatformFFI-${CI_JOB_ID}-${V}.xcframework.zip"
           curl -fsSL --max-time 60 --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
