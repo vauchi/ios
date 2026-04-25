@@ -57,7 +57,6 @@
 		27A936CD7057DF31FD867C86 /* testContactsViewWithContactsDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 25A0A7E324ADCC9333CC08A5 /* testContactsViewWithContactsDark.1.png */; };
 		281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */; };
 		2841C875B5ADCE5A837F139B /* DeepLinkConsentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F10CFAFFF2CD3F74871E914 /* DeepLinkConsentTests.swift */; };
-		2903A514CED60A36C5F93F26 /* ContactMergeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11B603C61CCD942DB2A920AB /* ContactMergeView.swift */; };
 		2B299FE3EE8C6AA3F7E94D29 /* testHomeViewWithFieldsGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 39051A8E2D361D595C7536C9 /* testHomeViewWithFieldsGerman.1.png */; };
 		2C996CD80C42DEDB7C30B91E /* testContactsScreenDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 334AA464FB30E416B9A73537 /* testContactsScreenDark.1.png */; };
 		2D0728F99D4DBB3C8491C25B /* ThemeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CF989EA84DBE8A9F43E05D /* ThemeService.swift */; };
@@ -316,7 +315,6 @@
 		0F85E4838465BB8A1A9CB4F2 /* contact_info.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contact_info.json; sourceTree = "<group>"; };
 		0FC890F55872A927941111CE /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		108E48F43D27EA5EB6FFB226 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		11B603C61CCD942DB2A920AB /* ContactMergeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactMergeView.swift; sourceTree = "<group>"; };
 		140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		153F4A124314CB426DB39375 /* InfoPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoPanelView.swift; sourceTree = "<group>"; };
 		16817F15488300C5EAF304A8 /* testCardPreviewGroupSelected.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCardPreviewGroupSelected.1.png; sourceTree = "<group>"; };
@@ -878,7 +876,6 @@
 				E454B8F698D68725F434338E /* ConsentSettingsView.swift */,
 				3EEBDEA9304696A8DAE86642 /* ContactDetailComponents.swift */,
 				F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */,
-				11B603C61CCD942DB2A920AB /* ContactMergeView.swift */,
 				773071C286EDA29BCB17B365 /* ContactsView.swift */,
 				30C91B081CDC3A250428A644 /* DeliveryStatusView.swift */,
 				5D188A68C0567059D98640C5 /* ExchangeModePicker.swift */,
@@ -1381,7 +1378,6 @@
 				CA32F697BDD3346B24319D5E /* ContactDetailView.swift in Sources */,
 				975814A17842850E5538C6EF /* ContactGroupBadges.swift in Sources */,
 				AF71B5181C8D4924DCF36C1B /* ContactListView.swift in Sources */,
-				2903A514CED60A36C5F93F26 /* ContactMergeView.swift in Sources */,
 				DD478B0145A11A9B9277A5BB /* ContactsView.swift in Sources */,
 				9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */,
 				5680FAB9C220183B0BB3AC03 /* ContentView.swift in Sources */,
