@@ -1314,23 +1314,6 @@ class VauchiRepository {
         }
     }
 
-    /// Finalize a multi-stage exchange — persist the contact and init double ratchet.
-    func finalizeMultistageExchange(session: MobileMultiStageSession) throws -> MobileExchangeResult {
-        do {
-            return try vauchi.finalizeMultistageExchange(session: session)
-        } catch let error as MobileError {
-            #if DEBUG
-                NSLog("[Exchange] Failed: %@", "\(error)")
-            #endif
-            throw VauchiRepositoryError.from(error)
-        } catch {
-            #if DEBUG
-                NSLog("[Exchange] Failed: %@", "\(error)")
-            #endif
-            throw error
-        }
-    }
-
     // MARK: - NFC Exchange
 
     /// Create an NFC initiator (reader) handshake session.
