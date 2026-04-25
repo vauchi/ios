@@ -608,19 +608,40 @@ build:debug:
       fi
       echo "  Resolved version: $V"
 
-      # 2. Ensure SPM checkout dir exists at the right tag.
-      mkdir -p .spm-packages/checkouts
-      if [ ! -d "$PKG_DIR/.git" ]; then
-        rm -rf "$PKG_DIR"
-        git clone --quiet https://gitlab.com/vauchi/vauchi-platform-swift.git "$PKG_DIR"
-      fi
-      git -C "$PKG_DIR" fetch --quiet --tags
-      # --force handles a previous run that path:-patched Package.swift
-      # without committing; reset --hard restores the upstream tag content.
-      git -C "$PKG_DIR" checkout --force --quiet "v$V"
-      git -C "$PKG_DIR" reset --hard --quiet "v$V"
+      PKG="$PKG_DIR/Package.swift"
 
-      # 3. Sanity-check the tag's Package.swift declares the same version.
+      # 2. Cache-hit short-circuit (early): artifact already extracted +
+      # Package.swift already path:-patched at the right version.
+      if [ -d "$ARTIFACTS/VauchiPlatformFFI.xcframework" ] \
+         && [ -d "$PKG_DIR/VauchiPlatformFFI.xcframework" ] \
+         && [ -f "$PKG" ] \
+         && grep -q "let version = \"$V\"" "$PKG" \
+         && grep -q 'path: "VauchiPlatformFFI.xcframework"' "$PKG"; then
+        echo "  Cache hit: artifact + path:-patched Package.swift in place for v$V"
+        # Resolve and return — skip clone + curl + patch.
+        xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
+          -clonedSourcePackagesDirPath .spm-packages \
+          -derivedDataPath .derived-data \
+          -resolvePackageDependencies
+        echo "  SPM resolve OK (curl-primary, cache hit)"
+        exit 0
+      fi
+
+      # 3. Wipe and shallow-clone the package source. We always wipe rather
+      # than fetch over a cached checkout because SPM's
+      # `.git/objects/info/alternates` references an absolute path tied to
+      # the runner build slot (`.spm-packages/repositories/<name-hash>/`).
+      # A cache restored on a different slot — or in this same slot before
+      # SPM's repositories/ dir was populated — has stale alternates that
+      # break every git op with "unable to normalize alternate object path"
+      # (observed: ios pipeline #2479384749). A fresh single-tag clone has
+      # no alternates and is cheap (~1 s for this small repo).
+      mkdir -p .spm-packages/checkouts
+      rm -rf "$PKG_DIR"
+      git clone --quiet --depth=1 --branch "v$V" \
+        https://gitlab.com/vauchi/vauchi-platform-swift.git "$PKG_DIR"
+
+      # 4. Sanity-check the tag's Package.swift declares the same version.
       # Tags v0.21.8..v0.21.12 shipped Package.swift with stale
       # `let version = "0.21.7"` because the upstream release CI failed
       # to update it — see _private/docs/problems/
@@ -634,45 +655,36 @@ build:debug:
         exit 1
       fi
 
-      PKG="$PKG_DIR/Package.swift"
+      # 5. Curl the xcframework. Public registry — no JOB-TOKEN needed.
+      ZIP="/tmp/VauchiPlatformFFI-${CI_JOB_ID}-${V}.xcframework.zip"
+      curl -fsSL --max-time 120 --retry 3 --retry-max-time 240 --retry-connrefused \
+        "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
+        -o "$ZIP"
+      echo "  Downloaded $(du -h "$ZIP" | cut -f1)"
 
-      # 4. Cache-hit short-circuit.
-      if [ -d "$ARTIFACTS/VauchiPlatformFFI.xcframework" ] \
-         && [ -d "$PKG_DIR/VauchiPlatformFFI.xcframework" ] \
-         && grep -q 'path: "VauchiPlatformFFI.xcframework"' "$PKG"; then
-        echo "  Cache hit: artifact + path:-patched Package.swift in place for v$V"
-      else
-        # 5. Curl the xcframework. Public registry — no JOB-TOKEN needed.
-        ZIP="/tmp/VauchiPlatformFFI-${CI_JOB_ID}-${V}.xcframework.zip"
-        curl -fsSL --max-time 120 --retry 3 --retry-max-time 240 --retry-connrefused \
-          "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
-          -o "$ZIP"
-        echo "  Downloaded $(du -h "$ZIP" | cut -f1)"
+      # 6. Replace stale extracted artifacts (a partial extract from a
+      # prior failed run, or an older binding version's headers, would
+      # silently win at compile time — see macos!169 #2477514192).
+      rm -rf "$ARTIFACTS/VauchiPlatformFFI.xcframework"
+      mkdir -p "$ARTIFACTS"
+      unzip -o -q "$ZIP" -d "$ARTIFACTS"
+      rm -rf "$PKG_DIR/VauchiPlatformFFI.xcframework"
+      cp -R "$ARTIFACTS/VauchiPlatformFFI.xcframework" "$PKG_DIR/"
 
-        # 6. Replace stale extracted artifacts (a partial extract from a
-        # prior failed run, or an older binding version's headers, would
-        # silently win at compile time — see macos!169 #2477514192).
-        rm -rf "$ARTIFACTS/VauchiPlatformFFI.xcframework"
-        mkdir -p "$ARTIFACTS"
-        unzip -o -q "$ZIP" -d "$ARTIFACTS"
-        rm -rf "$PKG_DIR/VauchiPlatformFFI.xcframework"
-        cp -R "$ARTIFACTS/VauchiPlatformFFI.xcframework" "$PKG_DIR/"
+      # 7. Patch Package.swift: url: → path:. Drop the checksum arg
+      # (path: targets don't take a checksum).
+      sed -i.bak 's|url: "https://[^"]*xcframework.zip",|path: "VauchiPlatformFFI.xcframework"|' "$PKG"
+      sed -i.bak '/checksum: checksum/d' "$PKG"
+      rm -f "${PKG}.bak"
 
-        # 7. Patch Package.swift: url: → path:. Drop the checksum arg
-        # (path: targets don't take a checksum).
-        sed -i.bak 's|url: "https://[^"]*xcframework.zip",|path: "VauchiPlatformFFI.xcframework"|' "$PKG"
-        sed -i.bak '/checksum: checksum/d' "$PKG"
-        rm -f "${PKG}.bak"
+      # 8. Drop derived data + Xcode's shared module cache so the FFI
+      # swiftmodule is re-emitted from fresh C headers. Without this,
+      # newly-added types appear missing because Xcode reuses a
+      # swiftmodule compiled against the previous binding version.
+      rm -rf .derived-data
+      rm -rf ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
 
-        # 8. Drop derived data + Xcode's shared module cache so the FFI
-        # swiftmodule is re-emitted from fresh C headers. Without this,
-        # newly-added types appear missing because Xcode reuses a
-        # swiftmodule compiled against the previous binding version.
-        rm -rf .derived-data
-        rm -rf ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
-
-        echo "  Prepared $PKG_DIR for path:-mode resolve"
-      fi
+      echo "  Prepared $PKG_DIR for path:-mode resolve"
 
       # 9. Resolve. SPM sees an existing checkout with a path: binaryTarget;
       # no URLSession download, no watchdog needed.
