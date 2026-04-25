@@ -575,108 +575,112 @@ build:debug:
     - echo "── [$(date +%H:%M:%S)] xcodegen ──"
     - rm -rf Vauchi.xcodeproj
     - xcodegen generate
-    # EXPERIMENT (Fix B, problem 2026-04-22-ci-spm-watchdog-robustness):
-    # Previously deleted .spm-packages/workspace-state.json and
-    # Package.resolved before every resolve, citing "URLSession can't
-    # authenticate with GitLab". That premise is wrong — the artifact
-    # URL is public (verified 2026-04-22). Hypothesis: the deletions
-    # force SPM into a URLSession code path that hangs against the
-    # cached artifact, which is why the 30 s watchdog fires on every
-    # CI run. With the state files preserved, SPM should reuse the
-    # artifact cache without re-downloading.
-    # If this pipeline is healthy, proceed to Fix A (promote
-    # curl-then-path-patch to primary, drop the watchdog).
-    - echo "── [$(date +%H:%M:%S)] SPM resolve ──"
+    # SPM artifact provisioning — curl-primary, no URLSession download.
+    # Problem: 2026-04-22-ci-spm-watchdog-robustness (root cause
+    # confirmed 2026-04-25). SwiftPM's URLSession download path for
+    # `.binaryTarget` is structurally unreliable in CI:
+    #   - URLSessionConfiguration.default has timeoutIntervalForResource
+    #     = 7 days, with no SwiftPM override (verified in
+    #     swiftlang/swift-package-manager Sources/Basics/HTTPClient/
+    #     URLSessionHTTPClient.swift on main).
+    #   - Open upstream bugs against CDN-redirected hosts:
+    #     swiftlang/swift-package-manager#6635 (silent truncation),
+    #     #7470 (proxy/network errors), #7586 (binary-artifact cache
+    #     key bug). actions/runner-images#6233 reports the same
+    #     "Checking out X of package Y" hang signature, unresolved.
+    # We bypass URLSession entirely: clone vauchi-platform-swift
+    # ourselves, curl the xcframework via the public registry URL,
+    # patch Package.swift to use `path:` instead of `url:`, then run
+    # `-resolvePackageDependencies` with no network IO. CC-21: every
+    # failure mode surfaces as a loud `exit 1`, no fallback, no
+    # watchdog masking.
+    - echo "── [$(date +%H:%M:%S)] SPM resolve (curl-primary) ──"
     - |
-      # SPM URLSession cannot authenticate with GitLab's package registry
-      # for binary target downloads (.netrc not used by URLSession).
-      # Resolve with timeout — if binary is cached, completes in <10s.
-      # If it hangs on download, fall back to authenticated curl.
+      set -e
+      PKG_DIR=".spm-packages/checkouts/vauchi-platform-swift"
+      ARTIFACTS=".spm-packages/artifacts/vauchi-platform-swift"
+
+      # 1. Determine version from project.yml (XcodeGen package pin).
+      V=$(sed -n '/vauchi-platform-swift/{n;s/.*"\([^"]*\)".*/\1/p;}' project.yml)
+      if [ -z "$V" ]; then
+        echo "  ERROR: could not extract VauchiPlatform version from project.yml"
+        exit 1
+      fi
+      echo "  Resolved version: $V"
+
+      # 2. Ensure SPM checkout dir exists at the right tag.
+      mkdir -p .spm-packages/checkouts
+      if [ ! -d "$PKG_DIR/.git" ]; then
+        rm -rf "$PKG_DIR"
+        git clone --quiet https://gitlab.com/vauchi/vauchi-platform-swift.git "$PKG_DIR"
+      fi
+      git -C "$PKG_DIR" fetch --quiet --tags
+      # --force handles a previous run that path:-patched Package.swift
+      # without committing; reset --hard restores the upstream tag content.
+      git -C "$PKG_DIR" checkout --force --quiet "v$V"
+      git -C "$PKG_DIR" reset --hard --quiet "v$V"
+
+      # 3. Sanity-check the tag's Package.swift declares the same version.
+      # Tags v0.21.8..v0.21.12 shipped Package.swift with stale
+      # `let version = "0.21.7"` because the upstream release CI failed
+      # to update it — see _private/docs/problems/
+      # 2026-04-22-phantom-core-registry-artifacts/. Fail loudly here
+      # instead of silently downloading the wrong artifact.
+      PKG_VERSION=$(sed -n 's/^let version = "\([^"]*\)".*/\1/p' "$PKG_DIR/Package.swift")
+      if [ "$PKG_VERSION" != "$V" ]; then
+        echo "  ERROR: tag v$V Package.swift declares version=\"$PKG_VERSION\""
+        echo "  upstream release CI failed to update Package.swift on this tag."
+        echo "  See _private/docs/problems/2026-04-22-phantom-core-registry-artifacts/"
+        exit 1
+      fi
+
+      PKG="$PKG_DIR/Package.swift"
+
+      # 4. Cache-hit short-circuit.
+      if [ -d "$ARTIFACTS/VauchiPlatformFFI.xcframework" ] \
+         && [ -d "$PKG_DIR/VauchiPlatformFFI.xcframework" ] \
+         && grep -q 'path: "VauchiPlatformFFI.xcframework"' "$PKG"; then
+        echo "  Cache hit: artifact + path:-patched Package.swift in place for v$V"
+      else
+        # 5. Curl the xcframework. Public registry — no JOB-TOKEN needed.
+        ZIP="/tmp/VauchiPlatformFFI-${CI_JOB_ID}-${V}.xcframework.zip"
+        curl -fsSL --max-time 120 --retry 3 --retry-max-time 240 --retry-connrefused \
+          "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
+          -o "$ZIP"
+        echo "  Downloaded $(du -h "$ZIP" | cut -f1)"
+
+        # 6. Replace stale extracted artifacts (a partial extract from a
+        # prior failed run, or an older binding version's headers, would
+        # silently win at compile time — see macos!169 #2477514192).
+        rm -rf "$ARTIFACTS/VauchiPlatformFFI.xcframework"
+        mkdir -p "$ARTIFACTS"
+        unzip -o -q "$ZIP" -d "$ARTIFACTS"
+        rm -rf "$PKG_DIR/VauchiPlatformFFI.xcframework"
+        cp -R "$ARTIFACTS/VauchiPlatformFFI.xcframework" "$PKG_DIR/"
+
+        # 7. Patch Package.swift: url: → path:. Drop the checksum arg
+        # (path: targets don't take a checksum).
+        sed -i.bak 's|url: "https://[^"]*xcframework.zip",|path: "VauchiPlatformFFI.xcframework"|' "$PKG"
+        sed -i.bak '/checksum: checksum/d' "$PKG"
+        rm -f "${PKG}.bak"
+
+        # 8. Drop derived data + Xcode's shared module cache so the FFI
+        # swiftmodule is re-emitted from fresh C headers. Without this,
+        # newly-added types appear missing because Xcode reuses a
+        # swiftmodule compiled against the previous binding version.
+        rm -rf .derived-data
+        rm -rf ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
+
+        echo "  Prepared $PKG_DIR for path:-mode resolve"
+      fi
+
+      # 9. Resolve. SPM sees an existing checkout with a path: binaryTarget;
+      # no URLSession download, no watchdog needed.
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
         -clonedSourcePackagesDirPath .spm-packages \
         -derivedDataPath .derived-data \
-        -resolvePackageDependencies &
-      RESOLVE_PID=$!
-      ( sleep 30 && kill $RESOLVE_PID 2>/dev/null ) &
-      WATCHDOG=$!
-      if wait $RESOLVE_PID 2>/dev/null; then
-        kill $WATCHDOG 2>/dev/null || true; wait $WATCHDOG 2>/dev/null || true
-        echo "  SPM resolve OK"
-      else
-        kill $WATCHDOG 2>/dev/null || true; wait $WATCHDOG 2>/dev/null || true
-        echo "  SPM resolve timed out — downloading XCFramework with curl"
-        # Cached `.derived-data` holds a `VauchiPlatformFFI.swiftmodule`
-        # compiled against the previous xcframework's C header. After
-        # we swap the xcframework bytes on-disk, Xcode still reuses
-        # that stale swiftmodule — so new types in the refreshed C
-        # header (e.g. UniffiVTableCallbackInterfaceMultiStageSessionListener
-        # added in vauchi-platform-swift 0.22.0) appear absent to
-        # Swift and the VauchiPlatform target fails to build with
-        # `cannot find type ... in scope`. Drop the cached derived
-        # data so Xcode re-emits the FFI swiftmodule from the fresh
-        # headers. Also drop Xcode's shared Clang module cache — that
-        # lives outside `-derivedDataPath` and retains the previous
-        # module import of `vauchi_platformFFI` across jobs / branches,
-        # defeating the per-job derived-data reset.
-        rm -rf .derived-data
-        rm -rf ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
-        # Version must come from the resolved package's Package.swift
-        # (`let version = "0.22.0"`), NOT project.yml. project.yml
-        # carries the SPM `from:` lower bound (e.g. "0.21.12") — SPM
-        # resolves to the latest matching tag, which can be a later
-        # minor (0.22.0). Using the lower bound here downloads the
-        # wrong xcframework, which then fails to match the resolved
-        # Swift source's type set and produces
-        # `cannot find type 'UniffiVTableCallbackInterface...' in scope`.
-        V=$(sed -n 's/^let version = "\([^"]*\)".*/\1/p' \
-              .spm-packages/checkouts/vauchi-platform-swift/Package.swift 2>/dev/null)
-        # Fallback to project.yml if checkout hasn't been created yet
-        # (e.g. first-ever run with no cache — rare but possible).
-        if [ -z "$V" ]; then
-          V=$(sed -n '/vauchi-platform-swift/{n;s/.*"\([^"]*\)".*/\1/p;}' project.yml)
-          echo "  WARNING: extracted version $V from project.yml (lower bound); resolved tag may differ"
-        fi
-        if [ -n "$V" ]; then
-          ZIP="/tmp/VauchiPlatformFFI-${CI_JOB_ID}-${V}.xcframework.zip"
-          curl -fsSL --max-time 60 --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
-            "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
-            -o "$ZIP"
-          echo "  Downloaded $(du -h "$ZIP" | cut -f1)"
-          # Pre-populate SPM artifact cache — when cached here, resolve
-          # uses the local artifact instead of re-downloading (401).
-          # Previous approach patched the checkout's Package.swift, but
-          # resolve re-clones from git and overwrites the patch.
-          # Wipe any cached xcframework from prior pipeline runs — `unzip -o`
-          # and `cp -R` merge into existing directories rather than replacing
-          # them, so stale `Versions/A/Headers/vauchi_platformFFI.h` from a
-          # previous binding version can survive on disk and be what Xcode
-          # actually reads at compile time. That manifests as the new
-          # version's symbols being reported as missing.
-          ARTIFACTS=".spm-packages/artifacts/vauchi-platform-swift"
-          rm -rf "$ARTIFACTS/VauchiPlatformFFI.xcframework"
-          mkdir -p "$ARTIFACTS"
-          unzip -o "$ZIP" -d "$ARTIFACTS" > /dev/null
-          echo "  Placed in artifact cache: $ARTIFACTS/VauchiPlatformFFI.xcframework"
-          # Also patch checkout if it survived the killed first resolve
-          CHECKOUT=".spm-packages/checkouts/vauchi-platform-swift"
-          if [ -d "$CHECKOUT" ]; then
-            rm -rf "$CHECKOUT/VauchiPlatformFFI.xcframework"
-            cp -R "$ARTIFACTS/VauchiPlatformFFI.xcframework" "$CHECKOUT/"
-            PKG="$CHECKOUT/Package.swift"
-            sed -i.bak 's|url: "https://[^"]*xcframework.zip",|path: "VauchiPlatformFFI.xcframework"|' "$PKG"
-            sed -i.bak '/checksum: checksum/d' "$PKG"
-            rm -f "${PKG}.bak"
-          fi
-          xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
-            -clonedSourcePackagesDirPath .spm-packages \
-            -derivedDataPath .derived-data \
-            -resolvePackageDependencies
-          echo "  SPM resolve OK (curl fallback)"
-        else
-          echo "  ERROR: Could not extract platform version from project.yml"
-          exit 1
-        fi
-      fi
+        -resolvePackageDependencies
+      echo "  SPM resolve OK (curl-primary, no URLSession)"
     - echo "── [$(date +%H:%M:%S)] xcodebuild compile ──"
     - |
       # Heartbeat: print elapsed time every 120s so CI log shows progress
