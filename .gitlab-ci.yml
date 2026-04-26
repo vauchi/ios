@@ -670,8 +670,11 @@ build:debug:
 
         # Commit + force-tag in the mirror so `git clone v$V` restores
         # the manifest AND the xcframework as one atomic checkout.
-        git -C "$MIRROR" -c user.email=ci@vauchi.local -c user.name=ci-mirror \
-          add -A
+        # `-f` is required: VauchiPlatformFFI.xcframework/ is gitignored
+        # upstream (it's a build output) — without -f, `git add` is a
+        # silent no-op and the subsequent commit fails with "nothing to
+        # commit, working tree clean".
+        git -C "$MIRROR" add -f VauchiPlatformFFI.xcframework
         git -C "$MIRROR" -c user.email=ci@vauchi.local -c user.name=ci-mirror \
           commit -q -m "ci-mirror: bundle xcframework v$V"
         git -C "$MIRROR" tag -f "v$V"
