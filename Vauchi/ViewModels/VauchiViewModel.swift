@@ -1720,7 +1720,7 @@ class VauchiViewModel: ObservableObject {
             return qrCode
         }
 
-        throw VauchiRepositoryError.operationFailed("QR generation failed")
+        throw VauchiRepositoryError.internalError("QR generation failed")
     }
 
     /// Approve with ultrasonic proximity proof.
