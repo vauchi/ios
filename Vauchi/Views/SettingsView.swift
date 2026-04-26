@@ -1303,9 +1303,7 @@ struct DeviceLinkSheet: View {
             do {
                 let data = try await viewModel.startDeviceLinkInitiator()
                 qrData = data
-
-                // Start listening for incoming request in background
-                try await viewModel.listenForDeviceLinkRequest()
+                // Session cycle thread handles listening and all state transitions
             } catch {
                 viewModel.deviceLinkState = .failed(error.localizedDescription)
             }

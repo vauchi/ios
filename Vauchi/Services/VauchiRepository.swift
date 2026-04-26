@@ -1692,6 +1692,15 @@ class VauchiRepository {
         }
     }
 
+    /// Create a new device-link orchestration session (Phase 1: initiator only).
+    func createDeviceLinkSessionInitiator() throws -> MobileDeviceLinkSession {
+        do {
+            return try vauchi.createDeviceLinkSessionInitiator()
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     /// Get the number of linked devices
     func deviceCount() throws -> UInt32 {
         do {

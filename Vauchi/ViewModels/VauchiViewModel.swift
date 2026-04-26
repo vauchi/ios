@@ -1636,101 +1636,123 @@ class VauchiViewModel: ObservableObject {
     }
 
     @Published var deviceLinkState: DeviceLinkState = .idle
-    private var currentInitiator: MobileDeviceLinkInitiator?
-    private var currentSenderToken: String?
+    @Published var deviceLinkQRCode: String?
+    private var currentSession: MobileDeviceLinkSession?
+    private var confirmationCode: String?
+    private var proximityChallenge: Data?
 
-    /// Start the initiator flow: generate QR, listen for request.
+    /// Session listener that bridges core events to @Published state.
+    private class DeviceLinkSessionBridge: DeviceLinkSessionListener {
+        weak var viewModel: VauchiViewModel?
+
+        func onQrReady(qrData: String, expiresAtUnix: UInt64) {
+            DispatchQueue.main.async {
+                self.viewModel?.deviceLinkQRCode = qrData
+                self.viewModel?.deviceLinkState = .waitingForRequest(expiresAt: expiresAtUnix)
+            }
+        }
+
+        func onConfirmationRequired(deviceName: String, confirmationCode: String, identityFingerprint _: String, proximityChallenge: Data) {
+            DispatchQueue.main.async {
+                self.viewModel?.confirmationCode = confirmationCode
+                self.viewModel?.proximityChallenge = proximityChallenge
+                self.viewModel?.deviceLinkState = .confirmingDevice(
+                    name: deviceName,
+                    code: confirmationCode,
+                    challenge: proximityChallenge
+                )
+            }
+        }
+
+        func onRequestSent(confirmationCode _: String) {
+            // Phase 2 responder only, not used in Phase 1
+        }
+
+        func onCompleted(deviceName _: String, deviceIndex _: UInt32) {
+            DispatchQueue.main.async {
+                self.viewModel?.deviceLinkState = .success
+            }
+        }
+
+        func onFailed(reason: String) {
+            DispatchQueue.main.async {
+                self.viewModel?.deviceLinkState = .failed(reason)
+            }
+        }
+
+        func onSessionEnded() {
+            DispatchQueue.main.async {
+                if case .idle = self.viewModel?.deviceLinkState {
+                    // Already cancelled or handled
+                } else if case .success = self.viewModel?.deviceLinkState {
+                    // Success already set
+                } else if case .failed = self.viewModel?.deviceLinkState {
+                    // Failed already set
+                } else {
+                    self.viewModel?.deviceLinkState = .idle
+                }
+            }
+        }
+    }
+
+    /// Start the initiator flow: core owns QR generation and listening.
     func startDeviceLinkInitiator() async throws -> String {
         guard let repository else {
             throw VauchiRepositoryError.notInitialized
         }
 
         deviceLinkState = .generatingQR
-        let initiator = try repository.startDeviceLink()
-        currentInitiator = initiator
-        let qrData = initiator.qrData()
-        // TODO: use initiator.expiresAt() once core 0.18.5 bindings are published
-        let expiresAt = UInt64(Date().timeIntervalSince1970) + 300
-        deviceLinkState = .waitingForRequest(expiresAt: expiresAt)
-        return qrData
-    }
+        let session = try repository.createDeviceLinkSessionInitiator()
+        currentSession = session
 
-    /// Listen for device link request via relay (blocking, call from background).
-    func listenForDeviceLinkRequest() async throws {
-        guard let repository, let initiator = currentInitiator else {
-            throw VauchiRepositoryError.notInitialized
+        let bridge = DeviceLinkSessionBridge()
+        bridge.viewModel = self
+        try session.setListener(listener: bridge)
+        try session.start()
+
+        // Wait for on_qr_ready to fire and update state
+        while case .generatingQR = deviceLinkState {
+            try await Task.sleep(nanoseconds: 10_000_000) // 10ms
         }
 
-        let request = try repository.listenForDeviceLinkRequest(timeoutSecs: 300)
-        currentSenderToken = request.senderToken
-        let confirmation = try initiator.prepareConfirmation(
-            encryptedRequest: request.encryptedPayload
-        )
+        // Return QR code once received
+        if let qrCode = deviceLinkQRCode {
+            return qrCode
+        }
 
-        let challenge = Data(initiator.proximityChallenge())
-
-        deviceLinkState = .confirmingDevice(
-            name: confirmation.deviceName,
-            code: confirmation.confirmationCode,
-            challenge: challenge
-        )
+        throw VauchiRepositoryError.operationFailed("QR generation failed")
     }
 
-    /// Approve the device link with ultrasonic proximity proof.
+    /// Approve with ultrasonic proximity proof.
     func approveDeviceLinkUltrasonic(challengeResponse: Data, verifiedAt: UInt64) async throws {
-        guard let repository,
-              let initiator = currentInitiator,
-              let senderToken = currentSenderToken
-        else {
+        guard let session = currentSession else {
             throw VauchiRepositoryError.notInitialized
         }
 
         deviceLinkState = .completing
-        let result = try initiator.confirmLinkUltrasonic(
-            challengeResponse: challengeResponse,
-            verifiedAt: verifiedAt
-        )
-        if let responseBytes = result.encryptedResponse {
-            try repository.sendDeviceLinkResponse(
-                senderToken: senderToken,
-                encryptedResponse: responseBytes
-            )
-        }
-        deviceLinkState = .success
-        currentInitiator = nil
-        currentSenderToken = nil
+        try session.confirmUltrasonic(challengeResponse: challengeResponse, verifiedAt: verifiedAt)
     }
 
-    /// Approve the device link with manual confirmation.
+    /// Approve with manual confirmation code.
     func approveDeviceLinkManual(confirmationCode: String, confirmedAt: UInt64) async throws {
-        guard let repository,
-              let initiator = currentInitiator,
-              let senderToken = currentSenderToken
-        else {
+        guard let session = currentSession else {
             throw VauchiRepositoryError.notInitialized
         }
 
         deviceLinkState = .completing
-        let result = try initiator.confirmLinkManual(
-            confirmationCode: confirmationCode,
-            confirmedAt: confirmedAt
-        )
-        if let responseBytes = result.encryptedResponse {
-            try repository.sendDeviceLinkResponse(
-                senderToken: senderToken,
-                encryptedResponse: responseBytes
-            )
-        }
-        deviceLinkState = .success
-        currentInitiator = nil
-        currentSenderToken = nil
+        try session.confirmManual(confirmationCode: confirmationCode, confirmedAt: confirmedAt)
     }
 
     /// Cancel the device link flow.
     func cancelDeviceLink() {
+        if let session = currentSession {
+            try? session.cancel()
+        }
         deviceLinkState = .idle
-        currentInitiator = nil
-        currentSenderToken = nil
+        deviceLinkQRCode = nil
+        currentSession = nil
+        confirmationCode = nil
+        proximityChallenge = nil
     }
 
     // MARK: - GDPR Operations
