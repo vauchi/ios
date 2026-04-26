@@ -708,8 +708,19 @@ build:debug:
       # the locally-tagged commit). Other packages' caches are untouched.
       rm -rf .spm-packages/repositories/vauchi-platform-swift-*
       rm -rf .spm-packages/checkouts/vauchi-platform-swift
+      rm -rf .spm-packages/manifests/vauchi-platform-swift-*
+      rm -rf .spm-packages/artifacts/vauchi-platform-swift
       rm -f  .spm-packages/workspace-state.json
       rm -f  Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+      # SwiftPM TOFU fingerprint storage: when v0.24.0 was force-moved
+      # to apply Fix C, the recorded version→SHA mapping (`v0.24.0 →
+      # <old SHA>`) now conflicts with the new SHA, producing
+      # "Revision X for ... version 0.24.0 does not match previously
+      # recorded value Y". Clear all known fingerprint locations.
+      rm -rf .spm-packages/security/fingerprints/vauchi-platform-swift* 2>/dev/null || true
+      rm -rf ~/.swiftpm/security/fingerprints/vauchi-platform-swift* 2>/dev/null || true
+      rm -rf ~/Library/org.swift.swiftpm/security/fingerprints/vauchi-platform-swift* 2>/dev/null || true
+      rm -rf ~/Library/Caches/org.swift.swiftpm/security/fingerprints/vauchi-platform-swift* 2>/dev/null || true
 
       # 6. Resolve. Env var triggers `path:` binaryTarget; mirror has
       # the xcframework. No URLSession download path is reachable.
