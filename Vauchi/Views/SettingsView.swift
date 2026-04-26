@@ -1404,10 +1404,13 @@ struct SetCertificateSheet: View {
     @State private var certificateText = ""
     @State private var errorMessage: String?
 
+    /// Marker check delegated to core (`mobileIsValidPemCertificate`) so
+    /// the rule lives in one place. Real cryptographic validation
+    /// happens in the rustls verifier when `setPinnedCertificate` is
+    /// consumed; this surface is for inline UI feedback while the user
+    /// pastes the cert.
     var isValidPem: Bool {
-        let trimmed = certificateText.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.hasPrefix("-----BEGIN CERTIFICATE-----") &&
-            trimmed.hasSuffix("-----END CERTIFICATE-----")
+        mobileIsValidPemCertificate(value: certificateText)
     }
 
     var body: some View {
