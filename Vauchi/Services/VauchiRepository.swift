@@ -767,6 +767,19 @@ class VauchiRepository {
         }
     }
 
+    /// Returns the footer-button `ScreenAction` id that core's
+    /// `ContactDetailEngine` would emit for the given contact —
+    /// `"delete_contact"` (imported) or `"archive_contact"` (exchanged).
+    /// Views dispatch on the returned id so they never branch on
+    /// `MobileContact.isImported` directly. See §1A pure-renderer rule.
+    func contactDetailFooterActionId(contactId: String) throws -> String {
+        do {
+            return try vauchi.contactDetailFooterActionId(contactId: contactId)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     /// List all archived contacts.
     func listArchivedContacts() throws -> [VauchiContact] {
         do {

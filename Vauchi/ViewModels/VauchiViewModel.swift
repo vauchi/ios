@@ -790,6 +790,15 @@ class VauchiViewModel: ObservableObject {
         archivedContacts.removeAll { $0.id == id }
     }
 
+    /// Returns the footer-button action id (`"delete_contact"` or
+    /// `"archive_contact"`) for the given contact. Views dispatch on
+    /// the returned id so they never branch on
+    /// `MobileContact.isImported` directly (§1A pure-renderer rule).
+    func contactDetailFooterActionId(contactId: String) throws -> String {
+        guard let repository else { throw VauchiRepositoryError.notInitialized }
+        return try repository.contactDetailFooterActionId(contactId: contactId)
+    }
+
     /// Load archived contacts.
     func loadArchivedContacts() async {
         guard let repository else { return }

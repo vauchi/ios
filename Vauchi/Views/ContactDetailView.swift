@@ -28,6 +28,12 @@ struct ContactDetailView: View {
     @State private var isEditingNote = false
     @State private var fieldNotes: [String: String] = [:]
     @State private var proposalTrusted: Bool = false
+    /// Footer-button action id from core (`"delete_contact"` or
+    /// `"archive_contact"`). Loaded in onAppear and used to dispatch
+    /// the destructive-vs-secondary footer button without branching
+    /// on the imported-vs-exchanged distinction in the view layer
+    /// (§1A pure-renderer).
+    @State private var footerActionId: String?
     @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
@@ -382,64 +388,18 @@ struct ContactDetailView: View {
 
                 Spacer(minLength: 40)
 
-                // Archive / Delete button
-                if contact.isImported {
-                    Button(role: .destructive) {
-                        Task {
-                            do {
-                                try await viewModel.softDeleteImportedContact(id: contact.id)
-                                let contactId = contact.id
-                                viewModel.showToast(
-                                    localizationService.t("contacts.toast_deleted"),
-                                    undoHandler: {
-                                        try await viewModel.undoDeleteImportedContact(id: contactId)
-                                    }
-                                )
-                                dismiss()
-                            } catch {
-                                viewModel.showError("Delete Failed", message: error.localizedDescription)
-                            }
-                        }
-                    } label: {
-                        Label(localizationService.t("action.delete"), systemImage: "trash")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-                    }
-                    .padding(.horizontal)
-                    .accessibilityLabel("Delete contact")
-                    .accessibilityHint("Delete this imported contact with undo option")
-                } else {
-                    Button {
-                        Task {
-                            do {
-                                try await viewModel.archiveContact(id: contact.id)
-                                await viewModel.loadContacts()
-                                let contactId = contact.id
-                                viewModel.showToast(
-                                    localizationService.t("contacts.toast_archived"),
-                                    undoHandler: {
-                                        try await viewModel.unarchiveContact(id: contactId)
-                                        await viewModel.loadContacts()
-                                    }
-                                )
-                                dismiss()
-                            } catch {
-                                viewModel.showError("Archive Failed", message: error.localizedDescription)
-                            }
-                        }
-                    } label: {
-                        Label(localizationService.t("contacts.action_archive"), systemImage: "archivebox")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-                    }
-                    .foregroundColor(.orange)
-                    .padding(.horizontal)
-                    .accessibilityLabel("Archive contact")
-                    .accessibilityHint("Move this contact to the archive with undo option")
+                // Footer button — destructive vs secondary chosen by core
+                // (`contactDetailFooterActionId`). The view dispatches on
+                // the returned action id rather than re-deriving the
+                // delete-vs-archive choice from the contact model — see
+                // §1A pure-renderer rule.
+                switch footerActionId {
+                case "delete_contact":
+                    deleteFooterButton
+                case "archive_contact":
+                    archiveFooterButton
+                default:
+                    EmptyView()
                 }
             }
             .padding(.vertical)
@@ -449,6 +409,7 @@ struct ContactDetailView: View {
             loadVisibility()
             loadContactGroups()
             loadNotes()
+            loadFooterActionId()
             proposalTrusted = contact.proposalTrusted
         }
         .sheet(isPresented: $showManageGroupsSheet) {
@@ -488,6 +449,74 @@ struct ContactDetailView: View {
         } catch {
             contactGroups = []
         }
+    }
+
+    private func loadFooterActionId() {
+        // Best-effort: an unreachable contact_id leaves the button area
+        // empty until a refresh, which is preferable to surfacing a
+        // technical error in the detail screen.
+        footerActionId = try? viewModel.contactDetailFooterActionId(contactId: contact.id)
+    }
+
+    private var deleteFooterButton: some View {
+        Button(role: .destructive) {
+            Task {
+                do {
+                    try await viewModel.softDeleteImportedContact(id: contact.id)
+                    let contactId = contact.id
+                    viewModel.showToast(
+                        localizationService.t("contacts.toast_deleted"),
+                        undoHandler: {
+                            try await viewModel.undoDeleteImportedContact(id: contactId)
+                        }
+                    )
+                    dismiss()
+                } catch {
+                    viewModel.showError("Delete Failed", message: error.localizedDescription)
+                }
+            }
+        } label: {
+            Label(localizationService.t("action.delete"), systemImage: "trash")
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
+        }
+        .padding(.horizontal)
+        .accessibilityLabel("Delete contact")
+        .accessibilityHint("Delete this imported contact with undo option")
+    }
+
+    private var archiveFooterButton: some View {
+        Button {
+            Task {
+                do {
+                    try await viewModel.archiveContact(id: contact.id)
+                    await viewModel.loadContacts()
+                    let contactId = contact.id
+                    viewModel.showToast(
+                        localizationService.t("contacts.toast_archived"),
+                        undoHandler: {
+                            try await viewModel.unarchiveContact(id: contactId)
+                            await viewModel.loadContacts()
+                        }
+                    )
+                    dismiss()
+                } catch {
+                    viewModel.showError("Archive Failed", message: error.localizedDescription)
+                }
+            }
+        } label: {
+            Label(localizationService.t("contacts.action_archive"), systemImage: "archivebox")
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
+        }
+        .foregroundColor(.orange)
+        .padding(.horizontal)
+        .accessibilityLabel("Archive contact")
+        .accessibilityHint("Move this contact to the archive with undo option")
     }
 
     private func loadNotes() {
