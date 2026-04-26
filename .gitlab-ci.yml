@@ -938,21 +938,21 @@ build:debug:
     paths:
       - build/Build/Products/Debug-iphonesimulator/
       - Vauchi.xcodeproj/
-      - .spm-packages/
       - build.log
-    # Exclude the vauchi-platform xcframework (~600 MB extracted) from the
-    # uploaded archive — gitlab.com's coordinator caps job artifacts at 1 GB
-    # and including the xcframework pushes the upload over 413. The
-    # downstream test/coverage stages re-acquire it via the same file://
-    # mirror (`VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK=1` + per-runner cache
-    # at $HOME/.cache/vauchi-platform-swift-mirror/v$V), so dropping it
-    # from artifacts costs nothing in the happy path. If a test job runs
-    # on a different runner without the mirror cache, build:debug's mirror
-    # build script reproduces it deterministically — no artifact handoff
-    # needed.
-    exclude:
-      - .spm-packages/checkouts/vauchi-platform-swift/VauchiPlatformFFI.xcframework/**/*
-      - .spm-packages/artifacts/vauchi-platform-swift/**/*
+    # `.spm-packages/` deliberately omitted: the previous attempt to ship
+    # it via artifacts hit gitlab.com's 1 GB coordinator cap (HTTP 413),
+    # even after excluding the xcframework — the SPM checkouts +
+    # repositories metadata for swift-syntax / snapshot-testing alone
+    # exceed the limit. Downstream test/coverage stages re-resolve via:
+    #   1. the runner-local CI cache (`.spm-cache-readonly` on the test
+    #      jobs restores `.spm-packages/` from the same runner that ran
+    #      build:debug), and
+    #   2. the file:// mirror at $HOME/.cache/vauchi-platform-swift-mirror
+    #      with VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK=1, which xcodebuild
+    #      consults during implicit resolve at the start of `test`.
+    # If a test job lands on a fresh runner without the cache, xcodebuild
+    # resolves from the mirror config left in ~/Library/org.swift.swiftpm/
+    # configuration/mirrors.json (per-runner, persistent across pipelines).
     expire_in: 1 hour
   rules:
     # Skip on upstream triggers — update:bindings-version handles the bump,
