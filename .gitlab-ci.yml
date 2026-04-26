@@ -730,16 +730,24 @@ build:debug:
       fi
 
       # 3. Wire SPM to the local mirror.
-      mkdir -p .swiftpm/configuration
-      printf '%s\n' \
+      # Write mirror config to BOTH project-local AND user-level paths.
+      # Project-local works for raw `swift build`, but Xcode's SPM
+      # consults the user-level config (`~/Library/org.swift.swiftpm/
+      # configuration/mirrors.json`). On the runner, the trace
+      # `Fetching from https://gitlab.com/... (cached)` confirmed the
+      # project-local mirror was ignored.
+      MIRROR_JSON=$(printf '%s\n' \
         '{' \
         '  "version": 1,' \
         '  "object": [{' \
         '    "original": "https://gitlab.com/vauchi/vauchi-platform-swift.git",' \
         "    \"mirror\": \"file://$MIRROR\"" \
         '  }]' \
-        '}' \
-        > .swiftpm/configuration/mirrors.json
+        '}')
+      mkdir -p .swiftpm/configuration
+      printf '%s' "$MIRROR_JSON" > .swiftpm/configuration/mirrors.json
+      mkdir -p ~/Library/org.swift.swiftpm/configuration
+      printf '%s' "$MIRROR_JSON" > ~/Library/org.swift.swiftpm/configuration/mirrors.json
 
       # 4. Drop derived data + Xcode's shared module cache so the FFI
       # swiftmodule is re-emitted from fresh C headers. Without this,
@@ -752,11 +760,19 @@ build:debug:
       # vauchi-platform-swift so SPM re-fetches from the file:// mirror
       # instead of using its cached gitlab.com refs (which would lack
       # the locally-tagged commit). Other packages' caches are untouched.
+      # Also wipe the user-level Xcode SPM cache: the trace
+      # `Fetching from https://gitlab.com/... (cached)` proves Xcode's
+      # SPM was using a cached bare repo from a path OUTSIDE the
+      # project-local .spm-packages/ — likely the user-level cache that
+      # mirror config does not redirect cache lookups for.
       rm -rf .spm-packages/repositories/vauchi-platform-swift-*
       rm -rf .spm-packages/checkouts/vauchi-platform-swift
       rm -rf .spm-packages/manifests/vauchi-platform-swift-*
       rm -rf .spm-packages/artifacts/vauchi-platform-swift
       rm -f  .spm-packages/workspace-state.json
+      rm -rf ~/Library/Caches/org.swift.swiftpm/repositories/vauchi-platform-swift-* 2>/dev/null || true
+      rm -rf ~/Library/org.swift.swiftpm/repositories/vauchi-platform-swift-* 2>/dev/null || true
+      rm -rf ~/Library/Developer/Xcode/DerivedData/Vauchi-*/SourcePackages 2>/dev/null || true
       rm -f  Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
       # SwiftPM TOFU fingerprint storage: when v0.24.0 was force-moved
       # to apply Fix C, the recorded version→SHA mapping (`v0.24.0 →
