@@ -940,6 +940,19 @@ build:debug:
       - Vauchi.xcodeproj/
       - .spm-packages/
       - build.log
+    # Exclude the vauchi-platform xcframework (~600 MB extracted) from the
+    # uploaded archive — gitlab.com's coordinator caps job artifacts at 1 GB
+    # and including the xcframework pushes the upload over 413. The
+    # downstream test/coverage stages re-acquire it via the same file://
+    # mirror (`VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK=1` + per-runner cache
+    # at $HOME/.cache/vauchi-platform-swift-mirror/v$V), so dropping it
+    # from artifacts costs nothing in the happy path. If a test job runs
+    # on a different runner without the mirror cache, build:debug's mirror
+    # build script reproduces it deterministically — no artifact handoff
+    # needed.
+    exclude:
+      - .spm-packages/checkouts/vauchi-platform-swift/VauchiPlatformFFI.xcframework/**/*
+      - .spm-packages/artifacts/vauchi-platform-swift/**/*
     expire_in: 1 hour
   rules:
     # Skip on upstream triggers — update:bindings-version handles the bump,
