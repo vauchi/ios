@@ -626,7 +626,10 @@ build:debug:
       # 2. Per-version mirror lives outside the build dir so it survives
       # cache wipes and is shared across ios/macos jobs on this runner.
       MIRROR="$HOME/.cache/vauchi-platform-swift-mirror/v$V"
-      MIRROR_READY="$MIRROR/.ci-mirror-ready"
+      # Bumped (-v2) to invalidate caches built before the symlink-fix
+      # patch — those mirrors committed broken-symlink form which breaks
+      # SPM's `path:` binaryTarget validation.
+      MIRROR_READY="$MIRROR/.ci-mirror-ready-v2"
 
       if [ -f "$MIRROR_READY" ]; then
         echo "  Mirror cache hit at $MIRROR"
@@ -668,6 +671,36 @@ build:debug:
         unzip -o -q "$ZIP" -d "$MIRROR"
         rm -f "$ZIP"
 
+        # Fix versioned-framework symlinks broken by upstream `zip -r`
+        # (missing -y). The published xcframework stores macOS framework
+        # symlinks (Versions/Current, Headers, Modules, Resources, and the
+        # binary symlink) as plain 24–34-byte files containing the symlink
+        # target text. SPM's `path:` binaryTarget validation checks that
+        # the binary inside the framework is an actual binary; with the
+        # broken form, resolve fails with "does not contain a binary
+        # artifact". Mirrors the existing scripts/fix-xcframework-symlinks.sh
+        # logic but applied to the mirror dir so the broken-symlink form
+        # is never committed (and therefore never sees SPM resolve).
+        # Remove this block once core publishes with `zip -ry` (see
+        # core MR !259) and the bumped vauchi-platform-swift consumes it.
+        for fw in "$MIRROR/VauchiPlatformFFI.xcframework"/macos-*/VauchiPlatformFFI.framework; do
+          [ -d "$fw/Versions/A" ] || continue
+          if [ -d "$fw/Versions/Current" ] && [ ! -L "$fw/Versions/Current" ]; then
+            rm -rf "$fw/Versions/Current"
+            (cd "$fw/Versions" && ln -sf A Current)
+            for link in Headers Modules Resources; do
+              if [ -e "$fw/$link" ] && [ ! -L "$fw/$link" ]; then
+                rm -rf "$fw/$link"
+              fi
+              (cd "$fw" && ln -sf "Versions/Current/$link" "$link")
+            done
+            if [ -e "$fw/VauchiPlatformFFI" ] && [ ! -L "$fw/VauchiPlatformFFI" ]; then
+              rm -f "$fw/VauchiPlatformFFI"
+            fi
+            (cd "$fw" && ln -sf "Versions/Current/VauchiPlatformFFI" "VauchiPlatformFFI")
+          fi
+        done
+
         # Commit + force-tag in the mirror so `git clone v$V` restores
         # the manifest AND the xcframework as one atomic checkout.
         # `-f` is required: VauchiPlatformFFI.xcframework/ is gitignored
@@ -679,8 +712,21 @@ build:debug:
           commit -q -m "ci-mirror: bundle xcframework v$V"
         git -C "$MIRROR" tag -f "v$V"
 
+        # Sanity: the commit must contain the iOS binary artifact path
+        # listed in the xcframework Info.plist. If the binary is missing
+        # (e.g. `git add -f` didn't recurse into the gitignored dir, or
+        # the unzip failed silently), SPM resolve will fail with
+        # "does not contain a binary artifact" — fail fast here instead.
+        BIN_PATH="VauchiPlatformFFI.xcframework/ios-arm64/VauchiPlatformFFI.framework/VauchiPlatformFFI"
+        if ! git -C "$MIRROR" cat-file -e "v$V:$BIN_PATH" 2>/dev/null; then
+          echo "  ERROR: mirror commit missing $BIN_PATH"
+          echo "  Files captured in mirror commit:"
+          git -C "$MIRROR" ls-tree -r "v$V" --name-only | grep VauchiPlatformFFI | head -20
+          exit 1
+        fi
+
         touch "$MIRROR_READY"
-        echo "  Mirror built ($(du -sh "$MIRROR" | cut -f1))"
+        echo "  Mirror built ($(du -sh "$MIRROR" | cut -f1), $(git -C "$MIRROR" ls-tree -r "v$V" --name-only | grep -c '^VauchiPlatformFFI.xcframework/') xcframework files)"
       fi
 
       # 3. Wire SPM to the local mirror.
