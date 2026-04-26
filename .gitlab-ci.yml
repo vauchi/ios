@@ -661,10 +661,15 @@ build:debug:
       # 2. Per-version mirror lives outside the build dir so it survives
       # cache wipes and is shared across ios/macos jobs on this runner.
       MIRROR="$HOME/.cache/vauchi-platform-swift-mirror/v$V"
-      # Bumped (-v2) to invalidate caches built before the symlink-fix
-      # patch — those mirrors committed broken-symlink form which breaks
-      # SPM's `path:` binaryTarget validation.
-      MIRROR_READY="$MIRROR/.ci-mirror-ready-v2"
+      # Bumped (-v4) to invalidate v3 caches built during the gitlab.com
+      # eventual-consistency window after the v0.25.0 force-tag-move. The
+      # first v3 rebuild ran before the new tag SHA propagated to all git
+      # replicas, so `git clone --branch v0.25.0` re-served the broken
+      # manifest and the sanity checks below didn't catch it (they only
+      # validate `let version = ...` and the env-var switch — both still
+      # textually present in the broken Package.swift). Prior bumps:
+      # v3 (force-moved v0.25.0 tag), v2 (symlink-fix invalidation).
+      MIRROR_READY="$MIRROR/.ci-mirror-ready-v4"
 
       if [ -f "$MIRROR_READY" ]; then
         echo "  Mirror cache hit at $MIRROR"
@@ -693,6 +698,29 @@ build:debug:
           echo "  ERROR: tag v$V Package.swift is missing the env-var switch."
           echo "  Bump core to a release that includes Fix C — see"
           echo "  _private/docs/problems/2026-04-26-vauchi-platform-swift-resolve-hang/."
+          exit 1
+        fi
+
+        # Sanity 3: Package.swift actually parses. Catches the stale-tag
+        # window after a force-tag-move where gitlab.com's git replicas
+        # may briefly serve the pre-move SHA — e.g. v0.25.0 was moved
+        # from e3a92e7 (broken ternary at line 28, mangled by old
+        # swift-bindings-update regex) to 5cd0c24, and the first cache
+        # rebuild caught the old SHA before propagation completed. Sanity
+        # 1+2 don't catch this because both signal lines (`let version`
+        # and `useLocalXCFramework`) survive intact in the broken file —
+        # only the ternary body is mangled. `swift package dump-package`
+        # is the same parser xcodebuild uses, so a green dump means SPM
+        # resolve will not hit "Invalid manifest".
+        if ! (cd "$MIRROR" && swift package dump-package > /dev/null 2>&1); then
+          echo "  ERROR: tag v$V Package.swift fails to parse."
+          echo "  This usually means gitlab.com's git replicas have not yet"
+          echo "  propagated a recent force-tag-move. Wait 1–2 minutes and"
+          echo "  re-trigger the pipeline; the next clone should pick up"
+          echo "  the canonical tag SHA. The (broken) cache directory has"
+          echo "  not been stamped MIRROR_READY, so the next run will"
+          echo "  re-clone instead of cache-hit."
+          rm -rf "$MIRROR"
           exit 1
         fi
 
@@ -809,15 +837,20 @@ build:debug:
       rm -rf ~/Library/org.swift.swiftpm/repositories/vauchi-platform-swift-* 2>/dev/null || true
       rm -rf ~/Library/Developer/Xcode/DerivedData/Vauchi-*/SourcePackages 2>/dev/null || true
       rm -f  Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
-      # SwiftPM TOFU fingerprint storage: when v0.24.0 was force-moved
-      # to apply Fix C, the recorded version→SHA mapping (`v0.24.0 →
-      # <old SHA>`) now conflicts with the new SHA, producing
-      # "Revision X for ... version 0.24.0 does not match previously
-      # recorded value Y". Clear all known fingerprint locations.
-      rm -rf .spm-packages/security/fingerprints/vauchi-platform-swift* 2>/dev/null || true
-      rm -rf ~/.swiftpm/security/fingerprints/vauchi-platform-swift* 2>/dev/null || true
-      rm -rf ~/Library/org.swift.swiftpm/security/fingerprints/vauchi-platform-swift* 2>/dev/null || true
-      rm -rf ~/Library/Caches/org.swift.swiftpm/security/fingerprints/vauchi-platform-swift* 2>/dev/null || true
+      # SwiftPM TOFU fingerprint storage: when a tag is force-moved
+      # (v0.24.0 → Fix C, v0.25.0 → restored Package.swift), the
+      # recorded version→SHA mapping conflicts with the new SHA,
+      # producing "Revision X for ... version V does not match previously
+      # recorded value Y". The earlier wildcard `vauchi-platform-swift*`
+      # only matched URL-based identities; for the file:// mirror, SPM
+      # stores fingerprints under a hash of the path (e.g. `v0.25.0-<hex>/`)
+      # which the wildcard misses. Nuke the whole fingerprints dir —
+      # SPM re-trusts on next resolve, and the only consumer here is
+      # vauchi-platform-swift anyway.
+      rm -rf .spm-packages/security/fingerprints 2>/dev/null || true
+      rm -rf ~/.swiftpm/security/fingerprints 2>/dev/null || true
+      rm -rf ~/Library/org.swift.swiftpm/security/fingerprints 2>/dev/null || true
+      rm -rf ~/Library/Caches/org.swift.swiftpm/security/fingerprints 2>/dev/null || true
 
       # 6. Resolve. Env var triggers `path:` binaryTarget; mirror has
       # the xcframework. No URLSession download path is reachable.
