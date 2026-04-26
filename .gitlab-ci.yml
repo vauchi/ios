@@ -571,34 +571,49 @@ check:design-tokens:
 build:debug:
   extends: [.macos-job, .spm-cache, .timeout-extended]
   stage: build
+  variables:
+    # Triggers vauchi-platform-swift Package.swift to emit a `path:`
+    # binaryTarget instead of `url:` (Fix C, see Package.swift comment +
+    # _private/docs/problems/2026-04-26-vauchi-platform-swift-resolve-hang/).
+    # MUST be set at job level so all script blocks see it (xcodebuild
+    # resolve AND compile both invoke SPM manifest evaluation).
+    VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
   script:
     - echo "── [$(date +%H:%M:%S)] xcodegen ──"
     - rm -rf Vauchi.xcodeproj
     - xcodegen generate
-    # SPM artifact provisioning — curl-primary, no URLSession download.
-    # Problem: 2026-04-22-ci-spm-watchdog-robustness (root cause
-    # confirmed 2026-04-25). SwiftPM's URLSession download path for
-    # `.binaryTarget` is structurally unreliable in CI:
-    #   - URLSessionConfiguration.default has timeoutIntervalForResource
-    #     = 7 days, with no SwiftPM override (verified in
-    #     swiftlang/swift-package-manager Sources/Basics/HTTPClient/
-    #     URLSessionHTTPClient.swift on main).
-    #   - Open upstream bugs against CDN-redirected hosts:
-    #     swiftlang/swift-package-manager#6635 (silent truncation),
-    #     #7470 (proxy/network errors), #7586 (binary-artifact cache
-    #     key bug). actions/runner-images#6233 reports the same
-    #     "Checking out X of package Y" hang signature, unresolved.
-    # We bypass URLSession entirely: clone vauchi-platform-swift
-    # ourselves, curl the xcframework via the public registry URL,
-    # patch Package.swift to use `path:` instead of `url:`, then run
-    # `-resolvePackageDependencies` with no network IO. CC-21: every
-    # failure mode surfaces as a loud `exit 1`, no fallback, no
-    # watchdog masking.
-    - echo "── [$(date +%H:%M:%S)] SPM resolve (curl-primary) ──"
+    # SPM artifact provisioning — file:// SwiftPM mirror (Fix A) +
+    # env-var-aware Package.swift (Fix C).
+    # Problem: 2026-04-26-vauchi-platform-swift-resolve-hang/.
+    #
+    # Why not just curl-primary (the prior approach):
+    #   The 2026-04-22 curl-primary fix patched Package.swift to `path:`
+    #   inside `.spm-packages/checkouts/vauchi-platform-swift/` and pre-
+    #   placed the xcframework. On cache-hit + same-version this works
+    #   because SwiftPM's `Workspace.openWorkingCopy` returns the existing
+    #   checkout untouched. On cache-restored-from-main + version delta
+    #   (the dominant case for every bump MR), `Workspace.createWorkingCopy`
+    #   detects a workspace-state mismatch and `removeFileTree`s the
+    #   checkout dir before re-cloning from the bare mirror — wiping the
+    #   `path:` patch and the xcframework. SwiftPM then evaluates the
+    #   stock manifest, sees `url:`, and falls into URLSession download
+    #   which hangs against Cloudflare-fronted gitlab.com for the full
+    #   7-day default `timeoutIntervalForResource` (= 2 h job timeout in
+    #   CI). Confirmed on the runner 2026-04-26: post-hang Package.swift
+    #   was mode `r--r--r--` (SwiftPM checkout marker) with `url:` content.
+    #
+    # The mirror approach is race-free: the mirror is a real git repo at
+    # `$HOME/.cache/vauchi-platform-swift-mirror/v$V` containing the
+    # upstream tag PLUS the xcframework, all committed and re-tagged as
+    # `v$V` locally. We point SwiftPM at it via
+    # `.swiftpm/configuration/mirrors.json`. SPM's `git clone` from
+    # `file://$MIRROR` then restores both the manifest AND the xcframework
+    # atomically. With the env var set, the manifest emits a `path:`
+    # binaryTarget that resolves to the mirror-bundled xcframework. No
+    # URLSession download path is reachable.
+    - echo "── [$(date +%H:%M:%S)] SPM resolve (file:// mirror + env var) ──"
     - |
       set -e
-      PKG_DIR=".spm-packages/checkouts/vauchi-platform-swift"
-      ARTIFACTS=".spm-packages/artifacts/vauchi-platform-swift"
 
       # 1. Determine version from project.yml (XcodeGen package pin).
       V=$(sed -n '/vauchi-platform-swift/{n;s/.*"\([^"]*\)".*/\1/p;}' project.yml)
@@ -608,91 +623,98 @@ build:debug:
       fi
       echo "  Resolved version: $V"
 
-      PKG="$PKG_DIR/Package.swift"
+      # 2. Per-version mirror lives outside the build dir so it survives
+      # cache wipes and is shared across ios/macos jobs on this runner.
+      MIRROR="$HOME/.cache/vauchi-platform-swift-mirror/v$V"
+      MIRROR_READY="$MIRROR/.ci-mirror-ready"
 
-      # 2. Cache-hit short-circuit (early): artifact already extracted +
-      # Package.swift already path:-patched at the right version.
-      if [ -d "$ARTIFACTS/VauchiPlatformFFI.xcframework" ] \
-         && [ -d "$PKG_DIR/VauchiPlatformFFI.xcframework" ] \
-         && [ -f "$PKG" ] \
-         && grep -q "let version = \"$V\"" "$PKG" \
-         && grep -q 'path: "VauchiPlatformFFI.xcframework"' "$PKG"; then
-        echo "  Cache hit: artifact + path:-patched Package.swift in place for v$V"
-        # Resolve and return — skip clone + curl + patch.
-        xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
-          -clonedSourcePackagesDirPath .spm-packages \
-          -derivedDataPath .derived-data \
-          -resolvePackageDependencies
-        echo "  SPM resolve OK (curl-primary, cache hit)"
-        exit 0
+      if [ -f "$MIRROR_READY" ]; then
+        echo "  Mirror cache hit at $MIRROR"
+      else
+        echo "  Building mirror at $MIRROR"
+        rm -rf "$MIRROR"
+        mkdir -p "$(dirname "$MIRROR")"
+
+        # Shallow clone of the upstream tag.
+        git clone --quiet --depth=1 --branch "v$V" \
+          https://gitlab.com/vauchi/vauchi-platform-swift.git "$MIRROR"
+
+        # Sanity 1: tag's Package.swift declares matching version. Catches
+        # the upstream release-CI bug observed for v0.21.8..v0.21.12 where
+        # the bump commit forgot to update `let version = ...` — see
+        # _private/docs/problems/2026-04-22-phantom-core-registry-artifacts/.
+        PKG_VERSION=$(sed -n 's/^let version = "\([^"]*\)".*/\1/p' "$MIRROR/Package.swift")
+        if [ "$PKG_VERSION" != "$V" ]; then
+          echo "  ERROR: tag v$V Package.swift declares version=\"$PKG_VERSION\""
+          exit 1
+        fi
+
+        # Sanity 2: env-var-aware binaryTarget present. Without Fix C,
+        # the manifest unconditionally emits `url:` and SPM hangs.
+        if ! grep -q 'VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK' "$MIRROR/Package.swift"; then
+          echo "  ERROR: tag v$V Package.swift is missing the env-var switch."
+          echo "  Bump core to a release that includes Fix C — see"
+          echo "  _private/docs/problems/2026-04-26-vauchi-platform-swift-resolve-hang/."
+          exit 1
+        fi
+
+        # Curl xcframework, place inside mirror (will be committed to
+        # mirror tag). Public registry — no JOB-TOKEN needed.
+        ZIP="/tmp/VauchiPlatformFFI-${CI_JOB_ID}-${V}.xcframework.zip"
+        curl -fsSL --max-time 120 --retry 3 --retry-max-time 240 --retry-connrefused \
+          "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
+          -o "$ZIP"
+        echo "  Downloaded $(du -h "$ZIP" | cut -f1)"
+        unzip -o -q "$ZIP" -d "$MIRROR"
+        rm -f "$ZIP"
+
+        # Commit + force-tag in the mirror so `git clone v$V` restores
+        # the manifest AND the xcframework as one atomic checkout.
+        git -C "$MIRROR" -c user.email=ci@vauchi.local -c user.name=ci-mirror \
+          add -A
+        git -C "$MIRROR" -c user.email=ci@vauchi.local -c user.name=ci-mirror \
+          commit -q -m "ci-mirror: bundle xcframework v$V"
+        git -C "$MIRROR" tag -f "v$V"
+
+        touch "$MIRROR_READY"
+        echo "  Mirror built ($(du -sh "$MIRROR" | cut -f1))"
       fi
 
-      # 3. Wipe and shallow-clone the package source. We always wipe rather
-      # than fetch over a cached checkout because SPM's
-      # `.git/objects/info/alternates` references an absolute path tied to
-      # the runner build slot (`.spm-packages/repositories/<name-hash>/`).
-      # A cache restored on a different slot — or in this same slot before
-      # SPM's repositories/ dir was populated — has stale alternates that
-      # break every git op with "unable to normalize alternate object path"
-      # (observed: ios pipeline #2479384749). A fresh single-tag clone has
-      # no alternates and is cheap (~1 s for this small repo).
-      mkdir -p .spm-packages/checkouts
-      rm -rf "$PKG_DIR"
-      git clone --quiet --depth=1 --branch "v$V" \
-        https://gitlab.com/vauchi/vauchi-platform-swift.git "$PKG_DIR"
+      # 3. Wire SPM to the local mirror.
+      mkdir -p .swiftpm/configuration
+      printf '%s\n' \
+        '{' \
+        '  "version": 1,' \
+        '  "object": [{' \
+        '    "original": "https://gitlab.com/vauchi/vauchi-platform-swift.git",' \
+        "    \"mirror\": \"file://$MIRROR\"" \
+        '  }]' \
+        '}' \
+        > .swiftpm/configuration/mirrors.json
 
-      # 4. Sanity-check the tag's Package.swift declares the same version.
-      # Tags v0.21.8..v0.21.12 shipped Package.swift with stale
-      # `let version = "0.21.7"` because the upstream release CI failed
-      # to update it — see _private/docs/problems/
-      # 2026-04-22-phantom-core-registry-artifacts/. Fail loudly here
-      # instead of silently downloading the wrong artifact.
-      PKG_VERSION=$(sed -n 's/^let version = "\([^"]*\)".*/\1/p' "$PKG_DIR/Package.swift")
-      if [ "$PKG_VERSION" != "$V" ]; then
-        echo "  ERROR: tag v$V Package.swift declares version=\"$PKG_VERSION\""
-        echo "  upstream release CI failed to update Package.swift on this tag."
-        echo "  See _private/docs/problems/2026-04-22-phantom-core-registry-artifacts/"
-        exit 1
-      fi
-
-      # 5. Curl the xcframework. Public registry — no JOB-TOKEN needed.
-      ZIP="/tmp/VauchiPlatformFFI-${CI_JOB_ID}-${V}.xcframework.zip"
-      curl -fsSL --max-time 120 --retry 3 --retry-max-time 240 --retry-connrefused \
-        "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
-        -o "$ZIP"
-      echo "  Downloaded $(du -h "$ZIP" | cut -f1)"
-
-      # 6. Replace stale extracted artifacts (a partial extract from a
-      # prior failed run, or an older binding version's headers, would
-      # silently win at compile time — see macos!169 #2477514192).
-      rm -rf "$ARTIFACTS/VauchiPlatformFFI.xcframework"
-      mkdir -p "$ARTIFACTS"
-      unzip -o -q "$ZIP" -d "$ARTIFACTS"
-      rm -rf "$PKG_DIR/VauchiPlatformFFI.xcframework"
-      cp -R "$ARTIFACTS/VauchiPlatformFFI.xcframework" "$PKG_DIR/"
-
-      # 7. Patch Package.swift: url: → path:. Drop the checksum arg
-      # (path: targets don't take a checksum).
-      sed -i.bak 's|url: "https://[^"]*xcframework.zip",|path: "VauchiPlatformFFI.xcframework"|' "$PKG"
-      sed -i.bak '/checksum: checksum/d' "$PKG"
-      rm -f "${PKG}.bak"
-
-      # 8. Drop derived data + Xcode's shared module cache so the FFI
+      # 4. Drop derived data + Xcode's shared module cache so the FFI
       # swiftmodule is re-emitted from fresh C headers. Without this,
       # newly-added types appear missing because Xcode reuses a
       # swiftmodule compiled against the previous binding version.
       rm -rf .derived-data
       rm -rf ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
 
-      echo "  Prepared $PKG_DIR for path:-mode resolve"
+      # 5. On version delta, also wipe SPM's bare-mirror cache for
+      # vauchi-platform-swift so SPM re-fetches from the file:// mirror
+      # instead of using its cached gitlab.com refs (which would lack
+      # the locally-tagged commit). Other packages' caches are untouched.
+      rm -rf .spm-packages/repositories/vauchi-platform-swift-*
+      rm -rf .spm-packages/checkouts/vauchi-platform-swift
+      rm -f  .spm-packages/workspace-state.json
+      rm -f  Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
-      # 9. Resolve. SPM sees an existing checkout with a path: binaryTarget;
-      # no URLSession download, no watchdog needed.
+      # 6. Resolve. Env var triggers `path:` binaryTarget; mirror has
+      # the xcframework. No URLSession download path is reachable.
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
         -clonedSourcePackagesDirPath .spm-packages \
         -derivedDataPath .derived-data \
         -resolvePackageDependencies
-      echo "  SPM resolve OK (curl-primary, no URLSession)"
+      echo "  SPM resolve OK (file:// mirror, no URLSession)"
     - echo "── [$(date +%H:%M:%S)] xcodebuild compile ──"
     - |
       # Heartbeat: print elapsed time every 120s so CI log shows progress
