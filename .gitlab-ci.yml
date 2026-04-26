@@ -84,9 +84,13 @@ workflow:
   tags:
     - macos
     - self-hosted
-  # Serialize all SPM-using jobs on the shared macOS runner.
-  # Multiple concurrent xcodebuild -resolvePackageDependencies deadlock
-  # on SPM's global package cache (~/.cache/org.swift.swiftpm/).
+  # Resolve-touching jobs (build:debug, build:release, snapshot:record)
+  # use this group. The deadlock that motivated serialization is on
+  # `xcodebuild -resolvePackageDependencies` against SPM's global
+  # cache (`~/.cache/org.swift.swiftpm/`). Test jobs use
+  # `-disableAutomaticPackageResolution` and DO NOT touch this cache,
+  # so they extend `.macos-test-job` below to get their own lock and
+  # run in parallel with each other.
   # NOTE: If jobs get stuck in waiting_for_resource due to a poisoned lock
   # (GitLab bug: cancelled jobs don't release resource_group), rename the
   # group (e.g. ios-spm-v6) to create a fresh lock. See incidents
@@ -116,6 +120,27 @@ workflow:
   after_script:
     # Clean up per-job keychain (best-effort — after_script runs even on failure)
     - security delete-keychain "$CI_JOB_KEYCHAIN" 2>/dev/null || true
+
+# Test-only macOS job: shares all of .macos-job's setup but uses a
+# DIFFERENT resource_group so two test jobs from different categories
+# (test:unit + test:snapshots + test:ui) can run in parallel on the
+# same runner. Each individual test JOB still gets concurrency-1
+# (overridden per-job below), but the tests-as-a-class are not
+# serialized against each other or against build/release jobs.
+#
+# Per-job lock is critical: gitlab-runner's shell executor runs
+# concurrent jobs in DIFFERENT build dirs (.../{concurrent-id}/...)
+# so DerivedData clobbering between concurrent jobs of the same name
+# is impossible — only the same-name re-runs need the lock.
+#
+# `test:ui` keeps `.simulator-job` (defined below) which already has
+# its own resource_group `ios-simulator`; tests:ui inherits both,
+# the per-job override below picks the right one.
+.macos-test-job:
+  extends: .macos-job
+  # Overridden per-job (see test:unit, test:snapshots, etc.) so each
+  # test type gets its own concurrency-1 lock.
+  resource_group: macos-test-default
 
 # Simulator serialization — prevents "Busy / preflight checks" failures.
 # 1. resource_group: only one simulator job runs at a time (across pipelines)
@@ -410,7 +435,10 @@ lint:images:
 lint:swiftlint:
   extends: [.macos-job, .timeout-quick]
   stage: lint
-  needs: [lint:reuse]  # sequential: lint headers before code
+  # Independent of lint:reuse — both can run in parallel. Original
+  # `needs: [lint:reuse]` was for "fail header issues first" aesthetics
+  # but cost ~63s of serial wait for a 6s job.
+  needs: []
   script:
     - |
       if command -v swiftlint &> /dev/null; then
@@ -437,9 +465,8 @@ lint:swiftlint:
 lint:swiftformat:
   extends: [.macos-job, .timeout-quick]
   stage: lint
-  needs:
-    - job: lint:swiftlint
-      optional: true  # may be excluded by change-based rules
+  # Independent of lint:swiftlint — different tool, different config.
+  needs: []
   script:
     - if command -v swiftformat &> /dev/null; then swiftformat --lint .; else echo "SwiftFormat not installed, skipping"; fi
   rules:
@@ -454,9 +481,8 @@ lint:swiftformat:
 lint:xcodegen:
   extends: .macos-job
   stage: lint
-  needs:
-    - job: lint:swiftformat
-      optional: true  # may be excluded by change-based rules
+  # Independent of swiftformat — runs `xcodegen generate` and diffs.
+  needs: []
   before_script:
     - command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
   script:
@@ -571,6 +597,11 @@ check:design-tokens:
 build:debug:
   extends: [.macos-job, .spm-cache, .timeout-extended]
   stage: build
+  # Don't gate on the lint stage — build:debug has no dependency on
+  # swiftlint/swiftformat/reuse output, only on the source tree itself.
+  # Without this, build:debug waits for the slowest lint job (typically
+  # lint:reuse at ~63s) before starting, even though they're orthogonal.
+  needs: []
   variables:
     # Triggers vauchi-platform-swift Package.swift to emit a `path:`
     # binaryTarget instead of `url:` (Fix C, see Package.swift comment +
@@ -578,6 +609,10 @@ build:debug:
     # MUST be set at job level so all script blocks see it (xcodebuild
     # resolve AND compile both invoke SPM manifest evaluation).
     VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
+    # Skip Xcode index-store generation in CI — we never read the
+    # autocomplete/cross-reference index here. Cuts 10–30% off
+    # incremental compile per Bitrise/Flutter benchmarks.
+    COMPILER_INDEX_STORE_ENABLE: "NO"
   script:
     - echo "── [$(date +%H:%M:%S)] xcodegen ──"
     - rm -rf Vauchi.xcodeproj
