@@ -7,6 +7,19 @@
 
 import CoreUIModels
 import SwiftUI
+import VauchiPlatform
+
+/// Hex-encoded length of an Ed25519 identity public key (32 bytes ×
+/// 2 hex chars = 64). Sourced from core's
+/// `recoveryPublicKeyHexLength()` so frontend and core stay in sync.
+private let recoveryPublicKeyHexLen = Int(recoveryPublicKeyHexLength())
+
+/// Minimum length of a recovery claim input string before the
+/// "Verify Claim" button is enabled. Sourced from core's
+/// `recoveryClaimMinInputLength()` (= 20). Heuristic — actual base64
+/// parse happens in core's `AppEngine` intercept; this gates the UI
+/// affordance.
+private let recoveryClaimMinInputLen = Int(recoveryClaimMinInputLength())
 
 struct RecoveryView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
@@ -337,11 +350,11 @@ struct CreateClaimSheet: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(oldPublicKey.count >= 64 && !isCreating ? Color.cyan : Color.gray)
+                            .background(oldPublicKey.count >= recoveryPublicKeyHexLen && !isCreating ? Color.cyan : Color.gray)
                             .foregroundColor(.white)
                             .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                         }
-                        .disabled(oldPublicKey.count < 64 || isCreating)
+                        .disabled(oldPublicKey.count < recoveryPublicKeyHexLen || isCreating)
                         .accessibilityLabel("Create claim")
                         .accessibilityHint("Generate a recovery claim using the old public key")
                     }
@@ -537,11 +550,11 @@ struct CreateVoucherSheet: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(claimData.count >= 20 && !isParsing ? Color.cyan : Color.gray)
+                            .background(claimData.count >= recoveryClaimMinInputLen && !isParsing ? Color.cyan : Color.gray)
                             .foregroundColor(.white)
                             .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                         }
-                        .disabled(claimData.count < 20 || isParsing)
+                        .disabled(claimData.count < recoveryClaimMinInputLen || isParsing)
                         .accessibilityLabel("Verify claim")
                         .accessibilityHint("Parse and verify the recovery claim data")
                     }
@@ -696,11 +709,11 @@ struct AddVoucherSheet: View {
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(voucherData.count >= 20 && !isAdding ? Color.blue : Color.gray)
+                            .background(voucherData.count >= recoveryClaimMinInputLen && !isAdding ? Color.blue : Color.gray)
                             .foregroundColor(.white)
                             .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
                         }
-                        .disabled(voucherData.count < 20 || isAdding)
+                        .disabled(voucherData.count < recoveryClaimMinInputLen || isAdding)
                         .accessibilityLabel("Add voucher")
                         .accessibilityHint("Submit the voucher to your recovery claim")
                     }
