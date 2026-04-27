@@ -1879,6 +1879,19 @@ class VauchiRepository {
         }
     }
 
+    /// Get only failed delivery records — pre-filtered by core (G3).
+    ///
+    /// Frontends should call this instead of fetching `getAllDeliveryRecords()`
+    /// and applying `.filter(\.isFailed)` themselves. The partition lives in
+    /// core so iOS and Android render the same list (ADR-021/043 Humble UI).
+    func getFailedDeliveryRecords() throws -> [VauchiDeliveryRecord] {
+        do {
+            return try vauchi.getFailedDeliveryRecords().map(convertDeliveryRecord)
+        } catch let error as MobileError {
+            throw VauchiRepositoryError.from(error)
+        }
+    }
+
     /// Get delivery records for a specific contact
     func getDeliveryRecordsForContact(contactId: String) throws -> [VauchiDeliveryRecord] {
         do {

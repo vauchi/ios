@@ -38,7 +38,7 @@ struct DeliveryStatusView: View {
                 case 0:
                     RecentDeliveriesView(records: viewModel.deliveryRecords)
                 case 1:
-                    FailedDeliveriesView(records: failedRecords, onRetry: retryDelivery)
+                    FailedDeliveriesView(records: viewModel.failedRecords, onRetry: retryDelivery)
                 case 2:
                     PendingDeliveriesView(entries: viewModel.retryEntries)
                 default:
@@ -54,10 +54,6 @@ struct DeliveryStatusView: View {
         .refreshable {
             await refreshData()
         }
-    }
-
-    private var failedRecords: [VauchiDeliveryRecord] {
-        viewModel.deliveryRecords.filter(\.isFailed)
     }
 
     private func loadData() {

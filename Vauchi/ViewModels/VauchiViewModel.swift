@@ -57,8 +57,9 @@ class VauchiViewModel: ObservableObject {
     /// Network state
     @Published var isOnline = false
 
-    // Delivery status
+    // Delivery status — both lists pushed by core (G3).
     @Published var deliveryRecords: [VauchiDeliveryRecord] = []
+    @Published var failedRecords: [VauchiDeliveryRecord] = []
     @Published var retryEntries: [VauchiRetryEntry] = []
     @Published var failedDeliveryCount: Int = 0
 
@@ -1247,9 +1248,13 @@ class VauchiViewModel: ObservableObject {
 
         do {
             deliveryRecords = try repository.getAllDeliveryRecords()
-            failedDeliveryCount = deliveryRecords.filter(\.isFailed).count
+            // G3 (ADR-021/043): pre-filtered list + count come from core,
+            // not from a frontend `.filter(\.isFailed)`.
+            failedRecords = try repository.getFailedDeliveryRecords()
+            failedDeliveryCount = failedRecords.count
         } catch {
             deliveryRecords = []
+            failedRecords = []
             failedDeliveryCount = 0
         }
     }
