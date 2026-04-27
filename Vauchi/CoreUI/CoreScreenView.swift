@@ -26,12 +26,38 @@ import VauchiPlatform
 struct CoreScreenView: View {
     let screenName: String
     @EnvironmentObject var viewModel: VauchiViewModel
+
+    var body: some View {
+        // The actual rendering lives in `CoreScreenContent`, which observes
+        // `coreViewModel` directly via `@ObservedObject`. The previous
+        // pattern read `viewModel.coreViewModel?.currentScreen` from this
+        // outer view, but `coreViewModel` is itself only `@Published` on
+        // `viewModel` — SwiftUI re-renders when the `coreViewModel`
+        // *reference* changes, not when its inner `@Published`
+        // `currentScreen` does. After `navigate_to(...)` updated
+        // `currentScreen`, the My Card body kept showing the previous
+        // ScreenModel because nothing on `viewModel` had emitted, so the
+        // outer view never recomposed. Splitting into an inner
+        // `@ObservedObject coreVM` view fixes that — SwiftUI now subscribes
+        // to `coreVM.objectWillChange` directly.
+        Group {
+            if let coreVM = viewModel.coreViewModel {
+                CoreScreenContent(screenName: screenName, coreVM: coreVM)
+            } else {
+                ProgressView("Loading...")
+            }
+        }
+    }
+}
+
+private struct CoreScreenContent: View {
+    let screenName: String
+    @ObservedObject var coreVM: AppViewModel
     @State private var currentScreen: String?
 
     var body: some View {
         Group {
-            if let coreVM = viewModel.coreViewModel,
-               let screen = coreVM.currentScreen {
+            if let screen = coreVM.currentScreen {
                 ScreenRendererView(screen: screen, onAction: { action in
                     coreVM.handleAction(action)
                 })
@@ -42,14 +68,14 @@ struct CoreScreenView: View {
         .task(id: screenName) {
             navigateIfNeeded(to: screenName)
         }
-        .onChange(of: viewModel.coreViewModel?.currentScreen?.screenId) { newId in
+        .onChange(of: coreVM.currentScreen?.screenId) { newId in
             syncQrFrameTimer(for: newId)
         }
         .onAppear {
-            syncQrFrameTimer(for: viewModel.coreViewModel?.currentScreen?.screenId)
+            syncQrFrameTimer(for: coreVM.currentScreen?.screenId)
         }
         .onDisappear {
-            viewModel.coreViewModel?.stopQrFrameTimer()
+            coreVM.stopQrFrameTimer()
         }
         .alert(item: alertBinding) { alert in
             Alert(
@@ -60,16 +86,16 @@ struct CoreScreenView: View {
         }
         .sheet(isPresented: imagePickerBinding) {
             ImagePickerSheet { imageData in
-                viewModel.coreViewModel?.sendImageReceived(data: imageData)
+                coreVM.sendImageReceived(data: imageData)
             } onCancel: {
-                viewModel.coreViewModel?.sendImagePickCancelled()
+                coreVM.sendImagePickCancelled()
             }
         }
         .sheet(isPresented: cameraPickerBinding) {
             CameraPickerSheet { imageData in
-                viewModel.coreViewModel?.sendImageReceived(data: imageData)
+                coreVM.sendImageReceived(data: imageData)
             } onCancel: {
-                viewModel.coreViewModel?.sendImagePickCancelled()
+                coreVM.sendImagePickCancelled()
             }
         }
     }
@@ -77,14 +103,13 @@ struct CoreScreenView: View {
     private func navigateIfNeeded(to screen: String) {
         guard currentScreen != screen else { return }
         currentScreen = screen
-        viewModel.coreViewModel?.navigateTo(screenJson: "\"\(screen)\"")
+        coreVM.navigateTo(screenJson: "\"\(screen)\"")
     }
 
     /// Start the animated-QR timer while the ShowQr screen is visible; stop
     /// it everywhere else. Cheap to call unconditionally — both methods are
     /// idempotent.
     private func syncQrFrameTimer(for screenId: String?) {
-        guard let coreVM = viewModel.coreViewModel else { return }
         if screenId == "exchange_show_qr" {
             coreVM.startQrFrameTimer()
         } else {
@@ -94,22 +119,22 @@ struct CoreScreenView: View {
 
     private var alertBinding: Binding<AppViewModel.AlertMessage?> {
         Binding(
-            get: { viewModel.coreViewModel?.alertMessage },
-            set: { viewModel.coreViewModel?.alertMessage = $0 }
+            get: { coreVM.alertMessage },
+            set: { coreVM.alertMessage = $0 }
         )
     }
 
     private var imagePickerBinding: Binding<Bool> {
         Binding(
-            get: { viewModel.coreViewModel?.showImagePicker ?? false },
-            set: { viewModel.coreViewModel?.showImagePicker = $0 }
+            get: { coreVM.showImagePicker },
+            set: { coreVM.showImagePicker = $0 }
         )
     }
 
     private var cameraPickerBinding: Binding<Bool> {
         Binding(
-            get: { viewModel.coreViewModel?.showCameraPicker ?? false },
-            set: { viewModel.coreViewModel?.showCameraPicker = $0 }
+            get: { coreVM.showCameraPicker },
+            set: { coreVM.showCameraPicker = $0 }
         )
     }
 }
