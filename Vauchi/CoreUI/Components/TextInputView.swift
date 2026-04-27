@@ -57,6 +57,14 @@ struct TextInputView: View {
         .onAppear {
             localValue = component.value
         }
+        // Track core-driven value changes (e.g. submit_custom_group resets
+        // the field to empty in the ScreenModel — Humble UI principle:
+        // never desync from core state).
+        .onChange(of: component.value) { newValue in
+            if newValue != localValue {
+                localValue = newValue
+            }
+        }
     }
 
     private func keyboardType(for inputType: InputType) -> UIKeyboardType {
