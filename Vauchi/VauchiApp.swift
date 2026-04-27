@@ -11,9 +11,7 @@ import VauchiPlatform
 @main
 struct VauchiApp: App {
     @StateObject private var viewModel = VauchiViewModel()
-    @State private var deepLinkHandler = DeepLinkHandler()
     @State private var showDeepLinkConsent = false
-    @State private var pendingDeepLinkPayload: String?
     #if DEBUG
         @State private var showBleDiagnostic = false
         @State private var bleDiagAutoTest: String?
@@ -175,33 +173,32 @@ struct VauchiApp: App {
                                 return
                             }
                         #endif
-                        // Deep link consent gate (SP-9)
-                        // NEVER auto-process — always ask the user first
-                        let result = deepLinkHandler.handleDeepLink(url: url)
-                        switch result {
-                        case let .exchangePending(payload):
-                            pendingDeepLinkPayload = payload
-                            showDeepLinkConsent = true
-                        case let .invalid(reason):
-                            #if DEBUG
-                                print("VauchiApp: Invalid deep link: \(reason)")
-                            #endif
+                        // Deep link consent gate (SP-9). The state machine + URL
+                        // parser live in core (`PlatformAppEngine.handleDeepLinkUri`);
+                        // see _private/docs/problems/2026-04-25-deeplink-consent-orchestrator.
+                        // NEVER auto-process — the alert below forces an explicit
+                        // grant or deny ScreenAction press.
+                        guard let coreVM = viewModel.coreViewModel else {
                             viewModel.showError("Invalid Link",
-                                                message: "The link could not be processed: \(reason)")
+                                                message: "Please unlock Vauchi first, then re-open the link.")
+                            return
+                        }
+                        do {
+                            try coreVM.handleDeepLinkUri(url.absoluteString)
+                            showDeepLinkConsent = true
+                        } catch {
+                            viewModel.showError("Invalid Link",
+                                                message: "The link could not be processed: \(error.localizedDescription)")
                         }
                     }
                     .alert("Exchange Request", isPresented: $showDeepLinkConsent) {
                         Button("Accept Exchange") {
-                            deepLinkHandler.grantConsent()
-                            if let payload = pendingDeepLinkPayload {
-                                // Start the exchange flow with proximity verification
-                                viewModel.startExchangeWithDeepLink(payload: payload)
-                            }
-                            pendingDeepLinkPayload = nil
+                            viewModel.coreViewModel?
+                                .handleAction(.actionPressed(actionId: "grant"))
                         }
                         Button("Decline", role: .cancel) {
-                            deepLinkHandler.denyConsent()
-                            pendingDeepLinkPayload = nil
+                            viewModel.coreViewModel?
+                                .handleAction(.actionPressed(actionId: "deny"))
                         }
                     } message: {
                         Text("Someone shared an exchange link with you. " +

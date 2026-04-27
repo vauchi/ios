@@ -156,6 +156,28 @@ class AppViewModel: ObservableObject {
         }
     }
 
+    /// Dispatch an incoming `vauchi://exchange?...` deep link URI to core.
+    ///
+    /// On success core navigates to `AppScreen::DeepLinkConsent` and
+    /// `currentScreen` updates to the consent ScreenModel — the native
+    /// alert is shown by `VauchiApp` while that screen is current.
+    /// Throws on parse failure (UniFFI `MobileError::InvalidInput`); the
+    /// caller surfaces the message via the existing error alert path.
+    func handleDeepLinkUri(_ uri: String) throws {
+        let json = try appEngine.handleDeepLinkUri(uri: uri)
+        guard let data = json.data(using: .utf8) else {
+            throw NSError(
+                domain: "AppViewModel",
+                code: 0,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid screen JSON"]
+            )
+        }
+        currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
+        validationErrors = [:]
+        loadAvailableScreens()
+        updateSelectedScreen()
+    }
+
     func navigateBack() {
         do {
             let json = try appEngine.navigateBackJson()

@@ -1192,15 +1192,6 @@ class VauchiViewModel: ObservableObject {
         AudioProximityService.shared.stop()
     }
 
-    /// Start an exchange from a deep link payload.
-    /// Called after the user grants consent in the deep link consent gate (SP-9).
-    /// TODO: Deep links use the old wb:// single-QR format. Re-implement when
-    /// the multi-stage protocol supports deep link payloads.
-    func startExchangeWithDeepLink(payload _: String) {
-        showError("Not Supported",
-                  message: "Deep link exchange is not yet supported with the new protocol.")
-    }
-
     // MARK: - Sync
 
     func sync() async {
