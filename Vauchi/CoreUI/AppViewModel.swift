@@ -333,6 +333,11 @@ class AppViewModel: ObservableObject {
             validationErrors[componentId] = message
         case .complete, .wipeComplete:
             loadScreen()
+        case .completeWith:
+            // CompleteWith is consumed by AppEngine.route_result in core,
+            // which re-emits NavigateTo to the destination screen — frontends
+            // never observe it during normal post-onboarding routing.
+            break
         case let .openUrl(url):
             if let nsUrl = URL(string: url) {
                 UIApplication.shared.open(nsUrl)

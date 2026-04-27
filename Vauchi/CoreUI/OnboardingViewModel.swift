@@ -28,6 +28,7 @@ import SwiftUI
         @Published var currentScreen: ScreenModel?
         @Published var validationErrors: [String: String] = [:]
         @Published var isComplete = false
+        @Published var postOnboardingDestination: PostOnboardingDestination?
         @Published var requestBackupImport = false
 
         private let workflow: MobileOnboardingWorkflow
@@ -105,6 +106,10 @@ import SwiftUI
                 validationErrors[componentId] = message
 
             case .complete:
+                isComplete = true
+
+            case let .completeWith(destination):
+                postOnboardingDestination = destination
                 isComplete = true
 
             case .startBackupImport:
