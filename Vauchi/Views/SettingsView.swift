@@ -220,19 +220,6 @@ struct SettingsView: View {
 
                 // Privacy section
                 Section(localizationService.t("settings.privacy")) {
-                    NavigationLink(destination: LabelsView()) {
-                        HStack {
-                            Label("Visibility Labels", systemImage: "tag")
-                            Spacer()
-                            if !viewModel.visibilityLabels.isEmpty {
-                                Text("\(viewModel.visibilityLabels.count)")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                    .accessibilityHint("Manage labels that control which fields contacts can see")
-
                     NavigationLink(destination: GroupsView()) {
                         HStack {
                             Label("Contact Groups", systemImage: "person.3")
