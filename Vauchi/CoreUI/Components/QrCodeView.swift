@@ -9,7 +9,23 @@ import CoreUIModels
 import SwiftUI
 import VauchiPlatform
 
-/// Renders a core `Component::QrCode` as a QR code display or scan placeholder.
+/// Renders a core `Component::QrCode`.
+///
+/// Display mode: encodes `data` to a QR bitmap via the rxing-backed
+/// `generateQrBitmap` UniFFI helper and shows it inline. The `data`
+/// string is the full payload core wants the peer to scan (typically
+/// rotates every ~300 ms during multipart exchange).
+///
+/// Scan mode: opens an inline AVCaptureSession preview via the existing
+/// `MultipartCameraPreview` helper. Each detected QR payload is emitted
+/// as `UserAction.textChanged(componentId: component.id, value: code)`
+/// — `core/vauchi-app/src/ui/exchange_qr.rs` interprets this as
+/// `QrActionOutcome::QrScanned { data }` for the legacy single-stage
+/// ScanQr step, and `core/vauchi-platform/src/platform_app_engine.rs`
+/// auto-routes it into the live cycle-thread session when the
+/// multi-stage screen is active. Replaces the long-standing "Tap to
+/// Scan" no-op placeholder which was unimplemented when the
+/// core-driven exchange flow first landed.
 struct QrCodeView: View {
     let component: QrCodeComponent
     let onAction: (UserAction) -> Void
@@ -22,7 +38,7 @@ struct QrCodeView: View {
                 qrDisplayView()
 
             case .scan:
-                qrScanPlaceholder()
+                qrScannerView()
             }
 
             if let label = component.label {
@@ -56,26 +72,25 @@ struct QrCodeView: View {
         }
     }
 
-    private func qrScanPlaceholder() -> some View {
-        VStack(spacing: CGFloat(tokens.spacing.md)) {
-            Image(systemName: "qrcode.viewfinder")
-                .font(.system(size: 64))
-                .foregroundColor(.cyan)
-                .accessibilityHidden(true)
-
-            Button {
-                onAction(.actionPressed(actionId: "scan"))
-            } label: {
-                Text("Tap to Scan")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, CGFloat(tokens.spacing.lg))
-                    .padding(.vertical, CGFloat(tokens.spacing.smMd))
-                    .background(Color.cyan)
-                    .cornerRadius(CGFloat(tokens.borderRadius.md))
-            }
-            .accessibilityLabel("Tap to scan QR code")
+    private func qrScannerView() -> some View {
+        // Forward every detected QR payload to core. `exchange_qr.rs`
+        // pattern-matches on TextChanged with the QR component id and
+        // routes the payload through QrScanned for the single-stage
+        // engine; the multi-stage screen relies on
+        // `PlatformAppEngine.handle_action_json`'s peer_scan auto-route
+        // to feed the cycle-thread session.
+        MultipartCameraPreview { code in
+            onAction(.textChanged(componentId: component.id, value: code))
         }
+        .aspectRatio(1.0, contentMode: .fit)
+        .frame(maxWidth: 250)
+        .clipShape(RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md)))
+        .overlay(
+            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md))
+                .stroke(Color.cyan.opacity(0.5), lineWidth: 2)
+        )
+        .accessibilityLabel(component.a11y?.label ?? "QR code scanner")
+        .accessibilityHint(component.a11y?.hint ?? "Point the camera at a Vauchi QR code to scan it")
     }
 
     /// Generates a QR code image using the Rust qrcode crate via UniFFI.
