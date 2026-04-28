@@ -141,13 +141,14 @@ final class VisualRegressionTests: XCTestCase {
         assertScreenSnapshot(of: view)
     }
 
-    func testLabelsView() {
-        let vm = makeViewModel()
-        let view = LabelsView()
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
+    // testLabelsView removed in the 2026-04-28 Pure Humble UI Pair 2
+    // retirement: native LabelsView (a SwiftUI shadow of GroupsView)
+    // and LabelDetailView were deleted; "Visibility Labels" navigation
+    // now lands on GroupsView's CoreScreenView("Groups"), which would
+    // need a real PlatformAppEngine seeded with labels for a snapshot.
+    // Behavioral coverage lives in
+    // core/vauchi-app/src/ui/group_detail.rs (engine tests) and the
+    // reachability walker.
 
     // MARK: - Detail Views
 
