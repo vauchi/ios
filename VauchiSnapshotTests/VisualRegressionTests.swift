@@ -151,38 +151,17 @@ final class VisualRegressionTests: XCTestCase {
 
     // MARK: - Detail Views
 
-    func testContactDetailView() {
-        let contact = VauchiContact(
-            id: "c1",
-            displayName: "Bob",
-            fingerprint: "",
-            isVerified: true,
-            isRecoveryTrusted: false,
-            isHidden: false,
-            isImported: false,
-            card: VauchiContactCard(displayName: "Bob", fields: [
-                VauchiContactField(id: "bf1", fieldType: .email, label: "Work", value: "bob@work.com"),
-                VauchiContactField(id: "bf2", fieldType: .phone, label: "Mobile", value: "+41 78 987 65 43"),
-            ]),
-            addedAt: UInt64(Date().timeIntervalSince1970),
-            trustLevel: .standard,
-            proposalTrusted: false,
-            reciprocity: .unknown
-        )
-        let vm = makeViewModel(contacts: [contact])
-        let view = ContactDetailView(contact: contact)
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
-    func testDeliveryStatusView() {
-        let vm = makeViewModel()
-        let view = DeliveryStatusView()
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
+    //
+    // testContactDetailView and testDeliveryStatusView removed in the
+    // 2026-04-28 Pure Humble UI retirement
+    // (_private/docs/problems/2026-04-28-pure-humble-ui-retire-native-screens/).
+    // Both screens now render via CoreScreenView against core's
+    // ContactDetailEngine / DeliveryStatusEngine. A snapshot test against
+    // CoreScreenView would need a real PlatformAppEngine seeded with the
+    // contact / delivery records — not available in the SnapshotTest
+    // runtime. Behavioral coverage lives in
+    // core/vauchi-app/tests/reachability/contact_detail.rs and
+    // core/vauchi-app/tests/reachability/delivery_status.rs.
 
     func testRecoveryView() {
         let vm = makeViewModel()

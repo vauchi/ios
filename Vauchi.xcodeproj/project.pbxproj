@@ -27,7 +27,6 @@
 		10B3D5481A8E17F07E439629 /* testContactsViewWithContactsGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 2708AF0FE3066AC85A5EAF63 /* testContactsViewWithContactsGerman.1.png */; };
 		10BCAB3BFF0E6F665B519A1F /* WaitingForUnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */; };
 		10E60235A5FD647963680956 /* AudioProximityServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */; };
-		11134171C628F66156FF29AD /* ContactDetailComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEBDEA9304696A8DAE86642 /* ContactDetailComponents.swift */; };
 		112FC393D24528EF7DC572D1 /* testEditableTextWithValidationError.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 4E1E46D84F357AADC686DF8A /* testEditableTextWithValidationError.1.png */; };
 		12582E8F80C463B7C877A8A9 /* testFieldListPerGroup.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 03E71A86E87D901D3FF80D72 /* testFieldListPerGroup.1.png */; };
 		12BC56BA1BF270125C3DADB6 /* testTextInputAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 677E67E216D48E378A773CD8 /* testTextInputAccessibility.1.txt */; };
@@ -207,9 +206,7 @@
 		C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */; };
 		C8BAE6814208A1BBB189E5C8 /* testInlineConfirmNonDestructive.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 388BCB8B838F2D5C9858C087 /* testInlineConfirmNonDestructive.1.png */; };
 		C93A0D7367B46594F457C13B /* GroupsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78FA47BD58BB7B71D2AC250D /* GroupsView.swift */; };
-		C9A763F2C3F5E581F08EFD13 /* testContactDetailView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1EE116FC8484DF9F6D73F91F /* testContactDetailView.1.png */; };
 		C9C86FD0A30B8E8FBAD1245C /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F79BD1F4A165335E472E06C /* DiagnosticLogger.swift */; };
-		CA32F697BDD3346B24319D5E /* ContactDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */; };
 		CE057880AF7A31CD46AF1FD4 /* welcome.json in Resources */ = {isa = PBXBuildFile; fileRef = 4C16296B579065E5D536DB40 /* welcome.json */; };
 		D03CDFB9D57985CBD50D9C98 /* testTextInputWithValidationError.1.png in Resources */ = {isa = PBXBuildFile; fileRef = E31A56C292E9073A8A07BAF0 /* testTextInputWithValidationError.1.png */; };
 		D12A54D8D19EA3D447AAA3C9 /* RestoreIdentitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3AEDA84B5F37E858F3F1A47 /* RestoreIdentitySheet.swift */; };
@@ -236,7 +233,6 @@
 		E4ABA23960463F55C2C3FB0D /* ContactActionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F097D48EF96B8E6440ACD9 /* ContactActionsTests.swift */; };
 		E544D67D5C73DC535A0D4F68 /* contact_edit_preview.json in Resources */ = {isa = PBXBuildFile; fileRef = C29DE27FD4421553D034E37A /* contact_edit_preview.json */; };
 		E5E3CB99966C49B90D004159 /* emergency_shred.json in Resources */ = {isa = PBXBuildFile; fileRef = 3FC1E2FF696B02B2B79363C3 /* emergency_shred.json */; };
-		E64BFCB9DA9A9A2358CC7250 /* testDeliveryStatusView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D5B1A7DCA3B64FEF00204F1 /* testDeliveryStatusView.1.png */; };
 		E6CA302BE3E3934640945466 /* testCardPreviewNoVisibleFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 39F6474DA682103308EE2BFF /* testCardPreviewNoVisibleFields.1.png */; };
 		E7357AD786DE4BDF5C38C465 /* testSecurityStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 6310B8BCD3B5DC621926CA76 /* testSecurityStep.1.png */; };
 		E77805599DCC9EDD5AFD644B /* testInlineConfirmAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = A5E222C3D79E971771915FC6 /* testInlineConfirmAccessibility.1.txt */; };
@@ -327,7 +323,6 @@
 		1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModel.swift; sourceTree = "<group>"; };
 		1DDB8A091A24E66931A46D88 /* testScreenRendererAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testScreenRendererAccessibility.1.txt; sourceTree = "<group>"; };
 		1E9D757735447E71670611EA /* EditableTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableTextView.swift; sourceTree = "<group>"; };
-		1EE116FC8484DF9F6D73F91F /* testContactDetailView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactDetailView.1.png; sourceTree = "<group>"; };
 		1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SineWaveGenerator.swift; sourceTree = "<group>"; };
 		200902ADA24D8C97BC83DA08 /* testHomeViewEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testHomeViewEmpty.1.png; sourceTree = "<group>"; };
 		21B33063ADD1C9CDC8C4186B /* AnimatedQrTimerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedQrTimerTests.swift; sourceTree = "<group>"; };
@@ -363,7 +358,6 @@
 		39F6474DA682103308EE2BFF /* testCardPreviewNoVisibleFields.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCardPreviewNoVisibleFields.1.png; sourceTree = "<group>"; };
 		3CCDAF85FAFC1F03E0E5EF5D /* testSettingsGroupDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSettingsGroupDark.1.png; sourceTree = "<group>"; };
 		3E7B642257C4005F82A40BCF /* delivery_empty.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = delivery_empty.json; sourceTree = "<group>"; };
-		3EEBDEA9304696A8DAE86642 /* ContactDetailComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailComponents.swift; sourceTree = "<group>"; };
 		3F12B12FCE38D7CBAB15A8A0 /* LabelDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelDetailView.swift; sourceTree = "<group>"; };
 		3FA79BEC85FC2E70D2E996D7 /* TextInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputView.swift; sourceTree = "<group>"; };
 		3FC1E2FF696B02B2B79363C3 /* emergency_shred.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = emergency_shred.json; sourceTree = "<group>"; };
@@ -444,7 +438,6 @@
 		8C9F616A82E64818C7D1BEB4 /* testInfoPanelSingleItem.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInfoPanelSingleItem.1.png; sourceTree = "<group>"; };
 		8CD3FC943884B00F74F1EA32 /* device_linking.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = device_linking.json; sourceTree = "<group>"; };
 		8D3CA9B99F37140B17344FDB /* testTextInputEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextInputEmpty.1.png; sourceTree = "<group>"; };
-		8D5B1A7DCA3B64FEF00204F1 /* testDeliveryStatusView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testDeliveryStatusView.1.png; sourceTree = "<group>"; };
 		8EC13750603D7C1EF84BACBC /* CoreOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreOnboardingView.swift; sourceTree = "<group>"; };
 		8F79BD1F4A165335E472E06C /* DiagnosticLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticLogger.swift; sourceTree = "<group>"; };
 		8FDE9009AE079A27B82E5CB6 /* VauchiUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -541,7 +534,6 @@
 		F0B262096D756FC7E6603C05 /* security_explanation.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = security_explanation.json; sourceTree = "<group>"; };
 		F3AEDA84B5F37E858F3F1A47 /* RestoreIdentitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestoreIdentitySheet.swift; sourceTree = "<group>"; };
 		F461B0AB8A05C9F2E430B202 /* testFieldListDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testFieldListDark.1.png; sourceTree = "<group>"; };
-		F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailView.swift; sourceTree = "<group>"; };
 		F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEdgeTests.swift; sourceTree = "<group>"; };
 		F8736078E77840EDC8E0283A /* RecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryView.swift; sourceTree = "<group>"; };
 		F94CFFC17D772290645209B3 /* testFieldListWithFieldsPerGroup.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testFieldListWithFieldsPerGroup.1.png; sourceTree = "<group>"; };
@@ -818,14 +810,12 @@
 			isa = PBXGroup;
 			children = (
 				268841458ED0C3A21E73ECA5 /* testAddFieldsStep.1.png */,
-				1EE116FC8484DF9F6D73F91F /* testContactDetailView.1.png */,
 				023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */,
 				73C57002D4EAE39D0378F9F4 /* testContactsViewWithContacts.1.png */,
 				25A0A7E324ADCC9333CC08A5 /* testContactsViewWithContactsDark.1.png */,
 				2708AF0FE3066AC85A5EAF63 /* testContactsViewWithContactsGerman.1.png */,
 				FE7FAFE456A1F513CADD0631 /* testCreateIdentityStep.1.png */,
 				BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */,
-				8D5B1A7DCA3B64FEF00204F1 /* testDeliveryStatusView.1.png */,
 				367C77DA03F258D4B1D9C6FF /* testHelpView.1.png */,
 				200902ADA24D8C97BC83DA08 /* testHomeViewEmpty.1.png */,
 				AE391D2B30E4ECCA0C1161B7 /* testHomeViewWithFields.1.png */,
@@ -869,8 +859,6 @@
 				0960DACC4E92268E1A00F28E /* ArchivedContactsView.swift */,
 				A790D4D87DA66E3C3C93253D /* BleExchangeView.swift */,
 				E454B8F698D68725F434338E /* ConsentSettingsView.swift */,
-				3EEBDEA9304696A8DAE86642 /* ContactDetailComponents.swift */,
-				F77D804C8B2599B1BAB091CD /* ContactDetailView.swift */,
 				773071C286EDA29BCB17B365 /* ContactsView.swift */,
 				30C91B081CDC3A250428A644 /* DeliveryStatusView.swift */,
 				5D188A68C0567059D98640C5 /* ExchangeModePicker.swift */,
@@ -1162,7 +1150,6 @@
 				E6CA302BE3E3934640945466 /* testCardPreviewNoVisibleFields.1.png in Resources */,
 				A387A34BD2E5E95169ADB6B7 /* testCardPreviewWithFields.1.png in Resources */,
 				7C752A3331298ADB01A6DDF9 /* testCardPreviewWithGroups.1.png in Resources */,
-				C9A763F2C3F5E581F08EFD13 /* testContactDetailView.1.png in Resources */,
 				D760BC32033DC33902E254D8 /* testContactListAccessibility.1.txt in Resources */,
 				E9866D4AE388DC57B562ADDB /* testContactListEmpty.1.png in Resources */,
 				E0642E4014C2147EBDC4FFF3 /* testContactListWithContacts.1.png in Resources */,
@@ -1176,7 +1163,6 @@
 				A2C2F1EA2AE9566A3880EA6E /* testCreateIdentityScreen.1.png in Resources */,
 				08FE2DB74EB09F3226F6371C /* testCreateIdentityStep.1.png in Resources */,
 				EE06B8DCB941892BEACE00A0 /* testCreateIdentityStepFilled.1.png in Resources */,
-				E64BFCB9DA9A9A2358CC7250 /* testDeliveryStatusView.1.png in Resources */,
 				9B37E421D497D0041517566A /* testDivider.1.png in Resources */,
 				A6823765C922C70A24D8815B /* testEditableTextDark.1.png in Resources */,
 				25F92258277228332EE69BEE /* testEditableTextDisplay.1.png in Resources */,
@@ -1367,8 +1353,6 @@
 				307654F6186C276FC27E761A /* ConfirmationDialogView.swift in Sources */,
 				08512AFB915670B874B58220 /* ConsentSettingsView.swift in Sources */,
 				02DD49946382C26E78CE06C9 /* ContactActions.swift in Sources */,
-				11134171C628F66156FF29AD /* ContactDetailComponents.swift in Sources */,
-				CA32F697BDD3346B24319D5E /* ContactDetailView.swift in Sources */,
 				975814A17842850E5538C6EF /* ContactGroupBadges.swift in Sources */,
 				AF71B5181C8D4924DCF36C1B /* ContactListView.swift in Sources */,
 				DD478B0145A11A9B9277A5BB /* ContactsView.swift in Sources */,
