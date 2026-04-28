@@ -150,6 +150,11 @@ class VauchiViewModel: ObservableObject {
             )
             repository = repo
             coreViewModel = AppViewModel(appEngine: repo.appEngine)
+            // Hand the engine to BackgroundSyncService so its
+            // BGTaskScheduler interval comes from core's
+            // PERIODIC_SYNC_INTERVAL_SECONDS rather than a frontend
+            // magic number (audit P2-C).
+            BackgroundSyncService.shared.setAppEngine(repo.appEngine)
             appState = .ready
             #if DEBUG
                 print("VauchiViewModel: repository initialized successfully")
@@ -202,28 +207,25 @@ class VauchiViewModel: ObservableObject {
             DispatchQueue.main.async {
                 if success {
                     self?.initializeRepository()
-                    // Hold on loading state during duress check
-                    // to prevent real contacts from flashing if
+                    // Hold on loading state during the constant-time
+                    // duress decision so real contacts don't flash if
                     // initializeRepository() set .ready.
                     self?.appState = .loading
-                    // isDuressEnabled() reads SQLite — dispatch
-                    // off main thread (matches Android's
-                    // withContext(Dispatchers.IO) pattern).
-                    // Constant-time delay prevents timing
-                    // side-channel (observer can't infer
-                    // isDuressEnabled from transition speed).
+                    // Core owns the post-biometric duress decision and
+                    // the constant-time floor that hides whether duress
+                    // is configured (audit
+                    // `2026-04-28-lifecycle-session-residue-umbrella`
+                    // P2-B). The call sleeps in Rust for ≥
+                    // BIOMETRIC_UNLOCK_MIN_DURATION (300 ms), so dispatch
+                    // off main to avoid blocking the UI.
+                    let engine = self?.coreViewModel?.appEngine
                     DispatchQueue.global(qos: .userInitiated).async {
-                        let start = Date()
-                        let duress = (try? self?.repository?
-                            .isDuressEnabled()) == true
-                        let elapsed = Date().timeIntervalSince(start)
-                        let pad = max(0, 0.3 - elapsed)
-                        DispatchQueue.main.asyncAfter(
-                            deadline: .now() + pad
-                        ) {
-                            if duress {
+                        let outcome = try? engine?.biometricUnlockCheck()
+                        DispatchQueue.main.async {
+                            switch outcome {
+                            case .promptForDuressPin:
                                 self?.appState = .appPasswordRequired
-                            } else {
+                            case .unlocked, .none:
                                 self?.appState = .ready
                                 self?.loadState()
                             }
@@ -260,11 +262,18 @@ class VauchiViewModel: ObservableObject {
     }
 
     private func setupNetworkMonitoring() {
-        // Subscribe to network connectivity changes
+        // Forward platform reachability into core, which decides
+        // banner rendering (via `Component::Banner` injected into
+        // every emitted ScreenModel) and auto-sync on reconnect.
+        // Frontend just plumbs the platform signal through —
+        // no local `isOnline` mirror, no banner switch, no
+        // auto-sync closure (audit
+        // `2026-04-28-lifecycle-session-residue-umbrella` P2-D).
         NetworkMonitor.shared.$isConnected
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isConnected in
                 self?.isOnline = isConnected
+                try? self?.coreViewModel?.appEngine.setNetworkOnline(online: isConnected)
 
                 // Auto-sync when connection restored (if enabled and has identity)
                 if isConnected, SettingsService.shared.autoSyncEnabled, self?.hasIdentity ?? false {
@@ -277,6 +286,7 @@ class VauchiViewModel: ObservableObject {
 
         // Initialize with current state
         isOnline = NetworkMonitor.shared.isConnected
+        try? coreViewModel?.appEngine.setNetworkOnline(online: isOnline)
     }
 
     // MARK: - State Management

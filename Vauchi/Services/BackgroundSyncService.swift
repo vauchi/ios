@@ -8,6 +8,7 @@
 
 import BackgroundTasks
 import Foundation
+import VauchiPlatform
 
 /// Service for managing background sync operations
 final class BackgroundSyncService {
@@ -20,12 +21,21 @@ final class BackgroundSyncService {
     /// Background task identifier (must match Info.plist)
     static let syncTaskIdentifier = "app.vauchi.sync"
 
-    /// Minimum interval between sync tasks (15 minutes)
-    private static let syncInterval: TimeInterval = 15 * 60
-
     // MARK: - Private Properties
 
     private var syncHandler: (() async -> Void)?
+
+    /// Engine used to query the core-owned scheduler interval.
+    /// Set by the app at registration time (audit
+    /// `2026-04-28-lifecycle-session-residue-umbrella` P2-C —
+    /// the 15-min cadence is no longer a frontend constant).
+    private var appEngine: PlatformAppEngine?
+
+    /// Fallback interval used before the engine is wired
+    /// (e.g. cold-start scheduling that runs before the
+    /// repository is constructed). Matches core's
+    /// `PERIODIC_SYNC_INTERVAL_SECONDS = 900`.
+    private static let fallbackSyncIntervalSeconds: UInt64 = 900
 
     // MARK: - Initialization
 
@@ -45,6 +55,12 @@ final class BackgroundSyncService {
         }
     }
 
+    /// Wire the engine so the scheduler interval comes from core
+    /// rather than from a frontend magic constant.
+    func setAppEngine(_ engine: PlatformAppEngine) {
+        appEngine = engine
+    }
+
     /// Set the sync handler that will be called when background sync runs
     func setSyncHandler(_ handler: @escaping () async -> Void) {
         syncHandler = handler
@@ -53,7 +69,8 @@ final class BackgroundSyncService {
     /// Schedule the next sync task
     func scheduleSyncTask() {
         let request = BGAppRefreshTaskRequest(identifier: Self.syncTaskIdentifier)
-        request.earliestBeginDate = Date(timeIntervalSinceNow: Self.syncInterval)
+        let intervalSeconds = appEngine?.periodicSyncIntervalSeconds() ?? Self.fallbackSyncIntervalSeconds
+        request.earliestBeginDate = Date(timeIntervalSinceNow: TimeInterval(intervalSeconds))
 
         do {
             try BGTaskScheduler.shared.submit(request)

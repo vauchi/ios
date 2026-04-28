@@ -80,20 +80,20 @@ struct VauchiApp: App {
             print("VauchiApp: background tasks registered")
         #endif
 
-        // Set up the sync handler
+        // Set up the sync handler — delegates the per-tick decision
+        // (gate on identity / OHTTP key, honour throttle) to core's
+        // `periodicSyncTick` so the 15-min cadence and 3-retry policy
+        // live in one place (audit
+        // `2026-04-28-lifecycle-session-residue-umbrella` P2-C). The
+        // closure constructs a fresh repository when invoked from the
+        // BGTask so it is independent of the foreground app lifecycle.
         BackgroundSyncService.shared.setSyncHandler {
-            // Get the repository from settings
             guard let repository = try? VauchiRepository(relayUrl: SettingsService.shared.relayUrl) else {
                 return
             }
-
-            // Only sync if we have an identity
-            guard repository.hasIdentity() else {
-                return
-            }
-
-            // Perform sync
-            _ = try? repository.sync()
+            // Drive the tick through the engine so policy decisions
+            // (15-min interval, retry budget) come from core.
+            _ = try? repository.appEngine.periodicSyncTick()
 
             // Poll for notifications (E)
             NotificationService.shared.pollAndDisplayNotifications(repository: repository)
