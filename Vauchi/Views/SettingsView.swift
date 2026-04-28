@@ -199,17 +199,21 @@ struct SettingsView: View {
                 }
 
                 // Sync section - Delivery Status
+                //
+                // The native "N failed" badge was removed in the
+                // 2026-04-28 Pure Humble UI retirement audit follow-up.
+                // After Pair 1 retired DeliveryStatusView to a thin
+                // CoreScreenView shell, `viewModel.failedDeliveryCount`
+                // had no caller refreshing it (the load was tied to
+                // DeliveryStatusView appear). The count is now visible
+                // inside the destination screen as the "Failed (n)"
+                // section header emitted by `DeliveryStatusEngine`.
+                // Settings itself will move to CoreScreenView in a
+                // follow-up MR; the engine's Settings ScreenModel will
+                // expose the count as part of the delivery_status link.
                 Section("Message Delivery") {
                     NavigationLink(destination: DeliveryStatusView()) {
-                        HStack {
-                            Label("Delivery Status", systemImage: "paperplane.circle")
-                            Spacer()
-                            if viewModel.failedDeliveryCount > 0 {
-                                Text("\(viewModel.failedDeliveryCount) failed")
-                                    .font(.caption)
-                                    .foregroundColor(.red)
-                            }
-                        }
+                        Label("Delivery Status", systemImage: "paperplane.circle")
                     }
                     .accessibilityHint("View the delivery status of your card updates")
                 }
