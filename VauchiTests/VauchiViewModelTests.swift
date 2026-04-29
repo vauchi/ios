@@ -12,6 +12,25 @@ import XCTest
 /// Based on: features/identity_management.feature, features/contact_card_management.feature
 @MainActor
 final class VauchiViewModelTests: XCTestCase {
+    // `VauchiViewModel()` uses the default Application Support data dir,
+    // which means every test in this class shares one directory. Pre-MR the
+    // legacy `vauchi.create_identity` silently overwrote any existing
+    // identity, so multiple `createIdentity` calls succeeded; post-MR
+    // `appEngine.create_identity` strictly errors with `AlreadyInitialized`
+    // (Vauchi::init eagerly loads identity from disk). Wiping the dir before
+    // each test restores the per-test isolation those tests expect.
+    override func setUp() {
+        super.setUp()
+        Self.wipeDefaultDataDir()
+    }
+
+    private static func wipeDefaultDataDir() {
+        let appSupport = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Vauchi")
+        try? FileManager.default.removeItem(at: appSupport)
+    }
+
     // MARK: - Initial State Tests
 
     /// Scenario: ViewModel starts in loading state
