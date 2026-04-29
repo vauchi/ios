@@ -347,4 +347,114 @@ extension PlatformAppEngine {
             command: .deleteContactFieldNote(contactId: contactId, fieldId: fieldId)
         )
     }
+
+    // MARK: - Field Visibility (C3)
+
+    func hideFieldFromContact(contactId: String, fieldLabel: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .hideFieldFromContact(contactId: contactId, fieldLabel: fieldLabel)
+        )
+    }
+
+    func showFieldToContact(contactId: String, fieldLabel: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .showFieldToContact(contactId: contactId, fieldLabel: fieldLabel)
+        )
+    }
+
+    func isFieldVisibleToContact(contactId: String, fieldLabel: String) throws -> Bool {
+        let result = try dispatchDomainCommand(
+            command: .isFieldVisibleToContact(contactId: contactId, fieldLabel: fieldLabel)
+        )
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "IsFieldVisibleToContact: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    // MARK: - Visibility Labels (C3)
+
+    func listLabels() throws -> [MobileVisibilityLabel] {
+        let result = try dispatchDomainCommand(command: .listLabels)
+        guard case let .labels(labels) = result else {
+            throw MobileError.Other(
+                detail: "ListLabels: unexpected result variant"
+            )
+        }
+        return labels
+    }
+
+    func createLabel(name: String) throws -> MobileVisibilityLabel {
+        let result = try dispatchDomainCommand(command: .createLabel(name: name))
+        guard case let .label(label) = result else {
+            throw MobileError.Other(
+                detail: "CreateLabel: unexpected result variant"
+            )
+        }
+        return label
+    }
+
+    func getLabel(labelId: String) throws -> MobileVisibilityLabelDetail {
+        let result = try dispatchDomainCommand(command: .getLabel(labelId: labelId))
+        guard case let .labelDetail(detail) = result else {
+            throw MobileError.Other(
+                detail: "GetLabel: unexpected result variant"
+            )
+        }
+        return detail
+    }
+
+    func renameLabel(labelId: String, newName: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .renameLabel(labelId: labelId, newName: newName)
+        )
+    }
+
+    func deleteLabel(labelId: String) throws {
+        _ = try dispatchDomainCommand(command: .deleteLabel(labelId: labelId))
+    }
+
+    func addContactToGroup(labelId: String, contactId: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .addContactToGroup(labelId: labelId, contactId: contactId)
+        )
+    }
+
+    func removeContactFromGroup(labelId: String, contactId: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .removeContactFromGroup(labelId: labelId, contactId: contactId)
+        )
+    }
+
+    func getGroupsForContact(contactId: String) throws -> [MobileVisibilityLabel] {
+        let result = try dispatchDomainCommand(
+            command: .getGroupsForContact(contactId: contactId)
+        )
+        guard case let .labels(labels) = result else {
+            throw MobileError.Other(
+                detail: "GetGroupsForContact: unexpected result variant"
+            )
+        }
+        return labels
+    }
+
+    func setGroupFieldVisibility(labelId: String, fieldLabel: String, isVisible: Bool) throws {
+        _ = try dispatchDomainCommand(
+            command: .setGroupFieldVisibility(
+                labelId: labelId, fieldLabel: fieldLabel, isVisible: isVisible
+            )
+        )
+    }
+
+    func getSuggestedLabels() throws -> [String] {
+        let result = try dispatchDomainCommand(command: .getSuggestedLabels)
+        guard case let .strings(values) = result else {
+            throw MobileError.Other(
+                detail: "GetSuggestedLabels: unexpected result variant"
+            )
+        }
+        return values
+    }
 }

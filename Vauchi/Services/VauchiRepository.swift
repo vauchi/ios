@@ -1153,7 +1153,7 @@ class VauchiRepository {
     /// Hide field from contact
     func hideFieldFromContact(contactId: String, fieldLabel: String) throws {
         do {
-            try vauchi.hideFieldFromContact(contactId: contactId, fieldLabel: fieldLabel)
+            try appEngine.hideFieldFromContact(contactId: contactId, fieldLabel: fieldLabel)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1162,7 +1162,7 @@ class VauchiRepository {
     /// Show field to contact
     func showFieldToContact(contactId: String, fieldLabel: String) throws {
         do {
-            try vauchi.showFieldToContact(contactId: contactId, fieldLabel: fieldLabel)
+            try appEngine.showFieldToContact(contactId: contactId, fieldLabel: fieldLabel)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1171,7 +1171,7 @@ class VauchiRepository {
     /// Check if field is visible to contact
     func isFieldVisibleToContact(contactId: String, fieldLabel: String) throws -> Bool {
         do {
-            return try vauchi.isFieldVisibleToContact(contactId: contactId, fieldLabel: fieldLabel)
+            return try appEngine.isFieldVisibleToContact(contactId: contactId, fieldLabel: fieldLabel)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1184,7 +1184,7 @@ class VauchiRepository {
     /// List all visibility labels
     func listLabels() throws -> [VauchiVisibilityLabel] {
         do {
-            return try vauchi.listLabels().map { VauchiVisibilityLabel(from: $0) }
+            return try appEngine.listLabels().map { VauchiVisibilityLabel(from: $0) }
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1193,7 +1193,7 @@ class VauchiRepository {
     /// Create a new visibility label
     func createLabel(name: String) throws -> VauchiVisibilityLabel {
         do {
-            let label = try vauchi.createLabel(name: name)
+            let label = try appEngine.createLabel(name: name)
             return VauchiVisibilityLabel(from: label)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
@@ -1203,7 +1203,7 @@ class VauchiRepository {
     /// Get label details by ID
     func getLabel(id: String) throws -> VauchiVisibilityLabelDetail {
         do {
-            let detail = try vauchi.getLabel(labelId: id)
+            let detail = try appEngine.getLabel(labelId: id)
             return VauchiVisibilityLabelDetail(from: detail)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
@@ -1213,7 +1213,7 @@ class VauchiRepository {
     /// Rename a visibility label
     func renameLabel(id: String, newName: String) throws {
         do {
-            try vauchi.renameLabel(labelId: id, newName: newName)
+            try appEngine.renameLabel(labelId: id, newName: newName)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1222,7 +1222,7 @@ class VauchiRepository {
     /// Delete a visibility label
     func deleteLabel(id: String) throws {
         do {
-            try vauchi.deleteLabel(labelId: id)
+            try appEngine.deleteLabel(labelId: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1231,7 +1231,7 @@ class VauchiRepository {
     /// Add contact to a label
     func addContactToLabel(labelId: String, contactId: String) throws {
         do {
-            try vauchi.addContactToGroup(labelId: labelId, contactId: contactId)
+            try appEngine.addContactToGroup(labelId: labelId, contactId: contactId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1240,7 +1240,7 @@ class VauchiRepository {
     /// Remove contact from a label
     func removeContactFromLabel(labelId: String, contactId: String) throws {
         do {
-            try vauchi.removeContactFromGroup(labelId: labelId, contactId: contactId)
+            try appEngine.removeContactFromGroup(labelId: labelId, contactId: contactId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1249,7 +1249,7 @@ class VauchiRepository {
     /// Get all labels for a contact
     func getLabelsForContact(contactId: String) throws -> [VauchiVisibilityLabel] {
         do {
-            return try vauchi.getGroupsForContact(contactId: contactId).map { VauchiVisibilityLabel(from: $0) }
+            return try appEngine.getGroupsForContact(contactId: contactId).map { VauchiVisibilityLabel(from: $0) }
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1258,15 +1258,20 @@ class VauchiRepository {
     /// Set field visibility for a label
     func setLabelFieldVisibility(labelId: String, fieldLabel: String, isVisible: Bool) throws {
         do {
-            try vauchi.setGroupFieldVisibility(labelId: labelId, fieldLabel: fieldLabel, isVisible: isVisible)
+            try appEngine.setGroupFieldVisibility(labelId: labelId, fieldLabel: fieldLabel, isVisible: isVisible)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
     }
 
-    /// Get suggested label names
+    /// Get suggested label names.
+    ///
+    /// Non-throwing wrapper that returns `[]` on failure — `getSuggestedLabels`
+    /// is a non-essential UI hint, so dispatch errors silently degrade rather
+    /// than propagate. The legacy `vauchi.getSuggestedLabels()` was likewise
+    /// non-throwing on the FFI surface; we preserve that shape.
     func getSuggestedLabels() -> [String] {
-        vauchi.getSuggestedLabels()
+        (try? appEngine.getSuggestedLabels()) ?? []
     }
 
     // MARK: - Exchange Operations
