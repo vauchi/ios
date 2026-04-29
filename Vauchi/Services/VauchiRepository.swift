@@ -669,7 +669,7 @@ class VauchiRepository {
     /// List all contacts
     func listContacts() throws -> [VauchiContact] {
         do {
-            return try vauchi.listContacts().map(convertContact)
+            return try appEngine.listContacts().map(convertContact)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -678,7 +678,7 @@ class VauchiRepository {
     /// List contacts with pagination
     func listContactsPaginated(offset: UInt32, limit: UInt32) throws -> [VauchiContact] {
         do {
-            return try vauchi.listContactsPaginated(offset: offset, limit: limit).map(convertContact)
+            return try appEngine.listContactsPaginated(offset: offset, limit: limit).map(convertContact)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -687,7 +687,7 @@ class VauchiRepository {
     /// Get contact by ID
     func getContact(id: String) throws -> VauchiContact? {
         do {
-            return try vauchi.getContact(id: id).map(convertContact)
+            return try appEngine.getContact(id: id).map(convertContact)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -696,7 +696,7 @@ class VauchiRepository {
     /// Search contacts
     func searchContacts(query: String) throws -> [VauchiContact] {
         do {
-            return try vauchi.searchContacts(query: query).map(convertContact)
+            return try appEngine.searchContacts(query: query).map(convertContact)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -705,7 +705,7 @@ class VauchiRepository {
     /// Get contact count
     func contactCount() throws -> UInt32 {
         do {
-            return try vauchi.contactCount()
+            return try appEngine.contactCount()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -714,7 +714,7 @@ class VauchiRepository {
     /// Remove contact
     func removeContact(id: String) throws -> Bool {
         do {
-            return try vauchi.removeContact(id: id)
+            return try appEngine.removeContact(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -725,7 +725,7 @@ class VauchiRepository {
     /// Soft-delete an imported contact (reversible).
     func softDeleteImportedContact(id: String) throws {
         do {
-            try vauchi.softDeleteImportedContact(id: id)
+            try appEngine.softDeleteImportedContact(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -734,7 +734,7 @@ class VauchiRepository {
     /// Undo a soft-delete.
     func undoDeleteImportedContact(id: String) throws {
         do {
-            try vauchi.undoDeleteImportedContact(id: id)
+            try appEngine.undoDeleteImportedContact(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -743,7 +743,7 @@ class VauchiRepository {
     /// Permanently delete an imported contact.
     func hardDeleteImportedContact(id: String) throws {
         do {
-            try vauchi.hardDeleteImportedContact(id: id)
+            try appEngine.hardDeleteImportedContact(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -752,7 +752,7 @@ class VauchiRepository {
     /// Archive a contact (remove from main list, keep data).
     func archiveContact(id: String) throws {
         do {
-            try vauchi.archiveContact(id: id)
+            try appEngine.archiveContact(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -761,7 +761,7 @@ class VauchiRepository {
     /// Unarchive a contact back to the main list.
     func unarchiveContact(id: String) throws {
         do {
-            try vauchi.unarchiveContact(id: id)
+            try appEngine.unarchiveContact(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -783,7 +783,7 @@ class VauchiRepository {
     /// List all archived contacts.
     func listArchivedContacts() throws -> [VauchiContact] {
         do {
-            return try vauchi.listArchivedContacts().map(convertContact)
+            return try appEngine.listArchivedContacts().map(convertContact)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -843,7 +843,7 @@ class VauchiRepository {
     /// Hide a contact
     func hideContact(id: String) throws {
         do {
-            try vauchi.hideContact(contactId: id)
+            try appEngine.hideContact(contactId: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -852,7 +852,7 @@ class VauchiRepository {
     /// Unhide a contact
     func unhideContact(id: String) throws {
         do {
-            try vauchi.unhideContact(contactId: id)
+            try appEngine.unhideContact(contactId: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1034,7 +1034,7 @@ class VauchiRepository {
 
     func setContactNote(contactId: String, note: String) throws {
         do {
-            try vauchi.setContactNote(contactId: contactId, note: note)
+            try appEngine.setContactNote(contactId: contactId, note: note)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1042,7 +1042,7 @@ class VauchiRepository {
 
     func getContactNote(contactId: String) throws -> String? {
         do {
-            return try vauchi.getContactNote(contactId: contactId)
+            return try appEngine.getContactNote(contactId: contactId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1050,7 +1050,7 @@ class VauchiRepository {
 
     func deleteContactNote(contactId: String) throws {
         do {
-            try vauchi.deleteContactNote(contactId: contactId)
+            try appEngine.deleteContactNote(contactId: contactId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1058,7 +1058,7 @@ class VauchiRepository {
 
     func setContactFieldNote(contactId: String, fieldId: String, note: String) throws {
         do {
-            try vauchi.setContactFieldNote(contactId: contactId, fieldId: fieldId, note: note)
+            try appEngine.setContactFieldNote(contactId: contactId, fieldId: fieldId, note: note)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1066,7 +1066,7 @@ class VauchiRepository {
 
     func getContactFieldNotes(contactId: String) throws -> [MobileFieldNote] {
         do {
-            return try vauchi.getContactFieldNotes(contactId: contactId)
+            return try appEngine.getContactFieldNotes(contactId: contactId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1074,7 +1074,7 @@ class VauchiRepository {
 
     func deleteContactFieldNote(contactId: String, fieldId: String) throws {
         do {
-            try vauchi.deleteContactFieldNote(contactId: contactId, fieldId: fieldId)
+            try appEngine.deleteContactFieldNote(contactId: contactId, fieldId: fieldId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1082,7 +1082,7 @@ class VauchiRepository {
 
     func setProposalTrusted(contactId: String, trusted: Bool) throws {
         do {
-            try vauchi.setProposalTrusted(contactId: contactId, trusted: trusted)
+            try appEngine.setProposalTrusted(contactId: contactId, trusted: trusted)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1133,7 +1133,7 @@ class VauchiRepository {
     /// Get own identity fingerprint for verification display.
     func getOwnFingerprint() throws -> String {
         do {
-            return try vauchi.getOwnFingerprint()
+            return try appEngine.getOwnFingerprint()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1142,7 +1142,7 @@ class VauchiRepository {
     /// Verify contact fingerprint
     func verifyContact(id: String) throws {
         do {
-            try vauchi.verifyContact(id: id)
+            try appEngine.verifyContact(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }

@@ -179,4 +179,172 @@ extension PlatformAppEngine {
         }
         return value
     }
+
+    // MARK: - Contact CRUD (C2)
+
+    func listContacts() throws -> [MobileContact] {
+        let result = try dispatchDomainCommand(command: .listContacts)
+        guard case let .contacts(contacts) = result else {
+            throw MobileError.Other(
+                detail: "ListContacts: unexpected result variant"
+            )
+        }
+        return contacts
+    }
+
+    func listContactsPaginated(offset: UInt32, limit: UInt32) throws -> [MobileContact] {
+        let result = try dispatchDomainCommand(
+            command: .listContactsPaginated(offset: offset, limit: limit)
+        )
+        guard case let .contacts(contacts) = result else {
+            throw MobileError.Other(
+                detail: "ListContactsPaginated: unexpected result variant"
+            )
+        }
+        return contacts
+    }
+
+    func getContact(id: String) throws -> MobileContact? {
+        let result = try dispatchDomainCommand(command: .getContact(id: id))
+        guard case let .contactOpt(contact) = result else {
+            throw MobileError.Other(
+                detail: "GetContact: unexpected result variant"
+            )
+        }
+        return contact
+    }
+
+    func searchContacts(query: String) throws -> [MobileContact] {
+        let result = try dispatchDomainCommand(command: .searchContacts(query: query))
+        guard case let .contacts(contacts) = result else {
+            throw MobileError.Other(
+                detail: "SearchContacts: unexpected result variant"
+            )
+        }
+        return contacts
+    }
+
+    func contactCount() throws -> UInt32 {
+        let result = try dispatchDomainCommand(command: .contactCount)
+        guard case let .count(value) = result else {
+            throw MobileError.Other(
+                detail: "ContactCount: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func removeContact(id: String) throws -> Bool {
+        let result = try dispatchDomainCommand(command: .removeContact(id: id))
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "RemoveContact: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func softDeleteImportedContact(id: String) throws {
+        _ = try dispatchDomainCommand(command: .softDeleteImportedContact(id: id))
+    }
+
+    func undoDeleteImportedContact(id: String) throws {
+        _ = try dispatchDomainCommand(command: .undoDeleteImportedContact(id: id))
+    }
+
+    func hardDeleteImportedContact(id: String) throws {
+        _ = try dispatchDomainCommand(command: .hardDeleteImportedContact(id: id))
+    }
+
+    func archiveContact(id: String) throws {
+        _ = try dispatchDomainCommand(command: .archiveContact(id: id))
+    }
+
+    func unarchiveContact(id: String) throws {
+        _ = try dispatchDomainCommand(command: .unarchiveContact(id: id))
+    }
+
+    func listArchivedContacts() throws -> [MobileContact] {
+        let result = try dispatchDomainCommand(command: .listArchivedContacts)
+        guard case let .contacts(contacts) = result else {
+            throw MobileError.Other(
+                detail: "ListArchivedContacts: unexpected result variant"
+            )
+        }
+        return contacts
+    }
+
+    func hideContact(contactId: String) throws {
+        _ = try dispatchDomainCommand(command: .hideContact(contactId: contactId))
+    }
+
+    func unhideContact(contactId: String) throws {
+        _ = try dispatchDomainCommand(command: .unhideContact(contactId: contactId))
+    }
+
+    // MARK: - Contact Verification (C2)
+
+    func verifyContact(id: String) throws {
+        _ = try dispatchDomainCommand(command: .verifyContact(id: id))
+    }
+
+    func setProposalTrusted(contactId: String, trusted: Bool) throws {
+        _ = try dispatchDomainCommand(
+            command: .setProposalTrusted(contactId: contactId, trusted: trusted)
+        )
+    }
+
+    func getOwnFingerprint() throws -> String {
+        let result = try dispatchDomainCommand(command: .getOwnFingerprint)
+        guard case let .text(value) = result else {
+            throw MobileError.Other(
+                detail: "GetOwnFingerprint: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    // MARK: - Contact Notes (C2)
+
+    func setContactNote(contactId: String, note: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .setContactNote(contactId: contactId, note: note)
+        )
+    }
+
+    func getContactNote(contactId: String) throws -> String? {
+        let result = try dispatchDomainCommand(command: .getContactNote(contactId: contactId))
+        guard case let .stringOpt(value) = result else {
+            throw MobileError.Other(
+                detail: "GetContactNote: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func deleteContactNote(contactId: String) throws {
+        _ = try dispatchDomainCommand(command: .deleteContactNote(contactId: contactId))
+    }
+
+    func setContactFieldNote(contactId: String, fieldId: String, note: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .setContactFieldNote(contactId: contactId, fieldId: fieldId, note: note)
+        )
+    }
+
+    func getContactFieldNotes(contactId: String) throws -> [MobileFieldNote] {
+        let result = try dispatchDomainCommand(command: .getContactFieldNotes(contactId: contactId))
+        guard case let .fieldNotes(notes) = result else {
+            throw MobileError.Other(
+                detail: "GetContactFieldNotes: unexpected result variant"
+            )
+        }
+        return notes
+    }
+
+    func deleteContactFieldNote(contactId: String, fieldId: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .deleteContactFieldNote(contactId: contactId, fieldId: fieldId)
+        )
+    }
 }
