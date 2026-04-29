@@ -457,4 +457,237 @@ extension PlatformAppEngine {
         }
         return values
     }
+
+    // MARK: - Aha Moments (C8 partial)
+
+    func hasSeenAhaMoment(momentType: MobileAhaMomentType) throws -> Bool {
+        let result = try dispatchDomainCommand(
+            command: .hasSeenAhaMoment(momentType: momentType)
+        )
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "HasSeenAhaMoment: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func tryTriggerAhaMoment(momentType: MobileAhaMomentType) throws -> MobileAhaMoment? {
+        let result = try dispatchDomainCommand(
+            command: .tryTriggerAhaMoment(momentType: momentType)
+        )
+        guard case let .ahaMomentOpt(moment) = result else {
+            throw MobileError.Other(
+                detail: "TryTriggerAhaMoment: unexpected result variant"
+            )
+        }
+        return moment
+    }
+
+    func tryTriggerAhaMomentWithContext(
+        momentType: MobileAhaMomentType,
+        context: String
+    ) throws -> MobileAhaMoment? {
+        let result = try dispatchDomainCommand(
+            command: .tryTriggerAhaMomentWithContext(momentType: momentType, context: context)
+        )
+        guard case let .ahaMomentOpt(moment) = result else {
+            throw MobileError.Other(
+                detail: "TryTriggerAhaMomentWithContext: unexpected result variant"
+            )
+        }
+        return moment
+    }
+
+    func ahaMomentsSeenCount() throws -> UInt32 {
+        let result = try dispatchDomainCommand(command: .ahaMomentsSeenCount)
+        guard case let .count(value) = result else {
+            throw MobileError.Other(
+                detail: "AhaMomentsSeenCount: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func ahaMomentsTotalCount() throws -> UInt32 {
+        let result = try dispatchDomainCommand(command: .ahaMomentsTotalCount)
+        guard case let .count(value) = result else {
+            throw MobileError.Other(
+                detail: "AhaMomentsTotalCount: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func resetAhaMoments() throws {
+        _ = try dispatchDomainCommand(command: .resetAhaMoments)
+    }
+
+    // MARK: - Demo Contact (C8 partial)
+
+    func initDemoContactIfNeeded() throws -> MobileDemoContact? {
+        let result = try dispatchDomainCommand(command: .initDemoContactIfNeeded)
+        guard case let .demoContactOpt(contact) = result else {
+            throw MobileError.Other(
+                detail: "InitDemoContactIfNeeded: unexpected result variant"
+            )
+        }
+        return contact
+    }
+
+    func getDemoContact() throws -> MobileDemoContact? {
+        let result = try dispatchDomainCommand(command: .getDemoContact)
+        guard case let .demoContactOpt(contact) = result else {
+            throw MobileError.Other(
+                detail: "GetDemoContact: unexpected result variant"
+            )
+        }
+        return contact
+    }
+
+    func getDemoContactState() throws -> MobileDemoContactState {
+        let result = try dispatchDomainCommand(command: .getDemoContactState)
+        guard case let .demoContactState(state) = result else {
+            throw MobileError.Other(
+                detail: "GetDemoContactState: unexpected result variant"
+            )
+        }
+        return state
+    }
+
+    func isDemoUpdateAvailable() throws -> Bool {
+        let result = try dispatchDomainCommand(command: .isDemoUpdateAvailable)
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "IsDemoUpdateAvailable: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func triggerDemoUpdate() throws -> MobileDemoContact? {
+        let result = try dispatchDomainCommand(command: .triggerDemoUpdate)
+        guard case let .demoContactOpt(contact) = result else {
+            throw MobileError.Other(
+                detail: "TriggerDemoUpdate: unexpected result variant"
+            )
+        }
+        return contact
+    }
+
+    func dismissDemoContact() throws {
+        _ = try dispatchDomainCommand(command: .dismissDemoContact)
+    }
+
+    func autoRemoveDemoContact() throws -> Bool {
+        let result = try dispatchDomainCommand(command: .autoRemoveDemoContact)
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "AutoRemoveDemoContact: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func restoreDemoContact() throws -> MobileDemoContact? {
+        let result = try dispatchDomainCommand(command: .restoreDemoContact)
+        guard case let .demoContactOpt(contact) = result else {
+            throw MobileError.Other(
+                detail: "RestoreDemoContact: unexpected result variant"
+            )
+        }
+        return contact
+    }
+
+    // MARK: - Social Networks (C8 partial)
+
+    func listSocialNetworks() throws -> [MobileSocialNetwork] {
+        let result = try dispatchDomainCommand(command: .listSocialNetworks)
+        guard case let .socialNetworks(networks) = result else {
+            throw MobileError.Other(
+                detail: "ListSocialNetworks: unexpected result variant"
+            )
+        }
+        return networks
+    }
+
+    func searchSocialNetworks(query: String) throws -> [MobileSocialNetwork] {
+        let result = try dispatchDomainCommand(command: .searchSocialNetworks(query: query))
+        guard case let .socialNetworks(networks) = result else {
+            throw MobileError.Other(
+                detail: "SearchSocialNetworks: unexpected result variant"
+            )
+        }
+        return networks
+    }
+
+    func getProfileUrl(networkId: String, username: String) throws -> String? {
+        let result = try dispatchDomainCommand(
+            command: .getProfileUrl(networkId: networkId, username: username)
+        )
+        guard case let .stringOpt(value) = result else {
+            throw MobileError.Other(
+                detail: "GetProfileUrl: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func reloadSocialNetworks() throws -> [MobileSocialNetwork] {
+        let result = try dispatchDomainCommand(command: .reloadSocialNetworks)
+        guard case let .socialNetworks(networks) = result else {
+            throw MobileError.Other(
+                detail: "ReloadSocialNetworks: unexpected result variant"
+            )
+        }
+        return networks
+    }
+
+    // MARK: - Content Updates (C8 partial)
+
+    func isContentUpdatesSupported() throws -> Bool {
+        let result = try dispatchDomainCommand(command: .isContentUpdatesSupported)
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "IsContentUpdatesSupported: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func checkContentUpdates() throws -> MobileUpdateStatus {
+        let result = try dispatchDomainCommand(command: .checkContentUpdates)
+        guard case let .updateStatus(status) = result else {
+            throw MobileError.Other(
+                detail: "CheckContentUpdates: unexpected result variant"
+            )
+        }
+        return status
+    }
+
+    func applyContentUpdates() throws -> MobileApplyResult {
+        let dispatched = try dispatchDomainCommand(command: .applyContentUpdates)
+        guard case let .applyResult(result) = dispatched else {
+            throw MobileError.Other(
+                detail: "ApplyContentUpdates: unexpected result variant"
+            )
+        }
+        return result
+    }
+
+    // MARK: - Certificate Pinning (C8 partial)
+
+    func isCertificatePinningEnabled() throws -> Bool {
+        let result = try dispatchDomainCommand(command: .isCertificatePinningEnabled)
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "IsCertificatePinningEnabled: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func setPinnedCertificate(certPem: String) throws {
+        _ = try dispatchDomainCommand(command: .setPinnedCertificate(certPem: certPem))
+    }
 }

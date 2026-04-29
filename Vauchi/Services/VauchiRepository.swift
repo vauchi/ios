@@ -1442,9 +1442,15 @@ class VauchiRepository {
 
     // MARK: - Social Networks
 
-    /// List available social networks
+    /// List available social networks.
+    ///
+    /// Non-throwing wrapper that returns `[]` on dispatch failure — the
+    /// callers treat social-networks data as a UI hint, so silent
+    /// degradation matches the legacy `vauchi.listSocialNetworks()`
+    /// shape. Same convention applies to the other Social/Content/
+    /// Aha/Cert wrappers below where the legacy FFI was non-throwing.
     func listSocialNetworks() -> [VauchiSocialNetwork] {
-        vauchi.listSocialNetworks().map { sn in
+        ((try? appEngine.listSocialNetworks()) ?? []).map { sn in
             VauchiSocialNetwork(
                 id: sn.id,
                 displayName: sn.displayName,
@@ -1455,7 +1461,7 @@ class VauchiRepository {
 
     /// Search social networks
     func searchSocialNetworks(query: String) -> [VauchiSocialNetwork] {
-        vauchi.searchSocialNetworks(query: query).map { sn in
+        ((try? appEngine.searchSocialNetworks(query: query)) ?? []).map { sn in
             VauchiSocialNetwork(
                 id: sn.id,
                 displayName: sn.displayName,
@@ -1466,7 +1472,7 @@ class VauchiRepository {
 
     /// Get profile URL for social network
     func getProfileUrl(networkId: String, username: String) -> String? {
-        vauchi.getProfileUrl(networkId: networkId, username: username)
+        (try? appEngine.getProfileUrl(networkId: networkId, username: username)) ?? nil
     }
 
     // MARK: - Content Updates
@@ -1475,22 +1481,23 @@ class VauchiRepository {
 
     /// Check if content updates feature is supported
     func isContentUpdatesSupported() -> Bool {
-        vauchi.isContentUpdatesSupported()
+        (try? appEngine.isContentUpdatesSupported()) ?? false
     }
 
     /// Check for available content updates
     func checkContentUpdates() -> MobileUpdateStatus {
-        vauchi.checkContentUpdates()
+        (try? appEngine.checkContentUpdates()) ?? .upToDate
     }
 
     /// Apply available content updates
     func applyContentUpdates() -> MobileApplyResult {
-        vauchi.applyContentUpdates()
+        (try? appEngine.applyContentUpdates())
+            ?? MobileApplyResult.error(error: "Dispatch failed")
     }
 
     /// Reload social networks after content updates
     func reloadSocialNetworks() -> [VauchiSocialNetwork] {
-        vauchi.reloadSocialNetworks().map { sn in
+        ((try? appEngine.reloadSocialNetworks()) ?? []).map { sn in
             VauchiSocialNetwork(
                 id: sn.id,
                 displayName: sn.displayName,
@@ -1503,45 +1510,45 @@ class VauchiRepository {
 
     /// Check if user has seen a specific aha moment
     func hasSeenAhaMoment(_ momentType: MobileAhaMomentType) -> Bool {
-        vauchi.hasSeenAhaMoment(momentType: momentType)
+        (try? appEngine.hasSeenAhaMoment(momentType: momentType)) ?? false
     }
 
     /// Try to trigger an aha moment (returns nil if already seen)
     func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) throws -> MobileAhaMoment? {
-        try vauchi.tryTriggerAhaMoment(momentType: momentType)
+        try appEngine.tryTriggerAhaMoment(momentType: momentType)
     }
 
     /// Try to trigger an aha moment with context (returns nil if already seen)
     func tryTriggerAhaMomentWithContext(_ momentType: MobileAhaMomentType, context: String) throws -> MobileAhaMoment? {
-        try vauchi.tryTriggerAhaMomentWithContext(momentType: momentType, context: context)
+        try appEngine.tryTriggerAhaMomentWithContext(momentType: momentType, context: context)
     }
 
     /// Get count of seen aha moments
     func ahaMomentsSeenCount() -> UInt32 {
-        vauchi.ahaMomentsSeenCount()
+        (try? appEngine.ahaMomentsSeenCount()) ?? 0
     }
 
     /// Get total count of aha moments
     func ahaMomentsTotalCount() -> UInt32 {
-        vauchi.ahaMomentsTotalCount()
+        (try? appEngine.ahaMomentsTotalCount()) ?? 0
     }
 
     /// Reset all aha moments (for development/testing)
     func resetAhaMoments() throws {
-        try vauchi.resetAhaMoments()
+        try appEngine.resetAhaMoments()
     }
 
     // MARK: - Certificate Pinning
 
     /// Check if certificate pinning is enabled
     func isCertificatePinningEnabled() -> Bool {
-        vauchi.isCertificatePinningEnabled()
+        (try? appEngine.isCertificatePinningEnabled()) ?? false
     }
 
     /// Set the pinned certificate for relay TLS connections
     /// - Parameter certPem: Certificate in PEM format
     func setPinnedCertificate(_ certPem: String) {
-        vauchi.setPinnedCertificate(certPem: certPem)
+        try? appEngine.setPinnedCertificate(certPem: certPem)
     }
 
     // MARK: - Device Linking Operations
@@ -1993,7 +2000,7 @@ class VauchiRepository {
     /// - Returns: The demo contact if created, nil if user has contacts or demo was dismissed
     func initDemoContactIfNeeded() throws -> VauchiDemoContact? {
         do {
-            guard let mobile = try vauchi.initDemoContactIfNeeded() else {
+            guard let mobile = try appEngine.initDemoContactIfNeeded() else {
                 return nil
             }
             return VauchiDemoContact(from: mobile)
@@ -2007,7 +2014,7 @@ class VauchiRepository {
     /// - Returns: The demo contact if active, nil otherwise
     func getDemoContact() throws -> VauchiDemoContact? {
         do {
-            guard let mobile = try vauchi.getDemoContact() else {
+            guard let mobile = try appEngine.getDemoContact() else {
                 return nil
             }
             return VauchiDemoContact(from: mobile)
@@ -2018,9 +2025,19 @@ class VauchiRepository {
 
     /// Get the demo contact state.
     ///
+    /// Non-throwing wrapper — falls back to an inactive default on
+    /// dispatch failure to match the legacy non-throwing
+    /// `vauchi.getDemoContactState()` shape.
+    ///
     /// - Returns: Current state of the demo contact
     func getDemoContactState() -> VauchiDemoContactState {
-        let mobile = vauchi.getDemoContactState()
+        let fallback = MobileDemoContactState(
+            isActive: false,
+            wasDismissed: false,
+            autoRemoved: false,
+            updateCount: 0
+        )
+        let mobile = (try? appEngine.getDemoContactState()) ?? fallback
         return VauchiDemoContactState(from: mobile)
     }
 
@@ -2028,7 +2045,7 @@ class VauchiRepository {
     ///
     /// - Returns: True if an update is due (based on 2-hour interval)
     func isDemoUpdateAvailable() -> Bool {
-        vauchi.isDemoUpdateAvailable()
+        (try? appEngine.isDemoUpdateAvailable()) ?? false
     }
 
     /// Trigger a demo update and get the new content.
@@ -2036,7 +2053,7 @@ class VauchiRepository {
     /// - Returns: Updated demo contact with new tip, nil if demo not active
     func triggerDemoUpdate() throws -> VauchiDemoContact? {
         do {
-            guard let mobile = try vauchi.triggerDemoUpdate() else {
+            guard let mobile = try appEngine.triggerDemoUpdate() else {
                 return nil
             }
             return VauchiDemoContact(from: mobile)
@@ -2048,7 +2065,7 @@ class VauchiRepository {
     /// Dismiss the demo contact manually.
     func dismissDemoContact() throws {
         do {
-            try vauchi.dismissDemoContact()
+            try appEngine.dismissDemoContact()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -2060,7 +2077,7 @@ class VauchiRepository {
     /// - Returns: True if demo was removed, false if it wasn't active
     func autoRemoveDemoContact() throws -> Bool {
         do {
-            return try vauchi.autoRemoveDemoContact()
+            return try appEngine.autoRemoveDemoContact()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -2071,7 +2088,7 @@ class VauchiRepository {
     /// - Returns: The restored demo contact
     func restoreDemoContact() throws -> VauchiDemoContact? {
         do {
-            guard let mobile = try vauchi.restoreDemoContact() else {
+            guard let mobile = try appEngine.restoreDemoContact() else {
                 return nil
             }
             return VauchiDemoContact(from: mobile)
