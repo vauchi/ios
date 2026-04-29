@@ -12,11 +12,31 @@ import XCTest
 /// Based on: features/identity_management.feature, features/contact_card_management.feature
 @MainActor
 final class VauchiViewModelTests: XCTestCase {
+    var tempDir: URL!
+
+    override func setUpWithError() throws {
+        tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+    }
+
+    override func tearDownWithError() throws {
+        try? FileManager.default.removeItem(at: tempDir)
+    }
+
+    /// Build a `VauchiViewModel` rooted at the per-test `tempDir` so each
+    /// test gets its own clean storage — avoids the strict
+    /// `appEngine.create_identity` `AlreadyInitialized` error the shared
+    /// default Application Support dir caused before this refactor.
+    private func makeViewModel() -> VauchiViewModel {
+        VauchiViewModel(dataDir: tempDir.path, relayUrl: nil)
+    }
+
     // MARK: - Initial State Tests
 
     /// Scenario: ViewModel starts in loading state
     func testInitialStateIsLoading() {
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
 
         // Before loadState, should be in loading state
         XCTAssertTrue(viewModel.isLoading)
@@ -33,8 +53,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Create identity updates state
     func testCreateIdentityUpdatesState() async throws {
-        try Self.skipPendingTestIsolation()
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
 
         try await viewModel.createIdentity(name: "Alice")
 
@@ -45,8 +64,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Create identity initializes empty card
     func testCreateIdentityInitializesCard() async throws {
-        try Self.skipPendingTestIsolation()
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
 
         try await viewModel.createIdentity(name: "Alice")
 
@@ -60,7 +78,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Add field to card
     func testAddFieldToCard() async throws {
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
         try await viewModel.createIdentity(name: "Alice")
 
         try await viewModel.addField(type: "email", label: "Work", value: "alice@company.com")
@@ -72,8 +90,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Add multiple fields to card
     func testAddMultipleFields() async throws {
-        try Self.skipPendingTestIsolation()
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
         try await viewModel.createIdentity(name: "Alice")
 
         try await viewModel.addField(type: "email", label: "Work", value: "alice@work.com")
@@ -85,8 +102,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Remove field from card
     func testRemoveFieldFromCard() async throws {
-        try Self.skipPendingTestIsolation()
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
         try await viewModel.createIdentity(name: "Alice")
         try await viewModel.addField(type: "email", label: "Work", value: "alice@work.com")
 
@@ -104,8 +120,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Initial contacts list is empty
     func testInitialContactsListEmpty() async throws {
-        try Self.skipPendingTestIsolation()
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
         try await viewModel.createIdentity(name: "Alice")
 
         await viewModel.loadContacts()
@@ -115,8 +130,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Remove contact updates list
     func testRemoveContactUpdatesState() async throws {
-        try Self.skipPendingTestIsolation()
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
         try await viewModel.createIdentity(name: "Alice")
 
         // Add a mock contact for testing
@@ -133,7 +147,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Error message clears on load
     func testErrorMessageClearsOnLoad() {
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
 
         // Manually set error for testing
         // In real usage, errors come from failed operations
@@ -148,7 +162,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Initial sync state is idle
     func testInitialSyncStateIsIdle() {
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
 
         XCTAssertEqual(viewModel.syncState, .idle)
     }
@@ -159,8 +173,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Hide contact removes it from normal list
     func testHideContactUpdatesState() async throws {
-        try Self.skipPendingTestIsolation()
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
         try await viewModel.createIdentity(name: "Alice")
 
         // Test hiding a contact (will gracefully handle missing method)
@@ -172,8 +185,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Load hidden contacts
     func testLoadHiddenContacts() async throws {
-        try Self.skipPendingTestIsolation()
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
         try await viewModel.createIdentity(name: "Alice")
 
         // Load hidden contacts (will gracefully handle missing method)
@@ -185,8 +197,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: Unhide contact restores to normal list
     func testUnhideContactUpdatesState() async throws {
-        try Self.skipPendingTestIsolation()
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
         try await viewModel.createIdentity(name: "Alice")
 
         // Test unhiding a contact (will gracefully handle missing method)
@@ -224,7 +235,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: ViewModel initial appState is loading
     func testInitialAppStateIsLoading() {
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
 
         // On simulator with protected data available, it should initialize successfully
         // and move to .ready (or stay .loading briefly then .ready)
@@ -238,7 +249,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: loadState bails out when appState is waitingForUnlock
     func testLoadStateBailsOutWhenWaitingForUnlock() {
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
 
         // Force the state to waitingForUnlock
         viewModel.appState = .waitingForUnlock
@@ -253,7 +264,7 @@ final class VauchiViewModelTests: XCTestCase {
 
     /// Scenario: loadState bails out when appState is authenticationRequired
     func testLoadStateBailsOutWhenAuthenticationRequired() {
-        let viewModel = VauchiViewModel()
+        let viewModel = makeViewModel()
 
         // Force the state to authenticationRequired
         viewModel.appState = .authenticationRequired
@@ -273,25 +284,5 @@ final class VauchiViewModelTests: XCTestCase {
         XCTAssertEqual(error.errorDescription,
                        "Device is locked \u{2014} unlock your device to access Vauchi",
                        "deviceLocked error should have a user-friendly description")
-    }
-
-    /// Skip helper for tests that call `viewModel.createIdentity` from the
-    /// shared default Application Support data dir (`VauchiViewModel()` has no
-    /// data-dir override). Pre-MR the legacy `vauchi.create_identity` silently
-    /// overwrote any existing identity, so successive tests in this class all
-    /// passed; post-MR `appEngine.create_identity` is strict — `Vauchi::init`
-    /// eagerly loads identity from disk and the second `createIdentity` call
-    /// errors with `AlreadyInitialized`. Restored when `VauchiViewModel`
-    /// supports an injectable data dir or test isolation is added another way.
-    /// Tracked under
-    /// `_private/docs/problems/2026-04-28-collapse-vauchi-platform-into-app-engine/`.
-    private static func skipPendingTestIsolation() throws {
-        throw XCTSkip(
-            "Blocked on shared default-dir test isolation — "
-                + "appEngine.create_identity is strict; restored when "
-                + "VauchiViewModel allows an injectable data dir. See "
-                + "_private/docs/problems/2026-04-28-collapse-vauchi-"
-                + "platform-into-app-engine/."
-        )
     }
 }

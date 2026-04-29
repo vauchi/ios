@@ -13,6 +13,18 @@ import XCTest
 /// Traces to: features/message_delivery.feature
 @MainActor
 final class DeliveryStatusTests: XCTestCase {
+    var tempDir: URL!
+
+    override func setUpWithError() throws {
+        tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+    }
+
+    override func tearDownWithError() throws {
+        try? FileManager.default.removeItem(at: tempDir)
+    }
+
     // MARK: - Delivery Status Type Tests
 
     /// Scenario: DeliveryStatus has correct states
@@ -143,9 +155,13 @@ final class DeliveryStatusTests: XCTestCase {
     // MARK: - ViewModel Integration Tests
 
     /// Scenario: ViewModel loads delivery records
+    ///
+    /// `loadDeliveryRecords` swallows the underlying `vauchi.getAllDeliveryRecords`
+    /// error and resets to `[]`, so this test verifies the empty-state behavior
+    /// rather than the legacy delivery query itself — the per-test data dir
+    /// just lets `createIdentity` succeed without colliding with prior tests.
     func testViewModelLoadsDeliveryRecords() async throws {
-        try Self.skipPendingDeliveryMigration()
-        let viewModel = VauchiViewModel()
+        let viewModel = VauchiViewModel(dataDir: tempDir.path, relayUrl: nil)
         try await viewModel.createIdentity(name: "Alice")
 
         // Load delivery records
@@ -157,8 +173,7 @@ final class DeliveryStatusTests: XCTestCase {
 
     /// Scenario: ViewModel loads retry entries
     func testViewModelLoadsRetryEntries() async throws {
-        try Self.skipPendingDeliveryMigration()
-        let viewModel = VauchiViewModel()
+        let viewModel = VauchiViewModel(dataDir: tempDir.path, relayUrl: nil)
         try await viewModel.createIdentity(name: "Alice")
 
         // Load retry entries
@@ -170,8 +185,7 @@ final class DeliveryStatusTests: XCTestCase {
 
     /// Scenario: ViewModel reports failed delivery count
     func testViewModelFailedDeliveryCount() async throws {
-        try Self.skipPendingDeliveryMigration()
-        let viewModel = VauchiViewModel()
+        let viewModel = VauchiViewModel(dataDir: tempDir.path, relayUrl: nil)
         try await viewModel.createIdentity(name: "Alice")
 
         await viewModel.loadDeliveryRecords()

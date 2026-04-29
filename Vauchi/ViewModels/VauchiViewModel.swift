@@ -121,10 +121,24 @@ class VauchiViewModel: ObservableObject {
 
     private var repository: VauchiRepository?
     private var cancellables = Set<AnyCancellable>()
+    private let dataDirOverride: String?
+    private let relayUrlOverride: String?
 
     // MARK: - Initialization
 
-    init() {
+    /// Default initializer used by the production app — picks up the
+    /// system Application Support data dir and the user's configured
+    /// relay URL.
+    convenience init() {
+        self.init(dataDir: nil, relayUrl: nil)
+    }
+
+    /// Test-friendly initializer. `dataDir` lets each test isolate its
+    /// own storage; `relayUrl` lets tests point at a local dev relay.
+    /// Pass `nil` for either to fall back to production defaults.
+    init(dataDir: String?, relayUrl: String?) {
+        dataDirOverride = dataDir
+        relayUrlOverride = relayUrl
         lastSyncTime = SettingsService.shared.lastSyncTime
         initializeRepository()
         setupNetworkMonitoring()
@@ -146,7 +160,8 @@ class VauchiViewModel: ObservableObject {
                 print("VauchiViewModel: initializing repository...")
             #endif
             let repo = try VauchiRepository(
-                relayUrl: SettingsService.shared.relayUrl
+                dataDir: dataDirOverride,
+                relayUrl: relayUrlOverride ?? SettingsService.shared.relayUrl
             )
             repository = repo
             coreViewModel = AppViewModel(appEngine: repo.appEngine)
