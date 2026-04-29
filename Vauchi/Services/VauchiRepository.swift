@@ -1873,7 +1873,7 @@ class VauchiRepository {
     /// Get all delivery records
     func getAllDeliveryRecords() throws -> [VauchiDeliveryRecord] {
         do {
-            return try vauchi.getAllDeliveryRecords().map(convertDeliveryRecord)
+            return try appEngine.getAllDeliveryRecords().map(convertDeliveryRecord)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1886,7 +1886,7 @@ class VauchiRepository {
     /// core so iOS and Android render the same list (ADR-021/043 Humble UI).
     func getFailedDeliveryRecords() throws -> [VauchiDeliveryRecord] {
         do {
-            return try vauchi.getFailedDeliveryRecords().map(convertDeliveryRecord)
+            return try appEngine.getFailedDeliveryRecords().map(convertDeliveryRecord)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1895,7 +1895,7 @@ class VauchiRepository {
     /// Get delivery records for a specific contact
     func getDeliveryRecordsForContact(contactId: String) throws -> [VauchiDeliveryRecord] {
         do {
-            return try vauchi.getDeliveryRecordsForContact(recipientId: contactId).map(convertDeliveryRecord)
+            return try appEngine.getDeliveryRecordsForContact(recipientId: contactId).map(convertDeliveryRecord)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1904,7 +1904,7 @@ class VauchiRepository {
     /// Get delivery summary for a message (multi-device)
     func getDeliverySummary(messageId: String) throws -> VauchiDeliverySummary {
         do {
-            let summary = try vauchi.getDeliverySummary(messageId: messageId)
+            let summary = try appEngine.getDeliverySummary(messageId: messageId)
             return VauchiDeliverySummary(
                 messageId: summary.messageId,
                 totalDevices: summary.totalDevices,
@@ -1920,7 +1920,7 @@ class VauchiRepository {
     /// Get all retry entries
     func getRetryEntries() throws -> [VauchiRetryEntry] {
         do {
-            return try vauchi.getDueRetries().map(convertRetryEntry)
+            return try appEngine.getDueRetries().map(convertRetryEntry)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1929,7 +1929,7 @@ class VauchiRepository {
     /// Retry a failed delivery
     func retryDelivery(messageId: String) throws -> Bool {
         do {
-            return try vauchi.manualRetry(messageId: messageId)
+            return try appEngine.manualRetry(messageId: messageId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1938,7 +1938,7 @@ class VauchiRepository {
     /// Get count of failed deliveries
     func failedDeliveryCount() throws -> UInt32 {
         do {
-            return try vauchi.countFailedDeliveries()
+            return try appEngine.countFailedDeliveries()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }

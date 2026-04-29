@@ -101,4 +101,82 @@ extension PlatformAppEngine {
             command: .importBackup(backupData: backupData, password: password)
         )
     }
+
+    // MARK: - Delivery Records / Retry Queue (C4)
+
+    func getAllDeliveryRecords() throws -> [MobileDeliveryRecord] {
+        let result = try dispatchDomainCommand(command: .getAllDeliveryRecords)
+        guard case let .deliveryRecords(records) = result else {
+            throw MobileError.Other(
+                detail: "GetAllDeliveryRecords: unexpected result variant"
+            )
+        }
+        return records
+    }
+
+    func getFailedDeliveryRecords() throws -> [MobileDeliveryRecord] {
+        let result = try dispatchDomainCommand(command: .getFailedDeliveryRecords)
+        guard case let .deliveryRecords(records) = result else {
+            throw MobileError.Other(
+                detail: "GetFailedDeliveryRecords: unexpected result variant"
+            )
+        }
+        return records
+    }
+
+    func getDeliveryRecordsForContact(recipientId: String) throws -> [MobileDeliveryRecord] {
+        let result = try dispatchDomainCommand(
+            command: .getDeliveryRecordsForContact(recipientId: recipientId)
+        )
+        guard case let .deliveryRecords(records) = result else {
+            throw MobileError.Other(
+                detail: "GetDeliveryRecordsForContact: unexpected result variant"
+            )
+        }
+        return records
+    }
+
+    func getDeliverySummary(messageId: String) throws -> MobileDeliverySummary {
+        let result = try dispatchDomainCommand(
+            command: .getDeliverySummary(messageId: messageId)
+        )
+        guard case let .deliverySummary(summary) = result else {
+            throw MobileError.Other(
+                detail: "GetDeliverySummary: unexpected result variant"
+            )
+        }
+        return summary
+    }
+
+    func getDueRetries() throws -> [MobileRetryEntry] {
+        let result = try dispatchDomainCommand(command: .getDueRetries)
+        guard case let .retryEntries(entries) = result else {
+            throw MobileError.Other(
+                detail: "GetDueRetries: unexpected result variant"
+            )
+        }
+        return entries
+    }
+
+    func manualRetry(messageId: String) throws -> Bool {
+        let result = try dispatchDomainCommand(
+            command: .manualRetry(messageId: messageId)
+        )
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "ManualRetry: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func countFailedDeliveries() throws -> UInt32 {
+        let result = try dispatchDomainCommand(command: .countFailedDeliveries)
+        guard case let .count(value) = result else {
+            throw MobileError.Other(
+                detail: "CountFailedDeliveries: unexpected result variant"
+            )
+        }
+        return value
+    }
 }

@@ -155,11 +155,6 @@ final class DeliveryStatusTests: XCTestCase {
     // MARK: - ViewModel Integration Tests
 
     /// Scenario: ViewModel loads delivery records
-    ///
-    /// `loadDeliveryRecords` swallows the underlying `vauchi.getAllDeliveryRecords`
-    /// error and resets to `[]`, so this test verifies the empty-state behavior
-    /// rather than the legacy delivery query itself — the per-test data dir
-    /// just lets `createIdentity` succeed without colliding with prior tests.
     func testViewModelLoadsDeliveryRecords() async throws {
         let viewModel = VauchiViewModel(dataDir: tempDir.path, relayUrl: nil)
         try await viewModel.createIdentity(name: "Alice")
@@ -198,8 +193,7 @@ final class DeliveryStatusTests: XCTestCase {
 
     /// Scenario: Repository gets delivery records for contact
     func testRepositoryGetDeliveryRecordsForContact() throws {
-        try Self.skipPendingDeliveryMigration()
-        let repository = try VauchiRepository()
+        let repository = try VauchiRepository(dataDir: tempDir.path)
         try repository.createIdentity(displayName: "Alice")
 
         let records = try repository.getDeliveryRecordsForContact(contactId: "test-contact")
@@ -210,8 +204,7 @@ final class DeliveryStatusTests: XCTestCase {
 
     /// Scenario: Repository gets delivery summary
     func testRepositoryGetDeliverySummary() throws {
-        try Self.skipPendingDeliveryMigration()
-        let repository = try VauchiRepository()
+        let repository = try VauchiRepository(dataDir: tempDir.path)
         try repository.createIdentity(displayName: "Alice")
 
         // Getting summary for non-existent message should return nil or empty summary
@@ -223,30 +216,12 @@ final class DeliveryStatusTests: XCTestCase {
 
     /// Scenario: Repository can retry failed delivery
     func testRepositoryRetryDelivery() throws {
-        try Self.skipPendingDeliveryMigration()
-        let repository = try VauchiRepository()
+        let repository = try VauchiRepository(dataDir: tempDir.path)
         try repository.createIdentity(displayName: "Alice")
 
         // Retrying non-existent message should return false
         let result = try repository.retryDelivery(messageId: "nonexistent")
 
         XCTAssertFalse(result)
-    }
-
-    /// Skip helper for tests that go through the legacy `vauchi: VauchiPlatform`
-    /// instance after `appEngine.createIdentity`. The legacy instance has no
-    /// `reload_from_storage()` seam, so its in-memory state stays "no identity"
-    /// even though the DB has one — every delivery query then errors with
-    /// `Identity not found`. Restored when the Delivery domain migrates to
-    /// `PlatformAppEngine` (C4 in
-    /// `_private/docs/problems/2026-04-28-collapse-vauchi-platform-into-app-engine/`).
-    private static func skipPendingDeliveryMigration() throws {
-        throw XCTSkip(
-            "Blocked on dual-instance state drift — Delivery methods still "
-                + "go through legacy VauchiPlatform; restored when C4 "
-                + "(Delivery Records / Retry) migrates to PlatformAppEngine. "
-                + "See _private/docs/problems/2026-04-28-collapse-vauchi-"
-                + "platform-into-app-engine/."
-        )
     }
 }
