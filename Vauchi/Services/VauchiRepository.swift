@@ -586,13 +586,13 @@ class VauchiRepository {
 
     /// Check if identity exists
     func hasIdentity() -> Bool {
-        vauchi.hasIdentity()
+        (try? appEngine.hasIdentity()) ?? false
     }
 
     /// Create new identity with display name
     func createIdentity(displayName: String) throws {
         do {
-            try vauchi.createIdentity(displayName: displayName)
+            try appEngine.createIdentity(displayName: displayName)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -601,7 +601,7 @@ class VauchiRepository {
     /// Get public ID
     func getPublicId() throws -> String {
         do {
-            return try vauchi.getPublicId()
+            return try appEngine.getPublicId()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -610,7 +610,7 @@ class VauchiRepository {
     /// Get display name
     func getDisplayName() throws -> String {
         do {
-            return try vauchi.getDisplayName()
+            return try appEngine.getDisplayName()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -621,7 +621,7 @@ class VauchiRepository {
     /// Get own contact card
     func getOwnCard() throws -> VauchiContactCard {
         do {
-            let card = try vauchi.getOwnCard()
+            let card = try appEngine.getOwnCard()
             return convertCard(card)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
@@ -631,7 +631,7 @@ class VauchiRepository {
     /// Add field to own card
     func addField(type: VauchiFieldType, label: String, value: String) throws {
         do {
-            try vauchi.addField(fieldType: type.toMobile, label: label, value: value)
+            try appEngine.addField(fieldType: type.toMobile, label: label, value: value)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -640,7 +640,7 @@ class VauchiRepository {
     /// Update field value
     func updateField(label: String, newValue: String) throws {
         do {
-            try vauchi.updateField(label: label, newValue: newValue)
+            try appEngine.updateField(label: label, newValue: newValue)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -649,7 +649,7 @@ class VauchiRepository {
     /// Remove field by label
     func removeField(label: String) throws -> Bool {
         do {
-            return try vauchi.removeField(label: label)
+            return try appEngine.removeField(label: label)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -658,7 +658,7 @@ class VauchiRepository {
     /// Set display name
     func setDisplayName(_ name: String) throws {
         do {
-            try vauchi.setDisplayName(name: name)
+            try appEngine.setDisplayName(name: name)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1402,7 +1402,7 @@ class VauchiRepository {
     /// Export encrypted backup
     func exportBackup(password: String) throws -> String {
         do {
-            return try vauchi.exportBackup(password: password)
+            return try appEngine.exportBackup(password: password)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1411,7 +1411,7 @@ class VauchiRepository {
     /// Import backup
     func importBackup(data: String, password: String) throws {
         do {
-            try vauchi.importBackup(backupData: data, password: password)
+            try appEngine.importBackup(backupData: data, password: password)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1758,7 +1758,7 @@ class VauchiRepository {
     /// Create a recovery claim for a lost identity
     func createRecoveryClaim(oldPkHex: String) throws -> RecoveryClaimInfo {
         do {
-            let claim = try vauchi.createRecoveryClaim(oldPkHex: oldPkHex)
+            let claim = try appEngine.createRecoveryClaim(oldPkHex: oldPkHex)
             return RecoveryClaimInfo(
                 oldPublicKey: claim.oldPublicKey,
                 newPublicKey: claim.newPublicKey,
@@ -1773,7 +1773,7 @@ class VauchiRepository {
     /// Parse a recovery claim from base64
     func parseRecoveryClaim(claimB64: String) throws -> RecoveryClaimInfo {
         do {
-            let claim = try vauchi.parseRecoveryClaim(claimB64: claimB64)
+            let claim = try appEngine.parseRecoveryClaim(claimB64: claimB64)
             return RecoveryClaimInfo(
                 oldPublicKey: claim.oldPublicKey,
                 newPublicKey: claim.newPublicKey,
@@ -1788,7 +1788,7 @@ class VauchiRepository {
     /// Create a voucher for someone's recovery claim
     func createRecoveryVoucher(claimB64: String) throws -> RecoveryVoucherInfo {
         do {
-            let voucher = try vauchi.createRecoveryVoucher(claimB64: claimB64)
+            let voucher = try appEngine.createRecoveryVoucher(claimB64: claimB64)
             return RecoveryVoucherInfo(
                 voucherPublicKey: voucher.voucherPublicKey,
                 voucherData: voucher.voucherData
@@ -1801,7 +1801,7 @@ class VauchiRepository {
     /// Add a voucher to the current recovery claim
     func addRecoveryVoucher(voucherB64: String) throws -> RecoveryProgressInfo {
         do {
-            let progress = try vauchi.addRecoveryVoucher(voucherB64: voucherB64)
+            let progress = try appEngine.addRecoveryVoucher(voucherB64: voucherB64)
             return RecoveryProgressInfo(
                 oldPublicKey: progress.oldPublicKey,
                 newPublicKey: progress.newPublicKey,
@@ -1817,7 +1817,7 @@ class VauchiRepository {
     /// Get the current recovery progress
     func getRecoveryStatus() throws -> RecoveryProgressInfo? {
         do {
-            guard let progress = try vauchi.getRecoveryStatus() else {
+            guard let progress = try appEngine.getRecoveryStatus() else {
                 return nil
             }
             return RecoveryProgressInfo(
@@ -1835,7 +1835,7 @@ class VauchiRepository {
     /// Get the completed recovery proof as base64
     func getRecoveryProof() throws -> String? {
         do {
-            return try vauchi.getRecoveryProof()
+            return try appEngine.getRecoveryProof()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
