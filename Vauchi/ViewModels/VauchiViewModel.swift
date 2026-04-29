@@ -1127,59 +1127,6 @@ class VauchiViewModel: ObservableObject {
         await loadLabels()
     }
 
-    // MARK: - Multi-Stage Exchange
-
-    //
-    // Core drives the protocol clock via the G4 event API (vauchi-platform
-    // 0.22.0). The frontend registers a `MultiStageSessionListener`, calls
-    // `start()`, and then only forwards scanned QRs via `processScannedQr`.
-    // No timers, no state polling, no manual finalize call.
-
-    /// Multi-stage exchange session — core owns the cycle thread.
-    private(set) var multiStageSession: MobileMultiStageSession?
-
-    /// Create a session, register `listener`, and start the cycle thread.
-    /// Returns the session so callers can feed scanned QRs; returns `nil`
-    /// if session creation fails.
-    func startMultiStageExchange(listener: MultiStageSessionListener) -> MobileMultiStageSession? {
-        guard let repository else { return nil }
-        do {
-            let session = try repository.createMultistageSession()
-            session.setListener(listener: listener)
-            session.start()
-            multiStageSession = session
-
-            // Run audio proximity as trust boost (non-blocking, best-effort).
-            // Fires once per session start; tied to the exchange lifecycle
-            // rather than the Finalized callback.
-            Task.detached(priority: .userInitiated) { [weak self] in
-                self?.runAudioProximity()
-            }
-            return session
-        } catch {
-            #if DEBUG
-                NSLog("[Exchange] Failed to create session: %@", "\(error)")
-            #endif
-            return nil
-        }
-    }
-
-    // TODO: Re-implement via command/event proximity protocol (ADR-031)
-    private nonisolated func runAudioProximity() {
-        // MobileProximityVerifier removed in core 0.19.21.
-        // Audio proximity will use the command/event pattern when re-enabled.
-    }
-
-    func processMultiStageQr(raw: String) -> MobileProtocolState {
-        guard let session = multiStageSession else { return .failed(reason: "No session") }
-        return session.processScannedQr(raw: raw)
-    }
-
-    func cancelMultiStageExchange() {
-        multiStageSession?.cancel()
-        multiStageSession = nil
-    }
-
     /// Proximity — used by device linking views and audio trust boost.
     /// MobileProximityVerifier removed in core 0.19.21; stubbed until command/event protocol lands.
     @Published var proximitySupported: Bool = false

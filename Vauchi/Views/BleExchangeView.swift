@@ -14,7 +14,6 @@ import SwiftUI
 
 struct BleExchangeView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
-    var switchToContacts: (() -> Void)?
     @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
@@ -34,7 +33,7 @@ struct BleExchangeView: View {
 
             // Reuse the face-to-face exchange which drives the full
             // command/event protocol including BLE via ExchangeCommandHandler.
-            FaceToFaceExchangeView(switchToContacts: switchToContacts)
+            FaceToFaceExchangeView()
         }
     }
 }

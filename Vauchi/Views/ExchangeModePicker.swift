@@ -39,7 +39,7 @@ struct ExchangeModePicker: View {
                     title: localizationService.t("exchange.mode.qr"),
                     subtitle: localizationService.t("exchange.mode.qr_description"),
                     enabled: true,
-                    destination: FaceToFaceExchangeView(switchToContacts: switchToContacts)
+                    destination: FaceToFaceExchangeView()
                 )
 
                 modeCard(
@@ -55,7 +55,7 @@ struct ExchangeModePicker: View {
                     title: localizationService.t("exchange.mode.ble"),
                     subtitle: localizationService.t("exchange.mode.ble_description"),
                     enabled: true,
-                    destination: BleExchangeView(switchToContacts: switchToContacts)
+                    destination: BleExchangeView()
                 )
 
                 Spacer()
