@@ -1616,7 +1616,7 @@ class VauchiRepository {
     /// Get list of linked devices
     func getDevices() throws -> [DeviceInfo] {
         do {
-            return try vauchi.getDevices().map { DeviceInfo(from: $0) }
+            return try appEngine.getDevices().map { DeviceInfo(from: $0) }
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1625,7 +1625,7 @@ class VauchiRepository {
     /// Generate a device link QR code for a new device to scan
     func generateDeviceLinkQr() throws -> DeviceLinkData {
         do {
-            let data = try vauchi.generateDeviceLinkQr()
+            let data = try appEngine.generateDeviceLinkQr()
             return DeviceLinkData(from: data)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
@@ -1635,7 +1635,7 @@ class VauchiRepository {
     /// Parse a device link QR code scanned from another device
     func parseDeviceLinkQr(qrData: String) throws -> DeviceLinkInfo {
         do {
-            let info = try vauchi.parseDeviceLinkQr(qrData: qrData)
+            let info = try appEngine.parseDeviceLinkQr(qrData: qrData)
             return DeviceLinkInfo(from: info)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
@@ -1707,7 +1707,7 @@ class VauchiRepository {
     /// Create a new device-link orchestration session (Phase 1: initiator only).
     func createDeviceLinkSessionInitiator() throws -> MobileDeviceLinkSession {
         do {
-            return try vauchi.createDeviceLinkSessionInitiator()
+            return try appEngine.createDeviceLinkSessionInitiator()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1716,7 +1716,7 @@ class VauchiRepository {
     /// Get the number of linked devices
     func deviceCount() throws -> UInt32 {
         do {
-            return try vauchi.deviceCount()
+            return try appEngine.deviceCount()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1727,7 +1727,7 @@ class VauchiRepository {
     /// - Returns: True if the device was successfully unlinked
     func unlinkDevice(deviceIndex: UInt32) throws -> Bool {
         do {
-            return try vauchi.unlinkDevice(deviceIndex: deviceIndex)
+            return try appEngine.unlinkDevice(deviceIndex: deviceIndex)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1736,7 +1736,7 @@ class VauchiRepository {
     /// Check if this is the primary (first) device
     func isPrimaryDevice() throws -> Bool {
         do {
-            return try vauchi.isPrimaryDevice()
+            return try appEngine.isPrimaryDevice()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
