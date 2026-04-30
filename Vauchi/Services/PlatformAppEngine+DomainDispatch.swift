@@ -690,4 +690,165 @@ extension PlatformAppEngine {
     func setPinnedCertificate(certPem: String) throws {
         _ = try dispatchDomainCommand(command: .setPinnedCertificate(certPem: certPem))
     }
+
+    // MARK: - Passcode (C6)
+
+    func setupAppPassword(password: String) throws {
+        _ = try dispatchDomainCommand(command: .setupAppPassword(password: password))
+    }
+
+    func authenticate(password: String) throws -> MobileAuthMode {
+        let result = try dispatchDomainCommand(command: .authenticate(password: password))
+        guard case let .authMode(mode) = result else {
+            throw MobileError.Other(
+                detail: "Authenticate: unexpected result variant"
+            )
+        }
+        return mode
+    }
+
+    func isPasswordEnabled() throws -> Bool {
+        let result = try dispatchDomainCommand(command: .isPasswordEnabled)
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "IsPasswordEnabled: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    // MARK: - Duress (C6)
+
+    func setupDuressPassword(duressPassword: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .setupDuressPassword(duressPassword: duressPassword)
+        )
+    }
+
+    func isDuressEnabled() throws -> Bool {
+        let result = try dispatchDomainCommand(command: .isDuressEnabled)
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "IsDuressEnabled: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func disableDuress() throws {
+        _ = try dispatchDomainCommand(command: .disableDuress)
+    }
+
+    func configureDuressAlerts(contactIds: [String], message: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .configureDuressAlerts(contactIds: contactIds, message: message)
+        )
+    }
+
+    func getDuressSettings() throws -> MobileDuressSettings? {
+        let result = try dispatchDomainCommand(command: .getDuressSettings)
+        guard case let .duressSettingsOpt(settings) = result else {
+            throw MobileError.Other(
+                detail: "GetDuressSettings: unexpected result variant"
+            )
+        }
+        return settings
+    }
+
+    // MARK: - Shred — read-only (C6)
+
+    //
+    // The 4 keychain-bound shred operations (panicShred, softShred,
+    // hardShred, cancelShred) remain on legacy `vauchi.X` until
+    // `MobilePlatformKeychain` plumbing lands on `PlatformAppEngine`
+    // (tracked as a separate B7 keychain batch). Only `shredStatus` —
+    // a read-only deletion-state snapshot — has a dispatch arm today.
+
+    func shredStatus() throws -> MobileShredStatus {
+        let result = try dispatchDomainCommand(command: .shredStatus)
+        guard case let .shredStatus(status) = result else {
+            throw MobileError.Other(
+                detail: "ShredStatus: unexpected result variant"
+            )
+        }
+        return status
+    }
+
+    // MARK: - GDPR / Identity Deletion (C6)
+
+    func exportGdprData() throws -> MobileGdprExport {
+        let result = try dispatchDomainCommand(command: .exportGdprData)
+        guard case let .gdprExport(export) = result else {
+            throw MobileError.Other(
+                detail: "ExportGdprData: unexpected result variant"
+            )
+        }
+        return export
+    }
+
+    func scheduleIdentityDeletion() throws -> MobileDeletionInfo {
+        let result = try dispatchDomainCommand(command: .scheduleIdentityDeletion)
+        guard case let .deletionInfo(info) = result else {
+            throw MobileError.Other(
+                detail: "ScheduleIdentityDeletion: unexpected result variant"
+            )
+        }
+        return info
+    }
+
+    func cancelIdentityDeletion() throws {
+        _ = try dispatchDomainCommand(command: .cancelIdentityDeletion)
+    }
+
+    func getDeletionState() throws -> MobileDeletionInfo {
+        let result = try dispatchDomainCommand(command: .getDeletionState)
+        guard case let .deletionInfo(info) = result else {
+            throw MobileError.Other(
+                detail: "GetDeletionState: unexpected result variant"
+            )
+        }
+        return info
+    }
+
+    // MARK: - Consent (C6)
+
+    func grantConsent(consentType: MobileConsentType) throws {
+        _ = try dispatchDomainCommand(command: .grantConsent(consentType: consentType))
+    }
+
+    func revokeConsent(consentType: MobileConsentType) throws {
+        _ = try dispatchDomainCommand(command: .revokeConsent(consentType: consentType))
+    }
+
+    func checkConsent(consentType: MobileConsentType) throws -> Bool {
+        let result = try dispatchDomainCommand(command: .checkConsent(consentType: consentType))
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "CheckConsent: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func getConsentStatus(consentType: MobileConsentType) throws -> MobileConsentStatus {
+        let result = try dispatchDomainCommand(
+            command: .getConsentStatus(consentType: consentType)
+        )
+        guard case let .consentStatus(status) = result else {
+            throw MobileError.Other(
+                detail: "GetConsentStatus: unexpected result variant"
+            )
+        }
+        return status
+    }
+
+    func getConsentRecords() throws -> [MobileConsentRecord] {
+        let result = try dispatchDomainCommand(command: .getConsentRecords)
+        guard case let .consentRecords(records) = result else {
+            throw MobileError.Other(
+                detail: "GetConsentRecords: unexpected result variant"
+            )
+        }
+        return records
+    }
 }

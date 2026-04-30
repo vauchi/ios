@@ -874,7 +874,7 @@ class VauchiRepository {
     /// Set up app password
     func setupAppPassword(password: String) throws {
         do {
-            try vauchi.setupAppPassword(password: password)
+            try appEngine.setupAppPassword(password: password)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -883,7 +883,7 @@ class VauchiRepository {
     /// Set up duress PIN (requires app password to be set first)
     func setupDuressPassword(duressPassword: String) throws {
         do {
-            try vauchi.setupDuressPassword(duressPassword: duressPassword)
+            try appEngine.setupDuressPassword(duressPassword: duressPassword)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -892,7 +892,7 @@ class VauchiRepository {
     /// Authenticate with password/PIN — returns "normal" or "duress", throws on invalid
     func authenticate(password: String) throws -> String {
         do {
-            let mode = try vauchi.authenticate(password: password)
+            let mode = try appEngine.authenticate(password: password)
             switch mode {
             case .normal: return "normal"
             case .duress: return "duress"
@@ -905,7 +905,7 @@ class VauchiRepository {
     /// Check if app password is enabled
     func isPasswordEnabled() throws -> Bool {
         do {
-            return try vauchi.isPasswordEnabled()
+            return try appEngine.isPasswordEnabled()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -914,7 +914,7 @@ class VauchiRepository {
     /// Check if duress PIN is enabled
     func isDuressEnabled() throws -> Bool {
         do {
-            return try vauchi.isDuressEnabled()
+            return try appEngine.isDuressEnabled()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -923,7 +923,7 @@ class VauchiRepository {
     /// Disable duress PIN
     func disableDuress() throws {
         do {
-            try vauchi.disableDuress()
+            try appEngine.disableDuress()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -932,7 +932,7 @@ class VauchiRepository {
     /// Configure duress alert contacts and message
     func configureDuressAlerts(contactIds: [String], message: String) throws {
         do {
-            try vauchi.configureDuressAlerts(contactIds: contactIds, message: message)
+            try appEngine.configureDuressAlerts(contactIds: contactIds, message: message)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -941,7 +941,7 @@ class VauchiRepository {
     /// Get duress settings (alert contacts, message, location flag)
     func getDuressSettings() throws -> MobileDuressSettings? {
         do {
-            return try vauchi.getDuressSettings()
+            return try appEngine.getDuressSettings()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -986,6 +986,12 @@ class VauchiRepository {
     // MARK: - Panic Shred Operations
 
     // Based on: features/panic_widget.feature - R2 Panic Widget
+    //
+    // The 4 mutating shred operations below (`panicShred`, `softShred`,
+    // `cancelShred`, `hardShred`) remain on legacy `vauchi.X` because
+    // they require keychain plumbing on `PlatformAppEngine` that has
+    // not yet shipped (tracked as the B7 keychain batch). Read-only
+    // `shredStatus` already has a dispatch arm and is migrated.
 
     /// Execute emergency panic shred — destroys all data
     @discardableResult
@@ -1024,7 +1030,7 @@ class VauchiRepository {
 
     func shredStatus() throws -> MobileShredStatus {
         do {
-            return try vauchi.shredStatus()
+            return try appEngine.shredStatus()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -2102,7 +2108,7 @@ class VauchiRepository {
     /// Export all user data in GDPR-compliant format
     func exportGdprData() throws -> VauchiGdprExport {
         do {
-            let export = try vauchi.exportGdprData()
+            let export = try appEngine.exportGdprData()
             return VauchiGdprExport(
                 jsonData: export.jsonData,
                 exportedAt: export.exportedAt,
@@ -2116,7 +2122,7 @@ class VauchiRepository {
     /// Schedule identity deletion with grace period
     func scheduleIdentityDeletion() throws -> VauchiDeletionInfo {
         do {
-            let info = try vauchi.scheduleIdentityDeletion()
+            let info = try appEngine.scheduleIdentityDeletion()
             return VauchiDeletionInfo(from: info)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
@@ -2126,7 +2132,7 @@ class VauchiRepository {
     /// Cancel a scheduled identity deletion
     func cancelIdentityDeletion() throws {
         do {
-            try vauchi.cancelIdentityDeletion()
+            try appEngine.cancelIdentityDeletion()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -2135,7 +2141,7 @@ class VauchiRepository {
     /// Get current deletion state
     func getDeletionState() throws -> VauchiDeletionInfo {
         do {
-            let info = try vauchi.getDeletionState()
+            let info = try appEngine.getDeletionState()
             return VauchiDeletionInfo(from: info)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
@@ -2145,7 +2151,7 @@ class VauchiRepository {
     /// Grant consent for a specific type
     func grantConsent(consentType: VauchiConsentType) throws {
         do {
-            try vauchi.grantConsent(consentType: consentType.toMobile)
+            try appEngine.grantConsent(consentType: consentType.toMobile)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -2154,7 +2160,7 @@ class VauchiRepository {
     /// Revoke consent for a specific type
     func revokeConsent(consentType: VauchiConsentType) throws {
         do {
-            try vauchi.revokeConsent(consentType: consentType.toMobile)
+            try appEngine.revokeConsent(consentType: consentType.toMobile)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -2163,7 +2169,7 @@ class VauchiRepository {
     /// Check if consent is granted for a specific type
     func checkConsent(consentType: VauchiConsentType) throws -> Bool {
         do {
-            return try vauchi.checkConsent(consentType: consentType.toMobile)
+            return try appEngine.checkConsent(consentType: consentType.toMobile)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -2172,7 +2178,7 @@ class VauchiRepository {
     /// Get aggregated consent status for a specific type
     func getConsentStatus(consentType: VauchiConsentType) throws -> MobileConsentStatus {
         do {
-            return try vauchi.getConsentStatus(consentType: consentType.toMobile)
+            return try appEngine.getConsentStatus(consentType: consentType.toMobile)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -2181,7 +2187,7 @@ class VauchiRepository {
     /// Get all consent records
     func getConsentRecords() throws -> [VauchiConsentRecord] {
         do {
-            return try vauchi.getConsentRecords().map { VauchiConsentRecord(from: $0) }
+            return try appEngine.getConsentRecords().map { VauchiConsentRecord(from: $0) }
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
