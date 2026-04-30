@@ -911,411 +911,65 @@ struct DeviceRow: View {
     }
 }
 
-/// Transport selection for device linking
-enum DeviceLinkTransport {
-    case notSelected
-    case internet // existing relay flow
-    case offline // multipart QR flow (stub)
-}
-
-/// Sheet for device linking full protocol flow
+/// Sheet for device linking — Pair 5b of
+/// `_private/docs/problems/2026-04-28-pure-humble-ui-retire-native-screens`.
+///
+/// Pure Humble UI shell — renders the device-link flow via `CoreScreenView`
+/// over the core-owned `DeviceLinkingEngine`. The cycle-thread session
+/// lifecycle is owned by `PlatformAppEngine` (`after_screen_transition`
+/// auto-creates / cancels the `MobileDeviceLinkSession` on entry / exit
+/// of `AppScreen::DeviceLinking`).
+///
+/// Per ADR-021/043 this view holds no domain state, no nav decisions, and
+/// references no domain types. It only:
+///   1. Renders whatever core's current screen says (transport selection,
+///      QR display, confirming-device prompt, proximity verification,
+///      success/failed views — all driven by core).
+///   2. Emits a `UserAction("cancel")` to core when SwiftUI dismisses the
+///      sheet without core having routed away.
 struct DeviceLinkSheet: View {
     @EnvironmentObject var viewModel: VauchiViewModel
+
+    var body: some View {
+        Group {
+            if let coreVM = viewModel.coreViewModel {
+                DeviceLinkCoreShell(coreVM: coreVM)
+            } else {
+                ProgressView("Loading...")
+            }
+        }
+    }
+}
+
+/// Inner shell observing `AppViewModel` directly via `@ObservedObject` —
+/// without it, SwiftUI would not propagate inner `@Published` updates from
+/// `viewModel.coreViewModel` (same root cause `CoreScreenView` documents).
+private struct DeviceLinkCoreShell: View {
+    @ObservedObject var coreVM: AppViewModel
     @Environment(\.dismiss) var dismiss
-    @Environment(\.designTokens) private var tokens
-    @State private var qrData: String?
-    @State private var isListening = false
-    @State private var transport: DeviceLinkTransport = .notSelected
 
     var body: some View {
         NavigationView {
-            Group {
-                switch transport {
-                case .notSelected:
-                    transportSelectionView
-
-                case .offline:
-                    offlineStubView
-
-                case .internet:
-                    internetFlowView
-                }
-            }
-            .padding()
-            .navigationTitle("Link New Device")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        viewModel.cancelDeviceLink()
-                        dismiss()
-                    }
-                }
-            }
-            .onDisappear {
-                if case .success = viewModel.deviceLinkState {
-                    viewModel.cancelDeviceLink()
-                } else if case .idle = viewModel.deviceLinkState {
-                    // already cleaned up
-                } else {
-                    viewModel.cancelDeviceLink()
-                }
-            }
-        }
-    }
-
-    // MARK: - Transport Selection
-
-    private var transportSelectionView: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "link.badge.plus")
-                .font(.system(size: 48))
-                .foregroundColor(.cyan)
-                .accessibilityHidden(true)
-
-            Text("How would you like to link?")
-                .font(Font.title3.weight(.semibold))
-
-            Text("Choose how to connect with your new device.")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-
-            VStack(spacing: 12) {
-                Button(action: {
-                    transport = .internet
-                    startLinkFlow()
-                }) {
-                    Label("Link via Internet", systemImage: "wifi")
-                        .font(Font.body.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.cyan)
-                        .foregroundColor(.white)
-                        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-                }
-                .accessibilityHint("Links devices using the relay server over the internet")
-
-                Button(action: {
-                    transport = .offline
-                }) {
-                    Label("Link Offline (QR)", systemImage: "qrcode")
-                        .font(Font.body.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color(.systemGray5))
-                        .foregroundColor(.primary)
-                        .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-                }
-                .accessibilityHint("Links devices using animated QR codes without internet")
-            }
-        }
-    }
-
-    // MARK: - Offline Stub
-
-    private var offlineStubView: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "qrcode")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
-                .accessibilityHidden(true)
-
-            Text("Offline Device Linking")
-                .font(Font.title3.weight(.semibold))
-
-            Text("Coming soon — offline device linking requires protocol updates.")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Text("This mode will use animated QR codes to exchange device linking data without requiring an internet connection.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Button(action: {
-                transport = .notSelected
-            }) {
-                Label("Back", systemImage: "chevron.left")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(.systemGray5))
-                    .foregroundColor(.primary)
-                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-            }
-        }
-    }
-
-    // MARK: - Internet Flow (existing relay flow)
-
-    private var internetFlowView: some View {
-        Group {
-            switch viewModel.deviceLinkState {
-            case .idle, .generatingQR:
-                VStack(spacing: 20) {
-                    ProgressView("Generating link...")
-                }
-
-            case let .waitingForRequest(expiresAt):
-                waitingForRequestView(expiresAt: expiresAt)
-
-            case .expired:
-                expiredQRView
-
-            case let .confirmingDevice(name, code, challenge):
-                confirmingDeviceView(name: name, code: code, challenge: challenge)
-
-            case let .verifyingProximity(challenge, confirmationCode):
-                ProximityVerificationView(
-                    challenge: challenge,
-                    confirmationCode: confirmationCode,
-                    onVerified: { result in
-                        Task {
-                            do {
-                                let now = UInt64(Date().timeIntervalSince1970)
-                                switch result {
-                                case let .ultrasonic(challengeResponse):
-                                    try await viewModel.approveDeviceLinkUltrasonic(
-                                        challengeResponse: challengeResponse,
-                                        verifiedAt: now
-                                    )
-                                case let .manual(code):
-                                    try await viewModel.approveDeviceLinkManual(
-                                        confirmationCode: code,
-                                        confirmedAt: now
-                                    )
-                                }
-                            } catch {
-                                viewModel.deviceLinkState = .failed(error.localizedDescription)
-                            }
+            CoreScreenView(screenName: "device_linking")
+                .navigationTitle("Link New Device")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            coreVM.handleAction(.actionPressed(actionId: "cancel"))
+                            dismiss()
                         }
-                    },
-                    onCancel: {
-                        viewModel.cancelDeviceLink()
-                        dismiss()
                     }
-                )
-
-            case .completing:
-                VStack(spacing: 20) {
-                    ProgressView("Completing link...")
-                    Text("Sending credentials to new device...")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
-
-            case .success:
-                successView
-
-            case let .failed(message):
-                failedView(message: message)
+        }
+        .onDisappear {
+            // System-gesture dismissal (swipe-down). If core hasn't already
+            // routed away from the DeviceLink subtree, send `cancel` so the
+            // engine ends the cycle thread and navigates back.
+            if coreVM.currentScreen?.screenId.hasPrefix("link_") == true {
+                coreVM.handleAction(.actionPressed(actionId: "cancel"))
             }
         }
-    }
-
-    // MARK: - Subviews
-
-    private func waitingForRequestView(expiresAt: UInt64) -> some View {
-        QRCountdownView(
-            qrData: qrData,
-            expiresAt: expiresAt,
-            generateQRCode: generateQRCode,
-            onExpired: { viewModel.deviceLinkState = .expired }
-        )
-    }
-
-    private var expiredQRView: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "clock.badge.exclamationmark")
-                .font(.system(size: 56))
-                .foregroundColor(.orange)
-
-            Text("QR Code Expired")
-                .font(Font.title2.weight(.semibold))
-
-            Text("The device link QR code has expired for security reasons. Generate a new one to continue.")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Button(action: {
-                viewModel.cancelDeviceLink()
-                startLinkFlow()
-            }) {
-                Text("Generate New QR")
-                    .font(Font.body.weight(.semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.cyan)
-                    .foregroundColor(.white)
-                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-            }
-            .accessibilityHint("Generates a new device link QR code")
-            .padding(.horizontal)
-        }
-    }
-
-    private func confirmingDeviceView(name: String, code: String, challenge: Data) -> some View {
-        VStack(spacing: 24) {
-            Image(systemName: "iphone.and.arrow.forward")
-                .font(.system(size: 48))
-                .foregroundColor(.cyan)
-                .accessibilityHidden(true)
-
-            Text("Device Wants to Link")
-                .font(Font.title2.weight(.semibold))
-
-            VStack(spacing: 8) {
-                Text("Device: **\(name)**")
-                    .font(.body)
-
-                Text("Confirmation Code")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                Text(code)
-                    .font(Font.system(.title, design: .monospaced).weight(.bold))
-                    .foregroundColor(.cyan)
-                    .accessibilityLabel("Confirmation code: \(code)")
-            }
-
-            Text("Verify this code matches the code shown on the new device, then proceed to proximity verification.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Spacer().frame(height: 8)
-
-            Button(action: {
-                viewModel.deviceLinkState = .verifyingProximity(challenge: challenge, confirmationCode: code)
-            }) {
-                Text("Codes Match — Verify Proximity")
-                    .font(Font.body.weight(.semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.cyan)
-                    .foregroundColor(.white)
-                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-            }
-            .accessibilityHint("Proceeds to proximity verification step")
-
-            Button(action: {
-                viewModel.cancelDeviceLink()
-                dismiss()
-            }) {
-                Text("Deny")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(.systemGray5))
-                    .foregroundColor(.primary)
-                    .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-            }
-            .accessibilityHint("Rejects the device link request")
-        }
-    }
-
-    private var successView: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 56))
-                .foregroundStyle(.secondary)
-                .accessibilityHidden(true)
-
-            Text("Device Linked Successfully")
-                .font(Font.title2.weight(.semibold))
-
-            Text("The new device now has access to your identity. You can manage linked devices in Settings.")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Button("Done") {
-                viewModel.cancelDeviceLink()
-                dismiss()
-            }
-            .font(Font.body.weight(.semibold))
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.cyan)
-            .foregroundColor(.white)
-            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-        }
-    }
-
-    private func failedView(message: String) -> some View {
-        VStack(spacing: 20) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 56))
-                .foregroundColor(.red)
-                .accessibilityHidden(true)
-
-            Text("Linking Failed")
-                .font(Font.title2.weight(.semibold))
-
-            Text(message)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Button("Try Again") {
-                viewModel.cancelDeviceLink()
-                startLinkFlow()
-            }
-            .font(Font.body.weight(.semibold))
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.cyan)
-            .foregroundColor(.white)
-            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-
-            Button("Cancel") {
-                viewModel.cancelDeviceLink()
-                dismiss()
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color(.systemGray5))
-            .foregroundColor(.primary)
-            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-        }
-    }
-
-    // MARK: - Flow Control
-
-    private func startLinkFlow() {
-        Task {
-            do {
-                let data = try await viewModel.startDeviceLinkInitiator()
-                qrData = data
-                // Session cycle thread handles listening and all state transitions
-            } catch {
-                viewModel.deviceLinkState = .failed(error.localizedDescription)
-            }
-        }
-    }
-
-    private func generateQRCode(from string: String) -> UIImage? {
-        guard let qr = try? generateQrBitmap(
-            data: string, size: 512, ecc: .high, dark: 0, light: 255, margin: 4
-        ) else { return nil }
-        let imageSize = Int(qr.size)
-        let colorSpace = CGColorSpaceCreateDeviceGray()
-        guard let provider = CGDataProvider(data: Data(qr.pixels) as CFData),
-              let cgImage = CGImage(
-                  width: imageSize, height: imageSize,
-                  bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: imageSize,
-                  space: colorSpace, bitmapInfo: CGBitmapInfo(rawValue: 0),
-                  provider: provider, decode: nil, shouldInterpolate: false,
-                  intent: .defaultIntent
-              ) else { return nil }
-        return UIImage(cgImage: cgImage)
     }
 }
 
