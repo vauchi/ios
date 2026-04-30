@@ -119,8 +119,15 @@ final class AccessibilityUITests: XCTestCase {
                 .elementDetection,
                 .hitRegion,
             ]) { issue in
-                // Return value: true → report as failure, false → ignore.
-                !issue.compactDescription.contains("Potentially inaccessible text")
+                // Apple's `performAccessibilityAudit(for:_:)` issueHandler:
+                // return `true` to ignore the issue, `false` to fail the
+                // test on it. The earlier landing of this filter
+                // (`219274a`) had the convention inverted, which made the
+                // closure escalate the match instead of suppressing it —
+                // the flake then re-fired on every run regardless of the
+                // intent documented in
+                // `_private/docs/problems/2026-04-26-ios-accessibility-audit-flake/`.
+                issue.compactDescription.contains("Potentially inaccessible text")
             }
         } else {
             throw XCTSkip("Accessibility audit requires iOS 17+")
