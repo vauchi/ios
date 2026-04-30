@@ -85,7 +85,7 @@ struct ArchivedContactsView: View {
                         .padding(.vertical, 4)
                         .accessibilityIdentifier("archived_contacts.row")
                         .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(contact.displayName), \(contact.isVerified ? "verified" : "not verified")")
+                        .accessibilityLabel(contact.displayName)
                         .accessibilityHint("Double tap to unarchive this contact")
                     }
                 }
