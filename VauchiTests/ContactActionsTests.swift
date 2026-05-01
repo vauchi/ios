@@ -71,10 +71,14 @@ final class ContactActionsTests: XCTestCase {
     }
 
     /// Scenario: Generate maps URL for address
-    func testBuildAddressUrl() {
-        let url = ContactActions.buildUrl(for: "123 Main St", type: .address)
-        XCTAssertNotNil(url)
-        // Should be Apple Maps URL or fallback
+    func testBuildAddressUrl() throws {
+        let url = try XCTUnwrap(ContactActions.buildUrl(for: "123 Main St", type: .address))
+        XCTAssertEqual(url.scheme, "maps", "Address URLs route through the Apple Maps maps:// scheme")
+        let queryEncoded = url.query ?? ""
+        XCTAssertTrue(
+            queryEncoded.contains("123") && queryEncoded.contains("Main"),
+            "Query must encode the address tokens (got \(url.absoluteString))"
+        )
     }
 
     // MARK: - Security Tests

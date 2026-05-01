@@ -48,8 +48,10 @@ final class PlatformEdgeTests: XCTestCase {
         // Schedule task (may fail silently in test environment where BGTaskScheduler unavailable)
         service.scheduleSyncTask()
 
-        // Service should remain valid
-        XCTAssertNotNil(service, "Service should remain valid after scheduling")
+        // Singleton identity must survive scheduling — i.e. the call doesn't
+        // accidentally wire up a fresh instance behind .shared.
+        XCTAssertTrue(service === BackgroundSyncService.shared,
+                      "Singleton must remain identical after scheduleSyncTask")
 
         // Cancel pending tasks
         service.cancelPendingTasks()
@@ -57,8 +59,8 @@ final class PlatformEdgeTests: XCTestCase {
         // Re-schedule to verify service is still functional
         service.scheduleSyncTask()
 
-        // Final state check
-        XCTAssertNotNil(service, "Service should remain valid after cancel/reschedule cycle")
+        XCTAssertTrue(service === BackgroundSyncService.shared,
+                      "Singleton must remain identical after cancel + reschedule cycle")
     }
 
     // MARK: - Memory Limit Tests
@@ -185,9 +187,11 @@ final class PlatformEdgeTests: XCTestCase {
             "Network state should be determinable"
         )
 
-        // Connection type should be valid
+        // Connection type must be one of the four declared cases
         let connectionType = monitor.connectionType
-        XCTAssertNotNil(connectionType, "Connection type should be available")
+        let validTypes: Set<NetworkMonitor.ConnectionType> = [.wifi, .cellular, .wired, .unknown]
+        XCTAssertTrue(validTypes.contains(connectionType),
+                      "Connection type \(connectionType) should be one of wifi/cellular/wired/unknown")
 
         // Stop monitoring
         monitor.stop()

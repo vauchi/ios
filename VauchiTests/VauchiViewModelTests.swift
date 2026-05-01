@@ -59,7 +59,8 @@ final class VauchiViewModelTests: XCTestCase {
 
         XCTAssertTrue(viewModel.hasIdentity)
         XCTAssertEqual(viewModel.displayName, "Alice")
-        XCTAssertNotNil(viewModel.card)
+        let card = try XCTUnwrap(viewModel.card, "Card must be hydrated alongside the new identity")
+        XCTAssertEqual(card.displayName, "Alice", "Card display name must mirror the identity")
     }
 
     /// Scenario: Create identity initializes empty card

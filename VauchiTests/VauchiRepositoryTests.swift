@@ -306,8 +306,10 @@ final class VauchiRepositoryTests: XCTestCase {
         let backup = try repo.exportBackup(password: "correct-horse-battery-staple")
 
         XCTAssertFalse(backup.isEmpty, "Backup should not be empty")
-        // Backup is base64 encoded
-        XCTAssertNotNil(Data(base64Encoded: backup), "Backup should be valid base64")
+        // Backup is base64 encoded — assert non-empty decoded payload to ensure
+        // it isn't just a base64 representation of zero bytes.
+        let decoded = try XCTUnwrap(Data(base64Encoded: backup), "Backup should be valid base64")
+        XCTAssertGreaterThan(decoded.count, 0, "Decoded backup must contain at least the encrypted payload")
     }
 
     /// Scenario: Import backup restores identity
@@ -406,8 +408,9 @@ final class VauchiRepositoryTests: XCTestCase {
         let oldPkHex = String(repeating: "b", count: 64)
         let claim = try repo.createRecoveryClaim(oldPkHex: oldPkHex)
 
-        // Claim data should be base64 encoded
-        XCTAssertNotNil(Data(base64Encoded: claim.claimData), "Claim should be valid base64")
+        // Claim data should be base64 encoded with a non-empty payload
+        let decoded = try XCTUnwrap(Data(base64Encoded: claim.claimData), "Claim should be valid base64")
+        XCTAssertGreaterThan(decoded.count, 0, "Decoded claim must carry the signed claim envelope")
         XCTAssertEqual(claim.oldPublicKey.count, 64, "Old public key should be 64 hex chars")
         XCTAssertEqual(claim.newPublicKey.count, 64, "New public key should be 64 hex chars")
     }
@@ -445,13 +448,15 @@ final class VauchiRepositoryTests: XCTestCase {
         let oldPkHex = String(repeating: "d", count: 64)
         _ = try repo.createRecoveryClaim(oldPkHex: oldPkHex)
 
-        let status = try repo.getRecoveryStatus()
+        let status = try XCTUnwrap(
+            try repo.getRecoveryStatus(),
+            "Should have active recovery after claim creation"
+        )
 
-        XCTAssertNotNil(status, "Should have active recovery after claim creation")
-        XCTAssertEqual(status?.oldPublicKey, oldPkHex)
-        XCTAssertEqual(status?.vouchersCollected, 0)
-        XCTAssertGreaterThan(status?.vouchersNeeded ?? 0, 0, "Should need at least 1 voucher")
-        XCTAssertFalse(status?.isComplete ?? true)
+        XCTAssertEqual(status.oldPublicKey, oldPkHex)
+        XCTAssertEqual(status.vouchersCollected, 0)
+        XCTAssertGreaterThan(status.vouchersNeeded, 0, "Should need at least 1 voucher")
+        XCTAssertFalse(status.isComplete)
     }
 
     /// Scenario: Default recovery threshold
@@ -563,9 +568,8 @@ final class VauchiRepositoryTests: XCTestCase {
         let claim = try aliceRepo.createRecoveryClaim(oldPkHex: oldPkHex)
 
         // Initial status: 0 vouchers collected
-        let initialStatus = try aliceRepo.getRecoveryStatus()
-        XCTAssertNotNil(initialStatus)
-        XCTAssertEqual(initialStatus?.vouchersCollected, 0)
+        let initialStatus = try XCTUnwrap(try aliceRepo.getRecoveryStatus())
+        XCTAssertEqual(initialStatus.vouchersCollected, 0)
 
         // Bob vouches for Alice
         let bobDir = FileManager.default.temporaryDirectory

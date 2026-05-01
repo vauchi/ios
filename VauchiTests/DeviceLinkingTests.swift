@@ -48,8 +48,12 @@ final class DeviceLinkingTests: XCTestCase {
     func testCurrentDeviceIdentified() throws {
         let devices = try repo.getDevices()
 
-        let currentDevice = devices.first { $0.isCurrent }
-        XCTAssertNotNil(currentDevice, "Should identify current device")
+        let currentDevice = try XCTUnwrap(
+            devices.first { $0.isCurrent },
+            "Should identify exactly one current device after createIdentity"
+        )
+        XCTAssertTrue(currentDevice.isCurrent)
+        XCTAssertFalse(currentDevice.deviceName.isEmpty)
     }
 
     /// Scenario: Device has creation timestamp

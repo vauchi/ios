@@ -68,25 +68,31 @@ final class SettingsServiceTests: XCTestCase {
     }
 
     /// Scenario: Last sync time can be set and retrieved
-    func testLastSyncTimePersistence() {
+    func testLastSyncTimePersistence() throws {
         let testDate = Date()
 
         service.lastSyncTime = testDate
 
-        XCTAssertNotNil(service.lastSyncTime)
-        if let retrieved = service.lastSyncTime {
-            XCTAssertEqual(retrieved.timeIntervalSince1970, testDate.timeIntervalSince1970, accuracy: 1.0)
-        }
+        let retrieved = try XCTUnwrap(service.lastSyncTime)
+        XCTAssertEqual(retrieved.timeIntervalSince1970, testDate.timeIntervalSince1970, accuracy: 1.0)
 
         // Create new service to verify persistence
         let service2 = SettingsService(defaults: testDefaults)
-        XCTAssertNotNil(service2.lastSyncTime)
+        let retrievedAfterReload = try XCTUnwrap(service2.lastSyncTime)
+        XCTAssertEqual(
+            retrievedAfterReload.timeIntervalSince1970,
+            testDate.timeIntervalSince1970,
+            accuracy: 1.0,
+            "lastSyncTime must round-trip through UserDefaults at the same precision"
+        )
     }
 
     /// Scenario: Last sync time can be cleared
-    func testClearLastSyncTime() {
-        service.lastSyncTime = Date()
-        XCTAssertNotNil(service.lastSyncTime)
+    func testClearLastSyncTime() throws {
+        let testDate = Date()
+        service.lastSyncTime = testDate
+        let beforeClear = try XCTUnwrap(service.lastSyncTime)
+        XCTAssertEqual(beforeClear.timeIntervalSince1970, testDate.timeIntervalSince1970, accuracy: 1.0)
 
         service.lastSyncTime = nil
         XCTAssertNil(service.lastSyncTime)

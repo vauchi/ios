@@ -300,10 +300,9 @@ final class VisibilityLabelsTests: XCTestCase {
         }
 
         let labels = try repo.listLabels()
-        let workLabel = labels.first { $0.name == "Work" }
+        let workLabel = try XCTUnwrap(labels.first { $0.name == "Work" })
 
-        XCTAssertNotNil(workLabel)
-        XCTAssertEqual(workLabel?.contactCount, 3)
+        XCTAssertEqual(workLabel.contactCount, 3)
     }
 
     // MARK: - Edge Cases
