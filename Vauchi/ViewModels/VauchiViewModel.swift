@@ -1142,29 +1142,6 @@ class VauchiViewModel: ObservableObject {
         await loadLabels()
     }
 
-    /// Proximity — used by device linking views and audio trust boost.
-    /// MobileProximityVerifier removed in core 0.19.21; stubbed until command/event protocol lands.
-    @Published var proximitySupported: Bool = false
-
-    var proximityCapability: String {
-        AudioProximityService.shared.checkCapability()
-    }
-
-    // TODO: Re-implement via command/event proximity protocol (ADR-031)
-    func emitProximityChallenge(_: Data) -> Bool {
-        // MobileProximityVerifier removed in core 0.19.21.
-        false
-    }
-
-    func listenForProximityResponse(timeoutMs _: UInt64 = 5000) -> Data? {
-        // MobileProximityVerifier removed in core 0.19.21.
-        nil
-    }
-
-    func stopProximityVerification() {
-        AudioProximityService.shared.stop()
-    }
-
     // MARK: - Sync
 
     func sync() async {
