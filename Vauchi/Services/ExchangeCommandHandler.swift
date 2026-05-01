@@ -25,6 +25,8 @@ final class ExchangeCommandHandler {
     /// Kept alive so that cancel() can interrupt a pending accept().
     private var directSendService: DirectSendService?
 
+    private let audioService = AudioProximityService.shared
+
     init(session: MobileExchangeSession) {
         self.session = session
     }
@@ -61,8 +63,7 @@ final class ExchangeCommandHandler {
             listenForAudioResponse(timeoutMs: timeoutMs, sampleRate: sampleRate)
 
         case .audioStop:
-            // Audio operations are one-shot — no persistent state to stop.
-            break
+            audioService.stop()
 
         // ── BLE (CoreBluetooth) ─────────────────────────────────────
         case let .bleStartScanning(serviceUuid):
@@ -123,17 +124,24 @@ final class ExchangeCommandHandler {
         service.exchange(payload: payload, isInitiator: isInitiator)
     }
 
-    // MARK: - Audio
+    // MARK: - Audio (ADR-031 command/event protocol)
 
-    // TODO: Re-implement via command/event proximity protocol (ADR-031)
-    private func emitAudioChallenge(samples _: [Float], sampleRate _: UInt32) {
-        // MobileProximityVerifier removed in core 0.19.21.
-        // Audio proximity will use the command/event pattern when re-enabled.
+    private func emitAudioChallenge(samples: [Float], sampleRate: UInt32) {
+        // emitSignal blocks for the playback duration, so dispatch off the
+        // command-drain thread to avoid stalling other commands.
+        DispatchQueue.global(qos: .userInitiated).async { [audioService] in
+            _ = audioService.emitSignal(samples: samples, sampleRate: sampleRate)
+        }
     }
 
-    private func listenForAudioResponse(timeoutMs _: UInt64, sampleRate _: UInt32) {
-        // MobileProximityVerifier removed in core 0.19.21.
-        // Audio proximity will use the command/event pattern when re-enabled.
+    private func listenForAudioResponse(timeoutMs: UInt64, sampleRate: UInt32) {
+        audioService.receiveSignal(timeoutMs: timeoutMs, sampleRate: sampleRate) { [weak self] samples, recordedRate in
+            guard let self, let session else { return }
+            try? session.applyHardwareEvent(
+                event: .audioSamplesRecorded(samples: samples, sampleRate: recordedRate)
+            )
+            drainAndDispatch()
+        }
     }
 
     // MARK: - Relay Escrow
