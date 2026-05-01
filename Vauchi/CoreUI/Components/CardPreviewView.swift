@@ -140,15 +140,12 @@ struct CardPreviewView: View {
     }
 
     private var currentFields: [FieldDisplay] {
-        if let selectedGroup = component.selectedGroup,
-           let groupView = component.groupViews.first(where: { $0.groupName == selectedGroup }) {
-            return groupView.visibleFields
-        }
-        return component.fields.filter { field in
-            if case .shown = field.visibility { return true }
-            if case .groups = field.visibility { return true }
-            return false
-        }
+        // Core's `build_visible_fields` does the selectedGroup branch + the
+        // visibility filter identically across frontends. Render the
+        // pre-computed list directly — no fallback. Test fixtures are part
+        // of the contract: they must populate `visibleFields:` matching
+        // what core emits. ADR-021 / ADR-043 (Humble UI).
+        component.visibleFields
     }
 }
 
