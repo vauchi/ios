@@ -54,11 +54,11 @@ final class ExchangeCommandHandler {
             break
 
         // ── Audio (ultrasonic proximity) ────────────────────────────
-        case let .audioEmitChallenge(data):
-            emitAudioChallenge(data: data)
+        case let .audioEmitChallenge(samples, sampleRate):
+            emitAudioChallenge(samples: samples, sampleRate: sampleRate)
 
-        case let .audioListenForResponse(timeoutMs):
-            listenForAudioResponse(timeoutMs: timeoutMs)
+        case let .audioListenForResponse(timeoutMs, sampleRate):
+            listenForAudioResponse(timeoutMs: timeoutMs, sampleRate: sampleRate)
 
         case .audioStop:
             // Audio operations are one-shot — no persistent state to stop.
@@ -126,12 +126,12 @@ final class ExchangeCommandHandler {
     // MARK: - Audio
 
     // TODO: Re-implement via command/event proximity protocol (ADR-031)
-    private func emitAudioChallenge(data _: Data) {
+    private func emitAudioChallenge(samples _: [Float], sampleRate _: UInt32) {
         // MobileProximityVerifier removed in core 0.19.21.
         // Audio proximity will use the command/event pattern when re-enabled.
     }
 
-    private func listenForAudioResponse(timeoutMs _: UInt64) {
+    private func listenForAudioResponse(timeoutMs _: UInt64, sampleRate _: UInt32) {
         // MobileProximityVerifier removed in core 0.19.21.
         // Audio proximity will use the command/event pattern when re-enabled.
     }
