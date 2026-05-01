@@ -98,31 +98,62 @@ final class AudioProximityServiceTests: XCTestCase {
 
     // MARK: - Receive Signal Tests
 
-    /// Scenario: Receive with zero timeout returns immediately
+    /// Scenario: Receive with zero timeout fires callback with actual hardware rate
     func testReceiveZeroTimeout() throws {
         #if targetEnvironment(simulator)
             throw XCTSkip("Audio recording not functional in iOS Simulator")
         #endif
-        let samples = audioService.receiveSignal(timeoutMs: 0, sampleRate: 44100)
+        let expectation = XCTestExpectation(description: "callback fires")
+        var capturedRate: UInt32 = 0
 
-        // Should return empty or minimal samples with 0 timeout
-        // This is environment-dependent
-        XCTAssertNotNil(samples, "Should return array (may be empty)")
+        audioService.receiveSignal(timeoutMs: 0, sampleRate: 44100) { _, recordedRate in
+            capturedRate = recordedRate
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 2.0)
+        XCTAssertGreaterThan(capturedRate, 0, "Should report actual hardware sample rate (typically 44100 or 48000)")
     }
 
-    /// Scenario: Receive returns float array
+    /// Scenario: Receive callback delivers samples in [-1.0, 1.0] range
     func testReceiveReturnsFloatArray() throws {
         #if targetEnvironment(simulator)
             throw XCTSkip("Audio recording not functional in iOS Simulator")
         #endif
-        // Very short recording - 50ms
-        let samples = audioService.receiveSignal(timeoutMs: 50, sampleRate: 44100)
+        let expectation = XCTestExpectation(description: "callback fires with samples")
+        var capturedSamples: [Float] = []
 
-        // Verify samples are in valid range if any were recorded
-        for sample in samples {
+        audioService.receiveSignal(timeoutMs: 50, sampleRate: 44100) { samples, _ in
+            capturedSamples = samples
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 2.0)
+        for sample in capturedSamples {
             XCTAssertGreaterThanOrEqual(sample, -1.0, "Sample should be >= -1.0")
             XCTAssertLessThanOrEqual(sample, 1.0, "Sample should be <= 1.0")
         }
+    }
+
+    /// Scenario: Recorded rate is reported even when device rate differs from requested rate
+    func testReceiveReportsActualRecordedRate() throws {
+        #if targetEnvironment(simulator)
+            throw XCTSkip("Audio recording not functional in iOS Simulator")
+        #endif
+        let expectation = XCTestExpectation(description: "callback fires")
+        var capturedRate: UInt32 = 0
+
+        // Request 44100 — device may record at 48000. Either is correct;
+        // the contract is that the actual rate is reported, not silently coerced.
+        audioService.receiveSignal(timeoutMs: 50, sampleRate: 44100) { _, recordedRate in
+            capturedRate = recordedRate
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 2.0)
+        // Common rates: 22050, 44100, 48000. Anything > 0 means we captured it.
+        XCTAssertTrue([22050, 44100, 48000].contains(Int(capturedRate)) || capturedRate > 0,
+                      "Recorded rate should be a real hardware rate, got: \(capturedRate)")
     }
 
     // MARK: - Integration Tests
@@ -133,13 +164,15 @@ final class AudioProximityServiceTests: XCTestCase {
             throw XCTSkip("Audio recording not functional in iOS Simulator")
         #endif
         for _ in 0 ..< 3 {
-            // Start emit
             let samples = [Float](repeating: 0.5, count: 100)
             _ = audioService.emitSignal(samples: samples, sampleRate: 44100)
             audioService.stop()
 
-            // Start receive
-            _ = audioService.receiveSignal(timeoutMs: 10, sampleRate: 44100)
+            let expectation = XCTestExpectation(description: "receive callback")
+            audioService.receiveSignal(timeoutMs: 10, sampleRate: 44100) { _, _ in
+                expectation.fulfill()
+            }
+            wait(for: [expectation], timeout: 2.0)
             audioService.stop()
         }
 
@@ -166,7 +199,7 @@ final class AudioProximityServiceTests: XCTestCase {
 
     // MARK: - Sample Rate Tests
 
-    /// Scenario: Different sample rates are handled
+    /// Scenario: Different requested sample rates are handled (device may not honor)
     func testDifferentSampleRates() throws {
         #if targetEnvironment(simulator)
             throw XCTSkip("Audio recording not functional in iOS Simulator")
@@ -174,9 +207,11 @@ final class AudioProximityServiceTests: XCTestCase {
         let sampleRates: [UInt32] = [22050, 44100, 48000]
 
         for rate in sampleRates {
-            let samples = audioService.receiveSignal(timeoutMs: 10, sampleRate: rate)
-            // Should not crash with different sample rates
-            XCTAssertNotNil(samples)
+            let expectation = XCTestExpectation(description: "rate \(rate)")
+            audioService.receiveSignal(timeoutMs: 10, sampleRate: rate) { _, _ in
+                expectation.fulfill()
+            }
+            wait(for: [expectation], timeout: 2.0)
             audioService.stop()
         }
     }

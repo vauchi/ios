@@ -139,22 +139,50 @@ class AudioProximityService {
         }
     }
 
-    /// Record audio and return samples.
-    func receiveSignal(timeoutMs: UInt64, sampleRate: UInt32) -> [Float] {
+    /// Record audio for `timeoutMs` and report samples + actual rate via callback.
+    ///
+    /// `sampleRate` is core's suggested rate; the device may record at a different
+    /// rate (typically 48 kHz on modern iPhones). The actual rate is reported
+    /// alongside the samples so core can resample as needed (Phase 1 resampler).
+    /// Recording runs on a background queue; callback fires on the main queue.
+    func receiveSignal(
+        timeoutMs: UInt64,
+        sampleRate _: UInt32,
+        completion: @escaping ([Float], UInt32) -> Void
+    ) {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else {
+                DispatchQueue.main.async { completion([], 0) }
+                return
+            }
+            let (samples, recordedRate) = recordSamples(timeoutMs: timeoutMs)
+            DispatchQueue.main.async {
+                completion(samples, recordedRate)
+            }
+        }
+    }
+
+    /// Synchronous variant for diagnostic/loopback tools that already run on a
+    /// background thread. Production code (`ExchangeCommandHandler`) uses the
+    /// callback-based `receiveSignal` instead.
+    func receiveSignalSync(timeoutMs: UInt64, sampleRate _: UInt32) -> [Float] {
+        recordSamples(timeoutMs: timeoutMs).samples
+    }
+
+    private func recordSamples(timeoutMs: UInt64) -> (samples: [Float], recordedRate: UInt32) {
         do {
             try setupAudioSession()
 
             let inputNode = audioEngine.inputNode
             let inputFormat = inputNode.outputFormat(forBus: 0)
+            let recordedRate = UInt32(inputFormat.sampleRate)
 
-            // Clear previous samples
             sampleLock.lock()
             recordedSamples = []
             sampleLock.unlock()
 
             isRecording = true
 
-            // Install tap on input
             inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
                 guard let self, isRecording else { return }
 
@@ -167,33 +195,25 @@ class AudioProximityService {
 
             try audioEngine.start()
 
-            // Record for timeout duration
             Thread.sleep(forTimeInterval: Double(timeoutMs) / 1000.0)
 
-            // Stop recording
             isRecording = false
             inputNode.removeTap(onBus: 0)
             audioEngine.stop()
 
-            // Get recorded samples
             sampleLock.lock()
             let result = recordedSamples
             recordedSamples = []
             sampleLock.unlock()
 
-            // Resample if needed
-            if inputFormat.sampleRate != Double(sampleRate) {
-                return resample(result, from: Float(inputFormat.sampleRate), to: Float(sampleRate))
-            }
-
-            return result
+            return (samples: result, recordedRate: recordedRate)
 
         } catch {
             #if DEBUG
                 print("AudioProximityService: Recording failed: \(error)")
             #endif
             isRecording = false
-            return []
+            return (samples: [], recordedRate: 0)
         }
     }
 
@@ -230,29 +250,6 @@ class AudioProximityService {
         }
 
         return samples
-    }
-
-    private func resample(_ samples: [Float], from sourceSampleRate: Float, to targetSampleRate: Float) -> [Float] {
-        guard sourceSampleRate != targetSampleRate else { return samples }
-
-        let ratio = targetSampleRate / sourceSampleRate
-        let newCount = Int(Float(samples.count) * ratio)
-        var result = [Float](repeating: 0, count: newCount)
-
-        // Simple linear interpolation resampling
-        for i in 0 ..< newCount {
-            let srcIndex = Float(i) / ratio
-            let srcIndexInt = Int(srcIndex)
-            let fraction = srcIndex - Float(srcIndexInt)
-
-            if srcIndexInt + 1 < samples.count {
-                result[i] = samples[srcIndexInt] * (1 - fraction) + samples[srcIndexInt + 1] * fraction
-            } else if srcIndexInt < samples.count {
-                result[i] = samples[srcIndexInt]
-            }
-        }
-
-        return result
     }
 }
 

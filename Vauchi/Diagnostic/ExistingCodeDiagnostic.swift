@@ -30,7 +30,7 @@
                     continue
                 }
 
-                let recorded = audioService.receiveSignal(timeoutMs: 4000, sampleRate: UInt32(sampleRate))
+                let recorded = audioService.receiveSignalSync(timeoutMs: 4000, sampleRate: UInt32(sampleRate))
                 if recorded.isEmpty {
                     DiagnosticLogger.logError(test: "A", track: "existing", error: "No samples at \(freq) Hz")
                     log("  FAIL: no samples recorded")
@@ -50,7 +50,7 @@
         func runNoiseFloorTest(log: @escaping (String) -> Void) {
             log("--- Test B: Noise Floor (existing code) ---")
 
-            let recorded = audioService.receiveSignal(timeoutMs: 5000, sampleRate: UInt32(sampleRate))
+            let recorded = audioService.receiveSignalSync(timeoutMs: 5000, sampleRate: UInt32(sampleRate))
             if recorded.isEmpty {
                 log("FAIL: no samples recorded")
                 return
