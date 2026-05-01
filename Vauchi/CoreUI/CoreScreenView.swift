@@ -93,7 +93,7 @@ private struct CoreScreenContent: View {
             }
         }
         .sheet(isPresented: cameraPickerBinding) {
-            CameraPickerSheet { imageData in
+            AVCameraCaptureSheet { imageData in
                 coreVM.sendImageReceived(data: imageData)
             } onCancel: {
                 coreVM.sendImagePickCancelled()
@@ -190,56 +190,6 @@ struct ImagePickerSheet: UIViewControllerRepresentable {
                 let bytes = [UInt8](data)
                 DispatchQueue.main.async { self?.onImageSelected(bytes) }
             }
-        }
-    }
-}
-
-// MARK: - Camera Picker
-
-/// Wraps UIImagePickerController with camera source for capturing a photo.
-struct CameraPickerSheet: UIViewControllerRepresentable {
-    let onImageSelected: ([UInt8]) -> Void
-    let onCancel: () -> Void
-
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.sourceType = .camera
-        picker.delegate = context.coordinator
-        return picker
-    }
-
-    func updateUIViewController(_: UIImagePickerController, context _: Context) {}
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onImageSelected: onImageSelected, onCancel: onCancel)
-    }
-
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let onImageSelected: ([UInt8]) -> Void
-        let onCancel: () -> Void
-
-        init(onImageSelected: @escaping ([UInt8]) -> Void, onCancel: @escaping () -> Void) {
-            self.onImageSelected = onImageSelected
-            self.onCancel = onCancel
-        }
-
-        func imagePickerController(
-            _ picker: UIImagePickerController,
-            didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
-        ) {
-            picker.dismiss(animated: true)
-            guard let image = info[.originalImage] as? UIImage,
-                  let data = image.jpegData(compressionQuality: 0.9) else {
-                onCancel()
-                return
-            }
-            let bytes = [UInt8](data)
-            onImageSelected(bytes)
-        }
-
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            picker.dismiss(animated: true)
-            onCancel()
         }
     }
 }

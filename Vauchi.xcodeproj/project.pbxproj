@@ -109,6 +109,7 @@
 		65262CC8E09632011AB35DB5 /* testSyncingState.1.png in Resources */ = {isa = PBXBuildFile; fileRef = D42379D47C2AFA9F80BAAB6A /* testSyncingState.1.png */; };
 		652D44BD2148FA55AA835812 /* testInfoPanelSingleItem.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 8C9F616A82E64818C7D1BEB4 /* testInfoPanelSingleItem.1.png */; };
 		655FCE4413340F3FF3F5E5CF /* QRDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */; };
+		657B005AE09FDFE3AEE0ED58 /* AVCameraCaptureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75191060DEDFC1C531D132FE /* AVCameraCaptureSheet.swift */; };
 		66B3D241905E9D64213D575A /* testWelcomeStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 95147D906B74EF746C328B63 /* testWelcomeStep.1.png */; };
 		675C6A3151B41B2B192C9A38 /* testSettingsScreenDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 609B02226C8115A54FBEFAB5 /* testSettingsScreenDark.1.png */; };
 		67EDB7F0C1E6404DCA29F8C9 /* preview_card.json in Resources */ = {isa = PBXBuildFile; fileRef = 1A1C1FABFE041B08E41B4276 /* preview_card.json */; };
@@ -410,6 +411,7 @@
 		73C57002D4EAE39D0378F9F4 /* testContactsViewWithContacts.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewWithContacts.1.png; sourceTree = "<group>"; };
 		74400BE90CD802A95312C01B /* testFieldListEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testFieldListEmpty.1.png; sourceTree = "<group>"; };
 		74945D0AD48A22730D842AA2 /* testTextInputDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextInputDark.1.png; sourceTree = "<group>"; };
+		75191060DEDFC1C531D132FE /* AVCameraCaptureSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVCameraCaptureSheet.swift; sourceTree = "<group>"; };
 		754BD6DA5325E71B6D09BAAB /* testSettingsViewGerman.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSettingsViewGerman.1.png; sourceTree = "<group>"; };
 		7661570C00E05D693455F344 /* testActionButtonDisabledAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testActionButtonDisabledAccessibility.1.txt; sourceTree = "<group>"; };
 		773071C286EDA29BCB17B365 /* ContactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
@@ -753,6 +755,7 @@
 			isa = PBXGroup;
 			children = (
 				80D908420E7769CC3225282C /* AppViewModel.swift */,
+				75191060DEDFC1C531D132FE /* AVCameraCaptureSheet.swift */,
 				8EC13750603D7C1EF84BACBC /* CoreOnboardingView.swift */,
 				9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */,
 				140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */,
@@ -1329,6 +1332,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				657B005AE09FDFE3AEE0ED58 /* AVCameraCaptureSheet.swift in Sources */,
 				E90014729E0D4394D5A26628 /* AccountDeletionView.swift in Sources */,
 				B105AF29B3E8B2E6AE0F3DFE /* ActionListView.swift in Sources */,
 				80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */,
