@@ -488,38 +488,47 @@ final class ModelsTests: XCTestCase {
         let action = UserAction.textChanged(componentId: "name_input", value: "Bob")
 
         let data = try coreJSONEncoder.encode(action)
-        let jsonObject = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let jsonObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        XCTAssertNotNil(jsonObject)
-        let inner = jsonObject?["TextChanged"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'TextChanged' key at top level")
-        XCTAssertEqual(inner?["component_id"] as? String, "name_input")
-        XCTAssertEqual(inner?["value"] as? String, "Bob")
+        let inner = try XCTUnwrap(
+            jsonObject["TextChanged"] as? [String: Any],
+            "Expected 'TextChanged' key at top level"
+        )
+        XCTAssertEqual(inner["component_id"] as? String, "name_input")
+        XCTAssertEqual(inner["value"] as? String, "Bob")
     }
 
     func testUserActionActionPressedEncoding() throws {
         let action = UserAction.actionPressed(actionId: "next")
 
         let data = try coreJSONEncoder.encode(action)
-        let jsonObject = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let jsonObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        XCTAssertNotNil(jsonObject)
-        let inner = jsonObject?["ActionPressed"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'ActionPressed' key at top level")
-        XCTAssertEqual(inner?["action_id"] as? String, "next")
+        let inner = try XCTUnwrap(
+            jsonObject["ActionPressed"] as? [String: Any],
+            "Expected 'ActionPressed' key at top level"
+        )
+        XCTAssertEqual(inner["action_id"] as? String, "next")
     }
 
     func testUserActionItemToggledEncoding() throws {
         let action = UserAction.itemToggled(componentId: "groups", itemId: "family")
 
         let data = try coreJSONEncoder.encode(action)
-        let jsonObject = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let jsonObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        XCTAssertNotNil(jsonObject)
-        let inner = jsonObject?["ItemToggled"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'ItemToggled' key at top level")
-        XCTAssertEqual(inner?["component_id"] as? String, "groups")
-        XCTAssertEqual(inner?["item_id"] as? String, "family")
+        let inner = try XCTUnwrap(
+            jsonObject["ItemToggled"] as? [String: Any],
+            "Expected 'ItemToggled' key at top level"
+        )
+        XCTAssertEqual(inner["component_id"] as? String, "groups")
+        XCTAssertEqual(inner["item_id"] as? String, "family")
     }
 
     func testUserActionFieldVisibilityChangedEncoding() throws {
@@ -528,14 +537,17 @@ final class ModelsTests: XCTestCase {
         )
 
         let data = try coreJSONEncoder.encode(action)
-        let jsonObject = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let jsonObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        XCTAssertNotNil(jsonObject)
-        let inner = jsonObject?["FieldVisibilityChanged"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'FieldVisibilityChanged' key at top level")
-        XCTAssertEqual(inner?["field_id"] as? String, "f1")
-        XCTAssertEqual(inner?["group_id"] as? String, "Family")
-        XCTAssertEqual(inner?["visible"] as? Bool, true)
+        let inner = try XCTUnwrap(
+            jsonObject["FieldVisibilityChanged"] as? [String: Any],
+            "Expected 'FieldVisibilityChanged' key at top level"
+        )
+        XCTAssertEqual(inner["field_id"] as? String, "f1")
+        XCTAssertEqual(inner["group_id"] as? String, "Family")
+        XCTAssertEqual(inner["visible"] as? Bool, true)
     }
 
     func testUserActionFieldVisibilityChangedNilGroupEncoding() throws {
@@ -544,39 +556,48 @@ final class ModelsTests: XCTestCase {
         )
 
         let data = try coreJSONEncoder.encode(action)
-        let jsonObject = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let jsonObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        XCTAssertNotNil(jsonObject)
-        let inner = jsonObject?["FieldVisibilityChanged"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'FieldVisibilityChanged' key at top level")
-        XCTAssertEqual(inner?["field_id"] as? String, "f1")
+        let inner = try XCTUnwrap(
+            jsonObject["FieldVisibilityChanged"] as? [String: Any],
+            "Expected 'FieldVisibilityChanged' key at top level"
+        )
+        XCTAssertEqual(inner["field_id"] as? String, "f1")
         // group_id should be absent (encodeIfPresent with nil)
-        XCTAssertNil(inner?["group_id"])
-        XCTAssertEqual(inner?["visible"] as? Bool, false)
+        XCTAssertNil(inner["group_id"])
+        XCTAssertEqual(inner["visible"] as? Bool, false)
     }
 
     func testUserActionGroupViewSelectedEncoding() throws {
         let action = UserAction.groupViewSelected(groupName: "Family")
 
         let data = try coreJSONEncoder.encode(action)
-        let jsonObject = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let jsonObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        XCTAssertNotNil(jsonObject)
-        let inner = jsonObject?["GroupViewSelected"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'GroupViewSelected' key at top level")
-        XCTAssertEqual(inner?["group_name"] as? String, "Family")
+        let inner = try XCTUnwrap(
+            jsonObject["GroupViewSelected"] as? [String: Any],
+            "Expected 'GroupViewSelected' key at top level"
+        )
+        XCTAssertEqual(inner["group_name"] as? String, "Family")
     }
 
     func testUserActionGroupViewSelectedNilEncoding() throws {
         let action = UserAction.groupViewSelected(groupName: nil)
 
         let data = try coreJSONEncoder.encode(action)
-        let jsonObject = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let jsonObject = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        XCTAssertNotNil(jsonObject)
-        let inner = jsonObject?["GroupViewSelected"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'GroupViewSelected' key at top level")
-        XCTAssertNil(inner?["group_name"])
+        let inner = try XCTUnwrap(
+            jsonObject["GroupViewSelected"] as? [String: Any],
+            "Expected 'GroupViewSelected' key at top level"
+        )
+        XCTAssertNil(inner["group_name"])
     }
 
     // MARK: - Unknown Variant Handling
@@ -766,11 +787,13 @@ final class ModelsTests: XCTestCase {
             actionId: "archive"
         )
         let encoded = try JSONEncoder().encode(action)
-        let decoded = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
-        let payload = decoded?["ListItemAction"] as? [String: Any]
-        XCTAssertNotNil(payload, "expected outer serde variant key ListItemAction")
-        XCTAssertEqual(payload?["component_id"] as? String, "contacts")
-        XCTAssertEqual(payload?["item_id"] as? String, "c1")
-        XCTAssertEqual(payload?["action_id"] as? String, "archive")
+        let decoded = try XCTUnwrap(try JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        let payload = try XCTUnwrap(
+            decoded["ListItemAction"] as? [String: Any],
+            "expected outer serde variant key ListItemAction"
+        )
+        XCTAssertEqual(payload["component_id"] as? String, "contacts")
+        XCTAssertEqual(payload["item_id"] as? String, "c1")
+        XCTAssertEqual(payload["action_id"] as? String, "archive")
     }
 }

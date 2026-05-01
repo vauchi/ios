@@ -145,16 +145,20 @@ final class ContractTests: XCTestCase {
     func testUserActionRoundtripTextChanged() throws {
         let action = UserAction.textChanged(componentId: "name_input", value: "Alice")
         let data = try coreJSONEncoder.encode(action)
-        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let json = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        let inner = json?["TextChanged"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'TextChanged' key")
-        XCTAssertEqual(inner?["component_id"] as? String, "name_input")
-        XCTAssertEqual(inner?["value"] as? String, "Alice")
+        let inner = try XCTUnwrap(
+            json["TextChanged"] as? [String: Any],
+            "Expected 'TextChanged' key"
+        )
+        XCTAssertEqual(inner["component_id"] as? String, "name_input")
+        XCTAssertEqual(inner["value"] as? String, "Alice")
 
         // Round-trip: re-encode from parsed JSON and compare
         let reEncoded = try JSONSerialization.data(
-            withJSONObject: json as Any, options: [.sortedKeys]
+            withJSONObject: json, options: [.sortedKeys]
         )
         let original = try JSONSerialization.data(
             withJSONObject: JSONSerialization.jsonObject(with: data), options: [.sortedKeys]
@@ -165,22 +169,30 @@ final class ContractTests: XCTestCase {
     func testUserActionRoundtripItemToggled() throws {
         let action = UserAction.itemToggled(componentId: "groups", itemId: "family")
         let data = try coreJSONEncoder.encode(action)
-        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let json = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        let inner = json?["ItemToggled"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'ItemToggled' key")
-        XCTAssertEqual(inner?["component_id"] as? String, "groups")
-        XCTAssertEqual(inner?["item_id"] as? String, "family")
+        let inner = try XCTUnwrap(
+            json["ItemToggled"] as? [String: Any],
+            "Expected 'ItemToggled' key"
+        )
+        XCTAssertEqual(inner["component_id"] as? String, "groups")
+        XCTAssertEqual(inner["item_id"] as? String, "family")
     }
 
     func testUserActionRoundtripActionPressed() throws {
         let action = UserAction.actionPressed(actionId: "get_started")
         let data = try coreJSONEncoder.encode(action)
-        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let json = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        let inner = json?["ActionPressed"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'ActionPressed' key")
-        XCTAssertEqual(inner?["action_id"] as? String, "get_started")
+        let inner = try XCTUnwrap(
+            json["ActionPressed"] as? [String: Any],
+            "Expected 'ActionPressed' key"
+        )
+        XCTAssertEqual(inner["action_id"] as? String, "get_started")
     }
 
     func testUserActionRoundtripFieldVisibilityChanged() throws {
@@ -188,23 +200,31 @@ final class ContractTests: XCTestCase {
             fieldId: "f1", groupId: "Family", visible: true
         )
         let data = try coreJSONEncoder.encode(action)
-        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let json = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        let inner = json?["FieldVisibilityChanged"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'FieldVisibilityChanged' key")
-        XCTAssertEqual(inner?["field_id"] as? String, "f1")
-        XCTAssertEqual(inner?["group_id"] as? String, "Family")
-        XCTAssertEqual(inner?["visible"] as? Bool, true)
+        let inner = try XCTUnwrap(
+            json["FieldVisibilityChanged"] as? [String: Any],
+            "Expected 'FieldVisibilityChanged' key"
+        )
+        XCTAssertEqual(inner["field_id"] as? String, "f1")
+        XCTAssertEqual(inner["group_id"] as? String, "Family")
+        XCTAssertEqual(inner["visible"] as? Bool, true)
     }
 
     func testUserActionRoundtripGroupViewSelected() throws {
         let action = UserAction.groupViewSelected(groupName: "Friends")
         let data = try coreJSONEncoder.encode(action)
-        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let json = try XCTUnwrap(
+            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
 
-        let inner = json?["GroupViewSelected"] as? [String: Any]
-        XCTAssertNotNil(inner, "Expected 'GroupViewSelected' key")
-        XCTAssertEqual(inner?["group_name"] as? String, "Friends")
+        let inner = try XCTUnwrap(
+            json["GroupViewSelected"] as? [String: Any],
+            "Expected 'GroupViewSelected' key"
+        )
+        XCTAssertEqual(inner["group_name"] as? String, "Friends")
     }
 
     /// Verify that all UserAction variant keys use PascalCase (matching serde).
@@ -227,14 +247,16 @@ final class ContractTests: XCTestCase {
 
         for (action, expectedKey) in zip(actions, expectedKeys) {
             let data = try coreJSONEncoder.encode(action)
-            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-            XCTAssertNotNil(json, "Failed to parse JSON for \(expectedKey)")
+            let json = try XCTUnwrap(
+                try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                "Failed to parse JSON for \(expectedKey)"
+            )
             XCTAssertTrue(
-                json?.keys.contains(expectedKey) == true,
-                "Expected PascalCase key '\(expectedKey)', got keys: \(json?.keys.sorted() ?? [])"
+                json.keys.contains(expectedKey),
+                "Expected PascalCase key '\(expectedKey)', got keys: \(json.keys.sorted())"
             )
             XCTAssertEqual(
-                json?.keys.count, 1,
+                json.keys.count, 1,
                 "Expected exactly one top-level key for \(expectedKey)"
             )
         }
@@ -246,14 +268,21 @@ final class ContractTests: XCTestCase {
     func testVersionMetadataMatchesFixtureCount() throws {
         let versionURL = Self.fixturesURL.appendingPathComponent(".version")
         let data = try Data(contentsOf: versionURL)
-        let meta = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        let meta = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [String: Any])
 
-        XCTAssertNotNil(meta?["core_version"], ".version must have core_version")
-        let schemaVersion = meta?["schema_version"] as? Int
-        XCTAssertNotNil(schemaVersion, ".version must have schema_version")
-        XCTAssertGreaterThanOrEqual(schemaVersion ?? 0, 1)
+        let coreVersion = try XCTUnwrap(
+            meta["core_version"] as? String,
+            ".version must have core_version"
+        )
+        XCTAssertFalse(coreVersion.isEmpty, "core_version must not be empty")
 
-        let fixtureCount = meta?["fixture_count"] as? Int
+        let schemaVersion = try XCTUnwrap(
+            meta["schema_version"] as? Int,
+            ".version must have schema_version"
+        )
+        XCTAssertGreaterThanOrEqual(schemaVersion, 1)
+
+        let fixtureCount = meta["fixture_count"] as? Int
         XCTAssertEqual(
             fixtureCount, Self.fixtureNames.count,
             ".version fixture_count (\(fixtureCount ?? -1)) must match actual count (\(Self.fixtureNames.count))"

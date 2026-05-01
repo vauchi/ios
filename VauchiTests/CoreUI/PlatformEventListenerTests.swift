@@ -66,10 +66,13 @@ final class PlatformEventListenerTests: XCTestCase {
         // Allow the main-queue hop the implementation performs.
         try await Task.sleep(nanoseconds: 100_000_000)
 
-        XCTAssertNotNil(viewModel.currentScreen, "reload must yield a screen")
+        let currentScreen = try XCTUnwrap(
+            viewModel.currentScreen,
+            "reload must yield a screen"
+        )
         if let before = screenIdBefore {
             XCTAssertEqual(
-                viewModel.currentScreen?.screenId,
+                currentScreen.screenId,
                 before,
                 "reloading an unchanged underlying state must yield the same screen id"
             )

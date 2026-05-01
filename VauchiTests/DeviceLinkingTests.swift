@@ -134,9 +134,7 @@ final class DeviceLinkingTests: XCTestCase {
     func testParseInvalidDeviceLinkQR() throws {
         let invalidData = "not-valid-device-link-qr"
 
-        XCTAssertThrowsError(try repo.parseDeviceLinkQr(qrData: invalidData)) { error in
-            XCTAssertNotNil(error)
-        }
+        XCTAssertThrowsError(try repo.parseDeviceLinkQr(qrData: invalidData))
     }
 
     /// Scenario: Parse empty device link QR returns error

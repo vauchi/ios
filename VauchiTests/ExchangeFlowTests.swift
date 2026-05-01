@@ -78,10 +78,9 @@ final class ExchangeFlowTests: XCTestCase {
         let invalidData = "not-a-valid-qr-code"
         let sessionData = try repo.generateExchangeQrWithSession()
 
-        XCTAssertThrowsError(try sessionData.session.processQr(qrData: invalidData)) { error in
-            // Should throw some form of parse error
-            XCTAssertNotNil(error)
-        }
+        // XCTAssertThrowsError already verifies a throw occurred — the closure's
+        // `error` is non-optional, so a bare nil check would be tautological.
+        XCTAssertThrowsError(try sessionData.session.processQr(qrData: invalidData))
     }
 
     /// Scenario: Parse empty QR data returns error
@@ -89,9 +88,7 @@ final class ExchangeFlowTests: XCTestCase {
         try Self.skipPendingExchangeMigration()
         let sessionData = try repo.generateExchangeQrWithSession()
 
-        XCTAssertThrowsError(try sessionData.session.processQr(qrData: "")) { error in
-            XCTAssertNotNil(error)
-        }
+        XCTAssertThrowsError(try sessionData.session.processQr(qrData: ""))
     }
 
     /// Scenario: Parse corrupted base64 returns error
@@ -115,10 +112,7 @@ final class ExchangeFlowTests: XCTestCase {
 
         let repoNoIdentity = try VauchiRepository(dataDir: tempDir2.path)
 
-        XCTAssertThrowsError(try repoNoIdentity.generateExchangeQrWithSession()) { error in
-            // Should require identity
-            XCTAssertNotNil(error)
-        }
+        XCTAssertThrowsError(try repoNoIdentity.generateExchangeQrWithSession())
     }
 
     // MARK: - Contact Card Tests
