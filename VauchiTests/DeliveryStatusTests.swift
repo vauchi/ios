@@ -59,20 +59,23 @@ final class DeliveryStatusTests: XCTestCase {
 
     /// Scenario: DeliveryRecord contains required fields
     func testDeliveryRecordFields() {
+        let createdAt = Date()
+        let updatedAt = Date()
         let record = VauchiDeliveryRecord(
             messageId: "msg-123",
             recipientId: "contact-456",
             status: .delivered,
-            createdAt: Date(),
-            updatedAt: Date(),
+            createdAt: createdAt,
+            updatedAt: updatedAt,
             expiresAt: nil
         )
 
         XCTAssertEqual(record.messageId, "msg-123")
         XCTAssertEqual(record.recipientId, "contact-456")
         XCTAssertEqual(record.status, .delivered)
-        XCTAssertNotNil(record.createdAt)
-        XCTAssertNotNil(record.updatedAt)
+        XCTAssertEqual(record.createdAt, createdAt)
+        XCTAssertEqual(record.updatedAt, updatedAt)
+        XCTAssertNil(record.expiresAt, "expiresAt was passed as nil")
     }
 
     /// Scenario: DeliveryRecord with expiration
@@ -87,7 +90,7 @@ final class DeliveryStatusTests: XCTestCase {
             expiresAt: expiresAt
         )
 
-        XCTAssertNotNil(record.expiresAt)
+        XCTAssertEqual(record.expiresAt, expiresAt)
         XCTAssertFalse(record.isExpired)
     }
 
@@ -207,11 +210,17 @@ final class DeliveryStatusTests: XCTestCase {
         let repository = try VauchiRepository(dataDir: tempDir.path)
         try repository.createIdentity(displayName: "Alice")
 
-        // Getting summary for non-existent message should return nil or empty summary
+        // For a non-existent message, the summary returns the queried id
+        // with all device counters at zero — never throws, never invents
+        // delivery records.
         let summary = try repository.getDeliverySummary(messageId: "nonexistent")
 
-        // Should handle gracefully
-        XCTAssertNotNil(summary)
+        XCTAssertEqual(summary.messageId, "nonexistent")
+        XCTAssertEqual(summary.totalDevices, 0)
+        XCTAssertEqual(summary.deliveredDevices, 0)
+        XCTAssertEqual(summary.pendingDevices, 0)
+        XCTAssertEqual(summary.failedDevices, 0)
+        XCTAssertFalse(summary.isFullyDelivered, "Empty summary cannot be fully delivered")
     }
 
     /// Scenario: Repository can retry failed delivery

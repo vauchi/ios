@@ -92,8 +92,13 @@ final class ContractTests: XCTestCase {
         let screen = try loadFixture("welcome")
         XCTAssertEqual(screen.screenId, "welcome")
         XCTAssertFalse(screen.title.isEmpty)
-        XCTAssertNotNil(screen.subtitle)
-        XCTAssertNotNil(screen.progress)
+        XCTAssertFalse(screen.subtitle?.isEmpty ?? true,
+                       "welcome fixture must carry a non-empty subtitle")
+        let progress = try XCTUnwrap(screen.progress,
+                                     "welcome fixture is an onboarding step and must carry progress")
+        XCTAssertEqual(progress.currentStep, 1, "welcome is step 1 of the onboarding flow")
+        XCTAssertGreaterThan(progress.totalSteps, progress.currentStep,
+                             "totalSteps must exceed currentStep on the first onboarding step")
         XCTAssertFalse(screen.components.isEmpty)
         XCTAssertFalse(screen.actions.isEmpty)
         XCTAssertEqual(screen.actions[0].style, .primary)
@@ -103,7 +108,10 @@ final class ContractTests: XCTestCase {
     func testPreviewCardFixtureContent() throws {
         let screen = try loadFixture("preview_card")
         XCTAssertEqual(screen.screenId, "preview_card")
-        XCTAssertNotNil(screen.progress)
+        let progress = try XCTUnwrap(screen.progress,
+                                     "preview_card fixture is an onboarding step and must carry progress")
+        XCTAssertGreaterThan(progress.totalSteps, 0)
+        XCTAssertGreaterThan(progress.currentStep, 0)
         XCTAssertFalse(screen.components.isEmpty)
     }
 

@@ -33,16 +33,15 @@ final class NetworkMonitorTests: XCTestCase {
 
     /// Scenario: ConnectionType enum has all expected cases
     func testConnectionTypeHasAllCases() {
-        // Verify all connection types exist
-        let wifi = NetworkMonitor.ConnectionType.wifi
-        let cellular = NetworkMonitor.ConnectionType.cellular
-        let wired = NetworkMonitor.ConnectionType.wired
-        let unknown = NetworkMonitor.ConnectionType.unknown
+        // Each case must be distinct — relying on Set equality catches an
+        // accidental aliasing collapse (e.g. wired = wifi) that a plain
+        // existence check would silently miss.
+        let allCases: Set<NetworkMonitor.ConnectionType> = [
+            .wifi, .cellular, .wired, .unknown,
+        ]
 
-        XCTAssertNotNil(wifi)
-        XCTAssertNotNil(cellular)
-        XCTAssertNotNil(wired)
-        XCTAssertNotNil(unknown)
+        XCTAssertEqual(allCases.count, 4,
+                       "ConnectionType must expose 4 distinct cases (wifi, cellular, wired, unknown)")
     }
 
     // MARK: - Published Properties Tests
