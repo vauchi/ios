@@ -7,6 +7,7 @@
 
 import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 import VauchiPlatform
 
 /// Renders a core-driven screen by name using the shared `AppViewModel`.
@@ -174,18 +175,19 @@ struct ImagePickerSheet: UIViewControllerRepresentable {
             picker.dismiss(animated: true)
 
             guard let provider = results.first?.itemProvider,
-                  provider.canLoadObject(ofClass: UIImage.self) else {
+                  provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) else {
                 onCancel()
                 return
             }
 
-            provider.loadObject(ofClass: UIImage.self) { [weak self] object, _ in
-                guard let image = object as? UIImage,
-                      let data = image.jpegData(compressionQuality: 0.9) else {
+            // Per ADR-042: hand raw bytes to core. Core converts/resizes to
+            // WebP ≤ 32 KB internally — no frontend re-encode.
+            provider.loadDataRepresentation(forTypeIdentifier: UTType.image.identifier) { [weak self] data, _ in
+                guard let data else {
                     DispatchQueue.main.async { self?.onCancel() }
                     return
                 }
-                let bytes = Array(data)
+                let bytes = [UInt8](data)
                 DispatchQueue.main.async { self?.onImageSelected(bytes) }
             }
         }
