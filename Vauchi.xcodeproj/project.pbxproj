@@ -69,6 +69,7 @@
 		345A6E8CFA128DEE17B47EAF /* NfcDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EDBF8DCF3784366CBDEDEF6 /* NfcDiagnosticView.swift */; };
 		34E2C9FC8A075320B7F7ACF5 /* testFieldListWithFieldsPerGroup.1.png in Resources */ = {isa = PBXBuildFile; fileRef = F94CFFC17D772290645209B3 /* testFieldListWithFieldsPerGroup.1.png */; };
 		34F52840713164ECB2872F0A /* security_explanation.json in Resources */ = {isa = PBXBuildFile; fileRef = F0B262096D756FC7E6603C05 /* security_explanation.json */; };
+		356F61682CEE85BF2AEC1329 /* LinkResponderSessionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFCBFE7125B76192A4D2CF8D /* LinkResponderSessionService.swift */; };
 		358AFF239AC4AAA206629F70 /* ExchangeFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8814BC91D7F7804BEC20F59B /* ExchangeFlowTests.swift */; };
 		3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5484CED84D0E33E917230C9A /* NetworkMonitorTests.swift */; };
 		3D787C329E429BC3B8206837 /* RecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8736078E77840EDC8E0283A /* RecoveryView.swift */; };
@@ -498,6 +499,7 @@
 		CE69227779252FAF163BCC07 /* ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsTests.swift; sourceTree = "<group>"; };
 		CE9581C53B23B46E50E35837 /* PasscodePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodePolicyTests.swift; sourceTree = "<group>"; };
 		CEA6AABBC0A3101980DD8C37 /* ImportContactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportContactsView.swift; sourceTree = "<group>"; };
+		CFCBFE7125B76192A4D2CF8D /* LinkResponderSessionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkResponderSessionService.swift; sourceTree = "<group>"; };
 		D00EF6554B76A106ACC1A18A /* testThemeSettingsView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testThemeSettingsView.1.png; sourceTree = "<group>"; };
 		D42379D47C2AFA9F80BAAB6A /* testSyncingState.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSyncingState.1.png; sourceTree = "<group>"; };
 		D51F85BE507FC3741AFF9FE2 /* testExchangeShowQrDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeShowQrDark.1.png; sourceTree = "<group>"; };
@@ -978,6 +980,7 @@
 				7A701A0C348B6758EED1D949 /* DirectSendService.swift */,
 				BFEFA0373F92D41AE00637B0 /* ExchangeCommandHandler.swift */,
 				B31DFE6F23CEA01F0437957B /* KeychainService.swift */,
+				CFCBFE7125B76192A4D2CF8D /* LinkResponderSessionService.swift */,
 				6C859B6215BADD6A45480D9F /* LocalizationService.swift */,
 				CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */,
 				B2D34EC3AF2AE35F80A5354A /* NFCExchangeService.swift */,
@@ -1372,6 +1375,7 @@
 				D69FF7EF9ACE7B733C6D3534 /* InlineConfirmView.swift in Sources */,
 				8CD4D48FC7E49B0DA82AD497 /* KeychainService.swift in Sources */,
 				0098BE4EAD470F85DBCBE2E7 /* LanguageSettingsView.swift in Sources */,
+				356F61682CEE85BF2AEC1329 /* LinkResponderSessionService.swift in Sources */,
 				6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */,
 				9C9A5E8876CAFA84118E8DBF /* LockScreenView.swift in Sources */,
 				A08A872D7E8A41B36C908DD3 /* MoreView.swift in Sources */,
