@@ -116,7 +116,7 @@ struct SettingsView: View {
                     .contextMenu {
                         if let publicId = viewModel.publicId {
                             Button(action: {
-                                UIPasteboard.general.string = publicId
+                                ContactActions.copyToClipboard(publicId)
                             }) {
                                 Label("Copy Full ID", systemImage: "doc.on.doc")
                             }
@@ -903,7 +903,7 @@ struct DeviceRow: View {
             }
 
             Button(action: {
-                UIPasteboard.general.string = device.publicKeyPrefix
+                ContactActions.copyToClipboard(device.publicKeyPrefix)
             }) {
                 Label("Copy Device ID", systemImage: "doc.on.doc")
             }
