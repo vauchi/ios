@@ -306,7 +306,7 @@ struct CreateClaimSheet: View {
                             .cornerRadius(8)
 
                         Button(action: {
-                            UIPasteboard.general.string = claim
+                            ContactActions.copyToClipboard(claim)
                         }) {
                             Label("Copy Claim Data", systemImage: "doc.on.doc")
                                 .frame(maxWidth: .infinity)
@@ -429,7 +429,7 @@ struct CreateVoucherSheet: View {
                             .cornerRadius(8)
 
                         Button(action: {
-                            UIPasteboard.general.string = voucher
+                            ContactActions.copyToClipboard(voucher)
                         }) {
                             Label("Copy Voucher Data", systemImage: "doc.on.doc")
                                 .frame(maxWidth: .infinity)
@@ -662,7 +662,7 @@ struct AddVoucherSheet: View {
                             Button(action: {
                                 Task {
                                     if let proof = try? await viewModel.getRecoveryProof() {
-                                        UIPasteboard.general.string = proof
+                                        ContactActions.copyToClipboard(proof)
                                     }
                                 }
                             }) {
@@ -874,7 +874,7 @@ struct RecoveryStatusSheet: View {
     private func copyProof() {
         Task {
             if let proof = try? await viewModel.getRecoveryProof() {
-                UIPasteboard.general.string = proof
+                ContactActions.copyToClipboard(proof)
             }
         }
     }

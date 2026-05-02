@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import UniformTypeIdentifiers
 import VauchiPlatform
 
 /// Bridge to vauchi-core's URL safety validator. Defined at file scope
@@ -196,15 +197,35 @@ enum ContactActions {
         openUrl(url)
     }
 
-    /// Copy a value to the clipboard. Auto-clear timing is owned by core
-    /// via `mobileClipboardPolicy()`; `autoClearSeconds == 0` disables
-    /// the timer (used for debug builds or user opt-out).
+    /// Copy a sensitive value to the clipboard with platform-level guards:
+    ///
+    /// - `localOnly`: prevents Universal Clipboard sync to other Apple
+    ///   devices on the same iCloud account.
+    /// - `expirationDate`: tells iOS itself to clear the pasteboard after
+    ///   the configured TTL even if the app is suspended or killed.
+    /// - In-process auto-clear timer: defence in depth; covers older iOS
+    ///   builds and in-foreground sessions.
+    ///
+    /// Auto-clear timing is owned by core via `mobileClipboardPolicy()`;
+    /// `autoClearSeconds == 0` disables every timer (used for debug
+    /// builds or user opt-out) and falls back to a plain copy.
     @MainActor
     static func copyToClipboard(_ value: String) {
-        UIPasteboard.general.string = value
-
         let autoClearSeconds = mobileClipboardPolicy().autoClearSeconds
-        guard autoClearSeconds > 0 else { return }
+
+        guard autoClearSeconds > 0 else {
+            UIPasteboard.general.string = value
+            return
+        }
+
+        let expiration = Date().addingTimeInterval(TimeInterval(autoClearSeconds))
+        UIPasteboard.general.setItems(
+            [[UTType.utf8PlainText.identifier: value]],
+            options: [
+                .localOnly: true,
+                .expirationDate: expiration,
+            ]
+        )
 
         let nanoseconds = UInt64(autoClearSeconds) * 1_000_000_000
         Task {
