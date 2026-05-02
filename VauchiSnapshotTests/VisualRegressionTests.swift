@@ -109,33 +109,20 @@ final class VisualRegressionTests: XCTestCase {
         assertScreenSnapshot(of: view)
     }
 
-    func testSettingsView() {
-        let vm = makeViewModel()
-        let view = SettingsView()
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
+    // testSettingsView, testThemeSettingsView, testLanguageSettingsView
+    // removed in the 2026-05-02 SettingsView/RecoveryView retirement
+    // (_private/docs/problems/2026-04-28-pure-humble-ui-retire-native-screens/).
+    // SettingsView and its sub-screens (Theme, Language, Consent, Resistance,
+    // Groups, Recovery, SocialGraph) are deleted — the Settings tab routes to
+    // CoreScreenView("Settings") via MoreView. Behavioral coverage lives in
+    // core/vauchi-app/src/ui/settings.rs (engine tests) and the reachability
+    // walker. A snapshot test against CoreScreenView would need a real
+    // PlatformAppEngine seeded for the Settings screen — not available in
+    // the SnapshotTest runtime.
 
     func testHelpView() {
         let vm = makeViewModel()
         let view = HelpView()
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
-    func testThemeSettingsView() {
-        let vm = makeViewModel()
-        let view = ThemeSettingsView()
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
-    func testLanguageSettingsView() {
-        let vm = makeViewModel()
-        let view = LanguageSettingsView()
             .environmentObject(vm)
 
         assertScreenSnapshot(of: view)
@@ -164,13 +151,9 @@ final class VisualRegressionTests: XCTestCase {
     // core/vauchi-app/tests/reachability/contact_detail.rs and
     // core/vauchi-app/tests/reachability/delivery_status.rs.
 
-    func testRecoveryView() {
-        let vm = makeViewModel()
-        let view = RecoveryView()
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
+    // testRecoveryView removed in the 2026-05-02
+    // SettingsView/RecoveryView retirement — the Recovery screen now
+    // renders via core's BackupRecoveryEngine.
 
     // MARK: - Special States
 
@@ -219,14 +202,8 @@ final class VisualRegressionTests: XCTestCase {
         assertScreenSnapshot(of: view)
     }
 
-    func testSettingsViewDark() {
-        let vm = makeViewModel()
-        let view = SettingsView()
-            .environmentObject(vm)
-            .environment(\.colorScheme, .dark)
-
-        assertScreenSnapshot(of: view)
-    }
+    // testSettingsViewDark removed in the 2026-05-02
+    // SettingsView/RecoveryView retirement.
 
     // MARK: - German Locale Variants
 
@@ -279,11 +256,6 @@ final class VisualRegressionTests: XCTestCase {
         withLocale("de", view: view)
     }
 
-    func testSettingsViewGerman() {
-        let vm = makeViewModel()
-        let view = SettingsView()
-            .environmentObject(vm)
-
-        withLocale("de", view: view)
-    }
+    // testSettingsViewGerman removed in the 2026-05-02
+    // SettingsView/RecoveryView retirement.
 }
