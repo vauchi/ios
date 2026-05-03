@@ -52,6 +52,7 @@
 		281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */; };
 		2B299FE3EE8C6AA3F7E94D29 /* testHomeViewWithFieldsGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 39051A8E2D361D595C7536C9 /* testHomeViewWithFieldsGerman.1.png */; };
 		2C996CD80C42DEDB7C30B91E /* testContactsScreenDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 334AA464FB30E416B9A73537 /* testContactsScreenDark.1.png */; };
+		2CF66DF4CD6F73102C31FA79 /* MultipartCameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B6C7CB36B2E650C3AA7DE1 /* MultipartCameraPreview.swift */; };
 		2D0728F99D4DBB3C8491C25B /* ThemeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CF989EA84DBE8A9F43E05D /* ThemeService.swift */; };
 		2D0FA5FFF83AA630F89F99F4 /* testFieldListMultipleFieldTypes.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 5AAC9A42D453BD1CCD3905C7 /* testFieldListMultipleFieldTypes.1.png */; };
 		2D46271A4B586388DDF2A5A9 /* contact_list.json in Resources */ = {isa = PBXBuildFile; fileRef = 640EF3CDE75D016F2437C111 /* contact_list.json */; };
@@ -433,6 +434,7 @@
 		B2D34EC3AF2AE35F80A5354A /* NFCExchangeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFCExchangeService.swift; sourceTree = "<group>"; };
 		B31DFE6F23CEA01F0437957B /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		B5C3AC067DAD006C8E3956CA /* testInfoPanelAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testInfoPanelAccessibility.1.txt; sourceTree = "<group>"; };
+		B7B6C7CB36B2E650C3AA7DE1 /* MultipartCameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartCameraPreview.swift; sourceTree = "<group>"; };
 		B8027B69C9794DDF7044A016 /* testContactListEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactListEmpty.1.png; sourceTree = "<group>"; };
 		BCB872C64B7220D3BEEFACED /* MoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreView.swift; sourceTree = "<group>"; };
 		BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCreateIdentityStepFilled.1.png; sourceTree = "<group>"; };
@@ -839,6 +841,7 @@
 				9E6425CCA740A863389E0918 /* FieldListView.swift */,
 				153F4A124314CB426DB39375 /* InfoPanelView.swift */,
 				03E516C3B759A34E4923EB25 /* InlineConfirmView.swift */,
+				B7B6C7CB36B2E650C3AA7DE1 /* MultipartCameraPreview.swift */,
 				286546CE3A05A6793AB73C5C /* PinInputView.swift */,
 				5CAC3D107CAB9E9674E9BF31 /* QrCodeView.swift */,
 				9FA11554E5C2DD27F7DABE4D /* SettingsGroupView.swift */,
@@ -1283,6 +1286,7 @@
 				6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */,
 				9C9A5E8876CAFA84118E8DBF /* LockScreenView.swift in Sources */,
 				A08A872D7E8A41B36C908DD3 /* MoreView.swift in Sources */,
+				2CF66DF4CD6F73102C31FA79 /* MultipartCameraPreview.swift in Sources */,
 				ADBDBB305DC254FE3A94B2F3 /* MultipartQRView.swift in Sources */,
 				ACB1FE30772E1BEAF475FAD3 /* NFCExchangeService.swift in Sources */,
 				281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */,
