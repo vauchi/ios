@@ -478,6 +478,66 @@ lint:swiftformat:
           - ".swiftformat"
           - ".gitlab-ci.yml"
 
+# Humble UI ratchets — five shared lint scripts mirrored from
+# `just lint ios` (xcode arm). Until this job landed the ratchets ran
+# only on dev laptops; CI silently let drift through. Scripts live in
+# `vauchi/scripts/scripts/` and are pulled by `${CI_API_V4_URL}` (same
+# pattern as Android's `check:design-tokens` and core's
+# `check:parser-parity` job — keeps the gate self-healing as scripts
+# evolve on `main`).
+#
+# Coverage:
+#   - check-domain-named-views.sh        — fences new `Vauchi/Views/*.swift`
+#                                          outside `.domain-named-views-allowlist`
+#   - check-text-literal-count.sh        — caps hardcoded `Text("Foo")` count
+#                                          via `.text-literal-baseline`
+#   - check-no-isimported-in-views.sh    — no view-layer `.isImported` reads
+#   - check-no-domain-conditionals-in-views.sh
+#                                        — no view-layer `.isVerified` /
+#                                          `.trustLevel` / etc. reads
+#   - check-no-direct-clipboard-writes.sh — no `UIPasteboard.general` writes
+#                                          outside `ContactActions.copyToClipboard`
+#
+# Source records:
+#   - 2026-05-02-ios-humble-ui-deep-retirement (G3, G5)
+#   - 2026-04-16-frontend-pure-renderer-violations (umbrella)
+check:humble-ui-ratchets:
+  extends: [.macos-job, .timeout-quick]
+  stage: lint
+  needs: []
+  before_script:
+    - mkdir -p .ratchet-scripts
+    - |
+      for script in \
+          check-domain-named-views.sh \
+          check-text-literal-count.sh \
+          check-no-isimported-in-views.sh \
+          check-no-domain-conditionals-in-views.sh \
+          check-no-direct-clipboard-writes.sh; do
+        curl --silent --fail \
+          "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2F${script}/raw?ref=main" \
+          -o ".ratchet-scripts/${script}"
+        chmod +x ".ratchet-scripts/${script}"
+      done
+  script:
+    # Each script exits non-zero on violation; `set -e` propagates the
+    # first failure as the job's exit status.
+    - .ratchet-scripts/check-domain-named-views.sh "$(pwd)"
+    - .ratchet-scripts/check-text-literal-count.sh "$(pwd)" Vauchi/Views/
+    - .ratchet-scripts/check-no-isimported-in-views.sh "$(pwd)"
+    - .ratchet-scripts/check-no-domain-conditionals-in-views.sh "$(pwd)"
+    - .ratchet-scripts/check-no-direct-clipboard-writes.sh "$(pwd)"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "Vauchi/**/*.swift"
+          - ".domain-named-views-allowlist"
+          - ".text-literal-baseline"
+          - ".gitlab-ci.yml"
+    - if: $CI_COMMIT_BRANCH == "main"
+
 lint:xcodegen:
   extends: .macos-job
   stage: lint
