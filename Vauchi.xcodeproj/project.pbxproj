@@ -124,7 +124,6 @@
 		7C752A3331298ADB01A6DDF9 /* testCardPreviewWithGroups.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 9F9346F7C59019E0E90B13BF /* testCardPreviewWithGroups.1.png */; };
 		7DD186FEB97D2385E15B8293 /* testInlineConfirmDestructive.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 6994C561A843EE3A785246A5 /* testInlineConfirmDestructive.1.png */; };
 		7E3F6E5B0E2A197266F3D9BC /* testHomeViewEmpty.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 200902ADA24D8C97BC83DA08 /* testHomeViewEmpty.1.png */; };
-		80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A63B916A948A0A03F3F45B6 /* AhaMomentView.swift */; };
 		81A3A29B52DFD10E82E5A85C /* exchange_show_qr.json in Resources */ = {isa = PBXBuildFile; fileRef = B0F87ACCDE28EC2B24B9A518 /* exchange_show_qr.json */; };
 		8233D17C24CBA0A46042C2BF /* SnapshotHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EEF8A8901309034B87F6CB /* SnapshotHelpers.swift */; };
 		86B371D3BFB2EDE95D642173 /* testStatusIndicatorFailed.1.png in Resources */ = {isa = PBXBuildFile; fileRef = AF0F088CC55F4D96F34D113B /* testStatusIndicatorFailed.1.png */; };
@@ -210,7 +209,6 @@
 		DD478B0145A11A9B9277A5BB /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773071C286EDA29BCB17B365 /* ContactsView.swift */; };
 		DEE606B56ADE8E72560BF538 /* testTextInputEmailType.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 21E325007F4C69CC6F55675D /* testTextInputEmailType.1.png */; };
 		E0642E4014C2147EBDC4FFF3 /* testContactListWithContacts.1.png in Resources */ = {isa = PBXBuildFile; fileRef = EDE8371E9A0D88B92DA2E683 /* testContactListWithContacts.1.png */; };
-		E274DDDCD426344D25E204F7 /* NfcTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B1F349466E7039EA4F918FC /* NfcTestView.swift */; };
 		E48B85C4088FE7CA877DAB25 /* contact_edit_fields.json in Resources */ = {isa = PBXBuildFile; fileRef = 07F69D47DBE79635FE185938 /* contact_edit_fields.json */; };
 		E4ABA23960463F55C2C3FB0D /* ContactActionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F097D48EF96B8E6440ACD9 /* ContactActionsTests.swift */; };
 		E544D67D5C73DC535A0D4F68 /* contact_edit_preview.json in Resources */ = {isa = PBXBuildFile; fileRef = C29DE27FD4421553D034E37A /* contact_edit_preview.json */; };
@@ -219,7 +217,6 @@
 		E7357AD786DE4BDF5C38C465 /* testSecurityStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 6310B8BCD3B5DC621926CA76 /* testSecurityStep.1.png */; };
 		E77805599DCC9EDD5AFD644B /* testInlineConfirmAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = A5E222C3D79E971771915FC6 /* testInlineConfirmAccessibility.1.txt */; };
 		E7893F4E30D7E6B7E3706323 /* TextInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA79BEC85FC2E70D2E996D7 /* TextInputView.swift */; };
-		E90014729E0D4394D5A26628 /* AccountDeletionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB5E7CFFD83945D91D395072 /* AccountDeletionView.swift */; };
 		E9866D4AE388DC57B562ADDB /* testContactListEmpty.1.png in Resources */ = {isa = PBXBuildFile; fileRef = B8027B69C9794DDF7044A016 /* testContactListEmpty.1.png */; };
 		E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EBCAF628D08C167C0D9721 /* QRScannerView.swift */; };
 		EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */; };
@@ -342,7 +339,6 @@
 		46CE8156A15BD5428BE8514A /* ContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContractTests.swift; sourceTree = "<group>"; };
 		47BDD68D75A3C55A093327A0 /* DividerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DividerView.swift; sourceTree = "<group>"; };
 		49509AE0DF70B880F977B015 /* AudioProximityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProximityService.swift; sourceTree = "<group>"; };
-		4A63B916A948A0A03F3F45B6 /* AhaMomentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AhaMomentView.swift; sourceTree = "<group>"; };
 		4B8C613C7D55CF224BEE622D /* testPreviewCardStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testPreviewCardStep.1.png; sourceTree = "<group>"; };
 		4C16296B579065E5D536DB40 /* welcome.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = welcome.json; sourceTree = "<group>"; };
 		4C33C5B250ED22834663E64B /* testHomeScreenEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testHomeScreenEmpty.1.png; sourceTree = "<group>"; };
@@ -373,7 +369,6 @@
 		677E67E216D48E378A773CD8 /* testTextInputAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testTextInputAccessibility.1.txt; sourceTree = "<group>"; };
 		6994C561A843EE3A785246A5 /* testInlineConfirmDestructive.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInlineConfirmDestructive.1.png; sourceTree = "<group>"; };
 		6A4D772FACC8B2FEB3D60DA8 /* testEditableTextDisplay.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testEditableTextDisplay.1.png; sourceTree = "<group>"; };
-		6B1F349466E7039EA4F918FC /* NfcTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NfcTestView.swift; sourceTree = "<group>"; };
 		6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPasswordView.swift; sourceTree = "<group>"; };
 		6C859B6215BADD6A45480D9F /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationService.swift; sourceTree = "<group>"; };
 		7068F2971F7C560EF2B884D8 /* SliderComponentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderComponentView.swift; sourceTree = "<group>"; };
@@ -477,7 +472,6 @@
 		D6E1FE2EE5B0C2CC821F5397 /* testInfoPanelDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInfoPanelDark.1.png; sourceTree = "<group>"; };
 		D7E1798719172168B0EBBBD3 /* PasscodePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodePolicy.swift; sourceTree = "<group>"; };
 		D98D690995A0DF8546684FA8 /* testSetupViewDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSetupViewDark.1.png; sourceTree = "<group>"; };
-		DB5E7CFFD83945D91D395072 /* AccountDeletionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDeletionView.swift; sourceTree = "<group>"; };
 		E044AD16B5BA923A443ADFC7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTests.swift; sourceTree = "<group>"; };
 		E31A56C292E9073A8A07BAF0 /* testTextInputWithValidationError.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextInputWithValidationError.1.png; sourceTree = "<group>"; };
@@ -809,8 +803,6 @@
 		CC27001BE792CD487814D16E /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				DB5E7CFFD83945D91D395072 /* AccountDeletionView.swift */,
-				4A63B916A948A0A03F3F45B6 /* AhaMomentView.swift */,
 				6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */,
 				A790D4D87DA66E3C3C93253D /* BleExchangeView.swift */,
 				773071C286EDA29BCB17B365 /* ContactsView.swift */,
@@ -821,7 +813,6 @@
 				644F12D83413B334E234F4AC /* LockScreenView.swift */,
 				BCB872C64B7220D3BEEFACED /* MoreView.swift */,
 				B001A2CBC5F0C8943926DA04 /* NfcExchangeView.swift */,
-				6B1F349466E7039EA4F918FC /* NfcTestView.swift */,
 				AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */,
 				36EBCAF628D08C167C0D9721 /* QRScannerView.swift */,
 				2C2D8422E9B837A1B336A071 /* SetupView.swift */,
@@ -1272,9 +1263,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				657B005AE09FDFE3AEE0ED58 /* AVCameraCaptureSheet.swift in Sources */,
-				E90014729E0D4394D5A26628 /* AccountDeletionView.swift in Sources */,
 				B105AF29B3E8B2E6AE0F3DFE /* ActionListView.swift in Sources */,
-				80C319570F738E26412F31A3 /* AhaMomentView.swift in Sources */,
 				76CE62B95DC53A13516F7D80 /* AppPasswordView.swift in Sources */,
 				0FC8C1248458C98DAE402799 /* AppViewModel.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
@@ -1322,7 +1311,6 @@
 				281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */,
 				345A6E8CFA128DEE17B47EAF /* NfcDiagnosticView.swift in Sources */,
 				202472C7B53FC0BE508D0CD8 /* NfcExchangeView.swift in Sources */,
-				E274DDDCD426344D25E204F7 /* NfcTestView.swift in Sources */,
 				138BEFDCC908871EDE97D333 /* NotificationService.swift in Sources */,
 				F1607238A8523A2811B18B74 /* OnboardingViewModel.swift in Sources */,
 				9C89BE4773D3F64FB89BFE9B /* PasscodePolicy.swift in Sources */,

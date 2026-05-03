@@ -26,8 +26,6 @@ WaitingForUnlockView.swift
 # --- To-be-retired (G1 targets) --------------------------------------
 # Each line below is a planned deletion. See the per-file plan in
 # the problem record once written.
-AccountDeletionView.swift
-AhaMomentView.swift
 BleExchangeView.swift
 ContactsView.swift
 ExchangeModePicker.swift
@@ -36,6 +34,5 @@ HomeView.swift
 ImportContactsView.swift
 MoreView.swift
 NfcExchangeView.swift
-NfcTestView.swift
 QRDiagnosticView.swift
 SetupView.swift
