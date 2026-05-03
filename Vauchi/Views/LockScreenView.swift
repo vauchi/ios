@@ -15,6 +15,8 @@ import SwiftUI
 struct LockScreenView: View {
     let onUnlock: () -> Void
 
+    @ObservedObject private var localizationService = LocalizationService.shared
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -24,25 +26,28 @@ struct LockScreenView: View {
                 .foregroundColor(.cyan)
                 .accessibilityHidden(true)
 
-            Text("Vauchi is Locked")
+            Text(localizationService.t("lock.title"))
                 .font(Font.title2.weight(.semibold))
                 .accessibilityAddTraits(.isHeader)
 
-            Text("Authenticate to access your contacts")
+            Text(localizationService.t("lock.subtitle"))
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
 
             Button(action: onUnlock) {
-                Label("Tap to Unlock", systemImage: "lock.open.fill")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
+                Label(
+                    localizationService.t("lock.unlock_button"),
+                    systemImage: "lock.open.fill"
+                )
+                .font(.headline)
+                .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .tint(.cyan)
             .padding(.horizontal, 48)
-            .accessibilityHint("Authenticate with Face ID, Touch ID, or passcode")
+            .accessibilityHint(localizationService.t("lock.a11y_hint"))
 
             Spacer()
         }
