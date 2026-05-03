@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Allow-list for ios/Vauchi/Views/*.swift consumed by
+# scripts/scripts/check-domain-named-views.sh (wired into `just lint ios`).
+#
+# Ratchet-down: each retirement MR (problem record
+# 2026-05-02-ios-humble-ui-deep-retirement, G1) deletes both the view
+# file and its entry below. The destination is the platform-required
+# subset only.
+#
+# One filename per line. Lines starting with `#` and blank lines
+# ignored.
+#
+# --- Platform-required (likely permanent) ----------------------------
+# LockScreenView   — pre-unlock biometric host; runs before core is
+#                    decrypted, so cannot render a core ScreenModel.
+# AppPasswordView  — pre-unlock password entry; same constraint.
+# QRScannerView    — AVCaptureSession host (camera lifecycle owner).
+# AVCameraCaptureSheet lives in CoreUI/, out of scope for this lint.
+AppPasswordView.swift
+LockScreenView.swift
+QRScannerView.swift
+WaitingForUnlockView.swift
+
+# --- To-be-retired (G1 targets) --------------------------------------
+# Each line below is a planned deletion. See the per-file plan in
+# the problem record once written.
+AccountDeletionView.swift
+AhaMomentView.swift
+ArchivedContactsView.swift
+BleExchangeView.swift
+ContactsView.swift
+DeliveryStatusView.swift
+ExchangeModePicker.swift
+FaceToFaceExchangeView.swift
+HelpView.swift
+HomeView.swift
+ImportContactsView.swift
+MoreView.swift
+NfcExchangeView.swift
+NfcTestView.swift
+QRDiagnosticView.swift
+SetupView.swift
