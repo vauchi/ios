@@ -185,7 +185,6 @@
 		CE057880AF7A31CD46AF1FD4 /* welcome.json in Resources */ = {isa = PBXBuildFile; fileRef = 4C16296B579065E5D536DB40 /* welcome.json */; };
 		D03CDFB9D57985CBD50D9C98 /* testTextInputWithValidationError.1.png in Resources */ = {isa = PBXBuildFile; fileRef = E31A56C292E9073A8A07BAF0 /* testTextInputWithValidationError.1.png */; };
 		D12A54D8D19EA3D447AAA3C9 /* RestoreIdentitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3AEDA84B5F37E858F3F1A47 /* RestoreIdentitySheet.swift */; };
-		D2EF571FC20DD01AF5776C64 /* MultipartQRScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */; };
 		D334DA4F74B2FD458729763E /* testCardPreviewMinimal.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 79B16A2E56FA9B8FA0C9F628 /* testCardPreviewMinimal.1.png */; };
 		D51F9490703B77CD5FC79AB5 /* testInfoPanelAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = B5C3AC067DAD006C8E3956CA /* testInfoPanelAccessibility.1.txt */; };
 		D585242288C2785DC2A788B6 /* testTextInputWithErrorAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 549D880176A65B3914B77EAC /* testTextInputWithErrorAccessibility.1.txt */; };
@@ -272,7 +271,6 @@
 		075A43D13266E824544C1089 /* ready.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ready.json; sourceTree = "<group>"; };
 		07F69D47DBE79635FE185938 /* contact_edit_fields.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contact_edit_fields.json; sourceTree = "<group>"; };
 		08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitingForUnlockView.swift; sourceTree = "<group>"; };
-		09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRScanner.swift; sourceTree = "<group>"; };
 		09D79E0645FD89F4223BD160 /* testEditableTextDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testEditableTextDark.1.png; sourceTree = "<group>"; };
 		0B50587B7EC6319B106FB462 /* testToggleListSingleItem.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testToggleListSingleItem.1.png; sourceTree = "<group>"; };
 		0D3497B12DDDF10370069F86 /* Vauchi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Vauchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -888,7 +886,6 @@
 			isa = PBXGroup;
 			children = (
 				794858315D56910FBB0F9531 /* ContactGroupBadges.swift */,
-				09922B1D829C4DCE4A2746A3 /* MultipartQRScanner.swift */,
 				66D4DF5873BED53D99177B4A /* MultipartQRView.swift */,
 			);
 			path = Components;
@@ -1286,7 +1283,6 @@
 				6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */,
 				9C9A5E8876CAFA84118E8DBF /* LockScreenView.swift in Sources */,
 				A08A872D7E8A41B36C908DD3 /* MoreView.swift in Sources */,
-				D2EF571FC20DD01AF5776C64 /* MultipartQRScanner.swift in Sources */,
 				ADBDBB305DC254FE3A94B2F3 /* MultipartQRView.swift in Sources */,
 				ACB1FE30772E1BEAF475FAD3 /* NFCExchangeService.swift in Sources */,
 				281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */,
