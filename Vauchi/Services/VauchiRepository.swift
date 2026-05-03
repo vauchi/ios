@@ -19,10 +19,6 @@
 // DONE: Password strength indicator - checkPasswordStrength() integrated in ExportBackupSheet
 // with PasswordStrengthIndicator component showing real-time visual feedback.
 //
-// DONE: Aha moments - hasSeenAhaMoment(), tryTriggerAhaMoment(),
-// tryTriggerAhaMomentWithContext(), ahaMomentsSeenCount(), ahaMomentsTotalCount(),
-// resetAhaMoments() methods implemented for progressive onboarding hints.
-//
 // DONE: Demo contact - implemented initDemoContactIfNeeded(), getDemoContact(),
 // getDemoContactState(), isDemoUpdateAvailable(), triggerDemoUpdate(),
 // dismissDemoContact(), autoRemoveDemoContact(), restoreDemoContact().
@@ -1528,38 +1524,6 @@ class VauchiRepository {
                 urlTemplate: sn.urlTemplate
             )
         }
-    }
-
-    // MARK: - Aha Moments (Progressive Onboarding)
-
-    /// Check if user has seen a specific aha moment
-    func hasSeenAhaMoment(_ momentType: MobileAhaMomentType) -> Bool {
-        (try? appEngine.hasSeenAhaMoment(momentType: momentType)) ?? false
-    }
-
-    /// Try to trigger an aha moment (returns nil if already seen)
-    func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) throws -> MobileAhaMoment? {
-        try appEngine.tryTriggerAhaMoment(momentType: momentType)
-    }
-
-    /// Try to trigger an aha moment with context (returns nil if already seen)
-    func tryTriggerAhaMomentWithContext(_ momentType: MobileAhaMomentType, context: String) throws -> MobileAhaMoment? {
-        try appEngine.tryTriggerAhaMomentWithContext(momentType: momentType, context: context)
-    }
-
-    /// Get count of seen aha moments
-    func ahaMomentsSeenCount() -> UInt32 {
-        (try? appEngine.ahaMomentsSeenCount()) ?? 0
-    }
-
-    /// Get total count of aha moments
-    func ahaMomentsTotalCount() -> UInt32 {
-        (try? appEngine.ahaMomentsTotalCount()) ?? 0
-    }
-
-    /// Reset all aha moments (for development/testing)
-    func resetAhaMoments() throws {
-        try appEngine.resetAhaMoments()
     }
 
     // MARK: - Certificate Pinning

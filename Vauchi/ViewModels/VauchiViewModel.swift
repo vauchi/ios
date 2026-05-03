@@ -107,9 +107,6 @@ class VauchiViewModel: ObservableObject {
     @Published var toastUndoActionId: String?
     private var toastUndoHandler: (() async throws -> Void)?
 
-    /// Aha moments (progressive onboarding)
-    @Published var currentAhaMoment: MobileAhaMoment?
-
     // MARK: - Core-Driven UI
 
     /// Shared AppViewModel for core-driven screens (Groups, and future tabs).
@@ -1381,61 +1378,6 @@ class VauchiViewModel: ObservableObject {
             throw VauchiRepositoryError.notInitialized
         }
         try repository.reloadSocialNetworks()
-    }
-
-    // MARK: - Aha Moments (Progressive Onboarding)
-
-    /// Try to trigger an aha moment and display it
-    func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) {
-        guard let repository else { return }
-        do {
-            if let moment = try repository.tryTriggerAhaMoment(momentType) {
-                DispatchQueue.main.async {
-                    self.currentAhaMoment = moment
-                }
-            }
-        } catch {
-            // Silently fail - aha moments are non-critical
-        }
-    }
-
-    /// Try to trigger an aha moment with context
-    func tryTriggerAhaMomentWithContext(_ momentType: MobileAhaMomentType, context: String) {
-        guard let repository else { return }
-        do {
-            if let moment = try repository.tryTriggerAhaMomentWithContext(momentType, context: context) {
-                DispatchQueue.main.async {
-                    self.currentAhaMoment = moment
-                }
-            }
-        } catch {
-            // Silently fail - aha moments are non-critical
-        }
-    }
-
-    /// Dismiss the current aha moment
-    func dismissAhaMoment() {
-        currentAhaMoment = nil
-    }
-
-    /// Check if user has seen a specific aha moment
-    func hasSeenAhaMoment(_ momentType: MobileAhaMomentType) -> Bool {
-        guard let repository else { return true }
-        return repository.hasSeenAhaMoment(momentType)
-    }
-
-    /// Get aha moments progress (seen/total)
-    func ahaMomentsProgress() -> (seen: Int, total: Int) {
-        guard let repository else { return (0, 0) }
-        return (Int(repository.ahaMomentsSeenCount()), Int(repository.ahaMomentsTotalCount()))
-    }
-
-    /// Reset aha moments (for Settings)
-    func resetAhaMoments() async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-        try repository.resetAhaMoments()
     }
 
     // MARK: - Certificate Pinning
