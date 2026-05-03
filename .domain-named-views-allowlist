@@ -26,7 +26,6 @@ WaitingForUnlockView.swift
 # --- To-be-retired (G1 targets) --------------------------------------
 # Each line below is a planned deletion. See the per-file plan in
 # the problem record once written.
-BleExchangeView.swift
 ContactsView.swift
 ExchangeModePicker.swift
 FaceToFaceExchangeView.swift

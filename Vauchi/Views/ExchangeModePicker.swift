@@ -55,7 +55,33 @@ struct ExchangeModePicker: View {
                     title: localizationService.t("exchange.mode.ble"),
                     subtitle: localizationService.t("exchange.mode.ble_description"),
                     enabled: true,
-                    destination: BleExchangeView()
+                    destination: VStack(spacing: 0) {
+                        // BLE proximity banner — was the body of the
+                        // retired BleExchangeView. Inlined here at the
+                        // single call site so BleExchangeView is no
+                        // longer a domain-named view file. The actual
+                        // exchange flow is FaceToFaceExchangeView's
+                        // multi-stage engine; BLE transport is enabled
+                        // automatically by the core ExchangeCommandHandler.
+                        HStack(spacing: 8) {
+                            Image(systemName: "antenna.radiowaves.left.and.right")
+                                .foregroundStyle(.blue)
+                            // Hardcoded string preserved verbatim from
+                            // the retired BleExchangeView. Adding a
+                            // locale key here is G3 follow-up — out of
+                            // scope for this retirement to keep the diff
+                            // behaviour-equivalent.
+                            Text("Bluetooth proximity active — exchange will use BLE when available")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity)
+                        .background(Color(.systemGray6))
+
+                        FaceToFaceExchangeView()
+                    }
                 )
 
                 Spacer()

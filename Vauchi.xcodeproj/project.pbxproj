@@ -70,7 +70,6 @@
 		3EE222C1CDE5AA17773953B3 /* testLoadingView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */; };
 		40CA0D251A7EE2861DB81ADE /* testCardPreviewGroupSelected.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 16817F15488300C5EAF304A8 /* testCardPreviewGroupSelected.1.png */; };
 		4235EDCB7DC3862C3F48F194 /* testInfoPanelWithIcon.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1A85B8272FE7B284D215644A /* testInfoPanelWithIcon.1.png */; };
-		424288A6F9E8D746208AF20B /* BleExchangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A790D4D87DA66E3C3C93253D /* BleExchangeView.swift */; };
 		431503ADA7BCDB0CA94FBDEE /* testWelcomeScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 962C13D56F463655E00BA233 /* testWelcomeScreen.1.png */; };
 		4322A5CEDF0F187C9BB72186 /* DropdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A73A60BF23E98F506D8E5A8D /* DropdownView.swift */; };
 		43631E8778F64B024498C964 /* testTextComponentBody.1.png in Resources */ = {isa = PBXBuildFile; fileRef = BF21CF300C61D81BBA57F040 /* testTextComponentBody.1.png */; };
@@ -418,7 +417,6 @@
 		A5E222C3D79E971771915FC6 /* testInlineConfirmAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testInlineConfirmAccessibility.1.txt; sourceTree = "<group>"; };
 		A73A60BF23E98F506D8E5A8D /* DropdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownView.swift; sourceTree = "<group>"; };
 		A75DABB058471CE8E0587E20 /* home_empty.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = home_empty.json; sourceTree = "<group>"; };
-		A790D4D87DA66E3C3C93253D /* BleExchangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleExchangeView.swift; sourceTree = "<group>"; };
 		A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testLoadingView.1.png; sourceTree = "<group>"; };
 		A96F7230AD994FA18A53A544 /* testWelcomeScreenDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testWelcomeScreenDark.1.png; sourceTree = "<group>"; };
 		A96FE811E67752C2D8F9079E /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
@@ -793,7 +791,6 @@
 			isa = PBXGroup;
 			children = (
 				6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */,
-				A790D4D87DA66E3C3C93253D /* BleExchangeView.swift */,
 				773071C286EDA29BCB17B365 /* ContactsView.swift */,
 				5D188A68C0567059D98640C5 /* ExchangeModePicker.swift */,
 				A34F01BD07BC1A3FF39429C8 /* FaceToFaceExchangeView.swift */,
@@ -1257,7 +1254,6 @@
 				6A3C10861679B93C3B320E98 /* BannerView.swift in Sources */,
 				7532FD4076FE6E6670E901E6 /* BleDiagnosticView.swift in Sources */,
 				EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */,
-				424288A6F9E8D746208AF20B /* BleExchangeView.swift in Sources */,
 				EC26C5F66AE81B6841339A50 /* CardPreviewView.swift in Sources */,
 				8F1D5438434B846475597477 /* ComponentView.swift in Sources */,
 				307654F6186C276FC27E761A /* ConfirmationDialogView.swift in Sources */,
