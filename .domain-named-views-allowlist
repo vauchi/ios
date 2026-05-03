@@ -28,7 +28,6 @@ WaitingForUnlockView.swift
 # the problem record once written.
 AccountDeletionView.swift
 AhaMomentView.swift
-ArchivedContactsView.swift
 BleExchangeView.swift
 ContactsView.swift
 ExchangeModePicker.swift
