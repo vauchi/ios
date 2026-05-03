@@ -57,13 +57,13 @@ final class VisualRegressionTests: XCTestCase {
 
     // MARK: - Setup / No Identity State
 
-    func testSetupView() {
-        let vm = makeViewModel(hasIdentity: false)
-        let view = SetupView()
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
+    // testSetupView, testSetupViewDark, testSetupViewGerman removed alongside
+    // SetupView retirement (2026-05-03 Phase 1 of
+    // 2026-05-02-ios-humble-ui-deep-retirement): the dead SetupView
+    // (no production call site — onboarding routes through CoreOnboardingView
+    // in ContentView, not SetupView) was deleted. Behavioral coverage of
+    // identity creation lives in CoreOnboardingView's own tests + the core
+    // engine's reachability walker.
 
     // MARK: - Onboarding
 
@@ -174,15 +174,6 @@ final class VisualRegressionTests: XCTestCase {
 
     // MARK: - Dark Mode Variants
 
-    func testSetupViewDark() {
-        let vm = makeViewModel(hasIdentity: false)
-        let view = SetupView()
-            .environmentObject(vm)
-            .environment(\.colorScheme, .dark)
-
-        assertScreenSnapshot(of: view)
-    }
-
     func testHomeViewWithFieldsDark() {
         let vm = makeViewModel(
             card: VauchiContactCard(displayName: "Alice", fields: sampleFields)
@@ -229,14 +220,6 @@ final class VisualRegressionTests: XCTestCase {
         } else {
             LocalizationService.shared.selectLocale(previousLocale)
         }
-    }
-
-    func testSetupViewGerman() {
-        let vm = makeViewModel(hasIdentity: false)
-        let view = SetupView()
-            .environmentObject(vm)
-
-        withLocale("de", view: view)
     }
 
     func testHomeViewWithFieldsGerman() {
