@@ -147,21 +147,21 @@ struct ContactGroupBadgesLoader: View {
 #Preview("Multiple badges") {
     ContactGroupBadges(
         groups: [
-            VauchiVisibilityLabel(from: MobileVisibilityLabel(
+            VauchiVisibilityLabel(
                 id: "1", name: "Family",
                 contactCount: 5, visibleFieldCount: 3,
                 createdAt: 0, modifiedAt: 0
-            )),
-            VauchiVisibilityLabel(from: MobileVisibilityLabel(
+            ),
+            VauchiVisibilityLabel(
                 id: "2", name: "Friends",
                 contactCount: 12, visibleFieldCount: 2,
                 createdAt: 0, modifiedAt: 0
-            )),
-            VauchiVisibilityLabel(from: MobileVisibilityLabel(
+            ),
+            VauchiVisibilityLabel(
                 id: "3", name: "Work",
                 contactCount: 8, visibleFieldCount: 4,
                 createdAt: 0, modifiedAt: 0
-            )),
+            ),
         ],
         compact: true
     )
@@ -171,11 +171,11 @@ struct ContactGroupBadgesLoader: View {
 #Preview("Single badge") {
     ContactGroupBadges(
         groups: [
-            VauchiVisibilityLabel(from: MobileVisibilityLabel(
+            VauchiVisibilityLabel(
                 id: "1", name: "Family",
                 contactCount: 5, visibleFieldCount: 3,
                 createdAt: 0, modifiedAt: 0
-            )),
+            ),
         ]
     )
     .padding()

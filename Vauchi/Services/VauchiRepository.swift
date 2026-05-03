@@ -267,13 +267,31 @@ struct VauchiVisibilityLabel: Identifiable {
     let createdAt: UInt64
     let modifiedAt: UInt64
 
+    init(
+        id: String,
+        name: String,
+        contactCount: UInt32,
+        visibleFieldCount: UInt32,
+        createdAt: UInt64,
+        modifiedAt: UInt64
+    ) {
+        self.id = id
+        self.name = name
+        self.contactCount = contactCount
+        self.visibleFieldCount = visibleFieldCount
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+
     init(from mobile: MobileVisibilityLabel) {
-        id = mobile.id
-        name = mobile.name
-        contactCount = mobile.contactCount
-        visibleFieldCount = mobile.visibleFieldCount
-        createdAt = mobile.createdAt
-        modifiedAt = mobile.modifiedAt
+        self.init(
+            id: mobile.id,
+            name: mobile.name,
+            contactCount: mobile.contactCount,
+            visibleFieldCount: mobile.visibleFieldCount,
+            createdAt: mobile.createdAt,
+            modifiedAt: mobile.modifiedAt
+        )
     }
 }
 
