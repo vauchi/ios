@@ -120,13 +120,14 @@ final class VisualRegressionTests: XCTestCase {
     // PlatformAppEngine seeded for the Settings screen — not available in
     // the SnapshotTest runtime.
 
-    func testHelpView() {
-        let vm = makeViewModel()
-        let view = HelpView()
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
+    // testHelpView removed alongside HelpView retirement
+    // (2026-05-03 Phase 1 of 2026-05-02-ios-humble-ui-deep-retirement):
+    // the More tab now routes Help via `CoreScreenView(screenName: "help")`.
+    // A snapshot test against CoreScreenView would need a real
+    // PlatformAppEngine seeded for the Help screen — not available in
+    // the SnapshotTest runtime. Behavioral coverage lives in
+    // core/vauchi-app/src/ui/help.rs (engine tests) and the reachability
+    // walker.
 
     // testLabelsView removed in the 2026-04-28 Pure Humble UI Pair 2
     // retirement: native LabelsView (a SwiftUI shadow of GroupsView)

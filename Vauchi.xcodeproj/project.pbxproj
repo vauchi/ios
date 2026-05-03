@@ -112,7 +112,6 @@
 		6C775CA748C7BDD8C00321F0 /* testHomeViewWithFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = AE391D2B30E4ECCA0C1161B7 /* testHomeViewWithFields.1.png */; };
 		6E713428218E42433EB22954 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 108E48F43D27EA5EB6FFB226 /* PrivacyInfo.xcprivacy */; };
 		6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C859B6215BADD6A45480D9F /* LocalizationService.swift */; };
-		7017670F8C2EDE1BDBDDAA7B /* testHelpView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 367C77DA03F258D4B1D9C6FF /* testHelpView.1.png */; };
 		71CABD3B8764AE19DD69EE44 /* testInfoPanelWithoutIcon.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 32949B7AFAC3435ABA7D93FD /* testInfoPanelWithoutIcon.1.png */; };
 		7268CABF6013A271BFD83C39 /* CoreOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC13750603D7C1EF84BACBC /* CoreOnboardingView.swift */; };
 		72989B5EB5FC96F172CB1C49 /* testAddFieldsScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 22CBF2E4029854CB3051D98A /* testAddFieldsScreen.1.png */; };
@@ -149,7 +148,6 @@
 		9DA062B94245C7748637A619 /* CoreScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */; };
 		9DB670EF78DB7FBAEEF7696B /* DeliveryStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A9F60104DE94274578CB08 /* DeliveryStatusTests.swift */; };
 		9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */; };
-		9ECAED5D4945C8D7669BD1CC /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2760186DEA7C9870633BA8E8 /* HelpView.swift */; };
 		A08A872D7E8A41B36C908DD3 /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB872C64B7220D3BEEFACED /* MoreView.swift */; };
 		A20441612CDA08A586DADCC0 /* DirectSendService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A701A0C348B6758EED1D949 /* DirectSendService.swift */; };
 		A2C2F1EA2AE9566A3880EA6E /* testCreateIdentityScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7DE23F7F336DC77627DE3D0E /* testCreateIdentityScreen.1.png */; };
@@ -315,7 +313,6 @@
 		268841458ED0C3A21E73ECA5 /* testAddFieldsStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testAddFieldsStep.1.png; sourceTree = "<group>"; };
 		2708AF0FE3066AC85A5EAF63 /* testContactsViewWithContactsGerman.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewWithContactsGerman.1.png; sourceTree = "<group>"; };
 		273DE3DDCB1F1D595DEF1B92 /* CoreUIComponentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreUIComponentTests.swift; sourceTree = "<group>"; };
-		2760186DEA7C9870633BA8E8 /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		2802DD443EEBA48D15EAF359 /* lock_screen.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = lock_screen.json; sourceTree = "<group>"; };
 		286546CE3A05A6793AB73C5C /* PinInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinInputView.swift; sourceTree = "<group>"; };
 		2A73AC43BC305CE2DFADE313 /* default_name.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = default_name.json; sourceTree = "<group>"; };
@@ -328,7 +325,6 @@
 		32C2E5A32B1033C46E976D2F /* VisibilityLabelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityLabelsTests.swift; sourceTree = "<group>"; };
 		334AA464FB30E416B9A73537 /* testContactsScreenDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsScreenDark.1.png; sourceTree = "<group>"; };
 		33A0048E8A2E34AA58D84E4A /* testToggleListAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testToggleListAccessibility.1.txt; sourceTree = "<group>"; };
-		367C77DA03F258D4B1D9C6FF /* testHelpView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testHelpView.1.png; sourceTree = "<group>"; };
 		36EBCAF628D08C167C0D9721 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		3741052F03E3274B5C209EF6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		388BCB8B838F2D5C9858C087 /* testInlineConfirmNonDestructive.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInlineConfirmNonDestructive.1.png; sourceTree = "<group>"; };
@@ -785,7 +781,6 @@
 				2708AF0FE3066AC85A5EAF63 /* testContactsViewWithContactsGerman.1.png */,
 				FE7FAFE456A1F513CADD0631 /* testCreateIdentityStep.1.png */,
 				BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */,
-				367C77DA03F258D4B1D9C6FF /* testHelpView.1.png */,
 				200902ADA24D8C97BC83DA08 /* testHomeViewEmpty.1.png */,
 				AE391D2B30E4ECCA0C1161B7 /* testHomeViewWithFields.1.png */,
 				CACA1754B8EE1F6D0FC0A04D /* testHomeViewWithFieldsDark.1.png */,
@@ -824,7 +819,6 @@
 				773071C286EDA29BCB17B365 /* ContactsView.swift */,
 				5D188A68C0567059D98640C5 /* ExchangeModePicker.swift */,
 				A34F01BD07BC1A3FF39429C8 /* FaceToFaceExchangeView.swift */,
-				2760186DEA7C9870633BA8E8 /* HelpView.swift */,
 				0FC890F55872A927941111CE /* HomeView.swift */,
 				CEA6AABBC0A3101980DD8C37 /* ImportContactsView.swift */,
 				644F12D83413B334E234F4AC /* LockScreenView.swift */,
@@ -1130,7 +1124,6 @@
 				12582E8F80C463B7C877A8A9 /* testFieldListPerGroup.1.png in Resources */,
 				34E2C9FC8A075320B7F7ACF5 /* testFieldListWithFieldsPerGroup.1.png in Resources */,
 				F831303CE3FCE9DBE6E2319E /* testFieldListWithFieldsShowHide.1.png in Resources */,
-				7017670F8C2EDE1BDBDDAA7B /* testHelpView.1.png in Resources */,
 				45EDBC6D5526AD94E96F8033 /* testHomeScreenDark.1.png in Resources */,
 				AD3A83D552E25C7A50441AE1 /* testHomeScreenEmpty.1.png in Resources */,
 				A3EBC8A0E02A1F7518211E81 /* testHomeScreenWithFields.1.png in Resources */,
@@ -1318,7 +1311,6 @@
 				105F980BB187FE89CD24B5D0 /* FaceToFaceExchangeView.swift in Sources */,
 				1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */,
 				267E3A1A19C1015C648A747C /* FieldListView.swift in Sources */,
-				9ECAED5D4945C8D7669BD1CC /* HelpView.swift in Sources */,
 				4DA8D8A5C3D704C592248C27 /* HomeView.swift in Sources */,
 				EF26D53CF87509F275F60F68 /* ImportContactsView.swift in Sources */,
 				F12257ABB31E5D291BB7ADDE /* InfoPanelView.swift in Sources */,

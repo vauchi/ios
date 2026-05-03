@@ -41,7 +41,7 @@ struct MoreView: View {
             .accessibilityIdentifier("more.settings")
 
             NavigationLink {
-                HelpView()
+                CoreScreenView(screenName: "help")
             } label: {
                 Label(
                     localizationService.t("nav.help"),
