@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Hardcoded SwiftUI `Text("Foo")` literal count — Humble UI G3 ratchet.
+#
+# Per ADR-021/043 + ADR-038, every user-visible string lives in
+# `locales/*.json` and is read via `LocalizationService.shared.t("foo.key")`.
+# A `Text("Foo")` literal bypasses i18n.
+#
+# Scope: top-level + nested .swift files under `Vauchi/Views/`.
+# Scanned by `just lint ios` via `scripts/scripts/check-text-literal-count.sh`.
+# Each retirement / localisation MR shrinks this number — the script fails
+# CI if the count rises above the baseline.
+#
+# Audit log:
+#   - 2026-05-02 audit baseline: 92 (cross-platform Humble-UI audit)
+#   - After Phase 0  (retire dead views): 29
+#   - After Phase 1a (7 retirements):     17
+#   - After Phase 1b (BleExchange):       17
+#   - After Phase 1c (LockScreen i18n):   15  ← current baseline
+
+15
