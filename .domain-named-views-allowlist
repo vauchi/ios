@@ -31,7 +31,6 @@ AhaMomentView.swift
 ArchivedContactsView.swift
 BleExchangeView.swift
 ContactsView.swift
-DeliveryStatusView.swift
 ExchangeModePicker.swift
 FaceToFaceExchangeView.swift
 HelpView.swift
