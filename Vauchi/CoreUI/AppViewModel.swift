@@ -373,12 +373,8 @@ class AppViewModel: ObservableObject {
             showToast(message, undoActionId: undoActionId)
         case .requestCamera:
             loadScreen()
-        case .startDeviceLink, .startBackupImport:
-            // `.startDeviceLink` is handled by native iOS flows.
-            // `.startBackupImport` is retired — core no longer emits it
-            // (Phase 2B routes backup restore through the file-picker
-            // command/event path); kept here so the switch stays
-            // exhaustive against the still-present enum variant.
+        case .startDeviceLink:
+            // Handled by native iOS flows.
             break
         case let .exchangeCommands(commands):
             handleExchangeCommands(commands)
