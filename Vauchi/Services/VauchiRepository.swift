@@ -836,24 +836,6 @@ class VauchiRepository {
 
     // Based on: features/resistance.feature - R3 Hidden Contact UI
 
-    /// Import contacts from vCard data.
-    ///
-    /// Warnings are flattened to English strings (`legacyText`) because the
-    /// consumer UI renders them verbatim. Once we add localization for
-    /// `MobileImportWarning.key`, pass the struct through instead.
-    func importContactsFromVcf(_ data: Data) throws -> (imported: Int, skipped: Int, warnings: [String]) {
-        do {
-            let result = try vauchi.importContactsFromVcf(data: data)
-            return (
-                imported: Int(result.imported),
-                skipped: Int(result.skipped),
-                warnings: result.warnings.map(\.legacyText)
-            )
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     /// Hide a contact
     func hideContact(id: String) throws {
         do {
