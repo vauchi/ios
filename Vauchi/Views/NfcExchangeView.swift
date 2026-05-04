@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // NfcExchangeView.swift
-// NFC tap exchange flow driven by NFCExchangeService + MobileNfcHandshake
+// NFC tap exchange flow driven by NFCExchangeService; the platform
+// service owns the UniFFI-side handshake state — this view only
+// renders local NfcState transitions.
 
 import CoreNFC
 import SwiftUI
