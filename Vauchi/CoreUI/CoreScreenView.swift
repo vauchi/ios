@@ -187,6 +187,7 @@ struct ImagePickerSheet: UIViewControllerRepresentable {
                     DispatchQueue.main.async { self?.onCancel() }
                     return
                 }
+                // swiftformat:disable:next spaceAroundBrackets spaceAroundParens
                 let bytes = [UInt8](data)
                 DispatchQueue.main.async { self?.onImageSelected(bytes) }
             }
