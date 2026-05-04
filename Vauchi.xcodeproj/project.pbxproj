@@ -45,6 +45,7 @@
 		2183BF09BDD4F4226A01DA1B /* testStatusIndicatorAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 444EB6E932C6BF9631AEE4D3 /* testStatusIndicatorAccessibility.1.txt */; };
 		222E89071C885A441E27F978 /* ModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE69227779252FAF163BCC07 /* ModelsTests.swift */; };
 		223E748C35520305B8EB1AE1 /* TextComponentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AE253E0DF71B38AAE856FB /* TextComponentView.swift */; };
+		23BC0E98F07437B17716FA15 /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0312368F5A12DEE6EAC3D75 /* ListView.swift */; };
 		2591B2C7493F02EE16A70906 /* duress_overview.json in Resources */ = {isa = PBXBuildFile; fileRef = A145FAE191703FB7CE06A212 /* duress_overview.json */; };
 		25F92258277228332EE69BEE /* testEditableTextDisplay.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 6A4D772FACC8B2FEB3D60DA8 /* testEditableTextDisplay.1.png */; };
 		267E3A1A19C1015C648A747C /* FieldListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6425CCA740A863389E0918 /* FieldListView.swift */; };
@@ -152,6 +153,7 @@
 		A3F2970F6C5C9A67FDB86A9A /* testSettingsGroup.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 91A78E60553610F7E79BD51C /* testSettingsGroup.1.png */; };
 		A417B542159AB8BB11E7B7DD /* testExchangeSuccessScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 5F315425F795BD9D8DB6CCA1 /* testExchangeSuccessScreen.1.png */; };
 		A51EBC2F9551EFF3F015F72E /* testToggleListSingleItem.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 0B50587B7EC6319B106FB462 /* testToggleListSingleItem.1.png */; };
+		A5C43C3132E90F16D8549877 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71C3F39CD9BCFA512EDBC6F5 /* PreviewView.swift */; };
 		A63F23AF79BBFFCD1DF2992E /* PinInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286546CE3A05A6793AB73C5C /* PinInputView.swift */; };
 		A6823765C922C70A24D8815B /* testEditableTextDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 09D79E0645FD89F4223BD160 /* testEditableTextDark.1.png */; };
 		A6AA2ED01F250DDE30A7D2F4 /* QrCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CAC3D107CAB9E9674E9BF31 /* QrCodeView.swift */; };
@@ -165,7 +167,6 @@
 		AD3A83D552E25C7A50441AE1 /* testHomeScreenEmpty.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C33C5B250ED22834663E64B /* testHomeScreenEmpty.1.png */; };
 		ADBDBB305DC254FE3A94B2F3 /* MultipartQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D4DF5873BED53D99177B4A /* MultipartQRView.swift */; };
 		AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95373D9E6440FED4B532EBDD /* VauchiRepository.swift */; };
-		AF71B5181C8D4924DCF36C1B /* ContactListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3DDDAC4A378A70C4B2EFFC /* ContactListView.swift */; };
 		B105AF29B3E8B2E6AE0F3DFE /* ActionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1793C01FB5DEAE4C84AED7C8 /* ActionListView.swift */; };
 		B1BAEDCA4134802BFA607609 /* VisualRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */; };
 		B222B3B7B7404F7BDF034ECF /* testToggleListAllSelected.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7BDCD05EC305C6B51CC0DF9E /* testToggleListAllSelected.1.png */; };
@@ -216,7 +217,6 @@
 		E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EBCAF628D08C167C0D9721 /* QRScannerView.swift */; };
 		EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */; };
 		EBDF43BF0E850A5D4345CA75 /* testScreenRendererAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 1DDB8A091A24E66931A46D88 /* testScreenRendererAccessibility.1.txt */; };
-		EC26C5F66AE81B6841339A50 /* CardPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC0C96CE81822B758A8E9B7 /* CardPreviewView.swift */; };
 		EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F950D6541F912A27DA57D /* BleExchangeService.swift */; };
 		EE06B8DCB941892BEACE00A0 /* testCreateIdentityStepFilled.1.png in Resources */ = {isa = PBXBuildFile; fileRef = BD52706224375EBB9227ECF4 /* testCreateIdentityStepFilled.1.png */; };
 		EE2E45E26234B17B707ADED9 /* testInlineConfirmDefault.1.png in Resources */ = {isa = PBXBuildFile; fileRef = E919A41F13031155AC578B3E /* testInlineConfirmDefault.1.png */; };
@@ -347,8 +347,6 @@
 		5CAC3D107CAB9E9674E9BF31 /* QrCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrCodeView.swift; sourceTree = "<group>"; };
 		5D188A68C0567059D98640C5 /* ExchangeModePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeModePicker.swift; sourceTree = "<group>"; };
 		5F315425F795BD9D8DB6CCA1 /* testExchangeSuccessScreen.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeSuccessScreen.1.png; sourceTree = "<group>"; };
-		5F3DDDAC4A378A70C4B2EFFC /* ContactListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactListView.swift; sourceTree = "<group>"; };
-		5FC0C96CE81822B758A8E9B7 /* CardPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPreviewView.swift; sourceTree = "<group>"; };
 		609B02226C8115A54FBEFAB5 /* testSettingsScreenDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSettingsScreenDark.1.png; sourceTree = "<group>"; };
 		625980A00DD2F14B6E724707 /* backup_prompt.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = backup_prompt.json; sourceTree = "<group>"; };
 		6310B8BCD3B5DC621926CA76 /* testSecurityStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSecurityStep.1.png; sourceTree = "<group>"; };
@@ -364,6 +362,7 @@
 		6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPasswordView.swift; sourceTree = "<group>"; };
 		6C859B6215BADD6A45480D9F /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationService.swift; sourceTree = "<group>"; };
 		7068F2971F7C560EF2B884D8 /* SliderComponentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderComponentView.swift; sourceTree = "<group>"; };
+		71C3F39CD9BCFA512EDBC6F5 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiApp.swift; sourceTree = "<group>"; };
 		72A4C01B28324F87697ADB7D /* StatusIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorView.swift; sourceTree = "<group>"; };
 		73C57002D4EAE39D0378F9F4 /* testContactsViewWithContacts.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewWithContacts.1.png; sourceTree = "<group>"; };
@@ -477,6 +476,7 @@
 		EE2F2878EEA849795B242248 /* skip_gate.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = skip_gate.json; sourceTree = "<group>"; };
 		EE36127CE5C1D4AC425BF1D5 /* testDivider.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testDivider.1.png; sourceTree = "<group>"; };
 		EF0789970BCC03D30F84E3D6 /* testExchangeShowQrScreen.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeShowQrScreen.1.png; sourceTree = "<group>"; };
+		F0312368F5A12DEE6EAC3D75 /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		F0A9E6EDE9C2286CB574E056 /* .version */ = {isa = PBXFileReference; path = .version; sourceTree = "<group>"; };
 		F0B262096D756FC7E6603C05 /* security_explanation.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = security_explanation.json; sourceTree = "<group>"; };
 		F3AEDA84B5F37E858F3F1A47 /* RestoreIdentitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestoreIdentitySheet.swift; sourceTree = "<group>"; };
@@ -831,18 +831,18 @@
 				1793C01FB5DEAE4C84AED7C8 /* ActionListView.swift */,
 				2A97B82A9B1F53812A7C048E /* AvatarPreviewView.swift */,
 				CB444F2925551B69EDE24BD7 /* BannerView.swift */,
-				5FC0C96CE81822B758A8E9B7 /* CardPreviewView.swift */,
 				EA272578E81247FB65A5C145 /* ComponentView.swift */,
 				9C3FB726E684074FF3A0B3DF /* ConfirmationDialogView.swift */,
-				5F3DDDAC4A378A70C4B2EFFC /* ContactListView.swift */,
 				47BDD68D75A3C55A093327A0 /* DividerView.swift */,
 				A73A60BF23E98F506D8E5A8D /* DropdownView.swift */,
 				1E9D757735447E71670611EA /* EditableTextView.swift */,
 				9E6425CCA740A863389E0918 /* FieldListView.swift */,
 				153F4A124314CB426DB39375 /* InfoPanelView.swift */,
 				03E516C3B759A34E4923EB25 /* InlineConfirmView.swift */,
+				F0312368F5A12DEE6EAC3D75 /* ListView.swift */,
 				B7B6C7CB36B2E650C3AA7DE1 /* MultipartCameraPreview.swift */,
 				286546CE3A05A6793AB73C5C /* PinInputView.swift */,
+				71C3F39CD9BCFA512EDBC6F5 /* PreviewView.swift */,
 				5CAC3D107CAB9E9674E9BF31 /* QrCodeView.swift */,
 				9FA11554E5C2DD27F7DABE4D /* SettingsGroupView.swift */,
 				7068F2971F7C560EF2B884D8 /* SliderComponentView.swift */,
@@ -1254,12 +1254,10 @@
 				6A3C10861679B93C3B320E98 /* BannerView.swift in Sources */,
 				7532FD4076FE6E6670E901E6 /* BleDiagnosticView.swift in Sources */,
 				EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */,
-				EC26C5F66AE81B6841339A50 /* CardPreviewView.swift in Sources */,
 				8F1D5438434B846475597477 /* ComponentView.swift in Sources */,
 				307654F6186C276FC27E761A /* ConfirmationDialogView.swift in Sources */,
 				02DD49946382C26E78CE06C9 /* ContactActions.swift in Sources */,
 				975814A17842850E5538C6EF /* ContactGroupBadges.swift in Sources */,
-				AF71B5181C8D4924DCF36C1B /* ContactListView.swift in Sources */,
 				DD478B0145A11A9B9277A5BB /* ContactsView.swift in Sources */,
 				9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */,
 				5680FAB9C220183B0BB3AC03 /* ContentView.swift in Sources */,
@@ -1283,6 +1281,7 @@
 				D69FF7EF9ACE7B733C6D3534 /* InlineConfirmView.swift in Sources */,
 				8CD4D48FC7E49B0DA82AD497 /* KeychainService.swift in Sources */,
 				356F61682CEE85BF2AEC1329 /* LinkResponderSessionService.swift in Sources */,
+				23BC0E98F07437B17716FA15 /* ListView.swift in Sources */,
 				6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */,
 				9C9A5E8876CAFA84118E8DBF /* LockScreenView.swift in Sources */,
 				A08A872D7E8A41B36C908DD3 /* MoreView.swift in Sources */,
@@ -1297,6 +1296,7 @@
 				9C89BE4773D3F64FB89BFE9B /* PasscodePolicy.swift in Sources */,
 				A63F23AF79BBFFCD1DF2992E /* PinInputView.swift in Sources */,
 				DCB3E583D86FF3A15C6BE915 /* PlatformAppEngine+DomainDispatch.swift in Sources */,
+				A5C43C3132E90F16D8549877 /* PreviewView.swift in Sources */,
 				655FCE4413340F3FF3F5E5CF /* QRDiagnosticView.swift in Sources */,
 				E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */,
 				F3096FD65BB8C411D32ACE99 /* QrCameraTunerView.swift in Sources */,
@@ -1673,7 +1673,7 @@
 			repositoryURL = "https://gitlab.com/vauchi/vauchi-platform-swift.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.41.0;
+				version = 0.42.0;
 			};
 		};
 		D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
