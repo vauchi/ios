@@ -134,7 +134,6 @@
 		92298947313F6DDD98944A43 /* contact_edit_visibility.json in Resources */ = {isa = PBXBuildFile; fileRef = 66948B6E4E0E10C56A794B44 /* contact_edit_visibility.json */; };
 		950CE4D91D128D63DD0CCD7F /* testReadyStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = C2A9361B22965ACC0939BC78 /* testReadyStep.1.png */; };
 		975814A17842850E5538C6EF /* ContactGroupBadges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 794858315D56910FBB0F9531 /* ContactGroupBadges.swift */; };
-		97FE59C10A71CD7B85D2EBE1 /* FilePickerReachabilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E1E492EF35A5004454D1C4 /* FilePickerReachabilityUITests.swift */; };
 		9A29351B039D6F08127F7A3E /* VisibilityLabelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C2E5A32B1033C46E976D2F /* VisibilityLabelsTests.swift */; };
 		9B0047F7A798FE0F300562CC /* testInlineConfirmDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 23946ECA0684070AFB40D2FA /* testInlineConfirmDark.1.png */; };
 		9B12926FA62EF78944BBD659 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */; };
@@ -204,6 +203,7 @@
 		DB6A58ECD9CC3C501D1CF697 /* delivery_empty.json in Resources */ = {isa = PBXBuildFile; fileRef = 3E7B642257C4005F82A40BCF /* delivery_empty.json */; };
 		DCB3E583D86FF3A15C6BE915 /* PlatformAppEngine+DomainDispatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8809B70A6BEDF6B35461415B /* PlatformAppEngine+DomainDispatch.swift */; };
 		DD478B0145A11A9B9277A5BB /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773071C286EDA29BCB17B365 /* ContactsView.swift */; };
+		DE3C936773D738AA723D8EA4 /* FilePickerBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C2819B64612A0A87A40931 /* FilePickerBridgeTests.swift */; };
 		DEE606B56ADE8E72560BF538 /* testTextInputEmailType.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 21E325007F4C69CC6F55675D /* testTextInputEmailType.1.png */; };
 		E0642E4014C2147EBDC4FFF3 /* testContactListWithContacts.1.png in Resources */ = {isa = PBXBuildFile; fileRef = EDE8371E9A0D88B92DA2E683 /* testContactListWithContacts.1.png */; };
 		E48B85C4088FE7CA877DAB25 /* contact_edit_fields.json in Resources */ = {isa = PBXBuildFile; fileRef = 07F69D47DBE79635FE185938 /* contact_edit_fields.json */; };
@@ -432,7 +432,6 @@
 		B105C9E0FF90D826631320D7 /* testSettingsGroupAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testSettingsGroupAccessibility.1.txt; sourceTree = "<group>"; };
 		B1075C1A497CE28C82672E93 /* Vauchi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Vauchi.entitlements; sourceTree = "<group>"; };
 		B2D34EC3AF2AE35F80A5354A /* NFCExchangeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFCExchangeService.swift; sourceTree = "<group>"; };
-		B2E1E492EF35A5004454D1C4 /* FilePickerReachabilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePickerReachabilityUITests.swift; sourceTree = "<group>"; };
 		B31DFE6F23CEA01F0437957B /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		B5C3AC067DAD006C8E3956CA /* testInfoPanelAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testInfoPanelAccessibility.1.txt; sourceTree = "<group>"; };
 		B7B6C7CB36B2E650C3AA7DE1 /* MultipartCameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartCameraPreview.swift; sourceTree = "<group>"; };
@@ -480,6 +479,7 @@
 		F0312368F5A12DEE6EAC3D75 /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		F0A9E6EDE9C2286CB574E056 /* .version */ = {isa = PBXFileReference; path = .version; sourceTree = "<group>"; };
 		F0B262096D756FC7E6603C05 /* security_explanation.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = security_explanation.json; sourceTree = "<group>"; };
+		F2C2819B64612A0A87A40931 /* FilePickerBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePickerBridgeTests.swift; sourceTree = "<group>"; };
 		F461B0AB8A05C9F2E430B202 /* testFieldListDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testFieldListDark.1.png; sourceTree = "<group>"; };
 		F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEdgeTests.swift; sourceTree = "<group>"; };
 		F94CFFC17D772290645209B3 /* testFieldListWithFieldsPerGroup.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testFieldListWithFieldsPerGroup.1.png; sourceTree = "<group>"; };
@@ -525,6 +525,7 @@
 			children = (
 				21B33063ADD1C9CDC8C4186B /* AnimatedQrTimerTests.swift */,
 				46CE8156A15BD5428BE8514A /* ContractTests.swift */,
+				F2C2819B64612A0A87A40931 /* FilePickerBridgeTests.swift */,
 				CE69227779252FAF163BCC07 /* ModelsTests.swift */,
 				42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */,
 				0795D7BA553D151750EFD399 /* fixtures */,
@@ -775,7 +776,6 @@
 			isa = PBXGroup;
 			children = (
 				1A3C0558C6550E4B58C71798 /* AccessibilityUITests.swift */,
-				B2E1E492EF35A5004454D1C4 /* FilePickerReachabilityUITests.swift */,
 				773C796EDEEFF9B928C04229 /* VauchiUITests.swift */,
 			);
 			path = VauchiUITests;
@@ -1198,6 +1198,7 @@
 				161D92EC11DFF0CDAE7B0F29 /* DemoContactTests.swift in Sources */,
 				60E5D23C6B32822C55E491C0 /* DeviceLinkingTests.swift in Sources */,
 				358AFF239AC4AAA206629F70 /* ExchangeFlowTests.swift in Sources */,
+				DE3C936773D738AA723D8EA4 /* FilePickerBridgeTests.swift in Sources */,
 				2E32911FDD537E5F664BF57C /* KeychainServiceTests.swift in Sources */,
 				222E89071C885A441E27F978 /* ModelsTests.swift in Sources */,
 				3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */,
@@ -1228,7 +1229,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				61A6ADF2FEA95610D52C9ACD /* AccessibilityUITests.swift in Sources */,
-				97FE59C10A71CD7B85D2EBE1 /* FilePickerReachabilityUITests.swift in Sources */,
 				DA673F09635BBBF9871092A8 /* VauchiUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
