@@ -10,6 +10,7 @@ import SwiftUI
 
 struct QRScannerView: View {
     @Environment(\.dismiss) var dismiss
+    @ObservedObject private var localizationService = LocalizationService.shared
     var onQrScanned: (String) -> Void
 
     @State private var scannedCode: String?
@@ -57,7 +58,7 @@ struct QRScannerView: View {
                             .background(Color.black.opacity(0.7))
                             .cornerRadius(8)
                         } else {
-                            Text("Point camera at a Vauchi QR code")
+                            Text(localizationService.t("qr.scanner_point_hint"))
                                 .foregroundColor(.white)
                                 .padding()
                                 .background(Color.black.opacity(0.7))
@@ -68,7 +69,7 @@ struct QRScannerView: View {
                     .padding(.bottom, 50)
                 }
             }
-            .navigationTitle("Scan QR Code")
+            .navigationTitle(localizationService.t("qr.scan_button"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

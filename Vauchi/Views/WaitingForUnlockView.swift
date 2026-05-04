@@ -13,6 +13,8 @@ import SwiftUI
 /// The app automatically retries initialization when the device is unlocked
 /// via `protectedDataDidBecomeAvailableNotification`.
 struct WaitingForUnlockView: View {
+    @ObservedObject private var localizationService = LocalizationService.shared
+
     var body: some View {
         VStack(spacing: 16) {
             Spacer()
@@ -22,12 +24,12 @@ struct WaitingForUnlockView: View {
                 .foregroundColor(.secondary)
                 .accessibilityHidden(true)
 
-            Text("Waiting for device unlock")
+            Text(localizationService.t("waiting_for_unlock.title"))
                 .font(.title3)
                 .foregroundColor(.secondary)
                 .accessibilityAddTraits(.isHeader)
 
-            Text("Vauchi will load automatically once your device is unlocked.")
+            Text(localizationService.t("waiting_for_unlock.subtitle"))
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

@@ -18,6 +18,7 @@ import SwiftUI
 /// the password after hashing (ZeroizeOnDrop).
 struct AppPasswordView: View {
     @ObservedObject var viewModel: VauchiViewModel
+    @ObservedObject private var localizationService = LocalizationService.shared
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var pin = ""
@@ -34,15 +35,15 @@ struct AppPasswordView: View {
                 .foregroundColor(.accentColor)
                 .accessibilityHidden(true)
 
-            Text("Enter Password")
+            Text(localizationService.t("app_password.title"))
                 .font(Font.title2.weight(.semibold))
 
-            Text("Enter your app password to continue")
+            Text(localizationService.t("app_password.subtitle"))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
-            SecureField("Password", text: $pin)
+            SecureField(localizationService.t("app_password.password_placeholder"), text: $pin)
                 .textContentType(.password)
                 .focused($pinFocused)
                 .multilineTextAlignment(.center)
@@ -77,7 +78,7 @@ struct AppPasswordView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 4)
                 } else {
-                    Text("Unlock")
+                    Text(localizationService.t("app_password.unlock_button"))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 4)
                 }
@@ -91,7 +92,7 @@ struct AppPasswordView: View {
                 pin = ""
                 viewModel.appState = .authenticationRequired
             } label: {
-                Text("Cancel")
+                Text(localizationService.t("app_password.cancel_button"))
                     .foregroundColor(.secondary)
             }
 
@@ -115,7 +116,7 @@ struct AppPasswordView: View {
             do {
                 try await viewModel.authenticateAppPassword(entered)
             } catch {
-                errorMessage = "Incorrect password"
+                errorMessage = localizationService.t("app_password.error_incorrect")
                 isAuthenticating = false
                 pinFocused = true
             }
