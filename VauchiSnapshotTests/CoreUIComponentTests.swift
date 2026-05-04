@@ -230,7 +230,7 @@ final class CoreUIComponentTests: XCTestCase {
         assertComponentSnapshot(of: view, height: 450)
     }
 
-    // MARK: - CardPreviewView
+    // MARK: - PreviewView
 
     func testCardPreviewMinimal() {
         let component = CardPreviewComponent(
@@ -240,7 +240,7 @@ final class CoreUIComponentTests: XCTestCase {
             groupViews: [],
             selectedGroup: nil
         )
-        let view = CardPreviewView(component: component, onAction: noOp)
+        let view = PreviewView(component: component, onAction: noOp)
         assertComponentSnapshot(of: view, height: 300)
     }
 
@@ -259,7 +259,7 @@ final class CoreUIComponentTests: XCTestCase {
             // is selected: every field with `.shown` or `.groups` visibility.
             visibleFields: fields
         )
-        let view = CardPreviewView(component: component, onAction: noOp)
+        let view = PreviewView(component: component, onAction: noOp)
         assertComponentSnapshot(of: view, height: 400)
     }
 
@@ -294,7 +294,7 @@ final class CoreUIComponentTests: XCTestCase {
             // path through `build_visible_fields` keeps both.
             visibleFields: fields
         )
-        let view = CardPreviewView(component: component, onAction: noOp)
+        let view = PreviewView(component: component, onAction: noOp)
         assertComponentSnapshot(of: view, height: 450)
     }
 
@@ -320,7 +320,7 @@ final class CoreUIComponentTests: XCTestCase {
             // visibleFields directly.
             visibleFields: friendsVisible
         )
-        let view = CardPreviewView(component: component, onAction: noOp)
+        let view = PreviewView(component: component, onAction: noOp)
         assertComponentSnapshot(of: view, height: 400)
     }
 
@@ -334,7 +334,7 @@ final class CoreUIComponentTests: XCTestCase {
             groupViews: [],
             selectedGroup: nil
         )
-        let view = CardPreviewView(component: component, onAction: noOp)
+        let view = PreviewView(component: component, onAction: noOp)
         assertComponentSnapshot(of: view, height: 300)
     }
 
@@ -539,7 +539,7 @@ final class CoreUIComponentTests: XCTestCase {
             selectedGroup: nil,
             visibleFields: fields
         )
-        assertDarkSnapshot(of: CardPreviewView(component: component, onAction: noOp), height: 400)
+        assertDarkSnapshot(of: PreviewView(component: component, onAction: noOp), height: 400)
     }
 
     func testInfoPanelDark() {

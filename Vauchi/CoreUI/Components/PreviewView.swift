@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// CardPreviewView.swift
+// PreviewView.swift
 // Renders a CardPreview component from core UI
 
 import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::CardPreview` as a styled card with group views.
-struct CardPreviewView: View {
+struct PreviewView: View {
     let component: CardPreviewComponent
     let onAction: (UserAction) -> Void
     @Environment(\.designTokens) private var tokens

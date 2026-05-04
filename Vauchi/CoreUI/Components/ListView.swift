@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// ContactListView.swift
+// ListView.swift
 // Renders a ContactList component from core UI
 
 import CoreUIModels
 import SwiftUI
 
 /// Renders a core `Component::ContactList` as a searchable list of contacts.
-struct ContactListView: View {
+struct ListView: View {
     let component: ContactListComponent
     let onAction: (UserAction) -> Void
     @Environment(\.designTokens) private var tokens

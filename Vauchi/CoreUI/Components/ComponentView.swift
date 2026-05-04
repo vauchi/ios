@@ -28,13 +28,13 @@ struct ComponentView: View {
             FieldListView(component: fieldComponent, onAction: onAction)
 
         case let .cardPreview(previewComponent):
-            CardPreviewView(component: previewComponent, onAction: onAction)
+            PreviewView(component: previewComponent, onAction: onAction)
 
         case let .infoPanel(panelComponent):
             InfoPanelView(component: panelComponent)
 
         case let .contactList(contactListComponent):
-            ContactListView(component: contactListComponent, onAction: onAction)
+            ListView(component: contactListComponent, onAction: onAction)
 
         case let .settingsGroup(settingsGroupComponent):
             SettingsGroupView(component: settingsGroupComponent, onAction: onAction)
