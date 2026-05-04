@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import Foundation
+import UIKit
 import VauchiPlatform
 
 /// Dispatches ADR-031 exchange commands from core to platform hardware.
@@ -26,6 +27,14 @@ final class ExchangeCommandHandler {
     private var directSendService: DirectSendService?
 
     private let audioService = AudioProximityService.shared
+
+    /// Snapshot of `UIScreen.main.brightness` taken on the first
+    /// `SetScreenBrightness { level: Some(_) }` command and restored
+    /// when `SetScreenBrightness { level: None }` arrives. Per
+    /// `2026-05-04-exchange-command-screen-presentation` Phase 2a —
+    /// the frontend owns the snapshot/restore lifecycle so core only
+    /// has to express intent.
+    private var savedBrightness: CGFloat?
 
     init(session: MobileExchangeSession) {
         self.session = session
@@ -102,12 +111,69 @@ final class ExchangeCommandHandler {
         // case let .directSend(payload, isInitiator):
         //     startDirectSend(payload: Array(payload), isInitiator: isInitiator)
 
+        // ── Screen presentation hardware (multi-stage exchange) ────
+        // BINDINGS_BUMP: uncomment when vauchi-platform-swift is
+        // regenerated against core 0.45.0 (introduces
+        // .setScreenBrightness(level:) and .setIdleTimerDisabled(disabled:)).
+        // Phase 2a of `2026-05-04-exchange-command-screen-presentation` —
+        // the helper methods below already implement the platform calls
+        // they will dispatch to, so the only change at bindings-bump
+        // time is to remove the comment markers and let these match arms
+        // take over from FaceToFaceExchangeView's onAppear/onDisappear.
+        //
+        // case let .setScreenBrightness(level):
+        //     setScreenBrightness(level: level.map { CGFloat($0) })
+        //
+        // case let .setIdleTimerDisabled(disabled):
+        //     setIdleTimerDisabled(disabled)
+
         // ── Tier 0 commands (active after bindings bump) ───────────
         // AccelerometerStart/Stop, RelayEscrowDeposit/Check/Retrieve,
-        // ShowShareSheet, DirectSend — handled via @unknown default until
+        // ShowShareSheet, DirectSend, SetScreenBrightness,
+        // SetIdleTimerDisabled — handled via @unknown default until
         // vauchi-platform-swift is regenerated with new variants.
         @unknown default:
             break
+        }
+    }
+
+    // MARK: - Screen presentation (ADR-031, Phase 2a)
+
+    //
+    // Drive `UIScreen.brightness` and `UIApplication.isIdleTimerDisabled`
+    // from core's `SetScreenBrightness` / `SetIdleTimerDisabled` commands.
+    // FaceToFaceExchangeView currently owns this in its `onAppear` /
+    // `onDisappear`; once the engine emits these commands and the
+    // bindings bump unlocks the dispatch arms above, the view becomes a
+    // thin `CoreScreenView("MultiStageExchange")` wrapper (Phase 3).
+
+    /// Set screen brightness. `Some(level)` clamps to 0.0–1.0 and
+    /// snapshots the prior platform value on the first call so a
+    /// subsequent `nil` restores it. `nil` restores from the saved
+    /// snapshot if present, or no-ops if no snapshot exists (defensive
+    /// — handles a `None` arriving without a preceding `Some`).
+    func setScreenBrightness(level: CGFloat?) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            if let level {
+                if savedBrightness == nil {
+                    savedBrightness = UIScreen.main.brightness
+                }
+                UIScreen.main.brightness = max(0.0, min(1.0, level))
+            } else if let prior = savedBrightness {
+                UIScreen.main.brightness = prior
+                savedBrightness = nil
+            }
+        }
+    }
+
+    /// Toggle the platform idle timer. Idempotent — the underlying
+    /// `UIApplication.isIdleTimerDisabled` setter is no-op on a
+    /// redundant value. Marshalled to the main thread because UIKit
+    /// requires it.
+    func setIdleTimerDisabled(_ disabled: Bool) {
+        DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = disabled
         }
     }
 
