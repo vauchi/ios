@@ -209,8 +209,8 @@ final class ModelsTests: XCTestCase {
 
         let component = try coreJSONDecoder.decode(Component.self, from: json)
 
-        guard case let .cardPreview(preview) = component else {
-            XCTFail("Expected .cardPreview variant, got \(component)")
+        guard case let .preview(preview) = component else {
+            XCTFail("Expected .preview variant, got \(component)")
             return
         }
         XCTAssertEqual(preview.name, "Alice")
@@ -728,9 +728,12 @@ final class ModelsTests: XCTestCase {
         }
     }
 
-    // MARK: - ContactItem + ListItemAction wire format (core!637)
+    // MARK: - Item + ListItemAction wire format (core!637, Wire Humble Tier 0 G2)
 
-    func testContactItemDecodesWithActions() throws {
+    func testItemDecodesWithActions() throws {
+        // Wire Humble G2 retired `searchable_fields` from `Item` — the JSON
+        // input here keeps the legacy key only to prove the decoder ignores
+        // it gracefully (forward-compat for older core revs).
         let json = Data("""
         {
             "id": "c1",
@@ -745,29 +748,27 @@ final class ModelsTests: XCTestCase {
             ]
         }
         """.utf8)
-        let contact = try coreJSONDecoder.decode(ContactItem.self, from: json)
-        XCTAssertEqual(contact.id, "c1")
-        XCTAssertEqual(contact.name, "Alice")
-        XCTAssertEqual(contact.avatarInitials, "A")
-        XCTAssertEqual(contact.searchableFields, ["alice@example.org", "+41 79 123 45 67"])
-        XCTAssertEqual(contact.actions.count, 2)
-        XCTAssertEqual(contact.actions[0].id, "archive")
-        XCTAssertEqual(contact.actions[0].kind, .archive)
-        XCTAssertFalse(contact.actions[0].destructive)
-        XCTAssertEqual(contact.actions[1].kind, .delete)
-        XCTAssertTrue(contact.actions[1].destructive)
+        let item = try coreJSONDecoder.decode(Item.self, from: json)
+        XCTAssertEqual(item.id, "c1")
+        XCTAssertEqual(item.name, "Alice")
+        XCTAssertEqual(item.avatarInitials, "A")
+        XCTAssertEqual(item.actions.count, 2)
+        XCTAssertEqual(item.actions[0].id, "archive")
+        XCTAssertEqual(item.actions[0].kind, .archive)
+        XCTAssertFalse(item.actions[0].destructive)
+        XCTAssertEqual(item.actions[1].kind, .delete)
+        XCTAssertTrue(item.actions[1].destructive)
     }
 
-    func testContactItemLegacyFixtureWithoutNewFields() throws {
-        // Fixtures written before core!637 omit `actions` + `searchable_fields`.
-        // Decoding must still succeed — the ContactItem init provides [] defaults.
+    func testItemLegacyFixtureWithoutNewFields() throws {
+        // Fixtures written before core!637 omit `actions`. Decoding must
+        // still succeed — the Item init provides [] defaults.
         let json = Data("""
         {"id": "c1", "name": "Bob", "avatar_initials": "B"}
         """.utf8)
-        let contact = try coreJSONDecoder.decode(ContactItem.self, from: json)
-        XCTAssertEqual(contact.id, "c1")
-        XCTAssertTrue(contact.actions.isEmpty)
-        XCTAssertTrue(contact.searchableFields.isEmpty)
+        let item = try coreJSONDecoder.decode(Item.self, from: json)
+        XCTAssertEqual(item.id, "c1")
+        XCTAssertTrue(item.actions.isEmpty)
     }
 
     func testListItemActionKindForwardCompatFallsBackToUnknown() throws {

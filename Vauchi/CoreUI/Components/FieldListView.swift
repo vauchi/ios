@@ -55,7 +55,7 @@ struct FieldListView: View {
 }
 
 struct FieldListRow: View {
-    let field: FieldDisplay
+    let field: Field
     let visibilityMode: VisibilityMode
     let availableGroups: [String]
     let onAction: (UserAction) -> Void
