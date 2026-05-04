@@ -20,6 +20,13 @@ import SwiftUI
         @StateObject private var viewModel = OnboardingViewModel()
         let onComplete: (_ onboardingDataJson: String?) -> Void
 
+        /// Bridge for `ActionResult.exchangeCommands` ActionResults
+        /// emitted by Phase 2B `restore_backup`. The host (ContentView)
+        /// passes its `viewModel.coreViewModel?.handleExchangeCommands`
+        /// so the FilePickFromUser command lands on the same
+        /// `pendingFilePick` state the root `.fileImporter` observes.
+        var onExchangeCommands: (([ExchangeCommandDTO]) -> Void)?
+
         var body: some View {
             Group {
                 if let screen = viewModel.currentScreen {
@@ -34,6 +41,9 @@ import SwiftUI
                 } else {
                     ProgressView("Loading...")
                 }
+            }
+            .onAppear {
+                viewModel.onExchangeCommands = onExchangeCommands
             }
             .onChange(of: viewModel.isComplete) { complete in
                 if complete {

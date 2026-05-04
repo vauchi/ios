@@ -77,6 +77,15 @@ struct ContentView: View {
                                 SettingsService.shared.hasCompletedOnboarding = true
                                 viewModel.loadState()
                             }
+                        },
+                        onExchangeCommands: { commands in
+                            // Bridge Phase 2B `restore_backup` —
+                            // OnboardingViewModel forwards
+                            // ExchangeCommands here so the
+                            // FilePickFromUser command lands on
+                            // AppViewModel.pendingFilePick, which the
+                            // root `.fileImporter` modifier observes.
+                            viewModel.coreViewModel?.handleExchangeCommands(commands)
                         }
                     )
                 } else {
@@ -99,8 +108,9 @@ struct ContentView: View {
         // system document picker is reachable from any flow that emits
         // `ExchangeCommand::FilePickFromUser` — including custom-view
         // tabs (MoreView "Import Contacts") that don't render through
-        // CoreScreenView. CoreOnboardingView attaches its own host
-        // because OnboardingViewModel is a separate state machine.
+        // CoreScreenView, and the Onboarding `restore_backup` path
+        // which forwards ExchangeCommands via `onExchangeCommands` into
+        // this same `coreViewModel.pendingFilePick` state.
         .corePendingFilePick(viewModel.coreViewModel)
     }
 

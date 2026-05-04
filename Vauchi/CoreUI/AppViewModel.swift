@@ -395,7 +395,12 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Exchange Command Handling
 
-    private func handleExchangeCommands(_ commands: [ExchangeCommandDTO]) {
+    /// Dispatch one or more `ExchangeCommand`s emitted by core. Called
+    /// from `applyResult` for `ActionResult.exchangeCommands`, and
+    /// from `OnboardingViewModel.onExchangeCommands` so the Onboarding
+    /// flow shares the same `.fileImporter` host attached at
+    /// ContentView root.
+    func handleExchangeCommands(_ commands: [ExchangeCommandDTO]) {
         for command in commands {
             switch command {
             case .imagePickFromLibrary:
