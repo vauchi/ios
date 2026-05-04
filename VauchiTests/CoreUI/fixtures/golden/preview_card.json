@@ -5,11 +5,11 @@
   "subtitle": "This is how your card will look.",
   "components": [
     {
-      "CardPreview": {
+      "Preview": {
         "name": "Alice",
         "fields": [],
-        "group_views": [],
-        "selected_group": null,
+        "variants": [],
+        "selected_variant": null,
         "a11y": null
       }
     }

@@ -5,16 +5,15 @@
   "subtitle": null,
   "components": [
     {
-      "ContactList": {
+      "List": {
         "id": "contacts",
-        "contacts": [
+        "items": [
           {
             "id": "c1",
             "name": "Alice",
             "subtitle": "Friend",
             "avatar_initials": "A",
             "status": null,
-            "searchable_fields": [],
             "a11y": null
           },
           {
@@ -23,7 +22,6 @@
             "subtitle": null,
             "avatar_initials": "B",
             "status": "Updated",
-            "searchable_fields": [],
             "a11y": null
           }
         ],
