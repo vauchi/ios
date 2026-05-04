@@ -129,7 +129,7 @@ import SwiftUI
                 onExchangeCommands?(commands)
 
             case .openEntryDetail, .showToast,
-                 .startDeviceLink, .startBackupImport, .openContact,
+                 .startDeviceLink, .openContact,
                  .editContact, .openUrl, .showAlert, .requestCamera,
                  .wipeComplete, .showFormDialog, .previewAs, .unknown:
                 break
