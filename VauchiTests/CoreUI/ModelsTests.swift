@@ -489,7 +489,7 @@ final class ModelsTests: XCTestCase {
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -505,7 +505,7 @@ final class ModelsTests: XCTestCase {
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -520,7 +520,7 @@ final class ModelsTests: XCTestCase {
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -538,7 +538,7 @@ final class ModelsTests: XCTestCase {
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -557,7 +557,7 @@ final class ModelsTests: XCTestCase {
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -575,7 +575,7 @@ final class ModelsTests: XCTestCase {
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -590,7 +590,7 @@ final class ModelsTests: XCTestCase {
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -787,7 +787,7 @@ final class ModelsTests: XCTestCase {
             actionId: "archive"
         )
         let encoded = try JSONEncoder().encode(action)
-        let decoded = try XCTUnwrap(try JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        let decoded = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
         let payload = try XCTUnwrap(
             decoded["ListItemAction"] as? [String: Any],
             "expected outer serde variant key ListItemAction"

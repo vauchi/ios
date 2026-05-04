@@ -449,7 +449,7 @@ final class VauchiRepositoryTests: XCTestCase {
         _ = try repo.createRecoveryClaim(oldPkHex: oldPkHex)
 
         let status = try XCTUnwrap(
-            try repo.getRecoveryStatus(),
+            repo.getRecoveryStatus(),
             "Should have active recovery after claim creation"
         )
 
@@ -568,7 +568,7 @@ final class VauchiRepositoryTests: XCTestCase {
         let claim = try aliceRepo.createRecoveryClaim(oldPkHex: oldPkHex)
 
         // Initial status: 0 vouchers collected
-        let initialStatus = try XCTUnwrap(try aliceRepo.getRecoveryStatus())
+        let initialStatus = try XCTUnwrap(aliceRepo.getRecoveryStatus())
         XCTAssertEqual(initialStatus.vouchersCollected, 0)
 
         // Bob vouches for Alice

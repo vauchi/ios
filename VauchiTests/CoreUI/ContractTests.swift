@@ -146,7 +146,7 @@ final class ContractTests: XCTestCase {
         let action = UserAction.textChanged(componentId: "name_input", value: "Alice")
         let data = try coreJSONEncoder.encode(action)
         let json = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -170,7 +170,7 @@ final class ContractTests: XCTestCase {
         let action = UserAction.itemToggled(componentId: "groups", itemId: "family")
         let data = try coreJSONEncoder.encode(action)
         let json = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -185,7 +185,7 @@ final class ContractTests: XCTestCase {
         let action = UserAction.actionPressed(actionId: "get_started")
         let data = try coreJSONEncoder.encode(action)
         let json = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -201,7 +201,7 @@ final class ContractTests: XCTestCase {
         )
         let data = try coreJSONEncoder.encode(action)
         let json = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -217,7 +217,7 @@ final class ContractTests: XCTestCase {
         let action = UserAction.groupViewSelected(groupName: "Friends")
         let data = try coreJSONEncoder.encode(action)
         let json = try XCTUnwrap(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
@@ -248,7 +248,7 @@ final class ContractTests: XCTestCase {
         for (action, expectedKey) in zip(actions, expectedKeys) {
             let data = try coreJSONEncoder.encode(action)
             let json = try XCTUnwrap(
-                try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                JSONSerialization.jsonObject(with: data) as? [String: Any],
                 "Failed to parse JSON for \(expectedKey)"
             )
             XCTAssertTrue(
@@ -268,7 +268,7 @@ final class ContractTests: XCTestCase {
     func testVersionMetadataMatchesFixtureCount() throws {
         let versionURL = Self.fixturesURL.appendingPathComponent(".version")
         let data = try Data(contentsOf: versionURL)
-        let meta = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let meta = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
 
         let coreVersion = try XCTUnwrap(
             meta["core_version"] as? String,

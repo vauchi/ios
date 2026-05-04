@@ -44,7 +44,7 @@ final class DemoContactTests: XCTestCase {
 
         // Initialize demo contact after onboarding
         let demoContact = try XCTUnwrap(
-            try repo.initDemoContactIfNeeded(),
+            repo.initDemoContactIfNeeded(),
             "Demo contact should appear for users with no contacts"
         )
 
@@ -118,7 +118,7 @@ final class DemoContactTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        let demoContact = try XCTUnwrap(try repo.initDemoContactIfNeeded())
+        let demoContact = try XCTUnwrap(repo.initDemoContactIfNeeded())
 
         XCTAssertTrue(demoContact.isDemo, "Demo contact should have isDemo flag")
     }
@@ -135,12 +135,12 @@ final class DemoContactTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        let initialDemo = try XCTUnwrap(try repo.initDemoContactIfNeeded())
+        let initialDemo = try XCTUnwrap(repo.initDemoContactIfNeeded())
         let initialTip = initialDemo.tipTitle
 
         // Trigger an update
         let updatedDemo = try XCTUnwrap(
-            try repo.triggerDemoUpdate(),
+            repo.triggerDemoUpdate(),
             "Demo update should return updated contact"
         )
 
@@ -154,7 +154,7 @@ final class DemoContactTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        let demoContact = try XCTUnwrap(try repo.initDemoContactIfNeeded())
+        let demoContact = try XCTUnwrap(repo.initDemoContactIfNeeded())
 
         XCTAssertFalse(demoContact.tipTitle.isEmpty, "Tip title should not be empty")
         XCTAssertFalse(demoContact.tipContent.isEmpty, "Tip content should not be empty")
@@ -176,7 +176,7 @@ final class DemoContactTests: XCTestCase {
         // Initialize demo contact
         _ = try repo.initDemoContactIfNeeded()
 
-        let beforeDismiss = try XCTUnwrap(try repo.getDemoContact())
+        let beforeDismiss = try XCTUnwrap(repo.getDemoContact())
         XCTAssertTrue(beforeDismiss.isDemo, "Pre-dismiss contact should still be a demo")
 
         // Dismiss the demo contact
@@ -217,7 +217,7 @@ final class DemoContactTests: XCTestCase {
         // Alice has demo contact
         _ = try aliceRepo.initDemoContactIfNeeded()
         let initialDemo = try XCTUnwrap(
-            try aliceRepo.getDemoContact(),
+            aliceRepo.getDemoContact(),
             "Demo contact should exist initially"
         )
         XCTAssertEqual(initialDemo.displayName, "Vauchi Tips")
@@ -276,13 +276,13 @@ final class DemoContactTests: XCTestCase {
 
         // Restore from settings
         let restoredDemo = try XCTUnwrap(
-            try repo.restoreDemoContact(),
+            repo.restoreDemoContact(),
             "Demo contact should be restored"
         )
         XCTAssertEqual(restoredDemo.displayName, "Vauchi Tips")
 
         let lookupDemo = try XCTUnwrap(
-            try repo.getDemoContact(),
+            repo.getDemoContact(),
             "getDemoContact should return contact after restore"
         )
         XCTAssertEqual(lookupDemo.displayName, restoredDemo.displayName)
@@ -304,7 +304,7 @@ final class DemoContactTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        let demoContact = try XCTUnwrap(try repo.initDemoContactIfNeeded())
+        let demoContact = try XCTUnwrap(repo.initDemoContactIfNeeded())
         XCTAssertTrue(demoContact.isDemo, "Initialized contact must be flagged as demo")
 
         // Demo contact should NOT appear in real contacts list
@@ -344,14 +344,14 @@ final class DemoContactTests: XCTestCase {
             try repo.createIdentity(displayName: "Alice")
             _ = try repo.initDemoContactIfNeeded()
 
-            let firstSessionDemo = try XCTUnwrap(try repo.getDemoContact())
+            let firstSessionDemo = try XCTUnwrap(repo.getDemoContact())
             XCTAssertEqual(firstSessionDemo.displayName, "Vauchi Tips")
         }
 
         // Second session - demo should persist
         let repo2 = try VauchiRepository(dataDir: tempDir.path)
         let demoContact = try XCTUnwrap(
-            try repo2.getDemoContact(),
+            repo2.getDemoContact(),
             "Demo contact should persist across sessions"
         )
 
