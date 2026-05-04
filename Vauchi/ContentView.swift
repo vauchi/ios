@@ -95,6 +95,13 @@ struct ContentView: View {
         } message: {
             Text(viewModel.alertMessage)
         }
+        // ADR-031 file-picker host. Applied at ContentView root so the
+        // system document picker is reachable from any flow that emits
+        // `ExchangeCommand::FilePickFromUser` — including custom-view
+        // tabs (MoreView "Import Contacts") that don't render through
+        // CoreScreenView. CoreOnboardingView attaches its own host
+        // because OnboardingViewModel is a separate state machine.
+        .corePendingFilePick(viewModel.coreViewModel)
     }
 
     /// Extract `display_name` from the core onboarding JSON.

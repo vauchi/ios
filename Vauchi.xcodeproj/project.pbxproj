@@ -106,6 +106,7 @@
 		699AB56D9B3994C02A5D8965 /* backup_prompt.json in Resources */ = {isa = PBXBuildFile; fileRef = 625980A00DD2F14B6E724707 /* backup_prompt.json */; };
 		6A3C10861679B93C3B320E98 /* BannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB444F2925551B69EDE24BD7 /* BannerView.swift */; };
 		6B4BCD6611BD2A2CF4C3C116 /* testContactsScreenEmpty.1.png in Resources */ = {isa = PBXBuildFile; fileRef = ACA09646545409433783D687 /* testContactsScreenEmpty.1.png */; };
+		6C3BF8542A2953DB82A45322 /* FilePickerModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDBAB28CCA0714450AC2B99 /* FilePickerModifier.swift */; };
 		6C775CA748C7BDD8C00321F0 /* testHomeViewWithFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = AE391D2B30E4ECCA0C1161B7 /* testHomeViewWithFields.1.png */; };
 		6E713428218E42433EB22954 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 108E48F43D27EA5EB6FFB226 /* PrivacyInfo.xcprivacy */; };
 		6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C859B6215BADD6A45480D9F /* LocalizationService.swift */; };
@@ -420,6 +421,7 @@
 		AA5DDD4269C94CD90ACEF692 /* testWipeConfirmScreen.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testWipeConfirmScreen.1.png; sourceTree = "<group>"; };
 		AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRDiagnosticView.swift; sourceTree = "<group>"; };
 		ACA09646545409433783D687 /* testContactsScreenEmpty.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsScreenEmpty.1.png; sourceTree = "<group>"; };
+		ADDBAB28CCA0714450AC2B99 /* FilePickerModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePickerModifier.swift; sourceTree = "<group>"; };
 		AE391D2B30E4ECCA0C1161B7 /* testHomeViewWithFields.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testHomeViewWithFields.1.png; sourceTree = "<group>"; };
 		AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualRegressionTests.swift; sourceTree = "<group>"; };
 		AF0F088CC55F4D96F34D113B /* testStatusIndicatorFailed.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testStatusIndicatorFailed.1.png; sourceTree = "<group>"; };
@@ -694,6 +696,7 @@
 				75191060DEDFC1C531D132FE /* AVCameraCaptureSheet.swift */,
 				8EC13750603D7C1EF84BACBC /* CoreOnboardingView.swift */,
 				9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */,
+				ADDBAB28CCA0714450AC2B99 /* FilePickerModifier.swift */,
 				140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */,
 				2BCD1112BEA2A776E27B15C3 /* ScreenRendererView.swift */,
 				CE42D30F93ED2ECE0C78FB70 /* Components */,
@@ -1261,6 +1264,7 @@
 				105F980BB187FE89CD24B5D0 /* FaceToFaceExchangeView.swift in Sources */,
 				1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */,
 				267E3A1A19C1015C648A747C /* FieldListView.swift in Sources */,
+				6C3BF8542A2953DB82A45322 /* FilePickerModifier.swift in Sources */,
 				4DA8D8A5C3D704C592248C27 /* HomeView.swift in Sources */,
 				F12257ABB31E5D291BB7ADDE /* InfoPanelView.swift in Sources */,
 				D69FF7EF9ACE7B733C6D3534 /* InlineConfirmView.swift in Sources */,
