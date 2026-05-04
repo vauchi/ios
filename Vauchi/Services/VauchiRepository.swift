@@ -5,8 +5,11 @@
 // VauchiRepository.swift
 // Repository layer wrapping UniFFI bindings for Vauchi iOS
 //
-// DONE: Restore feature - RestoreIdentitySheet allows users to restore from
-// backup during onboarding using importBackup().
+// DONE: Restore feature - core-driven via ExchangeCommand::FilePickFromUser +
+// BackupPasswordEntry screen (ADR-031, file-picker plan 2026-05-03). The legacy
+// `importBackup(data:password:)` repo/VM helpers remain available as direct
+// UniFFI-layer wrappers (covered by VauchiRepositoryTests) but are no longer
+// driven from the UI.
 //
 // DONE: Proximity verification - MobileProximityVerifier removed in core 0.19.21 (ADR-031).
 // AudioProximityService retained with inherent methods; proximity API stubbed until

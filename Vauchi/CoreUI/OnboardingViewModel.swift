@@ -29,7 +29,6 @@ import SwiftUI
         @Published var validationErrors: [String: String] = [:]
         @Published var isComplete = false
         @Published var postOnboardingDestination: PostOnboardingDestination?
-        @Published var requestBackupImport = false
 
         private let workflow: MobileOnboardingWorkflow
 
@@ -112,11 +111,8 @@ import SwiftUI
                 postOnboardingDestination = destination
                 isComplete = true
 
-            case .startBackupImport:
-                requestBackupImport = true
-
             case .openEntryDetail, .showToast, .exchangeCommands,
-                 .startDeviceLink, .openContact,
+                 .startDeviceLink, .startBackupImport, .openContact,
                  .editContact, .openUrl, .showAlert, .requestCamera,
                  .wipeComplete, .showFormDialog, .previewAs, .unknown:
                 break

@@ -17,6 +17,7 @@
 #   - After Phase 0  (retire dead views): 29
 #   - After Phase 1a (7 retirements):     17
 #   - After Phase 1b (BleExchange):       17
-#   - After Phase 1c (LockScreen i18n):   15  ← current baseline
+#   - After Phase 1c (LockScreen i18n):   15
+#   - After Phase 1d (RestoreIdentity):   13  ← current baseline
 
-15
+13

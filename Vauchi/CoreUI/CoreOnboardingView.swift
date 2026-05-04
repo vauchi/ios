@@ -19,7 +19,6 @@ import SwiftUI
     struct CoreOnboardingView: View {
         @StateObject private var viewModel = OnboardingViewModel()
         let onComplete: (_ onboardingDataJson: String?) -> Void
-        var onStartBackupImport: (() -> Void)?
 
         var body: some View {
             Group {
@@ -39,12 +38,6 @@ import SwiftUI
             .onChange(of: viewModel.isComplete) { complete in
                 if complete {
                     onComplete(viewModel.onboardingDataJson())
-                }
-            }
-            .onChange(of: viewModel.requestBackupImport) { requested in
-                if requested {
-                    viewModel.requestBackupImport = false
-                    onStartBackupImport?()
                 }
             }
         }

@@ -373,7 +373,7 @@ class AppViewModel: ObservableObject {
             showToast(message, undoActionId: undoActionId)
         case .requestCamera:
             loadScreen()
-        case .startDeviceLink, .startBackupImport:
+        case .startDeviceLink:
             // Handled by native iOS flows
             break
         case let .exchangeCommands(commands):

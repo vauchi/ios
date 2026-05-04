@@ -186,7 +186,6 @@
 		C9C86FD0A30B8E8FBAD1245C /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F79BD1F4A165335E472E06C /* DiagnosticLogger.swift */; };
 		CE057880AF7A31CD46AF1FD4 /* welcome.json in Resources */ = {isa = PBXBuildFile; fileRef = 4C16296B579065E5D536DB40 /* welcome.json */; };
 		D03CDFB9D57985CBD50D9C98 /* testTextInputWithValidationError.1.png in Resources */ = {isa = PBXBuildFile; fileRef = E31A56C292E9073A8A07BAF0 /* testTextInputWithValidationError.1.png */; };
-		D12A54D8D19EA3D447AAA3C9 /* RestoreIdentitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3AEDA84B5F37E858F3F1A47 /* RestoreIdentitySheet.swift */; };
 		D334DA4F74B2FD458729763E /* testCardPreviewMinimal.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 79B16A2E56FA9B8FA0C9F628 /* testCardPreviewMinimal.1.png */; };
 		D51F9490703B77CD5FC79AB5 /* testInfoPanelAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = B5C3AC067DAD006C8E3956CA /* testInfoPanelAccessibility.1.txt */; };
 		D585242288C2785DC2A788B6 /* testTextInputWithErrorAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 549D880176A65B3914B77EAC /* testTextInputWithErrorAccessibility.1.txt */; };
@@ -477,7 +476,6 @@
 		F0312368F5A12DEE6EAC3D75 /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		F0A9E6EDE9C2286CB574E056 /* .version */ = {isa = PBXFileReference; path = .version; sourceTree = "<group>"; };
 		F0B262096D756FC7E6603C05 /* security_explanation.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = security_explanation.json; sourceTree = "<group>"; };
-		F3AEDA84B5F37E858F3F1A47 /* RestoreIdentitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestoreIdentitySheet.swift; sourceTree = "<group>"; };
 		F461B0AB8A05C9F2E430B202 /* testFieldListDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testFieldListDark.1.png; sourceTree = "<group>"; };
 		F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEdgeTests.swift; sourceTree = "<group>"; };
 		F94CFFC17D772290645209B3 /* testFieldListWithFieldsPerGroup.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testFieldListWithFieldsPerGroup.1.png; sourceTree = "<group>"; };
@@ -579,14 +577,6 @@
 				4C16296B579065E5D536DB40 /* welcome.json */,
 			);
 			path = golden;
-			sourceTree = "<group>";
-		};
-		2CBD4B5D0F233D7B3EA59CED /* Onboarding */ = {
-			isa = PBXGroup;
-			children = (
-				F3AEDA84B5F37E858F3F1A47 /* RestoreIdentitySheet.swift */,
-			);
-			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		5B9EAC8491A990983095623D /* VauchiTests */ = {
@@ -800,7 +790,6 @@
 				36EBCAF628D08C167C0D9721 /* QRScannerView.swift */,
 				08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */,
 				E187C8E8E4D2A6C1CDA025AA /* Components */,
-				2CBD4B5D0F233D7B3EA59CED /* Onboarding */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1297,7 +1286,6 @@
 				E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */,
 				F3096FD65BB8C411D32ACE99 /* QrCameraTunerView.swift in Sources */,
 				A6AA2ED01F250DDE30A7D2F4 /* QrCodeView.swift in Sources */,
-				D12A54D8D19EA3D447AAA3C9 /* RestoreIdentitySheet.swift in Sources */,
 				C2AA1DC7FD7FA22C155F70BD /* ScreenRendererView.swift in Sources */,
 				C7267E367C96E3F2DC79A963 /* SettingsGroupView.swift in Sources */,
 				AA3F337ED100BA98F8D5B5E3 /* SettingsService.swift in Sources */,
