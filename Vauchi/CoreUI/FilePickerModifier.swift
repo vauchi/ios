@@ -27,12 +27,35 @@ struct FilePickerModifier: ViewModifier {
     @ObservedObject var coreVM: AppViewModel
 
     func body(content: Content) -> some View {
-        content.fileImporter(
-            isPresented: filePickerBinding,
-            allowedContentTypes: filePickerContentTypes,
-            allowsMultipleSelection: false
-        ) { result in
-            handleFilePickerResult(result)
+        content
+            .fileImporter(
+                isPresented: filePickerBinding,
+                allowedContentTypes: filePickerContentTypes,
+                allowsMultipleSelection: false
+            ) { result in
+                handleFilePickerResult(result)
+            }
+            // UI-test sentinel: a 1x1 invisible element whose
+            // accessibility identifier surfaces only while
+            // `pendingFilePick` is non-nil. Lets
+            // FilePickerReachabilityUITests verify the bridge state
+            // fires without polling the system picker process — the
+            // picker's bundle id and chrome labels vary across iOS
+            // versions, so the contract under test is "core asked the
+            // host to present a picker", not "the system picker
+            // actually opened".
+            .background(filePickerSentinel)
+    }
+
+    @ViewBuilder
+    private var filePickerSentinel: some View {
+        if coreVM.pendingFilePick != nil {
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityIdentifier("filepicker.pending")
+                .accessibilityHidden(false)
+        } else {
+            Color.clear.frame(width: 0, height: 0)
         }
     }
 

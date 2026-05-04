@@ -4,8 +4,9 @@
 
 // FilePickerReachabilityUITests.swift
 // Verifies the ADR-031 file-picker (`ExchangeCommand::FilePickFromUser`)
-// reaches the system document picker from each user-facing trigger
-// path. Closes the verification gap that hid two silent regressions:
+// reaches the host's `.fileImporter` modifier from each user-facing
+// trigger path. Closes the verification gap that hid two silent
+// regressions:
 //
 //   1. Onboarding `restore_backup` — Phase 2B emits ExchangeCommands;
 //      `OnboardingViewModel` previously dropped them with `break`.
@@ -14,10 +15,15 @@
 //      lived on `CoreScreenView`; `MoreView` is a custom List, so the
 //      picker host wasn't in the active hierarchy.
 //
-// Both regressions ship if the modifier is host-scoped instead of
-// rooted at `ContentView`. These tests would catch the regression
-// pattern: trigger the action, assert the system picker actually
-// appears (queried via the picker process's own bundle id).
+// What we assert: the `filepicker.pending` accessibility sentinel
+// (mounted by `FilePickerModifier` while `coreVM.pendingFilePick` is
+// non-nil) appears after the user-facing trigger. We deliberately do
+// *not* poll the system picker process — its bundle id
+// (`com.apple.DocumentManagerUICore`) and chrome labels drift across
+// iOS versions, and once the bridge sets `pendingFilePick`, SwiftUI's
+// `.fileImporter` is responsible for the actual presentation. The
+// contract under test is "the bridge fires", not "the OS picker
+// renders".
 //
 // Test ordering: XCTest sorts methods alphabetically within a class.
 // Splitting into two classes (Onboarding* / Tabs*) keeps each test in
@@ -36,8 +42,8 @@ import XCTest
 /// Phase 2B routes `restore_backup` through
 /// `ActionResult.exchangeCommands{FilePickFromUser{ImportBackup}}`.
 /// `OnboardingViewModel`'s bridge (`2026-05-04-ios-file-picker-hoist`
-/// commit 2) forwards the command to `AppViewModel`, where the root
-/// `.fileImporter` opens the picker.
+/// commit 2) forwards the command to `AppViewModel`, which sets
+/// `pendingFilePick`; the root `.fileImporter` modifier observes it.
 ///
 /// Today the test runs only when the simulator has no identity yet —
 /// the in-app `--reset-for-testing` arg seeds identity (used by
@@ -45,11 +51,7 @@ import XCTest
 /// and there is no inverse wipe API exposed to launch arguments.
 /// `XCTSkip` is used (rather than `XCTFail`) so a stale-identity sim
 /// surfaces as a skip in the test report instead of breaking the
-/// suite. The bridge itself (`OnboardingViewModel.onExchangeCommands`)
-/// is exercised end-to-end by manual smoke runs and by the core-side
-/// reachability walker (`just reachability`); a Swift unit test
-/// exercising it directly is a follow-up once a wipe API exposes a
-/// reliable onboarding-state hook.
+/// suite.
 final class OnboardingFilePickerReachabilityUITests: XCTestCase {
     var app: XCUIApplication!
 
@@ -59,7 +61,6 @@ final class OnboardingFilePickerReachabilityUITests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        terminateDocumentPicker()
         app = nil
     }
 
@@ -70,8 +71,7 @@ final class OnboardingFilePickerReachabilityUITests: XCTestCase {
         guard haveIdentity.waitForExistence(timeout: 10) else {
             throw XCTSkip(
                 "Sim has stale identity (likely seeded by a prior test) — " +
-                    "no `wipe-for-testing` arg exists yet to reset state. " +
-                    "Bridge logic covered by unit test in the meantime."
+                    "no `wipe-for-testing` arg exists yet to reset state."
             )
         }
         haveIdentity.tap()
@@ -82,8 +82,8 @@ final class OnboardingFilePickerReachabilityUITests: XCTestCase {
         restoreBackup.tap()
 
         XCTAssertTrue(
-            waitForDocumentPicker(timeout: 10),
-            "System document picker should appear after Onboarding 'Restore backup'"
+            app.otherElements["filepicker.pending"].waitForExistence(timeout: 10),
+            "AppViewModel.pendingFilePick should flip non-nil after Onboarding 'Restore backup'"
         )
     }
 }
@@ -94,7 +94,7 @@ final class OnboardingFilePickerReachabilityUITests: XCTestCase {
 /// the engine to AppScreen::More then emit `import_contacts`. Core's
 /// MoreEngine returns `ExchangeCommand::FilePickFromUser`. The
 /// `.fileImporter` host hoisted in `2026-05-04-ios-file-picker-hoist`
-/// to ContentView root must surface the system document picker.
+/// to ContentView root must observe `pendingFilePick` and present.
 final class TabsFilePickerReachabilityUITests: XCTestCase {
     var app: XCUIApplication!
 
@@ -104,7 +104,6 @@ final class TabsFilePickerReachabilityUITests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        terminateDocumentPicker()
         app = nil
     }
 
@@ -125,39 +124,8 @@ final class TabsFilePickerReachabilityUITests: XCTestCase {
         importContacts.tap()
 
         XCTAssertTrue(
-            waitForDocumentPicker(timeout: 5),
-            "System document picker should be presented after 'Import Contacts'"
+            app.otherElements["filepicker.pending"].waitForExistence(timeout: 10),
+            "AppViewModel.pendingFilePick should flip non-nil after 'Import Contacts'"
         )
-    }
-}
-
-// MARK: - Helpers
-
-/// Waits for the system document picker to surface. The picker hosts in
-/// `com.apple.DocumentManagerUICore` (iOS 17+) — we wait on its
-/// `runningForeground` state OR on its standard "Cancel" chrome button
-/// becoming queryable, whichever fires first. Both signals are
-/// evaluated by XCTest's predicate runloop (no busy `Thread.sleep`).
-///
-/// `XCTWaiter().wait(for:timeout:)` requires ALL expectations to
-/// fulfil — wrong for an OR condition. Instead we wrap both checks
-/// inside a single block-based `NSPredicate`; XCTest re-evaluates it
-/// on the runloop until it returns `true` or `timeout` elapses.
-private func waitForDocumentPicker(timeout: TimeInterval) -> Bool {
-    let pickerApp = XCUIApplication(bundleIdentifier: "com.apple.DocumentManagerUICore")
-    let predicate = NSPredicate { _, _ in
-        if pickerApp.state == .runningForeground { return true }
-        return pickerApp.buttons["Cancel"].exists
-    }
-    let exp = XCTNSPredicateExpectation(predicate: predicate, object: NSObject())
-    return XCTWaiter().wait(for: [exp], timeout: timeout) == .completed
-}
-
-/// Terminates the system document picker so the next test starts from a
-/// clean SpringBoard state.
-private func terminateDocumentPicker() {
-    let docPicker = XCUIApplication(bundleIdentifier: "com.apple.DocumentManagerUICore")
-    if docPicker.state != .notRunning {
-        docPicker.terminate()
     }
 }
