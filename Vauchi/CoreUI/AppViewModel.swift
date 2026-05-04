@@ -24,6 +24,21 @@ class AppViewModel: ObservableObject {
     @Published var selectedScreen: String?
     @Published var showImagePicker = false
     @Published var showCameraPicker = false
+    /// Set when core emits `ExchangeCommand::FilePickFromUser`. The
+    /// view layer presents a `.fileImporter` keyed on this state; on
+    /// pick / cancel it calls back into `sendFilePicked` /
+    /// `sendFilePickCancelled` which unset the state and forward the
+    /// matching `ExchangeHardwareEvent`. Phase 3 of
+    /// `2026-05-03-core-file-picker-command`.
+    @Published var pendingFilePick: PendingFilePick?
+
+    struct PendingFilePick: Identifiable {
+        let purpose: FilePickPurpose
+        let acceptedMimeTypes: [String]
+        var id: String {
+            String(describing: purpose)
+        }
+    }
 
     let appEngine: PlatformAppEngine
 
@@ -386,11 +401,36 @@ class AppViewModel: ObservableObject {
             case .imagePickFromFile:
                 // iOS uses photo library instead of file picker for images
                 sendImagePickCancelled()
+            case let .filePickFromUser(acceptedMimeTypes, purpose):
+                // Phase 3 of 2026-05-03-core-file-picker-command. Stash
+                // the parameters so the view layer can present a
+                // `.fileImporter`. Selection / cancel route back via
+                // `sendFilePicked` / `sendFilePickCancelled`.
+                pendingFilePick = PendingFilePick(
+                    purpose: purpose,
+                    acceptedMimeTypes: acceptedMimeTypes
+                )
             default:
                 // Other exchange commands handled by ExchangeCommandHandler
                 break
             }
         }
+    }
+
+    /// Send picked file bytes back to core. Called from the view layer's
+    /// `.fileImporter(onCompletion:)` after the user selects a file.
+    /// Always clears `pendingFilePick` so the modal dismisses even if
+    /// core's response triggers a re-render.
+    func sendFilePicked(bytes: [UInt8], filename: String) {
+        pendingFilePick = nil
+        sendHardwareEvent(.filePickedFromUser(bytes: Data(bytes), filename: filename))
+    }
+
+    /// Notify core that the user cancelled the file picker. Same
+    /// dismissal semantics as `sendFilePicked`.
+    func sendFilePickCancelled() {
+        pendingFilePick = nil
+        sendHardwareEvent(.filePickCancelledByUser)
     }
 
     /// Send selected image bytes back to core as an ImageReceived hardware event.

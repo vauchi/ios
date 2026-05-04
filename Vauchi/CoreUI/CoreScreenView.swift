@@ -99,6 +99,47 @@ private struct CoreScreenContent: View {
                 coreVM.sendImagePickCancelled()
             }
         }
+        // Phase 3 of `2026-05-03-core-file-picker-command`: when core
+        // emits `ExchangeCommand::FilePickFromUser`, present the system
+        // file importer keyed on the pending purpose. SwiftUI's
+        // `.fileImporter` uses a `Bool` binding — `pendingFilePick`'s
+        // optional state drives that binding so the modal dismisses
+        // automatically once `sendFilePicked` / `sendFilePickCancelled`
+        // clears the value.
+        .fileImporter(
+            isPresented: filePickerBinding,
+            allowedContentTypes: filePickerContentTypes,
+            allowsMultipleSelection: false
+        ) { result in
+            handleFilePickerResult(result)
+        }
+    }
+
+    private func handleFilePickerResult(_ result: Result<[URL], Error>) {
+        switch result {
+        case let .success(urls):
+            guard let url = urls.first else {
+                coreVM.sendFilePickCancelled()
+                return
+            }
+            // Per Apple's file-coordination contract for security-scoped
+            // resource URLs returned by `.fileImporter`: hold the access
+            // for the read, then release. Without this, sandboxed builds
+            // raise `NSCocoaErrorDomain 257` on `Data(contentsOf:)`.
+            let didStart = url.startAccessingSecurityScopedResource()
+            defer { if didStart { url.stopAccessingSecurityScopedResource() } }
+            do {
+                let data = try Data(contentsOf: url)
+                coreVM.sendFilePicked(bytes: Array(data), filename: url.lastPathComponent)
+            } catch {
+                #if DEBUG
+                    print("CoreScreenView: file read failed: \(error)")
+                #endif
+                coreVM.sendFilePickCancelled()
+            }
+        case .failure:
+            coreVM.sendFilePickCancelled()
+        }
     }
 
     private func navigateIfNeeded(to screen: String) {
@@ -137,6 +178,32 @@ private struct CoreScreenContent: View {
             get: { coreVM.showCameraPicker },
             set: { coreVM.showCameraPicker = $0 }
         )
+    }
+
+    private var filePickerBinding: Binding<Bool> {
+        Binding(
+            get: { coreVM.pendingFilePick != nil },
+            set: { isPresented in
+                // SwiftUI sets this to false when the importer dismisses.
+                // If `pendingFilePick` is still set when that happens, the
+                // user dismissed without our handler running (system back-
+                // gesture, app backgrounding) — surface the cancel so core
+                // doesn't sit forever waiting for a hardware event.
+                if !isPresented, coreVM.pendingFilePick != nil {
+                    coreVM.sendFilePickCancelled()
+                }
+            }
+        )
+    }
+
+    /// Translate core's advisory MIME types into iOS UTTypes. Falls back
+    /// to `.data` (the universal "any file" type) so unfamiliar MIME
+    /// strings still let the picker open. Filters and dedups along the
+    /// way; an empty input means "pick any file".
+    private var filePickerContentTypes: [UTType] {
+        guard let pending = coreVM.pendingFilePick else { return [.data] }
+        let types = pending.acceptedMimeTypes.compactMap { UTType(mimeType: $0) }
+        return types.isEmpty ? [.data] : types
     }
 }
 
