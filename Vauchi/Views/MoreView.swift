@@ -11,6 +11,7 @@
 import SwiftUI
 
 struct MoreView: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
 
     var body: some View {
@@ -82,8 +83,26 @@ struct MoreView: View {
             }
             .accessibilityIdentifier("more.backupRecovery")
 
-            NavigationLink {
-                ImportContactsView()
+            // Phase 3 of `2026-05-03-core-file-picker-command`:
+            // emit core's `import_contacts` action instead of pushing
+            // a custom .fileImporter view. Sequence:
+            //   1. navigate the engine to AppScreen::More so the
+            //      MoreEngine is the active engine
+            //   2. emit `import_contacts` action_id, which MoreEngine
+            //      maps to ExchangeCommand::FilePickFromUser
+            //   3. AppViewModel.handleExchangeCommands picks up the
+            //      command, sets `pendingFilePick`, CoreScreenView's
+            //      `.fileImporter` opens
+            //   4. picker resolves → FilePickedFromUser routes via
+            //      AppScreen::More → Vauchi::import_contacts_from_vcf
+            //      → toast with imported / skipped counts
+            // No visual transition: this view stays mounted while
+            // engine state moves; iOS doesn't render core's More
+            // screen here.
+            Button {
+                guard let coreVM = viewModel.coreViewModel else { return }
+                coreVM.navigateTo(screenJson: "\"More\"")
+                coreVM.handleAction(.actionPressed(actionId: "import_contacts"))
             } label: {
                 Label("Import Contacts", systemImage: "person.crop.rectangle.stack")
             }

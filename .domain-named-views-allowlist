@@ -30,7 +30,6 @@ ContactsView.swift
 ExchangeModePicker.swift
 FaceToFaceExchangeView.swift
 HomeView.swift
-ImportContactsView.swift
 MoreView.swift
 NfcExchangeView.swift
 QRDiagnosticView.swift
