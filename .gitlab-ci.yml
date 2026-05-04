@@ -194,7 +194,7 @@ workflow:
 # automatically create a v{version} tag to trigger the release pipeline.
 auto-tag:version:
   stage: auto-tag
-  image: alpine:3.21
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
   tags: [docker]
   resource_group: auto-tag
   needs: []
@@ -608,7 +608,7 @@ check:removed-symbols:
 # silently shadow the shared package and drift on every core release.
 check:coreuimodels-drift:
   stage: lint
-  image: alpine:3.21
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
   tags: [docker]
   needs: []
   script:
@@ -629,7 +629,7 @@ check:coreuimodels-drift:
 # allow_failure: true makes this a visibility gate, not a merge blocker.
 check:design-tokens:
   stage: lint
-  image: alpine:3.21
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
   tags: [docker]
   needs: []
   allow_failure: true
