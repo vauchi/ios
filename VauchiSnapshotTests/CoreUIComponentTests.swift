@@ -316,8 +316,8 @@ final class CoreUIComponentTests: XCTestCase {
                 ),
             ],
             selectedVariant: "Friends",
-            // selectedGroup matches a groupView → core uses that view's
-            // visibleFields directly.
+            // selectedVariant matches a PreviewVariant → core uses that
+            // variant's visibleFields directly.
             visibleFields: friendsVisible
         )
         let view = PreviewView(component: component, onAction: noOp)

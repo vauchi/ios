@@ -181,10 +181,10 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(list.availableGroups, ["Family", "Friends"])
     }
 
-    func testComponentCardPreviewDecoding() throws {
+    func testComponentPreviewDecoding() throws {
         let json = Data("""
         {
-            "CardPreview": {
+            "Preview": {
                 "name": "Alice",
                 "fields": [
                     {
@@ -195,14 +195,14 @@ final class ModelsTests: XCTestCase {
                         "visibility": "Shown"
                     }
                 ],
-                "group_views": [
+                "variants": [
                     {
-                        "group_name": "Family",
+                        "variant_id": "Family",
                         "display_name": "Alice (Family)",
                         "visible_fields": []
                     }
                 ],
-                "selected_group": "Family"
+                "selected_variant": "Family"
             }
         }
         """.utf8)
@@ -216,11 +216,11 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(preview.name, "Alice")
         XCTAssertEqual(preview.fields.count, 1)
         XCTAssertEqual(preview.fields[0].value, "alice@example.com")
-        XCTAssertEqual(preview.groupViews.count, 1)
-        XCTAssertEqual(preview.groupViews[0].groupName, "Family")
-        XCTAssertEqual(preview.groupViews[0].displayName, "Alice (Family)")
-        XCTAssertEqual(preview.groupViews[0].visibleFields.count, 0)
-        XCTAssertEqual(preview.selectedGroup, "Family")
+        XCTAssertEqual(preview.variants.count, 1)
+        XCTAssertEqual(preview.variants[0].variantId, "Family")
+        XCTAssertEqual(preview.variants[0].displayName, "Alice (Family)")
+        XCTAssertEqual(preview.variants[0].visibleFields.count, 0)
+        XCTAssertEqual(preview.selectedVariant, "Family")
     }
 
     func testComponentInfoPanelDecoding() throws {
