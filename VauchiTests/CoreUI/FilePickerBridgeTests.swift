@@ -3,19 +3,24 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // FilePickerBridgeTests.swift
-// Verifies that the ADR-031 file-picker bridge fires correctly:
-// when `AppViewModel.handleAction` receives an `import_contacts`
-// ActionPressed on `AppScreen::More`, core returns
-// `ActionResult.exchangeCommands{FilePickFromUser}`, and
-// `handleExchangeCommands` sets `pendingFilePick`.
+// Verifies the ADR-031 file-picker bridge wiring on iOS:
+//
+//   1. `AppViewModel.handleExchangeCommands` translates an
+//      `ExchangeCommandDTO.filePickFromUser` into a non-nil
+//      `pendingFilePick` carrying the correct purpose + MIME types.
+//   2. `sendFilePickCancelled` clears that state.
 //
 // Replaces the previous UI test (FilePickerReachabilityUITests's
 // MoreView path), which was racy: when `.fileImporter`'s binding
 // flips true the system picker presents and covers any sentinel
-// overlay before XCTest can query it. The unit test exercises the
-// same bridge end-to-end through real core code (no mocks) without
-// relying on the OS picker actually opening — that part is
-// SwiftUI's responsibility once `pendingFilePick` is non-nil.
+// overlay before XCTest can query it.
+//
+// The bridge logic exercised here is entirely iOS-side. We feed
+// `handleExchangeCommands` directly with a synthetic
+// `ExchangeCommandDTO.filePickFromUser` instead of routing through
+// real core — the upstream side (MoreEngine emits
+// `ActionResult.ExchangeCommands{FilePickFromUser}`) is already
+// covered by `core/vauchi-app/tests/it/file_picker_wiring_tests.rs`.
 
 @testable import Vauchi
 import VauchiPlatform
@@ -43,48 +48,49 @@ final class FilePickerBridgeTests: XCTestCase {
         try? FileManager.default.removeItem(at: tempDir)
     }
 
-    /// Scenario: user taps "Import Contacts" in MoreView. The button
-    /// navigates the engine to AppScreen::More and emits
-    /// `import_contacts`. MoreEngine returns a FilePickFromUser
-    /// command. `pendingFilePick` must flip non-nil with
-    /// `purpose == .importContacts`.
-    func testImportContactsActionSetsPendingFilePick() {
+    /// Scenario: core emits `ExchangeCommand::FilePickFromUser` for
+    /// `ImportContacts`. The bridge must store the purpose + accepted
+    /// MIME types on `pendingFilePick`, which the
+    /// `FilePickerModifier` then drives `.fileImporter` from.
+    func testFilePickFromUserSetsPendingFilePick() {
         XCTAssertNil(
             viewModel.pendingFilePick,
             "pendingFilePick should start nil"
         )
 
-        viewModel.navigateTo(screenJson: "\"More\"")
-        viewModel.handleAction(.actionPressed(actionId: "import_contacts"))
+        viewModel.handleExchangeCommands([
+            .filePickFromUser(
+                acceptedMimeTypes: ["text/vcard", "text/x-vcard"],
+                purpose: .importContacts
+            ),
+        ])
 
         guard let pending = viewModel.pendingFilePick else {
-            XCTFail("pendingFilePick should be non-nil after MoreEngine emits FilePickFromUser")
+            XCTFail("pendingFilePick should be non-nil after FilePickFromUser command")
             return
         }
         XCTAssertEqual(
             pending.purpose,
             .importContacts,
-            "purpose should match the FilePickPurpose::ImportContacts emitted by core"
+            "purpose should round-trip through the bridge"
         )
-        XCTAssertFalse(
-            pending.acceptedMimeTypes.isEmpty,
-            "core must emit at least one accepted MIME type for vCard import"
-        )
-        XCTAssertTrue(
-            pending.acceptedMimeTypes.contains("text/vcard"),
-            "expected text/vcard among accepted types, got \(pending.acceptedMimeTypes)"
+        XCTAssertEqual(
+            pending.acceptedMimeTypes,
+            ["text/vcard", "text/x-vcard"],
+            "accepted MIME types should round-trip through the bridge"
         )
     }
 
     /// Scenario: `sendFilePickCancelled` clears pending state and
-    /// emits the matching hardware event back to core. Verifies the
+    /// emits the matching hardware event back to core. Covers the
     /// modifier's "user dismissed without our handler" cleanup path.
     func testSendFilePickCancelledClearsPendingState() {
-        viewModel.navigateTo(screenJson: "\"More\"")
-        viewModel.handleAction(.actionPressed(actionId: "import_contacts"))
+        viewModel.handleExchangeCommands([
+            .filePickFromUser(acceptedMimeTypes: ["text/vcard"], purpose: .importContacts),
+        ])
         XCTAssertNotNil(
             viewModel.pendingFilePick,
-            "precondition: pendingFilePick should be set by the import_contacts action"
+            "precondition: pendingFilePick should be set by FilePickFromUser"
         )
 
         viewModel.sendFilePickCancelled()
