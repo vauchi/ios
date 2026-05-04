@@ -82,7 +82,7 @@ final class OnboardingFilePickerReachabilityUITests: XCTestCase {
         restoreBackup.tap()
 
         XCTAssertTrue(
-            app.otherElements["filepicker.pending"].waitForExistence(timeout: 10),
+            app.descendants(matching: .any).matching(identifier: "filepicker.pending").firstMatch.waitForExistence(timeout: 10),
             "AppViewModel.pendingFilePick should flip non-nil after Onboarding 'Restore backup'"
         )
     }
@@ -124,7 +124,7 @@ final class TabsFilePickerReachabilityUITests: XCTestCase {
         importContacts.tap()
 
         XCTAssertTrue(
-            app.otherElements["filepicker.pending"].waitForExistence(timeout: 10),
+            app.descendants(matching: .any).matching(identifier: "filepicker.pending").firstMatch.waitForExistence(timeout: 10),
             "AppViewModel.pendingFilePick should flip non-nil after 'Import Contacts'"
         )
     }

@@ -35,27 +35,29 @@ struct FilePickerModifier: ViewModifier {
             ) { result in
                 handleFilePickerResult(result)
             }
-            // UI-test sentinel: a 1x1 invisible element whose
-            // accessibility identifier surfaces only while
-            // `pendingFilePick` is non-nil. Lets
-            // FilePickerReachabilityUITests verify the bridge state
-            // fires without polling the system picker process — the
-            // picker's bundle id and chrome labels vary across iOS
-            // versions, so the contract under test is "core asked the
-            // host to present a picker", not "the system picker
+            // UI-test sentinel: a 1x1 invisible element placed in an
+            // overlay (so it is in the rendered hierarchy, unlike
+            // `.background` which SwiftUI may keep out of the a11y
+            // tree). Surfaces only while `pendingFilePick` is non-nil.
+            // Lets FilePickerReachabilityUITests verify the bridge
+            // state fires without polling the system picker process —
+            // the picker's bundle id and chrome labels vary across
+            // iOS versions, so the contract under test is "core asked
+            // the host to present a picker", not "the system picker
             // actually opened".
-            .background(filePickerSentinel)
+            .overlay(alignment: .topLeading) { filePickerSentinel }
     }
 
     @ViewBuilder
     private var filePickerSentinel: some View {
         if coreVM.pendingFilePick != nil {
-            Color.clear
+            Rectangle()
+                .fill(Color.clear)
                 .frame(width: 1, height: 1)
+                .accessibilityElement()
+                .accessibilityLabel("file picker pending")
                 .accessibilityIdentifier("filepicker.pending")
-                .accessibilityHidden(false)
-        } else {
-            Color.clear.frame(width: 0, height: 0)
+                .allowsHitTesting(false)
         }
     }
 
