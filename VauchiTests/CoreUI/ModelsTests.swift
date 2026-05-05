@@ -416,15 +416,15 @@ final class ModelsTests: XCTestCase {
         }
     }
 
-    func testActionResultExchangeCommands() throws {
+    func testActionResultCommands() throws {
         let json = Data("""
-        {"ExchangeCommands": {"commands": ["QrRequestScan", {"QrDisplay": {"data": "test-qr"}}]}}
+        {"Commands": {"commands": ["QrRequestScan", {"QrDisplay": {"data": "test-qr"}}]}}
         """.utf8)
 
         let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
 
-        guard case let .exchangeCommands(commands) = result else {
-            XCTFail("Expected .exchangeCommands, got \(result)")
+        guard case let .commands(commands) = result else {
+            XCTFail("Expected .commands, got \(result)")
             return
         }
         XCTAssertEqual(commands.count, 2)

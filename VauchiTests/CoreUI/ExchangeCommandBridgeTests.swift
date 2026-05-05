@@ -4,7 +4,7 @@
 
 // ExchangeCommandBridgeTests.swift
 // Verifies `AppViewModel.handleExchangeCommands` correctly translates
-// each `ExchangeCommandDTO` variant into the matching @Published
+// each `CommandDTO` variant into the matching @Published
 // state that drives a SwiftUI presentation:
 //
 //   ExchangeCommand                    @Published state on AppViewModel

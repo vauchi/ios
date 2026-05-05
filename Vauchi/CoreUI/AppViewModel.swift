@@ -145,8 +145,15 @@ class AppViewModel: ObservableObject {
             guard let actionJson = String(data: actionData, encoding: .utf8) else { return }
             let resultJson = try appEngine.handleActionJson(actionJson: actionJson)
             guard let resultData = resultJson.data(using: .utf8) else { return }
-            let result = try coreJSONDecoder.decode(ActionResult.self, from: resultData)
-            applyResult(result)
+            // Phase 2b: handleActionJson now returns
+            // `{"action_result": <ActionResult>, "commands": [<CommandDTO>]}`.
+            // The lifecycle commands carry brightness / idle-timer requests
+            // emitted by `WorkflowEngine::screen_entered/screen_exited`.
+            let envelope = try coreJSONDecoder.decode(ActionResultEnvelope.self, from: resultData)
+            applyResult(envelope.actionResult)
+            if !envelope.commands.isEmpty {
+                handleExchangeCommands(envelope.commands)
+            }
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to handle action: \(error)")
@@ -160,10 +167,16 @@ class AppViewModel: ObservableObject {
         do {
             let json = try appEngine.navigateToJson(screenJson: screenJson)
             guard let data = json.data(using: .utf8) else { return }
-            currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
+            // Phase 2b: navigateToJson now returns
+            // `{"screen": <ScreenModel>, "commands": [<CommandDTO>]}`.
+            let envelope = try coreJSONDecoder.decode(ScreenEnvelope.self, from: data)
+            currentScreen = envelope.screen
             validationErrors = [:]
             loadAvailableScreens()
             updateSelectedScreen()
+            if !envelope.commands.isEmpty {
+                handleExchangeCommands(envelope.commands)
+            }
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to navigate: \(error)")
@@ -197,8 +210,13 @@ class AppViewModel: ObservableObject {
         do {
             let json = try appEngine.navigateBackJson()
             guard let data = json.data(using: .utf8) else { return }
-            currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
+            // Phase 2b envelope shape (see `navigateTo`).
+            let envelope = try coreJSONDecoder.decode(ScreenEnvelope.self, from: data)
+            currentScreen = envelope.screen
             validationErrors = [:]
+            if !envelope.commands.isEmpty {
+                handleExchangeCommands(envelope.commands)
+            }
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to navigate back: \(error)")
@@ -376,7 +394,7 @@ class AppViewModel: ObservableObject {
         case .startDeviceLink:
             // Handled by native iOS flows.
             break
-        case let .exchangeCommands(commands):
+        case let .commands(commands):
             handleExchangeCommands(commands)
         case .showFormDialog:
             // Dialog presentation handled by NavigateTo — no separate action needed
@@ -392,11 +410,11 @@ class AppViewModel: ObservableObject {
     // MARK: - Exchange Command Handling
 
     /// Dispatch one or more `ExchangeCommand`s emitted by core. Called
-    /// from `applyResult` for `ActionResult.exchangeCommands`, and
+    /// from `applyResult` for `ActionResult.commands`, and
     /// from `OnboardingViewModel.onExchangeCommands` so the Onboarding
     /// flow shares the same `.fileImporter` host attached at
     /// ContentView root.
-    func handleExchangeCommands(_ commands: [ExchangeCommandDTO]) {
+    func handleExchangeCommands(_ commands: [CommandDTO]) {
         for command in commands {
             switch command {
             case .imagePickFromLibrary:

@@ -30,14 +30,14 @@ import SwiftUI
         @Published var isComplete = false
         @Published var postOnboardingDestination: PostOnboardingDestination?
 
-        /// Bridge for `ActionResult.exchangeCommands` ActionResults
+        /// Bridge for `ActionResult.commands` ActionResults
         /// (e.g. `FilePickFromUser` emitted by Phase 2B
         /// `restore_backup`). Set by CoreOnboardingView to the host
         /// app's `AppViewModel.handleExchangeCommands` so the system
         /// file importer attached at ContentView root receives the
         /// command. Without this bridge the case below would fall
         /// through and the picker would never open.
-        var onExchangeCommands: (([ExchangeCommandDTO]) -> Void)?
+        var onExchangeCommands: (([CommandDTO]) -> Void)?
 
         private let workflow: MobileOnboardingWorkflow
 
@@ -120,7 +120,7 @@ import SwiftUI
                 postOnboardingDestination = destination
                 isComplete = true
 
-            case let .exchangeCommands(commands):
+            case let .commands(commands):
                 // Forward to the host's AppViewModel so the .fileImporter
                 // hosted at ContentView root receives the
                 // FilePickFromUser command. CoreOnboardingView wires

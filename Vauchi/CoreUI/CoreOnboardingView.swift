@@ -20,12 +20,12 @@ import SwiftUI
         @StateObject private var viewModel = OnboardingViewModel()
         let onComplete: (_ onboardingDataJson: String?) -> Void
 
-        /// Bridge for `ActionResult.exchangeCommands` ActionResults
+        /// Bridge for `ActionResult.commands` ActionResults
         /// emitted by Phase 2B `restore_backup`. The host (ContentView)
         /// passes its `viewModel.coreViewModel?.handleExchangeCommands`
         /// so the FilePickFromUser command lands on the same
         /// `pendingFilePick` state the root `.fileImporter` observes.
-        var onExchangeCommands: (([ExchangeCommandDTO]) -> Void)?
+        var onExchangeCommands: (([CommandDTO]) -> Void)?
 
         var body: some View {
             Group {
