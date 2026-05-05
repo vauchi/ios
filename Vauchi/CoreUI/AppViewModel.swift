@@ -448,7 +448,7 @@ class AppViewModel: ObservableObject {
         sendHardwareEvent(.imagePickCancelled)
     }
 
-    private func sendHardwareEvent(_ event: MobileExchangeHardwareEvent) {
+    private func sendHardwareEvent(_ event: MobileEvent) {
         do {
             if let resultJson = try appEngine.handleHardwareEvent(event: event) {
                 guard let resultData = resultJson.data(using: .utf8) else { return }

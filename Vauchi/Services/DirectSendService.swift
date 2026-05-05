@@ -18,7 +18,7 @@ import VauchiPlatform
 final class DirectSendService {
     static let defaultPort: UInt16 = 19283
 
-    typealias EventCallback = (MobileExchangeHardwareEvent) -> Void
+    typealias EventCallback = (MobileEvent) -> Void
 
     private var eventCallback: EventCallback?
     private var listenerSocket: Int32 = -1

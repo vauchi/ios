@@ -88,7 +88,7 @@ final class LinkResponderSessionService {
         // sub-state. This is the hook for a future progress indicator.
     }
 
-    fileprivate func handleCommands(_: [MobileExchangeCommand]) {
+    fileprivate func handleCommands(_: [MobileCommand]) {
         // TODO(2026-04-27 deep-link-responder Phase 2): dispatch
         // RelayEscrowDeposit / RelayEscrowCheck / RelayEscrowRetrieve
         // via a relay HTTP client. The existing iOS `ExchangeCommandHandler`
@@ -157,7 +157,7 @@ private final class ListenerForwarder: LinkResponderSessionListener {
         Task { @MainActor [weak owner] in owner?.handleStateChanged(state) }
     }
 
-    func onCommands(commands: [MobileExchangeCommand]) {
+    func onCommands(commands: [MobileCommand]) {
         Task { @MainActor [weak owner] in owner?.handleCommands(commands) }
     }
 

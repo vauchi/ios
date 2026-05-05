@@ -9,10 +9,10 @@ import VauchiPlatform
 ///
 /// Executes BLE ExchangeCommands (scan, connect, GATT read/write) using
 /// CoreBluetooth and reports results back via a callback. The callback
-/// creates MobileExchangeHardwareEvents for the session.
+/// creates MobileEvents for the session.
 final class BleExchangeService: NSObject {
     /// Callback to report hardware events back to the exchange session.
-    typealias EventCallback = (MobileExchangeHardwareEvent) -> Void
+    typealias EventCallback = (MobileEvent) -> Void
 
     private var centralManager: CBCentralManager?
     private var targetServiceUuid: CBUUID?

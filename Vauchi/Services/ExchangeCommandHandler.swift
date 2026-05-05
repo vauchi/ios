@@ -52,7 +52,7 @@ final class ExchangeCommandHandler {
     }
 
     /// Dispatch a single exchange command to the appropriate platform service.
-    private func dispatch(_ command: MobileExchangeCommand) {
+    private func dispatch(_ command: MobileCommand) {
         switch command {
         // ── QR ──────────────────────────────────────────────────────
         case .qrDisplay:
