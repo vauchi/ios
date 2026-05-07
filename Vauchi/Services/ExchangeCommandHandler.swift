@@ -112,40 +112,34 @@ final class ExchangeCommandHandler {
         //     startDirectSend(payload: Array(payload), isInitiator: isInitiator)
 
         // ── Screen presentation hardware (multi-stage exchange) ────
-        // BINDINGS_BUMP: uncomment when vauchi-platform-swift is
-        // regenerated against core 0.45.0 (introduces
-        // .setScreenBrightness(level:) and .setIdleTimerDisabled(disabled:)).
-        // Phase 2a of `2026-05-04-exchange-command-screen-presentation` —
-        // the helper methods below already implement the platform calls
-        // they will dispatch to, so the only change at bindings-bump
-        // time is to remove the comment markers and let these match arms
-        // take over from FaceToFaceExchangeView's onAppear/onDisappear.
-        //
-        // case let .setScreenBrightness(level):
-        //     setScreenBrightness(level: level.map { CGFloat($0) })
-        //
-        // case let .setIdleTimerDisabled(disabled):
-        //     setIdleTimerDisabled(disabled)
+        // Phase 2a + 2b of `2026-05-04-exchange-command-screen-presentation`.
+        // `MultiStageExchangeEngine::screen_entered/screen_exited` emit these
+        // commands; the JSON envelope from `handle_action_json` /
+        // `navigate_to_json` / `navigate_back_json` carries them through to
+        // `AppViewModel.handleExchangeCommands`, which forwards here.
+        case let .setScreenBrightness(level):
+            setScreenBrightness(level: level.map { CGFloat($0) })
 
-        // ── Tier 0 commands (active after bindings bump) ───────────
-        // AccelerometerStart/Stop, RelayEscrowDeposit/Check/Retrieve,
-        // ShowShareSheet, DirectSend, SetScreenBrightness,
-        // SetIdleTimerDisabled — handled via @unknown default until
-        // vauchi-platform-swift is regenerated with new variants.
+        case let .setIdleTimerDisabled(disabled):
+            setIdleTimerDisabled(disabled)
+
         @unknown default:
+            // Forward-compat for variants added by future bindings bumps
+            // (haptics, orientation lock, etc.).
             break
         }
     }
 
-    // MARK: - Screen presentation (ADR-031, Phase 2a)
+    // MARK: - Screen presentation (ADR-031, Phase 2a + 2b + 3)
 
     //
     // Drive `UIScreen.brightness` and `UIApplication.isIdleTimerDisabled`
     // from core's `SetScreenBrightness` / `SetIdleTimerDisabled` commands.
-    // FaceToFaceExchangeView currently owns this in its `onAppear` /
-    // `onDisappear`; once the engine emits these commands and the
-    // bindings bump unlocks the dispatch arms above, the view becomes a
-    // thin `CoreScreenView("MultiStageExchange")` wrapper (Phase 3).
+    // The dispatch arms above route core-emitted commands here. Phase 3
+    // (2026-05-07) retired the parallel `FaceToFaceExchangeView.onAppear`
+    // / `onDisappear` brightness-and-idle-timer block — core's
+    // `MultiStageExchangeEngine::screen_entered/screen_exited` lifecycle
+    // hooks now drive the same behaviour through the JSON envelope.
 
     /// Set screen brightness. `Some(level)` clamps to 0.0–1.0 and
     /// snapshots the prior platform value on the first call so a

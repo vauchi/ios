@@ -13,12 +13,20 @@
 // This view holds no domain state, no nav decisions, and no domain types.
 // Per ADR-021/043 it only:
 //   1. Renders whatever core's current screen says.
-//   2. Forwards platform-presentation hardware concerns (screen brightness
-//      and idle-timer) per ADR-031 §Hardware.
-//   3. Emits a UserAction("cancel") to core when SwiftUI dismisses the
+//   2. Emits a UserAction("cancel") to core when SwiftUI dismisses the
 //      view without core having routed away — core decides what that
 //      means (today: the engine's CANCEL handler ends the cycle thread
 //      and navigates back).
+//
+// Brightness + idle-timer presentation moved to core 2026-05-05 (Phase 2b
+// of `2026-05-04-exchange-command-screen-presentation`):
+// `MultiStageExchangeEngine::screen_entered` emits
+// `Command::SetScreenBrightness(Some(0.65))` +
+// `Command::SetIdleTimerDisabled(disabled: true)` on screen entry,
+// `screen_exited` emits the inverse pair on exit. The frontend's
+// `CommandHandler` (Phase 2a) executes the platform calls — the
+// `UIScreen.main.brightness` / `UIApplication.shared.isIdleTimerDisabled`
+// access lives there with `savedBrightness` snapshot/restore semantics.
 
 import SwiftUI
 
@@ -43,23 +51,9 @@ private struct FaceToFaceCoreShell: View {
     @ObservedObject var coreVM: AppViewModel
     @Environment(\.dismiss) var dismiss
 
-    /// Snapshot of system brightness at entry, restored on exit.
-    @State private var previousBrightness: CGFloat = 0.5
-
     var body: some View {
         CoreScreenView(screenName: "MultiStageExchange")
-            .onAppear {
-                previousBrightness = UIScreen.main.brightness
-                // 65% brightness — matches Android. Higher values overexpose
-                // the device's own front camera, preventing it from scanning
-                // the peer's QR.
-                UIScreen.main.brightness = 0.65
-                UIApplication.shared.isIdleTimerDisabled = true
-            }
             .onDisappear {
-                UIScreen.main.brightness = previousBrightness
-                UIApplication.shared.isIdleTimerDisabled = false
-
                 // SwiftUI dismissed without core's lead (e.g., user swiped
                 // back) — emit the engine-level cancel event so core can
                 // react. Core decides the next screen.
