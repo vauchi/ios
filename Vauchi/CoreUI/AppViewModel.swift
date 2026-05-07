@@ -409,11 +409,18 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Exchange Command Handling
 
-    /// Dispatch one or more `ExchangeCommand`s emitted by core. Called
-    /// from `applyResult` for `ActionResult.commands`, and
-    /// from `OnboardingViewModel.onExchangeCommands` so the Onboarding
-    /// flow shares the same `.fileImporter` host attached at
-    /// ContentView root.
+    /// Snapshot of the platform brightness captured on the first
+    /// non-`nil` `setScreenBrightness` command, restored on the
+    /// subsequent `nil`. Defensive against `nil` arriving without a
+    /// preceding `Some` (no-op then).
+    private var savedBrightness: CGFloat?
+
+    /// Dispatch one or more core-emitted `Command`s. Called from
+    /// `applyResult` for `ActionResult.commands`, from the Phase 2b
+    /// envelope-drain path in `handleAction` / `navigateTo` /
+    /// `navigateBack`, and from `OnboardingViewModel.onExchangeCommands`
+    /// so the Onboarding flow shares the same `.fileImporter` host
+    /// attached at ContentView root.
     func handleExchangeCommands(_ commands: [CommandDTO]) {
         for command in commands {
             switch command {
@@ -433,8 +440,31 @@ class AppViewModel: ObservableObject {
                     purpose: purpose,
                     acceptedMimeTypes: acceptedMimeTypes
                 )
+            case let .setScreenBrightness(level):
+                // Phase 2b screen-presentation lifecycle command. Mirrors
+                // `MultiStageExchangeEngine::screen_entered/screen_exited`
+                // in core: `Some(level)` snapshots the prior brightness
+                // (so a subsequent `nil` restores it), `nil` restores.
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    if let level {
+                        if savedBrightness == nil {
+                            savedBrightness = UIScreen.main.brightness
+                        }
+                        UIScreen.main.brightness = max(0.0, min(1.0, CGFloat(level)))
+                    } else if let prior = savedBrightness {
+                        UIScreen.main.brightness = prior
+                        savedBrightness = nil
+                    }
+                }
+            case let .setIdleTimerDisabled(disabled):
+                DispatchQueue.main.async {
+                    UIApplication.shared.isIdleTimerDisabled = disabled
+                }
             default:
-                // Other exchange commands handled by ExchangeCommandHandler
+                // BLE, NFC, Audio commands handled by the in-process
+                // `ExchangeCommandHandler` instance attached to the
+                // `MobileExchangeSession`.
                 break
             }
         }
