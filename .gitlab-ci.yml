@@ -474,35 +474,39 @@ lint:images:
 # Pattern mirrors `vauchi/core!777`: alpine + apk add the tools,
 # inline-clone `vauchi/locales`, run script via positional API.
 #
-# Why `allow_failure: true` initially:
-#
-#   1. Sub-goal A (`vauchi/locales!59`) extends the swift extractor
-#      to also match `\.t\(`. Until that merges, the script catches
-#      only NSLocalizedString hits (1/48 of iOS's i18n surface).
-#   2. Once locales!59 merges and CI re-runs, the gate surfaces 4
-#      real missing-key bugs in en.json: action.start,
-#      exchange.failed, exchange.success, sync.offline_banner.
-#   3. Resolving those bugs is a UX/copy follow-up.
-#
-# Once locales!59 merges AND the 4 missing keys are reconciled,
-# flip allow_failure to false in a one-line tighten-up MR.
+# All 41 referenced keys exist across en/de/fr/es/it after the
+# 4 originally-flagged misses reconciled in `vauchi/locales!61`
+# (3 new keys: action.start, exchange.success_title,
+# sync.offline_banner) + 2 NfcExchangeView.swift heals in this MR
+# (`exchange.failed` → `exchange.failed_title`, `exchange.success`
+# → `exchange.success_title`). The gate now blocks: a typo or
+# stale call site in iOS Swift fails the MR pipeline instead of
+# shipping as the runtime fallback `Missing: <key>` from
+# `LocalizationService.t`.
 #
 # Variable-key call sites (`LocalizationService.t(computedKey)`)
 # are statically unreachable and not validated here — covered by
 # test discipline + runtime fallback.
 #
 # Wired 2026-05-08 as Phase 4-iOS sub-goal B of
-# `_private!2026-05-08-locale-key-coverage-fanout-ios`.
+# `_private!2026-05-08-locale-key-coverage-fanout-ios`;
+# tightened to blocking in this MR after `locales!61` merged.
 lint:locale-key-coverage:
   stage: lint
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
   tags: [docker]
   needs: []
-  allow_failure: true
   before_script:
     - apk add --no-cache bash ripgrep jq git findutils
+    # Always pull the latest locales/main. GitLab runners can preserve
+    # `../locales` across job retries on the same machine, and a stale
+    # clone causes the gate to fire on keys the current
+    # `vauchi/locales` main has already shipped.
     - |
-      if [ ! -d ../locales ]; then
+      if [ -d ../locales ]; then
+        git -C ../locales fetch --depth=1 origin main
+        git -C ../locales reset --hard origin/main
+      else
         git clone --depth=1 https://gitlab.com/vauchi/locales.git ../locales
       fi
   script:
