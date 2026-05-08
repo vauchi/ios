@@ -112,16 +112,16 @@ final class ExchangeCommandHandler {
         //     startDirectSend(payload: Array(payload), isInitiator: isInitiator)
 
         // ── Screen presentation hardware (multi-stage exchange) ────
-        // Phase 2a + 2b of `2026-05-04-exchange-command-screen-presentation`.
-        // `MultiStageExchangeEngine::screen_entered/screen_exited` emit these
-        // commands; the JSON envelope from `handle_action_json` /
-        // `navigate_to_json` / `navigate_back_json` carries them through to
-        // `AppViewModel.handleExchangeCommands`, which forwards here.
-        case let .setScreenBrightness(level):
-            setScreenBrightness(level: level.map { CGFloat($0) })
-
-        case let .setIdleTimerDisabled(disabled):
-            setIdleTimerDisabled(disabled)
+        // `Command::SetScreenBrightness` / `SetIdleTimerDisabled` exist on
+        // core's `Command` enum but are intentionally NOT exposed through
+        // the UniFFI `MobileCommand` path (vauchi-platform's
+        // `From<Command> for MobileCommand` filters them out). They flow
+        // exclusively through the JSON envelope (`handle_action_json` /
+        // `navigate_to_json` / `navigate_back_json`) and are dispatched
+        // by `AppViewModel.handleExchangeCommands` directly. The helper
+        // methods below remain as a parallel implementation for the day
+        // a session-agnostic handler is extracted (see Phase 3 follow-up
+        // commit on this branch).
 
         @unknown default:
             // Forward-compat for variants added by future bindings bumps
@@ -135,11 +135,14 @@ final class ExchangeCommandHandler {
     //
     // Drive `UIScreen.brightness` and `UIApplication.isIdleTimerDisabled`
     // from core's `SetScreenBrightness` / `SetIdleTimerDisabled` commands.
-    // The dispatch arms above route core-emitted commands here. Phase 3
-    // (2026-05-07) retired the parallel `FaceToFaceExchangeView.onAppear`
-    // / `onDisappear` brightness-and-idle-timer block — core's
+    // Phase 3 (2026-05-07) retired the parallel
+    // `FaceToFaceExchangeView.onAppear` / `onDisappear`
+    // brightness-and-idle-timer block — core's
     // `MultiStageExchangeEngine::screen_entered/screen_exited` lifecycle
-    // hooks now drive the same behaviour through the JSON envelope.
+    // hooks now drive the same behaviour through the JSON envelope, with
+    // `AppViewModel.handleExchangeCommands` doing the actual dispatch.
+    // The helpers below mirror that logic and stay in place as a
+    // ready-to-wire parallel implementation.
 
     /// Set screen brightness. `Some(level)` clamps to 0.0–1.0 and
     /// snapshots the prior platform value on the first call so a
