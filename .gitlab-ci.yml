@@ -163,28 +163,60 @@ workflow:
 # which is the primary source of slow iOS CI builds (PI-01).
 # DerivedData contains compiled swift-syntax (602.0.0) which takes
 # >60min to build from source — caching it prevents build timeouts.
+#
+# Two caches, split by what they contain and how they invalidate:
+#
+# 1. `.spm-packages/` is keyed on the SHA256 of project.yml, which is
+#    the XcodeGen source the platform-swift version pin lives in.
+#    When a chore-bump MR changes project.yml the cache key rolls
+#    automatically, the new branch starts from an empty cache, and
+#    `build:debug`'s SPM-resolve script populates it from the freshly
+#    re-cloned mirror. No fallback, by design — fallbacks were the
+#    vector for the corruption recorded in
+#    `_private/docs/problems/2026-05-08-nell-runner-spm-mirror-corruption/`,
+#    where a chore-bump MR pulled `ios-spm-main` (still on the old
+#    pin) and inherited a `workspace-state.json` that pinned a
+#    force-tag-aside revision.
+#
+# 2. `.derived-data/` stays branch-keyed with main → bare-branch
+#    fallback. It contains compiled swift-syntax + Xcode build
+#    intermediates that are independent of the platform-swift
+#    version, so a cold start here would cost ≥60 min of swift-syntax
+#    rebuild. The fallback chain is preserved.
 .spm-cache:
   cache:
-    key: ios-spm-${CI_COMMIT_REF_SLUG}
-    fallback_keys:
-      - ios-spm-${CI_DEFAULT_BRANCH}
-      - ios-spm
-    paths:
-      - .spm-packages/
-      - .derived-data/
-    policy: pull-push
+    - key:
+        prefix: ios-spm-${CI_COMMIT_REF_SLUG}
+        files:
+          - project.yml
+      paths:
+        - .spm-packages/
+      policy: pull-push
+    - key: ios-derived-${CI_COMMIT_REF_SLUG}
+      fallback_keys:
+        - ios-derived-${CI_DEFAULT_BRANCH}
+        - ios-derived
+      paths:
+        - .derived-data/
+      policy: pull-push
 
 # Read-only SPM cache for jobs that don't need to update it
 .spm-cache-readonly:
   cache:
-    key: ios-spm-${CI_COMMIT_REF_SLUG}
-    fallback_keys:
-      - ios-spm-${CI_DEFAULT_BRANCH}
-      - ios-spm
-    paths:
-      - .spm-packages/
-      - .derived-data/
-    policy: pull
+    - key:
+        prefix: ios-spm-${CI_COMMIT_REF_SLUG}
+        files:
+          - project.yml
+      paths:
+        - .spm-packages/
+      policy: pull
+    - key: ios-derived-${CI_COMMIT_REF_SLUG}
+      fallback_keys:
+        - ios-derived-${CI_DEFAULT_BRANCH}
+        - ios-derived
+      paths:
+        - .derived-data/
+      policy: pull
 
 # ============================================================
 # Auto-Tag Stage
