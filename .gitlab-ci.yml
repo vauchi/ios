@@ -464,6 +464,58 @@ update:bindings-version:
 lint:images:
   extends: .image-lint
 
+# Locale key coverage — extract i18n keys referenced in Swift source
+# (`NSLocalizedString("…")` plus the `<obj>.t("…")` shape used by
+# `LocalizationService.t(_:)` / `localizationManager.t(…)`) and
+# verify each one exists in `en.json`. Catches typos and stale call
+# sites before they ship as the runtime fallback `Missing: <key>`
+# from the LocalizationService path.
+#
+# Pattern mirrors `vauchi/core!777`: alpine + apk add the tools,
+# inline-clone `vauchi/locales`, run script via positional API.
+#
+# Why `allow_failure: true` initially:
+#
+#   1. Sub-goal A (`vauchi/locales!59`) extends the swift extractor
+#      to also match `\.t\(`. Until that merges, the script catches
+#      only NSLocalizedString hits (1/48 of iOS's i18n surface).
+#   2. Once locales!59 merges and CI re-runs, the gate surfaces 4
+#      real missing-key bugs in en.json: action.start,
+#      exchange.failed, exchange.success, sync.offline_banner.
+#   3. Resolving those bugs is a UX/copy follow-up.
+#
+# Once locales!59 merges AND the 4 missing keys are reconciled,
+# flip allow_failure to false in a one-line tighten-up MR.
+#
+# Variable-key call sites (`LocalizationService.t(computedKey)`)
+# are statically unreachable and not validated here — covered by
+# test discipline + runtime fallback.
+#
+# Wired 2026-05-08 as Phase 4-iOS sub-goal B of
+# `_private!2026-05-08-locale-key-coverage-fanout-ios`.
+lint:locale-key-coverage:
+  stage: lint
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
+  tags: [docker]
+  needs: []
+  allow_failure: true
+  before_script:
+    - apk add --no-cache bash ripgrep jq git findutils
+    - |
+      if [ ! -d ../locales ]; then
+        git clone --depth=1 https://gitlab.com/vauchi/locales.git ../locales
+      fi
+  script:
+    - bash ../locales/scripts/check-locale-key-coverage.sh
+        Vauchi ../locales '*.swift'
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+      changes:
+        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+        paths:
+          - "Vauchi/**/*.swift"
+          - ".gitlab-ci.yml"
+
 lint:swiftlint:
   extends: [.macos-job, .timeout-quick]
   stage: lint
