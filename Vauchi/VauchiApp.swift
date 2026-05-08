@@ -10,6 +10,7 @@ import VauchiPlatform
 
 @main
 struct VauchiApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var viewModel = VauchiViewModel()
     @State private var showDeepLinkConsent = false
     #if DEBUG

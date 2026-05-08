@@ -461,6 +461,16 @@ class AppViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     UIApplication.shared.isIdleTimerDisabled = disabled
                 }
+            case let .setOrientationLock(orientation):
+                // Phase 2c lifecycle command: bridge to the SwiftUI
+                // orientation gate consulted by `AppDelegate
+                // .application(_:supportedInterfaceOrientationsFor:)`.
+                // `nil` clears the lock (returns to portrait+landscape);
+                // `.portrait` / `.landscape` clamps to that mask. The
+                // gate lives in `OrientationLock` (App layer).
+                DispatchQueue.main.async {
+                    OrientationLock.shared.setMask(orientation?.uiKitMask)
+                }
             default:
                 // BLE, NFC, Audio commands handled by the in-process
                 // `ExchangeCommandHandler` instance attached to the

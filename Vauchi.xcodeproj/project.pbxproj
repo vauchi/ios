@@ -172,11 +172,13 @@
 		B105AF29B3E8B2E6AE0F3DFE /* ActionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1793C01FB5DEAE4C84AED7C8 /* ActionListView.swift */; };
 		B1BAEDCA4134802BFA607609 /* VisualRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */; };
 		B222B3B7B7404F7BDF034ECF /* testToggleListAllSelected.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7BDCD05EC305C6B51CC0DF9E /* testToggleListAllSelected.1.png */; };
+		B2FC70839C3AEFBE5C15753F /* OrientationLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5A795D0FCDE3726CBB528F8 /* OrientationLock.swift */; };
 		B5DBB5BC794C8E78B2AB7228 /* StatusIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A4C01B28324F87697ADB7D /* StatusIndicatorView.swift */; };
 		B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */; };
 		BB6505CC618DB35AC542A1AB /* testTextInputWithValue.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 0314EC94F504540A5BF02139 /* testTextInputWithValue.1.png */; };
 		BEA34D69912C7558E8710831 /* AnimatedQrTimerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B33063ADD1C9CDC8C4186B /* AnimatedQrTimerTests.swift */; };
 		C02CAD8B0F82B366CD4428D4 /* testSettingsGroupDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CCDAF85FAFC1F03E0E5EF5D /* testSettingsGroupDark.1.png */; };
+		C041D751F823A021E52DA876 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331706A539BC8824C9067EF5 /* AppDelegate.swift */; };
 		C0AB5B4A5DA1F0977B52C55E /* testEditableTextWithError.1.png in Resources */ = {isa = PBXBuildFile; fileRef = EA5E442564907FA7A15240F0 /* testEditableTextWithError.1.png */; };
 		C0C3AE19386A7C486E82B792 /* SliderComponentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7068F2971F7C560EF2B884D8 /* SliderComponentView.swift */; };
 		C122C622C69B289031EB8186 /* testActionList.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 9F8C1DD1586172CF870953F9 /* testActionList.1.png */; };
@@ -311,6 +313,7 @@
 		2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModelTests.swift; sourceTree = "<group>"; };
 		32949B7AFAC3435ABA7D93FD /* testInfoPanelWithoutIcon.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInfoPanelWithoutIcon.1.png; sourceTree = "<group>"; };
 		32C2E5A32B1033C46E976D2F /* VisibilityLabelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityLabelsTests.swift; sourceTree = "<group>"; };
+		331706A539BC8824C9067EF5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		334AA464FB30E416B9A73537 /* testContactsScreenDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsScreenDark.1.png; sourceTree = "<group>"; };
 		33A0048E8A2E34AA58D84E4A /* testToggleListAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testToggleListAccessibility.1.txt; sourceTree = "<group>"; };
 		36EBCAF628D08C167C0D9721 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
@@ -459,6 +462,7 @@
 		D42379D47C2AFA9F80BAAB6A /* testSyncingState.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSyncingState.1.png; sourceTree = "<group>"; };
 		D51F85BE507FC3741AFF9FE2 /* testExchangeShowQrDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testExchangeShowQrDark.1.png; sourceTree = "<group>"; };
 		D591A9D83EA84F2E2EBCE827 /* testTextComponentTitle.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextComponentTitle.1.png; sourceTree = "<group>"; };
+		D5A795D0FCDE3726CBB528F8 /* OrientationLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationLock.swift; sourceTree = "<group>"; };
 		D618628DDEAEBAD0CE3FB0EC /* testActionButtonEnabledAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testActionButtonEnabledAccessibility.1.txt; sourceTree = "<group>"; };
 		D6E1FE2EE5B0C2CC821F5397 /* testInfoPanelDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInfoPanelDark.1.png; sourceTree = "<group>"; };
 		D7E1798719172168B0EBBBD3 /* PasscodePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodePolicy.swift; sourceTree = "<group>"; };
@@ -701,6 +705,7 @@
 				9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */,
 				ADDBAB28CCA0714450AC2B99 /* FilePickerModifier.swift */,
 				140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */,
+				D5A795D0FCDE3726CBB528F8 /* OrientationLock.swift */,
 				2BCD1112BEA2A776E27B15C3 /* ScreenRendererView.swift */,
 				CE42D30F93ED2ECE0C78FB70 /* Components */,
 			);
@@ -803,6 +808,7 @@
 		CE3F5B89773435D1670DD40B /* Vauchi */ = {
 			isa = PBXGroup;
 			children = (
+				331706A539BC8824C9067EF5 /* AppDelegate.swift */,
 				E044AD16B5BA923A443ADFC7 /* ContentView.swift */,
 				3741052F03E3274B5C209EF6 /* Info.plist */,
 				108E48F43D27EA5EB6FFB226 /* PrivacyInfo.xcprivacy */,
@@ -1239,6 +1245,7 @@
 			files = (
 				657B005AE09FDFE3AEE0ED58 /* AVCameraCaptureSheet.swift in Sources */,
 				B105AF29B3E8B2E6AE0F3DFE /* ActionListView.swift in Sources */,
+				C041D751F823A021E52DA876 /* AppDelegate.swift in Sources */,
 				76CE62B95DC53A13516F7D80 /* AppPasswordView.swift in Sources */,
 				0FC8C1248458C98DAE402799 /* AppViewModel.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
@@ -1286,6 +1293,7 @@
 				202472C7B53FC0BE508D0CD8 /* NfcExchangeView.swift in Sources */,
 				138BEFDCC908871EDE97D333 /* NotificationService.swift in Sources */,
 				F1607238A8523A2811B18B74 /* OnboardingViewModel.swift in Sources */,
+				B2FC70839C3AEFBE5C15753F /* OrientationLock.swift in Sources */,
 				9C89BE4773D3F64FB89BFE9B /* PasscodePolicy.swift in Sources */,
 				A63F23AF79BBFFCD1DF2992E /* PinInputView.swift in Sources */,
 				DCB3E583D86FF3A15C6BE915 /* PlatformAppEngine+DomainDispatch.swift in Sources */,
