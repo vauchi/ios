@@ -79,11 +79,20 @@ struct QrCodeView: View {
         // engine; the multi-stage screen relies on
         // `PlatformAppEngine.handle_action_json`'s peer_scan auto-route
         // to feed the cycle-thread session.
+        //
+        // F2-NEW-3: pin the preview to an explicit 250×250 frame.
+        // Earlier `.aspectRatio(1.0).frame(maxWidth: 250)` left
+        // `MultipartCameraPreview` (a `UIViewRepresentable` with no
+        // intrinsic content size) at 0×0 inside the SwiftUI VStack —
+        // the AVCaptureSession started but the preview layer's bounds
+        // were `.zero`, so nothing visible to the user and the
+        // peer-side QR was never caught. The legacy
+        // `Views/QRScannerView.swift` uses the same explicit-size
+        // pattern.
         MultipartCameraPreview { code in
             onAction(.textChanged(componentId: component.id, value: code))
         }
-        .aspectRatio(1.0, contentMode: .fit)
-        .frame(maxWidth: 250)
+        .frame(width: 250, height: 250)
         .clipShape(RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md)))
         .overlay(
             RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md))

@@ -76,6 +76,20 @@ class MultipartCameraView: UIView {
         super.layoutSubviews()
         previewLayer?.frame = bounds
 
+        // Defer setupCamera until SwiftUI hands us a non-zero size.
+        // F2-NEW-3: under the prior `aspectRatio(1.0).frame(maxWidth: 250)`
+        // call site, `MultipartCameraPreview` (a UIViewRepresentable with
+        // no intrinsicContentSize) collapsed to 0×0 on first layout. The
+        // first layoutSubviews fired with bounds=zero, setupCamera spun
+        // up an AVCaptureSession with a previewLayer.frame=.zero, and
+        // even after the call site was pinned to an explicit 250×250
+        // (the current size fix in QrCodeView) subsequent layout passes
+        // updated `previewLayer.frame` but the AVCaptureVideoPreviewLayer
+        // never recovered from its zero-bounds first-layout — the layer
+        // stayed black on screen. Guarding setup behind non-zero bounds
+        // ensures the layer is created with a valid size from the start.
+        guard bounds.width > 0, bounds.height > 0 else { return }
+
         if captureSession == nil {
             setupCamera()
         }
