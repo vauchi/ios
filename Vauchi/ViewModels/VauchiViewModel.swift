@@ -47,8 +47,6 @@ class VauchiViewModel: ObservableObject {
     @Published var card: VauchiContactCard?
     @Published var contacts: [VauchiContact] = []
     private let contactsPageSize: UInt32 = 20
-    @Published var hasMoreContacts = true
-    private var contactsOffset: UInt32 = 0
     @Published var errorMessage: String?
     @Published var syncState: SyncState = .idle
     @Published var lastSyncTime: Date?
@@ -57,9 +55,8 @@ class VauchiViewModel: ObservableObject {
     /// Network state
     @Published var isOnline = false
 
-    // Demo contact (for users with no contacts)
+    /// Demo contact (for users with no contacts)
     @Published var demoContact: VauchiDemoContact?
-    @Published var demoContactState: VauchiDemoContactState?
 
     // User-facing alerts
     @Published var showAlert = false
@@ -417,30 +414,12 @@ class VauchiViewModel: ObservableObject {
         guard let repository else { return }
 
         // Reset pagination
-        contactsOffset = 0
-        hasMoreContacts = true
 
         do {
             let contactsData = try repository.listContactsPaginated(offset: 0, limit: contactsPageSize)
             contacts = contactsData
-            contactsOffset = UInt32(contacts.count)
-            hasMoreContacts = contactsData.count == Int(contactsPageSize)
         } catch {
             contacts = []
-            hasMoreContacts = false
-        }
-    }
-
-    func loadMoreContacts() async {
-        guard let repository, hasMoreContacts else { return }
-
-        do {
-            let moreData = try repository.listContactsPaginated(offset: contactsOffset, limit: contactsPageSize)
-            contacts.append(contentsOf: moreData)
-            contactsOffset += UInt32(moreData.count)
-            hasMoreContacts = moreData.count == Int(contactsPageSize)
-        } catch {
-            hasMoreContacts = false
         }
     }
 
@@ -684,14 +663,13 @@ class VauchiViewModel: ObservableObject {
 
     // Based on: features/demo_contact.feature
 
-    /// Initialize demo contact if user has no real contacts.
-    /// Call this after onboarding completes.
+    /// Initialize demo contact if needed (called by `createIdentity`
+    /// for new users with no contacts).
     func initDemoContactIfNeeded() async {
         guard let repository else { return }
 
         do {
             demoContact = try repository.initDemoContactIfNeeded()
-            demoContactState = repository.getDemoContactState()
         } catch {
             #if DEBUG
                 print("VauchiViewModel: Failed to init demo contact: \(error)")
@@ -699,20 +677,19 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
-    /// Load the current demo contact state
+    /// Load the current demo contact (called by the post-init data-load
+    /// path when an identity already exists).
     func loadDemoContact() async {
         guard let repository else { return }
 
         do {
             demoContact = try repository.getDemoContact()
-            demoContactState = repository.getDemoContactState()
         } catch {
             demoContact = nil
-            demoContactState = repository.getDemoContactState()
         }
     }
 
-    /// Dismiss the demo contact manually
+    /// Dismiss the demo contact manually.
     func dismissDemoContact() async throws {
         guard let repository else {
             throw VauchiRepositoryError.notInitialized
@@ -720,54 +697,6 @@ class VauchiViewModel: ObservableObject {
 
         try repository.dismissDemoContact()
         demoContact = nil
-        demoContactState = repository.getDemoContactState()
-    }
-
-    /// Auto-remove demo contact after first real exchange
-    func autoRemoveDemoContact() async {
-        guard let repository else { return }
-
-        do {
-            let removed = try repository.autoRemoveDemoContact()
-            if removed {
-                demoContact = nil
-                demoContactState = repository.getDemoContactState()
-            }
-        } catch {
-            #if DEBUG
-                print("VauchiViewModel: Failed to auto-remove demo contact: \(error)")
-            #endif
-        }
-    }
-
-    /// Restore the demo contact from Settings
-    func restoreDemoContact() async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        demoContact = try repository.restoreDemoContact()
-        demoContactState = repository.getDemoContactState()
-    }
-
-    /// Trigger a demo update
-    func triggerDemoUpdate() async {
-        guard let repository else { return }
-
-        do {
-            demoContact = try repository.triggerDemoUpdate()
-            demoContactState = repository.getDemoContactState()
-        } catch {
-            #if DEBUG
-                print("VauchiViewModel: Failed to trigger demo update: \(error)")
-            #endif
-        }
-    }
-
-    /// Check if demo update is available
-    func isDemoUpdateAvailable() -> Bool {
-        guard let repository else { return false }
-        return repository.isDemoUpdateAvailable()
     }
 
     // MARK: - Visibility Labels
