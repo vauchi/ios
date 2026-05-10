@@ -72,9 +72,6 @@ class VauchiViewModel: ObservableObject {
     @Published var deletionInfo: VauchiDeletionInfo?
     @Published var consentRecords: [VauchiConsentRecord] = []
 
-    /// Duplicate contact pairs with resolved contact info
-    @Published var duplicatePairs: [(pair: MobileDuplicatePair, contact1: VauchiContact, contact2: VauchiContact)] = []
-
     // Visibility labels (for organizing contacts)
     // Based on: features/visibility_labels.feature
     @Published var visibilityLabels: [VauchiVisibilityLabel] = []
@@ -794,41 +791,6 @@ class VauchiViewModel: ObservableObject {
     func contactDetailFooterActionId(contactId: String) throws -> String {
         guard let repository else { throw VauchiRepositoryError.notInitialized }
         return try repository.contactDetailFooterActionId(contactId: contactId)
-    }
-
-    // MARK: - Duplicate Detection
-
-    /// Load duplicate contact pairs with display info.
-    func loadDuplicates() async {
-        guard let repository else { return }
-
-        do {
-            let pairs = try repository.findDuplicates()
-            var resolved: [(pair: MobileDuplicatePair, contact1: VauchiContact, contact2: VauchiContact)] = []
-            for pair in pairs {
-                guard let c1 = try repository.getContact(id: pair.id1),
-                      let c2 = try repository.getContact(id: pair.id2) else { continue }
-                resolved.append((pair: pair, contact1: c1, contact2: c2))
-            }
-            duplicatePairs = resolved
-        } catch {
-            #if DEBUG
-                print("VauchiViewModel: loadDuplicates failed: \(error)")
-            #endif
-            duplicatePairs = []
-        }
-    }
-
-    /// Merge two contacts, keeping the primary.
-    func mergeContacts(primaryId: String, secondaryId: String) async throws {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        _ = try repository.mergeContacts(primaryId: primaryId, secondaryId: secondaryId)
-    }
-
-    /// Dismiss a duplicate pair.
-    func dismissDuplicate(id1: String, id2: String) async throws {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        try repository.dismissDuplicate(id1: id1, id2: id2)
     }
 
     // MARK: - Toast
