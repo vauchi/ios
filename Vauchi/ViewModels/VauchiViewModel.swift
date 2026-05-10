@@ -57,12 +57,6 @@ class VauchiViewModel: ObservableObject {
     /// Network state
     @Published var isOnline = false
 
-    // Delivery status — both lists pushed by core (G3).
-    @Published var deliveryRecords: [VauchiDeliveryRecord] = []
-    @Published var failedRecords: [VauchiDeliveryRecord] = []
-    @Published var retryEntries: [VauchiRetryEntry] = []
-    @Published var failedDeliveryCount: Int = 0
-
     // Demo contact (for users with no contacts)
     @Published var demoContact: VauchiDemoContact?
     @Published var demoContactState: VauchiDemoContactState?
@@ -1104,85 +1098,6 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Delivery Status
-
-    func loadDeliveryRecords() async {
-        guard let repository else { return }
-
-        do {
-            deliveryRecords = try repository.getAllDeliveryRecords()
-            // G3 (ADR-021/043): pre-filtered list + count come from core,
-            // not from a frontend `.filter(\.isFailed)`.
-            failedRecords = try repository.getFailedDeliveryRecords()
-            failedDeliveryCount = failedRecords.count
-        } catch {
-            deliveryRecords = []
-            failedRecords = []
-            failedDeliveryCount = 0
-        }
-    }
-
-    func loadRetryEntries() async {
-        guard let repository else { return }
-
-        do {
-            retryEntries = try repository.getRetryEntries()
-        } catch {
-            retryEntries = []
-        }
-    }
-
-    func getDeliveryRecordsForContact(contactId: String) async -> [VauchiDeliveryRecord] {
-        guard let repository else { return [] }
-
-        do {
-            return try repository.getDeliveryRecordsForContact(contactId: contactId)
-        } catch {
-            return []
-        }
-    }
-
-    func getDeliverySummary(messageId: String) async -> VauchiDeliverySummary? {
-        guard let repository else { return nil }
-
-        do {
-            return try repository.getDeliverySummary(messageId: messageId)
-        } catch {
-            return nil
-        }
-    }
-
-    func retryDelivery(messageId: String) async -> Bool {
-        guard let repository else { return false }
-
-        do {
-            let success = try repository.retryDelivery(messageId: messageId)
-            if success {
-                await loadDeliveryRecords()
-                await loadRetryEntries()
-            }
-            return success
-        } catch {
-            return false
-        }
-    }
-
-    /// Get the latest delivery status for a contact (delegates to core via repository)
-    func getLatestDeliveryStatusForContact(contactId: String) -> VauchiDeliveryStatus? {
-        guard let repository else { return nil }
-        let records = (try? repository.getDeliveryRecordsForContact(contactId: contactId)) ?? []
-        return records.first?.status
-    }
-
-    /// Check if a contact has any pending deliveries (delegates to core via repository)
-    func hasPendingDeliveryForContact(contactId: String) -> Bool {
-        guard let repository else { return false }
-        let records = (try? repository.getDeliveryRecordsForContact(contactId: contactId)) ?? []
-        return records.contains { record in
-            record.status == .queued || record.status == .sent || record.status == .stored
-        }
-    }
-
     // MARK: - Backup
 
     func exportBackup(password: String) async throws -> String {
@@ -1424,5 +1339,4 @@ class VauchiViewModel: ObservableObject {
         }
         return try repository.isPrimaryDevice()
     }
-
 }

@@ -155,43 +155,6 @@ final class DeliveryStatusTests: XCTestCase {
         XCTAssertEqual(summary.displayText, "Delivered to 2 of 3 devices")
     }
 
-    // MARK: - ViewModel Integration Tests
-
-    /// Scenario: ViewModel loads delivery records
-    func testViewModelLoadsDeliveryRecords() async throws {
-        let viewModel = VauchiViewModel(dataDir: tempDir.path, relayUrl: nil)
-        try await viewModel.createIdentity(name: "Alice")
-
-        // Load delivery records
-        await viewModel.loadDeliveryRecords()
-
-        // Initially should be empty (no messages sent)
-        XCTAssertTrue(viewModel.deliveryRecords.isEmpty)
-    }
-
-    /// Scenario: ViewModel loads retry entries
-    func testViewModelLoadsRetryEntries() async throws {
-        let viewModel = VauchiViewModel(dataDir: tempDir.path, relayUrl: nil)
-        try await viewModel.createIdentity(name: "Alice")
-
-        // Load retry entries
-        await viewModel.loadRetryEntries()
-
-        // Initially should be empty
-        XCTAssertTrue(viewModel.retryEntries.isEmpty)
-    }
-
-    /// Scenario: ViewModel reports failed delivery count
-    func testViewModelFailedDeliveryCount() async throws {
-        let viewModel = VauchiViewModel(dataDir: tempDir.path, relayUrl: nil)
-        try await viewModel.createIdentity(name: "Alice")
-
-        await viewModel.loadDeliveryRecords()
-
-        // Initially should be zero
-        XCTAssertEqual(viewModel.failedDeliveryCount, 0)
-    }
-
     // MARK: - Repository Tests
 
     /// Scenario: Repository gets delivery records for contact
