@@ -66,28 +66,46 @@ struct MultipartCameraPreview: UIViewRepresentable {
     }
 }
 
-class MultipartCameraView: UIView {
+final class MultipartCameraView: UIView {
     weak var delegate: AVCaptureMetadataOutputObjectsDelegate?
 
+    /// F2-NEW-3 follow-up: make the view's own backing layer the
+    /// AVCaptureVideoPreviewLayer (Apple-recommended pattern; same shape
+    /// as `AVCameraCaptureSheet.PreviewUIView`). The earlier addSublayer
+    /// approach worked when the view filled the screen (legacy
+    /// `Views/QRScannerView.swift` uses `.ignoresSafeArea()` with no
+    /// SwiftUI clipShape) but failed under the new `QrCodeView` call
+    /// site which pins the preview to 250×250 inside a
+    /// `RoundedRectangle.clipShape`. SwiftUI's clipShape masks the host
+    /// CALayer's contents — when the AVCaptureVideoPreviewLayer was a
+    /// separate sublayer, the mask only applied to the empty host
+    /// surface and the live camera frames rendered into a sibling layer
+    /// that the mask did not cover, leaving the preview area black even
+    /// though the AVCaptureSession was running and metadata callbacks
+    /// fired. Hosting the preview as the view's primary layer puts the
+    /// camera content directly under the SwiftUI mask, so clipShape now
+    /// does what it claims.
+    override static var layerClass: AnyClass {
+        AVCaptureVideoPreviewLayer.self
+    }
+
+    // Safe: layerClass above guarantees the layer's runtime type.
+    var previewLayer: AVCaptureVideoPreviewLayer {
+        // swiftlint:disable:next force_cast
+        layer as! AVCaptureVideoPreviewLayer
+    }
+
     private var captureSession: AVCaptureSession?
-    private var previewLayer: AVCaptureVideoPreviewLayer?
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        previewLayer?.frame = bounds
 
         // Defer setupCamera until SwiftUI hands us a non-zero size.
-        // F2-NEW-3: under the prior `aspectRatio(1.0).frame(maxWidth: 250)`
-        // call site, `MultipartCameraPreview` (a UIViewRepresentable with
-        // no intrinsicContentSize) collapsed to 0×0 on first layout. The
-        // first layoutSubviews fired with bounds=zero, setupCamera spun
-        // up an AVCaptureSession with a previewLayer.frame=.zero, and
-        // even after the call site was pinned to an explicit 250×250
-        // (the current size fix in QrCodeView) subsequent layout passes
-        // updated `previewLayer.frame` but the AVCaptureVideoPreviewLayer
-        // never recovered from its zero-bounds first-layout — the layer
-        // stayed black on screen. Guarding setup behind non-zero bounds
-        // ensures the layer is created with a valid size from the start.
+        // The first layoutSubviews still fires with bounds=zero under
+        // `UIViewRepresentable` (no intrinsicContentSize); without
+        // this guard, AVCaptureSession would start before the host
+        // layer has valid dimensions and the metadata-output
+        // coordinate space would be wrong.
         guard bounds.width > 0, bounds.height > 0 else { return }
 
         if captureSession == nil {
@@ -133,13 +151,13 @@ class MultipartCameraView: UIView {
             output.metadataObjectTypes = [.qr]
         }
 
-        let preview = AVCaptureVideoPreviewLayer(session: session)
-        preview.videoGravity = .resizeAspectFill
-        preview.frame = bounds
-        layer.addSublayer(preview)
-
+        // The view's own backing layer is the preview layer (see
+        // layerClass override), so just plug the session in. UIKit
+        // auto-resizes the host layer with the view's bounds — no
+        // manual frame management needed.
+        previewLayer.session = session
+        previewLayer.videoGravity = .resizeAspectFill
         captureSession = session
-        previewLayer = preview
 
         DispatchQueue.global(qos: .userInitiated).async {
             session.startRunning()
