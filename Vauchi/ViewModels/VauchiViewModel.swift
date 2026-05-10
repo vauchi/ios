@@ -61,11 +61,6 @@ class VauchiViewModel: ObservableObject {
     @Published var demoContact: VauchiDemoContact?
     @Published var demoContactState: VauchiDemoContactState?
 
-    // Visibility labels (for organizing contacts)
-    // Based on: features/visibility_labels.feature
-    @Published var visibilityLabels: [VauchiVisibilityLabel] = []
-    @Published var suggestedLabels: [String] = []
-
     // User-facing alerts
     @Published var showAlert = false
     @Published var alertTitle = ""
@@ -777,83 +772,6 @@ class VauchiViewModel: ObservableObject {
 
     // MARK: - Visibility Labels
 
-    // Based on: features/visibility_labels.feature
-
-    /// Load all visibility labels
-    func loadLabels() async {
-        guard let repository else { return }
-
-        do {
-            visibilityLabels = try repository.listLabels()
-            suggestedLabels = repository.getSuggestedLabels()
-        } catch {
-            #if DEBUG
-                print("VauchiViewModel: Failed to load labels: \(error)")
-            #endif
-            visibilityLabels = []
-        }
-    }
-
-    /// Create a new visibility label
-    func createLabel(name: String) async throws -> VauchiVisibilityLabel {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        let label = try repository.createLabel(name: name)
-        await loadLabels()
-        return label
-    }
-
-    /// Get label details
-    func getLabel(id: String) throws -> VauchiVisibilityLabelDetail {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        return try repository.getLabel(id: id)
-    }
-
-    /// Rename a visibility label
-    func renameLabel(id: String, newName: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.renameLabel(id: id, newName: newName)
-        await loadLabels()
-    }
-
-    /// Delete a visibility label
-    func deleteLabel(id: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.deleteLabel(id: id)
-        await loadLabels()
-    }
-
-    /// Add contact to a label
-    func addContactToLabel(labelId: String, contactId: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.addContactToLabel(labelId: labelId, contactId: contactId)
-        await loadLabels()
-    }
-
-    /// Remove contact from a label
-    func removeContactFromLabel(labelId: String, contactId: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.removeContactFromLabel(labelId: labelId, contactId: contactId)
-        await loadLabels()
-    }
-
     /// Get all labels for a contact
     func getLabelsForContact(contactId: String) throws -> [VauchiVisibilityLabel] {
         guard let repository else {
@@ -861,16 +779,6 @@ class VauchiViewModel: ObservableObject {
         }
 
         return try repository.getLabelsForContact(contactId: contactId)
-    }
-
-    /// Set field visibility for a label
-    func setLabelFieldVisibility(labelId: String, fieldLabel: String, isVisible: Bool) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.setLabelFieldVisibility(labelId: labelId, fieldLabel: fieldLabel, isVisible: isVisible)
-        await loadLabels()
     }
 
     // MARK: - Sync
