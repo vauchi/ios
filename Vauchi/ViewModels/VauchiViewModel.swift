@@ -72,9 +72,6 @@ class VauchiViewModel: ObservableObject {
     @Published var deletionInfo: VauchiDeletionInfo?
     @Published var consentRecords: [VauchiConsentRecord] = []
 
-    /// Archived contacts
-    @Published var archivedContacts: [VauchiContact] = []
-
     /// Duplicate contact pairs with resolved contact info
     @Published var duplicatePairs: [(pair: MobileDuplicatePair, contact1: VauchiContact, contact2: VauchiContact)] = []
 
@@ -790,13 +787,6 @@ class VauchiViewModel: ObservableObject {
         contacts.removeAll { $0.id == id }
     }
 
-    /// Unarchive a contact back to the main list.
-    func unarchiveContact(id: String) async throws {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        try repository.unarchiveContact(id: id)
-        archivedContacts.removeAll { $0.id == id }
-    }
-
     /// Returns the footer-button action id (`"delete_contact"` or
     /// `"archive_contact"`) for the given contact. Views dispatch on
     /// the returned id so they never branch on
@@ -804,20 +794,6 @@ class VauchiViewModel: ObservableObject {
     func contactDetailFooterActionId(contactId: String) throws -> String {
         guard let repository else { throw VauchiRepositoryError.notInitialized }
         return try repository.contactDetailFooterActionId(contactId: contactId)
-    }
-
-    /// Load archived contacts.
-    func loadArchivedContacts() async {
-        guard let repository else { return }
-
-        do {
-            archivedContacts = try repository.listArchivedContacts()
-        } catch {
-            #if DEBUG
-                print("VauchiViewModel: loadArchivedContacts failed: \(error)")
-            #endif
-            archivedContacts = []
-        }
     }
 
     // MARK: - Duplicate Detection
