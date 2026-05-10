@@ -30,6 +30,7 @@ struct QrCodeView: View {
     let component: QrCodeComponent
     let onAction: (UserAction) -> Void
     @Environment(\.designTokens) private var tokens
+    @EnvironmentObject private var viewModel: VauchiViewModel
 
     var body: some View {
         VStack(spacing: CGFloat(tokens.spacing.md)) {
@@ -72,34 +73,36 @@ struct QrCodeView: View {
         }
     }
 
+    @ViewBuilder
     private func qrScannerView() -> some View {
-        // Forward every detected QR payload to core. `exchange_qr.rs`
-        // pattern-matches on TextChanged with the QR component id and
-        // routes the payload through QrScanned for the single-stage
-        // engine; the multi-stage screen relies on
-        // `PlatformAppEngine.handle_action_json`'s peer_scan auto-route
-        // to feed the cycle-thread session.
-        //
-        // F2-NEW-3: pin the preview to an explicit 250×250 frame.
-        // Earlier `.aspectRatio(1.0).frame(maxWidth: 250)` left
-        // `MultipartCameraPreview` (a `UIViewRepresentable` with no
-        // intrinsic content size) at 0×0 inside the SwiftUI VStack —
-        // the AVCaptureSession started but the preview layer's bounds
-        // were `.zero`, so nothing visible to the user and the
-        // peer-side QR was never caught. The legacy
-        // `Views/QRScannerView.swift` uses the same explicit-size
-        // pattern.
-        MultipartCameraPreview { code in
-            onAction(.textChanged(componentId: component.id, value: code))
+        // The scanner reads the active camera selector (`Command::SwitchCamera`)
+        // from `AppViewModel.useFrontCamera`. `AppViewModel` is a nested
+        // ObservableObject inside `VauchiViewModel` — SwiftUI does not
+        // propagate inner-object publishes up to the outer @EnvironmentObject,
+        // so a body that read `viewModel.coreViewModel?.useFrontCamera`
+        // directly would not re-render when core flipped the value. Delegate
+        // to an inner view that holds the AppViewModel via `@ObservedObject`
+        // when it exists; the inner view re-renders on the published change
+        // and propagates a fresh `.id(useFrontCamera)` into the
+        // `MultipartCameraPreview` representable, which tears down and
+        // rebuilds the underlying `AVCaptureSession` on the chosen device.
+        if let coreVM = viewModel.coreViewModel {
+            QrScannerObservingView(
+                component: component,
+                onAction: onAction,
+                coreVM: coreVM
+            )
+        } else {
+            // Pre-bootstrap fallback: no AppViewModel yet, so default to the
+            // back camera. The scanner is unreachable from screens that
+            // render before AppViewModel exists, so this branch is a
+            // defensive default rather than a live code path.
+            QrScannerStaticView(
+                component: component,
+                onAction: onAction,
+                useFrontCamera: false
+            )
         }
-        .frame(width: 250, height: 250)
-        .clipShape(RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md)))
-        .overlay(
-            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md))
-                .stroke(Color.cyan.opacity(0.5), lineWidth: 2)
-        )
-        .accessibilityLabel(component.a11y?.label ?? "QR code scanner")
-        .accessibilityHint(component.a11y?.hint ?? "Point the camera at a Vauchi QR code to scan it")
     }
 
     /// Generates a QR code image using the Rust qrcode crate via UniFFI.
@@ -119,5 +122,60 @@ struct QrCodeView: View {
                   intent: .defaultIntent
               ) else { return nil }
         return UIImage(cgImage: cgImage)
+    }
+}
+
+/// Inner view that observes [AppViewModel] directly so changes to its
+/// nested `@Published useFrontCamera` re-render the camera preview.
+/// Always proxies to [QrScannerStaticView] with the resolved Bool so
+/// the layout side stays free of view-model knowledge.
+private struct QrScannerObservingView: View {
+    let component: QrCodeComponent
+    let onAction: (UserAction) -> Void
+    @ObservedObject var coreVM: AppViewModel
+
+    var body: some View {
+        QrScannerStaticView(
+            component: component,
+            onAction: onAction,
+            useFrontCamera: coreVM.useFrontCamera
+        )
+    }
+}
+
+/// Stateless layout for the scan-mode QR preview. Pure-renderer:
+/// no view-model access, just position + chunk callback. Recreate-on-flip
+/// of the underlying `MultipartCameraPreview` is driven by
+/// `.id(useFrontCamera)`, mirroring Android's `key(useFrontCamera)`
+/// pattern in `QrCodeComponent.kt`.
+private struct QrScannerStaticView: View {
+    let component: QrCodeComponent
+    let onAction: (UserAction) -> Void
+    let useFrontCamera: Bool
+    @Environment(\.designTokens) private var tokens
+
+    var body: some View {
+        // F2-NEW-3: pin the preview to an explicit 250×250 frame.
+        // Earlier `.aspectRatio(1.0).frame(maxWidth: 250)` left
+        // `MultipartCameraPreview` (a `UIViewRepresentable` with no
+        // intrinsicContentSize) at 0×0 inside the SwiftUI VStack — the
+        // AVCaptureSession started but the preview layer's bounds were
+        // `.zero`. The legacy `Views/QRScannerView.swift` uses the same
+        // explicit-size pattern.
+        MultipartCameraPreview(
+            onChunkScanned: { code in
+                onAction(.textChanged(componentId: component.id, value: code))
+            },
+            useFrontCamera: useFrontCamera
+        )
+        .id(useFrontCamera)
+        .frame(width: 250, height: 250)
+        .clipShape(RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md)))
+        .overlay(
+            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md))
+                .stroke(Color.cyan.opacity(0.5), lineWidth: 2)
+        )
+        .accessibilityLabel(component.a11y?.label ?? "QR code scanner")
+        .accessibilityHint(component.a11y?.hint ?? "Point the camera at a Vauchi QR code to scan it")
     }
 }

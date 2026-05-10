@@ -32,6 +32,17 @@ class AppViewModel: ObservableObject {
     /// `2026-05-03-core-file-picker-command`.
     @Published var pendingFilePick: PendingFilePick?
 
+    /// Active camera selector for `Component::QrCode` scan mode.
+    /// Flips when core's `MultiStageExchangeEngine` emits
+    /// `Command::SwitchCamera { use_front }` in response to the
+    /// `switch_camera` action. `QrCodeView.qrScannerView` reads this
+    /// via `@EnvironmentObject` and uses `.id(useFrontCamera)` so
+    /// SwiftUI recreates `MultipartCameraPreview` on flip, mirroring
+    /// the Android `key(useFrontCamera)` recreate-on-flip pattern.
+    /// Default `false` (back camera), matching `AVCaptureDevice
+    /// .default(for: .video)` semantics on every supported device.
+    @Published var useFrontCamera: Bool = false
+
     struct PendingFilePick: Identifiable {
         let purpose: FilePickPurpose
         let acceptedMimeTypes: [String]
@@ -471,6 +482,16 @@ class AppViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     OrientationLock.shared.setMask(orientation?.uiKitMask)
                 }
+            case let .switchCamera(useFront):
+                // Camera-selector toggle from
+                // `MultiStageExchangeEngine`'s `switch_camera` action.
+                // `QrCodeView.qrScannerView` observes [useFrontCamera]
+                // and uses `.id(useFrontCamera)` to recreate the
+                // `MultipartCameraPreview` when the value flips, so
+                // SwiftUI tears down the old `AVCaptureSession` and
+                // builds a fresh one on the chosen device. Mirrors
+                // Android's CoreAppViewModel.useFrontCamera flow.
+                useFrontCamera = useFront
             default:
                 // BLE, NFC, Audio commands handled by the in-process
                 // `ExchangeCommandHandler` instance attached to the

@@ -13,9 +13,19 @@ import SwiftUI
 
 struct MultipartCameraPreview: UIViewRepresentable {
     let onChunkScanned: (String) -> Void
+    /// When `true`, the preview opens the front-facing wide-angle
+    /// camera; when `false`, the back-facing one. Mirrors core's
+    /// `Command::SwitchCamera { use_front }`. `QrCodeView` recreates
+    /// the representable with `.id(useFrontCamera)` so a flip rebuilds
+    /// the underlying `MultipartCameraView` rather than reconfiguring
+    /// an in-flight `AVCaptureSession` (matches the Android
+    /// `key(useFrontCamera)` recreate-on-flip strategy — cost is one
+    /// session teardown per camera switch, well below camera-open
+    /// latency).
+    var useFrontCamera: Bool = false
 
     func makeUIView(context: Context) -> UIView {
-        let view = MultipartCameraView()
+        let view = MultipartCameraView(useFrontCamera: useFrontCamera)
         view.delegate = context.coordinator
         return view
     }
@@ -68,6 +78,17 @@ struct MultipartCameraPreview: UIViewRepresentable {
 
 final class MultipartCameraView: UIView {
     weak var delegate: AVCaptureMetadataOutputObjectsDelegate?
+    private let useFrontCamera: Bool
+
+    init(useFrontCamera: Bool) {
+        self.useFrontCamera = useFrontCamera
+        super.init(frame: .zero)
+    }
+
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
+        fatalError("init(coder:) is not used; views are constructed by MultipartCameraPreview")
+    }
 
     /// F2-NEW-3 follow-up: make the view's own backing layer the
     /// AVCaptureVideoPreviewLayer (Apple-recommended pattern; same shape
@@ -134,7 +155,14 @@ final class MultipartCameraView: UIView {
         let session = AVCaptureSession()
         session.sessionPreset = .hd1280x720
 
-        guard let device = AVCaptureDevice.default(for: .video),
+        // Pick the front- or back-facing wide-angle camera based on the
+        // selector core last emitted (`Command::SwitchCamera`). Falls back
+        // to the device-default video camera when the chosen position
+        // isn't available — devices without a front camera are rare, but
+        // the fallback prevents an empty preview if one ships.
+        let position: AVCaptureDevice.Position = useFrontCamera ? .front : .back
+        let chosenDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
+        guard let device = chosenDevice ?? AVCaptureDevice.default(for: .video),
               let input = try? AVCaptureDeviceInput(device: device)
         else {
             return
