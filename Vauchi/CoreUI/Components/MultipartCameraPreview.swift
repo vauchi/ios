@@ -153,6 +153,13 @@ final class MultipartCameraView: UIView {
 
     private func initializeCamera() {
         let session = AVCaptureSession()
+        // Configure the session inside a begin/commit block (Apple-
+        // recommended pattern; matches `AVCameraCaptureSheet.swift`).
+        // Outside the block, addInput/addOutput on a running session
+        // is undefined behaviour, and on a fresh session it can race
+        // with the recreate-on-flip teardown of the previous session
+        // when the user toggles `useFrontCamera`.
+        session.beginConfiguration()
         session.sessionPreset = .hd1280x720
 
         // Pick the front- or back-facing wide-angle camera based on the
@@ -161,16 +168,24 @@ final class MultipartCameraView: UIView {
         // isn't available — devices without a front camera are rare, but
         // the fallback prevents an empty preview if one ships.
         let position: AVCaptureDevice.Position = useFrontCamera ? .front : .back
+        let positionLabel = position == .front ? "front" : "back"
         let chosenDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position)
         guard let device = chosenDevice ?? AVCaptureDevice.default(for: .video),
               let input = try? AVCaptureDeviceInput(device: device)
         else {
+            session.commitConfiguration()
+            NSLog("[Vauchi] [QrCamera] Failed to acquire \(positionLabel) camera input")
+            showCameraFailed(reason: "Failed to acquire \(positionLabel) camera")
             return
         }
 
-        if session.canAddInput(input) {
-            session.addInput(input)
+        guard session.canAddInput(input) else {
+            session.commitConfiguration()
+            NSLog("[Vauchi] [QrCamera] Session cannot add \(positionLabel) camera input")
+            showCameraFailed(reason: "Camera busy — try again")
+            return
         }
+        session.addInput(input)
 
         let output = AVCaptureMetadataOutput()
         if session.canAddOutput(output) {
@@ -178,6 +193,8 @@ final class MultipartCameraView: UIView {
             output.setMetadataObjectsDelegate(delegate, queue: DispatchQueue.main)
             output.metadataObjectTypes = [.qr]
         }
+
+        session.commitConfiguration()
 
         // The view's own backing layer is the preview layer (see
         // layerClass override), so just plug the session in. UIKit
@@ -187,9 +204,62 @@ final class MultipartCameraView: UIView {
         previewLayer.videoGravity = .resizeAspectFill
         captureSession = session
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        // AVCaptureSession surfaces *runtime* failures (camera released
+        // by another process, device unplugged, etc.) only via this
+        // notification — there is no return value, no callback. Without
+        // the observer the session goes idle and the preview stays on
+        // its last frame (or black if it never produced one).
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleRuntimeError(_:)),
+            name: .AVCaptureSessionRuntimeError,
+            object: session
+        )
+
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             session.startRunning()
+            // Post-condition: `startRunning()` returns Void and does not
+            // throw or signal failure. If the camera was held by the
+            // previous session during the recreate-on-flip race (e.g.
+            // the old `AVCaptureSession`'s `stopRunning()` in deinit
+            // hadn't fully released the device yet), startRunning is a
+            // no-op and the preview stays black with no diagnostic.
+            // Surface that case explicitly — mirrors the post-condition
+            // pattern used in the dt-* recipe sweep (2026-05-11).
+            if !session.isRunning {
+                NSLog("[Vauchi] [QrCamera] startRunning returned but session is not running (\(positionLabel))")
+                DispatchQueue.main.async {
+                    self?.showCameraFailed(reason: "Camera failed to start (busy?)")
+                }
+            }
         }
+    }
+
+    @objc private func handleRuntimeError(_ note: Notification) {
+        let error = note.userInfo?[AVCaptureSessionErrorKey] as? NSError
+        NSLog("[Vauchi] [QrCamera] Runtime error code=\(error?.code ?? -1)")
+        DispatchQueue.main.async { [weak self] in
+            self?.showCameraFailed(reason: "Camera runtime error")
+        }
+    }
+
+    private func showCameraFailed(reason: String) {
+        let label = UILabel()
+        label.text = "Camera unavailable\n\(reason)"
+        label.textColor = .white
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+
+        addSubview(label)
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: centerYAnchor),
+            label.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 20),
+            label.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -20),
+        ])
+
+        backgroundColor = .black
     }
 
     private func showPermissionDenied() {
@@ -212,6 +282,7 @@ final class MultipartCameraView: UIView {
     }
 
     deinit {
+        NotificationCenter.default.removeObserver(self)
         captureSession?.stopRunning()
     }
 }
