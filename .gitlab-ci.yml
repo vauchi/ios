@@ -819,6 +819,29 @@ build:debug:
       # v3 (force-moved v0.25.0 tag), v2 (symlink-fix invalidation).
       MIRROR_READY="$MIRROR/.ci-mirror-ready-v4"
 
+      # Concurrency guard for the runner-shared mirror: ios + macos jobs
+      # racing through the cache-miss path of the if/else below produced
+      # overlapping `rm -rf "$MIRROR" → git clone` invocations on
+      # 2026-05-16 (ios!426 + macos!225), surfacing as
+      # `could not lock config file: No such file or directory`. mkdir(1)
+      # is the POSIX-atomic primitive available on the runner without
+      # installing util-linux (macOS lacks flock(1)). Stale-lock timeout
+      # 600s = 6× empirical mirror-build time.
+      LOCKDIR="$HOME/.cache/vauchi-platform-swift-mirror/.lock-v$V"
+      mkdir -p "$(dirname "$LOCKDIR")"
+      LOCK_WAIT=0
+      while ! mkdir "$LOCKDIR" 2>/dev/null; do
+        if [ "$LOCK_WAIT" -ge 600 ]; then
+          echo "  Mirror lock held >600s — treating as stale and reclaiming."
+          rmdir "$LOCKDIR" 2>/dev/null || true
+          continue
+        fi
+        echo "  Waiting for mirror lock at $LOCKDIR (${LOCK_WAIT}s)…"
+        sleep 10
+        LOCK_WAIT=$((LOCK_WAIT + 10))
+      done
+      trap 'rmdir "$LOCKDIR" 2>/dev/null || true' EXIT
+
       if [ -f "$MIRROR_READY" ]; then
         echo "  Mirror cache hit at $MIRROR"
       else
