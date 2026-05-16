@@ -809,15 +809,18 @@ build:debug:
       # 2. Per-version mirror lives outside the build dir so it survives
       # cache wipes and is shared across ios/macos jobs on this runner.
       MIRROR="$HOME/.cache/vauchi-platform-swift-mirror/v$V"
-      # Bumped (-v4) to invalidate v3 caches built during the gitlab.com
-      # eventual-consistency window after the v0.25.0 force-tag-move. The
-      # first v3 rebuild ran before the new tag SHA propagated to all git
-      # replicas, so `git clone --branch v0.25.0` re-served the broken
-      # manifest and the sanity checks below didn't catch it (they only
-      # validate `let version = ...` and the env-var switch — both still
-      # textually present in the broken Package.swift). Prior bumps:
-      # v3 (force-moved v0.25.0 tag), v2 (symlink-fix invalidation).
-      MIRROR_READY="$MIRROR/.ci-mirror-ready-v4"
+      # Bumped (-v5) on 2026-05-16 to align with macos's stamp ratchet
+      # (macos hit -v5 on 2026-05-04 for an orphaned-SHA cache poison
+      # that didn't trip ios; aligning so future invalidations bump both
+      # in lockstep — the shared `nell-shell` runner holds both caches).
+      # Prior bumps: v4 (gitlab eventual-consistency window after the
+      # v0.25.0 force-tag-move — first v3 rebuild ran before the new tag
+      # SHA propagated to all git replicas, so `git clone --branch
+      # v0.25.0` re-served the broken manifest and sanity checks 1+2
+      # didn't catch it because `let version` and the env-var switch
+      # survive intact in the broken Package.swift), v3 (force-moved
+      # v0.25.0 tag), v2 (symlink-fix invalidation).
+      MIRROR_READY="$MIRROR/.ci-mirror-ready-v5"
 
       # Concurrency guard for the runner-shared mirror: ios + macos jobs
       # racing through the cache-miss path of the if/else below produced
