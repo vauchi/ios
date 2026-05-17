@@ -227,7 +227,6 @@
 		EF20861679F1C93AE235E958 /* home.json in Resources */ = {isa = PBXBuildFile; fileRef = 00A1D1339DD9CF0DE2BCBEB3 /* home.json */; };
 		F12257ABB31E5D291BB7ADDE /* InfoPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153F4A124314CB426DB39375 /* InfoPanelView.swift */; };
 		F13B7CE37C1BFBFC6BC0408E /* ready.json in Resources */ = {isa = PBXBuildFile; fileRef = 075A43D13266E824544C1089 /* ready.json */; };
-		F1607238A8523A2811B18B74 /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */; };
 		F3096FD65BB8C411D32ACE99 /* QrCameraTunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E118373F3BD2F4E7FC20AB /* QrCameraTunerView.swift */; };
 		F831303CE3FCE9DBE6E2319E /* testFieldListWithFieldsShowHide.1.png in Resources */ = {isa = PBXBuildFile; fileRef = BFB533E7A5279BAE43E57029 /* testFieldListWithFieldsShowHide.1.png */; };
 		F835B561DD3F9802AF7163FC /* testToggleListAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 33A0048E8A2E34AA58D84E4A /* testToggleListAccessibility.1.txt */; };
@@ -282,7 +281,6 @@
 		0F85E4838465BB8A1A9CB4F2 /* contact_info.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contact_info.json; sourceTree = "<group>"; };
 		0FC890F55872A927941111CE /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		108E48F43D27EA5EB6FFB226 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		153F4A124314CB426DB39375 /* InfoPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoPanelView.swift; sourceTree = "<group>"; };
 		16817F15488300C5EAF304A8 /* testCardPreviewGroupSelected.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCardPreviewGroupSelected.1.png; sourceTree = "<group>"; };
 		1793C01FB5DEAE4C84AED7C8 /* ActionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionListView.swift; sourceTree = "<group>"; };
@@ -704,7 +702,6 @@
 				8EC13750603D7C1EF84BACBC /* CoreOnboardingView.swift */,
 				9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */,
 				ADDBAB28CCA0714450AC2B99 /* FilePickerModifier.swift */,
-				140815E737F0ADD2CE495CA1 /* OnboardingViewModel.swift */,
 				D5A795D0FCDE3726CBB528F8 /* OrientationLock.swift */,
 				2BCD1112BEA2A776E27B15C3 /* ScreenRendererView.swift */,
 				CE42D30F93ED2ECE0C78FB70 /* Components */,
@@ -1292,7 +1289,6 @@
 				345A6E8CFA128DEE17B47EAF /* NfcDiagnosticView.swift in Sources */,
 				202472C7B53FC0BE508D0CD8 /* NfcExchangeView.swift in Sources */,
 				138BEFDCC908871EDE97D333 /* NotificationService.swift in Sources */,
-				F1607238A8523A2811B18B74 /* OnboardingViewModel.swift in Sources */,
 				B2FC70839C3AEFBE5C15753F /* OrientationLock.swift in Sources */,
 				9C89BE4773D3F64FB89BFE9B /* PasscodePolicy.swift in Sources */,
 				A63F23AF79BBFFCD1DF2992E /* PinInputView.swift in Sources */,
