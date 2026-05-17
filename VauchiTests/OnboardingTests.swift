@@ -70,7 +70,13 @@ final class OnboardingTests: XCTestCase {
         XCTAssertTrue(settingsService.hasDismissedDemoContact)
     }
 
-    // Onboarding step/data tests removed — custom OnboardingStep enum and
-    // OnboardingData class replaced by core-driven MobileOnboardingWorkflow.
-    // Core's onboarding state machine is tested in vauchi-core.
+    // Onboarding step/data tests removed — the custom `OnboardingStep`
+    // enum and `OnboardingData` class were replaced by the core-driven
+    // OnboardingEngine. Slice 32c then collapsed the
+    // `MobileOnboardingWorkflow` peer UniFFI object into
+    // `PlatformAppEngine`, so onboarding is now driven through the same
+    // engine that drives every post-identity screen. Core's onboarding
+    // state machine — including the end-to-end persistence of display
+    // name + selected groups + fields on Complete — is tested in
+    // `core/vauchi-app/tests/it/app_engine_onboarding_completion_tests.rs`.
 }

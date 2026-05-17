@@ -70,21 +70,25 @@ struct ContentView: View {
                     LoadingView()
                 } else if shouldShowOnboarding {
                     CoreOnboardingView(
-                        onComplete: { onboardingDataJson in
-                            Task {
-                                let name = Self.displayName(from: onboardingDataJson)
-                                try? await viewModel.createIdentity(name: name)
-                                SettingsService.shared.hasCompletedOnboarding = true
-                                viewModel.loadState()
-                            }
+                        onIdentityCreated: {
+                            // Slice 32c: PAE owns onboarding end-to-end
+                            // — `AppEngine::handle_completion` already
+                            // created the identity, persisted groups
+                            // and fields, and flipped the
+                            // onboarding-complete flag in core. No
+                            // frontend `createIdentity` call needed
+                            // (and calling it would now double-create).
+                            // Refresh `hasIdentity` so this branch
+                            // re-evaluates and `MainTabView` takes
+                            // over.
+                            SettingsService.shared.hasCompletedOnboarding = true
+                            viewModel.loadState()
                         },
                         onExchangeCommands: { commands in
-                            // Bridge Phase 2B `restore_backup` —
-                            // OnboardingViewModel forwards
-                            // ExchangeCommands here so the
-                            // FilePickFromUser command lands on
-                            // AppViewModel.pendingFilePick, which the
-                            // root `.fileImporter` modifier observes.
+                            // Phase 2B `restore_backup` — forward
+                            // ExchangeCommands so FilePickFromUser
+                            // lands on AppViewModel.pendingFilePick,
+                            // which the root `.fileImporter` observes.
                             viewModel.coreViewModel?.handleExchangeCommands(commands)
                         }
                     )
@@ -112,18 +116,6 @@ struct ContentView: View {
         // which forwards ExchangeCommands via `onExchangeCommands` into
         // this same `coreViewModel.pendingFilePick` state.
         .corePendingFilePick(viewModel.coreViewModel)
-    }
-
-    /// Extract `display_name` from the core onboarding JSON.
-    /// Falls back to empty string so identity creation still proceeds.
-    static func displayName(from json: String?) -> String {
-        guard let data = json?.data(using: .utf8),
-              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let name = obj["display_name"] as? String
-        else {
-            return ""
-        }
-        return name
     }
 }
 

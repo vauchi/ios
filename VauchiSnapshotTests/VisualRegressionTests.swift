@@ -67,11 +67,15 @@ final class VisualRegressionTests: XCTestCase {
 
     // MARK: - Onboarding
 
-    // Onboarding screens are now rendered by core via CoreOnboardingView.
-    // Snapshot tests for individual step views were removed when the custom
-    // onboarding was replaced with the core-driven flow.
-    // TODO: Add CoreOnboardingView snapshot once MobileOnboardingWorkflow
-    // can be instantiated in the test harness.
+    // Onboarding screens are now rendered by core via CoreOnboardingView,
+    // which is a thin wrapper around the shared `AppViewModel` (PAE).
+    // Snapshot tests for individual step views were removed when the
+    // custom onboarding was replaced with the core-driven flow.
+    // Slice 32c retired the `MobileOnboardingWorkflow` peer object —
+    // CoreOnboardingView now uses the same `coreViewModel` the rest
+    // of the app uses, so a snapshot can be added by injecting a
+    // `VauchiViewModel` whose `coreViewModel` is on an Onboarding
+    // screen. Tracked in slice 32c follow-ups.
 
     // MARK: - Main App Views
 

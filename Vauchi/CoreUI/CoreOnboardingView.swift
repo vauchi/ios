@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // CoreOnboardingView.swift
-// Core-driven onboarding flow using ScreenRendererView + OnboardingViewModel
+// Core-driven onboarding flow rendered via the shared PlatformAppEngine.
 
 import CoreUIModels
 import SwiftUI
@@ -11,27 +11,81 @@ import SwiftUI
 #if canImport(VauchiPlatform)
     import VauchiPlatform
 
-    /// Core-driven onboarding flow.
+    /// Core-driven onboarding flow rendered through the shared
+    /// `AppViewModel` (PAE wrapper) — the same engine that drives
+    /// every post-identity screen.
     ///
-    /// Uses `OnboardingViewModel` to get `ScreenModel` from core and renders
-    /// it via `ScreenRendererView`. When the workflow signals completion, the
-    /// `onComplete` callback is invoked with the collected onboarding data JSON.
+    /// Slice 32c retired the `MobileOnboardingWorkflow` peer object;
+    /// the OnboardingEngine state machine lives inside `AppEngine`
+    /// and is already driven by `PlatformAppEngine.current_screen_json`
+    /// / `handle_action_json` when no identity exists. This view used
+    /// to instantiate its own `OnboardingViewModel` wrapping
+    /// `MobileOnboardingWorkflow`; that path collected `OnboardingData`
+    /// in memory and required the frontend to extract `display_name`
+    /// and call `createIdentity` on `Complete`, silently dropping
+    /// `selected_groups` + `fields`. The PAE path persists the full
+    /// `OnboardingData` atomically in core
+    /// (`AppEngine::handle_completion` in vauchi-app).
+    ///
+    /// See: `_private/docs/problems/2026-05-17-slice-32c-mobile-ui-retirement/`,
+    /// ADR-043 Amendment 2 (forthcoming).
     struct CoreOnboardingView: View {
-        @StateObject private var viewModel = OnboardingViewModel()
-        let onComplete: (_ onboardingDataJson: String?) -> Void
+        @EnvironmentObject var viewModel: VauchiViewModel
 
-        /// Bridge for `ActionResult.commands` ActionResults
-        /// emitted by Phase 2B `restore_backup`. The host (ContentView)
-        /// passes its `viewModel.coreViewModel?.handleExchangeCommands`
-        /// so the FilePickFromUser command lands on the same
-        /// `pendingFilePick` state the root `.fileImporter` observes.
+        /// Invoked once PAE transitions away from the onboarding screen
+        /// (i.e., identity exists in core). The host typically calls
+        /// `viewModel.loadState()` so `hasIdentity` flips and ContentView
+        /// re-renders as `MainTabView`.
+        let onIdentityCreated: () -> Void
+
+        /// Bridge for `ExchangeCommand`s emitted during onboarding (e.g.
+        /// the `FilePickFromUser` command from the Phase 2B
+        /// `restore_backup` path). The host wires this to
+        /// `viewModel.coreViewModel?.handleExchangeCommands` so the
+        /// FilePickFromUser command lands on the same `pendingFilePick`
+        /// state the root `.fileImporter` observes.
+        ///
+        /// Today `AppViewModel.handleAction` (Phase 2b envelope path)
+        /// already calls `handleExchangeCommands` internally, so this
+        /// bridge is a defence-in-depth no-op for the onboarding path —
+        /// kept on the public API for symmetry with the prior
+        /// `OnboardingViewModel.onExchangeCommands` field and to allow
+        /// the host to intercept commands if needed.
         var onExchangeCommands: (([CommandDTO]) -> Void)?
 
         var body: some View {
             Group {
-                if let screen = viewModel.currentScreen {
+                if let coreVM = viewModel.coreViewModel {
+                    CoreOnboardingContent(
+                        coreVM: coreVM,
+                        onIdentityCreated: onIdentityCreated,
+                        onExchangeCommands: onExchangeCommands
+                    )
+                } else {
+                    ProgressView("Loading...")
+                }
+            }
+        }
+    }
+
+    /// Inner content view that subscribes directly to `AppViewModel`
+    /// (the shared PAE wrapper) via `@ObservedObject`. The split is
+    /// required because `coreViewModel` itself is only `@Published`
+    /// on `VauchiViewModel` — SwiftUI re-renders when the
+    /// `coreViewModel` *reference* changes, not when its inner
+    /// `@Published currentScreen` does. Splitting into an inner view
+    /// with `@ObservedObject coreVM` fixes that — same pattern as
+    /// `CoreScreenContent` in `CoreScreenView.swift`.
+    private struct CoreOnboardingContent: View {
+        @ObservedObject var coreVM: AppViewModel
+        let onIdentityCreated: () -> Void
+        var onExchangeCommands: (([CommandDTO]) -> Void)?
+
+        var body: some View {
+            Group {
+                if let screen = coreVM.currentScreen {
                     ScreenRendererView(screen: screen, onAction: { action in
-                        viewModel.handleAction(action)
+                        coreVM.handleAction(action)
                     })
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
@@ -43,14 +97,47 @@ import SwiftUI
                 }
             }
             .onAppear {
-                viewModel.onExchangeCommands = onExchangeCommands
+                // Cold start: ensure PAE's current screen is loaded so
+                // the user sees the Onboarding step PAE reports. With
+                // no identity, that's `AppScreen::Onboarding` →
+                // `OnboardingEngine::current_screen()` →
+                // IdentityCheck / DefaultName / etc.
+                coreVM.loadScreen()
             }
-            .onChange(of: viewModel.isComplete) { complete in
-                if complete {
-                    onComplete(viewModel.onboardingDataJson())
+            .onChange(of: coreVM.currentScreen?.screenId) { newId in
+                // PAE transitioned away from onboarding — identity has
+                // been written to the DB by `AppEngine::handle_completion`
+                // (display name, groups, and per slice 32c S2, fields).
+                // Hand control back to ContentView so it re-evaluates
+                // `hasIdentity` and renders `MainTabView`.
+                //
+                // The onboarding screen_ids are an enumerated set
+                // owned by `core/vauchi-app/src/ui/onboarding.rs`:
+                // `identity_check`, `link_choice`, `default_name`,
+                // `groups_setup`, `contact_info`, `what_next`,
+                // `backup_password_entry`. Any other id means PAE
+                // navigated past Complete (typically `my_info`).
+                if let id = newId, !Self.onboardingScreenIds.contains(id) {
+                    onIdentityCreated()
                 }
             }
         }
+
+        /// Screen IDs produced by `OnboardingEngine::current_screen()`.
+        /// Source: `core/vauchi-app/src/ui/onboarding.rs:173,222,296,334,404,569,581`.
+        /// Kept in sync with that set is a structural contract — drift
+        /// is caught at the `app_engine_onboarding_completion_tests`
+        /// level in core, which exercises the same Step→screen_id
+        /// mapping end-to-end.
+        private static let onboardingScreenIds: Set<String> = [
+            "identity_check",
+            "link_choice",
+            "default_name",
+            "groups_setup",
+            "contact_info",
+            "what_next",
+            "backup_password_entry",
+        ]
     }
 
 #endif

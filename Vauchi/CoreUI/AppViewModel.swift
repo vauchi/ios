@@ -427,11 +427,12 @@ class AppViewModel: ObservableObject {
     private var savedBrightness: CGFloat?
 
     /// Dispatch one or more core-emitted `Command`s. Called from
-    /// `applyResult` for `ActionResult.commands`, from the Phase 2b
+    /// `applyResult` for `ActionResult.commands` and from the Phase 2b
     /// envelope-drain path in `handleAction` / `navigateTo` /
-    /// `navigateBack`, and from `OnboardingViewModel.onExchangeCommands`
-    /// so the Onboarding flow shares the same `.fileImporter` host
-    /// attached at ContentView root.
+    /// `navigateBack`. Slice 32c retired `OnboardingViewModel`; the
+    /// Onboarding flow now drives this same `AppViewModel`, so the
+    /// envelope-drain path covers Onboarding commands too (no separate
+    /// `OnboardingViewModel.onExchangeCommands` bridge any more).
     func handleExchangeCommands(_ commands: [CommandDTO]) {
         for command in commands {
             switch command {
