@@ -786,4 +786,86 @@ extension PlatformAppEngine {
         }
         return records
     }
+
+    // MARK: - Recovery Trust (slice 32g-B Phase 1)
+
+    // Core 0.51.2 retired `vauchi.trustContactForRecovery(id:)` /
+    // `untrustContactForRecovery(id:)` / `trustedContactCount()` direct
+    // methods on `VauchiPlatform` (and the matching direct methods on
+    // `PlatformAppEngine`). All three move to typed `DomainCommand`
+    // dispatch. Wrappers match the previous call shapes so
+    // `VauchiRepository` migrates with a `vauchi.X()` → `appEngine.X()`
+    // swap.
+
+    func trustContactForRecovery(id: String) throws {
+        _ = try dispatchDomainCommand(command: .trustContactForRecovery(contactId: id))
+    }
+
+    func untrustContactForRecovery(id: String) throws {
+        _ = try dispatchDomainCommand(command: .untrustContactForRecovery(contactId: id))
+    }
+
+    func trustedContactCount() throws -> UInt32 {
+        let result = try dispatchDomainCommand(command: .trustedContactCount)
+        guard case let .count(value) = result else {
+            throw MobileError.Other(
+                detail: "TrustedContactCount: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    // MARK: - Duplicate Detection (slice 32g-B Phase 2)
+
+    func findDuplicates() throws -> [MobileDuplicatePair] {
+        let result = try dispatchDomainCommand(command: .findDuplicates)
+        guard case let .duplicatePairs(pairs) = result else {
+            throw MobileError.Other(
+                detail: "FindDuplicates: unexpected result variant"
+            )
+        }
+        return pairs
+    }
+
+    func dismissDuplicate(id1: String, id2: String) throws {
+        _ = try dispatchDomainCommand(command: .dismissDuplicate(id1: id1, id2: id2))
+    }
+
+    func mergeContacts(primaryId: String, secondaryId: String) throws -> MobileContact {
+        let result = try dispatchDomainCommand(
+            command: .mergeContacts(primaryId: primaryId, secondaryId: secondaryId)
+        )
+        guard case let .contactSingle(contact) = result else {
+            throw MobileError.Other(
+                detail: "MergeContacts: unexpected result variant"
+            )
+        }
+        return contact
+    }
+
+    // MARK: - Hidden Contacts (slice 32g-B Phase 2)
+
+    func listHiddenContacts() throws -> [MobileContact] {
+        let result = try dispatchDomainCommand(command: .listHiddenContacts)
+        guard case let .contacts(contacts) = result else {
+            throw MobileError.Other(
+                detail: "ListHiddenContacts: unexpected result variant"
+            )
+        }
+        return contacts
+    }
+
+    // MARK: - Contact Detail Read (slice 32g-B Phase 2)
+
+    func contactDetailFooterActionId(contactId: String) throws -> String {
+        let result = try dispatchDomainCommand(
+            command: .contactDetailFooterActionId(contactId: contactId)
+        )
+        guard case let .text(value) = result else {
+            throw MobileError.Other(
+                detail: "ContactDetailFooterActionId: unexpected result variant"
+            )
+        }
+        return value
+    }
 }

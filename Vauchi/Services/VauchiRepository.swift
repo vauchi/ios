@@ -791,7 +791,7 @@ class VauchiRepository {
     /// `MobileContact.isImported` directly. See §1A pure-renderer rule.
     func contactDetailFooterActionId(contactId: String) throws -> String {
         do {
-            return try vauchi.contactDetailFooterActionId(contactId: contactId)
+            return try appEngine.contactDetailFooterActionId(contactId: contactId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -811,7 +811,7 @@ class VauchiRepository {
     /// Find duplicate contact pairs.
     func findDuplicates() throws -> [MobileDuplicatePair] {
         do {
-            return try vauchi.findDuplicates()
+            return try appEngine.findDuplicates()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -820,7 +820,7 @@ class VauchiRepository {
     /// Merge two contacts, keeping the primary.
     func mergeContacts(primaryId: String, secondaryId: String) throws -> MobileContact {
         do {
-            return try vauchi.mergeContacts(primaryId: primaryId, secondaryId: secondaryId)
+            return try appEngine.mergeContacts(primaryId: primaryId, secondaryId: secondaryId)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -829,7 +829,7 @@ class VauchiRepository {
     /// Dismiss a duplicate pair so it won't be suggested again.
     func dismissDuplicate(id1: String, id2: String) throws {
         do {
-            try vauchi.dismissDuplicate(id1: id1, id2: id2)
+            try appEngine.dismissDuplicate(id1: id1, id2: id2)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -860,7 +860,7 @@ class VauchiRepository {
     /// List hidden contacts
     func listHiddenContacts() throws -> [VauchiContact] {
         do {
-            return try vauchi.listHiddenContacts().map(convertContact)
+            return try appEngine.listHiddenContacts().map(convertContact)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1820,7 +1820,7 @@ class VauchiRepository {
     /// Mark a contact as trusted for recovery
     func trustContactForRecovery(id: String) throws {
         do {
-            try vauchi.trustContactForRecovery(id: id)
+            try appEngine.trustContactForRecovery(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1829,7 +1829,7 @@ class VauchiRepository {
     /// Remove recovery trust from a contact
     func untrustContactForRecovery(id: String) throws {
         do {
-            try vauchi.untrustContactForRecovery(id: id)
+            try appEngine.untrustContactForRecovery(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1838,7 +1838,7 @@ class VauchiRepository {
     /// Get the number of contacts trusted for recovery
     func trustedContactCount() throws -> UInt32 {
         do {
-            return try vauchi.trustedContactCount()
+            return try appEngine.trustedContactCount()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
