@@ -16,11 +16,17 @@ private enum ThemeSettingsKey: String {
     case followSystem = "vauchi.theme.followSystem"
 }
 
-/// Service for managing app theming
+/// Service for managing app theming.
+///
+/// Source of truth is `UserDefaults` (OS-native, Category 1 —
+/// render-context). Core's `RenderContext` is informed of changes via
+/// `setRenderContextJson` so the Settings dropdown's `selected` value
+/// stays in sync (S4 of `2026-05-16-settings-storage-by-sensitivity`).
 final class ThemeService: ObservableObject {
     static let shared = ThemeService()
 
     private let defaults: UserDefaults
+    private var appEngine: PlatformAppEngine?
 
     /// Published current theme (triggers UI updates)
     @Published var currentTheme: MobileTheme?
@@ -38,6 +44,19 @@ final class ThemeService: ObservableObject {
         self.defaults = defaults
         registerDefaults()
         loadThemes()
+    }
+
+    // MARK: - Engine attachment
+
+    /// Wire this service to the live [PlatformAppEngine] so subsequent
+    /// theme changes propagate to core's `RenderContext`. Called once
+    /// from `VauchiRepository` after the engine finishes
+    /// initialization. Re-applies the theme and pushes it to core so
+    /// the Settings dropdown reflects what's on disk.
+    func attachAppEngine(_ engine: PlatformAppEngine) {
+        appEngine = engine
+        applySelectedTheme()
+        pushRenderContext(engine: engine)
     }
 
     /// Register default values
@@ -91,6 +110,7 @@ final class ThemeService: ObservableObject {
     func selectTheme(_ themeId: String) {
         followSystem = false
         selectedThemeId = themeId
+        pushRenderContext(engine: appEngine)
     }
 
     /// Reset to follow system appearance
@@ -98,6 +118,7 @@ final class ThemeService: ObservableObject {
         followSystem = true
         selectedThemeId = nil
         applySelectedTheme()
+        pushRenderContext(engine: appEngine)
     }
 
     // MARK: - Color Conversion

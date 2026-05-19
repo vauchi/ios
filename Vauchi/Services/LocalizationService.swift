@@ -15,11 +15,18 @@ private enum LocaleSettingsKey: String {
     case followSystem = "vauchi.locale.followSystem"
 }
 
-/// Service for managing app localization
+/// Service for managing app localization.
+///
+/// Source of truth is `UserDefaults` (OS-native, Category 1 —
+/// render-context). Core's `RenderContext` is informed of changes via
+/// `setRenderContextJson` so the Settings dropdown's `selected` value
+/// and locale-aware string lookup stay in sync (S4 of
+/// `2026-05-16-settings-storage-by-sensitivity`).
 final class LocalizationService: ObservableObject {
     static let shared = LocalizationService()
 
     private let defaults: UserDefaults
+    private var appEngine: PlatformAppEngine?
 
     /// Published current locale
     @Published var currentLocale: MobileLocale = .english
@@ -37,6 +44,19 @@ final class LocalizationService: ObservableObject {
         self.defaults = defaults
         registerDefaults()
         loadLocales()
+    }
+
+    // MARK: - Engine attachment
+
+    /// Wire this service to the live [PlatformAppEngine] so subsequent
+    /// locale changes propagate to core's `RenderContext`. Called
+    /// once from `VauchiRepository` after the engine finishes
+    /// initialization. Re-applies the locale and pushes it to core so
+    /// the Settings dropdown reflects what's on disk.
+    func attachAppEngine(_ engine: PlatformAppEngine) {
+        appEngine = engine
+        applySelectedLocale()
+        pushRenderContext(engine: engine)
     }
 
     /// Register default values
@@ -100,6 +120,7 @@ final class LocalizationService: ObservableObject {
     func selectLocale(code: String) {
         followSystem = false
         selectedLocaleCode = code
+        pushRenderContext(engine: appEngine)
     }
 
     /// Select a locale directly
@@ -113,6 +134,7 @@ final class LocalizationService: ObservableObject {
         followSystem = true
         selectedLocaleCode = nil
         applySelectedLocale()
+        pushRenderContext(engine: appEngine)
     }
 
     // MARK: - String Lookup
