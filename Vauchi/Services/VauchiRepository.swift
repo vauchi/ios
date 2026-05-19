@@ -954,7 +954,7 @@ class VauchiRepository {
         cardJson: String
     ) throws -> String {
         do {
-            return try vauchi.addDecoyContact(
+            return try appEngine.addDecoyContact(
                 name: name,
                 cardJson: cardJson
             )
@@ -967,7 +967,7 @@ class VauchiRepository {
     func listDecoyContacts()
         throws -> [MobileDecoyContact] {
         do {
-            return try vauchi.listDecoyContacts()
+            return try appEngine.listDecoyContacts()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -976,7 +976,7 @@ class VauchiRepository {
     /// Delete a decoy contact by ID.
     func deleteDecoyContact(id: String) throws {
         do {
-            try vauchi.deleteDecoyContact(id: id)
+            try appEngine.deleteDecoyContact(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1100,7 +1100,7 @@ class VauchiRepository {
     /// Configure emergency broadcast
     func configureEmergencyBroadcast(contactIds: [String], message: String, includeLocation: Bool) throws {
         do {
-            try vauchi.configureEmergencyBroadcast(contactIds: contactIds, message: message, includeLocation: includeLocation)
+            try appEngine.configureEmergencyBroadcast(contactIds: contactIds, message: message, includeLocation: includeLocation)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1109,7 +1109,7 @@ class VauchiRepository {
     /// Get emergency broadcast config
     func getEmergencyConfig() throws -> (contactIds: [String], message: String, includeLocation: Bool)? {
         do {
-            guard let config = try vauchi.getEmergencyConfig() else { return nil }
+            guard let config = try appEngine.getEmergencyConfig() else { return nil }
             return (contactIds: config.trustedContactIds, message: config.message, includeLocation: config.includeLocation)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
@@ -1119,7 +1119,7 @@ class VauchiRepository {
     /// Send emergency broadcast
     func sendEmergencyBroadcast() throws -> (sent: Int, total: Int) {
         do {
-            let result = try vauchi.sendEmergencyBroadcast()
+            let result = try appEngine.sendEmergencyBroadcast()
             return (sent: Int(result.sent), total: Int(result.total))
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
@@ -1129,7 +1129,7 @@ class VauchiRepository {
     /// Disable emergency broadcast
     func disableEmergencyBroadcast() throws {
         do {
-            try vauchi.disableEmergencyBroadcast()
+            try appEngine.disableEmergencyBroadcast()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1352,22 +1352,22 @@ class VauchiRepository {
 
     /// Whether delivery receipts are enabled.
     func isDeliveryReceiptsEnabled() -> Bool {
-        vauchi.isDeliveryReceiptsEnabled()
+        (try? appEngine.isDeliveryReceiptsEnabled()) ?? true
     }
 
     /// Toggle delivery receipts (read confirmations).
     func setDeliveryReceiptsEnabled(_ enabled: Bool) {
-        vauchi.setDeliveryReceiptsEnabled(enabled: enabled)
+        _ = try? appEngine.setDeliveryReceiptsEnabled(enabled: enabled)
     }
 
     /// Whether presence suppression is enabled.
     func isSuppressPresenceEnabled() -> Bool {
-        vauchi.isSuppressPresenceEnabled()
+        (try? appEngine.isSuppressPresenceEnabled()) ?? false
     }
 
     /// Toggle presence suppression (hide online status).
     func setSuppressPresenceEnabled(_ enabled: Bool) {
-        vauchi.setSuppressPresenceEnabled(enabled: enabled)
+        _ = try? appEngine.setSuppressPresenceEnabled(enabled: enabled)
     }
 
     // MARK: - Sync Operations
@@ -1401,7 +1401,7 @@ class VauchiRepository {
     /// Get pending update count
     func pendingUpdateCount() throws -> UInt32 {
         do {
-            return try vauchi.pendingUpdateCount()
+            return try appEngine.pendingUpdateCount()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1430,7 +1430,7 @@ class VauchiRepository {
     /// Export full backup (identity + contacts + own card + labels)
     func exportFullBackup(password: String) throws -> String {
         do {
-            return try vauchi.exportFullBackup(password: password)
+            return try appEngine.exportFullBackup(password: password)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1439,7 +1439,7 @@ class VauchiRepository {
     /// Import full backup (identity + contacts + own card + labels)
     func importFullBackup(data: String, password: String) throws {
         do {
-            try vauchi.importFullBackup(backupData: data, password: password)
+            try appEngine.importFullBackup(backupData: data, password: password)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }

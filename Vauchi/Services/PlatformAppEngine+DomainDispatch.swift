@@ -102,6 +102,98 @@ extension PlatformAppEngine {
         )
     }
 
+    func exportFullBackup(password: String) throws -> String {
+        let result = try dispatchDomainCommand(
+            command: .exportFullBackup(password: password)
+        )
+        guard case let .text(value) = result else {
+            throw MobileError.Other(
+                detail: "ExportFullBackup: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func importFullBackup(backupData: String, password: String) throws {
+        _ = try dispatchDomainCommand(
+            command: .importFullBackup(backupData: backupData, password: password)
+        )
+    }
+
+    // MARK: - Decoy Contacts (B7 batch 7)
+
+    func addDecoyContact(name: String, cardJson: String) throws -> String {
+        let result = try dispatchDomainCommand(
+            command: .addDecoyContact(name: name, cardJson: cardJson)
+        )
+        guard case let .text(value) = result else {
+            throw MobileError.Other(
+                detail: "AddDecoyContact: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func listDecoyContacts() throws -> [MobileDecoyContact] {
+        let result = try dispatchDomainCommand(command: .listDecoyContacts)
+        guard case let .decoyContacts(contacts) = result else {
+            throw MobileError.Other(
+                detail: "ListDecoyContacts: unexpected result variant"
+            )
+        }
+        return contacts
+    }
+
+    func deleteDecoyContact(id: String) throws {
+        _ = try dispatchDomainCommand(command: .deleteDecoyContact(id: id))
+    }
+
+    // MARK: - Sync Flags (B7 batch 18)
+
+    func isDeliveryReceiptsEnabled() throws -> Bool {
+        let result = try dispatchDomainCommand(command: .isDeliveryReceiptsEnabled)
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "IsDeliveryReceiptsEnabled: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func setDeliveryReceiptsEnabled(enabled: Bool) throws {
+        _ = try dispatchDomainCommand(
+            command: .setDeliveryReceiptsEnabled(enabled: enabled)
+        )
+    }
+
+    func isSuppressPresenceEnabled() throws -> Bool {
+        let result = try dispatchDomainCommand(command: .isSuppressPresenceEnabled)
+        guard case let .bool(value) = result else {
+            throw MobileError.Other(
+                detail: "IsSuppressPresenceEnabled: unexpected result variant"
+            )
+        }
+        return value
+    }
+
+    func setSuppressPresenceEnabled(enabled: Bool) throws {
+        _ = try dispatchDomainCommand(
+            command: .setSuppressPresenceEnabled(enabled: enabled)
+        )
+    }
+
+    // MARK: - Pending Updates (B7 batch 13)
+
+    func pendingUpdateCount() throws -> UInt32 {
+        let result = try dispatchDomainCommand(command: .pendingUpdateCount)
+        guard case let .count(value) = result else {
+            throw MobileError.Other(
+                detail: "PendingUpdateCount: unexpected result variant"
+            )
+        }
+        return value
+    }
+
     // MARK: - Delivery Records / Retry Queue (C4)
 
     func getAllDeliveryRecords() throws -> [MobileDeliveryRecord] {
