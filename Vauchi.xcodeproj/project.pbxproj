@@ -46,6 +46,7 @@
 		2183BF09BDD4F4226A01DA1B /* testStatusIndicatorAccessibility.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 444EB6E932C6BF9631AEE4D3 /* testStatusIndicatorAccessibility.1.txt */; };
 		222E89071C885A441E27F978 /* ModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE69227779252FAF163BCC07 /* ModelsTests.swift */; };
 		223E748C35520305B8EB1AE1 /* TextComponentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AE253E0DF71B38AAE856FB /* TextComponentView.swift */; };
+		23542D8D4771261954AA6A2D /* NFCExchangeServiceTransceiveShimTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBA469A3ED4A4660FA45B6A /* NFCExchangeServiceTransceiveShimTests.swift */; };
 		23BC0E98F07437B17716FA15 /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0312368F5A12DEE6EAC3D75 /* ListView.swift */; };
 		2591B2C7493F02EE16A70906 /* duress_overview.json in Resources */ = {isa = PBXBuildFile; fileRef = A145FAE191703FB7CE06A212 /* duress_overview.json */; };
 		25F92258277228332EE69BEE /* testEditableTextDisplay.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 6A4D772FACC8B2FEB3D60DA8 /* testEditableTextDisplay.1.png */; };
@@ -279,6 +280,7 @@
 		09D79E0645FD89F4223BD160 /* testEditableTextDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testEditableTextDark.1.png; sourceTree = "<group>"; };
 		0A594A2A3929ED3F36E46FBD /* RenderContextPusher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderContextPusher.swift; sourceTree = "<group>"; };
 		0B50587B7EC6319B106FB462 /* testToggleListSingleItem.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testToggleListSingleItem.1.png; sourceTree = "<group>"; };
+		0CBA469A3ED4A4660FA45B6A /* NFCExchangeServiceTransceiveShimTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFCExchangeServiceTransceiveShimTests.swift; sourceTree = "<group>"; };
 		0D3497B12DDDF10370069F86 /* Vauchi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Vauchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0ED4420CCDFCB527415741E4 /* testToggleListDefault.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testToggleListDefault.1.png; sourceTree = "<group>"; };
 		0EDBF8DCF3784366CBDEDEF6 /* NfcDiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NfcDiagnosticView.swift; sourceTree = "<group>"; };
@@ -605,6 +607,7 @@
 				423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */,
 				812EEE5AF140DB98855AF442 /* LocalizationServiceSettingsTests.swift */,
 				5484CED84D0E33E917230C9A /* NetworkMonitorTests.swift */,
+				0CBA469A3ED4A4660FA45B6A /* NFCExchangeServiceTransceiveShimTests.swift */,
 				E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */,
 				CE9581C53B23B46E50E35837 /* PasscodePolicyTests.swift */,
 				F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */,
@@ -1214,6 +1217,7 @@
 				2E32911FDD537E5F664BF57C /* KeychainServiceTests.swift in Sources */,
 				78DEE11DBBB312E894650FBF /* LocalizationServiceSettingsTests.swift in Sources */,
 				222E89071C885A441E27F978 /* ModelsTests.swift in Sources */,
+				23542D8D4771261954AA6A2D /* NFCExchangeServiceTransceiveShimTests.swift in Sources */,
 				3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */,
 				B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */,
 				764FA757EB16C597120D1E93 /* PasscodePolicyTests.swift in Sources */,
