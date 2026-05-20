@@ -22,6 +22,15 @@ final class ExchangeCommandHandler {
         return service
     }()
 
+    /// `nfcService` is instantiated on first NFC command; the lifecycle
+    /// matches one tap (activate → sendApdu* → deactivate). Per the
+    /// 2026-05-19 NFC engine-graduation Phase 2 plan, this dispatch
+    /// path emits `Event.nfcDataReceived` back to core where
+    /// `NfcExchangeFlow` (`core/vauchi-app/src/ui/exchange_nfc.rs`)
+    /// drives the 3-phase handshake state machine. Service stays a
+    /// transceive shim per ADR-031 / ADR-043.
+    private lazy var nfcService: NFCExchangeService = .init()
+
     /// directSendService is instantiated on first DirectSend command.
     /// Kept alive so that cancel() can interrupt a pending accept().
     private var directSendService: DirectSendService?
@@ -94,14 +103,18 @@ final class ExchangeCommandHandler {
             bleService.disconnect()
 
         // ── NFC ─────────────────────────────────────────────────────
-        case .nfcActivate:
-            // NFC is handled separately via NFCExchangeService (ISO7816 APDU).
-            // The command/event path isn't used for NFC on iOS — the NFC
-            // reader session drives the protocol directly.
-            reportUnavailable(transport: "NFC-command")
+        case let .nfcActivate(payload):
+            nfcService.activate(payload: payload) { [weak self] event in
+                guard let self, let session else { return }
+                try? session.applyHardwareEvent(event: event)
+                drainAndDispatch()
+            }
+
+        case let .nfcSendApdu(data):
+            nfcService.sendApdu(data: data)
 
         case .nfcDeactivate:
-            break
+            nfcService.deactivate()
 
         // ── DirectSend (USB cable) ──────────────────────────────────
         // BINDINGS_BUMP: uncomment when vauchi-platform-swift gains the
