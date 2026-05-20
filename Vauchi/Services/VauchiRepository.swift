@@ -1626,24 +1626,6 @@ class VauchiRepository {
         }
     }
 
-    /// Start device linking as the existing (initiator) device.
-    func startDeviceLink() throws -> MobileDeviceLinkInitiator {
-        do {
-            return try vauchi.startDeviceLink()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Start device join as the new (responder) device.
-    func startDeviceJoin(qrData: String, deviceName: String) throws -> MobileDeviceLinkResponder {
-        do {
-            return try vauchi.startDeviceJoin(qrData: qrData, deviceName: deviceName)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     /// Relay transport request received from a new device wanting to link.
     struct DeviceLinkRequest {
         let encryptedPayload: Data
