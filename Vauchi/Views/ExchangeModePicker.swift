@@ -47,7 +47,7 @@ struct ExchangeModePicker: View {
                     title: localizationService.t("exchange.mode.nfc"),
                     subtitle: localizationService.t("exchange.mode.nfc_description"),
                     enabled: hasNfc,
-                    destination: NfcExchangeView(switchToContacts: switchToContacts)
+                    destination: NfcTapExchangeView()
                 )
 
                 modeCard(
