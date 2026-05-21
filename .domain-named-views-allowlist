@@ -31,5 +31,5 @@ ExchangeModePicker.swift
 FaceToFaceExchangeView.swift
 HomeView.swift
 MoreView.swift
-NfcExchangeView.swift
+NfcTapExchangeView.swift
 QRDiagnosticView.swift
