@@ -35,12 +35,16 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<true/>
 	<key>NFCReaderUsageDescription</key>
 	<string>Vauchi uses NFC to exchange contact cards with nearby devices.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Vauchi uses Bluetooth to exchange contact cards with nearby devices.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Vauchi uses the camera to scan QR codes for contact exchange.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Vauchi uses Face ID to unlock the app and authorize sensitive actions like exporting your backup or restoring your identity.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Vauchi uses the microphone for ultrasonic proximity verification during contact exchange.</string>
 	<key>UIBackgroundModes</key>

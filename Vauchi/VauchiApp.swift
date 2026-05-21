@@ -31,8 +31,7 @@ struct VauchiApp: App {
     init() {
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
-        let buildId = Self.binaryBuildDate() ?? "?"
-        NSLog("[Vauchi] Build: v%@ (%@) core=%@ buildId=%@", v, b, coreVersion(), buildId)
+        NSLog("[Vauchi] Build: v%@ (%@) core=%@", v, b, coreVersion())
 
         // T2-8: Exclude app data from iCloud/iTunes backup.
         // Vauchi stores encrypted identity keys and contact data locally —
@@ -99,18 +98,6 @@ struct VauchiApp: App {
             // Poll for notifications (E)
             NotificationService.shared.pollAndDisplayNotifications(repository: repository)
         }
-    }
-
-    /// Returns the binary's modification date as a compact build ID string.
-    private static func binaryBuildDate() -> String? {
-        guard let executableURL = Bundle.main.executableURL,
-              let attrs = try? FileManager.default.attributesOfItem(atPath: executableURL.path),
-              let date = attrs[.modificationDate] as? Date
-        else { return nil }
-        let fmt = DateFormatter()
-        fmt.dateFormat = "yyyyMMdd-HHmmss"
-        fmt.timeZone = TimeZone(identifier: "UTC")
-        return fmt.string(from: date)
     }
 
     /// Exclude the app's Documents and Library directories from iCloud/iTunes backup.
