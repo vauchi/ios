@@ -54,7 +54,6 @@ struct CoreScreenView: View {
 private struct CoreScreenContent: View {
     let screenName: String
     @ObservedObject var coreVM: AppViewModel
-    @State private var currentScreen: String?
 
     var body: some View {
         Group {
@@ -66,13 +65,26 @@ private struct CoreScreenContent: View {
                 ProgressView("Loading...")
             }
         }
+        // All CoreScreenView instances share one engine — and therefore one
+        // currentScreen. Whenever this view becomes visible (first mount or
+        // MainTabView tab re-selection), re-assert this view's screen
+        // because another tab may have driven the engine elsewhere since
+        // we last ran (e.g. user pushed More → Settings, then tapped the
+        // My Card tab — without re-asserting, HomeView would render the
+        // Settings ScreenModel under its own header). Both .task and
+        // .onAppear are kept: .task is async-aware and re-runs on id
+        // change, .onAppear is the more reliable signal on TabView re-
+        // selection. navigateTo to the active screen is cheap (engine
+        // caches screens). Bug repro:
+        // _private/docs/problems/2026-05-21-ios-shell-issues-from-walkthrough.
         .task(id: screenName) {
-            navigateIfNeeded(to: screenName)
+            coreVM.navigateTo(screenJson: "\"\(screenName)\"")
         }
         .onChange(of: coreVM.currentScreen?.screenId) { newId in
             syncQrFrameTimer(for: newId)
         }
         .onAppear {
+            coreVM.navigateTo(screenJson: "\"\(screenName)\"")
             syncQrFrameTimer(for: coreVM.currentScreen?.screenId)
         }
         .onDisappear {
@@ -105,12 +117,6 @@ private struct CoreScreenContent: View {
         // root + CoreOnboardingView so trigger paths from custom-view
         // tabs (MoreView) and from Onboarding `restore_backup` are
         // reachable; CoreScreenView no longer needs its own host.
-    }
-
-    private func navigateIfNeeded(to screen: String) {
-        guard currentScreen != screen else { return }
-        currentScreen = screen
-        coreVM.navigateTo(screenJson: "\"\(screen)\"")
     }
 
     /// Start the animated-QR timer while the ShowQr screen is visible; stop

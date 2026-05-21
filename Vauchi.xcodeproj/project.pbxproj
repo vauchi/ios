@@ -89,6 +89,7 @@
 		51F789E9AED63A62D45C4539 /* skip_gate.json in Resources */ = {isa = PBXBuildFile; fileRef = EE2F2878EEA849795B242248 /* skip_gate.json */; };
 		52DC12F76B99B041E9446B00 /* testEditableTextEditing.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 2B4F37ED41BEFBB54770AB27 /* testEditableTextEditing.1.png */; };
 		5680FAB9C220183B0BB3AC03 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E044AD16B5BA923A443ADFC7 /* ContentView.swift */; };
+		581C76FC638EF1F70BA9A15A /* CoreScreenNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D24E88349C756B9B8609CE /* CoreScreenNavigationTests.swift */; };
 		585352762DF068CBD6CD1EE8 /* SettingsServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852C63AD7ECE19A3177E137A /* SettingsServiceTests.swift */; };
 		59AD4D4BBA7C8F368C95B7CE /* link_choice.json in Resources */ = {isa = PBXBuildFile; fileRef = 852C63EED95011422DDDDB76 /* link_choice.json */; };
 		5D2702086C792C92874D64EF /* testWipeConfirmScreen.1.png in Resources */ = {isa = PBXBuildFile; fileRef = AA5DDD4269C94CD90ACEF692 /* testWipeConfirmScreen.1.png */; };
@@ -363,6 +364,7 @@
 		63AE253E0DF71B38AAE856FB /* TextComponentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextComponentView.swift; sourceTree = "<group>"; };
 		640EF3CDE75D016F2437C111 /* contact_list.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contact_list.json; sourceTree = "<group>"; };
 		644F12D83413B334E234F4AC /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
+		65D24E88349C756B9B8609CE /* CoreScreenNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreScreenNavigationTests.swift; sourceTree = "<group>"; };
 		66948B6E4E0E10C56A794B44 /* contact_edit_visibility.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contact_edit_visibility.json; sourceTree = "<group>"; };
 		66D4DF5873BED53D99177B4A /* MultipartQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRView.swift; sourceTree = "<group>"; };
 		677E67E216D48E378A773CD8 /* testTextInputAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testTextInputAccessibility.1.txt; sourceTree = "<group>"; };
@@ -535,6 +537,7 @@
 			children = (
 				21B33063ADD1C9CDC8C4186B /* AnimatedQrTimerTests.swift */,
 				46CE8156A15BD5428BE8514A /* ContractTests.swift */,
+				65D24E88349C756B9B8609CE /* CoreScreenNavigationTests.swift */,
 				C38FE0127E86CB045D89F88E /* ExchangeCommandBridgeTests.swift */,
 				CE69227779252FAF163BCC07 /* ModelsTests.swift */,
 				42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */,
@@ -1209,6 +1212,7 @@
 				76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */,
 				E4ABA23960463F55C2C3FB0D /* ContactActionsTests.swift in Sources */,
 				697942891CF20348B250C67D /* ContractTests.swift in Sources */,
+				581C76FC638EF1F70BA9A15A /* CoreScreenNavigationTests.swift in Sources */,
 				9DB670EF78DB7FBAEEF7696B /* DeliveryStatusTests.swift in Sources */,
 				161D92EC11DFF0CDAE7B0F29 /* DemoContactTests.swift in Sources */,
 				60E5D23C6B32822C55E491C0 /* DeviceLinkingTests.swift in Sources */,
