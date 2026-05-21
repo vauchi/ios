@@ -181,6 +181,17 @@ struct ToastOverlayView: View {
 }
 
 /// Renders a `ScreenAction` as a styled button.
+///
+/// Secondary actions render as outlined full-width pills, matching
+/// Android's `OutlinedButton` treatment in
+/// `android/app/src/main/kotlin/app/vauchi/ui/coreui/ScreenRenderer.kt`.
+/// Both frontends consume the same `ScreenAction` set from core (e.g.
+/// `add_field` / `toggle_view` / `preview-as-picker` on My Card) — the
+/// renderer must give them equivalent visual weight on every platform.
+/// The prior iOS rendering used bare cyan text labels (no outline, no
+/// frame), which the 2026-05-21 walkthrough flagged as humble-UI
+/// parity violation item 3 in
+/// `_private/docs/problems/2026-05-21-ios-shell-issues-from-walkthrough`.
 struct ActionButton: View {
     let action: ScreenAction
     let onTap: () -> Void
@@ -189,11 +200,12 @@ struct ActionButton: View {
     var body: some View {
         Button(action: onTap) {
             Text(action.label)
-                .font(isPrimary ? .headline : .subheadline)
-                .frame(maxWidth: isPrimary ? .infinity : nil)
-                .padding(isPrimary ? 16 : 8)
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .padding(16)
                 .background(background)
                 .foregroundColor(foregroundColor)
+                .overlay(outline)
                 .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         }
         .disabled(!action.enabled)
@@ -202,8 +214,12 @@ struct ActionButton: View {
         .accessibilityLabel(action.label)
     }
 
-    private var isPrimary: Bool {
-        action.style == .primary || action.style == .destructive
+    @ViewBuilder
+    private var outline: some View {
+        if action.style == .secondary {
+            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.mdLg))
+                .stroke(Color.cyan, lineWidth: 1)
+        }
     }
 
     private var background: Color {
