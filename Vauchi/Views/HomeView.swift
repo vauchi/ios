@@ -47,14 +47,24 @@ struct HomeView: View {
 
     private var header: some View {
         HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 4) {
-                if let publicId = viewModel.publicId {
-                    Text("ID: \(String(publicId.prefix(16)))...")
-                        .font(.system(.caption, design: .monospaced))
-                        .foregroundColor(themeService.textSecondary)
-                        .accessibilityLabel("Public ID prefix")
+            // The public-ID prefix is a developer-only affordance — it's
+            // a stable identity correlator visible to anyone in shoulder
+            // range and meaningless to end users. Gated behind DEBUG so
+            // it doesn't leak to release. If a release surface is ever
+            // needed, place it inside Settings → About (where the
+            // version is already shown) rather than the home header.
+            // See _private/docs/problems/2026-05-21-ios-shell-issues-
+            // from-walkthrough item 2.
+            #if DEBUG
+                VStack(alignment: .leading, spacing: 4) {
+                    if let publicId = viewModel.publicId {
+                        Text("ID: \(String(publicId.prefix(16)))...")
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundColor(themeService.textSecondary)
+                            .accessibilityLabel("Public ID prefix")
+                    }
                 }
-            }
+            #endif
             Spacer()
             SyncStatusIndicator(syncState: viewModel.syncState)
         }
