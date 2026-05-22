@@ -69,8 +69,7 @@ final class BackgroundSyncService {
     /// Schedule the next sync task
     func scheduleSyncTask() {
         let request = BGAppRefreshTaskRequest(identifier: Self.syncTaskIdentifier)
-        let intervalSeconds = appEngine?.periodicSyncIntervalSeconds() ?? Self.fallbackSyncIntervalSeconds
-        request.earliestBeginDate = Date(timeIntervalSinceNow: TimeInterval(intervalSeconds))
+        request.earliestBeginDate = Date(timeIntervalSinceNow: TimeInterval(Self.fallbackSyncIntervalSeconds))
 
         do {
             try BGTaskScheduler.shared.submit(request)
