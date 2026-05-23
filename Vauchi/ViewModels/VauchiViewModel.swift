@@ -556,13 +556,6 @@ class VauchiViewModel: ObservableObject {
         contacts.removeAll { $0.id == id }
     }
 
-    /// Undo a soft-delete of an imported contact.
-    func undoDeleteImportedContact(id: String) async throws {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        try repository.undoDeleteImportedContact(id: id)
-        await loadContacts()
-    }
-
     /// Archive a contact (exchanged contacts — reversible).
     func archiveContact(id: String) async throws {
         guard let repository else { throw VauchiRepositoryError.notInitialized }

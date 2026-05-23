@@ -545,12 +545,6 @@ class VauchiRepository {
         return newKeyData
     }
 
-    /// Export current storage key (for backup purposes only)
-    /// WARNING: Handle the returned data with extreme care
-    func exportStorageKey() -> Data {
-        vauchi.exportStorageKey()
-    }
-
     /// Handle app backgrounded event (C1 auto-lock)
     func handleAppBackgrounded() -> String? {
         do {
@@ -694,19 +688,19 @@ class VauchiRepository {
 
     // MARK: - Contact Operations
 
-    /// List all contacts
-    func listContacts() throws -> [VauchiContact] {
+    /// List contacts with pagination
+    func listContactsPaginated(offset: UInt32, limit: UInt32) throws -> [VauchiContact] {
         do {
-            return try appEngine.listContacts().map(convertContact)
+            return try appEngine.listContactsPaginated(offset: offset, limit: limit).map(convertContact)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
     }
 
-    /// List contacts with pagination
-    func listContactsPaginated(offset: UInt32, limit: UInt32) throws -> [VauchiContact] {
+    /// List all contacts
+    func listContacts() throws -> [VauchiContact] {
         do {
-            return try appEngine.listContactsPaginated(offset: offset, limit: limit).map(convertContact)
+            return try appEngine.listContacts().map(convertContact)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -754,24 +748,6 @@ class VauchiRepository {
     func softDeleteImportedContact(id: String) throws {
         do {
             try appEngine.softDeleteImportedContact(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Undo a soft-delete.
-    func undoDeleteImportedContact(id: String) throws {
-        do {
-            try appEngine.undoDeleteImportedContact(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Permanently delete an imported contact.
-    func hardDeleteImportedContact(id: String) throws {
-        do {
-            try appEngine.hardDeleteImportedContact(id: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
