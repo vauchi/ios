@@ -196,18 +196,6 @@ final class VauchiViewModelTests: XCTestCase {
         XCTAssertTrue(true, "loadHiddenContacts method exists")
     }
 
-    /// Scenario: Unhide contact restores to normal list
-    func testUnhideContactUpdatesState() async throws {
-        let viewModel = makeViewModel()
-        try await viewModel.createIdentity(name: "Alice")
-
-        // Test unhiding a contact (will gracefully handle missing method)
-        try? await viewModel.unhideContact(id: "test-contact-id")
-
-        // Method should exist and not crash
-        XCTAssertTrue(true, "unhideContact method exists")
-    }
-
     // MARK: - App State Tests (Locked Device)
 
     // Based on: _private/docs/problems/2026-03-02-locked-device-startup-error/

@@ -433,16 +433,6 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
-    func searchContacts(query: String) async -> [VauchiContact] {
-        guard let repository else { return [] }
-
-        do {
-            return try repository.searchContacts(query: query)
-        } catch {
-            return []
-        }
-    }
-
     // MARK: - Hidden Contacts
 
     // Based on: features/resistance.feature - R3 Hidden Contact UI
@@ -476,25 +466,6 @@ class VauchiViewModel: ObservableObject {
             // Gracefully handle if method not available yet
             #if DEBUG
                 print("VauchiViewModel: hideContact not yet available: \(error)")
-            #endif
-            throw VauchiRepositoryError.internalError("Hidden contacts feature not yet available")
-        }
-    }
-
-    /// Unhide a contact
-    func unhideContact(id: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        do {
-            try repository.unhideContact(id: id)
-            // Remove from hidden contacts list
-            contacts.removeAll { $0.id == id }
-        } catch {
-            // Gracefully handle if method not available yet
-            #if DEBUG
-                print("VauchiViewModel: unhideContact not yet available: \(error)")
             #endif
             throw VauchiRepositoryError.internalError("Hidden contacts feature not yet available")
         }

@@ -762,15 +762,6 @@ class VauchiRepository {
         }
     }
 
-    /// Unarchive a contact back to the main list.
-    func unarchiveContact(id: String) throws {
-        do {
-            try appEngine.unarchiveContact(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     /// Returns the footer-button `ScreenAction` id that core's
     /// `ContactDetailEngine` would emit for the given contact —
     /// `"delete_contact"` (imported) or `"archive_contact"` (exchanged).
@@ -784,44 +775,6 @@ class VauchiRepository {
         }
     }
 
-    /// List all archived contacts.
-    func listArchivedContacts() throws -> [VauchiContact] {
-        do {
-            return try appEngine.listArchivedContacts().map(convertContact)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    // MARK: - Duplicate Detection
-
-    /// Find duplicate contact pairs.
-    func findDuplicates() throws -> [MobileDuplicatePair] {
-        do {
-            return try appEngine.findDuplicates()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Merge two contacts, keeping the primary.
-    func mergeContacts(primaryId: String, secondaryId: String) throws -> MobileContact {
-        do {
-            return try appEngine.mergeContacts(primaryId: primaryId, secondaryId: secondaryId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Dismiss a duplicate pair so it won't be suggested again.
-    func dismissDuplicate(id1: String, id2: String) throws {
-        do {
-            try appEngine.dismissDuplicate(id1: id1, id2: id2)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     // MARK: - Hidden Contacts Operations
 
     // Based on: features/resistance.feature - R3 Hidden Contact UI
@@ -830,15 +783,6 @@ class VauchiRepository {
     func hideContact(id: String) throws {
         do {
             try appEngine.hideContact(contactId: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Unhide a contact
-    func unhideContact(id: String) throws {
-        do {
-            try appEngine.unhideContact(contactId: id)
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
