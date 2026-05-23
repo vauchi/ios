@@ -340,38 +340,12 @@ extension PlatformAppEngine {
         _ = try dispatchDomainCommand(command: .softDeleteImportedContact(id: id))
     }
 
-    func undoDeleteImportedContact(id: String) throws {
-        _ = try dispatchDomainCommand(command: .undoDeleteImportedContact(id: id))
-    }
-
-    func hardDeleteImportedContact(id: String) throws {
-        _ = try dispatchDomainCommand(command: .hardDeleteImportedContact(id: id))
-    }
-
     func archiveContact(id: String) throws {
         _ = try dispatchDomainCommand(command: .archiveContact(id: id))
     }
 
-    func unarchiveContact(id: String) throws {
-        _ = try dispatchDomainCommand(command: .unarchiveContact(id: id))
-    }
-
-    func listArchivedContacts() throws -> [MobileContact] {
-        let result = try dispatchDomainCommand(command: .listArchivedContacts)
-        guard case let .contacts(contacts) = result else {
-            throw MobileError.Other(
-                detail: "ListArchivedContacts: unexpected result variant"
-            )
-        }
-        return contacts
-    }
-
     func hideContact(contactId: String) throws {
         _ = try dispatchDomainCommand(command: .hideContact(contactId: contactId))
-    }
-
-    func unhideContact(contactId: String) throws {
-        _ = try dispatchDomainCommand(command: .unhideContact(contactId: contactId))
     }
 
     // MARK: - Contact Verification (C2)
@@ -905,34 +879,6 @@ extension PlatformAppEngine {
             )
         }
         return value
-    }
-
-    // MARK: - Duplicate Detection (slice 32g-B Phase 2)
-
-    func findDuplicates() throws -> [MobileDuplicatePair] {
-        let result = try dispatchDomainCommand(command: .findDuplicates)
-        guard case let .duplicatePairs(pairs) = result else {
-            throw MobileError.Other(
-                detail: "FindDuplicates: unexpected result variant"
-            )
-        }
-        return pairs
-    }
-
-    func dismissDuplicate(id1: String, id2: String) throws {
-        _ = try dispatchDomainCommand(command: .dismissDuplicate(id1: id1, id2: id2))
-    }
-
-    func mergeContacts(primaryId: String, secondaryId: String) throws -> MobileContact {
-        let result = try dispatchDomainCommand(
-            command: .mergeContacts(primaryId: primaryId, secondaryId: secondaryId)
-        )
-        guard case let .contactSingle(contact) = result else {
-            throw MobileError.Other(
-                detail: "MergeContacts: unexpected result variant"
-            )
-        }
-        return contact
     }
 
     // MARK: - Hidden Contacts (slice 32g-B Phase 2)
