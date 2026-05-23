@@ -917,46 +917,13 @@ class VauchiRepository {
 
     // Based on: features/panic_widget.feature - R2 Panic Widget
     //
-    // The 4 mutating shred operations below (`panicShred`, `softShred`,
-    // `cancelShred`, `hardShred`) remain on legacy `vauchi.X` because
-    // they require keychain plumbing on `PlatformAppEngine` that has
-    // not yet shipped (tracked as the B7 keychain batch). Read-only
-    // `shredStatus` already has a dispatch arm and is migrated.
-
-    /// Execute emergency panic shred — destroys all data
-    @discardableResult
-    func panicShred() throws -> MobileShredReport {
-        do {
-            return try vauchi.panicShred()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    func softShred() throws -> MobileShredToken {
-        do {
-            return try vauchi.softShred()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    func cancelShred(token: MobileShredToken) throws {
-        do {
-            try vauchi.cancelShred(token: token)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    @discardableResult
-    func hardShred(token: MobileShredToken) throws -> MobileShredReport {
-        do {
-            return try vauchi.hardShred(token: token)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
+    // The 4 mutating shred operations (`panicShred`, `softShred`,
+    // `cancelShred`, `hardShred`) were retired 2026-05-23 (Track A
+    // orphan cleanup): none of them had callers in `ios/` —
+    // emergency-wipe / identity-deletion UI flows go through other
+    // paths (`appEngine.scheduleIdentityDeletion` + the recovery /
+    // duress engines). Read-only `shredStatus` stays — it's
+    // PAE-dispatched and has live callers.
 
     func shredStatus() throws -> MobileShredStatus {
         do {
@@ -1024,47 +991,14 @@ class VauchiRepository {
         }
     }
 
-    // MARK: - Emergency Broadcast Operations
-
-    // Based on: features/emergency_broadcast.feature - R5 Emergency Broadcast
-
-    /// Configure emergency broadcast
-    func configureEmergencyBroadcast(contactIds: [String], message: String, includeLocation: Bool) throws {
-        do {
-            try appEngine.configureEmergencyBroadcast(contactIds: contactIds, message: message, includeLocation: includeLocation)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get emergency broadcast config
-    func getEmergencyConfig() throws -> (contactIds: [String], message: String, includeLocation: Bool)? {
-        do {
-            guard let config = try appEngine.getEmergencyConfig() else { return nil }
-            return (contactIds: config.trustedContactIds, message: config.message, includeLocation: config.includeLocation)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Send emergency broadcast
-    func sendEmergencyBroadcast() throws -> (sent: Int, total: Int) {
-        do {
-            let result = try appEngine.sendEmergencyBroadcast()
-            return (sent: Int(result.sent), total: Int(result.total))
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Disable emergency broadcast
-    func disableEmergencyBroadcast() throws {
-        do {
-            try appEngine.disableEmergencyBroadcast()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
+    // Emergency Broadcast Operations (R5 / features/emergency_broadcast.feature)
+    // — the 4 PAE delegators (`configureEmergencyBroadcast`,
+    // `getEmergencyConfig`, `sendEmergencyBroadcast`,
+    // `disableEmergencyBroadcast`) were retired 2026-05-23 (Track A
+    // orphan cleanup): no view, model, or service called them in `ios/`.
+    // The R5 UI surface routes through core engines / `dispatchDomainCommand`
+    // when wired; when it lands the wrappers can return without re-shipping
+    // the dead orphans first.
 
     /// Get own identity fingerprint for verification display.
     func getOwnFingerprint() throws -> String {
@@ -1257,16 +1191,12 @@ class VauchiRepository {
         }
     }
 
-    // MARK: - Multi-Stage Exchange
-
-    /// Create a multi-stage exchange session with real identity + contact card.
-    func createMultistageSession() throws -> MobileMultiStageSession {
-        do {
-            return try vauchi.createMultistageSession()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
+    // Multi-stage exchange — the `createMultistageSession` Repository
+    // wrapper was retired 2026-05-23 (Track A orphan cleanup): no view,
+    // model, or service called it. The live multi-stage flow on iOS
+    // runs through `LinkResponderSessionService`, which holds the
+    // session via `appEngine.currentLinkResponderSession()`, not
+    // through this surface.
 
     // MARK: - Privacy Toggles
 
@@ -1535,49 +1465,13 @@ class VauchiRepository {
         }
     }
 
-    /// Relay transport request received from a new device wanting to link.
-    struct DeviceLinkRequest {
-        let encryptedPayload: Data
-        let senderToken: String
-    }
-
-    /// Listen for incoming device link request via relay.
-    func listenForDeviceLinkRequest(timeoutSecs: UInt64) throws -> DeviceLinkRequest {
-        do {
-            let request = try vauchi.listenForDeviceLinkRequest(timeoutSecs: timeoutSecs)
-            return DeviceLinkRequest(encryptedPayload: request.encryptedPayload, senderToken: request.senderToken)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Send device link response via relay.
-    func sendDeviceLinkResponse(senderToken: String, encryptedResponse: Data) throws {
-        do {
-            try vauchi.sendDeviceLinkResponse(senderToken: senderToken, encryptedResponse: encryptedResponse)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Send device link request via relay and wait for response.
-    func sendDeviceLinkRequest(
-        targetIdentity: String,
-        senderToken: String,
-        encryptedRequest: Data,
-        timeoutSecs: UInt64
-    ) throws -> Data {
-        do {
-            return try vauchi.sendDeviceLinkRequest(
-                targetIdentity: targetIdentity,
-                senderToken: senderToken,
-                encryptedRequest: encryptedRequest,
-                timeoutSecs: timeoutSecs
-            )
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
+    // Pre-orchestrator device-link relay transport (`listenForDeviceLinkRequest`,
+    // `sendDeviceLinkResponse`, `sendDeviceLinkRequest`) + the matching
+    // `DeviceLinkRequest` payload struct retired 2026-05-23 (Track A orphan
+    // cleanup): the live device-link flow is the orchestrator session API
+    // (`appEngine.createDeviceLinkSessionInitiator` /
+    // `currentLinkResponderSession` + `LinkResponderSessionService`),
+    // not these legacy wrappers. Zero callers in `ios/`.
 
     /// Get the number of linked devices
     func deviceCount() throws -> UInt32 {
@@ -1795,28 +1689,15 @@ class VauchiRepository {
         }
     }
 
-    /// Get all retry entries
-    func getRetryEntries() throws -> [VauchiRetryEntry] {
-        do {
-            return try appEngine.getDueRetries().map(convertRetryEntry)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
+    // `getRetryEntries` + `failedDeliveryCount` retired 2026-05-23
+    // (Track A orphan cleanup): no production caller; the delivery
+    // status panel reads through screen-model rendering, not these
+    // wrappers. `retryDelivery` stays — covered by `VauchiTests`.
 
     /// Retry a failed delivery
     func retryDelivery(messageId: String) throws -> Bool {
         do {
             return try appEngine.manualRetry(messageId: messageId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get count of failed deliveries
-    func failedDeliveryCount() throws -> UInt32 {
-        do {
-            return try appEngine.countFailedDeliveries()
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
