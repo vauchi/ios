@@ -6,6 +6,7 @@
 // Main state management for Vauchi iOS app
 
 import Combine
+import CoreUIModels
 import Foundation
 import LocalAuthentication
 import Security
@@ -207,12 +208,24 @@ class VauchiViewModel: ObservableObject {
                     // off main to avoid blocking the UI.
                     let engine = self?.coreViewModel?.appEngine
                     DispatchQueue.global(qos: .userInitiated).async {
-                        let outcome = try? engine?.biometricUnlockCheck()
+                        // ADR-031: biometric success is reported as a
+                        // hardware event; core consults its duress state
+                        // (padding to BIOMETRIC_UNLOCK_MIN_DURATION) and
+                        // returns ActionResult.biometricUnlockOutcome.
+                        let resultJson = try? engine?.handleHardwareEvent(event: .biometricUnlockSucceeded)
+                        var promptForDuress = false
+                        if let resultJson,
+                           let data = resultJson.data(using: .utf8),
+                           let result = try? coreJSONDecoder.decode(ActionResult.self, from: data),
+                           case let .biometricUnlockOutcome(outcome) = result {
+                            promptForDuress = (outcome == "PromptForDuressPin")
+                        }
                         DispatchQueue.main.async {
-                            switch outcome {
-                            case .promptForDuressPin:
+                            if promptForDuress {
                                 self?.appState = .appPasswordRequired
-                            case .unlocked, .none:
+                            } else {
+                                // Unlocked, or no/undecodable outcome —
+                                // proceed, matching the prior .none behavior.
                                 self?.appState = .ready
                                 self?.loadState()
                             }

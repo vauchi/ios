@@ -413,6 +413,11 @@ class AppViewModel: ObservableObject {
         case .previewAs:
             // Card preview handled by NavigateTo — no separate action needed
             break
+        case .biometricUnlockOutcome:
+            // Consumed by VauchiViewModel.authenticateAndRetry(), which
+            // reports the biometric hardware event and decodes the outcome
+            // directly to drive appState — it never flows through here.
+            break
         case .unknown:
             break
         }
