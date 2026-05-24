@@ -503,6 +503,12 @@ class VauchiRepository {
         // LocalizationManager read from the vault — see `android!407`.)
         ThemeService.shared.attachAppEngine(appEngine)
         LocalizationService.shared.attachAppEngine(appEngine)
+
+        // Report this device's exchange-relevant hardware to core so the
+        // Exchange mode picker offers only modes the device can perform.
+        // Without this push core falls back to `DeviceCapabilities::default()`
+        // (all-false) — see `2026-05-23-exchange-capabilities-frontend-gap`.
+        pushDeviceCapabilities(engine: appEngine)
     }
 
     /// Default data directory in Application Support
