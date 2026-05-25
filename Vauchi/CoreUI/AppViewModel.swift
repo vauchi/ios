@@ -344,12 +344,28 @@ class AppViewModel: ObservableObject {
         ("more", "More"),
     ]
 
-    private func updateSelectedScreen() {
-        guard let screenId = currentScreen?.screenId else { return }
-        for mapping in Self.screenIdPrefixToTab where screenId.hasPrefix(mapping.prefix) {
-            selectedScreen = mapping.tab
-            return
+    /// Map a core-emitted `screen_id` to its owning bottom-bar tab, or
+    /// `nil` for screens that are not under a tab (sub-screens like
+    /// Backup / Sync that stay on whatever tab launched them).
+    ///
+    /// Prefix-based, so it matches both the canonical
+    /// `AppScreen::screen_id()` (`contacts`, `groups`) and the per-engine
+    /// ids (`contact_list`, `groups_list`). The zero-domain-vocab Tier-0
+    /// (c) narrow collapse makes core emit the canonical forms on the
+    /// Contacts/Groups tabs; `hasPrefix` already covers both, so iOS needs
+    /// no map-compat fix (unlike Android's `CoreScreenIdMap`). Pinned by
+    /// `ScreenIdTabAffinityTests`.
+    nonisolated static func tab(forScreenId id: String) -> String? {
+        for mapping in screenIdPrefixToTab where id.hasPrefix(mapping.prefix) {
+            return mapping.tab
         }
+        return nil
+    }
+
+    private func updateSelectedScreen() {
+        guard let screenId = currentScreen?.screenId,
+              let tab = Self.tab(forScreenId: screenId) else { return }
+        selectedScreen = tab
     }
 
     private func navigateToScreen(_ screenObject: [String: Any]) {
