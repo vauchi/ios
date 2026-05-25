@@ -75,7 +75,14 @@ targets:
         NSBluetoothAlwaysUsageDescription: "Vauchi uses Bluetooth to exchange contact cards with nearby devices."
         NSCameraUsageDescription: "Vauchi uses the camera to scan QR codes for contact exchange."
         NSMicrophoneUsageDescription: "Vauchi uses the microphone for ultrasonic proximity verification during contact exchange."
+        NSFaceIDUsageDescription: "Vauchi uses Face ID to unlock the app and authorize sensitive actions like exporting your backup or restoring your identity."
         NFCReaderUsageDescription: "Vauchi uses NFC to exchange contact cards with nearby devices."
+        # Export-compliance declaration App Store Connect requires at
+        # submission. Without it, every upload triggers a manual
+        # questionnaire. Kept here (not just in Info.plist) so xcodegen
+        # regen doesn't strip it — see problem
+        # 2026-05-24-ios-infoplist-projectyml-drift.
+        ITSAppUsesNonExemptEncryption: true
         com.apple.developer.nfc.readersession.iso7816.select-identifiers:
           - F0564155434849
 
