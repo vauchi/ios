@@ -1279,22 +1279,6 @@ class VauchiRepository {
         }
     }
 
-    // MARK: - Delivery Status Operations
-
-    // `getRetryEntries` + `failedDeliveryCount` retired 2026-05-23
-    // (Track A orphan cleanup): no production caller; the delivery
-    // status panel reads through screen-model rendering, not these
-    // wrappers. `retryDelivery` stays — covered by `VauchiTests`.
-
-    /// Retry a failed delivery
-    func retryDelivery(messageId: String) throws -> Bool {
-        do {
-            return try appEngine.manualRetry(messageId: messageId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     // MARK: - Demo Contact Operations
 
     // Based on: features/demo_contact.feature
