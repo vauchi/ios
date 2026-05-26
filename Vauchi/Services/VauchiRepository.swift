@@ -1196,10 +1196,9 @@ class VauchiRepository {
 
     // Multi-stage exchange — the `createMultistageSession` Repository
     // wrapper was retired 2026-05-23 (Track A orphan cleanup): no view,
-    // model, or service called it. The live multi-stage flow on iOS
-    // runs through `LinkResponderSessionService`, which holds the
-    // session via `appEngine.currentLinkResponderSession()`, not
-    // through this surface.
+    // model, or service called it. The link-mode responder is now
+    // engine-owned (core AppEngine); the frontend renders the screen
+    // and routes RelayEscrow* via the standard command envelope.
 
     // MARK: - Privacy Toggles
 

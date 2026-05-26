@@ -183,9 +183,9 @@ struct VauchiApp: App {
                         // After Accept, core's `DeepLinkConsentEngine` grant
                         // path navigates to `AppScreen::DeepLinkResponder` and
                         // the screen id flips to `link_responder_waiting`.
-                        // `LinkResponderLifecycleView` (attached to the body's
-                        // `.background`) observes the transition and starts
-                        // the responder cycle thread automatically.
+                        // The engine-owned responder then drives itself,
+                        // emitting RelayEscrow* commands through the standard
+                        // ActionResult / pending-commands envelope.
                         Button("Accept Exchange") {
                             viewModel.coreViewModel?
                                 .handleAction(.actionPressed(actionId: "grant"))
@@ -198,16 +198,6 @@ struct VauchiApp: App {
                         Text("Someone shared an exchange link with you. " +
                             "Do you want to proceed with the contact exchange?\n\n" +
                             "Only accept if you trust the source of this link.")
-                    }
-                    .background {
-                        // Side-effect-only observer: instantiates a
-                        // `LinkResponderSessionService` when core navigates to
-                        // `link_responder_waiting` (post-grant of a vauchi://
-                        // exchange deep link), and stops it when navigation
-                        // leaves. Sized 0×0 so it never affects layout.
-                        if let coreVM = viewModel.coreViewModel {
-                            LinkResponderLifecycleView(coreVM: coreVM)
-                        }
                     }
                 #if DEBUG
                     .fullScreenCover(isPresented: $showBleDiagnostic) {
@@ -285,36 +275,5 @@ struct VauchiApp: App {
                 }
             }
         }
-    }
-}
-
-/// Side-effect-only observer that owns the lifecycle of the active
-/// `LinkResponderSessionService`. Renders nothing — `Color.clear`
-/// sized 0×0 keeps it out of layout. Wired in `VauchiApp.body` via
-/// `.background { ... }`.
-///
-/// `coreVM.currentScreen` is `@Published` on `AppViewModel`, but
-/// SwiftUI does not propagate inner `@Published` changes through a
-/// nested optional reference, so this view holds `coreVM` directly as
-/// an `@ObservedObject` to subscribe to its `objectWillChange`. The
-/// `.onChange(of: coreVM.currentScreen?.screenId)` modifier then fires
-/// whenever the screen id transitions in or out of
-/// `link_responder_waiting`.
-private struct LinkResponderLifecycleView: View {
-    @ObservedObject var coreVM: AppViewModel
-    @State private var service: LinkResponderSessionService?
-
-    var body: some View {
-        Color.clear
-            .frame(width: 0, height: 0)
-            .onChange(of: coreVM.currentScreen?.screenId) { newId in
-                if newId == "link_responder_waiting" {
-                    let svc = service ?? LinkResponderSessionService(coreVM: coreVM)
-                    service = svc
-                    svc.startIfNeeded()
-                } else {
-                    service?.stop()
-                }
-            }
     }
 }
