@@ -217,29 +217,15 @@ class AppViewModel: ObservableObject {
     /// variant — that is the zero-domain-vocab Tier-1 contract (ADR-043
     /// Am4 / tier0-d plan item 2).
     ///
-    /// Dispatched via the raw action-JSON path rather than the typed
-    /// `handleAction(_:)` because the hand-written `UserAction` binding
-    /// (CoreUIModels 0.51.16) does not yet carry a `.navigateToTab` case.
-    /// The `action_id` is opaque and core-sourced; `JSONSerialization`
-    /// builds the envelope so any value is escaped safely.
+    /// Dispatched through the typed `handleAction(_:)` path (encode →
+    /// `handleActionJson` → apply result + lifecycle commands), then
+    /// refreshes the available-screens list. Requires the
+    /// `UserAction.navigateToTab` case from vauchi-platform-swift (added
+    /// in vauchi-platform-swift!59); does not compile against bindings
+    /// without it.
     func navigateToTab(actionId: String) {
-        do {
-            let payload: [String: [String: String]] = ["NavigateToTab": ["action_id": actionId]]
-            let actionData = try JSONSerialization.data(withJSONObject: payload)
-            guard let actionJson = String(data: actionData, encoding: .utf8) else { return }
-            let resultJson = try appEngine.handleActionJson(actionJson: actionJson)
-            guard let resultData = resultJson.data(using: .utf8) else { return }
-            let envelope = try coreJSONDecoder.decode(ActionResultEnvelope.self, from: resultData)
-            applyResult(envelope.actionResult)
-            loadAvailableScreens()
-            if !envelope.commands.isEmpty {
-                handleExchangeCommands(envelope.commands)
-            }
-        } catch {
-            #if DEBUG
-                print("AppViewModel: failed to navigate to tab: \(error)")
-            #endif
-        }
+        handleAction(.navigateToTab(actionId: actionId))
+        loadAvailableScreens()
     }
 
     /// Dispatch an incoming `vauchi://exchange?...` deep link URI to core.
