@@ -368,19 +368,6 @@ class AppViewModel: ObservableObject {
         selectedScreen = tab
     }
 
-    private func navigateToScreen(_ screenObject: [String: Any]) {
-        do {
-            let payload = try JSONSerialization.data(withJSONObject: screenObject)
-            if let screenJson = String(data: payload, encoding: .utf8) {
-                navigateTo(screenJson: screenJson)
-            }
-        } catch {
-            #if DEBUG
-                print("AppViewModel: failed to encode screen navigation: \(error)")
-            #endif
-        }
-    }
-
     private func applyResult(_ result: ActionResult) {
         switch result {
         case let .updateScreen(screen):
@@ -393,10 +380,12 @@ class AppViewModel: ObservableObject {
             validationErrors[componentId] = message
         case .complete, .wipeComplete:
             loadScreen()
-        case .completeWith:
-            // CompleteWith is consumed by AppEngine.route_result in core,
-            // which re-emits NavigateTo to the destination screen — frontends
-            // never observe it during normal post-onboarding routing.
+        case .completeWith, .openContact, .editContact, .openEntryDetail:
+            // Resolved to NavigateTo by AppEngine.route_result in core —
+            // frontends never observe these raw (ADR-043 Am4). CompleteWith
+            // re-emits the post-onboarding destination; OpenContact /
+            // EditContact / OpenEntryDetail re-emit the contact / edit /
+            // entry screens.
             break
         case let .openUrl(url):
             if let nsUrl = URL(string: url) {
@@ -404,12 +393,6 @@ class AppViewModel: ObservableObject {
             }
         case let .showAlert(title, message):
             alertMessage = AlertMessage(title: title, message: message)
-        case let .openContact(contactId):
-            navigateToScreen(["ContactDetail": ["contact_id": contactId]])
-        case let .editContact(contactId):
-            navigateToScreen(["ContactEdit": ["contact_id": contactId]])
-        case let .openEntryDetail(fieldId):
-            navigateToScreen(["EntryDetail": ["field_id": fieldId]])
         case let .showToast(message, undoActionId):
             // Reload screen — core may have navigated internally
             // (e.g. archive_contact intercept calls navigate_back()
