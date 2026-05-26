@@ -21,7 +21,6 @@ class AppViewModel: ObservableObject {
     @Published var toastMessage: String?
     @Published var toastUndoActionId: String?
     @Published var availableScreens: [String] = []
-    @Published var selectedScreen: String?
     @Published var showImagePicker = false
     @Published var showCameraPicker = false
     /// Set when core emits `ExchangeCommand::FilePickFromUser`. The
@@ -140,7 +139,6 @@ class AppViewModel: ObservableObject {
             guard let data = json.data(using: .utf8) else { return }
             currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
             validationErrors = [:]
-            updateSelectedScreen()
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to load screen: \(error)")
@@ -184,13 +182,62 @@ class AppViewModel: ObservableObject {
             currentScreen = envelope.screen
             validationErrors = [:]
             loadAvailableScreens()
-            updateSelectedScreen()
             if !envelope.commands.isEmpty {
                 handleExchangeCommands(envelope.commands)
             }
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to navigate: \(error)")
+            #endif
+        }
+    }
+
+    /// The bottom-bar tabs, sourced from core's `tab_info` (ADR-043 Am4).
+    /// Each carries an opaque `actionId` (forward via `navigateToTab`), a
+    /// core-resolved `label`, and an SF Symbol `icon` — replacing the
+    /// hardcoded `MainTabView` domain literals so iOS stays a pure
+    /// renderer. Returns `[]` only if the engine call throws (logged in
+    /// DEBUG); the bar then renders empty rather than crashing.
+    func tabs() -> [MobileTabInfo] {
+        do {
+            return try appEngine.tabInfo(locale: LocalizationService.shared.currentLocale)
+        } catch {
+            #if DEBUG
+                print("AppViewModel: failed to load tabs: \(error)")
+            #endif
+            return []
+        }
+    }
+
+    /// Forward a tab tap as `UserAction::NavigateToTab { action_id }`.
+    ///
+    /// `actionId` is the opaque canonical id handed out by `tabs()` (e.g.
+    /// "groups"); core resolves it to the canonical screen and returns
+    /// `NavigateTo`. The frontend never parses or constructs the domain
+    /// variant — that is the zero-domain-vocab Tier-1 contract (ADR-043
+    /// Am4 / tier0-d plan item 2).
+    ///
+    /// Dispatched via the raw action-JSON path rather than the typed
+    /// `handleAction(_:)` because the hand-written `UserAction` binding
+    /// (CoreUIModels 0.51.16) does not yet carry a `.navigateToTab` case.
+    /// The `action_id` is opaque and core-sourced; `JSONSerialization`
+    /// builds the envelope so any value is escaped safely.
+    func navigateToTab(actionId: String) {
+        do {
+            let payload: [String: [String: String]] = ["NavigateToTab": ["action_id": actionId]]
+            let actionData = try JSONSerialization.data(withJSONObject: payload)
+            guard let actionJson = String(data: actionData, encoding: .utf8) else { return }
+            let resultJson = try appEngine.handleActionJson(actionJson: actionJson)
+            guard let resultData = resultJson.data(using: .utf8) else { return }
+            let envelope = try coreJSONDecoder.decode(ActionResultEnvelope.self, from: resultData)
+            applyResult(envelope.actionResult)
+            loadAvailableScreens()
+            if !envelope.commands.isEmpty {
+                handleExchangeCommands(envelope.commands)
+            }
+        } catch {
+            #if DEBUG
+                print("AppViewModel: failed to navigate to tab: \(error)")
             #endif
         }
     }
@@ -214,7 +261,6 @@ class AppViewModel: ObservableObject {
         currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
         validationErrors = [:]
         loadAvailableScreens()
-        updateSelectedScreen()
     }
 
     func navigateBack() {
@@ -333,40 +379,6 @@ class AppViewModel: ObservableObject {
     }
 
     // MARK: - Private
-
-    private static let screenIdPrefixToTab: [(prefix: String, tab: String)] = [
-        ("my_info", "MyInfo"),
-        ("contact", "Contacts"),
-        ("exchange", "Exchange"),
-        ("groups", "Groups"),
-        ("group_detail", "Groups"),
-        ("device_replacement", "More"),
-        ("more", "More"),
-    ]
-
-    /// Map a core-emitted `screen_id` to its owning bottom-bar tab, or
-    /// `nil` for screens that are not under a tab (sub-screens like
-    /// Backup / Sync that stay on whatever tab launched them).
-    ///
-    /// Prefix-based, so it matches both the canonical
-    /// `AppScreen::screen_id()` (`contacts`, `groups`) and the per-engine
-    /// ids (`contact_list`, `groups_list`). The zero-domain-vocab Tier-0
-    /// (c) narrow collapse makes core emit the canonical forms on the
-    /// Contacts/Groups tabs; `hasPrefix` already covers both, so iOS needs
-    /// no map-compat fix (unlike Android's `CoreScreenIdMap`). Pinned by
-    /// `ScreenIdTabAffinityTests`.
-    nonisolated static func tab(forScreenId id: String) -> String? {
-        for mapping in screenIdPrefixToTab where id.hasPrefix(mapping.prefix) {
-            return mapping.tab
-        }
-        return nil
-    }
-
-    private func updateSelectedScreen() {
-        guard let screenId = currentScreen?.screenId,
-              let tab = Self.tab(forScreenId: screenId) else { return }
-        selectedScreen = tab
-    }
 
     private func applyResult(_ result: ActionResult) {
         switch result {

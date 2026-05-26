@@ -81,7 +81,7 @@ final class VisualRegressionTests: XCTestCase {
 
     func testHomeViewEmpty() {
         let vm = makeViewModel()
-        let view = HomeView()
+        let view = HomeView(actionId: "my_info")
             .environmentObject(vm)
 
         assertScreenSnapshot(of: view)
@@ -91,7 +91,7 @@ final class VisualRegressionTests: XCTestCase {
         let vm = makeViewModel(
             card: VauchiContactCard(displayName: "Alice", fields: sampleFields)
         )
-        let view = HomeView()
+        let view = HomeView(actionId: "my_info")
             .environmentObject(vm)
 
         assertScreenSnapshot(of: view)
@@ -99,7 +99,7 @@ final class VisualRegressionTests: XCTestCase {
 
     func testContactsViewEmpty() {
         let vm = makeViewModel()
-        let view = ContactsView()
+        let view = ContactsView(actionId: "contacts")
             .environmentObject(vm)
 
         assertScreenSnapshot(of: view)
@@ -107,7 +107,7 @@ final class VisualRegressionTests: XCTestCase {
 
     func testContactsViewWithContacts() {
         let vm = makeViewModel(contacts: sampleContacts)
-        let view = ContactsView()
+        let view = ContactsView(actionId: "contacts")
             .environmentObject(vm)
 
         assertScreenSnapshot(of: view)
@@ -170,7 +170,7 @@ final class VisualRegressionTests: XCTestCase {
 
     func testSyncingState() {
         let vm = makeViewModel(syncState: .syncing)
-        let view = HomeView()
+        let view = HomeView(actionId: "my_info")
             .environmentObject(vm)
 
         assertScreenSnapshot(of: view)
@@ -182,7 +182,7 @@ final class VisualRegressionTests: XCTestCase {
         let vm = makeViewModel(
             card: VauchiContactCard(displayName: "Alice", fields: sampleFields)
         )
-        let view = HomeView()
+        let view = HomeView(actionId: "my_info")
             .environmentObject(vm)
             .environment(\.colorScheme, .dark)
 
@@ -191,7 +191,7 @@ final class VisualRegressionTests: XCTestCase {
 
     func testContactsViewWithContactsDark() {
         let vm = makeViewModel(contacts: sampleContacts)
-        let view = ContactsView()
+        let view = ContactsView(actionId: "contacts")
             .environmentObject(vm)
             .environment(\.colorScheme, .dark)
 
@@ -230,7 +230,7 @@ final class VisualRegressionTests: XCTestCase {
         let vm = makeViewModel(
             card: VauchiContactCard(displayName: "Alice", fields: sampleFields)
         )
-        let view = HomeView()
+        let view = HomeView(actionId: "my_info")
             .environmentObject(vm)
 
         withLocale("de", view: view)
@@ -238,7 +238,7 @@ final class VisualRegressionTests: XCTestCase {
 
     func testContactsViewWithContactsGerman() {
         let vm = makeViewModel(contacts: sampleContacts)
-        let view = ContactsView()
+        let view = ContactsView(actionId: "contacts")
             .environmentObject(vm)
 
         withLocale("de", view: view)

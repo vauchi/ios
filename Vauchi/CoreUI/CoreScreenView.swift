@@ -21,12 +21,42 @@ import VauchiPlatform
 ///
 /// Usage:
 /// ```swift
-/// CoreScreenView(screenName: "Groups")
-/// CoreScreenView(screenName: "Settings")
+/// CoreScreenView(actionId: "groups")      // tab body — opaque id from tabInfo()
+/// CoreScreenView(screenName: "Settings")  // legacy sub-screen path
 /// ```
 struct CoreScreenView: View {
-    let screenName: String
+    /// What the shared engine navigates to when this view appears.
+    ///
+    /// `tab` forwards the opaque `action_id` from `tabInfo()` as
+    /// `UserAction::NavigateToTab` — the zero-domain-vocab tab path
+    /// (ADR-043 Am4). `screen` is the legacy serde-variant path still
+    /// used by non-tab sub-screens (Settings, Sync, Backup, …) pending
+    /// the `navigate_to_json` retirement tier.
+    enum Target: Equatable {
+        case tab(actionId: String)
+        case screen(name: String)
+
+        /// Stable key for `.task(id:)` so tab re-selection re-asserts.
+        var taskId: String {
+            switch self {
+            case let .tab(actionId): "tab:\(actionId)"
+            case let .screen(name): "screen:\(name)"
+            }
+        }
+    }
+
+    let target: Target
     @EnvironmentObject var viewModel: VauchiViewModel
+
+    /// Tab body: navigate by the opaque canonical `action_id` from core.
+    init(actionId: String) {
+        target = .tab(actionId: actionId)
+    }
+
+    /// Legacy sub-screen body: navigate by serde variant name.
+    init(screenName: String) {
+        target = .screen(name: screenName)
+    }
 
     var body: some View {
         // The actual rendering lives in `CoreScreenContent`, which observes
@@ -43,7 +73,7 @@ struct CoreScreenView: View {
         // to `coreVM.objectWillChange` directly.
         Group {
             if let coreVM = viewModel.coreViewModel {
-                CoreScreenContent(screenName: screenName, coreVM: coreVM)
+                CoreScreenContent(target: target, coreVM: coreVM)
             } else {
                 ProgressView("Loading...")
             }
@@ -52,8 +82,18 @@ struct CoreScreenView: View {
 }
 
 private struct CoreScreenContent: View {
-    let screenName: String
+    let target: CoreScreenView.Target
     @ObservedObject var coreVM: AppViewModel
+
+    /// Drive the shared engine to this view's target. Tabs forward the
+    /// opaque `action_id` (`NavigateToTab`); legacy sub-screens use the
+    /// serde-variant `navigateTo`.
+    private func navigate() {
+        switch target {
+        case let .tab(actionId): coreVM.navigateToTab(actionId: actionId)
+        case let .screen(name): coreVM.navigateTo(screenJson: "\"\(name)\"")
+        }
+    }
 
     var body: some View {
         Group {
@@ -77,14 +117,14 @@ private struct CoreScreenContent: View {
         // selection. navigateTo to the active screen is cheap (engine
         // caches screens). Bug repro:
         // _private/docs/problems/2026-05-21-ios-shell-issues-from-walkthrough.
-        .task(id: screenName) {
-            coreVM.navigateTo(screenJson: "\"\(screenName)\"")
+        .task(id: target.taskId) {
+            navigate()
         }
         .onChange(of: coreVM.currentScreen?.screenId) { newId in
             syncQrFrameTimer(for: newId)
         }
         .onAppear {
-            coreVM.navigateTo(screenJson: "\"\(screenName)\"")
+            navigate()
             syncQrFrameTimer(for: coreVM.currentScreen?.screenId)
         }
         .onDisappear {

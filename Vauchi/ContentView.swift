@@ -133,67 +133,19 @@ struct LoadingView: View {
 struct MainTabView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
-    /// Dynamic default: tab 1 (Contacts) when user has contacts, tab 0 (My Card) otherwise
-    @State private var selectedTab: Int
+    /// Default selection: the Contacts tab when the user already has
+    /// contacts, otherwise My Card. Keyed on the opaque canonical tab id
+    /// that core hands out via `tabInfo()` (ADR-043 Am4) — not a domain
+    /// variant.
+    @State private var selectedTabId: String
 
     init(hasContacts: Bool = false) {
-        _selectedTab = State(initialValue: hasContacts ? 1 : 0)
+        _selectedTabId = State(initialValue: hasContacts ? "contacts" : "my_info")
     }
 
     var body: some View {
         ZStack(alignment: .top) {
-            TabView(selection: $selectedTab) {
-                HomeView()
-                    .tabItem {
-                        Label(
-                            localizationService.t("nav.myCard"),
-                            systemImage: "person.crop.rectangle.fill"
-                        )
-                    }
-                    .tag(0)
-                    .accessibilityIdentifier("tab.myCard")
-
-                ContactsView()
-                    .tabItem {
-                        Label(
-                            localizationService.t("nav.contacts"),
-                            systemImage: "person.2.fill"
-                        )
-                    }
-                    .tag(1)
-                    .accessibilityIdentifier("tab.contacts")
-
-                ExchangeModePicker(switchToContacts: { selectedTab = 1 })
-                    .tabItem {
-                        Label(
-                            localizationService.t("nav.exchange"),
-                            systemImage: "qrcode"
-                        )
-                    }
-                    .tag(2)
-                    .accessibilityIdentifier("tab.exchange")
-
-                CoreScreenView(screenName: "Groups")
-                    .tabItem {
-                        Label(
-                            localizationService.t("nav.groups"),
-                            systemImage: "rectangle.3.group.fill"
-                        )
-                    }
-                    .tag(3)
-                    .accessibilityIdentifier("tab.groups")
-
-                MoreView()
-                    .tabItem {
-                        Label(
-                            localizationService.t("nav.more"),
-                            systemImage: "ellipsis.circle.fill"
-                        )
-                    }
-                    .tag(4)
-                    .accessibilityIdentifier("tab.more")
-            }
-            .accentColor(.cyan)
+            tabBar
 
             // Offline banner
             if !viewModel.isOnline {
@@ -246,6 +198,61 @@ struct MainTabView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: viewModel.toastMessage)
+    }
+
+    /// Bottom-tab bar sourced entirely from core's `tabInfo()` — labels,
+    /// SF Symbol icons and opaque `action_id`s all come from core, so iOS
+    /// holds no hardcoded tab domain literals (ADR-043 Am4). Each tab
+    /// body forwards `NavigateToTab(action_id)` on appear.
+    private var tabBar: some View {
+        Group {
+            if let coreVM = viewModel.coreViewModel {
+                TabView(selection: $selectedTabId) {
+                    ForEach(coreVM.tabs(), id: \.id) { tab in
+                        tabBody(for: tab.id)
+                            .tabItem {
+                                Label(tab.label, systemImage: tab.icon)
+                            }
+                            .tag(tab.id)
+                            .accessibilityIdentifier(accessibilityId(for: tab.id))
+                    }
+                }
+                .accentColor(.cyan)
+            } else {
+                ProgressView("Loading...")
+            }
+        }
+    }
+
+    /// Route the opaque canonical tab id to its native body. The bodies
+    /// are iOS presentation chrome around core screens; routing on the
+    /// opaque discriminant is the humble-renderer pattern (like Android's
+    /// id→Composable map), not domain branching. `default` renders any
+    /// future tab as a plain core screen so a new core tab can't crash.
+    @ViewBuilder
+    private func tabBody(for id: String) -> some View {
+        switch id {
+        case "my_info": HomeView(actionId: id)
+        case "contacts": ContactsView(actionId: id)
+        case "exchange": ExchangeModePicker(switchToContacts: { selectedTabId = "contacts" })
+        case "groups": CoreScreenView(actionId: id)
+        case "more": MoreView()
+        default: CoreScreenView(actionId: id)
+        }
+    }
+
+    /// Preserve the historical camelCase bottom-tab a11y identifiers
+    /// (referenced by manual QA scripts) rather than deriving
+    /// "tab.\(id)" from the snake_case canonical id.
+    private func accessibilityId(for id: String) -> String {
+        switch id {
+        case "my_info": "tab.myCard"
+        case "contacts": "tab.contacts"
+        case "exchange": "tab.exchange"
+        case "groups": "tab.groups"
+        case "more": "tab.more"
+        default: "tab.\(id)"
+        }
     }
 }
 

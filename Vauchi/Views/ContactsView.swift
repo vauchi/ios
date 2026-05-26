@@ -4,7 +4,8 @@
 
 // ContactsView.swift
 // Phase 1A.2 (core-gui-architecture-alignment): the Contacts tab is now
-// a thin iOS shell around `CoreScreenView(screenName: "Contacts")`. Core
+// a thin iOS shell around the core Contacts screen, navigated by the
+// opaque tab `action_id` from `tabInfo()` (ADR-043 Am4). Core
 // owns the search field, contact list, row actions (archive/hide/delete
 // via ListItemAction overflow menu), the "Archived Contacts" and "Find
 // Duplicates" screen actions, and the empty-state guidance —
@@ -20,6 +21,9 @@ import CoreUIModels
 import SwiftUI
 
 struct ContactsView: View {
+    /// Opaque canonical tab id from `tabInfo()`, forwarded to the inner
+    /// core screen via `NavigateToTab` (ADR-043 Am4) — no domain literal.
+    let actionId: String
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
 
@@ -31,7 +35,7 @@ struct ContactsView: View {
                         .padding(.horizontal)
                         .padding(.top, 8)
                 }
-                CoreScreenView(screenName: "Contacts")
+                CoreScreenView(actionId: actionId)
             }
             .navigationTitle(localizationService.t("nav.contacts"))
             .refreshable {
@@ -139,6 +143,6 @@ struct DemoContactCard: View {
 }
 
 #Preview {
-    ContactsView()
+    ContactsView(actionId: "contacts")
         .environmentObject(VauchiViewModel())
 }

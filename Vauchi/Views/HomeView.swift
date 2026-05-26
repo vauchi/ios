@@ -15,6 +15,9 @@ import CoreUIModels
 import SwiftUI
 
 struct HomeView: View {
+    /// Opaque canonical tab id from `tabInfo()`, forwarded to the inner
+    /// core screen via `NavigateToTab` (ADR-043 Am4) — no domain literal.
+    let actionId: String
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
     @ObservedObject private var themeService = ThemeService.shared
@@ -24,7 +27,7 @@ struct HomeView: View {
             VStack(spacing: 0) {
                 header
                 Divider()
-                CoreScreenView(screenName: "MyInfo")
+                CoreScreenView(actionId: actionId)
                 syncFooter
             }
             .navigationTitle(localizationService.t("nav.home"))
@@ -142,6 +145,6 @@ struct SyncStatusIndicator: View {
 }
 
 #Preview {
-    HomeView()
+    HomeView(actionId: "my_info")
         .environmentObject(VauchiViewModel())
 }

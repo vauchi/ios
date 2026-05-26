@@ -95,19 +95,52 @@ final class CoreScreenNavigationTests: XCTestCase {
     /// rotation, none of which is the More tab — defends against a
     /// regression where only the My Card path is fixed.
     ///
-    /// The rendered ScreenModel's `screenId` is the engine-emitted id,
-    /// NOT `AppScreen::screen_id()`. Groups navigation lands on
-    /// "groups_list"; Contacts on "contact_list" (see core/vauchi-app/
-    /// src/ui/groups/* and contact_list.rs).
+    /// The rendered ScreenModel's `screenId` is the canonical
+    /// `AppScreen::screen_id()` that core 0.51.16 stamps for the five
+    /// collapsed tab families (ADR-043 Am4, core commit d9798a0b):
+    /// Groups navigation lands on "groups"; Contacts on "contacts"
+    /// (previously the engine-emitted "groups_list"/"contact_list").
     func testGroupsContactsGroupsRotation() {
         viewModel.navigateTo(screenJson: "\"Groups\"")
-        XCTAssertEqual(viewModel.currentScreen?.screenId, "groups_list")
+        XCTAssertEqual(viewModel.currentScreen?.screenId, "groups")
 
         viewModel.navigateTo(screenJson: "\"Contacts\"")
-        XCTAssertEqual(viewModel.currentScreen?.screenId, "contact_list")
+        XCTAssertEqual(viewModel.currentScreen?.screenId, "contacts")
 
         viewModel.navigateTo(screenJson: "\"Groups\"")
-        XCTAssertEqual(viewModel.currentScreen?.screenId, "groups_list",
+        XCTAssertEqual(viewModel.currentScreen?.screenId, "groups",
                        "Groups must re-assert after a Contacts detour")
+    }
+
+    /// Tier-1 data-driven tabs (ADR-043 Am4): forwarding the opaque
+    /// `action_id` from `tabInfo()` as `UserAction::NavigateToTab` lands
+    /// on the canonical screen. This is the dispatch path the
+    /// data-driven `MainTabView` uses instead of constructing the domain
+    /// variant string.
+    func testNavigateToTabResolvesCanonicalScreen() {
+        viewModel.navigateToTab(actionId: "groups")
+        XCTAssertEqual(viewModel.currentScreen?.screenId, "groups",
+                       "NavigateToTab(\"groups\") must resolve to the groups screen")
+
+        viewModel.navigateToTab(actionId: "contacts")
+        XCTAssertEqual(viewModel.currentScreen?.screenId, "contacts",
+                       "NavigateToTab(\"contacts\") must resolve to the contacts screen")
+
+        viewModel.navigateToTab(actionId: "my_info")
+        XCTAssertEqual(viewModel.currentScreen?.screenId, "my_info",
+                       "NavigateToTab(\"my_info\") must resolve to the My Card screen")
+    }
+
+    /// CC-11 failure path: an unknown tab `action_id` must leave the
+    /// engine on the last good screen — core rejects the token with a
+    /// typed error, which iOS swallows rather than navigating to a wrong
+    /// screen.
+    func testNavigateToTabWithUnknownIdLeavesScreenUnchanged() {
+        viewModel.navigateToTab(actionId: "my_info")
+        XCTAssertEqual(viewModel.currentScreen?.screenId, "my_info")
+
+        viewModel.navigateToTab(actionId: "definitely_not_a_tab")
+        XCTAssertEqual(viewModel.currentScreen?.screenId, "my_info",
+                       "unknown tab id must not change the current screen")
     }
 }
