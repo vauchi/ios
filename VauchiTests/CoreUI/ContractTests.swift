@@ -227,6 +227,20 @@ final class ContractTests: XCTestCase {
         XCTAssertEqual(inner["group_name"] as? String, "Friends")
     }
 
+    func testUserActionRoundtripNavigateToTab() throws {
+        let action = UserAction.navigateToTab(actionId: "tab_contacts")
+        let data = try coreJSONEncoder.encode(action)
+        let json = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+
+        let inner = try XCTUnwrap(
+            json["NavigateToTab"] as? [String: Any],
+            "Expected 'NavigateToTab' key"
+        )
+        XCTAssertEqual(inner["action_id"] as? String, "tab_contacts")
+    }
+
     /// Verify that all UserAction variant keys use PascalCase (matching serde).
     func testUserActionVariantKeysArePascalCase() throws {
         let actions: [UserAction] = [
@@ -235,6 +249,7 @@ final class ContractTests: XCTestCase {
             .actionPressed(actionId: "a"),
             .fieldVisibilityChanged(fieldId: "f", groupId: nil, visible: false),
             .groupViewSelected(groupName: nil),
+            .navigateToTab(actionId: "t"),
         ]
 
         let expectedKeys = [
@@ -243,6 +258,7 @@ final class ContractTests: XCTestCase {
             "ActionPressed",
             "FieldVisibilityChanged",
             "GroupViewSelected",
+            "NavigateToTab",
         ]
 
         for (action, expectedKey) in zip(actions, expectedKeys) {
