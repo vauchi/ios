@@ -26,7 +26,7 @@ final class ExchangeCommandHandler {
     /// matches one tap (activate → sendApdu* → deactivate). Per the
     /// 2026-05-19 NFC engine-graduation Phase 2 plan, this dispatch
     /// path emits `Event.nfcDataReceived` back to core where
-    /// `NfcExchangeFlow` (`core/vauchi-app/src/ui/exchange_nfc.rs`)
+    /// `NfcExchangeFlow` (`core/vauchi-app/src/ui/exchange/nfc.rs`)
     /// drives the 3-phase handshake state machine. Service stays a
     /// transceive shim per ADR-031 / ADR-043.
     private lazy var nfcService: NFCExchangeService = .init()

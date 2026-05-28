@@ -19,7 +19,7 @@ import VauchiPlatform
 /// Scan mode: opens an inline AVCaptureSession preview via the existing
 /// `MultipartCameraPreview` helper. Each detected QR payload is emitted
 /// as `UserAction.textChanged(componentId: component.id, value: code)`
-/// — `core/vauchi-app/src/ui/exchange_qr.rs` interprets this as
+/// — `core/vauchi-app/src/ui/exchange/qr.rs` interprets this as
 /// `QrActionOutcome::QrScanned { data }` for the legacy single-stage
 /// ScanQr step, and `core/vauchi-platform/src/platform_app_engine.rs`
 /// auto-routes it into the live cycle-thread session when the

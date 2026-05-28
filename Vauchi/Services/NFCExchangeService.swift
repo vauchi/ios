@@ -13,7 +13,7 @@ import VauchiPlatform
 /// (`activate(payload:callback:)` + `sendApdu(data:)` +
 /// `deactivate()`). Pure APDU relay onto core's `ExchangeSession`
 /// per ADR-031. Core's `NfcExchangeFlow`
-/// (`core/vauchi-app/src/ui/exchange_nfc.rs`) owns the 3-phase
+/// (`core/vauchi-app/src/ui/exchange/nfc.rs`) owns the 3-phase
 /// handshake state-machine; this service just relays bytes in and
 /// `MobileEvent.nfcDataReceived` out. See
 /// `_private/docs/designs/2026-05-19-nfc-phase2-ios-handler-prep.md`.

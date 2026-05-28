@@ -8,7 +8,7 @@
 // Pure Humble UI shell — renders the NFC (TapTap) exchange via
 // `CoreScreenView` over the core-owned `ExchangeEngine`. The 3-phase
 // handshake state lives in core's `NfcExchangeFlow`
-// (`core/vauchi-app/src/ui/exchange_nfc.rs`); APDU transceive is
+// (`core/vauchi-app/src/ui/exchange/nfc.rs`); APDU transceive is
 // dispatched by `ExchangeCommandHandler` against `NFCExchangeService`'s
 // transceive-shim API (Phase 2 of the graduation).
 //
