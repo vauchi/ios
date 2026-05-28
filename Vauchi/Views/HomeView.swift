@@ -58,6 +58,13 @@ struct HomeView: View {
             // version is already shown) rather than the home header.
             // See _private/docs/problems/2026-05-21-ios-shell-issues-
             // from-walkthrough item 2.
+            //
+            // Sync status indicator retired here: core's
+            // apply_sync_chrome_overlay (core!994, core 0.51.23+) now
+            // emits a Component::Indicator { id: "sync", … } on every
+            // top-level screen, which CoreScreenView renders natively
+            // via IndicatorView (vauchi-platform-swift!60 + ios!466).
+            // See _private/docs/designs/2026-05-28-sync-chrome-overlay-design.md.
             #if DEBUG
                 VStack(alignment: .leading, spacing: 4) {
                     if let publicId = viewModel.publicId {
@@ -69,7 +76,6 @@ struct HomeView: View {
                 }
             #endif
             Spacer()
-            SyncStatusIndicator(syncState: viewModel.syncState)
         }
         .padding(.horizontal)
         .padding(.top, 4)
@@ -104,42 +110,6 @@ struct HomeView: View {
             }
             .padding(.horizontal)
             .padding(.bottom, 8)
-        }
-    }
-}
-
-struct SyncStatusIndicator: View {
-    let syncState: SyncState
-
-    var body: some View {
-        Group {
-            switch syncState {
-            case .idle:
-                Image(systemName: "checkmark.circle")
-                    .foregroundColor(.green)
-            case .syncing:
-                ProgressView()
-                    .scaleEffect(0.8)
-            case .success:
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-            case .error:
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundColor(.orange)
-            }
-        }
-        .accessibilityLabel(accessibilityLabel)
-        .accessibilityIdentifier("settings.sync.status")
-    }
-
-    private var accessibilityLabel: String {
-        switch syncState {
-        case .idle: "Sync ready"
-        case .syncing: "Syncing in progress"
-        case let .success(_, _, _, names) where !names.isEmpty:
-            "Sync completed, updated: \(names.joined(separator: ", "))"
-        case .success: "Sync completed successfully"
-        case .error: "Sync error occurred"
         }
     }
 }
