@@ -56,9 +56,6 @@ class VauchiViewModel: ObservableObject {
     /// Network state
     @Published var isOnline = false
 
-    /// Demo contact (for users with no contacts)
-    @Published var demoContact: VauchiDemoContact?
-
     // User-facing alerts
     @Published var showAlert = false
     @Published var alertTitle = ""
@@ -315,7 +312,6 @@ class VauchiViewModel: ObservableObject {
                 await loadCard()
                 await loadContacts()
                 await loadPendingUpdates()
-                await loadDemoContact()
             }
 
             isLoading = false
@@ -641,39 +637,18 @@ class VauchiViewModel: ObservableObject {
     // Based on: features/demo_contact.feature
 
     /// Initialize demo contact if needed (called by `createIdentity`
-    /// for new users with no contacts).
+    /// for new users with no contacts). Core's
+    /// `apply_demo_contact_overlay` reads the demo state at render time
+    /// and emits the banner — the view-model no longer holds a copy.
     func initDemoContactIfNeeded() async {
         guard let repository else { return }
-
         do {
-            demoContact = try repository.initDemoContactIfNeeded()
+            _ = try repository.initDemoContactIfNeeded()
         } catch {
             #if DEBUG
                 print("VauchiViewModel: Failed to init demo contact: \(error)")
             #endif
         }
-    }
-
-    /// Load the current demo contact (called by the post-init data-load
-    /// path when an identity already exists).
-    func loadDemoContact() async {
-        guard let repository else { return }
-
-        do {
-            demoContact = try repository.getDemoContact()
-        } catch {
-            demoContact = nil
-        }
-    }
-
-    /// Dismiss the demo contact manually.
-    func dismissDemoContact() async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.dismissDemoContact()
-        demoContact = nil
     }
 
     // MARK: - Visibility Labels
