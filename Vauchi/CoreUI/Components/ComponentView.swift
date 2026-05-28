@@ -75,6 +75,20 @@ struct ComponentView: View {
         case let .dropdown(dropdownComponent):
             DropdownView(component: dropdownComponent, onAction: onAction)
 
+        case .indicator:
+            // `Component.indicator` joined in core 0.51.21 (core !990).
+            // Native renderer follows in ios!466; until that lands the
+            // exhaustive switch needs an arm — render empty so the
+            // bump can ship standalone.
+            EmptyView()
+
+        case .sectionedActionList:
+            // `Component.sectionedActionList` joined in core 0.51.21
+            // (core !990). Native renderer follows in ios!466; until
+            // that lands the exhaustive switch needs an arm — render
+            // empty so the bump can ship standalone.
+            EmptyView()
+
         case let .avatarPreview(avatarComponent):
             AvatarPreviewView(component: avatarComponent, onAction: onAction)
 
