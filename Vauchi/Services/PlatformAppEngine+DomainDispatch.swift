@@ -182,18 +182,6 @@ extension PlatformAppEngine {
         )
     }
 
-    // MARK: - Pending Updates (B7 batch 13)
-
-    func pendingUpdateCount() throws -> UInt32 {
-        let result = try dispatchDomainCommand(command: .pendingUpdateCount)
-        guard case let .count(value) = result else {
-            throw MobileError.Other(
-                detail: "PendingUpdateCount: unexpected result variant"
-            )
-        }
-        return value
-    }
-
     // MARK: - Contact CRUD (C2)
 
     func listContacts() throws -> [MobileContact] {

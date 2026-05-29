@@ -62,42 +62,6 @@ final class SettingsServiceTests: XCTestCase {
 
     // MARK: - Sync Settings Tests
 
-    /// Scenario: Last sync time is nil initially
-    func testInitialLastSyncTimeIsNil() {
-        XCTAssertNil(service.lastSyncTime)
-    }
-
-    /// Scenario: Last sync time can be set and retrieved
-    func testLastSyncTimePersistence() throws {
-        let testDate = Date()
-
-        service.lastSyncTime = testDate
-
-        let retrieved = try XCTUnwrap(service.lastSyncTime)
-        XCTAssertEqual(retrieved.timeIntervalSince1970, testDate.timeIntervalSince1970, accuracy: 1.0)
-
-        // Create new service to verify persistence
-        let service2 = SettingsService(defaults: testDefaults)
-        let retrievedAfterReload = try XCTUnwrap(service2.lastSyncTime)
-        XCTAssertEqual(
-            retrievedAfterReload.timeIntervalSince1970,
-            testDate.timeIntervalSince1970,
-            accuracy: 1.0,
-            "lastSyncTime must round-trip through UserDefaults at the same precision"
-        )
-    }
-
-    /// Scenario: Last sync time can be cleared
-    func testClearLastSyncTime() throws {
-        let testDate = Date()
-        service.lastSyncTime = testDate
-        let beforeClear = try XCTUnwrap(service.lastSyncTime)
-        XCTAssertEqual(beforeClear.timeIntervalSince1970, testDate.timeIntervalSince1970, accuracy: 1.0)
-
-        service.lastSyncTime = nil
-        XCTAssertNil(service.lastSyncTime)
-    }
-
     /// Scenario: Auto sync enabled by default
     func testAutoSyncEnabledByDefault() {
         XCTAssertTrue(service.autoSyncEnabled)
@@ -146,7 +110,6 @@ final class SettingsServiceTests: XCTestCase {
         service.autoSyncEnabled = false
         service.syncOnLaunch = false
         service.notificationsEnabled = false
-        service.lastSyncTime = Date()
 
         // Reset
         service.resetToDefaults()
@@ -156,6 +119,5 @@ final class SettingsServiceTests: XCTestCase {
         XCTAssertTrue(service.autoSyncEnabled)
         XCTAssertTrue(service.syncOnLaunch)
         XCTAssertTrue(service.notificationsEnabled)
-        XCTAssertNil(service.lastSyncTime)
     }
 }

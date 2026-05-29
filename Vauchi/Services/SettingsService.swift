@@ -20,7 +20,6 @@ private func coreIsValidRelayUrl(_ url: String) -> Bool {
 /// Keys for UserDefaults storage
 private enum SettingsKey: String {
     case relayUrl = "vauchi.relayUrl"
-    case lastSyncTime = "vauchi.lastSyncTime"
     case autoSyncEnabled = "vauchi.autoSyncEnabled"
     case syncOnLaunch = "vauchi.syncOnLaunch"
     case notificationsEnabled = "vauchi.notificationsEnabled"
@@ -78,12 +77,6 @@ final class SettingsService {
     }
 
     // MARK: - Sync Settings
-
-    /// Last successful sync time
-    var lastSyncTime: Date? {
-        get { defaults.object(forKey: SettingsKey.lastSyncTime.rawValue) as? Date }
-        set { defaults.set(newValue, forKey: SettingsKey.lastSyncTime.rawValue) }
-    }
 
     /// Whether to automatically sync in the background
     var autoSyncEnabled: Bool {
@@ -160,7 +153,6 @@ final class SettingsService {
     func resetToDefaults() {
         for key in [
             SettingsKey.relayUrl,
-            SettingsKey.lastSyncTime,
             SettingsKey.autoSyncEnabled,
             SettingsKey.syncOnLaunch,
             SettingsKey.notificationsEnabled,

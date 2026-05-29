@@ -348,16 +348,6 @@ final class VauchiRepositoryTests: XCTestCase {
         XCTAssertEqual(repo.getSyncStatus(), .idle)
     }
 
-    /// Scenario: Initial pending update count is zero
-    func testInitialPendingUpdateCount() throws {
-        let repo = try VauchiRepository(dataDir: tempDir.path)
-        try repo.createIdentity(displayName: "Alice")
-
-        let count = try repo.pendingUpdateCount()
-
-        XCTAssertEqual(count, 0)
-    }
-
     // MARK: - Social Networks Tests
 
     /// Scenario: List available social networks

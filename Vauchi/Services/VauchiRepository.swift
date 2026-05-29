@@ -1124,15 +1124,6 @@ class VauchiRepository {
         }
     }
 
-    /// Get pending update count
-    func pendingUpdateCount() throws -> UInt32 {
-        do {
-            return try appEngine.pendingUpdateCount()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     // MARK: - Backup Operations
 
     /// Export encrypted backup

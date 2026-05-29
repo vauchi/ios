@@ -50,8 +50,6 @@ class VauchiViewModel: ObservableObject {
     private let contactsPageSize: UInt32 = 20
     @Published var errorMessage: String?
     @Published var syncState: SyncState = .idle
-    @Published var lastSyncTime: Date?
-    @Published var pendingUpdates: Int = 0
 
     /// Network state
     @Published var isOnline = false
@@ -109,7 +107,6 @@ class VauchiViewModel: ObservableObject {
     init(dataDir: String?, relayUrl: String?) {
         dataDirOverride = dataDir
         relayUrlOverride = relayUrl
-        lastSyncTime = SettingsService.shared.lastSyncTime
         initializeRepository()
         setupNetworkMonitoring()
     }
@@ -311,7 +308,6 @@ class VauchiViewModel: ObservableObject {
                 await loadIdentity()
                 await loadCard()
                 await loadContacts()
-                await loadPendingUpdates()
             }
 
             isLoading = false
@@ -681,10 +677,7 @@ class VauchiViewModel: ObservableObject {
                 updatesSent: Int(result.updatesSent),
                 updatedContactNames: names
             )
-            lastSyncTime = Date()
-            SettingsService.shared.lastSyncTime = lastSyncTime
             await loadContacts()
-            await loadPendingUpdates()
             if !names.isEmpty {
                 let loc = LocalizationService.shared
                 let msg = names.count == 1
@@ -697,16 +690,6 @@ class VauchiViewModel: ObservableObject {
             showError("Sync", message: "Please wait \(retryAfterSecs)s before syncing again")
         } catch {
             syncState = .error(error.localizedDescription)
-        }
-    }
-
-    func loadPendingUpdates() async {
-        guard let repository else { return }
-
-        do {
-            pendingUpdates = try Int(repository.pendingUpdateCount())
-        } catch {
-            pendingUpdates = 0
         }
     }
 
