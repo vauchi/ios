@@ -242,14 +242,6 @@ struct VauchiExchangeResult {
     let errorMessage: String?
 }
 
-/// Holds both the display data and the live session for a single exchange.
-/// The session MUST be reused for processQr/finalize — creating a new session
-/// generates different ephemeral keys and breaks key agreement.
-struct ExchangeSessionData {
-    let exchangeData: VauchiExchangeData
-    let session: MobileExchangeSession
-}
-
 // MARK: - Visibility Label Types
 
 // Based on: features/visibility_labels.feature
@@ -1023,50 +1015,13 @@ class VauchiRepository {
 
     // MARK: - Exchange Operations
 
-    /// Generate QR data AND return the live session.
-    /// The caller MUST hold onto the session and pass it to `finalizeExchange(session:)`
-    /// — creating a new session generates different ephemeral keys.
-    func generateExchangeQrWithSession() throws -> ExchangeSessionData {
-        do {
-            let session = try vauchi.createQrExchangeManual()
-            let qrData = try session.generateQr()
-            let publicId = try vauchi.getPublicId()
-            let expiresAt = UInt64(Date().timeIntervalSince1970) + 300 // 5 minutes
-            let data = VauchiExchangeData(
-                qrData: qrData,
-                publicId: publicId,
-                expiresAt: expiresAt
-            )
-            return ExchangeSessionData(exchangeData: data, session: session)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Finalize an exchange using the SAME session that generated the QR.
-    /// The session must have already been driven through processQr → confirmProximity →
-    /// theyScannedOurQr → performKeyAgreement → completeCardExchange.
-    func finalizeExchange(session: MobileExchangeSession) throws -> VauchiExchangeResult {
-        do {
-            let result = try vauchi.finalizeExchange(session: session)
-            return VauchiExchangeResult(
-                contactId: result.contactId,
-                contactName: result.contactName,
-                success: result.success,
-                errorMessage: result.errorMessage
-            )
-        } catch let error as MobileError {
-            #if DEBUG
-                NSLog("[Exchange] Failed: %@", "\(error)")
-            #endif
-            throw VauchiRepositoryError.from(error)
-        } catch {
-            #if DEBUG
-                NSLog("[Exchange] Failed: %@", "\(error)")
-            #endif
-            throw error
-        }
-    }
+    // QR-manual exchange — the session-based `generateExchangeQrWithSession`
+    // / `finalizeExchange(session:)` wrappers + `ExchangeSessionData` +
+    // `ExchangeCommandHandler` were retired by slice 32m (2026-05-29):
+    // orphaned (no live view caller; `ExchangeCommandHandler` never
+    // instantiated). Exchange is engine-owned — the frontend renders the
+    // CoreUI screen and routes commands via `handleExchangeCommands`
+    // (`ActionResult`/pending-commands envelope), same as multi-stage.
 
     // Multi-stage exchange — the `createMultistageSession` Repository
     // wrapper was retired 2026-05-23 (Track A orphan cleanup): no view,

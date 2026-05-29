@@ -496,9 +496,11 @@ class AppViewModel: ObservableObject {
                 // Android's CoreAppViewModel.useFrontCamera flow.
                 useFrontCamera = useFront
             default:
-                // BLE, NFC, Audio commands handled by the in-process
-                // `ExchangeCommandHandler` instance attached to the
-                // `MobileExchangeSession`.
+                // BLE / NFC / Audio exchange commands are not yet
+                // dispatched on iOS: the session-based ExchangeCommandHandler
+                // was retired with slice 32m. Wiring these into the
+                // engine-driven handleExchangeCommands path is owned by the
+                // NFC migration (2026-04-22-nfc-protocol-unification).
                 break
             }
         }
