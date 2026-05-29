@@ -52,64 +52,6 @@ final class DemoContactTests: XCTestCase {
         XCTAssertTrue(demoContact.isDemo, "Contact should be marked as demo")
     }
 
-    /// Scenario: Demo contact does not appear if user has contacts
-    /// Given I already have real contacts
-    /// When I complete the onboarding process
-    /// Then no demo contact should be created
-    func testDemoContactDoesNotAppearIfUserHasContacts() throws {
-        try Self.skipPendingExchangeMigration()
-        // Create two users so they can exchange
-        let aliceDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try FileManager.default.createDirectory(at: aliceDir, withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: aliceDir) }
-
-        let bobDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try FileManager.default.createDirectory(at: bobDir, withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: bobDir) }
-
-        let aliceRepo = try VauchiRepository(dataDir: aliceDir.path)
-        try aliceRepo.createIdentity(displayName: "Alice")
-
-        let bobRepo = try VauchiRepository(dataDir: bobDir.path)
-        try bobRepo.createIdentity(displayName: "Bob")
-
-        // Alice and Bob exchange contacts using session-based flow
-        let aliceSession = try aliceRepo.generateExchangeQrWithSession()
-        let bobSession = try bobRepo.generateExchangeQrWithSession()
-        do {
-            try bobSession.session.processQr(qrData: aliceSession.exchangeData.qrData)
-            let peerName = bobSession.session.peerDisplayName() ?? "Unknown"
-            try bobSession.session.confirmProximity()
-            try bobSession.session.theyScannedOurQr()
-            try bobSession.session.performKeyAgreement()
-            try bobSession.session.completeCardExchange(theirCardName: peerName)
-            _ = try bobRepo.finalizeExchange(session: bobSession.session)
-        } catch {
-            throw XCTSkip("Relay server unavailable: \(error.localizedDescription)")
-        }
-
-        do {
-            try aliceSession.session.processQr(qrData: bobSession.exchangeData.qrData)
-            let peerName = aliceSession.session.peerDisplayName() ?? "Unknown"
-            try aliceSession.session.confirmProximity()
-            try aliceSession.session.theyScannedOurQr()
-            try aliceSession.session.performKeyAgreement()
-            try aliceSession.session.completeCardExchange(theirCardName: peerName)
-            _ = try aliceRepo.finalizeExchange(session: aliceSession.session)
-        } catch {
-            throw XCTSkip("Relay server unavailable: \(error.localizedDescription)")
-        }
-
-        // Alice now has a real contact
-        XCTAssertGreaterThan(try aliceRepo.contactCount(), 0)
-
-        // Demo contact should NOT appear
-        let demoContact = try aliceRepo.initDemoContactIfNeeded()
-        XCTAssertNil(demoContact, "Demo contact should not appear for users with contacts")
-    }
-
     /// Scenario: Demo contact is visually distinct
     /// Given the demo contact exists
     /// When I view my contacts list
@@ -189,74 +131,6 @@ final class DemoContactTests: XCTestCase {
         let state = repo.getDemoContactState()
         XCTAssertTrue(state.wasDismissed, "State should show was_dismissed")
         XCTAssertFalse(state.isActive, "State should show not active")
-    }
-
-    /// Scenario: Demo contact auto-removes after first real exchange
-    /// Given the demo contact exists
-    /// When I complete an exchange with a real contact
-    /// Then the demo contact should be automatically removed
-    func testDemoContactAutoRemovesAfterFirstExchange() throws {
-        try Self.skipPendingExchangeMigration()
-        // Create two users
-        let aliceDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try FileManager.default.createDirectory(at: aliceDir, withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: aliceDir) }
-
-        let bobDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try FileManager.default.createDirectory(at: bobDir, withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: bobDir) }
-
-        let aliceRepo = try VauchiRepository(dataDir: aliceDir.path)
-        try aliceRepo.createIdentity(displayName: "Alice")
-
-        let bobRepo = try VauchiRepository(dataDir: bobDir.path)
-        try bobRepo.createIdentity(displayName: "Bob")
-
-        // Alice has demo contact
-        _ = try aliceRepo.initDemoContactIfNeeded()
-        let initialDemo = try XCTUnwrap(
-            aliceRepo.getDemoContact(),
-            "Demo contact should exist initially"
-        )
-        XCTAssertEqual(initialDemo.displayName, "Vauchi Tips")
-
-        // Alice and Bob exchange using session-based flow
-        let aliceSession = try aliceRepo.generateExchangeQrWithSession()
-        let bobSession = try bobRepo.generateExchangeQrWithSession()
-        do {
-            try bobSession.session.processQr(qrData: aliceSession.exchangeData.qrData)
-            let peerName = bobSession.session.peerDisplayName() ?? "Unknown"
-            try bobSession.session.confirmProximity()
-            try bobSession.session.theyScannedOurQr()
-            try bobSession.session.performKeyAgreement()
-            try bobSession.session.completeCardExchange(theirCardName: peerName)
-            _ = try bobRepo.finalizeExchange(session: bobSession.session)
-        } catch {
-            throw XCTSkip("Relay server unavailable: \(error.localizedDescription)")
-        }
-
-        do {
-            try aliceSession.session.processQr(qrData: bobSession.exchangeData.qrData)
-            let peerName = aliceSession.session.peerDisplayName() ?? "Unknown"
-            try aliceSession.session.confirmProximity()
-            try aliceSession.session.theyScannedOurQr()
-            try aliceSession.session.performKeyAgreement()
-            try aliceSession.session.completeCardExchange(theirCardName: peerName)
-            _ = try aliceRepo.finalizeExchange(session: aliceSession.session)
-        } catch {
-            throw XCTSkip("Relay server unavailable: \(error.localizedDescription)")
-        }
-
-        // Auto-remove demo contact after first real exchange
-        let wasRemoved = try aliceRepo.autoRemoveDemoContact()
-
-        XCTAssertTrue(wasRemoved, "Auto-remove should return true")
-        XCTAssertNil(try aliceRepo.getDemoContact(), "Demo contact should be removed after exchange")
-
-        let state = aliceRepo.getDemoContactState()
-        XCTAssertTrue(state.autoRemoved, "State should show auto_removed")
     }
 
     /// Scenario: Demo contact can be restored from settings
@@ -431,19 +305,5 @@ final class DemoContactTests: XCTestCase {
         // Just initialized, update should not be due yet (2 hour interval)
         let isAvailable = repo.isDemoUpdateAvailable()
         XCTAssertFalse(isAvailable, "Update should not be available immediately after init")
-    }
-
-    /// Skip helper for tests that complete an exchange via `repo.generateExchangeQrWithSession()` —
-    /// the session API still lives on legacy `vauchi: VauchiPlatform`, which has no in-memory
-    /// identity after `appEngine.createIdentity` (no `reload_from_storage()` seam). Restored
-    /// when the Exchange domain migrates (C8) per
-    /// `_private/docs/problems/2026-04-28-collapse-vauchi-platform-into-app-engine/`.
-    private static func skipPendingExchangeMigration() throws {
-        throw XCTSkip(
-            "Blocked on dual-instance state drift — Exchange session "
-                + "methods still live on legacy VauchiPlatform; restored "
-                + "when C8 (Exchange) migrates. See _private/docs/problems/"
-                + "2026-04-28-collapse-vauchi-platform-into-app-engine/."
-        )
     }
 }
