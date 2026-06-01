@@ -1016,8 +1016,12 @@ build:debug:
         '}')
       mkdir -p .swiftpm/configuration
       printf '%s' "$MIRROR_JSON" > .swiftpm/configuration/mirrors.json
-      mkdir -p ~/Library/org.swift.swiftpm/configuration
-      printf '%s' "$MIRROR_JSON" > ~/Library/org.swift.swiftpm/configuration/mirrors.json
+      # NOTE: the user-level config (~/Library/org.swift.swiftpm/...) that
+      # xcodebuild actually reads is now written under the shared host-wide
+      # config lock in §6, NOT here — §4/§5 run between this point and the
+      # resolve, leaving a window for a concurrent ios/macos bump pipeline to
+      # clobber it. Writing it adjacent to the resolve under .cfg-lock closes
+      # that window (matches macos!256).
 
       # 4. Drop derived data + Xcode's shared module cache so the FFI
       # swiftmodule is re-emitted from fresh C headers. Without this,
@@ -1059,13 +1063,48 @@ build:debug:
       rm -rf ~/Library/org.swift.swiftpm/security/fingerprints 2>/dev/null || true
       rm -rf ~/Library/Caches/org.swift.swiftpm/security/fingerprints 2>/dev/null || true
 
-      # 6. Resolve. Env var triggers `path:` binaryTarget; mirror has
-      # the xcframework. No URLSession download path is reachable.
+      # 6. Write the user-level mirror config + resolve, under the
+      # host-wide config lock shared with macos.
+      #
+      # xcodebuild reads the *user-level*
+      # ~/Library/org.swift.swiftpm/configuration/mirrors.json. The shared
+      # file is clobbered by concurrent ios/macos bump pipelines (macos!248 /
+      # macos!249), so serialise the write→resolve window under a host-wide
+      # lock — no other pipeline can overwrite the config between our write
+      # and our resolve. macos writes the same file under the same .cfg-lock;
+      # the two ship together. mkdir(1) is the POSIX-atomic primitive (no
+      # flock on macOS). The section is just write+resolve (~1–2 min), so the
+      # 600s stale threshold never false-reclaims.
+      CFGLOCK="$HOME/.cache/vauchi-platform-swift-mirror/.cfg-lock"
+      mkdir -p "$(dirname "$CFGLOCK")"
+      CFG_WAIT=0
+      while ! mkdir "$CFGLOCK" 2>/dev/null; do
+        if [ "$CFG_WAIT" -ge 600 ]; then
+          echo "  Config lock held >600s — treating as stale and reclaiming."
+          rmdir "$CFGLOCK" 2>/dev/null || true
+          continue
+        fi
+        echo "  Waiting for config lock at $CFGLOCK (${CFG_WAIT}s)…"
+        sleep 5
+        CFG_WAIT=$((CFG_WAIT + 5))
+      done
+      trap 'rmdir "$CFGLOCK" 2>/dev/null || true' EXIT
+
+      mkdir -p ~/Library/org.swift.swiftpm/configuration
+      printf '%s' "$MIRROR_JSON" > ~/Library/org.swift.swiftpm/configuration/mirrors.json
+
+      # Resolve. Env var triggers `path:` binaryTarget; mirror has the
+      # xcframework. No URLSession download path is reachable.
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
         -clonedSourcePackagesDirPath .spm-packages \
         -derivedDataPath .derived-data \
         -resolvePackageDependencies
       echo "  SPM resolve OK (file:// mirror, no URLSession)"
+
+      # Resolve done — SPM cloned the mirror into project-local .spm-packages,
+      # so the user-level config is no longer needed. Release the lock.
+      rmdir "$CFGLOCK" 2>/dev/null || true
+      trap - EXIT
     - echo "── [$(date +%H:%M:%S)] xcodebuild compile ──"
     - |
       # Heartbeat: print elapsed time every 120s so CI log shows progress
