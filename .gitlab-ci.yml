@@ -819,8 +819,12 @@ build:debug:
       # v0.25.0` re-served the broken manifest and sanity checks 1+2
       # didn't catch it because `let version` and the env-var switch
       # survive intact in the broken Package.swift), v3 (force-moved
-      # v0.25.0 tag), v2 (symlink-fix invalidation).
-      MIRROR_READY="$MIRROR/.ci-mirror-ready-v5"
+      # v0.25.0 tag), v2 (symlink-fix invalidation). v5→v6:
+      # poisoned-mirror invalidation — the 600s lock-reclaim race let
+      # concurrent 0.51.30 bumps (ios!482 / macos!256) commit a torn
+      # xcframework that passed the old sanity and poisoned the shared
+      # cache; bumped in lockstep with macos (shared $MIRROR + stamp).
+      MIRROR_READY="$MIRROR/.ci-mirror-ready-v6"
 
       # Concurrency guard for the runner-shared mirror: ios + macos jobs
       # racing through the cache-miss path of the if/else below produced
@@ -845,9 +849,25 @@ build:debug:
       done
       trap 'rmdir "$LOCKDIR" 2>/dev/null || true' EXIT
 
-      if [ -f "$MIRROR_READY" ]; then
+      # The iOS binary artifact the xcframework must contain. Used both to
+      # validate a cache-hit mirror (the guard below) and to fail-fast
+      # after a fresh build (Sanity check further down). A mirror can be
+      # stamped MIRROR_READY yet be missing this binary if a concurrent
+      # same-version bump job reclaimed the lock at the 600s stale
+      # threshold and tore the mirror mid-build — observed on macos!256
+      # racing ios!482, both bumping 0.51.30: `rm -rf "$MIRROR"` + re-clone
+      # of the upstream tag (which gitignores the xcframework) leaves a
+      # valid-version checkout with no binary, and SPM resolve fails
+      # "does not contain a binary artifact". The cache-hit guard treats a
+      # binary-less mirror as a miss and rebuilds, so a torn cache
+      # self-heals instead of failing every consumer that hits it.
+      BIN_PATH="VauchiPlatformFFI.xcframework/ios-arm64/VauchiPlatformFFI.framework/VauchiPlatformFFI"
+      if [ -f "$MIRROR_READY" ] && git -C "$MIRROR" cat-file -e "v$V:$BIN_PATH" 2>/dev/null; then
         echo "  Mirror cache hit at $MIRROR"
       else
+        if [ -f "$MIRROR_READY" ]; then
+          echo "  Mirror cache STALE (xcframework binary missing) — rebuilding"
+        fi
         echo "  Building mirror at $MIRROR"
         rm -rf "$MIRROR"
         mkdir -p "$(dirname "$MIRROR")"
@@ -950,11 +970,10 @@ build:debug:
         git -C "$MIRROR" tag -f "v$V"
 
         # Sanity: the commit must contain the iOS binary artifact path
-        # listed in the xcframework Info.plist. If the binary is missing
-        # (e.g. `git add -f` didn't recurse into the gitignored dir, or
-        # the unzip failed silently), SPM resolve will fail with
+        # ($BIN_PATH, defined above the cache-hit guard). If the binary is
+        # missing (e.g. `git add -f` didn't recurse into the gitignored
+        # dir, or the unzip failed silently), SPM resolve will fail with
         # "does not contain a binary artifact" — fail fast here instead.
-        BIN_PATH="VauchiPlatformFFI.xcframework/ios-arm64/VauchiPlatformFFI.framework/VauchiPlatformFFI"
         if ! git -C "$MIRROR" cat-file -e "v$V:$BIN_PATH" 2>/dev/null; then
           echo "  ERROR: mirror commit missing $BIN_PATH"
           echo "  Files captured in mirror commit:"
@@ -965,6 +984,20 @@ build:debug:
         touch "$MIRROR_READY"
         echo "  Mirror built ($(du -sh "$MIRROR" | cut -f1), $(git -C "$MIRROR" ls-tree -r "v$V" --name-only | grep -c '^VauchiPlatformFFI.xcframework/') xcframework files)"
       fi
+
+      # Release the mirror lock now: the critical section is the BUILD
+      # only. The EXIT-trap release (set at lock acquisition) is later
+      # OVERWRITTEN by the compile step's heartbeat/watchdog EXIT trap, so
+      # today the lock is effectively leaked until the next job's 600s
+      # stale-reclaim — which is why every concurrent same-version bump
+      # waits out 600s, reclaims the still-live lock, and collides in the
+      # build path, tearing the mirror and poisoning the shared cache
+      # (ios!482 / macos!256, 0.51.30). Freeing it explicitly here shrinks
+      # the critical section to the ~90s build; once READY-stamped the
+      # mirror is read-only for resolve, so concurrent jobs proceed in
+      # parallel against a stable dir.
+      rmdir "$LOCKDIR" 2>/dev/null || true
+      trap - EXIT
 
       # 3. Wire SPM to the local mirror.
       # Write mirror config to BOTH project-local AND user-level paths.
