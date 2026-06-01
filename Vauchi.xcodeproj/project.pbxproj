@@ -112,6 +112,7 @@
 		6C775CA748C7BDD8C00321F0 /* testHomeViewWithFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = AE391D2B30E4ECCA0C1161B7 /* testHomeViewWithFields.1.png */; };
 		6E713428218E42433EB22954 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 108E48F43D27EA5EB6FFB226 /* PrivacyInfo.xcprivacy */; };
 		6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C859B6215BADD6A45480D9F /* LocalizationService.swift */; };
+		710222E18DC609F7457EB5C0 /* NfcCommandDispatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2665E0EEA673F89A405C5D27 /* NfcCommandDispatchTests.swift */; };
 		71CABD3B8764AE19DD69EE44 /* testInfoPanelWithoutIcon.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 32949B7AFAC3435ABA7D93FD /* testInfoPanelWithoutIcon.1.png */; };
 		71E94FC6F171EE96790A5F4D /* IndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CA241C446FE565DD3CB10F1 /* IndicatorView.swift */; };
 		7268CABF6013A271BFD83C39 /* CoreOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC13750603D7C1EF84BACBC /* CoreOnboardingView.swift */; };
@@ -305,6 +306,7 @@
 		22CBF2E4029854CB3051D98A /* testAddFieldsScreen.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testAddFieldsScreen.1.png; sourceTree = "<group>"; };
 		23946ECA0684070AFB40D2FA /* testInlineConfirmDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInlineConfirmDark.1.png; sourceTree = "<group>"; };
 		25A0A7E324ADCC9333CC08A5 /* testContactsViewWithContactsDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewWithContactsDark.1.png; sourceTree = "<group>"; };
+		2665E0EEA673F89A405C5D27 /* NfcCommandDispatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NfcCommandDispatchTests.swift; sourceTree = "<group>"; };
 		268841458ED0C3A21E73ECA5 /* testAddFieldsStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testAddFieldsStep.1.png; sourceTree = "<group>"; };
 		2708AF0FE3066AC85A5EAF63 /* testContactsViewWithContactsGerman.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsViewWithContactsGerman.1.png; sourceTree = "<group>"; };
 		273DE3DDCB1F1D595DEF1B92 /* CoreUIComponentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreUIComponentTests.swift; sourceTree = "<group>"; };
@@ -540,6 +542,7 @@
 				CE69227779252FAF163BCC07 /* ModelsTests.swift */,
 				3AE4D6990BBEF8744FC7C05B /* MultiStagePollTimerTests.swift */,
 				47AE9012ABEFEB654325B7C5 /* NavTabDenyListTests.swift */,
+				2665E0EEA673F89A405C5D27 /* NfcCommandDispatchTests.swift */,
 				42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */,
 				0795D7BA553D151750EFD399 /* fixtures */,
 			);
@@ -1220,6 +1223,7 @@
 				23542D8D4771261954AA6A2D /* NFCExchangeServiceTransceiveShimTests.swift in Sources */,
 				A3982E78770B0DA9F0045F95 /* NavTabDenyListTests.swift in Sources */,
 				3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */,
+				710222E18DC609F7457EB5C0 /* NfcCommandDispatchTests.swift in Sources */,
 				B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */,
 				764FA757EB16C597120D1E93 /* PasscodePolicyTests.swift in Sources */,
 				1552B5F6D02172C2BA2C691D /* PlatformEdgeTests.swift in Sources */,

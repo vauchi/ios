@@ -28,7 +28,19 @@ import VauchiPlatform
 /// `MobileNfcHandshake`-based 3-phase state-machine retired
 /// 2026-05-21 alongside `NfcExchangeView` (Phase 4 of the
 /// engine-graduation, `ios!438`).
-class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate {
+/// Dispatch seam for the three NFC reader commands. `AppViewModel`
+/// holds this protocol type (not the concrete service) so the
+/// command-dispatch wiring is unit-testable with a spy that records
+/// calls instead of opening a real `NFCTagReaderSession` (CC-23: test
+/// the bridge, not the OS NFC sheet). Production binds it to
+/// `NFCExchangeService`.
+protocol NFCExchangeDispatching: AnyObject {
+    func activate(payload: Data, callback: @escaping (MobileEvent) -> Void)
+    func sendApdu(data: Data)
+    func deactivate()
+}
+
+class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate, NFCExchangeDispatching {
     // MARK: - Properties
 
     private var transceiveSession: NFCTagReaderSession?

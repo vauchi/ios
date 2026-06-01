@@ -84,6 +84,14 @@ class AppViewModel: ObservableObject {
     /// `advanceQrFrameJson` (gated to `AppScreen::Exchange` in core).
     private var multiStagePollTimer: Timer?
 
+    /// NFC reader-mode hardware bridge for the TapTap exchange
+    /// (`NfcActivate`/`NfcSendApdu`/`NfcDeactivate` commands). Held as
+    /// the `NFCExchangeDispatching` protocol so tests can inject a spy
+    /// instead of opening a real `NFCTagReaderSession`; production uses
+    /// the CoreNFC-backed `NFCExchangeService`. `lazy` so the session
+    /// host is built only when the first NFC command arrives.
+    lazy var nfcService: NFCExchangeDispatching = NFCExchangeService()
+
     struct AlertMessage: Identifiable {
         let id = UUID()
         let title: String
@@ -540,12 +548,24 @@ class AppViewModel: ObservableObject {
                 // builds a fresh one on the chosen device. Mirrors
                 // Android's CoreAppViewModel.useFrontCamera flow.
                 useFrontCamera = useFront
+            case let .nfcActivate(payload):
+                // Open reader mode for the TapTap exchange. The callback
+                // forwards every `MobileEvent` the service emits
+                // (`.nfcDataReceived`, hardware errors) back into core via
+                // `sendHardwareEvent` — this closure IS the T2.2 event
+                // wiring. Core's `NfcExchangeFlow` owns the handshake.
+                nfcService.activate(payload: Data(payload)) { [weak self] event in
+                    self?.sendHardwareEvent(event)
+                }
+            case let .nfcSendApdu(data):
+                nfcService.sendApdu(data: Data(data))
+            case .nfcDeactivate:
+                nfcService.deactivate()
             default:
-                // BLE / NFC / Audio exchange commands are not yet
-                // dispatched on iOS: the session-based ExchangeCommandHandler
-                // was retired with slice 32m. Wiring these into the
-                // engine-driven handleExchangeCommands path is owned by the
-                // NFC migration (2026-04-22-nfc-protocol-unification).
+                // BLE / Audio exchange commands are not yet dispatched on
+                // iOS: the session-based ExchangeCommandHandler was retired
+                // with slice 32m. Wiring these into the engine-driven
+                // handleExchangeCommands path is follow-on work.
                 break
             }
         }
