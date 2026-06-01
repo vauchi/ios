@@ -352,6 +352,11 @@ class VauchiRepository {
                 relayUrl: relayUrl,
                 storageKeyBytes: storageKeyBytes
             )
+            // B7 Phase 2: also wire the keychain to PlatformAppEngine so the
+            // core-driven shred DomainCommands (SoftShred / CancelShred /
+            // HardShred / PanicShred) can reach the platform keychain. The
+            // VauchiPlatform slot above stays for `widget_panic_shred`.
+            appEngine.setPlatformKeychain(keychain: VauchiKeychainBridge())
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
