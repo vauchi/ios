@@ -669,11 +669,14 @@ extension PlatformAppEngine {
     // MARK: - Shred — read-only (C6)
 
     //
-    // The 4 keychain-bound shred operations (panicShred, softShred,
-    // hardShred, cancelShred) remain on legacy `vauchi.X` until
-    // `MobilePlatformKeychain` plumbing lands on `PlatformAppEngine`
-    // (tracked as a separate B7 keychain batch). Only `shredStatus` —
-    // a read-only deletion-state snapshot — has a dispatch arm today.
+    // The 4 keychain-bound mutating shred operations now dispatch as
+    // PAE `DomainCommand`s (B7: Soft/Cancel shred in core 0.51.32,
+    // Hard/Panic shred in 0.51.33), backed by the `MobilePlatformKeychain`
+    // plumbing wired in `VauchiRepository`. The legacy `vauchi.*` methods
+    // were removed in 0.51.33 (slice 32i.2). iOS has no in-app caller for
+    // the mutating ops (emergency-wipe goes through `scheduleIdentityDeletion`
+    // + the recovery/duress engines), so only the read-only `shredStatus`
+    // snapshot needs a dispatch arm here.
 
     func shredStatus() throws -> MobileShredStatus {
         let result = try dispatchDomainCommand(command: .shredStatus)

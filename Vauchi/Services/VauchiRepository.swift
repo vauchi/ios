@@ -791,13 +791,14 @@ class VauchiRepository {
 
     // Based on: features/panic_widget.feature - R2 Panic Widget
     //
-    // The 4 mutating shred operations (`panicShred`, `softShred`,
-    // `cancelShred`, `hardShred`) were retired 2026-05-23 (Track A
+    // The 4 mutating shred operations were retired 2026-05-23 (Track A
     // orphan cleanup): none of them had callers in `ios/` —
     // emergency-wipe / identity-deletion UI flows go through other
     // paths (`appEngine.scheduleIdentityDeletion` + the recovery /
-    // duress engines). Read-only `shredStatus` stays — it's
-    // PAE-dispatched and has live callers.
+    // duress engines). Core dropped the corresponding legacy
+    // `VauchiPlatform` methods in 0.51.33 (B7 slice 32i.2); the
+    // equivalent shred `DomainCommand`s are now PAE-dispatched. Read-only
+    // `shredStatus` stays — it's PAE-dispatched and has live callers.
 
     func shredStatus() throws -> MobileShredStatus {
         do {
