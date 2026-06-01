@@ -129,6 +129,7 @@ private struct CoreScreenContent: View {
         }
         .onDisappear {
             coreVM.stopQrFrameTimer()
+            coreVM.stopMultiStagePollTimer()
         }
         .alert(item: alertBinding) { alert in
             Alert(
@@ -167,6 +168,15 @@ private struct CoreScreenContent: View {
             coreVM.startQrFrameTimer()
         } else {
             coreVM.stopQrFrameTimer()
+        }
+        // Multi-stage (Glance) exchange advances via a separate poll-driven
+        // tick — its machine replaced the legacy `exchange_show_qr` engine
+        // and is driven by `pollNotifications`, not `advanceQrFrameJson`
+        // (Bug 5, `2026-05-30-exchange-screen-nav-visual-bugs`).
+        if screenId == "multi_stage_exchange" {
+            coreVM.startMultiStagePollTimer()
+        } else {
+            coreVM.stopMultiStagePollTimer()
         }
     }
 

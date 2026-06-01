@@ -127,6 +127,7 @@
 		7C752A3331298ADB01A6DDF9 /* testCardPreviewWithGroups.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 9F9346F7C59019E0E90B13BF /* testCardPreviewWithGroups.1.png */; };
 		7DD186FEB97D2385E15B8293 /* testInlineConfirmDestructive.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 6994C561A843EE3A785246A5 /* testInlineConfirmDestructive.1.png */; };
 		7E3F6E5B0E2A197266F3D9BC /* testHomeViewEmpty.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 200902ADA24D8C97BC83DA08 /* testHomeViewEmpty.1.png */; };
+		7F88FF59F87214D3CC6734A8 /* MultiStagePollTimerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE4D6990BBEF8744FC7C05B /* MultiStagePollTimerTests.swift */; };
 		81A3A29B52DFD10E82E5A85C /* exchange_show_qr.json in Resources */ = {isa = PBXBuildFile; fileRef = B0F87ACCDE28EC2B24B9A518 /* exchange_show_qr.json */; };
 		8233D17C24CBA0A46042C2BF /* SnapshotHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EEF8A8901309034B87F6CB /* SnapshotHelpers.swift */; };
 		86B371D3BFB2EDE95D642173 /* testStatusIndicatorFailed.1.png in Resources */ = {isa = PBXBuildFile; fileRef = AF0F088CC55F4D96F34D113B /* testStatusIndicatorFailed.1.png */; };
@@ -325,6 +326,7 @@
 		38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiRepositoryTests.swift; sourceTree = "<group>"; };
 		39051A8E2D361D595C7536C9 /* testHomeViewWithFieldsGerman.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testHomeViewWithFieldsGerman.1.png; sourceTree = "<group>"; };
 		39F6474DA682103308EE2BFF /* testCardPreviewNoVisibleFields.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCardPreviewNoVisibleFields.1.png; sourceTree = "<group>"; };
+		3AE4D6990BBEF8744FC7C05B /* MultiStagePollTimerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiStagePollTimerTests.swift; sourceTree = "<group>"; };
 		3CCDAF85FAFC1F03E0E5EF5D /* testSettingsGroupDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSettingsGroupDark.1.png; sourceTree = "<group>"; };
 		3E7B642257C4005F82A40BCF /* delivery_empty.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = delivery_empty.json; sourceTree = "<group>"; };
 		3FA79BEC85FC2E70D2E996D7 /* TextInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputView.swift; sourceTree = "<group>"; };
@@ -536,6 +538,7 @@
 				65D24E88349C756B9B8609CE /* CoreScreenNavigationTests.swift */,
 				C38FE0127E86CB045D89F88E /* ExchangeCommandBridgeTests.swift */,
 				CE69227779252FAF163BCC07 /* ModelsTests.swift */,
+				3AE4D6990BBEF8744FC7C05B /* MultiStagePollTimerTests.swift */,
 				47AE9012ABEFEB654325B7C5 /* NavTabDenyListTests.swift */,
 				42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */,
 				0795D7BA553D151750EFD399 /* fixtures */,
@@ -1213,6 +1216,7 @@
 				2E32911FDD537E5F664BF57C /* KeychainServiceTests.swift in Sources */,
 				78DEE11DBBB312E894650FBF /* LocalizationServiceSettingsTests.swift in Sources */,
 				222E89071C885A441E27F978 /* ModelsTests.swift in Sources */,
+				7F88FF59F87214D3CC6734A8 /* MultiStagePollTimerTests.swift in Sources */,
 				23542D8D4771261954AA6A2D /* NFCExchangeServiceTransceiveShimTests.swift in Sources */,
 				A3982E78770B0DA9F0045F95 /* NavTabDenyListTests.swift in Sources */,
 				3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */,
