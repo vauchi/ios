@@ -45,7 +45,7 @@ final class NfcCommandDispatchTests: XCTestCase {
     var tempDir: URL!
     var repo: VauchiRepository!
     var viewModel: AppViewModel!
-    var spy: NFCDispatchSpy!
+    private var spy: NFCDispatchSpy!
 
     override func setUpWithError() throws {
         tempDir = FileManager.default.temporaryDirectory
