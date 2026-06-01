@@ -1285,6 +1285,7 @@ test:unit:
         ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
         CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
         CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" \
+        -disableAutomaticPackageResolution \
         test -skip-testing VauchiSnapshotTests -skip-testing VauchiUITests \
         -parallel-testing-enabled YES -parallel-testing-worker-count 4 \
         -resultBundlePath build/test_result.xcresult \
@@ -1375,7 +1376,7 @@ test:snapshots:
       fi
     - echo "✅ Found $BASELINE_COUNT snapshot baselines — running validation"
     # Reuse build:debug artifacts — skip xcodegen + SPM fetch
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
+    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" -disableAutomaticPackageResolution test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
   after_script:
     - !reference [.vrt-upload-script, script]
     - !reference [.macos-job, after_script]
@@ -1417,6 +1418,7 @@ test:ui:
         ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
         CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
         CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" \
+        -disableAutomaticPackageResolution \
         test -only-testing VauchiUITests \
         -resultBundlePath build/ui_test_result.xcresult \
         || XCODEBUILD_EXIT=$?
