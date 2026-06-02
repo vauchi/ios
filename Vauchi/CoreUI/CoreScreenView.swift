@@ -35,12 +35,16 @@ struct CoreScreenView: View {
     enum Target: Equatable {
         case tab(actionId: String)
         case screen(name: String)
+        /// Render-only: render the engine's *current* screen, issue no
+        /// navigation. Core has already navigated here.
+        case current
 
         /// Stable key for `.task(id:)` so tab re-selection re-asserts.
         var taskId: String {
             switch self {
             case let .tab(actionId): "tab:\(actionId)"
             case let .screen(name): "screen:\(name)"
+            case .current: "current"
             }
         }
     }
@@ -56,6 +60,15 @@ struct CoreScreenView: View {
     /// Legacy sub-screen body: navigate by serde variant name.
     init(screenName: String) {
         target = .screen(name: screenName)
+    }
+
+    /// Render-only body: renders the shared engine's *current* screen
+    /// without issuing any navigation. For native hardware wrappers
+    /// (FaceToFace / NfcTap) that core has already navigated to — re-
+    /// navigating would double-push `nav_history` (the android
+    /// double-push bug, `2026-05-21-android-back-stack-and-bottom-nav-broken`).
+    init(renderingCurrentScreen _: Void) {
+        target = .current
     }
 
     var body: some View {
@@ -92,6 +105,7 @@ private struct CoreScreenContent: View {
         switch target {
         case let .tab(actionId): coreVM.navigateToTab(actionId: actionId)
         case let .screen(name): coreVM.navigateTo(screenJson: "\"\(name)\"")
+        case .current: break // render-only — core already navigated here
         }
     }
 

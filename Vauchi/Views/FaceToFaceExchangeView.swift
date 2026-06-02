@@ -49,24 +49,23 @@ struct FaceToFaceExchangeView: View {
 /// `viewModel.coreViewModel` (same root cause `CoreScreenView` documents).
 private struct FaceToFaceCoreShell: View {
     @ObservedObject var coreVM: AppViewModel
-    @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        CoreScreenView(screenName: "MultiStageExchange")
+        // Render-only — core has already navigated to multi_stage_exchange
+        // (the picker's mode selection routed here). The Exchange tab body
+        // (`ExchangeTabContent`) presents/dismisses this wrapper by
+        // observing `currentScreen.screenId`, so there is no SwiftUI nav
+        // stack to pop and no re-navigation to issue.
+        CoreScreenView(renderingCurrentScreen: ())
             .onDisappear {
-                // SwiftUI dismissed without core's lead (e.g., user swiped
-                // back) — emit the engine-level cancel event so core can
-                // react. Core decides the next screen.
+                // The wrapper disappeared while core is STILL on
+                // multi_stage — i.e. the user left (tab switch) without
+                // core leading. Emit the engine-level cancel so core can
+                // end the cycle thread. If core already moved (screenId
+                // changed first), the guard is false and no spurious
+                // cancel fires on the next screen.
                 if coreVM.currentScreen?.screenId == "multi_stage_exchange" {
                     coreVM.handleAction(.actionPressed(actionId: "cancel"))
-                }
-            }
-            .onChange(of: coreVM.currentScreen?.screenId) { newId in
-                // Core moved off multi-stage — pop the SwiftUI nav stack
-                // so the new screen surfaces. This is a reaction to
-                // core's state, not a frontend nav decision.
-                if let id = newId, id != "multi_stage_exchange" {
-                    dismiss()
                 }
             }
     }

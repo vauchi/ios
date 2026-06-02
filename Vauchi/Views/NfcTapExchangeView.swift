@@ -51,36 +51,22 @@ struct NfcTapExchangeView: View {
 /// `viewModel.coreViewModel` (same root cause `CoreScreenView` documents).
 private struct NfcTapCoreShell: View {
     @ObservedObject var coreVM: AppViewModel
-    @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        CoreScreenView(screenName: "Exchange")
-            .task {
-                // Pre-select TapTap so the picker is skipped — emit
-                // the same action the mode picker would fire. The
-                // engine routes to start_taptap_mode and emits
-                // Command.NfcActivate (delivered to
-                // ExchangeCommandHandler via the
-                // ActionResultEnvelope.commands path).
-                coreVM.handleAction(.listItemSelected(
-                    componentId: "category:fun",
-                    itemId: "mode:tap_tap"
-                ))
-            }
+        // Render-only — core has already navigated to exchange_nfc_role.
+        // The core mode picker's "Tap tap" selection routed here (and
+        // emitted Command.NfcActivate), so this wrapper must NOT re-emit
+        // the listItemSelected pre-select (that double-routed under the
+        // old NavigationLink entry). The Exchange tab body presents/
+        // dismisses this wrapper by observing currentScreen.screenId.
+        CoreScreenView(renderingCurrentScreen: ())
             .onDisappear {
-                // SwiftUI dismissed without core's lead (e.g., user
-                // swiped back) — emit the engine-level cancel so core
-                // can react. Core decides the next screen.
+                // Wrapper disappeared while core is STILL on the NFC
+                // flow — the user left (tab switch) without core leading.
+                // Emit the engine-level cancel so core can react. If core
+                // already moved, the guard is false (no spurious cancel).
                 if coreVM.currentScreen?.screenId.hasPrefix("exchange_nfc") == true {
                     coreVM.handleAction(.actionPressed(actionId: "cancel"))
-                }
-            }
-            .onChange(of: coreVM.currentScreen?.screenId) { newId in
-                // Core moved off NFC exchange — pop the SwiftUI nav
-                // stack so the new screen surfaces. Reaction to core's
-                // state, not a frontend nav decision.
-                if let id = newId, !id.hasPrefix("exchange_nfc"), id != "exchange_mode_selection" {
-                    dismiss()
                 }
             }
     }

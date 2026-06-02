@@ -234,11 +234,11 @@ struct MainTabView: View {
         switch id {
         case "my_info": HomeView(actionId: id)
         case "contacts": ContactsView(actionId: id)
-        // S1: exchange entry is core-driven — `NavigateToTab("exchange")`
-        // resolves to core's `exchange_mode_selection` (11-mode picker),
-        // rendered generically. Mode selection drives core to the native
-        // hardware screen_ids; S2 presents FaceToFace/NfcTap off those ids.
-        case "exchange": CoreScreenView(actionId: id)
+        // S1/S2: exchange is core-driven. `NavigateToTab("exchange")`
+        // resolves to core's `exchange_mode_selection` (11-mode picker);
+        // selecting a mode drives core to a hardware `screen_id`, which
+        // `ExchangeTabView` swaps to the native FaceToFace / NfcTap wrapper.
+        case "exchange": ExchangeTabView()
         case "groups": CoreScreenView(actionId: id)
         case "more": MoreView()
         default: CoreScreenView(actionId: id)
@@ -268,4 +268,66 @@ struct MainTabView: View {
 #Preview("With contacts") {
     MainTabView(hasContacts: true)
         .environmentObject(VauchiViewModel())
+}
+
+/// Exchange tab body. The exchange flow is core-driven (S1/S2 of
+/// `2026-06-02-ios-exchange-flow-core-driven`): the tab root is core's
+/// `exchange_mode_selection` picker, and selecting a mode drives core to a
+/// hardware `screen_id`. This view observes `currentScreen.screenId` and
+/// swaps in the native hardware wrapper (camera/QR brightness, NFC reader)
+/// for those ids, rendering every other exchange screen (the picker,
+/// BLE/Web/Link modes, delivery status) generically. It is the iOS analogue
+/// of android's follow-core effect.
+private struct ExchangeTabView: View {
+    @EnvironmentObject var viewModel: VauchiViewModel
+
+    var body: some View {
+        Group {
+            if let coreVM = viewModel.coreViewModel {
+                ExchangeTabContent(coreVM: coreVM)
+            } else {
+                ProgressView("Loading...")
+            }
+        }
+    }
+}
+
+/// Inner shell observing `AppViewModel` directly so inner `@Published`
+/// `currentScreen` updates propagate (same root cause `CoreScreenView`
+/// documents).
+private struct ExchangeTabContent: View {
+    @ObservedObject var coreVM: AppViewModel
+
+    /// `screen_id`s rendered by a native hardware wrapper rather than
+    /// generically. `multi_stage_exchange` → camera/QR + brightness;
+    /// `exchange_nfc*` → NFC reader. Every other exchange screen renders
+    /// via the render-only `CoreScreenView`.
+    private var nativeBody: AnyView? {
+        switch coreVM.currentScreen?.screenId {
+        case "multi_stage_exchange":
+            AnyView(FaceToFaceExchangeView())
+        case let id? where id.hasPrefix("exchange_nfc"):
+            AnyView(NfcTapExchangeView())
+        default:
+            nil
+        }
+    }
+
+    var body: some View {
+        Group {
+            if let native = nativeBody {
+                native
+            } else {
+                // Render the current exchange screen without navigating.
+                CoreScreenView(renderingCurrentScreen: ())
+            }
+        }
+        // Re-assert the exchange tab root on tab entry (mirrors the
+        // `.tab(actionId)` re-assert). Kept on the tab body — NOT on the
+        // inner per-screen views — so that as core moves between exchange
+        // screens (picker → multi_stage → delivery), the inner render-only
+        // view does not re-issue `NavigateToTab` and clobber core's screen.
+        .task { coreVM.navigateToTab(actionId: "exchange") }
+        .onAppear { coreVM.navigateToTab(actionId: "exchange") }
+    }
 }
