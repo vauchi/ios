@@ -7,11 +7,24 @@
 // Zero coupling to core action IDs, flow order, or localized strings.
 // Uses --reset-for-testing to bypass onboarding (identity seeded by app).
 // Traces to: features/accessibility.feature
+//
+// The bottom tab bar is the custom `CoreBottomTabBar` (not a native
+// `UITabBar` — a native TabView cannot host the generic core-driven tabs;
+// see `2026-06-02-ios-exchange-flow-core-driven`). Its buttons carry the
+// stable frontend a11y identifiers `tab.myCard` / `tab.contacts` /
+// `tab.exchange` / `tab.groups` / `tab.more` (NOT core action ids), so the
+// tests query those instead of `app.tabBars`.
 
 import XCTest
 
 final class AccessibilityUITests: XCTestCase {
     var app: XCUIApplication!
+
+    /// Stable frontend a11y identifiers for the bottom-tab buttons
+    /// (`MainTabView.accessibilityId(for:)`). Not core action ids.
+    private let tabIds = [
+        "tab.myCard", "tab.contacts", "tab.exchange", "tab.groups", "tab.more",
+    ]
 
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -19,10 +32,10 @@ final class AccessibilityUITests: XCTestCase {
         app.launchArguments = ["--reset-for-testing"]
         app.launch()
 
-        // --reset-for-testing creates a test identity, so the app
-        // starts on the home screen with the tab bar visible.
-        let tabBar = app.tabBars.firstMatch
-        XCTAssertTrue(tabBar.waitForExistence(timeout: 10),
+        // --reset-for-testing creates a test identity, so the app starts on
+        // the home screen with the custom tab bar visible.
+        let firstTab = app.buttons["tab.myCard"]
+        XCTAssertTrue(firstTab.waitForExistence(timeout: 10),
                       "Tab bar should appear after --reset-for-testing identity seeding")
     }
 
@@ -32,14 +45,13 @@ final class AccessibilityUITests: XCTestCase {
 
     // MARK: - Tab Bar Structure
 
-    /// Tab bar has the expected number of tabs, all with non-empty labels.
+    /// The tab bar has the expected tabs, all with non-empty labels.
     func testTabBarHasCorrectNumberOfTabs() {
-        let tabBar = app.tabBars.firstMatch
-        let tabs = tabBar.buttons.allElementsBoundByIndex
-        XCTAssertEqual(tabs.count, 5, "Tab bar should have exactly 5 tabs")
-        for (index, tab) in tabs.enumerated() {
+        for id in tabIds {
+            let tab = app.buttons[id]
+            XCTAssertTrue(tab.exists, "Tab '\(id)' should exist in the tab bar")
             XCTAssertFalse(tab.label.isEmpty,
-                           "Tab at index \(index) should have a non-empty label")
+                           "Tab '\(id)' should have a non-empty accessibility label")
         }
     }
 
@@ -58,33 +70,29 @@ final class AccessibilityUITests: XCTestCase {
 
     /// Each tab renders a screen with at least one accessible element.
     func testEachTabRendersAccessibleContent() {
-        let tabBar = app.tabBars.firstMatch
-        let tabs = tabBar.buttons.allElementsBoundByIndex
-
-        for (index, tab) in tabs.enumerated() {
+        for id in tabIds {
+            let tab = app.buttons[id]
+            XCTAssertTrue(tab.waitForExistence(timeout: 3), "Tab '\(id)' should exist")
             tab.tap()
 
-            // Each screen should have at least one descendant element
+            // Each screen should have at least one descendant element.
             let anyElement = app.descendants(matching: .any).element(boundBy: 0)
             XCTAssertTrue(anyElement.waitForExistence(timeout: 3),
-                          "Tab \(index) ('\(tab.label)') should render accessible content")
+                          "Tab '\(id)' should render accessible content")
         }
     }
 
     /// Navigating to each tab and back does not leave the app in a broken state.
     func testTabNavigationRoundTrip() {
-        let tabBar = app.tabBars.firstMatch
-        let tabs = tabBar.buttons.allElementsBoundByIndex
-        let firstTab = tabs[0]
-
-        // Visit each tab, then return to the first
-        for tab in tabs {
-            tab.tap()
+        // Visit each tab, then return to the first.
+        for id in tabIds {
+            app.buttons[id].tap()
         }
-        firstTab.tap()
+        app.buttons["tab.myCard"].tap()
 
-        // Verify the app is still responsive
-        XCTAssertTrue(tabBar.exists, "Tab bar should still exist after round-trip navigation")
+        // Verify the app is still responsive.
+        XCTAssertTrue(app.buttons["tab.myCard"].exists,
+                      "Tab bar should still exist after round-trip navigation")
         let buttons = app.buttons.allElementsBoundByIndex
         let visibleButtons = buttons.filter { $0.exists && $0.isHittable }
         XCTAssertFalse(visibleButtons.isEmpty,

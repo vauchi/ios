@@ -3,24 +3,23 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // CoreScreenNavigationTests.swift
-// Guards the cross-tab navigation behaviour relied on by
-// `CoreScreenView` (ios/Vauchi/CoreUI/CoreScreenView.swift).
+// Guards the cross-tab navigation behaviour the main shell relies on.
 //
 // Bug repro:
 // _private/docs/problems/2026-05-21-ios-shell-issues-from-walkthrough item 1.
-// All `CoreScreenView`s on iOS share a single `AppViewModel`/engine, so
-// a single `currentScreen` is multiplexed across every tab. When tab A
-// drives the engine to screen X (e.g. More → Settings), then the user
-// taps tab B (My Card), the tab-B view must re-assert its expected
-// screen on appearance — otherwise tab B renders tab A's ScreenModel
-// underneath its own native header.
+// Every tab shares a single `AppViewModel`/engine, so one `currentScreen`
+// is multiplexed across the whole shell. When the engine drifts to screen
+// X (e.g. a sub-screen), selecting another tab must re-assert that tab's
+// canonical screen — otherwise the shell renders the previous screen's
+// ScreenModel.
 //
-// The previous implementation guarded `navigateTo` with a per-view
-// `@State` that remembered the last screen it asked for and refused to
-// re-issue the call. That guard silently broke cross-tab navigation:
-// the second appearance of any tab was a no-op even though the shared
-// engine had drifted. This test ensures the engine recovers when
-// `navigateTo` is called repeatedly with different screen names.
+// Navigation is now selection-driven: the custom `CoreBottomTabBar`
+// dispatches `UserAction::NavigateToTab(action_id)` on tap, and the single
+// `MainContentView` renders whatever core returns (the old per-view
+// lifecycle `navigateTo` re-assert + its `@State` guard — and
+// `navigateTo(screenJson:)` itself — were retired in
+// `2026-06-02-ios-exchange-flow-core-driven` S3). These tests drive that
+// same `navigateToTab` path directly.
 
 @testable import Vauchi
 import VauchiPlatform
@@ -48,66 +47,62 @@ final class CoreScreenNavigationTests: XCTestCase {
         try? FileManager.default.removeItem(at: tempDir)
     }
 
-    /// Scenario: My Card → More/Settings → My Card.
+    /// Scenario: My Card → Groups → My Card.
     ///
-    /// Simulates the MainTabView tab sequence that triggered the
-    /// walkthrough bug. After each navigateTo, `currentScreen.screenId`
-    /// must match the requested screen — otherwise the new tab's
-    /// CoreScreenContent body would render the previous tab's
-    /// ScreenModel under its own native header.
-    func testNavigateToRecoversFromCrossTabDrift() throws {
-        viewModel.navigateTo(screenJson: "\"MyInfo\"")
+    /// Simulates the tab sequence that triggered the walkthrough bug.
+    /// After each `navigateToTab`, `currentScreen.screenId` must match the
+    /// selected tab — otherwise the shell would render the previous tab's
+    /// ScreenModel. The tab-back to My Card must re-assert MyInfo even
+    /// though the engine had drifted to Groups.
+    func testNavigateToTabRecoversFromCrossTabDrift() throws {
+        viewModel.navigateToTab(actionId: "my_info")
         let afterMyInfo = try XCTUnwrap(viewModel.currentScreen)
         XCTAssertEqual(afterMyInfo.screenId, "my_info",
                        "first nav must land on My Card")
 
-        viewModel.navigateTo(screenJson: "\"Settings\"")
-        let afterSettings = try XCTUnwrap(viewModel.currentScreen)
-        XCTAssertEqual(afterSettings.screenId, "settings",
-                       "More → Settings nav must land on Settings")
+        viewModel.navigateToTab(actionId: "groups")
+        let afterGroups = try XCTUnwrap(viewModel.currentScreen)
+        XCTAssertEqual(afterGroups.screenId, "groups",
+                       "Groups tab must land on the groups screen")
 
-        // Tab back to My Card: the engine has drifted to Settings; the
-        // re-assertion that CoreScreenContent.task / .onAppear performs
-        // on view re-appearance must bring the engine back to MyInfo.
-        viewModel.navigateTo(screenJson: "\"MyInfo\"")
+        // Tab back to My Card: the engine has drifted to Groups; selecting
+        // the My Card tab must bring it back to MyInfo — without this the
+        // home tab would render Groups (walkthrough bug item 1).
+        viewModel.navigateToTab(actionId: "my_info")
         let afterReturn = try XCTUnwrap(viewModel.currentScreen)
         XCTAssertEqual(afterReturn.screenId, "my_info",
                        "tab-back to My Card must re-assert MyInfo even " +
-                           "though another tab pushed Settings — without this " +
-                           "recovery the home tab renders Settings under " +
-                           "its own native header (walkthrough bug item 1)")
+                           "though another tab pushed Groups")
     }
 
-    /// Scenario: navigating to the same screen twice in a row must be
-    /// idempotent — no error, screen stays put. Guards the case where
-    /// both `.task(id:)` and `.onAppear` fire on a single appearance.
-    func testRepeatedNavigateToSameScreenIsIdempotent() throws {
-        viewModel.navigateTo(screenJson: "\"MyInfo\"")
-        viewModel.navigateTo(screenJson: "\"MyInfo\"")
-        viewModel.navigateTo(screenJson: "\"MyInfo\"")
+    /// Scenario: selecting the same tab repeatedly must be idempotent —
+    /// no error, screen stays put. Guards the case where the tab body
+    /// re-asserts on every appearance.
+    func testRepeatedNavigateToTabSameTabIsIdempotent() throws {
+        viewModel.navigateToTab(actionId: "my_info")
+        viewModel.navigateToTab(actionId: "my_info")
+        viewModel.navigateToTab(actionId: "my_info")
         let after = try XCTUnwrap(viewModel.currentScreen)
         XCTAssertEqual(after.screenId, "my_info",
-                       "redundant nav to the active screen is a no-op " +
+                       "redundant nav to the active tab is a no-op " +
                            "but must not corrupt the engine state")
     }
 
     /// Scenario: Groups tab → Contacts tab → Groups tab. Three-tab
-    /// rotation, none of which is the More tab — defends against a
-    /// regression where only the My Card path is fixed.
+    /// rotation, none of which is the My Card path — defends against a
+    /// regression where only the home path is fixed.
     ///
     /// The rendered ScreenModel's `screenId` is the canonical
-    /// `AppScreen::screen_id()` that core 0.51.16 stamps for the five
-    /// collapsed tab families (ADR-043 Am4, core commit d9798a0b):
-    /// Groups navigation lands on "groups"; Contacts on "contacts"
-    /// (previously the engine-emitted "groups_list"/"contact_list").
+    /// `AppScreen::screen_id()` core stamps for the collapsed tab families
+    /// (ADR-043 Am4): Groups → "groups"; Contacts → "contacts".
     func testGroupsContactsGroupsRotation() {
-        viewModel.navigateTo(screenJson: "\"Groups\"")
+        viewModel.navigateToTab(actionId: "groups")
         XCTAssertEqual(viewModel.currentScreen?.screenId, "groups")
 
-        viewModel.navigateTo(screenJson: "\"Contacts\"")
+        viewModel.navigateToTab(actionId: "contacts")
         XCTAssertEqual(viewModel.currentScreen?.screenId, "contacts")
 
-        viewModel.navigateTo(screenJson: "\"Groups\"")
+        viewModel.navigateToTab(actionId: "groups")
         XCTAssertEqual(viewModel.currentScreen?.screenId, "groups",
                        "Groups must re-assert after a Contacts detour")
     }
