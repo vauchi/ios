@@ -192,25 +192,12 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Navigation
 
-    func navigateTo(screenJson: String) {
-        do {
-            let json = try appEngine.navigateToJson(screenJson: screenJson)
-            guard let data = json.data(using: .utf8) else { return }
-            // Phase 2b: navigateToJson now returns
-            // `{"screen": <ScreenModel>, "commands": [<CommandDTO>]}`.
-            let envelope = try coreJSONDecoder.decode(ScreenEnvelope.self, from: data)
-            currentScreen = envelope.screen
-            validationErrors = [:]
-            loadAvailableScreens()
-            if !envelope.commands.isEmpty {
-                handleExchangeCommands(envelope.commands)
-            }
-        } catch {
-            #if DEBUG
-                print("AppViewModel: failed to navigate: \(error)")
-            #endif
-        }
-    }
+    // `navigateTo(screenJson:)` (the `appEngine.navigateToJson` wrapper) was
+    // retired in S3 of `2026-06-02-ios-exchange-flow-core-driven` — every iOS
+    // screen now reaches core via the typed `navigateToTab` / `handleAction`
+    // paths or renders the engine's current screen render-only. The core
+    // `navigate_to_json` UniFFI surface is deleted in S5 (core MR) once iOS
+    // ships caller-free.
 
     /// The bottom-bar tabs, sourced from core's `tab_info` (ADR-043 Am4).
     /// Each carries an opaque `actionId` (forward via `navigateToTab`), a

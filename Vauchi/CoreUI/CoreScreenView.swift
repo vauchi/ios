@@ -34,7 +34,6 @@ struct CoreScreenView: View {
     /// the `navigate_to_json` retirement tier.
     enum Target: Equatable {
         case tab(actionId: String)
-        case screen(name: String)
         /// Render-only: render the engine's *current* screen, issue no
         /// navigation. Core has already navigated here.
         case current
@@ -43,7 +42,6 @@ struct CoreScreenView: View {
         var taskId: String {
             switch self {
             case let .tab(actionId): "tab:\(actionId)"
-            case let .screen(name): "screen:\(name)"
             case .current: "current"
             }
         }
@@ -55,11 +53,6 @@ struct CoreScreenView: View {
     /// Tab body: navigate by the opaque canonical `action_id` from core.
     init(actionId: String) {
         target = .tab(actionId: actionId)
-    }
-
-    /// Legacy sub-screen body: navigate by serde variant name.
-    init(screenName: String) {
-        target = .screen(name: screenName)
     }
 
     /// Render-only body: renders the shared engine's *current* screen
@@ -99,12 +92,11 @@ private struct CoreScreenContent: View {
     @ObservedObject var coreVM: AppViewModel
 
     /// Drive the shared engine to this view's target. Tabs forward the
-    /// opaque `action_id` (`NavigateToTab`); legacy sub-screens use the
-    /// serde-variant `navigateTo`.
+    /// opaque `action_id` (`NavigateToTab`); the render-only `.current`
+    /// target issues no navigation (core has already navigated here).
     private func navigate() {
         switch target {
         case let .tab(actionId): coreVM.navigateToTab(actionId: actionId)
-        case let .screen(name): coreVM.navigateTo(screenJson: "\"\(name)\"")
         case .current: break // render-only — core already navigated here
         }
     }

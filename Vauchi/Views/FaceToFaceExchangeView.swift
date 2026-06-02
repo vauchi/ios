@@ -53,7 +53,7 @@ private struct FaceToFaceCoreShell: View {
     var body: some View {
         // Render-only — core has already navigated to multi_stage_exchange
         // (the picker's mode selection routed here). The Exchange tab body
-        // (`ExchangeTabContent`) presents/dismisses this wrapper by
+        // (`MainContentView`) presents/dismisses this wrapper by
         // observing `currentScreen.screenId`, so there is no SwiftUI nav
         // stack to pop and no re-navigation to issue.
         CoreScreenView(renderingCurrentScreen: ())

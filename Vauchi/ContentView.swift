@@ -6,6 +6,7 @@
 // Root navigation for Vauchi iOS app
 
 import SwiftUI
+import VauchiPlatform
 
 struct ContentView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
@@ -207,42 +208,49 @@ struct MainTabView: View {
     private var tabBar: some View {
         Group {
             if let coreVM = viewModel.coreViewModel {
-                TabView(selection: $selectedTabId) {
-                    ForEach(coreVM.tabs(), id: \.id) { tab in
-                        tabBody(for: tab.id)
-                            .tabItem {
-                                Label(tab.label, systemImage: tab.icon)
-                            }
-                            .tag(tab.id)
-                            .accessibilityIdentifier(accessibilityId(for: tab.id))
+                VStack(spacing: 0) {
+                    // Single core-driven content area: renders core's current
+                    // screen generically, swapping in the native hardware
+                    // wrappers (camera/QR, NFC) for the exchange hardware
+                    // screen_ids. Pure Humble UI — no per-tab domain views.
+                    MainContentView(coreVM: coreVM)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .refreshable { await viewModel.sync() }
+
+                    Divider()
+
+                    // Custom bottom tab bar. A native `TabView` cannot host N
+                    // identical generic `CoreScreenView` tabs — its selection
+                    // binding and per-tab lifecycle both break when every tab is
+                    // the same view type (verified on device). The humble shell
+                    // therefore owns a thin tab bar that just dispatches
+                    // `NavigateToTab(action_id)` on tap; labels / icons / ids
+                    // all come from core's `tabInfo()`.
+                    CoreBottomTabBar(
+                        tabs: coreVM.tabs(),
+                        selectedId: selectedTabId,
+                        accessibilityId: accessibilityId(for:)
+                    ) { tab in
+                        selectedTabId = tab.id
+                        coreVM.navigateToTab(actionId: tab.actionId)
                     }
                 }
-                .accentColor(.cyan)
+                .onAppear {
+                    navigateToSelectedTab(selectedTabId, coreVM)
+                }
             } else {
                 ProgressView("Loading...")
             }
         }
     }
 
-    /// Route the opaque canonical tab id to its native body. The bodies
-    /// are iOS presentation chrome around core screens; routing on the
-    /// opaque discriminant is the humble-renderer pattern (like Android's
-    /// id→Composable map), not domain branching. `default` renders any
-    /// future tab as a plain core screen so a new core tab can't crash.
-    @ViewBuilder
-    private func tabBody(for id: String) -> some View {
-        switch id {
-        case "my_info": HomeView(actionId: id)
-        case "contacts": ContactsView(actionId: id)
-        // S1/S2: exchange is core-driven. `NavigateToTab("exchange")`
-        // resolves to core's `exchange_mode_selection` (11-mode picker);
-        // selecting a mode drives core to a hardware `screen_id`, which
-        // `ExchangeTabView` swaps to the native FaceToFace / NfcTap wrapper.
-        case "exchange": ExchangeTabView()
-        case "groups": CoreScreenView(actionId: id)
-        case "more": MoreView()
-        default: CoreScreenView(actionId: id)
-        }
+    /// Tell core to navigate to the selected tab. `id` is the canonical tab
+    /// id; the opaque `action_id` for `NavigateToTab` is looked up from
+    /// `tabInfo()`. Used for the initial selection; tab taps navigate via
+    /// `CoreBottomTabBar`'s `onTap`.
+    private func navigateToSelectedTab(_ id: String, _ coreVM: AppViewModel) {
+        guard let tab = coreVM.tabs().first(where: { $0.id == id }) else { return }
+        coreVM.navigateToTab(actionId: tab.actionId)
     }
 
     /// Preserve the historical camelCase bottom-tab a11y identifiers
@@ -270,38 +278,21 @@ struct MainTabView: View {
         .environmentObject(VauchiViewModel())
 }
 
-/// Exchange tab body. The exchange flow is core-driven (S1/S2 of
-/// `2026-06-02-ios-exchange-flow-core-driven`): the tab root is core's
-/// `exchange_mode_selection` picker, and selecting a mode drives core to a
-/// hardware `screen_id`. This view observes `currentScreen.screenId` and
-/// swaps in the native hardware wrapper (camera/QR brightness, NFC reader)
-/// for those ids, rendering every other exchange screen (the picker,
-/// BLE/Web/Link modes, delivery status) generically. It is the iOS analogue
-/// of android's follow-core effect.
-private struct ExchangeTabView: View {
-    @EnvironmentObject var viewModel: VauchiViewModel
-
-    var body: some View {
-        Group {
-            if let coreVM = viewModel.coreViewModel {
-                ExchangeTabContent(coreVM: coreVM)
-            } else {
-                ProgressView("Loading...")
-            }
-        }
-    }
-}
-
-/// Inner shell observing `AppViewModel` directly so inner `@Published`
-/// `currentScreen` updates propagate (same root cause `CoreScreenView`
-/// documents).
-private struct ExchangeTabContent: View {
+/// The single core-driven content area for the main shell. Renders core's
+/// current screen generically via the render-only `CoreScreenView`, except
+/// for the exchange hardware screens (`multi_stage_exchange`,
+/// `exchange_nfc*`) which need native wrappers (camera/QR brightness, NFC
+/// reader) presented off `currentScreen.screenId`. Pure Humble UI: one
+/// renderer for every tab; the bottom tab bar drives `NavigateToTab`.
+/// Observes `AppViewModel` directly so inner `@Published` `currentScreen`
+/// updates propagate (same root cause `CoreScreenView` documents).
+private struct MainContentView: View {
     @ObservedObject var coreVM: AppViewModel
 
     /// `screen_id`s rendered by a native hardware wrapper rather than
     /// generically. `multi_stage_exchange` → camera/QR + brightness;
-    /// `exchange_nfc*` → NFC reader. Every other exchange screen renders
-    /// via the render-only `CoreScreenView`.
+    /// `exchange_nfc*` → NFC reader. Every other screen renders via the
+    /// render-only `CoreScreenView`.
     private var nativeBody: AnyView? {
         switch coreVM.currentScreen?.screenId {
         case "multi_stage_exchange":
@@ -318,16 +309,47 @@ private struct ExchangeTabContent: View {
             if let native = nativeBody {
                 native
             } else {
-                // Render the current exchange screen without navigating.
                 CoreScreenView(renderingCurrentScreen: ())
             }
         }
-        // Re-assert the exchange tab root on tab entry (mirrors the
-        // `.tab(actionId)` re-assert). Kept on the tab body — NOT on the
-        // inner per-screen views — so that as core moves between exchange
-        // screens (picker → multi_stage → delivery), the inner render-only
-        // view does not re-issue `NavigateToTab` and clobber core's screen.
-        .task { coreVM.navigateToTab(actionId: "exchange") }
-        .onAppear { coreVM.navigateToTab(actionId: "exchange") }
+    }
+}
+
+/// Custom bottom tab bar rendered from core's `tabInfo()`. Holds no tab
+/// domain literals — labels, SF Symbol icons and selection state all come
+/// from core. Each item dispatches the tap to the shell, which sets the
+/// selection and forwards `NavigateToTab(action_id)` to core. Replaces the
+/// native `TabView`, which cannot host N identical generic `CoreScreenView`
+/// tabs (its selection binding and per-tab lifecycle break — verified on
+/// device).
+private struct CoreBottomTabBar: View {
+    let tabs: [MobileTabInfo]
+    let selectedId: String
+    let accessibilityId: (String) -> String
+    let onTap: (MobileTabInfo) -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 0) {
+            ForEach(tabs, id: \.id) { tab in
+                Button {
+                    onTap(tab)
+                } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: tab.icon)
+                            .font(.system(size: 22))
+                        Text(tab.label)
+                            .font(.system(size: 10))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .foregroundColor(tab.id == selectedId ? .cyan : .secondary)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier(accessibilityId(tab.id))
+            }
+        }
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+        .background(.bar)
     }
 }

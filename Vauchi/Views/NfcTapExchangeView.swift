@@ -13,17 +13,18 @@
 // transceive-shim API (Phase 2 of the graduation).
 //
 // This view holds no domain state, no nav decisions, and no domain
-// types. Per ADR-021/043 it only:
-//   1. Navigates to `CoreScreenView(screenName: "Exchange")`.
-//   2. Pre-selects TapTap on appear by emitting the picker action
-//      `UserAction.listItemSelected("category:fun", "mode:tap_tap")`
-//      — the core ExchangeEngine routes to `start_taptap_mode`,
-//      constructs the `NfcExchangeFlow`, and emits the initial
-//      `Command.NfcActivate { payload: key_offer }` (delivered to
-//      `ExchangeCommandHandler` which calls
-//      `NFCExchangeService.activate`).
-//   3. Emits a UserAction("cancel") to core when SwiftUI dismisses the
-//      view without core having routed away.
+// types. Per ADR-021/043 it is render-only: the core mode picker's
+// "Tap tap" selection already routed core to `exchange_nfc_role` (and
+// emitted the initial `Command.NfcActivate { payload: key_offer }` via
+// `ExchangeCommandHandler` → `NFCExchangeService.activate`), so
+// `MainContentView` presents this wrapper off `currentScreen.screenId`.
+// It only:
+//   1. Renders core's current screen render-only (`CoreScreenView`'s
+//      `.current` target) — no navigation, no pre-select (re-emitting
+//      the picker action would double-route the NfcExchangeFlow).
+//   2. Emits a UserAction("cancel") to core when the wrapper disappears
+//      while core is still on the NFC flow (user left without core
+//      having routed away).
 //
 // Replaces the legacy `NfcExchangeView` (137 LOC) which owned the
 // 3-phase state machine in Swift via `MobileNfcHandshake`. The legacy
