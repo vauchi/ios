@@ -336,15 +336,20 @@ private struct CoreBottomTabBar: View {
                 } label: {
                     VStack(spacing: 4) {
                         // Dynamic Type text styles so icon + label scale
-                        // with the user's text-size setting. The custom tab
-                        // bar replaced the native TabView (whose `.tabItem`
-                        // scaled automatically); fixed `.system(size:)` fonts
-                        // failed the `.dynamicType` accessibility audit
-                        // (AccessibilityUITests.testAccessibilityAudit).
+                        // with the user's text-size setting. The custom tab bar
+                        // replaced the native TabView (whose `.tabItem` scaled
+                        // automatically); fixed `.system(size:)` fonts failed
+                        // the `.dynamicType` accessibility audit
+                        // (AccessibilityUITests.testAccessibilityAudit). The
+                        // label uses `.caption`, not the smaller `.caption2`:
+                        // the audit flags caption2-sized text as too small to
+                        // scale legibly ("partially unsupported") — verified by
+                        // bisecting on the iOS 26 simulator (.caption2 fails,
+                        // .caption/.body pass).
                         Image(systemName: tab.icon)
                             .font(.title2)
                         Text(tab.label)
-                            .font(.caption2)
+                            .font(.caption)
                     }
                     .frame(maxWidth: .infinity)
                     .foregroundColor(tab.id == selectedId ? .cyan : .secondary)
