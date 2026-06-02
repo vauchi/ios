@@ -234,7 +234,11 @@ struct MainTabView: View {
         switch id {
         case "my_info": HomeView(actionId: id)
         case "contacts": ContactsView(actionId: id)
-        case "exchange": ExchangeModePicker(switchToContacts: { selectedTabId = "contacts" })
+        // S1: exchange entry is core-driven — `NavigateToTab("exchange")`
+        // resolves to core's `exchange_mode_selection` (11-mode picker),
+        // rendered generically. Mode selection drives core to the native
+        // hardware screen_ids; S2 presents FaceToFace/NfcTap off those ids.
+        case "exchange": CoreScreenView(actionId: id)
         case "groups": CoreScreenView(actionId: id)
         case "more": MoreView()
         default: CoreScreenView(actionId: id)
