@@ -10,31 +10,50 @@
 import CoreUIModels
 import SwiftUI
 
-/// Renders a core `Component::SectionedActionList` as a native SwiftUI
-/// list with one `Section` per group. iOS's native idiom — flat
-/// renderers that ignored a section grouping would downgrade UX from
-/// "structured menu" to "flat dump", so the discriminant lives at
-/// variant level.
+/// Renders a core `Component::SectionedActionList` as grouped sections of
+/// tappable rows.
+///
+/// **Must NOT use a SwiftUI `List`.** `ScreenRendererView` already wraps
+/// every component in a `ScrollView`, and a `List` nested in a `ScrollView`
+/// has no intrinsic height — it collapses to zero rows, leaving the screen
+/// blank (the iOS More-tab-empty bug, `problems/2026-06-02-ios-sectioned-
+/// action-list-empty`). Like `ActionListView`, this renders `VStack` +
+/// `ForEach` with hand-drawn section headers / dividers so it lays out
+/// inside the outer `ScrollView`.
 struct SectionedActionListView: View {
     let component: SectionedActionListComponent
     let onAction: (UserAction) -> Void
 
     var body: some View {
-        List {
+        VStack(alignment: .leading, spacing: 20) {
             ForEach(component.sections) { section in
-                Section(section.label) {
-                    ForEach(section.items) { item in
-                        SectionedActionRowView(
-                            componentId: component.id,
-                            sectionId: section.id,
-                            item: item,
-                            onAction: onAction
-                        )
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(section.label)
+                        .font(.footnote)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                        .padding(.horizontal, 16)
+
+                    VStack(spacing: 0) {
+                        ForEach(Array(section.items.enumerated()), id: \.element.id) { index, item in
+                            SectionedActionRowView(
+                                componentId: component.id,
+                                sectionId: section.id,
+                                item: item,
+                                onAction: onAction
+                            )
+                            if index < section.items.count - 1 {
+                                Divider().padding(.leading, 16)
+                            }
+                        }
                     }
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
         }
-        .listStyle(.insetGrouped)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityIdentifier(component.id)
     }
 }
@@ -59,7 +78,11 @@ private struct SectionedActionRowView: View {
                     .foregroundColor(.secondary)
                     .font(.caption)
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .accessibilityIdentifier("\(componentId).\(sectionId).\(item.id)")
         .accessibilityLabel(item.a11y?.label ?? item.label)
         .accessibilityHint(item.a11y?.hint ?? "")
