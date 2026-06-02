@@ -335,10 +335,16 @@ private struct CoreBottomTabBar: View {
                     onTap(tab)
                 } label: {
                     VStack(spacing: 4) {
+                        // Dynamic Type text styles so icon + label scale
+                        // with the user's text-size setting. The custom tab
+                        // bar replaced the native TabView (whose `.tabItem`
+                        // scaled automatically); fixed `.system(size:)` fonts
+                        // failed the `.dynamicType` accessibility audit
+                        // (AccessibilityUITests.testAccessibilityAudit).
                         Image(systemName: tab.icon)
-                            .font(.system(size: 22))
+                            .font(.title2)
                         Text(tab.label)
-                            .font(.system(size: 10))
+                            .font(.caption2)
                     }
                     .frame(maxWidth: .infinity)
                     .foregroundColor(tab.id == selectedId ? .cyan : .secondary)
