@@ -127,6 +127,10 @@ final class AccessibilityUITests: XCTestCase {
                 .elementDetection,
                 .hitRegion,
             ]) { issue in
+                // TEMP DIAGNOSTIC — name the element behind "Dynamic Type
+                // font sizes are partially unsupported" so the fix targets
+                // the right view. Reverted once identified.
+                print("VAUCHI_AUDIT_ISSUE | type=\(String(describing: issue.auditType)) | compact=\(issue.compactDescription) | detail=\(issue.detailedDescription) | element=\(String(describing: issue.element))")
                 // Apple's `performAccessibilityAudit(for:_:)` issueHandler:
                 // return `true` to ignore the issue, `false` to fail the
                 // test on it. The earlier landing of this filter
@@ -135,7 +139,7 @@ final class AccessibilityUITests: XCTestCase {
                 // the flake then re-fired on every run regardless of the
                 // intent documented in
                 // `_private/docs/problems/2026-04-26-ios-accessibility-audit-flake/`.
-                issue.compactDescription.contains("Potentially inaccessible text")
+                return issue.compactDescription.contains("Potentially inaccessible text")
             }
         } else {
             throw XCTSkip("Accessibility audit requires iOS 17+")
