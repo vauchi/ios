@@ -49,30 +49,17 @@ struct ScreenRendererView: View {
                     .accessibilityValue(progress.label ?? "\(progress.currentStep) of \(progress.totalSteps)")
                 }
 
-                ScrollView {
-                    VStack(spacing: CGFloat(spacing.lg)) {
-                        // Header
-                        VStack(spacing: CGFloat(spacing.sm)) {
-                            Text(screen.title)
-                                .font(.title2.bold())
-                                .multilineTextAlignment(.center)
-                                .accessibilityAddTraits(.isHeader)
-
-                            if let subtitle = screen.subtitle {
-                                Text(subtitle)
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                                    .multilineTextAlignment(.center)
-                            }
-                        }
-                        .padding(.top, CGFloat(spacing.lg))
-
-                        // Components
-                        ForEach(Array(screen.components.enumerated()), id: \.offset) { _, component in
-                            ComponentView(component: component, onAction: onAction)
-                        }
+                // Fixed-layout screens (e.g. the QR exchange,
+                // `multi_stage_exchange`) must NOT scroll — a live QR or
+                // camera preview should size to the viewport and never
+                // reflow. Drop the ScrollView wrapper in that case. Default
+                // (`.scroll`) keeps the scrolling content region.
+                if screen.layout == .fixed {
+                    scrollableContent
+                } else {
+                    ScrollView {
+                        scrollableContent
                     }
-                    .padding(.horizontal, CGFloat(spacing.lg))
                 }
 
                 Spacer()
@@ -118,6 +105,35 @@ struct ScreenRendererView: View {
             checkForToastComponent()
         }
         .environment(\.designTokens, screen.tokens)
+    }
+
+    /// Header + components stack. Wrapped in a `ScrollView` for the
+    /// default `.scroll` layout; rendered bare for `.fixed` so the
+    /// content sizes to the viewport without scrolling.
+    private var scrollableContent: some View {
+        VStack(spacing: CGFloat(spacing.lg)) {
+            // Header
+            VStack(spacing: CGFloat(spacing.sm)) {
+                Text(screen.title)
+                    .font(.title2.bold())
+                    .multilineTextAlignment(.center)
+                    .accessibilityAddTraits(.isHeader)
+
+                if let subtitle = screen.subtitle {
+                    Text(subtitle)
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .padding(.top, CGFloat(spacing.lg))
+
+            // Components
+            ForEach(Array(screen.components.enumerated()), id: \.offset) { _, component in
+                ComponentView(component: component, onAction: onAction)
+            }
+        }
+        .padding(.horizontal, CGFloat(spacing.lg))
     }
 
     private func checkForToastComponent() {

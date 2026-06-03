@@ -90,6 +90,20 @@ struct ComponentView: View {
         case .divider:
             DividerView()
 
+        case let .row(rowComponent):
+            // Horizontal container: render children left-to-right. Each
+            // child is width-bounded with an equal flex slice (mirrors
+            // Android's per-child `Modifier.weight(1f)`), so a child that
+            // fills its width internally (e.g. an ActionList with trailing
+            // Spacers) takes only its slice instead of overflowing and
+            // overlapping the preview.
+            HStack(alignment: .center, spacing: 0) {
+                ForEach(Array(rowComponent.items.enumerated()), id: \.offset) { _, child in
+                    ComponentView(component: child, onAction: onAction)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+
         case .unknown:
             // Core sent a component type this shell doesn't know about.
             // Render as invisible — the screen still works, just missing
