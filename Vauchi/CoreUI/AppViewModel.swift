@@ -548,6 +548,10 @@ class AppViewModel: ObservableObject {
                 nfcService.sendApdu(data: Data(data))
             case .nfcDeactivate:
                 nfcService.deactivate()
+            case .accelerometerStart:
+                startAccelerometerCapture()
+            case .accelerometerStop:
+                AccelerometerProximityService.shared.stop()
             default:
                 // BLE / Audio exchange commands are not yet dispatched on
                 // iOS: the session-based ExchangeCommandHandler was retired
@@ -582,6 +586,24 @@ class AppViewModel: ObservableObject {
     /// Notify core that the user cancelled image picking.
     func sendImagePickCancelled() {
         sendHardwareEvent(.imagePickCancelled)
+    }
+
+    /// TapHoverShake shake stage: stream accelerometer readings and route each
+    /// back to core (which builds + cross-correlates the envelope). The motion
+    /// handler fires off the main actor, so hop back before touching core.
+    private func startAccelerometerCapture() {
+        AccelerometerProximityService.shared.start { [weak self] timestampMs, xMilliG, yMilliG, zMilliG in
+            Task { @MainActor in
+                self?.sendHardwareEvent(
+                    .accelerometerData(
+                        timestampMs: timestampMs,
+                        xMilliG: xMilliG,
+                        yMilliG: yMilliG,
+                        zMilliG: zMilliG
+                    )
+                )
+            }
+        }
     }
 
     private func sendHardwareEvent(_ event: MobileEvent) {
