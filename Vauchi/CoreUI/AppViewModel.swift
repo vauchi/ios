@@ -256,6 +256,14 @@ class AppViewModel: ObservableObject {
         loadAvailableScreens()
     }
 
+    /// Whether the current screen offers a back step, per the engine's
+    /// nav state (`AppScreen` history + in-engine sub-flow back). Drives
+    /// the core-driven back chrome the shell renders above sub-screens,
+    /// so the frontend no longer depends on a footer "Back" action.
+    func canGoBack() -> Bool {
+        (try? appEngine.canGoBack()) ?? false
+    }
+
     func navigateBack() {
         do {
             let json = try appEngine.navigateBackJson()

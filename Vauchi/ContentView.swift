@@ -309,9 +309,41 @@ private struct MainContentView: View {
             if let native = nativeBody {
                 native
             } else {
-                CoreScreenView(renderingCurrentScreen: ())
+                VStack(spacing: 0) {
+                    // Core-driven back chrome: iOS has no NavigationStack for
+                    // core screens, so the shell renders a back control above
+                    // sub-screens (those the engine reports `can_go_back` for)
+                    // and forwards `navigateBack`. Roots report false, so the
+                    // bar only appears where a back step exists. Replaces the
+                    // per-screen footer "Back" action.
+                    if coreVM.canGoBack() {
+                        BackChromeBar { coreVM.navigateBack() }
+                    }
+                    CoreScreenView(renderingCurrentScreen: ())
+                }
             }
         }
+    }
+}
+
+/// Leading back control shown above core sub-screens when the engine
+/// reports a back step. Chevron + label, dispatching `navigateBack`.
+private struct BackChromeBar: View {
+    let onBack: () -> Void
+
+    var body: some View {
+        HStack {
+            Button(action: onBack) {
+                HStack(spacing: 4) {
+                    Image(systemName: "chevron.left")
+                    Text(LocalizationService.shared.t("action.back"))
+                }
+            }
+            .accessibilityIdentifier("nav.back")
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
     }
 }
 
