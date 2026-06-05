@@ -75,27 +75,40 @@ struct InfoItemRow: View {
     }
 }
 
+/// Core icon token → SF Symbol map. A table (rather than a `switch`)
+/// keeps the lookup at complexity 1 as the token set grows.
+private let coreIconSymbols: [String: String] = [
+    "lock": "lock.fill",
+    "refresh": "arrow.triangle.2.circlepath",
+    "people": "person.2.fill",
+    "shield": "shield.fill",
+    "server": "server.rack",
+    "key": "key.fill",
+    "backup": "externaldrive.fill",
+    "warning": "exclamationmark.triangle.fill",
+    "devices": "laptopcomputer.and.iphone",
+    "check": "checkmark.circle.fill",
+    "share": "square.and.arrow.up",
+    "edit": "pencil",
+    "group": "person.3.fill",
+    "card": "person.crop.rectangle",
+    "eye": "eye.fill",
+    "visibility_off": "eye.slash.fill",
+    // Exchange mode glyphs (mode-selection list).
+    "qrcode": "qrcode.viewfinder",
+    "nfc": "wave.3.right",
+    "bump": "dot.radiowaves.left.and.right",
+    "shake": "iphone.radiowaves.left.and.right",
+    "sparkles": "wand.and.stars",
+    "tap": "hand.tap.fill",
+    "gesture": "hand.draw.fill",
+    "link": "link",
+    "cable": "cable.connector",
+]
+
 /// Maps core icon names to SF Symbols.
 ///
 /// Core uses generic icon names; this function maps them to platform-native symbols.
 func sfSymbolForCoreIcon(_ name: String) -> String {
-    switch name {
-    case "lock": "lock.fill"
-    case "refresh": "arrow.triangle.2.circlepath"
-    case "people": "person.2.fill"
-    case "shield": "shield.fill"
-    case "server": "server.rack"
-    case "key": "key.fill"
-    case "backup": "externaldrive.fill"
-    case "warning": "exclamationmark.triangle.fill"
-    case "devices": "laptopcomputer.and.iphone"
-    case "check": "checkmark.circle.fill"
-    case "share": "square.and.arrow.up"
-    case "edit": "pencil"
-    case "group": "person.3.fill"
-    case "card": "person.crop.rectangle"
-    case "eye": "eye.fill"
-    case "visibility_off": "eye.slash.fill"
-    default: "info.circle"
-    }
+    coreIconSymbols[name] ?? "info.circle"
 }

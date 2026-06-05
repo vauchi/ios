@@ -48,17 +48,24 @@ struct ActionListItemRow: View {
                         .accessibilityHidden(true)
                 }
 
-                Text(item.label)
-                    .font(.body)
-                    .foregroundColor(.primary)
+                // Label on top, optional detail as a secondary subtitle line
+                // so instruction-style copy (e.g. exchange-mode "what you do"
+                // text) reads on its own line instead of crowding the trailing
+                // edge.
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.label)
+                        .font(.body)
+                        .foregroundColor(.primary)
+
+                    if let detail = item.detail {
+                        Text(detail)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
 
                 Spacer()
-
-                if let detail = item.detail {
-                    Text(detail)
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                }
 
                 Image(systemName: "chevron.right")
                     .font(.caption)

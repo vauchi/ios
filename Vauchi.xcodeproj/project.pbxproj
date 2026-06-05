@@ -188,6 +188,7 @@
 		C122C622C69B289031EB8186 /* testActionList.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 9F8C1DD1586172CF870953F9 /* testActionList.1.png */; };
 		C2AA1DC7FD7FA22C155F70BD /* ScreenRendererView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCD1112BEA2A776E27B15C3 /* ScreenRendererView.swift */; };
 		C2BF1FC510A65D73DD722C95 /* VauchiPlatform in Frameworks */ = {isa = PBXBuildFile; productRef = BE415B866BE8E26F05791810 /* VauchiPlatform */; };
+		C4258F025CF9EB990D9977F0 /* SfSymbolForCoreIconTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB7BD822B01CEB0D5F5CD01 /* SfSymbolForCoreIconTests.swift */; };
 		C7267E367C96E3F2DC79A963 /* SettingsGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA11554E5C2DD27F7DABE4D /* SettingsGroupView.swift */; };
 		C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */; };
 		C8BAE6814208A1BBB189E5C8 /* testInlineConfirmNonDestructive.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 388BCB8B838F2D5C9858C087 /* testInlineConfirmNonDestructive.1.png */; };
@@ -294,6 +295,7 @@
 		1A3C0558C6550E4B58C71798 /* AccessibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityUITests.swift; sourceTree = "<group>"; };
 		1A85B8272FE7B284D215644A /* testInfoPanelWithIcon.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInfoPanelWithIcon.1.png; sourceTree = "<group>"; };
 		1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModel.swift; sourceTree = "<group>"; };
+		1CB7BD822B01CEB0D5F5CD01 /* SfSymbolForCoreIconTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SfSymbolForCoreIconTests.swift; sourceTree = "<group>"; };
 		1DDB8A091A24E66931A46D88 /* testScreenRendererAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testScreenRendererAccessibility.1.txt; sourceTree = "<group>"; };
 		1E9D757735447E71670611EA /* EditableTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableTextView.swift; sourceTree = "<group>"; };
 		1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SineWaveGenerator.swift; sourceTree = "<group>"; };
@@ -540,6 +542,7 @@
 				47AE9012ABEFEB654325B7C5 /* NavTabDenyListTests.swift */,
 				2665E0EEA673F89A405C5D27 /* NfcCommandDispatchTests.swift */,
 				42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */,
+				1CB7BD822B01CEB0D5F5CD01 /* SfSymbolForCoreIconTests.swift */,
 				0795D7BA553D151750EFD399 /* fixtures */,
 			);
 			path = CoreUI;
@@ -1224,6 +1227,7 @@
 				1552B5F6D02172C2BA2C691D /* PlatformEdgeTests.swift in Sources */,
 				0DDA36A34D79308F42591BA3 /* PlatformEventListenerTests.swift in Sources */,
 				585352762DF068CBD6CD1EE8 /* SettingsServiceTests.swift in Sources */,
+				C4258F025CF9EB990D9977F0 /* SfSymbolForCoreIconTests.swift in Sources */,
 				60D8E07B9EFB1F102D7518A0 /* ThemeServiceSettingsTests.swift in Sources */,
 				ACB5D66C9DC53BB3DEC7044E /* VauchiKeychainBridgeTests.swift in Sources */,
 				C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */,
