@@ -36,6 +36,7 @@
 		191B895266678FE7D88D7FF1 /* testContactsViewWithContacts.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 73C57002D4EAE39D0378F9F4 /* testContactsViewWithContacts.1.png */; };
 		1AA3266DB9FF1423DCFE7514 /* testContactsViewEmpty.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */; };
 		1ABCC26C203868ABD7EB9255 /* testCardPreviewDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 5A2DFACA328F9C9EBEF5C3A2 /* testCardPreviewDark.1.png */; };
+		1B5A993D18450EBEEE902E68 /* testMultiStageExchangeCompactViewport.1.png in Resources */ = {isa = PBXBuildFile; fileRef = FF4FD97723ED524DB81F0ACB /* testMultiStageExchangeCompactViewport.1.png */; };
 		1BDCB504628325339F237DBB /* CoreUIComponentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 273DE3DDCB1F1D595DEF1B92 /* CoreUIComponentTests.swift */; };
 		1C4039FE783FF5D7BAA40F5C /* AvatarPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A97B82A9B1F53812A7C048E /* AvatarPreviewView.swift */; };
 		1ECD2FDE78B2CD9672DDD697 /* testPreviewCardStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B8C613C7D55CF224BEE622D /* testPreviewCardStep.1.png */; };
@@ -496,6 +497,7 @@
 		FA5DBF1C3713F1E055BA292C /* testStatusIndicatorDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testStatusIndicatorDark.1.png; sourceTree = "<group>"; };
 		FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncServiceTests.swift; sourceTree = "<group>"; };
 		FE7FAFE456A1F513CADD0631 /* testCreateIdentityStep.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCreateIdentityStep.1.png; sourceTree = "<group>"; };
+		FF4FD97723ED524DB81F0ACB /* testMultiStageExchangeCompactViewport.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testMultiStageExchangeCompactViewport.1.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -780,6 +782,7 @@
 				39051A8E2D361D595C7536C9 /* testHomeViewWithFieldsGerman.1.png */,
 				A2E7533C698BC2DD14E881AD /* testLabelsView.1.png */,
 				A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */,
+				FF4FD97723ED524DB81F0ACB /* testMultiStageExchangeCompactViewport.1.png */,
 				4B8C613C7D55CF224BEE622D /* testPreviewCardStep.1.png */,
 				C2A9361B22965ACC0939BC78 /* testReadyStep.1.png */,
 				6310B8BCD3B5DC621926CA76 /* testSecurityStep.1.png */,
@@ -1123,6 +1126,7 @@
 				C8BAE6814208A1BBB189E5C8 /* testInlineConfirmNonDestructive.1.png in Resources */,
 				767BDC51FFC0FFA5A5131E0E /* testLabelsView.1.png in Resources */,
 				3EE222C1CDE5AA17773953B3 /* testLoadingView.1.png in Resources */,
+				1B5A993D18450EBEEE902E68 /* testMultiStageExchangeCompactViewport.1.png in Resources */,
 				1ECD2FDE78B2CD9672DDD697 /* testPreviewCardStep.1.png in Resources */,
 				950CE4D91D128D63DD0CCD7F /* testReadyStep.1.png in Resources */,
 				EBDF43BF0E850A5D4345CA75 /* testScreenRendererAccessibility.1.txt in Resources */,
