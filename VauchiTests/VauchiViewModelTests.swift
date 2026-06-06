@@ -3,13 +3,22 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // VauchiViewModelTests.swift
-// Tests for VauchiViewModel state management
+// Tests for VauchiViewModel — the app-shell coordinator.
+//
+// The card-field / contact-CRUD / hidden-contact tests were removed in G4
+// (2026-06-06, problem record 2026-05-02-ios-humble-ui-deep-retirement)
+// alongside the view-model methods they covered: those domain actions now
+// flow through core via `coreViewModel`, and the card/identity hydration
+// they asserted lives in `VauchiRepositoryTests` (repository layer) and the
+// core engine tests. What remains here is genuine shell behaviour:
+// lock/auth routing, identity-presence, the contacts-presence flag, error
+// clearing, and initial sync state.
 
 @testable import Vauchi
 import XCTest
 
 /// Tests for VauchiViewModel
-/// Based on: features/identity_management.feature, features/contact_card_management.feature
+/// Based on: features/identity_management.feature
 @MainActor
 final class VauchiViewModelTests: XCTestCase {
     var tempDir: URL!
@@ -38,12 +47,9 @@ final class VauchiViewModelTests: XCTestCase {
     func testInitialStateIsLoading() {
         let viewModel = makeViewModel()
 
-        // Before loadState, should be in loading state
+        // Before loadState, should be in loading state with no identity.
         XCTAssertTrue(viewModel.isLoading)
         XCTAssertFalse(viewModel.hasIdentity)
-        XCTAssertNil(viewModel.displayName)
-        XCTAssertNil(viewModel.publicId)
-        XCTAssertNil(viewModel.card)
         XCTAssertTrue(viewModel.contacts.isEmpty)
     }
 
@@ -51,69 +57,18 @@ final class VauchiViewModelTests: XCTestCase {
 
     // Based on: features/identity_management.feature
 
-    /// Scenario: Create identity updates state
+    /// Scenario: Create identity flips the shell's identity-presence flag.
+    /// Card/display-name hydration is core-owned (rendered via
+    /// `coreViewModel`) and verified at the repository layer
+    /// (`VauchiRepositoryTests`), not here.
     func testCreateIdentityUpdatesState() async throws {
         let viewModel = makeViewModel()
 
+        XCTAssertFalse(viewModel.hasIdentity)
         try await viewModel.createIdentity(name: "Alice")
 
         XCTAssertTrue(viewModel.hasIdentity)
-        XCTAssertEqual(viewModel.displayName, "Alice")
-        let card = try XCTUnwrap(viewModel.card, "Card must be hydrated alongside the new identity")
-        XCTAssertEqual(card.displayName, "Alice", "Card display name must mirror the identity")
     }
-
-    /// Scenario: Create identity initializes empty card
-    func testCreateIdentityInitializesCard() async throws {
-        let viewModel = makeViewModel()
-
-        try await viewModel.createIdentity(name: "Alice")
-
-        XCTAssertEqual(viewModel.card?.displayName, "Alice")
-        XCTAssertTrue(viewModel.card?.fields.isEmpty ?? false)
-    }
-
-    // MARK: - Card Field Tests
-
-    // Based on: features/contact_card_management.feature
-
-    /// Scenario: Add field to card
-    func testAddFieldToCard() async throws {
-        let viewModel = makeViewModel()
-        try await viewModel.createIdentity(name: "Alice")
-
-        try await viewModel.addField(type: "email", label: "Work", value: "alice@company.com")
-
-        XCTAssertEqual(viewModel.card?.fields.count, 1)
-        XCTAssertEqual(viewModel.card?.fields[0].label, "Work")
-        XCTAssertEqual(viewModel.card?.fields[0].value, "alice@company.com")
-    }
-
-    /// Scenario: Add multiple fields to card
-    func testAddMultipleFields() async throws {
-        let viewModel = makeViewModel()
-        try await viewModel.createIdentity(name: "Alice")
-
-        try await viewModel.addField(type: "email", label: "Work", value: "alice@work.com")
-        try await viewModel.addField(type: "phone", label: "Mobile", value: "+1234567890")
-        try await viewModel.addField(type: "website", label: "Blog", value: "https://alice.dev")
-
-        XCTAssertEqual(viewModel.card?.fields.count, 3)
-    }
-
-    /// Scenario: Remove field from card
-    func testRemoveFieldFromCard() async throws {
-        let viewModel = makeViewModel()
-        try await viewModel.createIdentity(name: "Alice")
-        try await viewModel.addField(type: "email", label: "Work", value: "alice@work.com")
-
-        let field = try XCTUnwrap(viewModel.card?.fields[0])
-        try await viewModel.removeField(id: field.id)
-
-        XCTAssertTrue(viewModel.card?.fields.isEmpty ?? false)
-    }
-
-    // MARK: - Exchange Tests
 
     // MARK: - Contact Management Tests
 
@@ -127,21 +82,6 @@ final class VauchiViewModelTests: XCTestCase {
         await viewModel.loadContacts()
 
         XCTAssertTrue(viewModel.contacts.isEmpty)
-    }
-
-    /// Scenario: Remove contact updates list
-    func testRemoveContactUpdatesState() async throws {
-        let viewModel = makeViewModel()
-        try await viewModel.createIdentity(name: "Alice")
-
-        // Add a mock contact for testing
-        // When real bindings are connected, this will use actual exchange
-        let initialCount = viewModel.contacts.count
-
-        // Removing a non-existent contact should not change count
-        try await viewModel.removeContact(id: "nonexistent")
-
-        XCTAssertEqual(viewModel.contacts.count, initialCount)
     }
 
     // MARK: - Error Handling Tests
@@ -166,34 +106,6 @@ final class VauchiViewModelTests: XCTestCase {
         let viewModel = makeViewModel()
 
         XCTAssertEqual(viewModel.syncState, .idle)
-    }
-
-    // MARK: - Hidden Contacts Tests
-
-    // Based on: features/resistance.feature - R3 Hidden Contact UI
-
-    /// Scenario: Hide contact removes it from normal list
-    func testHideContactUpdatesState() async throws {
-        let viewModel = makeViewModel()
-        try await viewModel.createIdentity(name: "Alice")
-
-        // Test hiding a contact (will gracefully handle missing method)
-        try? await viewModel.hideContact(id: "test-contact-id")
-
-        // Method should exist and not crash
-        XCTAssertTrue(true, "hideContact method exists")
-    }
-
-    /// Scenario: Load hidden contacts
-    func testLoadHiddenContacts() async throws {
-        let viewModel = makeViewModel()
-        try await viewModel.createIdentity(name: "Alice")
-
-        // Load hidden contacts (will gracefully handle missing method)
-        await viewModel.loadHiddenContacts()
-
-        // Method should exist and not crash
-        XCTAssertTrue(true, "loadHiddenContacts method exists")
     }
 
     // MARK: - App State Tests (Locked Device)

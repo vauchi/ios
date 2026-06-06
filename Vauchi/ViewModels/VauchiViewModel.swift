@@ -3,21 +3,25 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // VauchiViewModel.swift
-// Main state management for Vauchi iOS app
+// App-shell coordinator for the Vauchi iOS app.
+//
+// Post-G4 (2026-06-06, problem record 2026-05-02-ios-humble-ui-deep-retirement):
+// the domain CRUD that the now-retired named views used to drive
+// (card field edit, contact notes / lifecycle, recovery trust, backup,
+// per-field visibility, social networks, content updates, cert pinning)
+// was deleted. Those actions flow through core via `coreViewModel`
+// (`AppViewModel` → `PlatformAppEngine`) under the Humble-UI architecture
+// (ADR-021/043), so the parallel view-model methods were dead. What
+// remains is genuine app-shell concern: lock/auth routing, repository
+// bootstrap, network plumbing, identity creation, the contacts-presence
+// flag, the alert/toast surfaces, notification polling, and sync.
 
 import Combine
 import CoreUIModels
 import Foundation
 import LocalAuthentication
-import Security
 import SwiftUI
 import VauchiPlatform
-
-// `FieldInfo`, `CardInfo`, and `ContactInfo` struct wrappers were removed
-// in Phase 1A.5 (core-gui-architecture-alignment) — consumers now use
-// the repository-layer types (`VauchiContact`, `VauchiContactCard`,
-// `VauchiContactField`) directly, eliminating the parallel-type round-trip
-// that was flagged as an ADR-021 violation.
 
 /// Sync state enum
 enum SyncState: Equatable {
@@ -43,9 +47,6 @@ class VauchiViewModel: ObservableObject {
     @Published var appState: AppState = .loading
     @Published var isLoading = true
     @Published var hasIdentity = false
-    @Published var displayName: String?
-    @Published var publicId: String?
-    @Published var card: VauchiContactCard?
     @Published var contacts: [VauchiContact] = []
     private let contactsPageSize: UInt32 = 20
     @Published var errorMessage: String?
@@ -304,9 +305,10 @@ class VauchiViewModel: ObservableObject {
         Task {
             hasIdentity = repository?.hasIdentity() ?? false
 
+            // Identity/card details are core-owned and rendered via
+            // `coreViewModel`; the shell only needs the contacts-presence
+            // flag (drives the tab layout) once an identity exists.
             if hasIdentity {
-                await loadIdentity()
-                await loadCard()
                 await loadContacts()
             }
 
@@ -324,82 +326,11 @@ class VauchiViewModel: ObservableObject {
         try repository.createIdentity(displayName: name)
         hasIdentity = true
 
-        // Load the created identity and card
-        await loadIdentity()
-        await loadCard()
-
         // Initialize demo contact for new users with no contacts
         await initDemoContactIfNeeded()
     }
 
-    private func loadIdentity() async {
-        guard let repository else { return }
-
-        do {
-            displayName = try repository.getDisplayName()
-            publicId = try repository.getPublicId()
-        } catch {
-            // Identity not found is expected if not created yet
-            displayName = nil
-            publicId = nil
-        }
-    }
-
-    // MARK: - Card
-
-    func loadCard() async {
-        guard let repository else { return }
-
-        do {
-            card = try repository.getOwnCard()
-        } catch {
-            // Card not found is expected if identity not created
-            card = nil
-        }
-    }
-
-    func addField(type: String, label: String, value: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        let fieldType = VauchiFieldType(rawValue: type) ?? .custom
-        try repository.addField(type: fieldType, label: label, value: value)
-        await loadCard()
-    }
-
-    func updateField(label: String, newValue: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.updateField(label: label, newValue: newValue)
-        await loadCard()
-    }
-
-    func removeField(id: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        // Find field by ID to get its label
-        guard let field = card?.fields.first(where: { $0.id == id }) else {
-            return
-        }
-
-        _ = try repository.removeField(label: field.label)
-        await loadCard()
-    }
-
-    func setDisplayName(_ name: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.setDisplayName(name)
-        await loadIdentity()
-        await loadCard()
-    }
+    // MARK: - Lifecycle
 
     /// Triggers auto-lock if enabled when app goes to background (C1)
     func handleAppBackgrounded() {
@@ -418,134 +349,12 @@ class VauchiViewModel: ObservableObject {
     func loadContacts() async {
         guard let repository else { return }
 
-        // Reset pagination
-
         do {
             let contactsData = try repository.listContactsPaginated(offset: 0, limit: contactsPageSize)
             contacts = contactsData
         } catch {
             contacts = []
         }
-    }
-
-    func getContact(id: String) async -> VauchiContact? {
-        guard let repository else { return nil }
-
-        do {
-            return try repository.getContact(id: id)
-        } catch {
-            return nil
-        }
-    }
-
-    // MARK: - Hidden Contacts
-
-    // Based on: features/resistance.feature - R3 Hidden Contact UI
-
-    /// Load hidden contacts
-    func loadHiddenContacts() async {
-        guard let repository else { return }
-
-        do {
-            contacts = try repository.listHiddenContacts()
-        } catch {
-            // Gracefully handle if method not available yet in UniFFI bindings
-            #if DEBUG
-                print("VauchiViewModel: loadHiddenContacts not yet available: \(error)")
-            #endif
-            contacts = []
-        }
-    }
-
-    /// Hide a contact
-    func hideContact(id: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        do {
-            try repository.hideContact(id: id)
-            // Remove from current contacts list
-            contacts.removeAll { $0.id == id }
-        } catch {
-            // Gracefully handle if method not available yet
-            #if DEBUG
-                print("VauchiViewModel: hideContact not yet available: \(error)")
-            #endif
-            throw VauchiRepositoryError.internalError("Hidden contacts feature not yet available")
-        }
-    }
-
-    // MARK: - Contact Notes & Proposal Trust
-
-    /// Save a private note for a contact (never shared).
-    func setContactNote(contactId: String, note: String) async throws {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        try repository.setContactNote(contactId: contactId, note: note)
-    }
-
-    /// Load the private note for a contact.
-    func getContactNote(contactId: String) async throws -> String? {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        return try repository.getContactNote(contactId: contactId)
-    }
-
-    /// Save a private note on a specific field of a contact.
-    func setContactFieldNote(contactId: String, fieldId: String, note: String) async throws {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        try repository.setContactFieldNote(contactId: contactId, fieldId: fieldId, note: note)
-    }
-
-    /// Load all private field notes for a contact.
-    func getContactFieldNotes(contactId: String) async throws -> [MobileFieldNote] {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        return try repository.getContactFieldNotes(contactId: contactId)
-    }
-
-    /// Delete a private note on a specific field of a contact.
-    func deleteContactFieldNote(contactId: String, fieldId: String) async throws {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        try repository.deleteContactFieldNote(contactId: contactId, fieldId: fieldId)
-    }
-
-    /// Toggle proposal trust for a contact (local-only flag).
-    func setProposalTrusted(contactId: String, trusted: Bool) async throws {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        try repository.setProposalTrusted(contactId: contactId, trusted: trusted)
-    }
-
-    func removeContact(id: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        _ = try repository.removeContact(id: id)
-        contacts.removeAll { $0.id == id }
-    }
-
-    // MARK: - Contact Lifecycle (archive / soft-delete)
-
-    /// Soft-delete an imported contact (reversible via undo toast).
-    func softDeleteImportedContact(id: String) async throws {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        try repository.softDeleteImportedContact(id: id)
-        contacts.removeAll { $0.id == id }
-    }
-
-    /// Archive a contact (exchanged contacts — reversible).
-    func archiveContact(id: String) async throws {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        try repository.archiveContact(id: id)
-        contacts.removeAll { $0.id == id }
-    }
-
-    /// Returns the footer-button action id (`"delete_contact"` or
-    /// `"archive_contact"`) for the given contact. Views dispatch on
-    /// the returned id so they never branch on
-    /// `MobileContact.isImported` directly (§1A pure-renderer rule).
-    func contactDetailFooterActionId(contactId: String) throws -> String {
-        guard let repository else { throw VauchiRepositoryError.notInitialized }
-        return try repository.contactDetailFooterActionId(contactId: contactId)
     }
 
     // MARK: - Toast
@@ -587,47 +396,6 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
-    func verifyContact(id: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.verifyContact(id: id)
-        await loadContacts()
-    }
-
-    /// Get own identity fingerprint for verification display.
-    func getOwnFingerprint() -> String? {
-        guard let repository else { return nil }
-        return try? repository.getOwnFingerprint()
-    }
-
-    func trustContactForRecovery(id: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.trustContactForRecovery(id: id)
-        await loadContacts()
-    }
-
-    func untrustContactForRecovery(id: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.untrustContactForRecovery(id: id)
-        await loadContacts()
-    }
-
-    func trustedContactCount() async throws -> UInt32 {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        return try repository.trustedContactCount()
-    }
-
     // MARK: - Demo Contact
 
     // Based on: features/demo_contact.feature
@@ -645,17 +413,6 @@ class VauchiViewModel: ObservableObject {
                 print("VauchiViewModel: Failed to init demo contact: \(error)")
             #endif
         }
-    }
-
-    // MARK: - Visibility Labels
-
-    /// Get all labels for a contact
-    func getLabelsForContact(contactId: String) throws -> [VauchiVisibilityLabel] {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        return try repository.getLabelsForContact(contactId: contactId)
     }
 
     // MARK: - Sync
@@ -691,133 +448,5 @@ class VauchiViewModel: ObservableObject {
         } catch {
             syncState = .error(error.localizedDescription)
         }
-    }
-
-    // MARK: - Backup
-
-    func exportBackup(password: String) async throws -> String {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        return try repository.exportBackup(password: password)
-    }
-
-    func importBackup(data: String, password: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.importBackup(data: data, password: password)
-        hasIdentity = true
-        await loadIdentity()
-        await loadCard()
-        await loadContacts()
-    }
-
-    func exportFullBackup(password: String) async throws -> String {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        return try repository.exportFullBackup(password: password)
-    }
-
-    func importFullBackup(data: String, password: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.importFullBackup(data: data, password: password)
-        hasIdentity = true
-        await loadIdentity()
-        await loadCard()
-        await loadContacts()
-    }
-
-    // MARK: - Visibility
-
-    func hideFieldFromContact(contactId: String, fieldLabel: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.hideFieldFromContact(contactId: contactId, fieldLabel: fieldLabel)
-    }
-
-    func showFieldToContact(contactId: String, fieldLabel: String) async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        try repository.showFieldToContact(contactId: contactId, fieldLabel: fieldLabel)
-    }
-
-    func isFieldVisibleToContact(contactId: String, fieldLabel: String) async throws -> Bool {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-
-        return try repository.isFieldVisibleToContact(contactId: contactId, fieldLabel: fieldLabel)
-    }
-
-    // MARK: - Social Networks
-
-    func listSocialNetworks() -> [VauchiSocialNetwork] {
-        guard let repository else { return [] }
-
-        return repository.listSocialNetworks()
-    }
-
-    func getProfileUrl(networkId: String, username: String) -> String? {
-        guard let repository else { return nil }
-
-        return repository.getProfileUrl(networkId: networkId, username: username)
-    }
-
-    // MARK: - Content Updates
-
-    /// Check if content updates feature is supported
-    func isContentUpdatesSupported() -> Bool {
-        guard let repository else { return false }
-        return repository.isContentUpdatesSupported()
-    }
-
-    /// Check for available content updates
-    func checkContentUpdates() async throws -> MobileUpdateStatus {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-        return try repository.checkContentUpdates()
-    }
-
-    /// Apply available content updates
-    func applyContentUpdates() async throws -> MobileApplyResult {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-        return try repository.applyContentUpdates()
-    }
-
-    /// Reload social networks after content updates
-    func reloadSocialNetworks() async throws {
-        guard let repository else {
-            throw VauchiRepositoryError.notInitialized
-        }
-        try repository.reloadSocialNetworks()
-    }
-
-    // MARK: - Certificate Pinning
-
-    /// Check if certificate pinning is enabled
-    func isCertificatePinningEnabled() -> Bool {
-        guard let repository else { return false }
-        return repository.isCertificatePinningEnabled()
-    }
-
-    /// Set the pinned certificate for relay TLS connections
-    func setPinnedCertificate(_ certPem: String) {
-        guard let repository else { return }
-        repository.setPinnedCertificate(certPem)
     }
 }
