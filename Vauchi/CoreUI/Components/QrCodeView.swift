@@ -14,7 +14,10 @@ import VauchiPlatform
 /// Display mode: encodes `data` to a QR bitmap via the rxing-backed
 /// `generateQrBitmap` UniFFI helper and shows it inline. The `data`
 /// string is the full payload core wants the peer to scan (typically
-/// rotates every ~300 ms during multipart exchange).
+/// rotates every ~300 ms during multipart exchange). The optional
+/// `label` doubles as the exchange status ("Show this" → "Transferring
+/// 3/5" → "Almost done"), folded in by core so the screen needs no
+/// separate status row.
 ///
 /// Scan mode: opens an inline AVCaptureSession preview via the existing
 /// `MultipartCameraPreview` helper. Each detected QR payload is emitted
@@ -33,7 +36,7 @@ struct QrCodeView: View {
     @EnvironmentObject private var viewModel: VauchiViewModel
 
     var body: some View {
-        VStack(spacing: CGFloat(tokens.spacing.md)) {
+        VStack(spacing: CGFloat(tokens.spacing.sm)) {
             switch component.mode {
             case .display:
                 qrDisplayView()
@@ -49,7 +52,7 @@ struct QrCodeView: View {
                     .multilineTextAlignment(.center)
             }
         }
-        .padding(CGFloat(tokens.spacing.md))
+        .padding(CGFloat(tokens.spacing.sm))
         .background(Color(.systemBackground))
         .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
@@ -60,16 +63,15 @@ struct QrCodeView: View {
     @ViewBuilder
     private func qrDisplayView() -> some View {
         if let qrImage = generateQRCode(from: component.data) {
-            // Responsive square: fills the height the screen's fixed
-            // (non-scrolling) layout allots to this card, capped at 250.
-            // The display QR and the scan camera are both `ResponsiveSquare`s,
-            // so the screen's VStack splits the leftover height between them
-            // instead of the rigid 250 camera starving the QR. Previously
-            // the flexible `.scaledToFit().frame(maxWidth: 250)` QR lost all
-            // its height to the rigid camera on a compact screen (iPhone SE,
-            // 667 pt); its card's `.cornerRadius` clip then shrank the QR to
-            // a ~9 pt sliver the peer could not scan.
-            ResponsiveSquare(maxSide: 250) { side in
+            // The display QR is the prominent element (the peer scans it). It's
+            // a greedy `ResponsiveSquare`: as the only flexible element in the
+            // non-scrolling content stack it claims ALL the height left after
+            // the small fixed scan camera + chrome, so the QR is as large as
+            // fits (nearly full-width on a compact iPhone SE now that the
+            // status row is folded into this label) with no wasted gaps, and
+            // never collapses the way the old `.scaledToFit().frame(maxWidth:)`
+            // did under pressure. The cap only limits it on very tall screens.
+            ResponsiveSquare(maxSide: 400) { side in
                 Image(uiImage: qrImage)
                     .interpolation(.none)
                     .resizable()
@@ -136,13 +138,12 @@ struct QrCodeView: View {
 }
 
 /// A centered square that fits the space its parent proposes, capped at
-/// `maxSide`. Greedy on both axes (no intrinsic size), so two of them in a
-/// VStack split the leftover height evenly — which is exactly how the
-/// exchange screen keeps the display QR and the scan camera both fully
-/// visible on a compact, non-scrolling layout (iPhone SE) instead of the
-/// rigid camera taking 250 pt and starving the QR. The `side` is handed to
-/// the content builder so a `UIViewRepresentable` (the camera preview, which
-/// has no intrinsic size) gets a definite `.frame(width:height:)`.
+/// `maxSide`. Greedy on both axes — it fills whatever the parent offers — so
+/// as the only flexible element in the exchange content stack it absorbs all
+/// the slack left by the small fixed scan camera, making the display QR as
+/// large as fits with no empty gaps. The square itself is clamped to
+/// `min(width, height, maxSide)` and centered. The `side` is handed to the
+/// content builder so the inner image gets a definite `.frame(width:height:)`.
 private struct ResponsiveSquare<Content: View>: View {
     let maxSide: CGFloat
     @ViewBuilder var content: (CGFloat) -> Content
@@ -153,7 +154,7 @@ private struct ResponsiveSquare<Content: View>: View {
             content(side)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: maxSide)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -186,30 +187,30 @@ private struct QrScannerStaticView: View {
     let useFrontCamera: Bool
     @Environment(\.designTokens) private var tokens
 
+    /// The scan preview is the secondary element — a small fixed square so the
+    /// display QR above it stays the focus and gets the rest of the viewport,
+    /// with the camera/cancel buttons stacked beside it in the same row
+    /// (matching Android). A definite frame is also required for
+    /// `MultipartCameraPreview` (a `UIViewRepresentable` with no
+    /// intrinsicContentSize): an earlier flexible `.aspectRatio(1.0)
+    /// .frame(maxWidth:)` left it at 0×0 and the AVCaptureSession previewed
+    /// into `.zero` bounds (F2-NEW-3).
+    private let cameraSide: CGFloat = 110
+
     var body: some View {
-        // Responsive square (capped at 250) — shares the screen's leftover
-        // height with the display QR so neither starves on a compact,
-        // non-scrolling layout. The `side` from `ResponsiveSquare` is a
-        // definite size for `MultipartCameraPreview` (a `UIViewRepresentable`
-        // with no intrinsicContentSize); an earlier flexible
-        // `.aspectRatio(1.0).frame(maxWidth: 250)` left it at 0×0 inside the
-        // VStack (F2-NEW-3) — the AVCaptureSession started but the preview
-        // layer's bounds were `.zero`. A definite per-frame size avoids that.
-        ResponsiveSquare(maxSide: 250) { side in
-            MultipartCameraPreview(
-                onChunkScanned: { code in
-                    onAction(.textChanged(componentId: component.id, value: code))
-                },
-                useFrontCamera: useFrontCamera
-            )
-            .id(useFrontCamera)
-            .frame(width: side, height: side)
-            .clipShape(RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md)))
-            .overlay(
-                RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md))
-                    .stroke(Color.cyan.opacity(0.5), lineWidth: 2)
-            )
-        }
+        MultipartCameraPreview(
+            onChunkScanned: { code in
+                onAction(.textChanged(componentId: component.id, value: code))
+            },
+            useFrontCamera: useFrontCamera
+        )
+        .id(useFrontCamera)
+        .frame(width: cameraSide, height: cameraSide)
+        .clipShape(RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md)))
+        .overlay(
+            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md))
+                .stroke(Color.cyan.opacity(0.5), lineWidth: 2)
+        )
         .accessibilityLabel(component.a11y?.label ?? "QR code scanner")
         .accessibilityHint(component.a11y?.hint ?? "Point the camera at a Vauchi QR code to scan it")
     }

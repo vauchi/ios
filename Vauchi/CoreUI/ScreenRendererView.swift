@@ -49,20 +49,22 @@ struct ScreenRendererView: View {
                     .accessibilityValue(progress.label ?? "\(progress.currentStep) of \(progress.totalSteps)")
                 }
 
-                // Fixed-layout screens (e.g. the QR exchange,
-                // `multi_stage_exchange`) must NOT scroll — a live QR or
-                // camera preview should size to the viewport and never
-                // reflow. Drop the ScrollView wrapper in that case. Default
-                // (`.scroll`) keeps the scrolling content region.
+                // Content region. `.fixed` (the multi_stage_exchange QR +
+                // camera) must NOT scroll — it fills the viewport so the live
+                // QR/camera size to the available space and never reflow. The
+                // content stack distributes that height itself: the display QR
+                // grows to claim the room while the scan camera stays a small
+                // fixed square. `.scroll` keeps the scrolling region with a
+                // Spacer pushing the action buttons to the bottom.
                 if screen.layout == .fixed {
                     scrollableContent
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 } else {
                     ScrollView {
                         scrollableContent
                     }
+                    Spacer()
                 }
-
-                Spacer()
 
                 // Action buttons
                 VStack(spacing: CGFloat(radius.mdLg)) {
@@ -107,11 +109,13 @@ struct ScreenRendererView: View {
         .environment(\.designTokens, screen.tokens)
     }
 
-    /// Header + components stack. Wrapped in a `ScrollView` for the
-    /// default `.scroll` layout; rendered bare for `.fixed` so the
-    /// content sizes to the viewport without scrolling.
+    /// Header + components stack.
     private var scrollableContent: some View {
-        VStack(spacing: CGFloat(spacing.lg)) {
+        // Fixed (exchange) screens pack tightly and hug the horizontal edges
+        // so the display QR grows large; scrolling screens keep the roomier
+        // `lg` rhythm and gutter.
+        let isFixed = screen.layout == .fixed
+        return VStack(spacing: CGFloat(isFixed ? spacing.sm : spacing.lg)) {
             // Header
             VStack(spacing: CGFloat(spacing.sm)) {
                 Text(screen.title)
@@ -126,14 +130,14 @@ struct ScreenRendererView: View {
                         .multilineTextAlignment(.center)
                 }
             }
-            .padding(.top, CGFloat(spacing.lg))
+            .padding(.top, CGFloat(isFixed ? spacing.sm : spacing.lg))
 
             // Components
             ForEach(Array(screen.components.enumerated()), id: \.offset) { _, component in
                 ComponentView(component: component, onAction: onAction)
             }
         }
-        .padding(.horizontal, CGFloat(spacing.lg))
+        .padding(.horizontal, CGFloat(isFixed ? spacing.sm : spacing.lg))
     }
 
     private func checkForToastComponent() {
