@@ -60,12 +60,22 @@ struct QrCodeView: View {
     @ViewBuilder
     private func qrDisplayView() -> some View {
         if let qrImage = generateQRCode(from: component.data) {
-            Image(uiImage: qrImage)
-                .interpolation(.none)
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: 250, maxHeight: 250)
-                .accessibilityLabel("QR code")
+            // Responsive square: fills the height the screen's fixed
+            // (non-scrolling) layout allots to this card, capped at 250.
+            // The display QR and the scan camera are both `ResponsiveSquare`s,
+            // so the screen's VStack splits the leftover height between them
+            // instead of the rigid 250 camera starving the QR. Previously
+            // the flexible `.scaledToFit().frame(maxWidth: 250)` QR lost all
+            // its height to the rigid camera on a compact screen (iPhone SE,
+            // 667 pt); its card's `.cornerRadius` clip then shrank the QR to
+            // a ~9 pt sliver the peer could not scan.
+            ResponsiveSquare(maxSide: 250) { side in
+                Image(uiImage: qrImage)
+                    .interpolation(.none)
+                    .resizable()
+                    .frame(width: side, height: side)
+                    .accessibilityLabel("QR code")
+            }
         } else {
             Text("Failed to generate QR code")
                 .font(.caption)
@@ -125,6 +135,28 @@ struct QrCodeView: View {
     }
 }
 
+/// A centered square that fits the space its parent proposes, capped at
+/// `maxSide`. Greedy on both axes (no intrinsic size), so two of them in a
+/// VStack split the leftover height evenly — which is exactly how the
+/// exchange screen keeps the display QR and the scan camera both fully
+/// visible on a compact, non-scrolling layout (iPhone SE) instead of the
+/// rigid camera taking 250 pt and starving the QR. The `side` is handed to
+/// the content builder so a `UIViewRepresentable` (the camera preview, which
+/// has no intrinsic size) gets a definite `.frame(width:height:)`.
+private struct ResponsiveSquare<Content: View>: View {
+    let maxSide: CGFloat
+    @ViewBuilder var content: (CGFloat) -> Content
+
+    var body: some View {
+        GeometryReader { geo in
+            let side = max(0, min(geo.size.width, geo.size.height, maxSide))
+            content(side)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .frame(maxWidth: .infinity, maxHeight: maxSide)
+    }
+}
+
 /// Inner view that observes [AppViewModel] directly so changes to its
 /// nested `@Published useFrontCamera` re-render the camera preview.
 /// Always proxies to [QrScannerStaticView] with the resolved Bool so
@@ -155,26 +187,29 @@ private struct QrScannerStaticView: View {
     @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        // F2-NEW-3: pin the preview to an explicit 250×250 frame.
-        // Earlier `.aspectRatio(1.0).frame(maxWidth: 250)` left
-        // `MultipartCameraPreview` (a `UIViewRepresentable` with no
-        // intrinsicContentSize) at 0×0 inside the SwiftUI VStack — the
-        // AVCaptureSession started but the preview layer's bounds were
-        // `.zero`. The legacy `Views/QRScannerView.swift` uses the same
-        // explicit-size pattern.
-        MultipartCameraPreview(
-            onChunkScanned: { code in
-                onAction(.textChanged(componentId: component.id, value: code))
-            },
-            useFrontCamera: useFrontCamera
-        )
-        .id(useFrontCamera)
-        .frame(width: 250, height: 250)
-        .clipShape(RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md)))
-        .overlay(
-            RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md))
-                .stroke(Color.cyan.opacity(0.5), lineWidth: 2)
-        )
+        // Responsive square (capped at 250) — shares the screen's leftover
+        // height with the display QR so neither starves on a compact,
+        // non-scrolling layout. The `side` from `ResponsiveSquare` is a
+        // definite size for `MultipartCameraPreview` (a `UIViewRepresentable`
+        // with no intrinsicContentSize); an earlier flexible
+        // `.aspectRatio(1.0).frame(maxWidth: 250)` left it at 0×0 inside the
+        // VStack (F2-NEW-3) — the AVCaptureSession started but the preview
+        // layer's bounds were `.zero`. A definite per-frame size avoids that.
+        ResponsiveSquare(maxSide: 250) { side in
+            MultipartCameraPreview(
+                onChunkScanned: { code in
+                    onAction(.textChanged(componentId: component.id, value: code))
+                },
+                useFrontCamera: useFrontCamera
+            )
+            .id(useFrontCamera)
+            .frame(width: side, height: side)
+            .clipShape(RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md)))
+            .overlay(
+                RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md))
+                    .stroke(Color.cyan.opacity(0.5), lineWidth: 2)
+            )
+        }
         .accessibilityLabel(component.a11y?.label ?? "QR code scanner")
         .accessibilityHint(component.a11y?.hint ?? "Point the camera at a Vauchi QR code to scan it")
     }
