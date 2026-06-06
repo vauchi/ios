@@ -296,9 +296,9 @@ private struct MainContentView: View {
     private var nativeBody: AnyView? {
         switch coreVM.currentScreen?.screenId {
         case "multi_stage_exchange":
-            AnyView(FaceToFaceExchangeView())
+            AnyView(ExchangeHardwareScreen(coreVM: coreVM, flow: .multiStage))
         case let id? where id.hasPrefix("exchange_nfc"):
-            AnyView(NfcTapExchangeView())
+            AnyView(ExchangeHardwareScreen(coreVM: coreVM, flow: .nfc))
         default:
             nil
         }

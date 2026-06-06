@@ -13,13 +13,11 @@
 		0378355005A83E0E4F086ED9 /* testFieldListEmpty.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 74400BE90CD802A95312C01B /* testFieldListEmpty.1.png */; };
 		04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44506B768565C7F52A328D17 /* BackgroundSyncService.swift */; };
 		061330DA32957211240D0384 /* default_name.json in Resources */ = {isa = PBXBuildFile; fileRef = 2A73AC43BC305CE2DFADE313 /* default_name.json */; };
-		08BBA81985924347B7E1EF13 /* NfcTapExchangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4250A43A593FC6433DDE08B8 /* NfcTapExchangeView.swift */; };
 		08FE2DB74EB09F3226F6371C /* testCreateIdentityStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = FE7FAFE456A1F513CADD0631 /* testCreateIdentityStep.1.png */; };
 		096B891F7A059A83D77D46FB /* testHomeViewWithFieldsDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = CACA1754B8EE1F6D0FC0A04D /* testHomeViewWithFieldsDark.1.png */; };
 		0BF3BAD91800C40DD1EE0501 /* testToggleListDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 04898F36EF605FB293E24A7A /* testToggleListDark.1.png */; };
 		0DDA36A34D79308F42591BA3 /* PlatformEventListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */; };
 		0FC8C1248458C98DAE402799 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80D908420E7769CC3225282C /* AppViewModel.swift */; };
-		105F980BB187FE89CD24B5D0 /* FaceToFaceExchangeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A34F01BD07BC1A3FF39429C8 /* FaceToFaceExchangeView.swift */; };
 		10B3D5481A8E17F07E439629 /* testContactsViewWithContactsGerman.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 2708AF0FE3066AC85A5EAF63 /* testContactsViewWithContactsGerman.1.png */; };
 		10BCAB3BFF0E6F665B519A1F /* WaitingForUnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */; };
 		10E60235A5FD647963680956 /* AudioProximityServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */; };
@@ -136,6 +134,7 @@
 		8EAFADC7FD9B053DE04551E5 /* testTextInputDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 74945D0AD48A22730D842AA2 /* testTextInputDark.1.png */; };
 		8F1D5438434B846475597477 /* ComponentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA272578E81247FB65A5C145 /* ComponentView.swift */; };
 		8F26A26B96E4272DD1DD0EBE /* DividerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47BDD68D75A3C55A093327A0 /* DividerView.swift */; };
+		90394B3B25DBC78F790E4C3B /* ExchangeHardwareScreenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B23942D76EC5EA833CB68B0 /* ExchangeHardwareScreenTests.swift */; };
 		904F29C70542F6760875A1A8 /* testTextComponentTitle.1.png in Resources */ = {isa = PBXBuildFile; fileRef = D591A9D83EA84F2E2EBCE827 /* testTextComponentTitle.1.png */; };
 		92298947313F6DDD98944A43 /* contact_edit_visibility.json in Resources */ = {isa = PBXBuildFile; fileRef = 66948B6E4E0E10C56A794B44 /* contact_edit_visibility.json */; };
 		950CE4D91D128D63DD0CCD7F /* testReadyStep.1.png in Resources */ = {isa = PBXBuildFile; fileRef = C2A9361B22965ACC0939BC78 /* testReadyStep.1.png */; };
@@ -182,6 +181,7 @@
 		B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */; };
 		BB6505CC618DB35AC542A1AB /* testTextInputWithValue.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 0314EC94F504540A5BF02139 /* testTextInputWithValue.1.png */; };
 		BEA34D69912C7558E8710831 /* AnimatedQrTimerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21B33063ADD1C9CDC8C4186B /* AnimatedQrTimerTests.swift */; };
+		C00ADA729D9E6CC080C0F75D /* ExchangeHardwareScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F11BA2A21984B44051D431 /* ExchangeHardwareScreen.swift */; };
 		C02CAD8B0F82B366CD4428D4 /* testSettingsGroupDark.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 3CCDAF85FAFC1F03E0E5EF5D /* testSettingsGroupDark.1.png */; };
 		C041D751F823A021E52DA876 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331706A539BC8824C9067EF5 /* AppDelegate.swift */; };
 		C0AB5B4A5DA1F0977B52C55E /* testEditableTextWithError.1.png in Resources */ = {isa = PBXBuildFile; fileRef = EA5E442564907FA7A15240F0 /* testEditableTextWithError.1.png */; };
@@ -281,6 +281,7 @@
 		08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitingForUnlockView.swift; sourceTree = "<group>"; };
 		09D79E0645FD89F4223BD160 /* testEditableTextDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testEditableTextDark.1.png; sourceTree = "<group>"; };
 		0A594A2A3929ED3F36E46FBD /* RenderContextPusher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderContextPusher.swift; sourceTree = "<group>"; };
+		0B23942D76EC5EA833CB68B0 /* ExchangeHardwareScreenTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeHardwareScreenTests.swift; sourceTree = "<group>"; };
 		0B50587B7EC6319B106FB462 /* testToggleListSingleItem.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testToggleListSingleItem.1.png; sourceTree = "<group>"; };
 		0CBA469A3ED4A4660FA45B6A /* NFCExchangeServiceTransceiveShimTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFCExchangeServiceTransceiveShimTests.swift; sourceTree = "<group>"; };
 		0D3497B12DDDF10370069F86 /* Vauchi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Vauchi.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -336,7 +337,6 @@
 		3FF0727A90972B41385E4C9B /* delivery_status.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = delivery_status.json; sourceTree = "<group>"; };
 		418F950D6541F912A27DA57D /* BleExchangeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleExchangeService.swift; sourceTree = "<group>"; };
 		423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
-		4250A43A593FC6433DDE08B8 /* NfcTapExchangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NfcTapExchangeView.swift; sourceTree = "<group>"; };
 		42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEventListenerTests.swift; sourceTree = "<group>"; };
 		444EB6E932C6BF9631AEE4D3 /* testStatusIndicatorAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testStatusIndicatorAccessibility.1.txt; sourceTree = "<group>"; };
 		44506B768565C7F52A328D17 /* BackgroundSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncService.swift; sourceTree = "<group>"; };
@@ -425,11 +425,11 @@
 		9FE92FFF24932C40ACAA1A02 /* ExistingCodeDiagnostic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExistingCodeDiagnostic.swift; sourceTree = "<group>"; };
 		A145FAE191703FB7CE06A212 /* duress_overview.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = duress_overview.json; sourceTree = "<group>"; };
 		A2E7533C698BC2DD14E881AD /* testLabelsView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testLabelsView.1.png; sourceTree = "<group>"; };
-		A34F01BD07BC1A3FF39429C8 /* FaceToFaceExchangeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceToFaceExchangeView.swift; sourceTree = "<group>"; };
 		A3A0DA0F1F9BF466F1D07D6E /* testTextComponentSubtitle.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextComponentSubtitle.1.png; sourceTree = "<group>"; };
 		A5E222C3D79E971771915FC6 /* testInlineConfirmAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testInlineConfirmAccessibility.1.txt; sourceTree = "<group>"; };
 		A73A60BF23E98F506D8E5A8D /* DropdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownView.swift; sourceTree = "<group>"; };
 		A75DABB058471CE8E0587E20 /* home_empty.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = home_empty.json; sourceTree = "<group>"; };
+		A7F11BA2A21984B44051D431 /* ExchangeHardwareScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeHardwareScreen.swift; sourceTree = "<group>"; };
 		A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testLoadingView.1.png; sourceTree = "<group>"; };
 		A96F7230AD994FA18A53A544 /* testWelcomeScreenDark.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testWelcomeScreenDark.1.png; sourceTree = "<group>"; };
 		A96FE811E67752C2D8F9079E /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
@@ -539,6 +539,7 @@
 				46CE8156A15BD5428BE8514A /* ContractTests.swift */,
 				65D24E88349C756B9B8609CE /* CoreScreenNavigationTests.swift */,
 				C38FE0127E86CB045D89F88E /* ExchangeCommandBridgeTests.swift */,
+				0B23942D76EC5EA833CB68B0 /* ExchangeHardwareScreenTests.swift */,
 				CE69227779252FAF163BCC07 /* ModelsTests.swift */,
 				3AE4D6990BBEF8744FC7C05B /* MultiStagePollTimerTests.swift */,
 				47AE9012ABEFEB654325B7C5 /* NavTabDenyListTests.swift */,
@@ -718,6 +719,7 @@
 				75191060DEDFC1C531D132FE /* AVCameraCaptureSheet.swift */,
 				8EC13750603D7C1EF84BACBC /* CoreOnboardingView.swift */,
 				9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */,
+				A7F11BA2A21984B44051D431 /* ExchangeHardwareScreen.swift */,
 				ADDBAB28CCA0714450AC2B99 /* FilePickerModifier.swift */,
 				D5A795D0FCDE3726CBB528F8 /* OrientationLock.swift */,
 				2BCD1112BEA2A776E27B15C3 /* ScreenRendererView.swift */,
@@ -805,9 +807,7 @@
 			isa = PBXGroup;
 			children = (
 				6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */,
-				A34F01BD07BC1A3FF39429C8 /* FaceToFaceExchangeView.swift */,
 				644F12D83413B334E234F4AC /* LockScreenView.swift */,
-				4250A43A593FC6433DDE08B8 /* NfcTapExchangeView.swift */,
 				AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */,
 				36EBCAF628D08C167C0D9721 /* QRScannerView.swift */,
 				08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */,
@@ -1218,6 +1218,7 @@
 				566C2C33F23B683B8CB8226F /* DeviceCapabilitiesPusherTests.swift in Sources */,
 				99D8ED2B60D43F62A79B0317 /* ExchangeCommandBridgeTests.swift in Sources */,
 				358AFF239AC4AAA206629F70 /* ExchangeFlowTests.swift in Sources */,
+				90394B3B25DBC78F790E4C3B /* ExchangeHardwareScreenTests.swift in Sources */,
 				2E32911FDD537E5F664BF57C /* KeychainServiceTests.swift in Sources */,
 				78DEE11DBBB312E894650FBF /* LocalizationServiceSettingsTests.swift in Sources */,
 				222E89071C885A441E27F978 /* ModelsTests.swift in Sources */,
@@ -1288,8 +1289,8 @@
 				8F26A26B96E4272DD1DD0EBE /* DividerView.swift in Sources */,
 				4322A5CEDF0F187C9BB72186 /* DropdownView.swift in Sources */,
 				D708F1E5547134FC3A984FD5 /* EditableTextView.swift in Sources */,
+				C00ADA729D9E6CC080C0F75D /* ExchangeHardwareScreen.swift in Sources */,
 				D6F192EAAFA4D534AC285A8E /* ExistingCodeDiagnostic.swift in Sources */,
-				105F980BB187FE89CD24B5D0 /* FaceToFaceExchangeView.swift in Sources */,
 				1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */,
 				267E3A1A19C1015C648A747C /* FieldListView.swift in Sources */,
 				6C3BF8542A2953DB82A45322 /* FilePickerModifier.swift in Sources */,
@@ -1305,7 +1306,6 @@
 				ACB1FE30772E1BEAF475FAD3 /* NFCExchangeService.swift in Sources */,
 				281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */,
 				345A6E8CFA128DEE17B47EAF /* NfcDiagnosticView.swift in Sources */,
-				08BBA81985924347B7E1EF13 /* NfcTapExchangeView.swift in Sources */,
 				138BEFDCC908871EDE97D333 /* NotificationService.swift in Sources */,
 				B2FC70839C3AEFBE5C15753F /* OrientationLock.swift in Sources */,
 				9C89BE4773D3F64FB89BFE9B /* PasscodePolicy.swift in Sources */,

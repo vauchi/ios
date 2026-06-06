@@ -12,20 +12,27 @@
 # One filename per line. Lines starting with `#` and blank lines
 # ignored.
 #
-# --- Platform-required (likely permanent) ----------------------------
-# LockScreenView   — pre-unlock biometric host; runs before core is
-#                    decrypted, so cannot render a core ScreenModel.
-# AppPasswordView  — pre-unlock password entry; same constraint.
-# QRScannerView    — AVCaptureSession host (camera lifecycle owner).
+# --- Platform-required / kept (permanent) ----------------------------
+# LockScreenView    — pre-unlock biometric host; runs before core is
+#                     decrypted, so cannot render a core ScreenModel.
+# AppPasswordView   — pre-unlock password entry; same constraint.
+# QRScannerView     — AVCaptureSession host (camera lifecycle owner).
+# WaitingForUnlockView — pre-unlock wait state; same constraint.
+# QRDiagnosticView  — `#if DEBUG`-only diagnostic that intentionally
+#                     exercises the FFI layer (MobileQrEccLevel) to tune
+#                     the multi-stage exchange protocol. Active dev tool,
+#                     not a retirement target (G8 of the problem record).
 # AVCameraCaptureSheet lives in CoreUI/, out of scope for this lint.
 AppPasswordView.swift
 LockScreenView.swift
 QRScannerView.swift
 WaitingForUnlockView.swift
+QRDiagnosticView.swift
 
 # --- To-be-retired (G1 targets) --------------------------------------
-# Each line below is a planned deletion. See the per-file plan in
-# the problem record once written.
-FaceToFaceExchangeView.swift
-NfcTapExchangeView.swift
-QRDiagnosticView.swift
+# Empty: G1 complete 2026-06-06. The last two domain-named shells
+# (FaceToFaceExchangeView + NfcTapExchangeView) were byte-identical
+# render-only wrappers differing only by screen-id guard; unified into the
+# non-domain-named `CoreUI/ExchangeHardwareScreen` (out of this lint's
+# Views/ scope). QRDiagnosticView reclassified as a kept dev tool (above)
+# per G8. Any NEW domain-named view in Views/ is now rejected by the lint.
