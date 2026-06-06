@@ -6,6 +6,7 @@
 // Snapshot tests for all SwiftUI views
 // Based on: VRT implementation plan Phase 2
 
+import CoreUIModels
 import SnapshotTesting
 import SwiftUI
 @testable import Vauchi
@@ -111,6 +112,55 @@ final class VisualRegressionTests: XCTestCase {
             .environmentObject(vm)
 
         assertScreenSnapshot(of: view)
+    }
+
+    // MARK: - Exchange (multi-stage QR) compact-viewport regression
+
+    /// Regression for the iPhone-SE QR collapse. On the non-scrolling
+    /// `multi_stage_exchange` screen (`ScreenLayout.fixed`) the display QR and
+    /// the scan camera must SHARE the compact viewport. Before the
+    /// `ResponsiveSquare` fix the rigid 250 pt camera kept its full size and
+    /// starved the flexible `scaledToFit` QR, whose card `.cornerRadius` clip
+    /// then shrank it to a ~9 pt sliver the peer could not scan. Rendered at
+    /// iPhone-SE logical size (375×667) so the height pressure is reproduced
+    /// regardless of the host simulator. The simulator has no camera, so the
+    /// scan square shows the deterministic "Camera unavailable" placeholder;
+    /// the baseline guards that the display QR stays large (both squares
+    /// co-sized), not collapsed.
+    func testMultiStageExchangeCompactViewport() {
+        let vm = makeViewModel()
+        let screen = ScreenModel(
+            screenId: "multi_stage_exchange",
+            title: "Exchange",
+            components: [
+                .qrCode(QrCodeComponent(
+                    id: "own_qr",
+                    data: "VAUCHI:snapshot-test-payload-0123456789abcdef",
+                    mode: .display,
+                    label: "Show this to your contact"
+                )),
+                .qrCode(QrCodeComponent(
+                    id: "peer_scan",
+                    data: "",
+                    mode: .scan,
+                    label: "Scan their code"
+                )),
+            ],
+            actions: [],
+            layout: .fixed
+        )
+        let view = ScreenRendererView(screen: screen, onAction: { _ in })
+            .environmentObject(vm)
+
+        assertSnapshot(
+            of: view,
+            as: .image(
+                perceptualPrecision: 0.98,
+                layout: .fixed(width: 375, height: 667),
+                traits: UITraitCollection(displayScale: 2.0)
+            ),
+            record: isRecording
+        )
     }
 
     // testSettingsView, testThemeSettingsView, testLanguageSettingsView
