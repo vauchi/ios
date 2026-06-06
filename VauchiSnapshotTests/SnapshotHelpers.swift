@@ -13,12 +13,14 @@ import VauchiPlatform
 ///
 /// By default, creates a minimal "has identity, no contacts" state
 /// suitable for most view snapshots.
+/// Identity display-name / public-id / card are no longer held on
+/// VauchiViewModel (G4 2026-06-06 — those projections were core-owned and
+/// dead). The card/identity-detail snapshots render core wire types
+/// (PreviewComponent etc.) directly, so the helper only seeds the shell
+/// state the surviving views read.
 @MainActor
 func makeViewModel(
     hasIdentity: Bool = true,
-    displayName: String = "Alice",
-    publicId: String = "abc123def456",
-    card: VauchiContactCard? = nil,
     contacts: [VauchiContact] = [],
     syncState: SyncState = .idle,
     isOnline: Bool = true,
@@ -28,26 +30,12 @@ func makeViewModel(
     vm.isLoading = false
     vm.hasIdentity = hasIdentity
     vm.errorMessage = errorMessage
-
-    if hasIdentity {
-        vm.displayName = displayName
-        vm.publicId = publicId
-        vm.card = card ?? VauchiContactCard(displayName: displayName, fields: [])
-    }
-
     vm.contacts = contacts
     vm.syncState = syncState
     vm.isOnline = isOnline
 
     return vm
 }
-
-/// Sample fields for testing card display
-let sampleFields: [VauchiContactField] = [
-    VauchiContactField(id: "f1", fieldType: .email, label: "Personal Email", value: "alice@example.com"),
-    VauchiContactField(id: "f2", fieldType: .phone, label: "Mobile", value: "+41 79 123 45 67"),
-    VauchiContactField(id: "f3", fieldType: .website, label: "Website", value: "https://alice.example.com"),
-]
 
 /// Sample contacts for testing contact list
 private func sampleContact(id: String, name: String, verified: Bool) -> VauchiContact {

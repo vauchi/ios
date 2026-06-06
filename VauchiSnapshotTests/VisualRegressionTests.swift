@@ -89,9 +89,10 @@ final class VisualRegressionTests: XCTestCase {
     }
 
     func testHomeViewWithFields() {
-        let vm = makeViewModel(
-            card: VauchiContactCard(displayName: "Alice", fields: sampleFields)
-        )
+        // `my_info` renders core wire types via `coreViewModel`; the card
+        // is no longer a VauchiViewModel field (G4), so the shell helper
+        // needs no card seed here.
+        let vm = makeViewModel()
         let view = CoreScreenView(actionId: "my_info")
             .environmentObject(vm)
 
@@ -229,9 +230,10 @@ final class VisualRegressionTests: XCTestCase {
     // MARK: - Dark Mode Variants
 
     func testHomeViewWithFieldsDark() {
-        let vm = makeViewModel(
-            card: VauchiContactCard(displayName: "Alice", fields: sampleFields)
-        )
+        // `my_info` renders core wire types via `coreViewModel`; the card
+        // is no longer a VauchiViewModel field (G4), so the shell helper
+        // needs no card seed here.
+        let vm = makeViewModel()
         let view = CoreScreenView(actionId: "my_info")
             .environmentObject(vm)
             .environment(\.colorScheme, .dark)
@@ -277,9 +279,10 @@ final class VisualRegressionTests: XCTestCase {
     }
 
     func testHomeViewWithFieldsGerman() {
-        let vm = makeViewModel(
-            card: VauchiContactCard(displayName: "Alice", fields: sampleFields)
-        )
+        // `my_info` renders core wire types via `coreViewModel`; the card
+        // is no longer a VauchiViewModel field (G4), so the shell helper
+        // needs no card seed here.
+        let vm = makeViewModel()
         let view = CoreScreenView(actionId: "my_info")
             .environmentObject(vm)
 
