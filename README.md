@@ -7,14 +7,15 @@
 [![Coverage](https://img.shields.io/endpoint?url=https://vauchi.gitlab.io/ios/badges/coverage.json&label=coverage)](https://gitlab.com/vauchi/ios/-/pipelines)
 [![REUSE](https://api.reuse.software/badge/gitlab.com/vauchi/ios)](https://api.reuse.software/info/gitlab.com/vauchi/ios)
 
-> [!WARNING]
-> **Pre-Alpha Software** - This project is under heavy
-> development and not ready for production use.
-> APIs may change without notice. Use at your own risk.
+> [!NOTE]
+> **You're early — and that's the point.** Vauchi is pre-alpha and
+> under heavy development: not yet ready for production, and APIs may
+> change without notice. If you're here now, you can help shape it —
+> try it, break it, and tell us what's missing.
 
 # Vauchi iOS
 
-Native iOS app for Vauchi - privacy-focused contact card exchange.
+Native iOS app for Vauchi - living contact cards, exchanged in person.
 
 ## Prerequisites
 
