@@ -171,7 +171,6 @@
 		ACB5D66C9DC53BB3DEC7044E /* VauchiKeychainBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE32C32136CEB8811C89778C /* VauchiKeychainBridgeTests.swift */; };
 		AD01F0575CCEB6301F6F7834 /* DiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */; };
 		AD3A83D552E25C7A50441AE1 /* testHomeScreenEmpty.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 4C33C5B250ED22834663E64B /* testHomeScreenEmpty.1.png */; };
-		ADBDBB305DC254FE3A94B2F3 /* MultipartQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D4DF5873BED53D99177B4A /* MultipartQRView.swift */; };
 		AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95373D9E6440FED4B532EBDD /* VauchiRepository.swift */; };
 		B105AF29B3E8B2E6AE0F3DFE /* ActionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1793C01FB5DEAE4C84AED7C8 /* ActionListView.swift */; };
 		B1BAEDCA4134802BFA607609 /* VisualRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7A69A54D0323B9A571D9A5 /* VisualRegressionTests.swift */; };
@@ -369,7 +368,6 @@
 		653B68CB3B3D86B13D52E63E /* DeviceCapabilitiesPusherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilitiesPusherTests.swift; sourceTree = "<group>"; };
 		65D24E88349C756B9B8609CE /* CoreScreenNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreScreenNavigationTests.swift; sourceTree = "<group>"; };
 		66948B6E4E0E10C56A794B44 /* contact_edit_visibility.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contact_edit_visibility.json; sourceTree = "<group>"; };
-		66D4DF5873BED53D99177B4A /* MultipartQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartQRView.swift; sourceTree = "<group>"; };
 		677E67E216D48E378A773CD8 /* testTextInputAccessibility.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testTextInputAccessibility.1.txt; sourceTree = "<group>"; };
 		6994C561A843EE3A785246A5 /* testInlineConfirmDestructive.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInlineConfirmDestructive.1.png; sourceTree = "<group>"; };
 		6A4D772FACC8B2FEB3D60DA8 /* testEditableTextDisplay.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testEditableTextDisplay.1.png; sourceTree = "<group>"; };
@@ -811,7 +809,6 @@
 				AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */,
 				36EBCAF628D08C167C0D9721 /* QRScannerView.swift */,
 				08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */,
-				E187C8E8E4D2A6C1CDA025AA /* Components */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -894,14 +891,6 @@
 				AA5DDD4269C94CD90ACEF692 /* testWipeConfirmScreen.1.png */,
 			);
 			path = ScreenSnapshotTests;
-			sourceTree = "<group>";
-		};
-		E187C8E8E4D2A6C1CDA025AA /* Components */ = {
-			isa = PBXGroup;
-			children = (
-				66D4DF5873BED53D99177B4A /* MultipartQRView.swift */,
-			);
-			path = Components;
 			sourceTree = "<group>";
 		};
 		F9FC793A89B3CAD3083ACA25 /* Services */ = {
@@ -1302,7 +1291,6 @@
 				6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */,
 				9C9A5E8876CAFA84118E8DBF /* LockScreenView.swift in Sources */,
 				2CF66DF4CD6F73102C31FA79 /* MultipartCameraPreview.swift in Sources */,
-				ADBDBB305DC254FE3A94B2F3 /* MultipartQRView.swift in Sources */,
 				ACB1FE30772E1BEAF475FAD3 /* NFCExchangeService.swift in Sources */,
 				281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */,
 				345A6E8CFA128DEE17B47EAF /* NfcDiagnosticView.swift in Sources */,
