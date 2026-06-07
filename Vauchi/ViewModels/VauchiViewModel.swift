@@ -209,10 +209,13 @@ class VauchiViewModel: ObservableObject {
                         // returns ActionResult.biometricUnlockOutcome.
                         let resultJson = try? engine?.handleHardwareEvent(event: .biometricUnlockSucceeded)
                         var promptForDuress = false
+                        // core 0.51.44+: handleHardwareEvent returns the
+                        // {action_result, commands} envelope; the unlock outcome
+                        // rides in action_result.
                         if let resultJson,
                            let data = resultJson.data(using: .utf8),
-                           let result = try? coreJSONDecoder.decode(ActionResult.self, from: data),
-                           case let .biometricUnlockOutcome(outcome) = result {
+                           let envelope = try? coreJSONDecoder.decode(HardwareEventEnvelope.self, from: data),
+                           case let .biometricUnlockOutcome(outcome)? = envelope.actionResult {
                             promptForDuress = (outcome == "PromptForDuressPin")
                         }
                         DispatchQueue.main.async {

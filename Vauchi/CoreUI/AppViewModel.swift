@@ -616,16 +616,43 @@ class AppViewModel: ObservableObject {
 
     private func sendHardwareEvent(_ event: MobileEvent) {
         do {
-            if let resultJson = try appEngine.handleHardwareEvent(event: event) {
-                guard let resultData = resultJson.data(using: .utf8) else { return }
-                let result = try coreJSONDecoder.decode(ActionResult.self, from: resultData)
+            let resultJson = try appEngine.handleHardwareEvent(event: event)
+            guard let resultData = resultJson.data(using: .utf8) else { return }
+            // core 0.51.44+: handleHardwareEvent returns
+            // `{"action_result": <ActionResult>|null, "commands": [<CommandDTO>]}`.
+            // The commands carry the protocol/lifecycle work the event produced
+            // (previously stranded); action_result is null when the event only
+            // advanced an engine-held machine.
+            let envelope = try coreJSONDecoder.decode(HardwareEventEnvelope.self, from: resultData)
+            if let result = envelope.actionResult {
                 applyResult(result)
+            }
+            if !envelope.commands.isEmpty {
+                handleExchangeCommands(envelope.commands)
             }
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to send hardware event: \(error)")
             #endif
         }
+    }
+}
+
+/// Envelope returned by `PlatformAppEngine.handleHardwareEvent` (core 0.51.44+):
+/// `{"action_result": <ActionResult>|null, "commands": [<CommandDTO>]}`.
+///
+/// `actionResult` is optional — `nil` when the event only advanced an
+/// engine-held machine (e.g. a multi-stage tick). `commands` carries every
+/// `Command` the event produced so the frontend executes it on the hardware
+/// (previously stranded in core's pending queue). Module-internal so the
+/// biometric-unlock caller in `VauchiViewModel` shares it.
+struct HardwareEventEnvelope: Decodable {
+    let actionResult: ActionResult?
+    let commands: [CommandDTO]
+
+    enum CodingKeys: String, CodingKey {
+        case actionResult = "action_result"
+        case commands
     }
 }
 
