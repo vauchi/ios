@@ -112,6 +112,14 @@ class AppViewModel: ObservableObject {
         }
     }
 
+    /// One-shot location capture for the exchange "where we met" annotation
+    /// (ADR-051). Driven by `Command::LocationRequest` in `handleExchangeCommands`.
+    lazy var locationService = LocationService()
+
+    /// True while a `LocationRequest` capture is in flight. Lets tests assert
+    /// the command started a capture without touching the OS modal (CC-23).
+    @Published var locationRequestInFlight = false
+
     struct AlertMessage: Identifiable {
         let id = UUID()
         let title: String
@@ -592,12 +600,30 @@ class AppViewModel: ObservableObject {
         }
     }
 
-    /// Try the hardware-transport command helpers (BLE, then audio) in turn.
-    /// Returns `true` as soon as one handles `command`, so the caller can
-    /// `continue`. Folding both guards into one call keeps
+    /// Try the out-of-switch command helpers (BLE, audio, then location) in
+    /// turn. Returns `true` as soon as one handles `command`, so the caller
+    /// can `continue`. Folding these into one call keeps
     /// `handleExchangeCommands` within SwiftLint's complexity budget.
     private func handleTransportCommand(_ command: CommandDTO) -> Bool {
         handleBleCommand(command) || handleAudioCommand(command)
+            || handleLocationCommand(command)
+    }
+
+    /// ADR-051 capture-at-exchange: grab a one-shot location fix and report it
+    /// back so the engine records `set_exchange_location`. The service answers
+    /// `permissionDenied`/`hardwareUnavailable` when no fix is possible, which
+    /// clears core's pending capture. Extracted to keep `handleExchangeCommands`
+    /// within SwiftLint's complexity budget.
+    private func handleLocationCommand(_ command: CommandDTO) -> Bool {
+        guard case let .locationRequest(timeoutMs) = command else { return false }
+        locationRequestInFlight = true
+        locationService.requestOneShot(timeoutMs: timeoutMs) { [weak self] event in
+            DispatchQueue.main.async {
+                self?.locationRequestInFlight = false
+                self?.sendHardwareEvent(event)
+            }
+        }
+        return true
     }
 
     /// Dispatch the engine-driven BLE exchange commands (ADR-031) to the

@@ -17,7 +17,7 @@ settings:
 packages:
   VauchiPlatform:
     url: https://gitlab.com/vauchi/vauchi-platform-swift.git
-    version: "0.51.47"
+    version: "0.51.48"
   SnapshotTesting:
     url: https://github.com/pointfreeco/swift-snapshot-testing.git
     from: "1.17.0"
@@ -77,6 +77,7 @@ targets:
         NSMicrophoneUsageDescription: "Vauchi uses the microphone for ultrasonic proximity verification during contact exchange."
         NSFaceIDUsageDescription: "Vauchi uses Face ID to unlock the app and authorize sensitive actions like exporting your backup or restoring your identity."
         NFCReaderUsageDescription: "Vauchi uses NFC to exchange contact cards with nearby devices."
+        NSLocationWhenInUseUsageDescription: "Vauchi can record where you met a contact during an in-person exchange. This is stored privately on your device and never shared."
         # Export-compliance declaration App Store Connect requires at
         # submission. Without it, every upload triggers a manual
         # questionnaire. Kept here (not just in Info.plist) so xcodegen

@@ -45,6 +45,8 @@
 	<string>Vauchi uses the camera to scan QR codes for contact exchange.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Vauchi uses Face ID to unlock the app and authorize sensitive actions like exporting your backup or restoring your identity.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Vauchi can record where you met a contact during an in-person exchange. This is stored privately on your device and never shared.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Vauchi uses the microphone for ultrasonic proximity verification during contact exchange.</string>
 	<key>UIBackgroundModes</key>
