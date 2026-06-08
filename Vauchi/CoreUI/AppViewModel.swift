@@ -92,6 +92,27 @@ class AppViewModel: ObservableObject {
     /// host is built only when the first NFC command arrives.
     lazy var nfcService: NFCExchangeDispatching = NFCExchangeService()
 
+    /// CoreBluetooth bridge for engine-driven BLE exchange commands
+    /// (`BleStartAdvertising`/`BleStartScanning`/`BleConnect`/… commands).
+    /// `lazy` so the central/peripheral managers are built only when the
+    /// first BLE command arrives; `activateBleIfNeeded` installs the
+    /// hardware-event callback exactly once.
+    lazy var bleService = BleExchangeService()
+    private var bleActivated = false
+
+    /// Install the `MobileEvent` callback on `bleService` the first time a
+    /// BLE command is dispatched. Mirrors the NFC `activate(payload:)`
+    /// wiring: the closure forwards every event the service emits
+    /// (`bleDeviceDiscovered`, `bleConnected`, `bleCharacteristicNotified`,
+    /// hardware errors) back into core via `sendHardwareEvent`.
+    private func activateBleIfNeeded() {
+        guard !bleActivated else { return }
+        bleActivated = true
+        bleService.activate { [weak self] event in
+            self?.sendHardwareEvent(event)
+        }
+    }
+
     struct AlertMessage: Identifiable {
         let id = UUID()
         let title: String
@@ -485,6 +506,9 @@ class AppViewModel: ObservableObject {
     /// `OnboardingViewModel.onExchangeCommands` bridge any more).
     func handleExchangeCommands(_ commands: [CommandDTO]) {
         for command in commands {
+            // BLE commands are dispatched in their own helper to keep this
+            // switch within SwiftLint's complexity budget.
+            if handleBleCommand(command) { continue }
             switch command {
             case .imagePickFromLibrary:
                 showImagePicker = true
@@ -561,13 +585,48 @@ class AppViewModel: ObservableObject {
             case .accelerometerStop:
                 AccelerometerProximityService.shared.stop()
             default:
-                // BLE / Audio exchange commands are not yet dispatched on
-                // iOS: the session-based ExchangeCommandHandler was retired
-                // with slice 32m. Wiring these into the engine-driven
-                // handleExchangeCommands path is follow-on work.
+                // BLE is handled in `handleBleCommand`; audio-proximity
+                // exchange commands are not yet dispatched on iOS — wiring
+                // those into the engine-driven path is follow-on work.
                 break
             }
         }
+    }
+
+    /// Dispatch the engine-driven BLE exchange commands (ADR-031) to the
+    /// lazily-activated `bleService`, forwarding every `MobileEvent` back via
+    /// `sendHardwareEvent`. Returns `true` when `command` was a BLE command
+    /// (and was handled here), `false` otherwise so the caller's main switch
+    /// can take it. Split out to keep `handleExchangeCommands` within
+    /// SwiftLint's cyclomatic-complexity budget.
+    private func handleBleCommand(_ command: CommandDTO) -> Bool {
+        switch command {
+        case let .bleStartAdvertising(serviceUuid, payload):
+            // Responder side (P5c): advertise the 128-bit service UUID plus
+            // the role token as a 32-bit service UUID, and stand up the GATT
+            // server. Core's `BleExchangeFlow` owns the handshake.
+            activateBleIfNeeded()
+            bleService.startAdvertising(serviceUuid: serviceUuid, payload: Data(payload))
+        case let .bleStartScanning(serviceUuid):
+            activateBleIfNeeded()
+            bleService.startScanning(serviceUuid: serviceUuid)
+        case .bleStopScanning:
+            bleService.stopScanning()
+        case let .bleConnect(deviceId):
+            bleService.connect(deviceId: deviceId)
+        case let .bleWriteCharacteristic(uuid, data):
+            // A write to a responder-notify characteristic is a peripheral
+            // push; everything else is a central GATT write. The service
+            // routes on `BleUuids.peripheralNotifyChars`.
+            bleService.writeCharacteristic(uuid: uuid, data: Data(data))
+        case let .bleReadCharacteristic(uuid):
+            bleService.readCharacteristic(uuid: uuid)
+        case .bleDisconnect:
+            bleService.disconnect()
+        default:
+            return false
+        }
+        return true
     }
 
     /// Send picked file bytes back to core. Called from the view layer's
