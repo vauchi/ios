@@ -506,9 +506,9 @@ class AppViewModel: ObservableObject {
     /// `OnboardingViewModel.onExchangeCommands` bridge any more).
     func handleExchangeCommands(_ commands: [CommandDTO]) {
         for command in commands {
-            // BLE commands are dispatched in their own helper to keep this
-            // switch within SwiftLint's complexity budget.
-            if handleBleCommand(command) { continue }
+            // BLE + audio commands are dispatched in their own helpers to
+            // keep this switch within SwiftLint's complexity budget.
+            if handleTransportCommand(command) { continue }
             switch command {
             case .imagePickFromLibrary:
                 showImagePicker = true
@@ -585,12 +585,20 @@ class AppViewModel: ObservableObject {
             case .accelerometerStop:
                 AccelerometerProximityService.shared.stop()
             default:
-                // BLE is handled in `handleBleCommand`; audio-proximity
-                // exchange commands are not yet dispatched on iOS — wiring
-                // those into the engine-driven path is follow-on work.
+                // BLE / audio-proximity are handled in `handleBleCommand` /
+                // `handleAudioCommand`. Any remaining command is a no-op on
+                // iOS.
                 break
             }
         }
+    }
+
+    /// Try the hardware-transport command helpers (BLE, then audio) in turn.
+    /// Returns `true` as soon as one handles `command`, so the caller can
+    /// `continue`. Folding both guards into one call keeps
+    /// `handleExchangeCommands` within SwiftLint's complexity budget.
+    private func handleTransportCommand(_ command: CommandDTO) -> Bool {
+        handleBleCommand(command) || handleAudioCommand(command)
     }
 
     /// Dispatch the engine-driven BLE exchange commands (ADR-031) to the
@@ -623,6 +631,38 @@ class AppViewModel: ObservableObject {
             bleService.readCharacteristic(uuid: uuid)
         case .bleDisconnect:
             bleService.disconnect()
+        default:
+            return false
+        }
+        return true
+    }
+
+    /// Dispatch the ultrasonic audio-proximity commands (ADR-031) to the
+    /// shared `AudioProximityService`, mirroring Android's
+    /// `AudioEmit/Listen/Stop` wiring. `AudioListenForResponse` records and
+    /// replies with `MobileEvent.audioSamplesRecorded`; `AudioEmitChallenge`
+    /// just plays the challenge tone (blocking, so it runs off the main
+    /// thread). Returns `true` when `command` was an audio command, `false`
+    /// otherwise so the caller's main switch can take it. Split out to keep
+    /// `handleExchangeCommands` within SwiftLint's complexity budget.
+    private func handleAudioCommand(_ command: CommandDTO) -> Bool {
+        switch command {
+        case let .audioEmitChallenge(samples, sampleRate):
+            // `emitSignal` schedules the buffer and blocks for its duration —
+            // never call it on the main thread.
+            DispatchQueue.global(qos: .userInitiated).async {
+                _ = AudioProximityService.shared.emitSignal(samples: samples, sampleRate: sampleRate)
+            }
+        case let .audioListenForResponse(timeoutMs, sampleRate):
+            AudioProximityService.shared.receiveSignal(
+                timeoutMs: timeoutMs, sampleRate: sampleRate
+            ) { [weak self] samples, recordedRate in
+                self?.sendHardwareEvent(
+                    .audioSamplesRecorded(samples: samples, sampleRate: recordedRate)
+                )
+            }
+        case .audioStop:
+            AudioProximityService.shared.stop()
         default:
             return false
         }
