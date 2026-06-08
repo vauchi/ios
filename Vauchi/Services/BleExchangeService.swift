@@ -34,6 +34,10 @@ final class BleExchangeService: NSObject {
     private var gattCharacteristics: [String: CBMutableCharacteristic] = [:]
     private var subscribedCentrals: Set<UUID> = []
     private var pendingAdvertise: (service: String, token: Data)?
+    /// Notifies that `updateValue` rejected (BLE transmit queue full). Drained
+    /// FIFO on `peripheralManagerIsReady(toUpdateSubscribers:)`. Without this the
+    /// responder's chunked card transfer silently drops on a full queue.
+    private var pendingNotifies: [(uuid: String, data: Data)] = []
 
     /// Initialize and start the central manager. The peripheral manager is
     /// created lazily on the first advertise command.
@@ -86,9 +90,8 @@ final class BleExchangeService: NSObject {
     /// Mirrors Android's `MainActivity` write routing.
     func writeCharacteristic(uuid: String, data: Data) {
         let normalized = uuid.lowercased()
-        if BleUuids.peripheralNotifyChars.contains(uuid), let ch = gattCharacteristics[normalized] {
-            ch.value = data
-            _ = peripheralManager?.updateValue(data, for: ch, onSubscribedCentrals: nil)
+        if BleUuids.peripheralNotifyChars.contains(uuid), gattCharacteristics[normalized] != nil {
+            enqueueNotify(uuid: normalized, data: data)
             return
         }
         guard let peripheral = connectedPeripheral else {
@@ -344,6 +347,37 @@ extension BleExchangeService: CBPeripheralManagerDelegate {
             }
             peripheral.respond(to: request, withResult: .success)
         }
+    }
+
+    /// Send a peripheral notify, queuing it (FIFO) if the BLE transmit queue is
+    /// full (`updateValue` returns false). Without this the chunked card
+    /// transfer silently drops a notify on a full queue and the exchange stalls.
+    private func enqueueNotify(uuid: String, data: Data) {
+        pendingNotifies.append((uuid: uuid, data: data))
+        drainNotifies()
+    }
+
+    /// Drain queued notifies until `updateValue` rejects (queue full) — then
+    /// stop and resume from `peripheralManagerIsReady(toUpdateSubscribers:)`.
+    private func drainNotifies() {
+        guard let pm = peripheralManager else { return }
+        while let next = pendingNotifies.first {
+            guard let ch = gattCharacteristics[next.uuid] else {
+                pendingNotifies.removeFirst()
+                continue
+            }
+            ch.value = next.data
+            if pm.updateValue(next.data, for: ch, onSubscribedCentrals: nil) {
+                pendingNotifies.removeFirst()
+            } else {
+                return // transmit queue full — wait for peripheralManagerIsReady
+            }
+        }
+    }
+
+    /// BLE transmit queue has space again — resume draining notifies.
+    func peripheralManagerIsReady(toUpdateSubscribers _: CBPeripheralManager) {
+        drainNotifies()
     }
 
     /// The initiator read our EXCHANGE_PAYLOAD characteristic (legacy path).
