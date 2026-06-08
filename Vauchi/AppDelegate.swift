@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// AppDelegate.swift
 // Minimal UIApplicationDelegate that exists only to gate
 // `supportedInterfaceOrientationsFor` on the `OrientationLock`
 // singleton. SwiftUI does not expose this hook directly.

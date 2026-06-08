@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// CoreScreenView.swift
 // Generic wrapper that renders any core-driven screen via PlatformAppEngine.
 
 import PhotosUI

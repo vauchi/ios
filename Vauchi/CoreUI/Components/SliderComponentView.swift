@@ -2,9 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// SliderComponentView.swift
-// Renders a Slider component from core UI
-
 import CoreUIModels
 import SwiftUI
 

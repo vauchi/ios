@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// NfcCommandDispatchTests.swift
 // Verifies `AppViewModel.handleExchangeCommands` routes the three NFC
 // reader commands (`nfcActivate` / `nfcSendApdu` / `nfcDeactivate`) to
 // `NFCExchangeDispatching`, and that `nfcActivate` hands the service a

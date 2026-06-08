@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// AVCameraCaptureSheet.swift
 // Camera capture using AVCaptureSession + AVCapturePhotoOutput so we can
 // hand raw HEIC/JPEG bytes from `AVCapturePhoto.fileDataRepresentation()`
 // straight to core. Replaces the prior `UIImagePickerController` wrapper,

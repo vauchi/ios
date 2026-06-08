@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// LocalizationService.swift
 // Internationalization service using vauchi-platform bindings
 
 import Combine

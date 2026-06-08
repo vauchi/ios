@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// NFCExchangeService.swift
 // CoreNFC reader (transceive-shim only).
 // iOS is always the reader/initiator (no HCE support on iOS).
 

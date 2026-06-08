@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// WaitingForUnlockView.swift
 // Passive waiting screen shown when protected data is unavailable
 // Based on: _private/docs/problems/2026-03-02-locked-device-startup-error/
 

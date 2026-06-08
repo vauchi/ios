@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// ContentView.swift
 // Root navigation for Vauchi iOS app
 
 import SwiftUI

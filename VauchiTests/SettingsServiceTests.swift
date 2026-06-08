@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// SettingsServiceTests.swift
 // Tests for SettingsService
 
 @testable import Vauchi
@@ -111,10 +110,8 @@ final class SettingsServiceTests: XCTestCase {
         service.syncOnLaunch = false
         service.notificationsEnabled = false
 
-        // Reset
         service.resetToDefaults()
 
-        // Verify defaults are restored
         XCTAssertEqual(service.relayUrl, SettingsService.defaultRelayUrl)
         XCTAssertTrue(service.autoSyncEnabled)
         XCTAssertTrue(service.syncOnLaunch)

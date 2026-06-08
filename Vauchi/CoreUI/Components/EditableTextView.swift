@@ -2,9 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// EditableTextView.swift
-// Renders an EditableText component from core UI (iOS)
-
 import CoreUIModels
 import SwiftUI
 

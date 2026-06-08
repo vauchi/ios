@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// DemoContactTests.swift
 // Tests for Demo Contact feature - based on features/demo_contact.feature Gherkin scenarios
 //
 // Traces to: features/demo_contact.feature
@@ -16,14 +15,12 @@ final class DemoContactTests: XCTestCase {
     var tempDir: URL!
 
     override func setUpWithError() throws {
-        // Create temp directory for each test
         tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
     }
 
     override func tearDownWithError() throws {
-        // Clean up temp directory
         try? FileManager.default.removeItem(at: tempDir)
     }
 
@@ -115,7 +112,6 @@ final class DemoContactTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        // Initialize demo contact
         _ = try repo.initDemoContactIfNeeded()
 
         let beforeDismiss = try XCTUnwrap(repo.getDemoContact())
@@ -145,7 +141,6 @@ final class DemoContactTests: XCTestCase {
         _ = try repo.initDemoContactIfNeeded()
         try repo.dismissDemoContact()
 
-        // Verify dismissed
         XCTAssertNil(try repo.getDemoContact())
 
         // Restore from settings
@@ -195,7 +190,6 @@ final class DemoContactTests: XCTestCase {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        // Initialize demo contact
         _ = try repo.initDemoContactIfNeeded()
 
         // Contact count should still be 0

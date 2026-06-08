@@ -2,9 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// AvatarPreviewView.swift
-// Renders an AvatarPreview component from core UI
-
 import CoreUIModels
 import SwiftUI
 

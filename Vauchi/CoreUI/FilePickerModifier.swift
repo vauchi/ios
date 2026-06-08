@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// FilePickerModifier.swift
 // Hosts the SwiftUI `.fileImporter` for the ADR-031 file-picker
 // `ExchangeCommand`. Applied at ContentView root + CoreOnboardingView
 // so the system document picker is reachable from any flow that emits

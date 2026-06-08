@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// ExchangeCommandBridgeTests.swift
 // Verifies `AppViewModel.handleExchangeCommands` correctly translates
 // each `CommandDTO` variant into the matching @Published
 // state that drives a SwiftUI presentation:

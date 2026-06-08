@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// ComponentView.swift
 // Routes a Component enum to the appropriate SwiftUI view
 
 import CoreUIModels

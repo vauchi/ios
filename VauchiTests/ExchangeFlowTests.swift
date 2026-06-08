@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// ExchangeFlowTests.swift
 // Tests for contact exchange flow integration
 // Based on: features/contact_exchange.feature
 
@@ -41,10 +40,8 @@ final class ExchangeFlowTests: XCTestCase {
 
     /// Scenario: Card can be updated with fields
     func testUpdateCardFields() throws {
-        // Add email field via addField API
         try repo.addField(type: .email, label: "Email", value: "test@example.com")
 
-        // Verify update persisted
         let updatedCard = try repo.getOwnCard()
         XCTAssertEqual(updatedCard.fields.count, 1)
         XCTAssertEqual(updatedCard.fields[0].fieldType, .email)

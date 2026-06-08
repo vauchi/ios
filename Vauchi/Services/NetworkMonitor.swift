@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// NetworkMonitor.swift
 // Network connectivity monitoring service for Vauchi iOS
 // Uses NWPathMonitor for reliable network state detection
 
@@ -67,7 +66,6 @@ final class NetworkMonitor: ObservableObject {
             }
         }
 
-        // Start monitoring immediately
         start()
     }
 

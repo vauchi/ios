@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// ContentUpdateService.swift
 // Manages remote content updates (networks, locales, themes, help)
 
 import Combine
@@ -107,7 +106,6 @@ final class ContentUpdateService: ObservableObject {
             Keys.checkInterval: Defaults.checkInterval,
         ])
 
-        // Load last check time
         if let timestamp = defaults.object(forKey: Keys.lastCheck) as? Date {
             lastCheckTime = timestamp
         }
@@ -182,7 +180,6 @@ final class ContentUpdateService: ObservableObject {
             }
         }
 
-        // Update status
         if failed.isEmpty {
             updateStatus = .upToDate
         } else if !applied.isEmpty {
@@ -227,7 +224,6 @@ final class ContentUpdateService: ObservableObject {
     private func compareVersions(remote: ContentManifest) -> [ContentType] {
         var updates: [ContentType] = []
 
-        // Get cached manifest
         guard let cachedData = defaults.data(forKey: Keys.cachedManifest),
               let cached = try? JSONDecoder().decode(ContentManifest.self, from: cachedData)
         else {
@@ -292,7 +288,6 @@ final class ContentUpdateService: ObservableObject {
         let url = URL(string: contentUrl)!.appendingPathComponent(entry.path)
         try await downloadAndVerify(url: url, checksum: entry.checksum, filename: filename, type: type)
 
-        // Save manifest after successful update
         if let manifestData = try? JSONEncoder().encode(manifest) {
             defaults.set(manifestData, forKey: Keys.cachedManifest)
         }
@@ -330,13 +325,11 @@ final class ContentUpdateService: ObservableObject {
             }
         }
 
-        // Verify checksum
         let actualChecksum = computeChecksum(buffer)
         guard actualChecksum == checksum else {
             throw ContentUpdateError.checksumMismatch
         }
 
-        // Save to cache
         try saveCachedContent(type: type, filename: filename, data: buffer)
     }
 

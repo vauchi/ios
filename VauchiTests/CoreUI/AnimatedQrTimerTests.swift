@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// AnimatedQrTimerTests.swift
 // Tests for AppViewModel QR frame timer lifecycle.
 // Based on: features/contact_exchange.feature — animated QR frames.
 

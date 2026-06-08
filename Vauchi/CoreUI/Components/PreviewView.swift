@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// PreviewView.swift
 // Renders a Preview component from core UI (Wire Humble — variants
 // replace the old contact-specific group views).
 

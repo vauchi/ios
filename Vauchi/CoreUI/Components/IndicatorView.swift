@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// IndicatorView.swift
 // Renders Component::Indicator — chrome-positioned status chip.
 // Distinct from StatusIndicatorView (body-positioned).
 // Per shell-purity investigation 2026-05-28.

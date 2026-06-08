@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// SectionedActionListView.swift
 // Renders Component::SectionedActionList — grouped menu with native sections.
 // Distinct from ActionListView (flat menu).
 // Per shell-purity investigation 2026-05-28.

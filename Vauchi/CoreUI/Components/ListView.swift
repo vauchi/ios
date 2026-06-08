@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// ListView.swift
 // Renders a List component from core UI (Wire Humble — domain-agnostic).
 
 import CoreUIModels

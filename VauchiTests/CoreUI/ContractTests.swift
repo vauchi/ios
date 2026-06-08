@@ -76,7 +76,6 @@ final class ContractTests: XCTestCase {
                 screen.components.isEmpty,
                 "Fixture '\(name)': components must not be empty"
             )
-            // Verify all actions that exist have non-empty labels
             for action in screen.actions {
                 XCTAssertFalse(
                     action.label.isEmpty,

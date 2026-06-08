@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// VauchiRepository.swift
 // Repository layer wrapping UniFFI bindings for Vauchi iOS
 //
 // DONE: Restore feature - core-driven via ExchangeCommand::FilePickFromUser +
@@ -327,7 +326,6 @@ class VauchiRepository {
         self.dataDir = dir
         self.relayUrl = relayUrl
 
-        // Create data directory if needed
         try FileManager.default.createDirectory(
             atPath: dir,
             withIntermediateDirectories: true,

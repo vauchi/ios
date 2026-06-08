@@ -2,9 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// DividerView.swift
-// Renders a Divider component from core UI
-
 import SwiftUI
 
 /// Renders a core `Component::Divider` as a horizontal line separator.

@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// AppViewModel.swift
 // Wraps PlatformAppEngine to drive ScreenRendererView for all core screens.
 // Ported from macOS — same pattern, iOS-specific adaptations.
 

@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// PlatformEdgeTests.swift
 // Tests for iOS platform-specific edge cases
 // Based on: features/platform_edge_cases.feature
 
@@ -151,7 +150,6 @@ final class PlatformEdgeTests: XCTestCase {
 
         XCTAssertEqual(retrieved, testValue, "Retrieved value should match stored value")
 
-        // Cleanup
         try? KeychainService.shared.delete(key: testKey)
     }
 
@@ -176,7 +174,6 @@ final class PlatformEdgeTests: XCTestCase {
     func test_network_monitor_connection_state() {
         let monitor = NetworkMonitor.shared
 
-        // Start monitoring
         monitor.start()
 
         // Connection state should be determinable
@@ -193,7 +190,6 @@ final class PlatformEdgeTests: XCTestCase {
         XCTAssertTrue(validTypes.contains(connectionType),
                       "Connection type \(connectionType) should be one of wifi/cellular/wired/unknown")
 
-        // Stop monitoring
         monitor.stop()
     }
 

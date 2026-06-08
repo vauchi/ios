@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// NetworkMonitorTests.swift
 // Tests for NetworkMonitor service
 // Based on: features/sync_updates.feature - network connectivity requirements
 

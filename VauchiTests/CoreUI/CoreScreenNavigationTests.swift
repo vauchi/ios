@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// CoreScreenNavigationTests.swift
 // Guards the cross-tab navigation behaviour the main shell relies on.
 //
 // Bug repro:

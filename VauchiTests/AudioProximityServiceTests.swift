@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// AudioProximityServiceTests.swift
 // Tests for AudioProximityService - ultrasonic proximity verification
 // Based on: features/contact_exchange.feature
 

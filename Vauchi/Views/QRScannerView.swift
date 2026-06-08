@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// QRScannerView.swift
 // Camera-based QR code scanning
 
 import AVFoundation
@@ -169,7 +168,6 @@ class CameraView: UIView {
     }
 
     private func setupCamera() {
-        // Check camera authorization
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
             initializeCamera()

@@ -2,9 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// QrCodeView.swift
-// Renders a QrCode component from core UI
-
 import CoreUIModels
 import SwiftUI
 import VauchiPlatform

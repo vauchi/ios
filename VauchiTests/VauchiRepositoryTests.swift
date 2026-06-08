@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// VauchiRepositoryTests.swift
 // Tests for VauchiRepository - based on features/*.feature Gherkin scenarios
 
 import Darwin
@@ -42,14 +41,12 @@ final class VauchiRepositoryTests: XCTestCase {
     }
 
     override func setUpWithError() throws {
-        // Create temp directory for each test
         tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
     }
 
     override func tearDownWithError() throws {
-        // Clean up temp directory
         try? FileManager.default.removeItem(at: tempDir)
     }
 
@@ -272,7 +269,6 @@ final class VauchiRepositoryTests: XCTestCase {
     func testImportBackup() throws {
         var backupData: String!
 
-        // Create identity and export backup
         do {
             let repo = try VauchiRepository(dataDir: tempDir.path)
             try repo.createIdentity(displayName: "Alice")
@@ -280,7 +276,6 @@ final class VauchiRepositoryTests: XCTestCase {
             backupData = try repo.exportBackup(password: "correct-horse-battery-staple")
         }
 
-        // Create new repository and import backup
         let newDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: newDir, withIntermediateDirectories: true)

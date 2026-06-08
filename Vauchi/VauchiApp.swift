@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// VauchiApp.swift
 // Main entry point for Vauchi iOS app
 
 import SwiftUI

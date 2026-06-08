@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// SettingsService.swift
 // Persistent settings storage using UserDefaults
 
 import Foundation

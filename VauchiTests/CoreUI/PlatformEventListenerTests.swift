@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// PlatformEventListenerTests.swift
 // Phase 2A (core-gui-architecture-alignment): AppViewModel wires a
 // PlatformEventListener on init so that async core events (background
 // sync, delivery receipts, device link) refresh the rendered screen

@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// BackgroundSyncService.swift
 // Background sync service using BGTaskScheduler for Vauchi iOS
 // Schedules periodic sync tasks to keep contacts up-to-date
 

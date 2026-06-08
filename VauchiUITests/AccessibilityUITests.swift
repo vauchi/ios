@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// AccessibilityUITests.swift
 // Structural accessibility tests — queries live view hierarchy.
 // Zero coupling to core action IDs, flow order, or localized strings.
 // Uses --reset-for-testing to bypass onboarding (identity seeded by app).
@@ -90,7 +89,6 @@ final class AccessibilityUITests: XCTestCase {
         }
         app.buttons["tab.myCard"].tap()
 
-        // Verify the app is still responsive.
         XCTAssertTrue(app.buttons["tab.myCard"].exists,
                       "Tab bar should still exist after round-trip navigation")
         let buttons = app.buttons.allElementsBoundByIndex

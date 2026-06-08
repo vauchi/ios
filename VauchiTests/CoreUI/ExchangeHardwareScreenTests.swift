@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// ExchangeHardwareScreenTests.swift
 // Tests for `ExchangeHardwareScreen.Flow.hosts`, the screen-id guard that
 // gates the on-dismiss `cancel` emission. The guard exists so a tab switch
 // (wrapper dismissed while core is STILL on the exchange screen) cancels the

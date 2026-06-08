@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// VauchiViewModel.swift
 // App-shell coordinator for the Vauchi iOS app.
 //
 // Post-G4 (2026-06-06, problem record 2026-05-02-ios-humble-ui-deep-retirement):
@@ -282,7 +281,6 @@ class VauchiViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // Initialize with current state
         isOnline = NetworkMonitor.shared.isConnected
         try? coreViewModel?.appEngine.setNetworkOnline(online: isOnline)
     }

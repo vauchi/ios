@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// NavTabDenyListTests.swift
 // Frontend-source deny-list for the zero-domain-vocab tab migration —
 // the iOS analogue of core's `wire_humble_keys_tests.rs` (ADR-043 Am4,
 // tier0-d plan item 2 §4 "Enforcement").

@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// LocalizationServiceSettingsTests.swift
 // Pin the UserDefaults-canonical contract for LocalizationService
 // introduced by S4 of `2026-05-16-settings-storage-by-sensitivity`:
 // the service no longer consults `appEngine.appPreferences()` for

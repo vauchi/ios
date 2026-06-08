@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// VauchiKeychainBridgeTests.swift
 // Tests for VauchiKeychainBridge — MobilePlatformKeychain adapter over KeychainService
 
 @testable import Vauchi

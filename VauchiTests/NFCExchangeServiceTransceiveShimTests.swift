@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// NFCExchangeServiceTransceiveShimTests.swift
 // Unit tests for the transceive-shim API added in Phase 2 of the
 // NFC engine-graduation
 // (_private/docs/problems/2026-05-19-nfc-exchange-engine-graduation).

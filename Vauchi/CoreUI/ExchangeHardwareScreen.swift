@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// ExchangeHardwareScreen.swift
 // G1 of `_private/docs/problems/2026-05-02-ios-humble-ui-deep-retirement`.
 //
 // Pure Humble UI shell for the two hardware-exchange screens

@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// MultiStagePollTimerTests.swift
 // Tests for AppViewModel multi-stage exchange poll-timer lifecycle.
 // Regression guard for Bug 5 of
 // `2026-05-30-exchange-screen-nav-visual-bugs`: the core cycle thread

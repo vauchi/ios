@@ -2,9 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// BannerView.swift
-// Renders a Banner component from core UI
-
 import CoreUIModels
 import SwiftUI
 

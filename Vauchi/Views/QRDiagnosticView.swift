@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// QRDiagnosticView.swift
 // Standalone QR scanning diagnostic — tests QR generation, front-camera
 // detection, and reports live stats to find the optimal configuration
 // for the multi-stage exchange protocol.

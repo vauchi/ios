@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// VauchiViewModelTests.swift
 // Tests for VauchiViewModel — the app-shell coordinator.
 //
 // The card-field / contact-CRUD / hidden-contact tests were removed in G4
@@ -125,7 +124,6 @@ final class VauchiViewModelTests: XCTestCase {
         XCTAssertEqual(authRequired, AppState.authenticationRequired)
         XCTAssertEqual(ready, AppState.ready)
 
-        // Verify distinct values
         XCTAssertNotEqual(loading, waiting)
         XCTAssertNotEqual(loading, authRequired)
         XCTAssertNotEqual(loading, ready)

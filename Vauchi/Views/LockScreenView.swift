@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// LockScreenView.swift
 // Branded lock screen shown when device authentication is required
 // Based on: _private/docs/problems/2026-03-02-locked-device-startup-error/
 

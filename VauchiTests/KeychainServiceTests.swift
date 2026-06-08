@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// KeychainServiceTests.swift
 // Tests for KeychainService - secure storage with file fallback
 // Based on: features/security.feature
 
@@ -22,7 +21,6 @@ final class KeychainServiceTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        // Clean up test keys
         try? keychainService.delete(key: "test_key")
         try? keychainService.delete(key: "test_string")
     }
@@ -117,7 +115,6 @@ final class KeychainServiceTests: XCTestCase {
         XCTAssertEqual(loadedKey, storageKey)
         XCTAssertEqual(loadedKey.count, 32, "Storage key should be 32 bytes")
 
-        // Cleanup
         try keychainService.delete(key: "storage_key")
     }
 
@@ -131,7 +128,6 @@ final class KeychainServiceTests: XCTestCase {
 
         XCTAssertEqual(loadedBackup, backupData)
 
-        // Cleanup
         try keychainService.delete(key: "identity_backup")
     }
 

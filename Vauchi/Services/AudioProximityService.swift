@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// AudioProximityService.swift
 // Ultrasonic audio proximity verification for Vauchi iOS
 // Audio proximity methods (PlatformAudioHandler removed in core 0.19.21, ADR-031)
 
@@ -121,7 +120,6 @@ class AudioProximityService {
             }
             player.play()
 
-            // Wait for playback to complete
             let duration = Double(samples.count) / Double(sampleRate)
             Thread.sleep(forTimeInterval: duration + 0.1)
 

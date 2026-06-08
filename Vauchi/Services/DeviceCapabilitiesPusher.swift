@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// DeviceCapabilitiesPusher.swift
 // Detects this device's exchange-relevant hardware and pushes it to
 // core's `DeviceCapabilities` via `setDeviceCapabilitiesJson`. Mirrors
 // `RenderContextPusher.swift`: a pure JSON builder + a thin

@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// BackgroundSyncServiceTests.swift
 // Tests for BackgroundSyncService
 // Based on: features/sync_updates.feature - background sync requirements
 

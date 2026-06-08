@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// VisibilityLabelsTests.swift
 // Tests for visibility labels feature
 // Based on: features/visibility_labels.feature
 
@@ -16,7 +15,6 @@ final class VisibilityLabelsTests: XCTestCase {
     var repo: VauchiRepository!
 
     override func setUpWithError() throws {
-        // Create temp directory for each test
         tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
@@ -25,7 +23,6 @@ final class VisibilityLabelsTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
-        // Clean up temp directory
         try? FileManager.default.removeItem(at: tempDir)
     }
 
@@ -233,11 +230,9 @@ final class VisibilityLabelsTests: XCTestCase {
     /// Scenario: Set field visibility for label
     /// @field-visibility
     func testSetLabelFieldVisibility() throws {
-        // Add a field first
         try repo.addField(type: .phone, label: "Personal", value: "+1-555-111-1111")
         let label = try repo.createLabel(name: "Family")
 
-        // Get the field ID from the card
         let card = try repo.getOwnCard()
         guard let field = card.fields.first(where: { $0.label == "Personal" }) else {
             XCTFail("Field not found")

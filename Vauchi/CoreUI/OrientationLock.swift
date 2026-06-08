@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// OrientationLock.swift
 // Bridge between core's `Command::SetOrientationLock` and UIKit's
 // `application(_:supportedInterfaceOrientationsFor:)` delegate hook.
 //

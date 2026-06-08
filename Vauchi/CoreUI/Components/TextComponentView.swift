@@ -2,9 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// TextComponentView.swift
-// Renders a Text component from core UI
-
 import CoreUIModels
 import SwiftUI
 

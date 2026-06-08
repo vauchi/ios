@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// CoreOnboardingView.swift
 // Core-driven onboarding flow rendered via the shared PlatformAppEngine.
 
 import CoreUIModels
