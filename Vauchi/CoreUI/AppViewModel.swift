@@ -19,7 +19,6 @@ class AppViewModel: ObservableObject {
     @Published var alertMessage: AlertMessage?
     @Published var toastMessage: String?
     @Published var toastUndoActionId: String?
-    @Published var availableScreens: [String] = []
     @Published var showImagePicker = false
     @Published var showCameraPicker = false
     /// Set when core emits `ExchangeCommand::FilePickFromUser`. The
@@ -128,7 +127,6 @@ class AppViewModel: ObservableObject {
 
     init(appEngine: PlatformAppEngine) {
         self.appEngine = appEngine
-        loadAvailableScreens()
         loadScreen()
         attachEventListener()
     }
@@ -168,18 +166,6 @@ class AppViewModel: ObservableObject {
     }
 
     // MARK: - Screen Loading
-
-    func loadAvailableScreens() {
-        do {
-            let json = try appEngine.availableScreensJson()
-            guard let data = json.data(using: .utf8) else { return }
-            availableScreens = try JSONDecoder().decode([String].self, from: data)
-        } catch {
-            #if DEBUG
-                print("AppViewModel: failed to load available screens: \(error)")
-            #endif
-        }
-    }
 
     func loadScreen() {
         do {
@@ -260,7 +246,6 @@ class AppViewModel: ObservableObject {
     /// without it.
     func navigateToTab(actionId: String) {
         handleAction(.navigateToTab(actionId: actionId))
-        loadAvailableScreens()
     }
 
     /// Dispatch an incoming `vauchi://exchange?...` deep link URI to core.
@@ -281,7 +266,6 @@ class AppViewModel: ObservableObject {
         }
         currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
         validationErrors = [:]
-        loadAvailableScreens()
     }
 
     /// Whether the current screen offers a back step, per the engine's
@@ -313,7 +297,6 @@ class AppViewModel: ObservableObject {
     func invalidateAll() {
         do {
             try appEngine.invalidateAll()
-            loadAvailableScreens()
             loadScreen()
         } catch {
             #if DEBUG
