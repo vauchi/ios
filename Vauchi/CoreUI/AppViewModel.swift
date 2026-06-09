@@ -213,15 +213,16 @@ class AppViewModel: ObservableObject {
     // `navigate_to_json` UniFFI surface is deleted in S5 (core MR) once iOS
     // ships caller-free.
 
-    /// The bottom-bar tabs, sourced from core's `tab_info` (ADR-043 Am4).
-    /// Each carries an opaque `actionId` (forward via `navigateToTab`), a
-    /// core-resolved `label`, and an SF Symbol `icon` — replacing the
-    /// hardcoded `MainTabView` domain literals so iOS stays a pure
-    /// renderer. Returns `[]` only if the engine call throws (logged in
-    /// DEBUG); the bar then renders empty rather than crashing.
+    /// The bottom-bar tabs, sourced from core's `nav_items(.mobile)`
+    /// (ADR-043 Am4; ADR-023 Am1). Each carries an opaque `actionId`
+    /// (forward via `navigateToTab`), a core-resolved `label`, and an SF
+    /// Symbol `icon` — replacing the hardcoded `MainTabView` domain
+    /// literals so iOS stays a pure renderer. Returns `[]` only if the
+    /// engine call throws (logged in DEBUG); the bar then renders empty
+    /// rather than crashing.
     func tabs() -> [MobileTabInfo] {
         do {
-            return try appEngine.tabInfo(locale: LocalizationService.shared.currentLocale)
+            return try appEngine.navItems(layout: .mobile, locale: LocalizationService.shared.currentLocale)
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to load tabs: \(error)")

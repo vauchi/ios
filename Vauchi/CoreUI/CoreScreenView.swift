@@ -20,13 +20,13 @@ import VauchiPlatform
 ///
 /// Usage:
 /// ```swift
-/// CoreScreenView(actionId: "groups")      // tab body — opaque id from tabInfo()
+/// CoreScreenView(actionId: "groups")      // tab body — opaque id from navItems(.mobile)
 /// CoreScreenView(screenName: "Settings")  // legacy sub-screen path
 /// ```
 struct CoreScreenView: View {
     /// What the shared engine navigates to when this view appears.
     ///
-    /// `tab` forwards the opaque `action_id` from `tabInfo()` as
+    /// `tab` forwards the opaque `action_id` from `navItems(.mobile)` as
     /// `UserAction::NavigateToTab` — the zero-domain-vocab tab path
     /// (ADR-043 Am4). `screen` is the legacy serde-variant path still
     /// used by non-tab sub-screens (Settings, Sync, Backup, …) pending

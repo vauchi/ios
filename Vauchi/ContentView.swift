@@ -135,7 +135,7 @@ struct MainTabView: View {
     @ObservedObject private var localizationService = LocalizationService.shared
     /// Default selection: the Contacts tab when the user already has
     /// contacts, otherwise My Card. Keyed on the opaque canonical tab id
-    /// that core hands out via `tabInfo()` (ADR-043 Am4) — not a domain
+    /// that core hands out via `navItems(.mobile)` (ADR-043 Am4) — not a domain
     /// variant.
     @State private var selectedTabId: String
 
@@ -200,7 +200,7 @@ struct MainTabView: View {
         .animation(.easeInOut(duration: 0.3), value: viewModel.toastMessage)
     }
 
-    /// Bottom-tab bar sourced entirely from core's `tabInfo()` — labels,
+    /// Bottom-tab bar sourced entirely from core's `navItems(.mobile)` — labels,
     /// SF Symbol icons and opaque `action_id`s all come from core, so iOS
     /// holds no hardcoded tab domain literals (ADR-043 Am4). Each tab
     /// body forwards `NavigateToTab(action_id)` on appear.
@@ -224,7 +224,7 @@ struct MainTabView: View {
                     // the same view type (verified on device). The humble shell
                     // therefore owns a thin tab bar that just dispatches
                     // `NavigateToTab(action_id)` on tap; labels / icons / ids
-                    // all come from core's `tabInfo()`.
+                    // all come from core's `navItems(.mobile)`.
                     CoreBottomTabBar(
                         tabs: coreVM.tabs(),
                         selectedId: selectedTabId,
@@ -245,7 +245,7 @@ struct MainTabView: View {
 
     /// Tell core to navigate to the selected tab. `id` is the canonical tab
     /// id; the opaque `action_id` for `NavigateToTab` is looked up from
-    /// `tabInfo()`. Used for the initial selection; tab taps navigate via
+    /// `navItems(.mobile)`. Used for the initial selection; tab taps navigate via
     /// `CoreBottomTabBar`'s `onTap`.
     private func navigateToSelectedTab(_ id: String, _ coreVM: AppViewModel) {
         guard let tab = coreVM.tabs().first(where: { $0.id == id }) else { return }
@@ -346,7 +346,7 @@ private struct BackChromeBar: View {
     }
 }
 
-/// Custom bottom tab bar rendered from core's `tabInfo()`. Holds no tab
+/// Custom bottom tab bar rendered from core's `navItems(.mobile)`. Holds no tab
 /// domain literals — labels, SF Symbol icons and selection state all come
 /// from core. Each item dispatches the tap to the shell, which sets the
 /// selection and forwards `NavigateToTab(action_id)` to core. Replaces the
