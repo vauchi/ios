@@ -121,13 +121,6 @@ enum VauchiRepositoryError: LocalizedError {
     }
 }
 
-/// Sync status enum
-enum VauchiSyncStatus {
-    case idle
-    case syncing
-    case error
-}
-
 /// Sync result
 struct VauchiSyncResult {
     let contactsAdded: UInt32
@@ -308,11 +301,10 @@ struct VauchiSocialNetwork: Identifiable {
     let urlTemplate: String
 }
 
-/// Repository class wrapping VauchiPlatform UniFFI bindings
+/// Repository class wrapping the single `PlatformAppEngine` UniFFI handle
 class VauchiRepository {
     // MARK: - Properties
 
-    private let vauchi: VauchiPlatform
     let appEngine: PlatformAppEngine
     private let dataDir: String
     private let relayUrl: String
@@ -335,25 +327,18 @@ class VauchiRepository {
         // Get storage key from Keychain (or migrate/generate)
         let storageKeyBytes = try VauchiRepository.getOrCreateStorageKey(dataDir: dir)
 
-        // Initialize VauchiPlatform and PlatformAppEngine with the same credentials.
-        // Sharing credentials means one DB, one key — no divergence between legacy
-        // VauchiPlatform calls and core-driven AppEngine screens.
+        // Single Rust handle (collapse-vauchi-platform G1): the engine owns
+        // the one DB + key. Sync routes through `dispatchDomainCommand(.sync)`;
+        // the legacy `VauchiPlatform` second handle is retired.
         do {
-            vauchi = try VauchiPlatform.newWithSecureKey(
-                dataDir: dir,
-                relayUrl: relayUrl,
-                storageKeyBytes: storageKeyBytes
-            )
-            vauchi.setPlatformKeychain(keychain: VauchiKeychainBridge())
             appEngine = try PlatformAppEngine(
                 dataDir: dir,
                 relayUrl: relayUrl,
                 storageKeyBytes: storageKeyBytes
             )
-            // B7 Phase 2: also wire the keychain to PlatformAppEngine so the
-            // core-driven shred DomainCommands (SoftShred / CancelShred /
-            // HardShred / PanicShred) can reach the platform keychain. The
-            // VauchiPlatform slot above stays for `widget_panic_shred`.
+            // Wire the keychain so core-driven shred DomainCommands (SoftShred /
+            // CancelShred / HardShred / PanicShred) reach the platform keychain.
+            // `widget_panic_shred` is a free function and needs no instance.
             appEngine.setPlatformKeychain(keychain: VauchiKeychainBridge())
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
@@ -1035,10 +1020,20 @@ class VauchiRepository {
 
     // MARK: - Sync Operations
 
-    /// Sync with relay server
+    /// Sync with relay server.
+    ///
+    /// Routes through the single engine handle. The engine lazily connects
+    /// and honors the C1/C2 timing throttle: a throttled (`TooSoon`) call
+    /// returns a benign no-change result (`hasChanges == false`), not an
+    /// error.
     func sync() throws -> VauchiSyncResult {
         do {
-            let result = try vauchi.sync()
+            let dcResult = try appEngine.dispatchDomainCommand(command: .sync)
+            guard case let .syncResult(result) = dcResult else {
+                throw VauchiRepositoryError.from(
+                    MobileError.Other(detail: "Sync: unexpected result variant")
+                )
+            }
             return VauchiSyncResult(
                 contactsAdded: result.contactsAdded,
                 cardsUpdated: result.cardsUpdated,
@@ -1049,15 +1044,6 @@ class VauchiRepository {
             )
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get sync status
-    func getSyncStatus() -> VauchiSyncStatus {
-        switch vauchi.getSyncStatus() {
-        case .idle: .idle
-        case .syncing: .syncing
-        case .error: .error
         }
     }
 

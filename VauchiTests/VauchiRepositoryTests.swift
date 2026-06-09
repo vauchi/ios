@@ -290,14 +290,13 @@ final class VauchiRepositoryTests: XCTestCase {
 
     // MARK: - Sync Tests
 
-    // Based on: features/sync_updates.feature
-
-    /// Scenario: Initial sync status is idle
-    func testInitialSyncStatusIsIdle() throws {
-        let repo = try VauchiRepository(dataDir: tempDir.path)
-
-        XCTAssertEqual(repo.getSyncStatus(), .idle)
-    }
+    //
+    // The repo-level `getSyncStatus()` passthrough was retired with the
+    // legacy `VauchiPlatform` handle (collapse-vauchi-platform G1): sync now
+    // routes through `appEngine.dispatchDomainCommand(.sync)`, whose outcome
+    // mapping (including the C1/C2 `TooSoon` no-change result) is covered in
+    // core `vauchi-platform/tests/it/mobile_sync_tests.rs`. The user-visible
+    // sync state lives on `VauchiViewModel.syncState`, not a repo getter.
 
     // MARK: - Social Networks Tests
 
