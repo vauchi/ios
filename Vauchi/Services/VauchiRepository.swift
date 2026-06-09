@@ -1033,28 +1033,6 @@ class VauchiRepository {
     // engine-owned (core AppEngine); the frontend renders the screen
     // and routes RelayEscrow* via the standard command envelope.
 
-    // MARK: - Privacy Toggles
-
-    /// Whether delivery receipts are enabled.
-    func isDeliveryReceiptsEnabled() -> Bool {
-        (try? appEngine.isDeliveryReceiptsEnabled()) ?? true
-    }
-
-    /// Toggle delivery receipts (read confirmations).
-    func setDeliveryReceiptsEnabled(_ enabled: Bool) {
-        _ = try? appEngine.setDeliveryReceiptsEnabled(enabled: enabled)
-    }
-
-    /// Whether presence suppression is enabled.
-    func isSuppressPresenceEnabled() -> Bool {
-        (try? appEngine.isSuppressPresenceEnabled()) ?? false
-    }
-
-    /// Toggle presence suppression (hide online status).
-    func setSuppressPresenceEnabled(_ enabled: Bool) {
-        _ = try? appEngine.setSuppressPresenceEnabled(enabled: enabled)
-    }
-
     // MARK: - Sync Operations
 
     /// Sync with relay server

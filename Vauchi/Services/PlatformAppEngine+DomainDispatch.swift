@@ -148,40 +148,6 @@ extension PlatformAppEngine {
         _ = try dispatchDomainCommand(command: .deleteDecoyContact(id: id))
     }
 
-    // MARK: - Sync Flags (B7 batch 18)
-
-    func isDeliveryReceiptsEnabled() throws -> Bool {
-        let result = try dispatchDomainCommand(command: .isDeliveryReceiptsEnabled)
-        guard case let .bool(value) = result else {
-            throw MobileError.Other(
-                detail: "IsDeliveryReceiptsEnabled: unexpected result variant"
-            )
-        }
-        return value
-    }
-
-    func setDeliveryReceiptsEnabled(enabled: Bool) throws {
-        _ = try dispatchDomainCommand(
-            command: .setDeliveryReceiptsEnabled(enabled: enabled)
-        )
-    }
-
-    func isSuppressPresenceEnabled() throws -> Bool {
-        let result = try dispatchDomainCommand(command: .isSuppressPresenceEnabled)
-        guard case let .bool(value) = result else {
-            throw MobileError.Other(
-                detail: "IsSuppressPresenceEnabled: unexpected result variant"
-            )
-        }
-        return value
-    }
-
-    func setSuppressPresenceEnabled(enabled: Bool) throws {
-        _ = try dispatchDomainCommand(
-            command: .setSuppressPresenceEnabled(enabled: enabled)
-        )
-    }
-
     // MARK: - Contact CRUD (C2)
 
     func listContacts() throws -> [MobileContact] {
