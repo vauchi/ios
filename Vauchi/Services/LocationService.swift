@@ -57,15 +57,13 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
 
     private func requestIfAuthorized() {
         guard let manager else { return }
-        switch manager.authorizationStatus {
-        case .authorizedWhenInUse, .authorizedAlways:
+        switch Self.decision(for: manager.authorizationStatus) {
+        case .requestFix:
             manager.requestLocation()
-        case .denied, .restricted:
-            finish(.permissionDenied(transport: "location"))
-        case .notDetermined:
-            break // wait for the authorization callback
-        @unknown default:
-            finish(.hardwareUnavailable(transport: "location"))
+        case .awaitCallback:
+            break
+        case let .finish(event):
+            finish(event)
         }
     }
 
@@ -92,17 +90,55 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         didUpdateLocations locations: [CLLocation]
     ) {
         guard let loc = locations.last else { return }
-        let accuracy = loc.horizontalAccuracy >= 0 ? Float(loc.horizontalAccuracy) : nil
         finish(
-            .locationResult(
+            Self.resultEvent(
                 latitude: loc.coordinate.latitude,
                 longitude: loc.coordinate.longitude,
-                accuracyMeters: accuracy
+                horizontalAccuracy: loc.horizontalAccuracy
             )
         )
     }
 
     func locationManager(_: CLLocationManager, didFailWithError _: Error) {
         finish(.hardwareUnavailable(transport: "location"))
+    }
+}
+
+// MARK: - Pure outcome mapping (CC-23: testable without a live CLLocationManager)
+
+extension LocationService {
+    /// What `requestOneShot` should do given the current authorization status.
+    enum AuthorizationDecision: Equatable {
+        case requestFix
+        case awaitCallback
+        case finish(MobileEvent)
+    }
+
+    static func decision(for status: CLAuthorizationStatus) -> AuthorizationDecision {
+        switch status {
+        case .authorizedWhenInUse, .authorizedAlways:
+            return .requestFix
+        case .denied, .restricted:
+            return .finish(.permissionDenied(transport: "location"))
+        case .notDetermined:
+            return .awaitCallback
+        @unknown default:
+            return .finish(.hardwareUnavailable(transport: "location"))
+        }
+    }
+
+    /// A negative `horizontalAccuracy` is CLLocation's invalid-fix sentinel and
+    /// maps to a `nil` accuracy rather than a bogus negative metre count.
+    static func resultEvent(
+        latitude: Double,
+        longitude: Double,
+        horizontalAccuracy: Double
+    ) -> MobileEvent {
+        let accuracy = horizontalAccuracy >= 0 ? Float(horizontalAccuracy) : nil
+        return .locationResult(
+            latitude: latitude,
+            longitude: longitude,
+            accuracyMeters: accuracy
+        )
     }
 }
