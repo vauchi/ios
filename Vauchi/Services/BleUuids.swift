@@ -46,19 +46,25 @@ enum BleUuids {
     /// central GATT write (matches Android `BleUuids.peripheralNotifyChars`).
     static let peripheralNotifyChars: Set<String> = [handshakeNotify, dataNotify]
 
-    // MARK: - Role-tiebreak token <-> 32-bit service UUID (P5c)
+    // MARK: - Role-tiebreak token <-> 16-bit service UUID (P5c v2)
 
     /// Token bytes carried in the advertisement. Core's identity-derived
-    /// tiebreak token (ADR-043) rides as a 32-bit Bluetooth-base service UUID
-    /// alongside the 128-bit service UUID — the only portable channel, since
-    /// iOS can't advertise service/manufacturer data (only service UUIDs). The
-    /// 32-bit UUID is a `CBUUID` built from 4 bytes; the peer reads it back the
-    /// same way. See `2026-06-07-ios-ble-execution-parity-plan`.
-    static let advTokenBytes = 4
+    /// tiebreak token (ADR-043) rides as a 16-bit Bluetooth-base service UUID
+    /// alongside the 128-bit service UUID — the only channel iOS can advertise
+    /// (service UUIDs only, no service/manufacturer data), and 16-bit is the
+    /// only compressed width every Android stack transmits intact:
+    /// pre-Android-9 advertisers truncate a 32-bit UUID to its low 16 bits,
+    /// which deadlocked the role tiebreak with both peers as responder
+    /// (`2026-06-06-android-ble-execution`, P5b re-test 2026-06-10). Matches
+    /// Android's `BleUuids.ADV_TOKEN_BYTES`.
+    static let advTokenBytes = 2
 
-    /// Encode the first `advTokenBytes` of `token` as a 32-bit service `CBUUID`
-    /// for advertising. `CBUUID(data:)` with 4 bytes yields a 32-bit UUID,
-    /// matching Android's `tokenToServiceUuid` (same big-endian 4 bytes).
+    /// Token width of the retired 32-bit format (P5c v1), still decoded.
+    private static let legacyAdvTokenBytes = 4
+
+    /// Encode the first `advTokenBytes` of `token` as a 16-bit service `CBUUID`
+    /// for advertising. `CBUUID(data:)` with 2 bytes yields a 16-bit UUID,
+    /// matching Android's `tokenToServiceUuid` (same big-endian bytes).
     static func tokenToServiceUUID(_ token: Data) -> CBUUID {
         var bytes = [UInt8](token.prefix(advTokenBytes))
         while bytes.count < advTokenBytes {
@@ -67,10 +73,14 @@ enum BleUuids {
         return CBUUID(data: Data(bytes))
     }
 
-    /// Decode a scanned service `CBUUID` back to its token bytes, or `nil` if it
-    /// is not a 32-bit UUID (e.g. the 128-bit service UUID reports 16 bytes).
-    /// The central picks the token UUID out of the advertised service-UUID list.
+    /// Decode a scanned service `CBUUID` back to its token bytes — 16-bit
+    /// (2-byte token) or the legacy 32-bit form (4-byte token from an
+    /// un-updated peer; decoding it whole keeps the full-vs-prefix compare
+    /// consistent) — or `nil` for anything else (e.g. the 128-bit service
+    /// UUID reports 16 bytes). The central picks the token UUID out of the
+    /// advertised service-UUID list.
     static func tokenFromServiceUUID(_ uuid: CBUUID) -> Data? {
-        uuid.data.count == advTokenBytes ? uuid.data : nil
+        let count = uuid.data.count
+        return (count == advTokenBytes || count == legacyAdvTokenBytes) ? uuid.data : nil
     }
 }
