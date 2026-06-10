@@ -112,6 +112,7 @@
 		6C775CA748C7BDD8C00321F0 /* testHomeViewWithFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = AE391D2B30E4ECCA0C1161B7 /* testHomeViewWithFields.1.png */; };
 		6E713428218E42433EB22954 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 108E48F43D27EA5EB6FFB226 /* PrivacyInfo.xcprivacy */; };
 		6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C859B6215BADD6A45480D9F /* LocalizationService.swift */; };
+		6F526CBE173AA74F1C620137 /* BleUuidsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */; };
 		70C9DADB6458BBB78951FCA9 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9A733800FBC19F520072A6 /* LocationService.swift */; };
 		710222E18DC609F7457EB5C0 /* NfcCommandDispatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2665E0EEA673F89A405C5D27 /* NfcCommandDispatchTests.swift */; };
 		71CABD3B8764AE19DD69EE44 /* testInfoPanelWithoutIcon.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 32949B7AFAC3435ABA7D93FD /* testInfoPanelWithoutIcon.1.png */; };
@@ -485,6 +486,7 @@
 		E919A41F13031155AC578B3E /* testInlineConfirmDefault.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInlineConfirmDefault.1.png; sourceTree = "<group>"; };
 		EA272578E81247FB65A5C145 /* ComponentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentView.swift; sourceTree = "<group>"; };
 		EA5E442564907FA7A15240F0 /* testEditableTextWithError.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testEditableTextWithError.1.png; sourceTree = "<group>"; };
+		EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleUuidsTests.swift; sourceTree = "<group>"; };
 		EB02FA7773C641BA05A1BF79 /* testHomeScreenWithFields.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testHomeScreenWithFields.1.png; sourceTree = "<group>"; };
 		EBA2E942944A9B0DF10E7D44 /* testSettingsScreen.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSettingsScreen.1.png; sourceTree = "<group>"; };
 		EDE8371E9A0D88B92DA2E683 /* testContactListWithContacts.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactListWithContacts.1.png; sourceTree = "<group>"; };
@@ -612,6 +614,7 @@
 				EEB2B575C59DEDEFBA323040 /* AccelerometerProximityServiceTests.swift */,
 				05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */,
 				FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */,
+				EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */,
 				7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */,
 				653B68CB3B3D86B13D52E63E /* DeviceCapabilitiesPusherTests.swift */,
 				8814BC91D7F7804BEC20F59B /* ExchangeFlowTests.swift */,
@@ -1210,6 +1213,7 @@
 				BEA34D69912C7558E8710831 /* AnimatedQrTimerTests.swift in Sources */,
 				10E60235A5FD647963680956 /* AudioProximityServiceTests.swift in Sources */,
 				76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */,
+				6F526CBE173AA74F1C620137 /* BleUuidsTests.swift in Sources */,
 				697942891CF20348B250C67D /* ContractTests.swift in Sources */,
 				581C76FC638EF1F70BA9A15A /* CoreScreenNavigationTests.swift in Sources */,
 				161D92EC11DFF0CDAE7B0F29 /* DemoContactTests.swift in Sources */,
