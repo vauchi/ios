@@ -88,27 +88,8 @@ final class VisualRegressionTests: XCTestCase {
         assertScreenSnapshot(of: view)
     }
 
-    func testHomeViewWithFields() {
-        // `my_info` renders core wire types via `coreViewModel`; the card
-        // is no longer a VauchiViewModel field (G4), so the shell helper
-        // needs no card seed here.
-        let vm = makeViewModel()
-        let view = CoreScreenView(actionId: "my_info")
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
     func testContactsViewEmpty() {
         let vm = makeViewModel()
-        let view = CoreScreenView(actionId: "contacts")
-            .environmentObject(vm)
-
-        assertScreenSnapshot(of: view)
-    }
-
-    func testContactsViewWithContacts() {
-        let vm = makeViewModel(contacts: sampleContacts)
         let view = CoreScreenView(actionId: "contacts")
             .environmentObject(vm)
 
@@ -229,10 +210,7 @@ final class VisualRegressionTests: XCTestCase {
 
     // MARK: - Dark Mode Variants
 
-    func testHomeViewWithFieldsDark() {
-        // `my_info` renders core wire types via `coreViewModel`; the card
-        // is no longer a VauchiViewModel field (G4), so the shell helper
-        // needs no card seed here.
+    func testHomeViewDark() {
         let vm = makeViewModel()
         let view = CoreScreenView(actionId: "my_info")
             .environmentObject(vm)
@@ -241,8 +219,8 @@ final class VisualRegressionTests: XCTestCase {
         assertScreenSnapshot(of: view)
     }
 
-    func testContactsViewWithContactsDark() {
-        let vm = makeViewModel(contacts: sampleContacts)
+    func testContactsViewDark() {
+        let vm = makeViewModel()
         let view = CoreScreenView(actionId: "contacts")
             .environmentObject(vm)
             .environment(\.colorScheme, .dark)
@@ -278,10 +256,7 @@ final class VisualRegressionTests: XCTestCase {
         }
     }
 
-    func testHomeViewWithFieldsGerman() {
-        // `my_info` renders core wire types via `coreViewModel`; the card
-        // is no longer a VauchiViewModel field (G4), so the shell helper
-        // needs no card seed here.
+    func testHomeViewGerman() {
         let vm = makeViewModel()
         let view = CoreScreenView(actionId: "my_info")
             .environmentObject(vm)
@@ -289,8 +264,8 @@ final class VisualRegressionTests: XCTestCase {
         withLocale("de", view: view)
     }
 
-    func testContactsViewWithContactsGerman() {
-        let vm = makeViewModel(contacts: sampleContacts)
+    func testContactsViewGerman() {
+        let vm = makeViewModel()
         let view = CoreScreenView(actionId: "contacts")
             .environmentObject(vm)
 

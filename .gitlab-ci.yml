@@ -45,6 +45,7 @@ include:
       - '/ci-templates/removed-symbols.yml'
       - '/ci-templates/badges.yml'
       - '/ci-templates/github-mirror.yml'
+      - '/ci-templates/orphan-baselines.yml'
       - '/ci-templates/vrt-upload.yml'
       - '/ci-templates/perf.yml'
 
@@ -1349,6 +1350,22 @@ coverage:unit:
 # Visual regression snapshot tests (swift-snapshot-testing)
 # Captures reference images for all SwiftUI views and compares against baselines.
 # Self-detecting: strict validation when baselines exist, advisory skip when missing.
+
+# Committed baselines must map to live test functions — orphans from
+# deleted tests/classes masquerade as current UI (2026-06-11: 49 found
+# across VisualRegressionTests/CoreUIComponentTests + two whole deleted
+# classes, ScreenSnapshotTests and AccessibilityTests).
+check:orphan-baselines:
+  extends: .check-orphan-baselines
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
+  tags: [docker]
+  before_script:
+    - apk add --no-cache bash findutils grep curl
+  variables:
+    ORPHAN_STYLE: swift
+    ORPHAN_BASELINE_ROOT: VauchiSnapshotTests/__Snapshots__
+    ORPHAN_TEST_SRC: VauchiSnapshotTests
+
 test:snapshots:
   extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
   stage: test

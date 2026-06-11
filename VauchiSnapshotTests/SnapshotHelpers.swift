@@ -21,7 +21,6 @@ import VauchiPlatform
 @MainActor
 func makeViewModel(
     hasIdentity: Bool = true,
-    contacts: [VauchiContact] = [],
     syncState: SyncState = .idle,
     isOnline: Bool = true,
     errorMessage: String? = nil
@@ -30,33 +29,8 @@ func makeViewModel(
     vm.isLoading = false
     vm.hasIdentity = hasIdentity
     vm.errorMessage = errorMessage
-    vm.contacts = contacts
     vm.syncState = syncState
     vm.isOnline = isOnline
 
     return vm
 }
-
-/// Sample contacts for testing contact list
-private func sampleContact(id: String, name: String, verified: Bool) -> VauchiContact {
-    VauchiContact(
-        id: id,
-        displayName: name,
-        fingerprint: "",
-        isVerified: verified,
-        isRecoveryTrusted: false,
-        isHidden: false,
-        isImported: false,
-        card: VauchiContactCard(displayName: name, fields: []),
-        addedAt: UInt64(Date().timeIntervalSince1970),
-        trustLevel: .standard,
-        proposalTrusted: false,
-        reciprocity: .unknown
-    )
-}
-
-let sampleContacts: [VauchiContact] = [
-    sampleContact(id: "c1", name: "Bob", verified: true),
-    sampleContact(id: "c2", name: "Charlie", verified: true),
-    sampleContact(id: "c3", name: "Diana", verified: false),
-]
