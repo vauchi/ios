@@ -217,6 +217,7 @@
 		DCB3E583D86FF3A15C6BE915 /* PlatformAppEngine+DomainDispatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8809B70A6BEDF6B35461415B /* PlatformAppEngine+DomainDispatch.swift */; };
 		DEE606B56ADE8E72560BF538 /* testTextInputEmailType.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 21E325007F4C69CC6F55675D /* testTextInputEmailType.1.png */; };
 		E0642E4014C2147EBDC4FFF3 /* testContactListWithContacts.1.png in Resources */ = {isa = PBXBuildFile; fileRef = EDE8371E9A0D88B92DA2E683 /* testContactListWithContacts.1.png */; };
+		E0AA8CE36DBC7778970CB359 /* ActionResultAlertToastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C6094E7BF109EBD216C09F1 /* ActionResultAlertToastTests.swift */; };
 		E48B85C4088FE7CA877DAB25 /* contact_edit_fields.json in Resources */ = {isa = PBXBuildFile; fileRef = 07F69D47DBE79635FE185938 /* contact_edit_fields.json */; };
 		E544D67D5C73DC535A0D4F68 /* contact_edit_preview.json in Resources */ = {isa = PBXBuildFile; fileRef = C29DE27FD4421553D034E37A /* contact_edit_preview.json */; };
 		E5E3CB99966C49B90D004159 /* emergency_shred.json in Resources */ = {isa = PBXBuildFile; fileRef = 3FC1E2FF696B02B2B79363C3 /* emergency_shred.json */; };
@@ -422,6 +423,7 @@
 		9B2136E121C827A50A107948 /* testContactsScreenWithContacts.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testContactsScreenWithContacts.1.png; sourceTree = "<group>"; };
 		9C3FB726E684074FF3A0B3DF /* ConfirmationDialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationDialogView.swift; sourceTree = "<group>"; };
 		9C58EE1A7DE8486716704A8C /* testStatusIndicatorSuccess.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testStatusIndicatorSuccess.1.png; sourceTree = "<group>"; };
+		9C6094E7BF109EBD216C09F1 /* ActionResultAlertToastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionResultAlertToastTests.swift; sourceTree = "<group>"; };
 		9E6425CCA740A863389E0918 /* FieldListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldListView.swift; sourceTree = "<group>"; };
 		9F8C1DD1586172CF870953F9 /* testActionList.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testActionList.1.png; sourceTree = "<group>"; };
 		9F9346F7C59019E0E90B13BF /* testCardPreviewWithGroups.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCardPreviewWithGroups.1.png; sourceTree = "<group>"; };
@@ -541,6 +543,7 @@
 		0551E4C6C31A1EF46B1DE22E /* CoreUI */ = {
 			isa = PBXGroup;
 			children = (
+				9C6094E7BF109EBD216C09F1 /* ActionResultAlertToastTests.swift */,
 				21B33063ADD1C9CDC8C4186B /* AnimatedQrTimerTests.swift */,
 				46CE8156A15BD5428BE8514A /* ContractTests.swift */,
 				65D24E88349C756B9B8609CE /* CoreScreenNavigationTests.swift */,
@@ -1210,6 +1213,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				577D2B590479C4D0D1F65DA3 /* AccelerometerProximityServiceTests.swift in Sources */,
+				E0AA8CE36DBC7778970CB359 /* ActionResultAlertToastTests.swift in Sources */,
 				BEA34D69912C7558E8710831 /* AnimatedQrTimerTests.swift in Sources */,
 				10E60235A5FD647963680956 /* AudioProximityServiceTests.swift in Sources */,
 				76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */,
