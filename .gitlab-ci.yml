@@ -1444,6 +1444,8 @@ test:ui:
 # Manual job: record snapshot baselines on CI and commit them to the branch.
 # CI is the single source of truth for baselines — never record locally.
 # Click "Record baselines" in the pipeline UI after pushing view changes.
+# Also re-run it when baselines lag main — view changes merged without
+# re-recording leave the VRT gallery stale (observed 2026-06-11).
 test:snapshots:record:
   extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
   stage: test
