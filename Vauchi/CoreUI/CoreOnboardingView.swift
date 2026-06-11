@@ -81,19 +81,50 @@ import SwiftUI
         var onExchangeCommands: (([CommandDTO]) -> Void)?
 
         var body: some View {
-            Group {
-                if let screen = coreVM.currentScreen {
-                    ScreenRendererView(screen: screen, onAction: { action in
-                        coreVM.handleAction(action)
-                    })
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .move(edge: .leading).combined(with: .opacity)
-                    ))
-                    .animation(.easeInOut(duration: 0.3), value: screen.screenId)
-                } else {
-                    ProgressView("Loading...")
+            ZStack(alignment: .top) {
+                Group {
+                    if let screen = coreVM.currentScreen {
+                        ScreenRendererView(screen: screen, onAction: { action in
+                            coreVM.handleAction(action)
+                        })
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        ))
+                        .animation(.easeInOut(duration: 0.3), value: screen.screenId)
+                    } else {
+                        ProgressView("Loading...")
+                    }
                 }
+
+                // `ActionResult.ShowToast` host: each screen tree needs its
+                // own, because the renderer's overlay only serves
+                // `Component.ShowToast`
+                // (`2026-06-11-ios-onboarding-alert-host-missing`).
+                if let message = coreVM.toastMessage {
+                    ToastOverlayView(
+                        message: message,
+                        undoActionId: coreVM.toastUndoActionId,
+                        onAction: { coreVM.handleAction($0) },
+                        onDismiss: {
+                            withAnimation {
+                                coreVM.toastMessage = nil
+                                coreVM.toastUndoActionId = nil
+                            }
+                        }
+                    )
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .padding(.top, 8)
+                    .padding(.horizontal, 16)
+                    .zIndex(100)
+                }
+            }
+            .alert(item: alertBinding) { alert in
+                Alert(
+                    title: Text(alert.title),
+                    message: Text(alert.message),
+                    dismissButton: .default(Text("OK"))
+                )
             }
             .onAppear {
                 // Cold start: ensure PAE's current screen is loaded so
@@ -120,6 +151,13 @@ import SwiftUI
                     onIdentityCreated()
                 }
             }
+        }
+
+        private var alertBinding: Binding<AppViewModel.AlertMessage?> {
+            Binding(
+                get: { coreVM.alertMessage },
+                set: { coreVM.alertMessage = $0 }
+            )
         }
 
         /// Screen IDs produced by `OnboardingEngine::current_screen()`.

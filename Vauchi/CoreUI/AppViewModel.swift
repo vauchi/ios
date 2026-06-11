@@ -426,7 +426,9 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Private
 
-    private func applyResult(_ result: ActionResult) {
+    /// Internal (not private) so tests can pin the ActionResult →
+    /// @Published contract directly, same seam as handleExchangeCommands.
+    func applyResult(_ result: ActionResult) {
         switch result {
         case let .updateScreen(screen):
             currentScreen = screen
