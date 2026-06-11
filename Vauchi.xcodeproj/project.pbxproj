@@ -175,6 +175,7 @@
 		DEE606B56ADE8E72560BF538 /* testTextInputEmailType.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 21E325007F4C69CC6F55675D /* testTextInputEmailType.1.png */; };
 		E0AA8CE36DBC7778970CB359 /* ActionResultAlertToastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C6094E7BF109EBD216C09F1 /* ActionResultAlertToastTests.swift */; };
 		E48B85C4088FE7CA877DAB25 /* contact_edit_fields.json in Resources */ = {isa = PBXBuildFile; fileRef = 07F69D47DBE79635FE185938 /* contact_edit_fields.json */; };
+		E4FB02EAEE93F3B08E769C64 /* PinnedLayoutDecodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DBADCC3CE459F52F031DF73 /* PinnedLayoutDecodeTests.swift */; };
 		E544D67D5C73DC535A0D4F68 /* contact_edit_preview.json in Resources */ = {isa = PBXBuildFile; fileRef = C29DE27FD4421553D034E37A /* contact_edit_preview.json */; };
 		E5E3CB99966C49B90D004159 /* emergency_shred.json in Resources */ = {isa = PBXBuildFile; fileRef = 3FC1E2FF696B02B2B79363C3 /* emergency_shred.json */; };
 		E6CA302BE3E3934640945466 /* testCardPreviewNoVisibleFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 39F6474DA682103308EE2BFF /* testCardPreviewNoVisibleFields.1.png */; };
@@ -346,6 +347,7 @@
 		9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreScreenView.swift; sourceTree = "<group>"; };
 		9C3FB726E684074FF3A0B3DF /* ConfirmationDialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationDialogView.swift; sourceTree = "<group>"; };
 		9C6094E7BF109EBD216C09F1 /* ActionResultAlertToastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionResultAlertToastTests.swift; sourceTree = "<group>"; };
+		9DBADCC3CE459F52F031DF73 /* PinnedLayoutDecodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedLayoutDecodeTests.swift; sourceTree = "<group>"; };
 		9E6425CCA740A863389E0918 /* FieldListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldListView.swift; sourceTree = "<group>"; };
 		9F9346F7C59019E0E90B13BF /* testCardPreviewWithGroups.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testCardPreviewWithGroups.1.png; sourceTree = "<group>"; };
 		9FA11554E5C2DD27F7DABE4D /* SettingsGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsGroupView.swift; sourceTree = "<group>"; };
@@ -451,6 +453,7 @@
 				3AE4D6990BBEF8744FC7C05B /* MultiStagePollTimerTests.swift */,
 				47AE9012ABEFEB654325B7C5 /* NavTabDenyListTests.swift */,
 				2665E0EEA673F89A405C5D27 /* NfcCommandDispatchTests.swift */,
+				9DBADCC3CE459F52F031DF73 /* PinnedLayoutDecodeTests.swift */,
 				42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */,
 				1CB7BD822B01CEB0D5F5CD01 /* SfSymbolForCoreIconTests.swift */,
 				0795D7BA553D151750EFD399 /* fixtures */,
@@ -1016,6 +1019,7 @@
 				710222E18DC609F7457EB5C0 /* NfcCommandDispatchTests.swift in Sources */,
 				B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */,
 				764FA757EB16C597120D1E93 /* PasscodePolicyTests.swift in Sources */,
+				E4FB02EAEE93F3B08E769C64 /* PinnedLayoutDecodeTests.swift in Sources */,
 				1552B5F6D02172C2BA2C691D /* PlatformEdgeTests.swift in Sources */,
 				0DDA36A34D79308F42591BA3 /* PlatformEventListenerTests.swift in Sources */,
 				585352762DF068CBD6CD1EE8 /* SettingsServiceTests.swift in Sources */,
