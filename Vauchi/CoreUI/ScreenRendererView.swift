@@ -32,6 +32,14 @@ struct ScreenRendererView: View {
         screen.tokens.borderRadius
     }
 
+    /// Raw-value compare so this compiles against vauchi-platform-swift
+    /// releases that predate `ScreenLayout.pinned`; the decoder rejects
+    /// "Pinned" on those versions anyway, so the branch is inert until
+    /// the package pin bumps. Switch to `== .pinned` at that bump.
+    private var isPinned: Bool {
+        screen.layout.rawValue == "Pinned"
+    }
+
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0) {
@@ -53,14 +61,20 @@ struct ScreenRendererView: View {
                 // QR/camera size to the available space and never reflow. The
                 // content stack distributes that height itself: the display QR
                 // grows to claim the room while the scan camera stays a small
-                // fixed square. `.scroll` keeps the scrolling region with a
-                // Spacer pushing the action buttons to the bottom.
+                // fixed square. `.scroll` and Pinned keep the scrolling
+                // region; under Pinned the list's rows compose lazily
+                // (LazyVStack) inside this ScrollView — pinning the chrome
+                // instead starved the list under tall action footers,
+                // device-verified on Android
+                // (2026-06-11-contacts-list-windowing-design). The Spacer
+                // pushes the action buttons to the bottom.
                 if screen.layout == .fixed {
                     scrollableContent
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 } else {
                     ScrollView {
                         scrollableContent
+                            .environment(\.listScrollHost, isPinned)
                     }
                     Spacer()
                 }

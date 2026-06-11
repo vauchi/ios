@@ -7,6 +7,22 @@
 import CoreUIModels
 import SwiftUI
 
+/// On `Pinned`-layout screens the renderer marks the list as the
+/// screen's scroll host: rows render lazily inside the list's own
+/// `ScrollView` instead of eagerly into the screen stack. Eager
+/// rendering at 10k contacts froze and crashed the UI
+/// (`2026-06-11-contacts-list-eager-render-anr`).
+private struct ListScrollHostKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var listScrollHost: Bool {
+        get { self[ListScrollHostKey.self] }
+        set { self[ListScrollHostKey.self] = newValue }
+    }
+}
+
 /// Renders a core `Component::List` as a searchable list of items. The
 /// renderer doesn't know what kind of items it's rendering — engines
 /// produce UI-shaped `Item`s from any domain (contacts, decoys, members).
@@ -14,6 +30,7 @@ struct ListView: View {
     let component: ListComponent
     let onAction: (UserAction) -> Void
     @Environment(\.designTokens) private var tokens
+    @Environment(\.listScrollHost) private var scrollHost
 
     @State private var searchQuery: String = ""
 
@@ -31,31 +48,50 @@ struct ListView: View {
                     .accessibilityLabel("Search list")
             }
 
-            VStack(spacing: 0) {
-                ForEach(component.items) { item in
-                    ItemRow(
-                        item: item,
-                        onTap: {
-                            onAction(.listItemSelected(componentId: component.id, itemId: item.id))
-                        },
-                        onAction: { action in
-                            onAction(.listItemAction(
-                                componentId: component.id,
-                                itemId: item.id,
-                                actionId: action.id
-                            ))
-                        }
-                    )
-
-                    if item.id != component.items.last?.id {
-                        Divider()
-                            .padding(.leading, 60)
-                    }
+            if scrollHost {
+                // Pinned-layout screens: rows compose lazily inside the
+                // renderer's ScrollView (lazy stacks are designed for
+                // exactly this — only native List collapses there, the
+                // SectionedActionList class). Eager rendering at 10k
+                // contacts froze the UI
+                // (2026-06-11-contacts-list-eager-render-anr).
+                LazyVStack(spacing: 0) {
+                    rows
                 }
+                .background(Color(.systemBackground))
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+            } else {
+                VStack(spacing: 0) {
+                    rows
+                }
+                .background(Color(.systemBackground))
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
+                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
             }
-            .background(Color(.systemBackground))
-            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-            .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+        }
+    }
+
+    private var rows: some View {
+        ForEach(component.items) { item in
+            ItemRow(
+                item: item,
+                onTap: {
+                    onAction(.listItemSelected(componentId: component.id, itemId: item.id))
+                },
+                onAction: { action in
+                    onAction(.listItemAction(
+                        componentId: component.id,
+                        itemId: item.id,
+                        actionId: action.id
+                    ))
+                }
+            )
+
+            if item.id != component.items.last?.id {
+                Divider()
+                    .padding(.leading, 60)
+            }
         }
     }
 }
