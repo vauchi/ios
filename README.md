@@ -104,32 +104,10 @@ Then use Cmd+B to build, Cmd+R to run.
 
 ## Project Structure
 
-```text
-vauchi-ios/
-├── Vauchi.xcodeproj      # Xcode project
-├── Package.swift          # Swift Package Manager manifest
-├── scripts/
-│   └── setup-xcode.sh     # Development environment setup
-├── Vauchi/
-│   ├── VauchiApp.swift   # App entry point
-│   ├── ContentView.swift  # Root view
-│   ├── Views/
-│   │   ├── HomeView.swift
-│   │   ├── ContactsView.swift
-│   │   ├── ContactDetailView.swift
-│   │   ├── ExchangeView.swift
-│   │   ├── QRScannerView.swift
-│   │   ├── SettingsView.swift
-│   │   └── SetupView.swift
-│   ├── ViewModels/
-│   │   └── VauchiViewModel.swift
-│   └── Services/
-│       ├── VauchiRepository.swift
-│       └── KeychainService.swift
-└── VauchiTests/
-    ├── VauchiRepositoryTests.swift
-    └── VauchiViewModelTests.swift
-```
+`Vauchi.xcodeproj` plus three source roots: `Vauchi/` (app code:
+`Views/`, `ViewModels/`, `Services/`, `CoreUI/`), `VauchiTests/`
+(unit tests), and `scripts/` (setup + signing helpers). Run `ls` for
+the live tree — this README deliberately carries no file inventory.
 
 ## Architecture
 
@@ -175,10 +153,10 @@ rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim
 
 | Repository | Description |
 |------------|-------------|
-| [vauchi/code](https://gitlab.com/vauchi/code) | Core Rust library (source of UniFFI bindings) |
+| [vauchi/core](https://gitlab.com/vauchi/core) | Core Rust library (source of UniFFI bindings) |
 | [vauchi/android](https://gitlab.com/vauchi/android) | Android app (Kotlin/Compose) |
 | [vauchi/docs](https://gitlab.com/vauchi/docs) | Documentation |
-| [vauchi/dev-tools](https://gitlab.com/vauchi/dev-tools) | Build scripts and workspace tools |
+| [vauchi/scripts](https://gitlab.com/vauchi/scripts) | Build scripts and workspace tools |
 
 ## ⚠️ Mandatory Development Rules
 
@@ -193,7 +171,7 @@ See [CLAUDE.md](../CLAUDE.md) for additional mandatory rules.
 1. Check [vauchi/docs](https://gitlab.com/vauchi/docs) for architecture decisions
 2. Follow Apple's Human Interface Guidelines
 3. Write tests for new features
-4. Core library changes go to [vauchi/code](https://gitlab.com/vauchi/code)
+4. Core library changes go to [vauchi/core](https://gitlab.com/vauchi/core)
 
 ## Support the Project
 
