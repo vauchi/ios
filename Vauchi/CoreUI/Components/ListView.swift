@@ -33,6 +33,14 @@ struct ListView: View {
     @Environment(\.listScrollHost) private var scrollHost
 
     @State private var searchQuery: String = ""
+    @State private var lastWindowRequest: WindowRequest?
+
+    /// Duplicate-request guard: one dispatch per (window, target) pair.
+    /// A new emission changes `fromOffset`, re-arming the guard.
+    private struct WindowRequest: Equatable {
+        let fromOffset: Int
+        let target: Int
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.smMd)) {
@@ -87,12 +95,35 @@ struct ListView: View {
                     ))
                 }
             )
+            .onAppear { rowAppeared(item) }
 
             if item.id != component.items.last?.id {
                 Divider()
                     .padding(.leading, 60)
             }
         }
+    }
+
+    /// Windowed emissions (Track B,
+    /// `2026-06-11-contacts-list-eager-render-anr`): a lazily composed
+    /// row appearing near the loaded window's edge asks core to
+    /// re-slice. Unwindowed lists (`totalCount == 0`) never dispatch.
+    private func rowAppeared(_ item: Item) {
+        guard component.totalCount > 0,
+              let row = component.items.firstIndex(where: { $0.id == item.id })
+        else { return }
+        let globalIndex = component.offset + row
+        guard let target = listWindowTarget(
+            firstVisible: globalIndex,
+            lastVisible: globalIndex,
+            offset: component.offset,
+            window: component.window,
+            totalCount: component.totalCount
+        ) else { return }
+        let request = WindowRequest(fromOffset: component.offset, target: target)
+        guard request != lastWindowRequest else { return }
+        lastWindowRequest = request
+        onAction(.listWindowRequested(componentId: component.id, offset: target))
     }
 }
 
