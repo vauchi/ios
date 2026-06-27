@@ -81,6 +81,7 @@ class AppViewModel: ObservableObject {
     /// `qrFrameTimer`, which drives the legacy `exchange_show_qr` path via
     /// `advanceQrFrameJson` (gated to `AppScreen::Exchange` in core).
     private var multiStagePollTimer: Timer?
+    private var corePollTimer: Timer?
 
     /// NFC reader-mode hardware bridge for the TapTap exchange
     /// (`NfcActivate`/`NfcSendApdu`/`NfcDeactivate` commands). Held as
@@ -129,6 +130,7 @@ class AppViewModel: ObservableObject {
         self.appEngine = appEngine
         loadScreen()
         attachEventListener()
+        startCorePollTimer()
     }
 
     private func attachEventListener() {
@@ -373,6 +375,42 @@ class AppViewModel: ObservableObject {
     /// Test-only accessor — true while the multi-stage poll timer is active.
     var hasActiveMultiStagePollTimer: Bool {
         multiStagePollTimer != nil
+    }
+
+    // MARK: - Core Cadence Poll (bounded-wait exchange timeout)
+
+    /// Tick the engine on a ~1s app-level cadence so bounded-wait exchanges
+    /// (BLE / NFC / cable discovery) fail at their stall budget instead of
+    /// "Searching…" forever. `pollNotifications` advances the active engine and
+    /// fires `onScreensInvalidated`; the listener refetches, surfacing
+    /// `exchange_failed` once `BLE_STEP_TIMEOUT_SECS` (60s) elapses. The 30s
+    /// notification timer also ticks the engine, but too coarsely to fire the
+    /// deadline on time — this is the iOS counterpart of the Android
+    /// `MainActivity` pump (`CORE_CADENCE_TICK_INTERVAL_MS`). Started in `init`
+    /// and runs on every core screen; the closure self-invalidates on dealloc
+    /// because no view manages its lifecycle (unlike the multi-stage sibling).
+    /// Idempotent.
+    func startCorePollTimer() {
+        guard corePollTimer == nil else { return }
+        let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] timer in
+            guard let self else {
+                timer.invalidate()
+                return
+            }
+            _ = try? appEngine.pollNotifications()
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        corePollTimer = timer
+    }
+
+    func stopCorePollTimer() {
+        corePollTimer?.invalidate()
+        corePollTimer = nil
+    }
+
+    /// Test-only accessor — true while the app-level core pump is active.
+    var hasActiveCorePollTimer: Bool {
+        corePollTimer != nil
     }
 
     private func advanceQrFrame() {
