@@ -744,6 +744,15 @@ class AppViewModel: ObservableObject {
         sendHardwareEvent(.imagePickCancelled)
     }
 
+    /// Forward a definitive camera-permission denial to core (T0.5). Called only
+    /// from a capture site's post-decision denial (the
+    /// `AVCaptureDevice.requestAccess` callback's `granted == false`, or a
+    /// synchronous `.denied`/`.restricted` status) — never while the OS prompt
+    /// is pending, never on grant (design §4). Keeps `sendHardwareEvent` private.
+    func sendCameraPermissionDenied() {
+        sendHardwareEvent(.permissionDenied(transport: CameraService.transport))
+    }
+
     /// TapHoverShake shake stage: stream accelerometer readings and route each
     /// back to core (which builds + cross-correlates the envelope). The motion
     /// handler fires off the main actor, so hop back before touching core.

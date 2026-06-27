@@ -168,7 +168,10 @@ private struct QrScannerObservingView: View {
         QrScannerStaticView(
             component: component,
             onAction: onAction,
-            useFrontCamera: coreVM.useFrontCamera
+            useFrontCamera: coreVM.useFrontCamera,
+            // T0.5: forward a camera-permission denial to core so the exchange
+            // QR leg fails fast (grant affordance) instead of waiting forever.
+            onPermissionDenied: { coreVM.sendCameraPermissionDenied() }
         )
     }
 }
@@ -182,6 +185,7 @@ private struct QrScannerStaticView: View {
     let component: QrCodeComponent
     let onAction: (UserAction) -> Void
     let useFrontCamera: Bool
+    var onPermissionDenied: () -> Void = {}
     @Environment(\.designTokens) private var tokens
 
     /// The scan preview is the secondary element — a small fixed square so the
@@ -199,7 +203,8 @@ private struct QrScannerStaticView: View {
             onChunkScanned: { code in
                 onAction(.textChanged(componentId: component.id, value: code))
             },
-            useFrontCamera: useFrontCamera
+            useFrontCamera: useFrontCamera,
+            onPermissionDenied: onPermissionDenied
         )
         .id(useFrontCamera)
         .frame(width: cameraSide, height: cameraSide)

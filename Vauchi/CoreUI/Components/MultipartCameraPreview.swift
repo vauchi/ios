@@ -24,9 +24,15 @@ struct MultipartCameraPreview: UIViewRepresentable {
     /// latency).
     var useFrontCamera: Bool = false
 
+    /// Forward a definitive camera-permission denial up to the view model
+    /// (T0.5). Default no-op for the pre-bootstrap fallback path that has no
+    /// AppViewModel.
+    var onPermissionDenied: () -> Void = {}
+
     func makeUIView(context: Context) -> UIView {
         let view = MultipartCameraView(useFrontCamera: useFrontCamera)
         view.delegate = context.coordinator
+        view.onPermissionDenied = onPermissionDenied
         return view
     }
 
@@ -78,6 +84,13 @@ struct MultipartCameraPreview: UIViewRepresentable {
 
 final class MultipartCameraView: UIView {
     weak var delegate: AVCaptureMetadataOutputObjectsDelegate?
+
+    /// Forwards a definitive camera-permission denial to core (T0.5). Guarded
+    /// by `permissionDenialReported` so the `layoutSubviews`-driven
+    /// `setupCamera` re-entry (captureSession stays nil on denial) can't fire it
+    /// — or stack permission overlays — more than once.
+    var onPermissionDenied: (() -> Void)?
+    private var permissionDenialReported = false
     private let useFrontCamera: Bool
 
     init(useFrontCamera: Bool) {
@@ -135,20 +148,36 @@ final class MultipartCameraView: UIView {
     }
 
     private func setupCamera() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
+        switch CameraService.decision(for: AVCaptureDevice.authorizationStatus(for: .video)) {
+        case .proceed:
             initializeCamera()
-        case .notDetermined:
+        case .awaitCallback:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-                if granted {
-                    DispatchQueue.main.async {
-                        self?.initializeCamera()
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    switch CameraService.decision(forGranted: granted) {
+                    case .proceed:
+                        self.initializeCamera()
+                    case .finish:
+                        self.handlePermissionDenied()
+                    case .awaitCallback:
+                        break
                     }
                 }
             }
-        default:
-            showPermissionDenied()
+        case .finish:
+            handlePermissionDenied()
         }
+    }
+
+    /// Show the in-app overlay AND forward the denial to core exactly once
+    /// (T0.5). The overlay is the local affordance; the forwarded event drives
+    /// core's CameraGate so the exchange QR leg fails fast instead of waiting.
+    private func handlePermissionDenied() {
+        showPermissionDenied()
+        guard !permissionDenialReported else { return }
+        permissionDenialReported = true
+        onPermissionDenied?()
     }
 
     private func initializeCamera() {
