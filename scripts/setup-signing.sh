@@ -88,29 +88,45 @@ echo "Installed provisioning profile: $PROFILE_UUID"
 # (here, in seconds) instead of 1 min into a cryptic archive error.
 echo "--- Imported code-signing identities (all) ---"
 security find-identity -p codesigning "$KEYCHAIN_NAME" || true
-echo "--- Valid (non-revoked, unexpired) identities ---"
-security find-identity -v -p codesigning "$KEYCHAIN_NAME" || true
 
-# SHA-1 hashes (uppercase, no separators) of VALID Apple Distribution identities.
-valid_hashes=$(security find-identity -v -p codesigning "$KEYCHAIN_NAME" \
+# Valid Apple Distribution identities = those find-identity lists but does NOT
+# mark revoked. NOTE: `-v` still PRINTS revoked certs, annotated
+# "(CSSMERR_TP_CERT_REVOKED)" — CI does an online OCSP/CRL check a warm dev
+# keychain may skip — so we must filter those lines out explicitly. The
+# trailing `|| true` keeps a no-match (grep exit 1) from tripping `set -e`.
+valid_hashes=$(security find-identity -v -p codesigning "$KEYCHAIN_NAME" 2>/dev/null \
     | grep "Apple Distribution" \
+    | grep -viE 'revoked|cssmerr' \
     | sed -E 's/^[[:space:]]*[0-9]+\)[[:space:]]+([0-9A-Fa-f]+).*/\1/' \
-    | tr 'a-f' 'A-F' | sort -u)
+    | tr 'a-f' 'A-F' | sort -u || true)
+echo "--- Valid (non-revoked) Apple Distribution identities ---"
+echo "${valid_hashes:-(none)}"
 if [ -z "$valid_hashes" ]; then
-    echo "ERROR: imported .p12 has no VALID 'Apple Distribution' identity"
-    echo "       (all revoked/expired — see lists above). Export a current,"
-    echo "       single Apple Distribution cert and update APPLE_DIST_CERT."
+    echo "ERROR: imported .p12 has no valid (non-revoked) 'Apple Distribution'"
+    echo "       identity. Export a current Apple Distribution cert whose private"
+    echo "       key is in your keychain, then update APPLE_DIST_CERT."
     exit 1
 fi
 
 # SHA-1 fingerprints the provisioning profile authorizes (DeveloperCertificates).
+# plutil cannot emit json for <data> (binary has no JSON type), and xml1 wraps
+# each <data> base64 across multiple lines — so an awk state machine
+# concatenates each <data>…</data> block into one base64 string per cert.
 profile_hashes=$(plutil -extract DeveloperCertificates xml1 -o - "$PROFILE_WORK/p.plist" 2>/dev/null \
-    | grep -oE '<data>[^<]+</data>' | sed -E 's#</?data>##g' \
+    | awk '
+        { s=$0
+          if (s ~ /<data>/)  { cap=1; sub(/.*<data>/, "", s) }
+          if (cap) { t=s; if (t ~ /<\/data>/) sub(/<\/data>.*/, "", t); buf=buf t }
+          if (s ~ /<\/data>/) { gsub(/[ \t\r\n]/, "", buf); if (buf!="") print buf; cap=0; buf="" }
+        }' \
     | while IFS= read -r b64; do
+        [ -n "$b64" ] || continue
         printf '%s' "$b64" | base64 --decode 2>/dev/null \
             | openssl x509 -inform DER -noout -fingerprint -sha1 2>/dev/null \
             | sed -E 's/^.*=//; s/://g'
-      done | tr 'a-f' 'A-F' | sort -u)
+      done | tr 'a-f' 'A-F' | sort -u || true)
+echo "--- Profile-authorized cert fingerprints ---"
+echo "${profile_hashes:-(none parsed)}"
 rm -rf "$PROFILE_WORK"
 
 # Prefer the identity that is valid AND profile-authorized.
@@ -126,19 +142,23 @@ $valid_hashes
 VALID
 
 if [ -z "$sign_hash" ]; then
-    if [ "$(printf '%s\n' "$valid_hashes" | grep -c .)" -eq 1 ]; then
+    nvalid=$(printf '%s\n' "$valid_hashes" | grep -c .)
+    if [ -n "$profile_hashes" ]; then
+        # Profile parsed, but none of the valid certs are in it -> real mismatch.
+        echo "ERROR: none of the valid Apple Distribution identities are authorized"
+        echo "       by the 'Vauchi iOS App Store' profile. Regenerate the profile"
+        echo "       for one of these certs, then update APP_STORE_PROFILE_IOS:"
+        echo "         valid:          $(printf '%s' "$valid_hashes" | tr '\n' ' ')"
+        echo "         profile-allows: $(printf '%s' "$profile_hashes" | tr '\n' ' ')"
+        exit 1
+    elif [ "$nvalid" -eq 1 ]; then
+        # Could not parse the profile; fall back to the sole valid cert.
         sign_hash="$valid_hashes"
-        echo "WARNING: no valid identity matched the profile's authorized certs;"
-        echo "         using the only valid Apple Distribution identity. If export"
-        echo "         fails, regenerate 'Vauchi iOS App Store' for this cert."
+        echo "WARNING: could not parse profile-authorized certs; using the only"
+        echo "         valid Apple Distribution identity ($sign_hash)."
     else
-        vh=$(printf '%s' "$valid_hashes" | tr '\n' ' ')
-        ph=$(printf '%s' "$profile_hashes" | tr '\n' ' ')
-        echo "ERROR: the profile authorizes none of the valid Apple Distribution"
-        echo "       identities, and there is more than one valid candidate:"
-        echo "         valid:          $vh"
-        echo "         profile-allows: ${ph:-(none parsed)}"
-        echo "       Regenerate 'Vauchi iOS App Store' for the intended cert."
+        echo "ERROR: could not parse the profile and there are multiple valid"
+        echo "       Apple Distribution identities — cannot safely disambiguate."
         exit 1
     fi
 fi
