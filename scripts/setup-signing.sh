@@ -28,7 +28,11 @@ KEYCHAIN_PASSWORD=$(head -c 32 /dev/urandom | base64)
 
 echo "--- Setting up code signing ---"
 
-# Create temporary keychain
+# Create temporary keychain. Delete any stale one first: a prior run that
+# died between create-keychain and teardown leaves it on disk, and a keychain
+# that's on disk but not in the search list is not removed by teardown, so a
+# plain create-keychain then fails with "already exists".
+security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null || true
 security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
 security set-keychain-settings -lut 3600 "$KEYCHAIN_NAME"
 security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"

@@ -11,9 +11,10 @@ KEYCHAIN_NAME="ci-signing.keychain-db"
 
 echo "--- Tearing down code signing ---"
 
-# Delete temporary keychain
-if security list-keychains -d user | grep -q "$KEYCHAIN_NAME"; then
-    security delete-keychain "$KEYCHAIN_NAME"
+# Delete temporary keychain unconditionally by name. Gating on the search
+# list misses a keychain that exists on disk but was never added to (or was
+# dropped from) the list, leaking it to the next run's create-keychain.
+if security delete-keychain "$KEYCHAIN_NAME" 2>/dev/null; then
     echo "Deleted keychain: $KEYCHAIN_NAME"
 fi
 
