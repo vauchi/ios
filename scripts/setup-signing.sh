@@ -16,7 +16,7 @@
 set -euo pipefail
 
 # Validate required CI variables
-for var in IOS_DIST_CERT IOS_DIST_CERT_PASSWORD ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_CONTENT IOS_PROVISION_PROFILE; do
+for var in IOS_DIST_CERT IOS_DIST_CERT_PASSWORD ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_CONTENT APP_STORE_PROVISION_PROFILE; do
     if [ -z "${!var:-}" ]; then
         echo "ERROR: Required CI variable $var is not set"
         exit 1
@@ -70,7 +70,7 @@ echo "$ASC_KEY_CONTENT" | base64 --decode > "private_keys/AuthKey_${ASC_KEY_ID}.
 PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
 mkdir -p "$PROFILE_DIR"
 PROFILE_WORK=$(mktemp -d)
-echo "$IOS_PROVISION_PROFILE" | base64 --decode > "$PROFILE_WORK/p.mobileprovision"
+echo "$APP_STORE_PROVISION_PROFILE" | base64 --decode > "$PROFILE_WORK/p.mobileprovision"
 PROFILE_UUID=$(security cms -D -i "$PROFILE_WORK/p.mobileprovision" | plutil -extract UUID raw -)
 cp "$PROFILE_WORK/p.mobileprovision" "$PROFILE_DIR/$PROFILE_UUID.mobileprovision"
 rm -rf "$PROFILE_WORK"
