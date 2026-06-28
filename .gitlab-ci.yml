@@ -1237,7 +1237,7 @@ build:release:
         -archivePath build/Vauchi.xcarchive
         -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data
         -allowProvisioningUpdates
-        -authenticationKeyPath "private_keys/AuthKey_${ASC_KEY_ID}.p8"
+        -authenticationKeyPath "$CI_PROJECT_DIR/private_keys/AuthKey_${ASC_KEY_ID}.p8"
         -authenticationKeyID "$ASC_KEY_ID"
         -authenticationKeyIssuerID "$ASC_ISSUER_ID"
         ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO
@@ -1633,7 +1633,7 @@ deploy:testflight:
         -exportOptionsPlist ExportOptions.plist
         -exportPath build/export
         -allowProvisioningUpdates
-        -authenticationKeyPath "private_keys/AuthKey_${ASC_KEY_ID}.p8"
+        -authenticationKeyPath "$CI_PROJECT_DIR/private_keys/AuthKey_${ASC_KEY_ID}.p8"
         -authenticationKeyID "$ASC_KEY_ID"
         -authenticationKeyIssuerID "$ASC_ISSUER_ID"
     # Upload to TestFlight
