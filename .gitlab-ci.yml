@@ -900,7 +900,7 @@ build:release:
         -archivePath build/Vauchi.xcarchive
         -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data
         CODE_SIGN_STYLE=Manual
-        CODE_SIGN_IDENTITY="Apple Distribution"
+        CODE_SIGN_IDENTITY="$(cat .signing-identity)"
         PROVISIONING_PROFILE_SPECIFIER="Vauchi iOS App Store"
         DEVELOPMENT_TEAM=L2853TNSJ4
         ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO

@@ -22,4 +22,7 @@ fi
 rm -rf private_keys/
 echo "Removed API key files"
 
+# Remove the pinned-identity hint written by setup-signing.sh
+rm -f .signing-identity
+
 echo "--- Teardown complete ---"
