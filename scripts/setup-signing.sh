@@ -40,16 +40,20 @@ security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
 # Add to search list (so xcodebuild can find certs)
 security list-keychains -d user -s "$KEYCHAIN_NAME" $(security list-keychains -d user | tr -d '"')
 
-# Import distribution certificate
-CERT_PATH=$(mktemp /tmp/cert.XXXXXX.p12)
-chmod 600 "$CERT_PATH"
+# Import distribution certificate. Use a temp dir for the .p12: BSD mktemp
+# (the macOS runner) requires the Xs to be trailing, so a
+# "cert.XXXXXX.p12" template yields a non-random, colliding name and fails
+# with "File exists" once a prior run has leaked one.
+CERT_DIR=$(mktemp -d)
+CERT_PATH="$CERT_DIR/cert.p12"
 echo "$IOS_DIST_CERT" | base64 --decode > "$CERT_PATH"
+chmod 600 "$CERT_PATH"
 security import "$CERT_PATH" \
     -k "$KEYCHAIN_NAME" \
     -P "$IOS_DIST_CERT_PASSWORD" \
     -T /usr/bin/codesign \
     -T /usr/bin/security
-rm -f "$CERT_PATH"
+rm -rf "$CERT_DIR"
 
 # Allow codesign to access keychain without prompt
 security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
