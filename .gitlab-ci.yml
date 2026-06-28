@@ -1236,10 +1236,10 @@ build:release:
         -configuration Release
         -archivePath build/Vauchi.xcarchive
         -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data
-        -allowProvisioningUpdates
-        -authenticationKeyPath "$CI_PROJECT_DIR/private_keys/AuthKey_${ASC_KEY_ID}.p8"
-        -authenticationKeyID "$ASC_KEY_ID"
-        -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+        CODE_SIGN_STYLE=Manual
+        CODE_SIGN_IDENTITY="Apple Distribution"
+        PROVISIONING_PROFILE_SPECIFIER="Vauchi App Store"
+        DEVELOPMENT_TEAM=L2853TNSJ4
         ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO
   after_script:
     - ./scripts/teardown-signing.sh
@@ -1632,10 +1632,6 @@ deploy:testflight:
         -archivePath build/Vauchi.xcarchive
         -exportOptionsPlist ExportOptions.plist
         -exportPath build/export
-        -allowProvisioningUpdates
-        -authenticationKeyPath "$CI_PROJECT_DIR/private_keys/AuthKey_${ASC_KEY_ID}.p8"
-        -authenticationKeyID "$ASC_KEY_ID"
-        -authenticationKeyIssuerID "$ASC_ISSUER_ID"
     # Upload to TestFlight
     - xcrun altool --upload-app
         -f build/export/Vauchi.ipa

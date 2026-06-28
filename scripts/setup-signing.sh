@@ -16,7 +16,7 @@
 set -euo pipefail
 
 # Validate required CI variables
-for var in IOS_DIST_CERT IOS_DIST_CERT_PASSWORD ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_CONTENT; do
+for var in IOS_DIST_CERT IOS_DIST_CERT_PASSWORD ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_CONTENT IOS_PROVISION_PROFILE; do
     if [ -z "${!var:-}" ]; then
         echo "ERROR: Required CI variable $var is not set"
         exit 1
@@ -62,6 +62,19 @@ security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN
 # xcrun altool looks for keys in ./private_keys/
 mkdir -p private_keys
 echo "$ASC_KEY_CONTENT" | base64 --decode > "private_keys/AuthKey_${ASC_KEY_ID}.p8"
+
+# Install the App Store provisioning profile so the archive/export can sign
+# MANUALLY — this removes the -allowProvisioningUpdates network call to Apple
+# that was hanging the archive for the full 2h job timeout. Xcode locates
+# profiles by <UUID>.mobileprovision in this directory.
+PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+mkdir -p "$PROFILE_DIR"
+PROFILE_WORK=$(mktemp -d)
+echo "$IOS_PROVISION_PROFILE" | base64 --decode > "$PROFILE_WORK/p.mobileprovision"
+PROFILE_UUID=$(security cms -D -i "$PROFILE_WORK/p.mobileprovision" | plutil -extract UUID raw -)
+cp "$PROFILE_WORK/p.mobileprovision" "$PROFILE_DIR/$PROFILE_UUID.mobileprovision"
+rm -rf "$PROFILE_WORK"
+echo "Installed provisioning profile: $PROFILE_UUID"
 
 echo "--- Code signing setup complete ---"
 echo "Keychain: $KEYCHAIN_NAME"

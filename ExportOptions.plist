@@ -9,7 +9,14 @@
     <key>destination</key>
     <string>export</string>
     <key>signingStyle</key>
-    <string>automatic</string>
+    <string>manual</string>
+    <key>signingCertificate</key>
+    <string>Apple Distribution</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>app.vauchi.ios</key>
+        <string>Vauchi App Store</string>
+    </dict>
     <key>uploadSymbols</key>
     <true/>
     <key>uploadBitcode</key>
