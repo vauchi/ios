@@ -1238,7 +1238,7 @@ build:release:
         -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data
         CODE_SIGN_STYLE=Manual
         CODE_SIGN_IDENTITY="Apple Distribution"
-        PROVISIONING_PROFILE_SPECIFIER="Vauchi App Store"
+        PROVISIONING_PROFILE_SPECIFIER="Vauchi iOS App Store"
         DEVELOPMENT_TEAM=L2853TNSJ4
         ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO
   after_script:

@@ -15,7 +15,7 @@
     <key>provisioningProfiles</key>
     <dict>
         <key>app.vauchi.ios</key>
-        <string>Vauchi App Store</string>
+        <string>Vauchi iOS App Store</string>
     </dict>
     <key>uploadSymbols</key>
     <true/>
