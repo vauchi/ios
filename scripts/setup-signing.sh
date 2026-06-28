@@ -7,8 +7,8 @@
 # and writes the App Store Connect API key to disk.
 #
 # Required CI variables:
-#   IOS_DIST_CERT          - Base64-encoded .p12 distribution certificate
-#   IOS_DIST_CERT_PASSWORD - Password for the .p12 certificate
+#   APPLE_DIST_CERT          - Base64-encoded .p12 distribution certificate
+#   APPLE_DIST_CERT_PASSWORD - Password for the .p12 certificate
 #   ASC_KEY_ID             - App Store Connect API Key ID
 #   ASC_ISSUER_ID          - App Store Connect Issuer ID
 #   ASC_KEY_CONTENT        - Base64-encoded .p8 API key file
@@ -16,7 +16,7 @@
 set -euo pipefail
 
 # Validate required CI variables
-for var in IOS_DIST_CERT IOS_DIST_CERT_PASSWORD ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_CONTENT APP_STORE_PROVISION_PROFILE; do
+for var in APPLE_DIST_CERT APPLE_DIST_CERT_PASSWORD ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_CONTENT APP_STORE_PROFILE_IOS; do
     if [ -z "${!var:-}" ]; then
         echo "ERROR: Required CI variable $var is not set"
         exit 1
@@ -46,11 +46,11 @@ security list-keychains -d user -s "$KEYCHAIN_NAME" $(security list-keychains -d
 # with "File exists" once a prior run has leaked one.
 CERT_DIR=$(mktemp -d)
 CERT_PATH="$CERT_DIR/cert.p12"
-echo "$IOS_DIST_CERT" | base64 --decode > "$CERT_PATH"
+echo "$APPLE_DIST_CERT" | base64 --decode > "$CERT_PATH"
 chmod 600 "$CERT_PATH"
 security import "$CERT_PATH" \
     -k "$KEYCHAIN_NAME" \
-    -P "$IOS_DIST_CERT_PASSWORD" \
+    -P "$APPLE_DIST_CERT_PASSWORD" \
     -T /usr/bin/codesign \
     -T /usr/bin/security
 rm -rf "$CERT_DIR"
@@ -70,7 +70,7 @@ echo "$ASC_KEY_CONTENT" | base64 --decode > "private_keys/AuthKey_${ASC_KEY_ID}.
 PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
 mkdir -p "$PROFILE_DIR"
 PROFILE_WORK=$(mktemp -d)
-echo "$APP_STORE_PROVISION_PROFILE" | base64 --decode > "$PROFILE_WORK/p.mobileprovision"
+echo "$APP_STORE_PROFILE_IOS" | base64 --decode > "$PROFILE_WORK/p.mobileprovision"
 PROFILE_UUID=$(security cms -D -i "$PROFILE_WORK/p.mobileprovision" | plutil -extract UUID raw -)
 cp "$PROFILE_WORK/p.mobileprovision" "$PROFILE_DIR/$PROFILE_UUID.mobileprovision"
 rm -rf "$PROFILE_WORK"
