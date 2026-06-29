@@ -1334,7 +1334,15 @@ deploy:testflight:
 perf:app-size:
   extends: .mobile-size-tracking-job
   tags: [macos, self-hosted]
-  needs: ["build:release"]
+  # The .ipa is produced by deploy:testflight's exportArchive — build:release
+  # only archives the .xcarchive, so a `needs: build:release` never sees
+  # build/export and the size check fails "Directory build/export does not
+  # exist" on every release. Depend on deploy:testflight (which publishes
+  # build/export/ as an artifact) and run in .post so this cross-stage needs
+  # is valid (deploy:testflight is in the deploy stage; the template defaults
+  # to the earlier test stage).
+  stage: .post
+  needs: ["deploy:testflight"]
   variables:
     MOBILE_SIZE_ARTIFACT_DIR: "build/export"
     MOBILE_SIZE_PLATFORM: "ios"
