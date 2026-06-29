@@ -36,7 +36,7 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
-	<true/>
+	<false/>
 	<key>NFCReaderUsageDescription</key>
 	<string>Vauchi uses NFC to exchange contact cards with nearby devices.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
