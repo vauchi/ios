@@ -29,7 +29,9 @@ targets:
     sources:
       - path: Vauchi
         excludes:
-          - "**/*.xcassets"
+          # Do NOT exclude **/*.xcassets — Assets.xcassets holds the AppIcon,
+          # and excluding it drops the icon from the build (App Store upload
+          # errors 90022/90023/90713: missing icon + CFBundleIconName).
           - "Generated"
           - "Libs"
     dependencies:
@@ -42,8 +44,12 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: app.vauchi.ios
         INFOPLIST_GENERATION_MODE: GeneratedFile
         GENERATE_INFOPLIST_FILE: YES
-        MARKETING_VERSION: "0.1.9"
-        CURRENT_PROJECT_VERSION: "10"
+        # Embeds the AppIcon + populates CFBundleIconName (App Store requires
+        # both). CI regenerates the .xcodeproj from this file, so it must be
+        # declared here, not only in the committed pbxproj.
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        MARKETING_VERSION: "0.1.10"
+        CURRENT_PROJECT_VERSION: "11"
         DEVELOPMENT_TEAM: L2853TNSJ4
         CODE_SIGN_IDENTITY: "Apple Development"
         CODE_SIGN_STYLE: Automatic
