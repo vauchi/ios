@@ -79,11 +79,13 @@ targets:
         NFCReaderUsageDescription: "Vauchi uses NFC to exchange contact cards with nearby devices."
         NSLocationWhenInUseUsageDescription: "Vauchi can record where you met a contact during an in-person exchange. This is stored privately on your device and never shared."
         # Export-compliance declaration App Store Connect requires at
-        # submission. Without it, every upload triggers a manual
-        # questionnaire. Kept here (not just in Info.plist) so xcodegen
-        # regen doesn't strip it — see problem
+        # submission. false = the app's encryption qualifies for export
+        # exemption (vauchi-core is GPL / publicly-available crypto), so no
+        # ASC compliance docs are required — assessment "exemption applies"
+        # in problem 2026-06-11-ios-encryption-export-compliance. Kept here
+        # (not just Info.plist) so xcodegen regen doesn't strip it — see
         # 2026-05-24-ios-infoplist-projectyml-drift.
-        ITSAppUsesNonExemptEncryption: true
+        ITSAppUsesNonExemptEncryption: false
         com.apple.developer.nfc.readersession.iso7816.select-identifiers:
           - F0564155434849
 

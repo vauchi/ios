@@ -2,10 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- NDEF intentionally omitted: App Store Connect rejects it (upload error
+	     90778, "NDEF is disallowed") for this SDK/min-OS combination — a
+	     long-standing Apple validation bug. TAG/PACE cover the planned NFC
+	     exchange; NDEF read/write still works at runtime without this entry. -->
 	<key>com.apple.developer.nfc.readersession.formats</key>
 	<array>
 		<string>PACE</string>
-		<string>NDEF</string>
 		<string>TAG</string>
 	</array>
 </dict>
