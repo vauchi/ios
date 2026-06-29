@@ -941,7 +941,12 @@ test:unit:
     # Capture exit code so JUnit conversion runs even when tests fail.
     # Without this, xcodebuild exit 65 stops the script and the artifact
     # is never generated (no JUnit report in the MR).
+    # Per-job SPM mirror-config isolation — immune to the shared-config race
+    # (problem 2026-06-29-spm-mirror-config-race). Writes a private config;
+    # the xcodebuild below reads it via the job-private HOME.
+    - ./scripts/ci-spm-isolate-config.sh
     - |
+      export HOME="$CI_PROJECT_DIR/.spm-home"
       XCODEBUILD_EXIT=0
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
         -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
@@ -1055,8 +1060,11 @@ test:snapshots:
         exit 0
       fi
     - echo "✅ Found $BASELINE_COUNT snapshot baselines — running validation"
+    # Per-job SPM mirror-config isolation — immune to the shared-config race
+    # (problem 2026-06-29-spm-mirror-config-race).
+    - ./scripts/ci-spm-isolate-config.sh
     # Reuse build:debug artifacts — skip xcodegen + SPM fetch
-    - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" -disableAutomaticPackageResolution test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
+    - HOME="$CI_PROJECT_DIR/.spm-home" xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" -disableAutomaticPackageResolution test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
   after_script:
     - !reference [.vrt-upload-script, script]
     - !reference [.macos-job, after_script]
@@ -1089,7 +1097,11 @@ test:ui:
     # Capture exit code so JUnit conversion runs even when tests fail.
     # Without this, xcodebuild exit 65 stops the script and the artifact
     # is never generated (no JUnit report in the MR).
+    # Per-job SPM mirror-config isolation — immune to the shared-config race
+    # (problem 2026-06-29-spm-mirror-config-race).
+    - ./scripts/ci-spm-isolate-config.sh
     - |
+      export HOME="$CI_PROJECT_DIR/.spm-home"
       XCODEBUILD_EXIT=0
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
         -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
@@ -1141,8 +1153,12 @@ test:snapshots:record:
     # SNAPSHOT_RECORD compilation condition forces isRecording=true in test binary.
     # Env vars don't reach the iOS Simulator process; build settings do.
     # Simulator cleanup handled by .simulator-job before_script/after_script.
+    # Per-job SPM mirror-config isolation — immune to the shared-config race
+    # (problem 2026-06-29-spm-mirror-config-race).
+    - ./scripts/ci-spm-isolate-config.sh
     - |
       set +e
+      export HOME="$CI_PROJECT_DIR/.spm-home"
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
         -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
         -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data \
