@@ -299,6 +299,29 @@ rm -rf ~/Library/Caches/org.swift.swiftpm/security/fingerprints 2>/dev/null || t
 # the two ship together. mkdir(1) is the POSIX-atomic primitive (no
 # flock on macOS). The section is just write+resolve (~1–2 min), so the
 # 600s stale threshold never false-reclaims.
+#
+# build:debug passes SPM_ISOLATE_HOME and takes the isolated branch below: it
+# writes the config into a JOB-PRIVATE HOME and resolves there — no shared
+# ~/Library file, so no CFGLOCK and no cross-pipeline race
+# (problem 2026-06-29-spm-mirror-config-race). The mirror itself ($MIRROR)
+# stays at the shared real-HOME cache path the private config points to, so
+# isolation costs zero extra mirror builds. The compile step that follows in
+# build:debug MUST also run with HOME=$SPM_ISOLATE_HOME. build:release (signing,
+# SPM_ISOLATE_HOME unset) falls through to the shared+CFGLOCK path below,
+# UNCHANGED: it needs the real HOME for ~/Library/Keychains and is tag-only +
+# barely raced, so single-writer contention on the shared config is fine.
+if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
+  CFG_DIR="$SPM_ISOLATE_HOME/Library/org.swift.swiftpm/configuration"
+  mkdir -p "$CFG_DIR"
+  printf '%s' "$MIRROR_JSON" > "$CFG_DIR/mirrors.json"
+  HOME="$SPM_ISOLATE_HOME" xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
+    -clonedSourcePackagesDirPath .spm-packages \
+    -derivedDataPath .derived-data \
+    -resolvePackageDependencies
+  echo "  SPM resolve OK (private config $CFG_DIR — no shared file, no CFGLOCK)"
+  exit 0
+fi
+
 CFGLOCK="$HOME/.cache/vauchi-platform-swift-mirror/.cfg-lock"
 mkdir -p "$(dirname "$CFGLOCK")"
 CFG_WAIT=0
