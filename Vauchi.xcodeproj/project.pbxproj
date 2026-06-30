@@ -81,6 +81,7 @@
 		5DB1F56C8F6BC86226B8180F /* VauchiViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */; };
 		60021558675886238772EAF6 /* home_empty.json in Resources */ = {isa = PBXBuildFile; fileRef = A75DABB058471CE8E0587E20 /* home_empty.json */; };
 		60D8E07B9EFB1F102D7518A0 /* ThemeServiceSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7BC594414EE931756CE54 /* ThemeServiceSettingsTests.swift */; };
+		61A67B78CEC1B20F68704049 /* CoreScreenToastHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF18174363E5C622E2421F97 /* CoreScreenToastHostTests.swift */; };
 		61A6ADF2FEA95610D52C9ACD /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C0558C6550E4B58C71798 /* AccessibilityUITests.swift */; };
 		65262CC8E09632011AB35DB5 /* testSyncingState.1.png in Resources */ = {isa = PBXBuildFile; fileRef = D42379D47C2AFA9F80BAAB6A /* testSyncingState.1.png */; };
 		652D44BD2148FA55AA835812 /* testInfoPanelSingleItem.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 8C9F616A82E64818C7D1BEB4 /* testInfoPanelSingleItem.1.png */; };
@@ -417,6 +418,7 @@
 		F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEdgeTests.swift; sourceTree = "<group>"; };
 		F94CFFC17D772290645209B3 /* testFieldListWithFieldsPerGroup.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testFieldListWithFieldsPerGroup.1.png; sourceTree = "<group>"; };
 		FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncServiceTests.swift; sourceTree = "<group>"; };
+		FF18174363E5C622E2421F97 /* CoreScreenToastHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreScreenToastHostTests.swift; sourceTree = "<group>"; };
 		FF4FD97723ED524DB81F0ACB /* testMultiStageExchangeCompactViewport.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testMultiStageExchangeCompactViewport.1.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -460,6 +462,7 @@
 				46CE8156A15BD5428BE8514A /* ContractTests.swift */,
 				AF503C09C690696935A4616F /* CorePollTimerTests.swift */,
 				65D24E88349C756B9B8609CE /* CoreScreenNavigationTests.swift */,
+				FF18174363E5C622E2421F97 /* CoreScreenToastHostTests.swift */,
 				C38FE0127E86CB045D89F88E /* ExchangeCommandBridgeTests.swift */,
 				0B23942D76EC5EA833CB68B0 /* ExchangeHardwareScreenTests.swift */,
 				700DC47BF39DB896425AACC4 /* ListWindowPrefetchTests.swift */,
@@ -1024,6 +1027,7 @@
 				697942891CF20348B250C67D /* ContractTests.swift in Sources */,
 				8642E655CE0DAF593322B89E /* CorePollTimerTests.swift in Sources */,
 				581C76FC638EF1F70BA9A15A /* CoreScreenNavigationTests.swift in Sources */,
+				61A67B78CEC1B20F68704049 /* CoreScreenToastHostTests.swift in Sources */,
 				161D92EC11DFF0CDAE7B0F29 /* DemoContactTests.swift in Sources */,
 				566C2C33F23B683B8CB8226F /* DeviceCapabilitiesPusherTests.swift in Sources */,
 				99D8ED2B60D43F62A79B0317 /* ExchangeCommandBridgeTests.swift in Sources */,
