@@ -143,6 +143,29 @@ private struct CoreScreenContent: View {
                 dismissButton: .default(Text("OK"))
             )
         }
+        .overlay(alignment: .top) {
+            // `ActionResult.ShowToast` host: the renderer's own overlay only
+            // serves `Component.ShowToast`, so each screen tree needs its own.
+            // Onboarding got one in `2026-06-11-ios-onboarding-alert-host-missing`;
+            // the main tree was the remaining gap.
+            if let message = coreVM.toastMessage {
+                ToastOverlayView(
+                    message: message,
+                    undoActionId: coreVM.toastUndoActionId,
+                    onAction: { coreVM.handleAction($0) },
+                    onDismiss: {
+                        withAnimation {
+                            coreVM.toastMessage = nil
+                            coreVM.toastUndoActionId = nil
+                        }
+                    }
+                )
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .padding(.top, 8)
+                .padding(.horizontal, 16)
+                .zIndex(100)
+            }
+        }
         .sheet(isPresented: imagePickerBinding) {
             ImagePickerSheet { imageData in
                 coreVM.sendImageReceived(data: imageData)
