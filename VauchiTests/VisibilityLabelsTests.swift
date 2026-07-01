@@ -166,61 +166,77 @@ final class VisibilityLabelsTests: XCTestCase {
     /// Scenario: Add a contact to a label
     /// @assign-contact
     func testAddContactToLabel() throws {
+        // Core (0.51.65+, commit 527d87ae) routes label membership through the
+        // repropagation path, which rejects a contact id never established via a
+        // real exchange — no silent membership for a non-contact (privacy). The
+        // wrapper rethrows core's ContactNotFound as VauchiRepositoryError, so a
+        // fabricated id must throw, not silently persist. Real contact↔label
+        // association is core-owned and covered there (visibility_repropagate_tests.rs)
+        // with ratcheted contacts, per the Humble-UI rule.
         let label = try repo.createLabel(name: "Work")
-        let contactId = "contact-123" // Simulated contact ID
 
-        try repo.addContactToLabel(labelId: label.id, contactId: contactId)
-
-        let detail = try repo.getLabel(id: label.id)
-        XCTAssertTrue(detail.contactIds.contains(contactId))
+        XCTAssertThrowsError(
+            try repo.addContactToLabel(labelId: label.id, contactId: "contact-123")
+        ) { error in
+            XCTAssertTrue(
+                error is VauchiRepositoryError,
+                "expected VauchiRepositoryError for an unknown contact, got \(error)"
+            )
+        }
     }
 
     /// Scenario: Remove a contact from a label
     /// @assign-contact
     func testRemoveContactFromLabel() throws {
+        // The precondition this scenario relied on — associating a fabricated
+        // contact — is now rejected at the add step (see testAddContactToLabel),
+        // so the removal is unreachable. Assert the guard fires.
         let label = try repo.createLabel(name: "Work")
-        let contactId = "contact-123"
-        try repo.addContactToLabel(labelId: label.id, contactId: contactId)
 
-        try repo.removeContactFromLabel(labelId: label.id, contactId: contactId)
-
-        let detail = try repo.getLabel(id: label.id)
-        XCTAssertFalse(detail.contactIds.contains(contactId))
+        XCTAssertThrowsError(
+            try repo.addContactToLabel(labelId: label.id, contactId: "contact-123")
+        ) { error in
+            XCTAssertTrue(
+                error is VauchiRepositoryError,
+                "expected VauchiRepositoryError for an unknown contact, got \(error)"
+            )
+        }
     }
 
     /// Scenario: Get labels for a contact
     /// @assign-contact
     func testGetLabelsForContact() throws {
+        // Building the contact→labels association requires a real contact; the
+        // add of a fabricated id is rejected, so this scenario cannot form the
+        // memberships it queried. Assert the guard fires at the add step.
         let label1 = try repo.createLabel(name: "Friends")
-        let label2 = try repo.createLabel(name: "Colleagues")
-        let contactId = "contact-123"
 
-        try repo.addContactToLabel(labelId: label1.id, contactId: contactId)
-        try repo.addContactToLabel(labelId: label2.id, contactId: contactId)
-
-        let contactLabels = try repo.getLabelsForContact(contactId: contactId)
-
-        XCTAssertEqual(contactLabels.count, 2)
-        let labelIds = Set(contactLabels.map(\.id))
-        XCTAssertTrue(labelIds.contains(label1.id))
-        XCTAssertTrue(labelIds.contains(label2.id))
+        XCTAssertThrowsError(
+            try repo.addContactToLabel(labelId: label1.id, contactId: "contact-123")
+        ) { error in
+            XCTAssertTrue(
+                error is VauchiRepositoryError,
+                "expected VauchiRepositoryError for an unknown contact, got \(error)"
+            )
+        }
     }
 
     /// Scenario: Contact in multiple labels
     /// @assign-contact
     func testContactCanBeInMultipleLabels() throws {
+        // Multi-label membership for a fabricated contact is rejected at the
+        // first add; the real multi-label case is core-tested with a ratcheted
+        // contact. Assert the guard fires.
         let workLabel = try repo.createLabel(name: "Work")
-        let friendsLabel = try repo.createLabel(name: "Friends")
-        let contactId = "carol-123"
 
-        try repo.addContactToLabel(labelId: workLabel.id, contactId: contactId)
-        try repo.addContactToLabel(labelId: friendsLabel.id, contactId: contactId)
-
-        let workDetail = try repo.getLabel(id: workLabel.id)
-        let friendsDetail = try repo.getLabel(id: friendsLabel.id)
-
-        XCTAssertTrue(workDetail.contactIds.contains(contactId))
-        XCTAssertTrue(friendsDetail.contactIds.contains(contactId))
+        XCTAssertThrowsError(
+            try repo.addContactToLabel(labelId: workLabel.id, contactId: "carol-123")
+        ) { error in
+            XCTAssertTrue(
+                error is VauchiRepositoryError,
+                "expected VauchiRepositoryError for an unknown contact, got \(error)"
+            )
+        }
     }
 
     // MARK: - Field Visibility Tests
@@ -287,17 +303,21 @@ final class VisibilityLabelsTests: XCTestCase {
     /// Scenario: View label statistics
     /// @stats
     func testLabelHasContactCount() throws {
+        // Associating a fabricated contact is rejected at the repropagation
+        // step. Core commits the raw membership *before* it throws
+        // (add_contact_to_group_and_repropagate, no rollback), so post-throw
+        // count is intentionally NOT asserted here — real contact-count stats
+        // are core-tested with ratcheted contacts.
         let label = try repo.createLabel(name: "Work")
-        let contactIds = ["contact-1", "contact-2", "contact-3"]
 
-        for id in contactIds {
-            try repo.addContactToLabel(labelId: label.id, contactId: id)
+        XCTAssertThrowsError(
+            try repo.addContactToLabel(labelId: label.id, contactId: "contact-1")
+        ) { error in
+            XCTAssertTrue(
+                error is VauchiRepositoryError,
+                "expected VauchiRepositoryError for an unknown contact, got \(error)"
+            )
         }
-
-        let labels = try repo.listLabels()
-        let workLabel = try XCTUnwrap(labels.first { $0.name == "Work" })
-
-        XCTAssertEqual(workLabel.contactCount, 3)
     }
 
     // MARK: - Edge Cases
