@@ -145,6 +145,47 @@ final class VisualRegressionTests: XCTestCase {
         )
     }
 
+    // MARK: - Glance (scroll-layout) QR display regression
+
+    /// The BLE-Glance screen (`exchange_ble_glance`) is `ScreenLayout.scroll`,
+    /// so its components render inside a ScrollView, which proposes nil
+    /// height. The old GeometryReader-based `ResponsiveSquare` collapsed to
+    /// its ~10 pt ideal under that proposal — an icon-sized, unscannable QR
+    /// (device-confirmed 2026-07-02, iPhone SE;
+    /// `2026-07-02-ios-qr-display-collapses-in-scroll-layout`). The baseline
+    /// guards a near full-width QR in a scroll context; the fixed-layout
+    /// sibling above guards the definite-height context — both proposals
+    /// must keep rendering large.
+    func testGlanceScrollLayoutQrDisplayStaysLarge() {
+        let vm = makeViewModel()
+        let screen = ScreenModel(
+            screenId: "exchange_ble_glance",
+            title: "Glance",
+            components: [
+                .qrCode(QrCodeComponent(
+                    id: "own_qr",
+                    data: "VAUCHI:snapshot-test-payload-0123456789abcdef",
+                    mode: .display,
+                    label: "Show this to exchange"
+                )),
+            ],
+            actions: [],
+            layout: .scroll
+        )
+        let view = ScreenRendererView(screen: screen, onAction: { _ in })
+            .environmentObject(vm)
+
+        assertSnapshot(
+            of: view,
+            as: .image(
+                perceptualPrecision: 0.98,
+                layout: .fixed(width: 375, height: 667),
+                traits: UITraitCollection(displayScale: 2.0)
+            ),
+            record: isRecording
+        )
+    }
+
     // testSettingsView, testThemeSettingsView, testLanguageSettingsView
     // removed in the 2026-05-02 SettingsView/RecoveryView retirement
     // (_private/docs/problems/2026-04-28-pure-humble-ui-retire-native-screens/).

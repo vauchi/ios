@@ -184,6 +184,7 @@
 		E4FB02EAEE93F3B08E769C64 /* PinnedLayoutDecodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DBADCC3CE459F52F031DF73 /* PinnedLayoutDecodeTests.swift */; };
 		E544D67D5C73DC535A0D4F68 /* contact_edit_preview.json in Resources */ = {isa = PBXBuildFile; fileRef = C29DE27FD4421553D034E37A /* contact_edit_preview.json */; };
 		E5E3CB99966C49B90D004159 /* emergency_shred.json in Resources */ = {isa = PBXBuildFile; fileRef = 3FC1E2FF696B02B2B79363C3 /* emergency_shred.json */; };
+		E628C8CF5E93C00F170CC3AD /* testGlanceScrollLayoutQrDisplayStaysLarge.1.png in Resources */ = {isa = PBXBuildFile; fileRef = D1E24774BC1F882EBC01A274 /* testGlanceScrollLayoutQrDisplayStaysLarge.1.png */; };
 		E6CA302BE3E3934640945466 /* testCardPreviewNoVisibleFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 39F6474DA682103308EE2BFF /* testCardPreviewNoVisibleFields.1.png */; };
 		E7893F4E30D7E6B7E3706323 /* TextInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA79BEC85FC2E70D2E996D7 /* TextInputView.swift */; };
 		E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EBCAF628D08C167C0D9721 /* QRScannerView.swift */; };
@@ -393,6 +394,7 @@
 		CB444F2925551B69EDE24BD7 /* BannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerView.swift; sourceTree = "<group>"; };
 		CE69227779252FAF163BCC07 /* ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsTests.swift; sourceTree = "<group>"; };
 		CE9581C53B23B46E50E35837 /* PasscodePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodePolicyTests.swift; sourceTree = "<group>"; };
+		D1E24774BC1F882EBC01A274 /* testGlanceScrollLayoutQrDisplayStaysLarge.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testGlanceScrollLayoutQrDisplayStaysLarge.1.png; sourceTree = "<group>"; };
 		D42379D47C2AFA9F80BAAB6A /* testSyncingState.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testSyncingState.1.png; sourceTree = "<group>"; };
 		D591A9D83EA84F2E2EBCE827 /* testTextComponentTitle.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextComponentTitle.1.png; sourceTree = "<group>"; };
 		D5A795D0FCDE3726CBB528F8 /* OrientationLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationLock.swift; sourceTree = "<group>"; };
@@ -670,6 +672,7 @@
 				1A0BDD0D6BFB562E01B712F3 /* testContactsViewDark.1.png */,
 				023A51C3DDFB94323E432129 /* testContactsViewEmpty.1.png */,
 				70CF007F601871ACD2A45F3E /* testContactsViewGerman.1.png */,
+				D1E24774BC1F882EBC01A274 /* testGlanceScrollLayoutQrDisplayStaysLarge.1.png */,
 				2A831751E96F7B46E676AC57 /* testHomeViewDark.1.png */,
 				200902ADA24D8C97BC83DA08 /* testHomeViewEmpty.1.png */,
 				EF65A2D797369AD06BE12CCD /* testHomeViewGerman.1.png */,
@@ -946,6 +949,7 @@
 				2D0FA5FFF83AA630F89F99F4 /* testFieldListMultipleFieldTypes.1.png in Resources */,
 				34E2C9FC8A075320B7F7ACF5 /* testFieldListWithFieldsPerGroup.1.png in Resources */,
 				F831303CE3FCE9DBE6E2319E /* testFieldListWithFieldsShowHide.1.png in Resources */,
+				E628C8CF5E93C00F170CC3AD /* testGlanceScrollLayoutQrDisplayStaysLarge.1.png in Resources */,
 				31745AFA91532C68E42BCC94 /* testHomeViewDark.1.png in Resources */,
 				7E3F6E5B0E2A197266F3D9BC /* testHomeViewEmpty.1.png in Resources */,
 				0B22B1478C6D150240508238 /* testHomeViewGerman.1.png in Resources */,

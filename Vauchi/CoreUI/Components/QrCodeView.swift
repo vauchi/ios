@@ -60,21 +60,31 @@ struct QrCodeView: View {
     @ViewBuilder
     private func qrDisplayView() -> some View {
         if let qrImage = generateQRCode(from: component.data) {
-            // The display QR is the prominent element (the peer scans it). It's
-            // a greedy `ResponsiveSquare`: as the only flexible element in the
-            // non-scrolling content stack it claims ALL the height left after
-            // the small fixed scan camera + chrome, so the QR is as large as
-            // fits (nearly full-width on a compact iPhone SE now that the
-            // status row is folded into this label) with no wasted gaps, and
-            // never collapses the way the old `.scaledToFit().frame(maxWidth:)`
-            // did under pressure. The cap only limits it on very tall screens.
-            ResponsiveSquare(maxSide: 400) { side in
-                Image(uiImage: qrImage)
-                    .interpolation(.none)
-                    .resizable()
-                    .frame(width: side, height: side)
-                    .accessibilityLabel("QR code")
-            }
+            // The display QR is the prominent element (the peer scans it).
+            // Aspect-fit sizes it from whichever dimension the parent
+            // actually proposes: on the non-scrolling `multi_stage_exchange`
+            // screen it fills the height left after the small fixed scan
+            // camera (the ResponsiveSquare lineage, d247571/5378fab); inside
+            // a ScrollView (`ScreenLayout.scroll` screens like
+            // `exchange_ble_glance`) the height proposal is nil, where the
+            // old GeometryReader collapsed to its ~10 pt ideal — an
+            // icon-sized, unscannable QR (device-confirmed 2026-07-02,
+            // `2026-07-02-ios-qr-display-collapses-in-scroll-layout`) — so
+            // the width drives instead, matching Android's
+            // `fillMaxWidth().aspectRatio(1f)`.
+            Image(uiImage: qrImage)
+                .interpolation(.none)
+                .resizable()
+                .aspectRatio(1, contentMode: .fit)
+                .frame(maxWidth: 400, maxHeight: 400)
+                // Greedy centering container — pixel-parity with the old
+                // ResponsiveSquare on definite-height (Fixed) screens, where
+                // the QR's card must keep absorbing the leftover viewport
+                // (CI baseline testMultiStageExchangeCompactViewport). Under
+                // a nil height proposal it collapses to the fitted image, so
+                // the scroll fix above is unaffected.
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .accessibilityLabel("QR code")
         } else {
             Text("Failed to generate QR code")
                 .font(.caption)
@@ -131,27 +141,6 @@ struct QrCodeView: View {
                   intent: .defaultIntent
               ) else { return nil }
         return UIImage(cgImage: cgImage)
-    }
-}
-
-/// A centered square that fits the space its parent proposes, capped at
-/// `maxSide`. Greedy on both axes — it fills whatever the parent offers — so
-/// as the only flexible element in the exchange content stack it absorbs all
-/// the slack left by the small fixed scan camera, making the display QR as
-/// large as fits with no empty gaps. The square itself is clamped to
-/// `min(width, height, maxSide)` and centered. The `side` is handed to the
-/// content builder so the inner image gets a definite `.frame(width:height:)`.
-private struct ResponsiveSquare<Content: View>: View {
-    let maxSide: CGFloat
-    @ViewBuilder var content: (CGFloat) -> Content
-
-    var body: some View {
-        GeometryReader { geo in
-            let side = max(0, min(geo.size.width, geo.size.height, maxSide))
-            content(side)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
