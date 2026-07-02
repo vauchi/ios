@@ -510,48 +510,6 @@ extension PlatformAppEngine {
         return value
     }
 
-    func reloadSocialNetworks() throws -> [MobileSocialNetwork] {
-        let result = try dispatchDomainCommand(command: .reloadSocialNetworks)
-        guard case let .socialNetworks(networks) = result else {
-            throw MobileError.Other(
-                detail: "ReloadSocialNetworks: unexpected result variant"
-            )
-        }
-        return networks
-    }
-
-    // MARK: - Content Updates (C8 partial)
-
-    func isContentUpdatesSupported() throws -> Bool {
-        let result = try dispatchDomainCommand(command: .isContentUpdatesSupported)
-        guard case let .bool(value) = result else {
-            throw MobileError.Other(
-                detail: "IsContentUpdatesSupported: unexpected result variant"
-            )
-        }
-        return value
-    }
-
-    func checkContentUpdates() throws -> MobileUpdateStatus {
-        let result = try dispatchDomainCommand(command: .checkContentUpdates)
-        guard case let .updateStatus(status) = result else {
-            throw MobileError.Other(
-                detail: "CheckContentUpdates: unexpected result variant"
-            )
-        }
-        return status
-    }
-
-    func applyContentUpdates() throws -> MobileApplyResult {
-        let dispatched = try dispatchDomainCommand(command: .applyContentUpdates)
-        guard case let .applyResult(result) = dispatched else {
-            throw MobileError.Other(
-                detail: "ApplyContentUpdates: unexpected result variant"
-            )
-        }
-        return result
-    }
-
     // MARK: - Certificate Pinning (C8 partial)
 
     func isCertificatePinningEnabled() throws -> Bool {

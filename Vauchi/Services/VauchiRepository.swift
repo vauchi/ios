@@ -14,10 +14,6 @@
 // AudioProximityService retained with inherent methods; proximity API stubbed until
 // command/event proximity protocol lands.
 //
-// DONE: Content updates - isContentUpdatesSupported(), checkContentUpdates(),
-// applyContentUpdates(), reloadSocialNetworks() methods implemented.
-//
-//
 // DONE: Password strength indicator - checkPasswordStrength() integrated in ExportBackupSheet
 // with PasswordStrengthIndicator component showing real-time visual feedback.
 //
@@ -1118,37 +1114,6 @@ class VauchiRepository {
     /// Get profile URL for social network
     func getProfileUrl(networkId: String, username: String) -> String? {
         (try? appEngine.getProfileUrl(networkId: networkId, username: username)) ?? nil
-    }
-
-    // MARK: - Content Updates
-
-    // Based on: features/content_updates.feature
-
-    /// Check if content updates feature is supported
-    func isContentUpdatesSupported() -> Bool {
-        (try? appEngine.isContentUpdatesSupported()) ?? false
-    }
-
-    /// Check for available content updates
-    func checkContentUpdates() -> MobileUpdateStatus {
-        (try? appEngine.checkContentUpdates()) ?? .upToDate
-    }
-
-    /// Apply available content updates
-    func applyContentUpdates() -> MobileApplyResult {
-        (try? appEngine.applyContentUpdates())
-            ?? MobileApplyResult.error(error: "Dispatch failed")
-    }
-
-    /// Reload social networks after content updates
-    func reloadSocialNetworks() -> [VauchiSocialNetwork] {
-        ((try? appEngine.reloadSocialNetworks()) ?? []).map { sn in
-            VauchiSocialNetwork(
-                id: sn.id,
-                displayName: sn.displayName,
-                urlTemplate: sn.urlTemplate
-            )
-        }
     }
 
     // MARK: - Certificate Pinning

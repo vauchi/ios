@@ -128,7 +128,6 @@
 		9C9A5E8876CAFA84118E8DBF /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644F12D83413B334E234F4AC /* LockScreenView.swift */; };
 		9DA062B94245C7748637A619 /* CoreScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0DA31CC5A745781E93A76D /* CoreScreenView.swift */; };
 		9E2BD59979752A9C670AF34A /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95DAE4A89BF1E2A04935E05F /* CameraService.swift */; };
-		9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */; };
 		A20441612CDA08A586DADCC0 /* DirectSendService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A701A0C348B6758EED1D949 /* DirectSendService.swift */; };
 		A387A34BD2E5E95169ADB6B7 /* testCardPreviewWithFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 011D4844DB2996A933073BC0 /* testCardPreviewWithFields.1.png */; };
 		A3982E78770B0DA9F0045F95 /* NavTabDenyListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47AE9012ABEFEB654325B7C5 /* NavTabDenyListTests.swift */; };
@@ -406,7 +405,6 @@
 		E17FD049E1582776B08D1899 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTests.swift; sourceTree = "<group>"; };
 		E31A56C292E9073A8A07BAF0 /* testTextInputWithValidationError.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextInputWithValidationError.1.png; sourceTree = "<group>"; };
-		E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentUpdateService.swift; sourceTree = "<group>"; };
 		E919A41F13031155AC578B3E /* testInlineConfirmDefault.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInlineConfirmDefault.1.png; sourceTree = "<group>"; };
 		EA272578E81247FB65A5C145 /* ComponentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentView.swift; sourceTree = "<group>"; };
 		EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleUuidsTests.swift; sourceTree = "<group>"; };
@@ -772,7 +770,6 @@
 				418F950D6541F912A27DA57D /* BleExchangeService.swift */,
 				5FC2A1B34A8846BEEE089202 /* BleUuids.swift */,
 				95DAE4A89BF1E2A04935E05F /* CameraService.swift */,
-				E72D1D0409574AAB3F55811A /* ContentUpdateService.swift */,
 				7A01546D222F8024BB3E0009 /* DeviceCapabilitiesPusher.swift */,
 				7A701A0C348B6758EED1D949 /* DirectSendService.swift */,
 				B31DFE6F23CEA01F0437957B /* KeychainService.swift */,
@@ -1101,7 +1098,6 @@
 				9E2BD59979752A9C670AF34A /* CameraService.swift in Sources */,
 				8F1D5438434B846475597477 /* ComponentView.swift in Sources */,
 				307654F6186C276FC27E761A /* ConfirmationDialogView.swift in Sources */,
-				9E3EC35D110FAEDCA68A0F0A /* ContentUpdateService.swift in Sources */,
 				5680FAB9C220183B0BB3AC03 /* ContentView.swift in Sources */,
 				7268CABF6013A271BFD83C39 /* CoreOnboardingView.swift in Sources */,
 				9DA062B94245C7748637A619 /* CoreScreenView.swift in Sources */,
