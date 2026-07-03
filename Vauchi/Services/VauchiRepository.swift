@@ -206,30 +206,6 @@ struct VauchiContact: Identifiable {
     let reciprocity: MobileReciprocity
 }
 
-/// Exchange data for QR code generation
-struct VauchiExchangeData {
-    let qrData: String
-    let publicId: String
-    let expiresAt: UInt64
-
-    var isExpired: Bool {
-        UInt64(Date().timeIntervalSince1970) > expiresAt
-    }
-
-    var timeRemaining: TimeInterval {
-        let now = Date().timeIntervalSince1970
-        return max(0, Double(expiresAt) - now)
-    }
-}
-
-/// Exchange result
-struct VauchiExchangeResult {
-    let contactId: String
-    let contactName: String
-    let success: Bool
-    let errorMessage: String?
-}
-
 // MARK: - Visibility Label Types
 
 // Based on: features/visibility_labels.feature
@@ -586,91 +562,15 @@ class VauchiRepository {
         }
     }
 
-    /// Remove contact
-    func removeContact(id: String) throws -> Bool {
-        do {
-            return try appEngine.removeContact(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     // MARK: - Contact Lifecycle (reversible deletion + archival)
-
-    /// Soft-delete an imported contact (reversible).
-    func softDeleteImportedContact(id: String) throws {
-        do {
-            try appEngine.softDeleteImportedContact(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Archive a contact (remove from main list, keep data).
-    func archiveContact(id: String) throws {
-        do {
-            try appEngine.archiveContact(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Returns the footer-button `ScreenAction` id that core's
-    /// `ContactDetailEngine` would emit for the given contact —
-    /// `"delete_contact"` (imported) or `"archive_contact"` (exchanged).
-    /// Views dispatch on the returned id so they never branch on
-    /// `MobileContact.isImported` directly. See §1A pure-renderer rule.
-    func contactDetailFooterActionId(contactId: String) throws -> String {
-        do {
-            return try appEngine.contactDetailFooterActionId(contactId: contactId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
 
     // MARK: - Hidden Contacts Operations
 
     // Based on: features/resistance.feature - R3 Hidden Contact UI
 
-    /// Hide a contact
-    func hideContact(id: String) throws {
-        do {
-            try appEngine.hideContact(contactId: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// List hidden contacts
-    func listHiddenContacts() throws -> [VauchiContact] {
-        do {
-            return try appEngine.listHiddenContacts().map(convertContact)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     // MARK: - Duress PIN Operations
 
     // Based on: features/duress_pin.feature - R1 Duress PIN
-
-    /// Set up app password
-    func setupAppPassword(password: String) throws {
-        do {
-            try appEngine.setupAppPassword(password: password)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Set up duress PIN (requires app password to be set first)
-    func setupDuressPassword(duressPassword: String) throws {
-        do {
-            try appEngine.setupDuressPassword(duressPassword: duressPassword)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
 
     /// Authenticate with password/PIN — returns "normal" or "duress", throws on invalid
     func authenticate(password: String) throws -> String {
@@ -685,165 +585,7 @@ class VauchiRepository {
         }
     }
 
-    /// Check if app password is enabled
-    func isPasswordEnabled() throws -> Bool {
-        do {
-            return try appEngine.isPasswordEnabled()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Check if duress PIN is enabled
-    func isDuressEnabled() throws -> Bool {
-        do {
-            return try appEngine.isDuressEnabled()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Disable duress PIN
-    func disableDuress() throws {
-        do {
-            try appEngine.disableDuress()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Configure duress alert contacts and message
-    func configureDuressAlerts(contactIds: [String], message: String) throws {
-        do {
-            try appEngine.configureDuressAlerts(contactIds: contactIds, message: message)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get duress settings (alert contacts, message, location flag)
-    func getDuressSettings() throws -> MobileDuressSettings? {
-        do {
-            return try appEngine.getDuressSettings()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     // MARK: - Decoy Contacts (duress mode profile)
-
-    /// Add a decoy contact for the duress profile.
-    func addDecoyContact(
-        name: String,
-        cardJson: String
-    ) throws -> String {
-        do {
-            return try appEngine.addDecoyContact(
-                name: name,
-                cardJson: cardJson
-            )
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// List all decoy contacts.
-    func listDecoyContacts()
-        throws -> [MobileDecoyContact] {
-        do {
-            return try appEngine.listDecoyContacts()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Delete a decoy contact by ID.
-    func deleteDecoyContact(id: String) throws {
-        do {
-            try appEngine.deleteDecoyContact(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    // MARK: - Panic Shred Operations
-
-    // Based on: features/panic_widget.feature - R2 Panic Widget
-    //
-    // The 4 mutating shred operations were retired 2026-05-23 (Track A
-    // orphan cleanup): none of them had callers in `ios/` —
-    // emergency-wipe / identity-deletion UI flows go through other
-    // paths (`appEngine.scheduleIdentityDeletion` + the recovery /
-    // duress engines). Core dropped the corresponding legacy
-    // `VauchiPlatform` methods in 0.51.33 (B7 slice 32i.2); the
-    // equivalent shred `DomainCommand`s are now PAE-dispatched. Read-only
-    // `shredStatus` stays — it's PAE-dispatched and has live callers.
-
-    func shredStatus() throws -> MobileShredStatus {
-        do {
-            return try appEngine.shredStatus()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    // MARK: - Contact Notes
-
-    func setContactNote(contactId: String, note: String) throws {
-        do {
-            try appEngine.setContactNote(contactId: contactId, note: note)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    func getContactNote(contactId: String) throws -> String? {
-        do {
-            return try appEngine.getContactNote(contactId: contactId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    func deleteContactNote(contactId: String) throws {
-        do {
-            try appEngine.deleteContactNote(contactId: contactId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    func setContactFieldNote(contactId: String, fieldId: String, note: String) throws {
-        do {
-            try appEngine.setContactFieldNote(contactId: contactId, fieldId: fieldId, note: note)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    func getContactFieldNotes(contactId: String) throws -> [MobileFieldNote] {
-        do {
-            return try appEngine.getContactFieldNotes(contactId: contactId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    func deleteContactFieldNote(contactId: String, fieldId: String) throws {
-        do {
-            try appEngine.deleteContactFieldNote(contactId: contactId, fieldId: fieldId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    func setProposalTrusted(contactId: String, trusted: Bool) throws {
-        do {
-            try appEngine.setProposalTrusted(contactId: contactId, trusted: trusted)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
 
     // Emergency Broadcast Operations (R5 / features/emergency_broadcast.feature)
     // — the 4 PAE delegators (`configureEmergencyBroadcast`,
@@ -854,52 +596,7 @@ class VauchiRepository {
     // when wired; when it lands the wrappers can return without re-shipping
     // the dead orphans first.
 
-    /// Get own identity fingerprint for verification display.
-    func getOwnFingerprint() throws -> String {
-        do {
-            return try appEngine.getOwnFingerprint()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Verify contact fingerprint
-    func verifyContact(id: String) throws {
-        do {
-            try appEngine.verifyContact(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     // MARK: - Visibility Operations
-
-    /// Hide field from contact
-    func hideFieldFromContact(contactId: String, fieldLabel: String) throws {
-        do {
-            try appEngine.hideFieldFromContact(contactId: contactId, fieldLabel: fieldLabel)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Show field to contact
-    func showFieldToContact(contactId: String, fieldLabel: String) throws {
-        do {
-            try appEngine.showFieldToContact(contactId: contactId, fieldLabel: fieldLabel)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Check if field is visible to contact
-    func isFieldVisibleToContact(contactId: String, fieldLabel: String) throws -> Bool {
-        do {
-            return try appEngine.isFieldVisibleToContact(contactId: contactId, fieldLabel: fieldLabel)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
 
     // MARK: - Visibility Labels Operations
 
@@ -956,24 +653,6 @@ class VauchiRepository {
     func addContactToLabel(labelId: String, contactId: String) throws {
         do {
             try appEngine.addContactToGroup(labelId: labelId, contactId: contactId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Remove contact from a label
-    func removeContactFromLabel(labelId: String, contactId: String) throws {
-        do {
-            try appEngine.removeContactFromGroup(labelId: labelId, contactId: contactId)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get all labels for a contact
-    func getLabelsForContact(contactId: String) throws -> [VauchiVisibilityLabel] {
-        do {
-            return try appEngine.getGroupsForContact(contactId: contactId).map { VauchiVisibilityLabel(from: $0) }
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
@@ -1063,24 +742,6 @@ class VauchiRepository {
         }
     }
 
-    /// Export full backup (identity + contacts + own card + labels)
-    func exportFullBackup(password: String) throws -> String {
-        do {
-            return try appEngine.exportFullBackup(password: password)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Import full backup (identity + contacts + own card + labels)
-    func importFullBackup(data: String, password: String) throws {
-        do {
-            try appEngine.importFullBackup(backupData: data, password: password)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     // MARK: - Social Networks
 
     /// List available social networks.
@@ -1100,17 +761,6 @@ class VauchiRepository {
         }
     }
 
-    /// Search social networks
-    func searchSocialNetworks(query: String) -> [VauchiSocialNetwork] {
-        ((try? appEngine.searchSocialNetworks(query: query)) ?? []).map { sn in
-            VauchiSocialNetwork(
-                id: sn.id,
-                displayName: sn.displayName,
-                urlTemplate: sn.urlTemplate
-            )
-        }
-    }
-
     /// Get profile URL for social network
     func getProfileUrl(networkId: String, username: String) -> String? {
         (try? appEngine.getProfileUrl(networkId: networkId, username: username)) ?? nil
@@ -1118,45 +768,7 @@ class VauchiRepository {
 
     // MARK: - Certificate Pinning
 
-    /// Check if certificate pinning is enabled
-    func isCertificatePinningEnabled() -> Bool {
-        (try? appEngine.isCertificatePinningEnabled()) ?? false
-    }
-
-    /// Set the pinned certificate for relay TLS connections
-    /// - Parameter certPem: Certificate in PEM format
-    func setPinnedCertificate(_ certPem: String) {
-        try? appEngine.setPinnedCertificate(certPem: certPem)
-    }
-
     // MARK: - Recovery Operations
-
-    /// Mark a contact as trusted for recovery
-    func trustContactForRecovery(id: String) throws {
-        do {
-            try appEngine.trustContactForRecovery(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Remove recovery trust from a contact
-    func untrustContactForRecovery(id: String) throws {
-        do {
-            try appEngine.untrustContactForRecovery(id: id)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get the number of contacts trusted for recovery
-    func trustedContactCount() throws -> UInt32 {
-        do {
-            return try appEngine.trustedContactCount()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
 
     // MARK: - Demo Contact Operations
 
@@ -1239,18 +851,6 @@ class VauchiRepository {
         }
     }
 
-    /// Auto-remove demo contact after first real exchange.
-    /// Call this after a successful contact exchange.
-    ///
-    /// - Returns: True if demo was removed, false if it wasn't active
-    func autoRemoveDemoContact() throws -> Bool {
-        do {
-            return try appEngine.autoRemoveDemoContact()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     /// Restore the demo contact from Settings.
     ///
     /// - Returns: The restored demo contact
@@ -1266,201 +866,9 @@ class VauchiRepository {
     }
 
     // MARK: - GDPR Operations
-
-    /// Export all user data in GDPR-compliant format
-    func exportGdprData() throws -> VauchiGdprExport {
-        do {
-            let export = try appEngine.exportGdprData()
-            return VauchiGdprExport(
-                jsonData: export.jsonData,
-                exportedAt: export.exportedAt,
-                version: export.version
-            )
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Schedule identity deletion with grace period
-    func scheduleIdentityDeletion() throws -> VauchiDeletionInfo {
-        do {
-            let info = try appEngine.scheduleIdentityDeletion()
-            return VauchiDeletionInfo(from: info)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Cancel a scheduled identity deletion
-    func cancelIdentityDeletion() throws {
-        do {
-            try appEngine.cancelIdentityDeletion()
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get current deletion state
-    func getDeletionState() throws -> VauchiDeletionInfo {
-        do {
-            let info = try appEngine.getDeletionState()
-            return VauchiDeletionInfo(from: info)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Grant consent for a specific type
-    func grantConsent(consentType: VauchiConsentType) throws {
-        do {
-            try appEngine.grantConsent(consentType: consentType.toMobile)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Revoke consent for a specific type
-    func revokeConsent(consentType: VauchiConsentType) throws {
-        do {
-            try appEngine.revokeConsent(consentType: consentType.toMobile)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Check if consent is granted for a specific type
-    func checkConsent(consentType: VauchiConsentType) throws -> Bool {
-        do {
-            return try appEngine.checkConsent(consentType: consentType.toMobile)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get aggregated consent status for a specific type
-    func getConsentStatus(consentType: VauchiConsentType) throws -> MobileConsentStatus {
-        do {
-            return try appEngine.getConsentStatus(consentType: consentType.toMobile)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    /// Get all consent records
-    func getConsentRecords() throws -> [VauchiConsentRecord] {
-        do {
-            return try appEngine.getConsentRecords().map { VauchiConsentRecord(from: $0) }
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
 }
 
 // MARK: - GDPR Types
-
-/// Deletion state enum matching MobileDeletionState
-enum VauchiDeletionState {
-    case none
-    case scheduled
-    case executed
-
-    /// Convert from MobileDeletionState
-    static func from(_ mobile: MobileDeletionState) -> VauchiDeletionState {
-        switch mobile {
-        case .none: .none
-        case .scheduled: .scheduled
-        case .executed: .executed
-        }
-    }
-}
-
-/// GDPR data export result
-struct VauchiGdprExport {
-    let jsonData: String
-    let exportedAt: UInt64
-    let version: UInt32
-
-    var exportedDate: Date {
-        Date(timeIntervalSince1970: TimeInterval(exportedAt))
-    }
-}
-
-/// Consent type enum matching MobileConsentType
-enum VauchiConsentType: String, CaseIterable {
-    case dataProcessing
-    case contactSharing
-    case recoveryVouching
-
-    var displayName: String {
-        switch self {
-        case .dataProcessing: "Data Processing"
-        case .contactSharing: "Contact Sharing"
-        case .recoveryVouching: "Recovery Vouching"
-        }
-    }
-
-    /// Convert to MobileConsentType
-    var toMobile: MobileConsentType {
-        switch self {
-        case .dataProcessing: .dataProcessing
-        case .contactSharing: .contactSharing
-        case .recoveryVouching: .recoveryVouching
-        }
-    }
-
-    /// Convert from MobileConsentType
-    static func from(_ mobile: MobileConsentType) -> VauchiConsentType {
-        switch mobile {
-        case .dataProcessing: .dataProcessing
-        case .contactSharing: .contactSharing
-        case .recoveryVouching: .recoveryVouching
-        }
-    }
-}
-
-/// Consent record
-struct VauchiConsentRecord: Identifiable {
-    let id: String
-    let consentType: VauchiConsentType
-    let granted: Bool
-    let timestamp: UInt64
-    let policyVersion: String?
-
-    init(from mobile: MobileConsentRecord) {
-        id = mobile.id
-        consentType = VauchiConsentType.from(mobile.consentType)
-        granted = mobile.granted
-        timestamp = mobile.timestamp
-        policyVersion = mobile.policyVersion
-    }
-
-    var date: Date {
-        Date(timeIntervalSince1970: TimeInterval(timestamp))
-    }
-}
-
-/// Deletion info containing state and timing
-struct VauchiDeletionInfo {
-    let state: VauchiDeletionState
-    let scheduledAt: UInt64
-    let executeAt: UInt64
-    let daysRemaining: UInt32
-
-    init(from mobile: MobileDeletionInfo) {
-        state = VauchiDeletionState.from(mobile.state)
-        scheduledAt = mobile.scheduledAt
-        executeAt = mobile.executeAt
-        daysRemaining = mobile.daysRemaining
-    }
-
-    var scheduledDate: Date {
-        Date(timeIntervalSince1970: TimeInterval(scheduledAt))
-    }
-
-    var executeDate: Date {
-        Date(timeIntervalSince1970: TimeInterval(executeAt))
-    }
-}
 
 // MARK: - Demo Contact Types
 
