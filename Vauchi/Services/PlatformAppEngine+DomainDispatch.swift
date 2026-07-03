@@ -12,6 +12,21 @@ extension PlatformAppEngine {
         )
     }
 
+    // MARK: - Content Updates
+
+    /// Run the whole content-update cycle (check → apply → screen
+    /// invalidation) in core and return its presentation-only outcome
+    /// (core 0.51.69, `RunContentUpdateCycle`).
+    func runContentUpdateCycle() throws -> MobileContentCycleOutcome {
+        let result = try dispatchDomainCommand(command: .runContentUpdateCycle)
+        guard case let .contentUpdateCycle(outcome) = result else {
+            throw MobileError.Other(
+                detail: "RunContentUpdateCycle: unexpected result variant"
+            )
+        }
+        return outcome
+    }
+
     func getPublicId() throws -> String {
         let result = try dispatchDomainCommand(command: .getPublicId)
         guard case let .text(value) = result else {

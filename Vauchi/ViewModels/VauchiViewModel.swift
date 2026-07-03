@@ -135,6 +135,7 @@ class VauchiViewModel: ObservableObject {
             // PERIODIC_SYNC_INTERVAL_SECONDS rather than a frontend
             // magic number (audit P2-C).
             BackgroundSyncService.shared.setAppEngine(repo.appEngine)
+            runContentUpdateCycle(appEngine: repo.appEngine)
             appState = .ready
             #if DEBUG
                 print("VauchiViewModel: repository initialized successfully")
@@ -151,6 +152,51 @@ class VauchiViewModel: ObservableObject {
                 print("VauchiViewModel: \(msg)")
             #endif
             errorMessage = msg
+        }
+    }
+
+    /// Native follow-ups for a content-update cycle outcome. Pure so the
+    /// decision is unit-testable (`ContentUpdateCycleTests`) without an
+    /// engine; the domain check→apply sequencing lives in core
+    /// (`RunContentUpdateCycle`). `refreshAppearance` implies `applied`
+    /// (core invariant), so the `applied` guard alone gates both.
+    nonisolated static func contentCycleActions(
+        _ outcome: MobileContentCycleOutcome
+    ) -> (refreshTheme: Bool, reloadUI: Bool) {
+        guard outcome.applied else { return (false, false) }
+        return (outcome.refreshAppearance, true)
+    }
+
+    /// Run the remote content-update cycle in the background at startup.
+    /// Core owns the whole check→apply→invalidate sequence
+    /// (`RunContentUpdateCycle`); iOS only performs the native
+    /// consequences — re-applying the theme when the appearance changed
+    /// and reloading the UI when anything was applied. Best effort:
+    /// fired once on launch (matching macOS `AppState`), no retry;
+    /// failures return a no-op outcome, logged in debug without
+    /// disrupting startup. A periodic mobile cadence is a separate
+    /// product decision (see the content-update-cycle-adoption MRs).
+    private func runContentUpdateCycle(appEngine: PlatformAppEngine) {
+        Task.detached(priority: .utility) { [weak self] in
+            let outcome: MobileContentCycleOutcome
+            do {
+                outcome = try appEngine.runContentUpdateCycle()
+            } catch {
+                #if DEBUG
+                    print("VauchiViewModel: runContentUpdateCycle failed: \(error)")
+                #endif
+                return
+            }
+            let actions = VauchiViewModel.contentCycleActions(outcome)
+            guard actions.reloadUI else { return }
+            await MainActor.run {
+                if actions.refreshTheme {
+                    ThemeService.shared.applySelectedTheme()
+                }
+                // Locale store is hot-reloaded by core — reload picks up
+                // any new social-network labels / locale strings.
+                self?.coreViewModel?.invalidateAll()
+            }
         }
     }
 
