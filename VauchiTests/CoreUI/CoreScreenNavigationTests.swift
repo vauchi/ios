@@ -53,6 +53,28 @@ final class CoreScreenNavigationTests: XCTestCase {
     /// selected tab — otherwise the shell would render the previous tab's
     /// ScreenModel. The tab-back to My Card must re-assert MyInfo even
     /// though the engine had drifted to Groups.
+    /// The shell's tab highlight is a pure read of core's current
+    /// screen — `currentTabId` returns the canonical id of the tab that
+    /// owns the active screen and follows core after every navigation.
+    /// This is the contract `ContentView`'s `.onAppear` relies on to
+    /// seed the highlight instead of re-deriving it from domain state
+    /// (the retired `hasContacts` branch). It must always be a real tab.
+    func testCurrentTabIdFollowsCoreNavigation() throws {
+        viewModel.navigateToTab(actionId: "contacts")
+        XCTAssertEqual(viewModel.currentTabId(), "contacts",
+                       "currentTabId must follow core to the Contacts tab")
+
+        viewModel.navigateToTab(actionId: "my_info")
+        XCTAssertEqual(viewModel.currentTabId(), "my_info",
+                       "currentTabId must follow core back to My Card")
+
+        let tabIds = Set(viewModel.tabs().map(\.id))
+        let current = try XCTUnwrap(viewModel.currentTabId(),
+                                    "on a bottom-tab screen currentTabId is non-nil")
+        XCTAssertTrue(tabIds.contains(current),
+                      "currentTabId must be one of the rendered tabs, got \(current)")
+    }
+
     func testNavigateToTabRecoversFromCrossTabDrift() throws {
         viewModel.navigateToTab(actionId: "my_info")
         let afterMyInfo = try XCTUnwrap(viewModel.currentScreen)

@@ -517,15 +517,6 @@ class VauchiRepository {
 
     // MARK: - Contact Operations
 
-    /// List contacts with pagination
-    func listContactsPaginated(offset: UInt32, limit: UInt32) throws -> [VauchiContact] {
-        do {
-            return try appEngine.listContactsPaginated(offset: offset, limit: limit).map(convertContact)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
     /// List all contacts
     func listContacts() throws -> [VauchiContact] {
         do {

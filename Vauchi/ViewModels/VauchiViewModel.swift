@@ -46,8 +46,6 @@ class VauchiViewModel: ObservableObject {
     @Published var appState: AppState = .loading
     @Published var isLoading = true
     @Published var hasIdentity = false
-    @Published var contacts: [VauchiContact] = []
-    private let contactsPageSize: UInt32 = 20
     @Published var errorMessage: String?
     @Published var syncState: SyncState = .idle
 
@@ -305,14 +303,6 @@ class VauchiViewModel: ObservableObject {
 
         Task {
             hasIdentity = repository?.hasIdentity() ?? false
-
-            // Identity/card details are core-owned and rendered via
-            // `coreViewModel`; the shell only needs the contacts-presence
-            // flag (drives the tab layout) once an identity exists.
-            if hasIdentity {
-                await loadContacts()
-            }
-
             isLoading = false
         }
     }
@@ -343,19 +333,6 @@ class VauchiViewModel: ObservableObject {
     /// Poll for and display OS notifications (E)
     func pollNotifications() {
         NotificationService.shared.pollAndDisplayNotifications(repository: repository)
-    }
-
-    // MARK: - Contacts
-
-    func loadContacts() async {
-        guard let repository else { return }
-
-        do {
-            let contactsData = try repository.listContactsPaginated(offset: 0, limit: contactsPageSize)
-            contacts = contactsData
-        } catch {
-            contacts = []
-        }
     }
 
     // MARK: - Toast
@@ -435,7 +412,6 @@ class VauchiViewModel: ObservableObject {
                 updatesSent: Int(result.updatesSent),
                 updatedContactNames: names
             )
-            await loadContacts()
             if !names.isEmpty {
                 let loc = LocalizationService.shared
                 let msg = names.count == 1
@@ -444,8 +420,9 @@ class VauchiViewModel: ObservableObject {
                 showSuccess("Sync", message: msg)
             }
         } catch let VauchiRepositoryError.rateLimited(retryAfterSecs) {
-            syncState = .error("Rate limited")
-            showError("Sync", message: "Please wait \(retryAfterSecs)s before syncing again")
+            let loc = LocalizationService.shared
+            syncState = .error(loc.t("rate_limit.message"))
+            showError("Sync", message: loc.t("rate_limit.retry_in", args: ["seconds": String(retryAfterSecs)]))
         } catch {
             syncState = .error(error.localizedDescription)
         }

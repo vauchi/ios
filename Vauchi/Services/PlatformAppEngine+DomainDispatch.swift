@@ -116,18 +116,6 @@ extension PlatformAppEngine {
         return contacts
     }
 
-    func listContactsPaginated(offset: UInt32, limit: UInt32) throws -> [MobileContact] {
-        let result = try dispatchDomainCommand(
-            command: .listContactsPaginated(offset: offset, limit: limit)
-        )
-        guard case let .contacts(contacts) = result else {
-            throw MobileError.Other(
-                detail: "ListContactsPaginated: unexpected result variant"
-            )
-        }
-        return contacts
-    }
-
     func getContact(id: String) throws -> MobileContact? {
         let result = try dispatchDomainCommand(command: .getContact(id: id))
         guard case let .contactOpt(contact) = result else {

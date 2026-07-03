@@ -233,6 +233,15 @@ class AppViewModel: ObservableObject {
         }
     }
 
+    /// Core's canonical tab id for the current screen — the bottom-tab
+    /// that owns it (nil when core is on a non-tab screen, e.g. Lock or
+    /// a modal). The shell reads this to keep its highlight in sync
+    /// with core instead of re-deriving "which tab" from domain state
+    /// (ADR-043 Am4). Mirrors Android's `CoreAppViewModel.currentTabId`.
+    func currentTabId() -> String? {
+        (try? appEngine.currentTabId(layout: .mobile)) ?? nil
+    }
+
     /// Forward a tab tap as `UserAction::NavigateToTab { action_id }`.
     ///
     /// `actionId` is the opaque canonical id handed out by `tabs()` (e.g.

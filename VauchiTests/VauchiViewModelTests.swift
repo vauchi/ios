@@ -49,7 +49,6 @@ final class VauchiViewModelTests: XCTestCase {
         // Before loadState, should be in loading state with no identity.
         XCTAssertTrue(viewModel.isLoading)
         XCTAssertFalse(viewModel.hasIdentity)
-        XCTAssertTrue(viewModel.contacts.isEmpty)
     }
 
     // MARK: - Identity Creation Tests
@@ -69,19 +68,10 @@ final class VauchiViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.hasIdentity)
     }
 
-    // MARK: - Contact Management Tests
-
-    // Based on: features/contacts_management.feature
-
-    /// Scenario: Initial contacts list is empty
-    func testInitialContactsListEmpty() async throws {
-        let viewModel = makeViewModel()
-        try await viewModel.createIdentity(name: "Alice")
-
-        await viewModel.loadContacts()
-
-        XCTAssertTrue(viewModel.contacts.isEmpty)
-    }
+    // Contact-list state is core-owned (rendered via `coreViewModel`
+    // ScreenModel); the shell no longer mirrors a `contacts` array.
+    // "Fresh identity → empty list" is covered in core; the humble
+    // tab-follow contract is in `CoreScreenNavigationTests`.
 
     // MARK: - Error Handling Tests
 

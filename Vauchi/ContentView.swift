@@ -93,7 +93,7 @@ struct ContentView: View {
                         }
                     )
                 } else {
-                    MainTabView(hasContacts: !viewModel.contacts.isEmpty)
+                    MainTabView()
                 }
             }
         }
@@ -133,15 +133,12 @@ struct LoadingView: View {
 struct MainTabView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
-    /// Default selection: the Contacts tab when the user already has
-    /// contacts, otherwise My Card. Keyed on the opaque canonical tab id
-    /// that core hands out via `navItems(.mobile)` (ADR-043 Am4) — not a domain
-    /// variant.
-    @State private var selectedTabId: String
-
-    init(hasContacts: Bool = false) {
-        _selectedTabId = State(initialValue: hasContacts ? "contacts" : "my_info")
-    }
+    /// Tab-bar highlight, keyed on the opaque canonical tab id from
+    /// `navItems(.mobile)` (ADR-043 Am4). Seeded from core's
+    /// `currentTabId` on appear so the highlight follows wherever core
+    /// booted; the shell never re-derives "which tab first" from
+    /// domain state (the retired `hasContacts` branch did).
+    @State private var selectedTabId: String = ""
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -235,21 +232,17 @@ struct MainTabView: View {
                     }
                 }
                 .onAppear {
-                    navigateToSelectedTab(selectedTabId, coreVM)
+                    // Pull, never push: core is already on its
+                    // default/current screen (post-auth self-heal);
+                    // the highlight just follows it.
+                    selectedTabId = coreVM.currentTabId()
+                        ?? coreVM.tabs().first?.id
+                        ?? selectedTabId
                 }
             } else {
                 ProgressView("Loading...")
             }
         }
-    }
-
-    /// Tell core to navigate to the selected tab. `id` is the canonical tab
-    /// id; the opaque `action_id` for `NavigateToTab` is looked up from
-    /// `navItems(.mobile)`. Used for the initial selection; tab taps navigate via
-    /// `CoreBottomTabBar`'s `onTap`.
-    private func navigateToSelectedTab(_ id: String, _ coreVM: AppViewModel) {
-        guard let tab = coreVM.tabs().first(where: { $0.id == id }) else { return }
-        coreVM.navigateToTab(actionId: tab.actionId)
     }
 
     /// Preserve the historical camelCase bottom-tab a11y identifiers
@@ -273,7 +266,7 @@ struct MainTabView: View {
 }
 
 #Preview("With contacts") {
-    MainTabView(hasContacts: true)
+    MainTabView()
         .environmentObject(VauchiViewModel())
 }
 
