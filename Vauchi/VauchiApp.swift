@@ -94,6 +94,13 @@ struct VauchiApp: App {
             // (15-min interval, retry budget) come from core.
             _ = try? repository.appEngine.periodicSyncTick()
 
+            // Opportunistic content-update cycle (cadence Option 2,
+            // `2026-07-03-periodic-mobile-content-update-cadence`):
+            // piggyback on this existing background wakeup — no new
+            // BGTask. Best-effort; the applied content lands on disk for
+            // the next foreground read, so no UI refresh is needed here.
+            _ = try? repository.appEngine.runContentUpdateCycle()
+
             // Poll for notifications (E)
             NotificationService.shared.pollAndDisplayNotifications(repository: repository)
         }
