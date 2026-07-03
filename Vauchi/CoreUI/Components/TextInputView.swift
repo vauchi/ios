@@ -47,7 +47,7 @@ struct TextInputView: View {
             if let error = component.validationError {
                 Text(error)
                     .font(.caption)
-                    .foregroundColor(.red)
+                    .foregroundColor(ThemeService.shared.error)
                     .accessibilityLabel("Error: \(error)")
             }
         }

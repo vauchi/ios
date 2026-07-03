@@ -40,7 +40,7 @@ struct QRScannerView: View {
                         if let error = errorMessage {
                             VStack(spacing: 8) {
                                 Text(error)
-                                    .foregroundColor(.red)
+                                    .foregroundColor(ThemeService.shared.error)
                                 Button("Try Again") {
                                     errorMessage = nil
                                     scannedCode = nil
@@ -48,7 +48,7 @@ struct QRScannerView: View {
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 20)
                                 .padding(.vertical, 8)
-                                .background(Color.red.opacity(0.8))
+                                .background(ThemeService.shared.error.opacity(0.8))
                                 .cornerRadius(8)
                                 .accessibilityLabel("Try scanning again")
                                 .accessibilityHint("Clears the error and restarts the camera scanner")

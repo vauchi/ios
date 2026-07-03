@@ -144,7 +144,7 @@ struct SettingsItemRow: View {
             HStack {
                 Text(label)
                     .font(.body)
-                    .foregroundColor(.red)
+                    .foregroundColor(ThemeService.shared.error)
 
                 Spacer()
             }

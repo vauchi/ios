@@ -259,7 +259,7 @@ struct ActionButton: View {
         switch action.style {
         case .primary: .cyan
         case .secondary: .clear
-        case .destructive: .red
+        case .destructive: ThemeService.shared.error
         }
     }
 

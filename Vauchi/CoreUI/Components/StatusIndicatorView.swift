@@ -51,9 +51,9 @@ struct StatusIndicatorView: View {
         switch status {
         case .pending: .gray
         case .inProgress: .blue
-        case .success: .green
-        case .failed: .red
-        case .warning: .orange
+        case .success: ThemeService.shared.success
+        case .failed: ThemeService.shared.error
+        case .warning: ThemeService.shared.warning
         }
     }
 

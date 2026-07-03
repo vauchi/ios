@@ -64,8 +64,8 @@ struct IndicatorView: View {
 
     private var textColor: Color {
         switch component.kind {
-        case .active: .green
-        case .error: .orange
+        case .active: ThemeService.shared.success
+        case .error: ThemeService.shared.warning
         case .neutral: .secondary
         case .busy: .primary
         }
@@ -73,8 +73,8 @@ struct IndicatorView: View {
 
     private var backgroundColor: Color {
         switch component.kind {
-        case .active: Color.green.opacity(0.12)
-        case .error: Color.orange.opacity(0.12)
+        case .active: ThemeService.shared.success.opacity(0.12)
+        case .error: ThemeService.shared.warning.opacity(0.12)
         case .neutral: Color(.tertiarySystemBackground)
         case .busy: Color(.tertiarySystemBackground)
         }

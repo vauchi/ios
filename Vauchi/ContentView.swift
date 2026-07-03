@@ -48,7 +48,7 @@ struct ContentView: View {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 50))
-                            .foregroundColor(.red)
+                            .foregroundColor(ThemeService.shared.error)
                             .accessibilityHidden(true)
                         Text(localizationService.t("error.generic"))
                             .font(Font.title.weight(.bold))
@@ -156,7 +156,7 @@ struct MainTabView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .background(Color.orange)
+                .background(ThemeService.shared.warning)
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .zIndex(99)
                 .accessibilityElement(children: .combine)

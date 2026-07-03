@@ -67,7 +67,7 @@ struct AppPasswordView: View {
             if let error = errorMessage {
                 Text(error)
                     .font(.caption)
-                    .foregroundColor(.red)
+                    .foregroundColor(ThemeService.shared.error)
             }
 
             Button {
