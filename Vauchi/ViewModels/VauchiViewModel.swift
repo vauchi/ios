@@ -135,7 +135,17 @@ class VauchiViewModel: ObservableObject {
             // PERIODIC_SYNC_INTERVAL_SECONDS rather than a frontend
             // magic number (audit P2-C).
             BackgroundSyncService.shared.setAppEngine(repo.appEngine)
-            runContentUpdateCycle(appEngine: repo.appEngine)
+            // The content cycle does real CDN network I/O, which the
+            // headless test-sim sandbox cannot service — it aborts the
+            // app process (unit tests via the injected XCTest bundle, UI
+            // tests via the separately-launched app). Core handles a real
+            // offline device gracefully (`check_for_updates` →
+            // `CheckFailed`, no panic), so this guard is a test-sandbox
+            // carve-out, not a production path. Mirrors macOS `AppState`
+            // skipping its network-heavy init under test.
+            if !VauchiViewModel.isRunningUnderTest {
+                runContentUpdateCycle(appEngine: repo.appEngine)
+            }
             appState = .ready
             #if DEBUG
                 print("VauchiViewModel: repository initialized successfully")
@@ -153,6 +163,17 @@ class VauchiViewModel: ObservableObject {
             #endif
             errorMessage = msg
         }
+    }
+
+    /// True when the app is hosting an automated test run, in either
+    /// mode: unit/snapshot tests inject the XCTest bundle
+    /// (`XCTestConfigurationFilePath` set in this process), while UI
+    /// tests launch the app separately with `--reset-for-testing`.
+    /// Startup network work (the content cycle) is skipped in both.
+    nonisolated static var isRunningUnderTest: Bool {
+        let env = ProcessInfo.processInfo.environment
+        return env["XCTestConfigurationFilePath"] != nil
+            || ProcessInfo.processInfo.arguments.contains("--reset-for-testing")
     }
 
     /// Native follow-ups for a content-update cycle outcome. Pure so the
