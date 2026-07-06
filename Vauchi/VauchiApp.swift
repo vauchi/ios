@@ -11,7 +11,6 @@ import VauchiPlatform
 struct VauchiApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var viewModel = VauchiViewModel()
-    @State private var showDeepLinkConsent = false
     #if DEBUG
         @State private var showBleDiagnostic = false
         @State private var bleDiagAutoTest: String?
@@ -167,46 +166,16 @@ struct VauchiApp: App {
                                 return
                             }
                         #endif
-                        // Deep link consent gate (SP-9). The state machine + URL
-                        // parser live in core (`PlatformAppEngine.handleDeepLinkUri`);
-                        // see _private/docs/problems/2026-04-25-deeplink-consent-orchestrator.
-                        // NEVER auto-process — the alert below forces an explicit
-                        // grant or deny ScreenAction press.
+                        // Humble deep-link surface: forward every vauchi:// URI
+                        // to core as UserAction::LinkOpened. Core decides whether
+                        // it is an exchange consent gate, a device-link join
+                        // invitation, or an unsupported link (ShowAlert).
                         guard let coreVM = viewModel.coreViewModel else {
                             viewModel.showError("Invalid Link",
                                                 message: "Please unlock Vauchi first, then re-open the link.")
                             return
                         }
-                        do {
-                            try coreVM.handleDeepLinkUri(url.absoluteString)
-                            showDeepLinkConsent = true
-                        } catch {
-                            viewModel.showError("Invalid Link",
-                                                message: "The link could not be processed: \(error.localizedDescription)")
-                        }
-                    }
-                    .alert("Exchange Request", isPresented: $showDeepLinkConsent) {
-                        // After Accept, core's `DeepLinkConsentEngine` grant
-                        // path navigates to `AppScreen::DeepLinkResponder` and
-                        // the screen id flips to `link_responder_waiting`.
-                        // The engine-owned responder then drives itself,
-                        // emitting RelayEscrow* commands through the standard
-                        // ActionResult / pending-commands envelope.
-                        // TODO(HUMBLE): [D/T, P1] frontend assembles the deep-link consent alert copy and
-                        // hardcodes `grant`/`deny` action ids; core should emit a `ShowConsentDialog` result
-                        // with opaque labels/action ids (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-                        Button("Accept Exchange") {
-                            viewModel.coreViewModel?
-                                .handleAction(.actionPressed(actionId: "grant"))
-                        }
-                        Button("Decline", role: .cancel) {
-                            viewModel.coreViewModel?
-                                .handleAction(.actionPressed(actionId: "deny"))
-                        }
-                    } message: {
-                        Text("Someone shared an exchange link with you. " +
-                            "Do you want to proceed with the contact exchange?\n\n" +
-                            "Only accept if you trust the source of this link.")
+                        coreVM.handleAction(.linkOpened(uri: url.absoluteString))
                     }
                 #if DEBUG
                     .fullScreenCover(isPresented: $showBleDiagnostic) {
