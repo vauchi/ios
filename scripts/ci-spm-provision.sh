@@ -22,6 +22,7 @@ set -euo pipefail
 # section, or a relative path; xcodebuild needs an absolute HOME for its SPM
 # config lookup. build:release intentionally leaves this unset so it keeps the
 # shared config path for signing.
+echo "  [debug] SPM_ISOLATE_HOME raw='${SPM_ISOLATE_HOME:-}' CI_PROJECT_DIR='${CI_PROJECT_DIR:-}' PWD='$PWD'"
 if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
   SPM_ISOLATE_HOME="${SPM_ISOLATE_HOME//\$CI_PROJECT_DIR/${CI_PROJECT_DIR:-$PWD}}"
   case "$SPM_ISOLATE_HOME" in
@@ -29,6 +30,9 @@ if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
     *) SPM_ISOLATE_HOME="$PWD/$SPM_ISOLATE_HOME" ;;
   esac
   export SPM_ISOLATE_HOME
+  echo "  [debug] SPM_ISOLATE_HOME normalized='$SPM_ISOLATE_HOME'"
+else
+  echo "  [debug] SPM_ISOLATE_HOME unset, will use shared config path"
 fi
 
 rm -rf Vauchi.xcodeproj
