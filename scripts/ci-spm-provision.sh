@@ -17,6 +17,20 @@
 # and 2026-06-28-ios-ci-spm-swift-syntax-checkout-hang.
 set -euo pipefail
 
+# Normalize SPM_ISOLATE_HOME if the caller provided one. CI sometimes passes a
+# literal '$CI_PROJECT_DIR' reference that does not expand in the variables:
+# section, or a relative path; xcodebuild needs an absolute HOME for its SPM
+# config lookup. build:release intentionally leaves this unset so it keeps the
+# shared config path for signing.
+if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
+  SPM_ISOLATE_HOME="${SPM_ISOLATE_HOME//\$CI_PROJECT_DIR/${CI_PROJECT_DIR:-$PWD}}"
+  case "$SPM_ISOLATE_HOME" in
+    /*) ;;
+    *) SPM_ISOLATE_HOME="$PWD/$SPM_ISOLATE_HOME" ;;
+  esac
+  export SPM_ISOLATE_HOME
+fi
+
 rm -rf Vauchi.xcodeproj
 xcodegen generate
 echo "── [$(date +%H:%M:%S)] SPM resolve (file:// mirror + env var) ──"
