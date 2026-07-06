@@ -334,6 +334,10 @@ if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
   CFG_DIR="$SPM_ISOLATE_HOME/Library/org.swift.swiftpm/configuration"
   mkdir -p "$CFG_DIR"
   printf '%s' "$MIRROR_JSON" > "$CFG_DIR/mirrors.json"
+  echo "  [debug] wrote mirror config to $CFG_DIR/mirrors.json:"
+  cat "$CFG_DIR/mirrors.json"
+  echo ""
+  echo "  [debug] running xcodebuild with HOME=$SPM_ISOLATE_HOME"
   HOME="$SPM_ISOLATE_HOME" xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
     -clonedSourcePackagesDirPath .spm-packages \
     -derivedDataPath .derived-data \
