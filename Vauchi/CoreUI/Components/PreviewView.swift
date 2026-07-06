@@ -35,6 +35,9 @@ struct PreviewView: View {
     }
 
     private var variantSelector: some View {
+        // TODO(HUMBLE): [W, P1] frontend uses `groupViewSelected(groupName:)` and a hardcoded "All" label;
+        // core should emit a generic `variantSelected(actionId:)` with opaque labels
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 // "All" tab
@@ -85,6 +88,8 @@ struct PreviewView: View {
 
                 Text(currentDisplayName)
                     .font(Font.title2.weight(.semibold))
+                    // TODO(HUMBLE): [W, P2] hardcoded English a11y label names a domain field role
+                    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                     .accessibilityLabel("Display name: \(currentDisplayName)")
             }
             .padding(.vertical, 24)
@@ -95,6 +100,8 @@ struct PreviewView: View {
             VStack(spacing: 0) {
                 let fields = currentFields
                 if fields.isEmpty {
+                    // TODO(HUMBLE): [W, P2] hardcoded English empty-state copy leaks domain concept (`fields`)
+                    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                     Text("No fields visible")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
@@ -109,6 +116,8 @@ struct PreviewView: View {
         .background(Color(.systemBackground))
         .cornerRadius(CGFloat(tokens.borderRadius.lg))
         .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 4)
+        // TODO(HUMBLE): [W, P2] default a11y label embeds domain word (`Preview`)
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         .accessibilityLabel(component.a11y?.label ?? "Preview: \(component.name)")
         .accessibilityHint(component.a11y?.hint ?? "")
     }
@@ -186,6 +195,8 @@ struct PreviewFieldRow: View {
     }
 
     private func iconForFieldType(_ type: String) -> String {
+        // TODO(HUMBLE): [T, P1] duplicate of FieldListView.iconForFieldType: frontend maps `field_type` strings;
+        // core should supply `icon_token` (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         switch type.lowercased() {
         case "phone": "phone"
         case "email": "envelope"

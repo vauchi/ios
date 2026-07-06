@@ -155,6 +155,8 @@ class NFCExchangeService: NSObject, NFCTagReaderSessionDelegate, NFCExchangeDisp
     }
 
     private func sendApduOn(tag: NFCISO7816Tag, data: Data) {
+        // TODO(HUMBLE): [T, P1] frontend wraps core bytes in APDU framing and maps OS errors to domain events;
+        // core should own the NFC transport protocol (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         let apdu = NFCISO7816APDU(
             instructionClass: 0x00,
             instructionCode: Self.insKeyOffer,

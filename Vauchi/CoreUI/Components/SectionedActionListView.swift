@@ -94,6 +94,8 @@ private struct SectionedActionRowView: View {
     @ViewBuilder
     private var leadingIcon: some View {
         if let icon = item.icon {
+            // TODO(HUMBLE): [T, P1] frontend treats core icon token as a raw SF Symbol name;
+            // use the platform icon-token mapper (see _private problem record 2026-07-06-mobile-domain-shell-violations).
             Image(systemName: icon)
                 .frame(width: 24)
                 .foregroundColor(.accentColor)

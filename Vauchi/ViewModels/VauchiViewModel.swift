@@ -184,6 +184,8 @@ class VauchiViewModel: ObservableObject {
     nonisolated static func contentCycleActions(
         _ outcome: MobileContentCycleOutcome
     ) -> (refreshTheme: Bool, reloadUI: Bool) {
+        // TODO(HUMBLE): [T, P1] frontend interprets domain outcome flags to decide native refresh actions;
+        // core should emit a lifecycle Command instead (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         guard outcome.applied else { return (false, false) }
         return (outcome.refreshAppearance, true)
     }
@@ -272,6 +274,9 @@ class VauchiViewModel: ObservableObject {
                         // (padding to BIOMETRIC_UNLOCK_MIN_DURATION) and
                         // returns ActionResult.biometricUnlockOutcome.
                         let resultJson = try? engine?.handleHardwareEvent(event: .biometricUnlockSucceeded)
+                        // TODO(HUMBLE): [D, P0] frontend decides post-biometric duress routing by matching
+                        // an outcome string; core should return a typed NavigateTo or shell state Command
+                        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                         var promptForDuress = false
                         // core 0.51.44+: handleHardwareEvent returns the
                         // {action_result, commands} envelope; the unlock outcome
@@ -487,6 +492,9 @@ class VauchiViewModel: ObservableObject {
             }
 
             if !names.isEmpty {
+                // TODO(HUMBLE): [T, P1] frontend assembles sync-summary copy from raw domain result fields;
+                // core should return a localized Banner/Toast or summary Command
+                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                 let loc = LocalizationService.shared
                 let msg = names.count == 1
                     ? loc.t("sync.updated_single", args: ["name": names.first!])

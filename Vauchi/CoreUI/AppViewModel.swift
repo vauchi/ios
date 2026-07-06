@@ -585,8 +585,14 @@ class AppViewModel: ObservableObject {
             loadScreen()
             showToast(message, undoActionId: undoActionId)
         case .requestCamera:
+            // TODO(HUMBLE): [D, P1] frontend maps a domain result (`requestCamera`) to a native screen side-effect;
+            // core should emit `NavigateTo` or a camera Command
+            // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
             loadScreen()
         case .startDeviceLink:
+            // TODO(HUMBLE): [D, P1] frontend swallows `startDeviceLink` and routes to native flows itself;
+            // core should emit `NavigateTo` with the device-link screen
+            // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
             // Handled by native iOS flows.
             break
         case let .commands(commands):

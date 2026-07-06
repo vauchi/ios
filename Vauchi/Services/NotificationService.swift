@@ -40,6 +40,9 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         let center = UNUserNotificationCenter.current()
 
         // Category for emergency alerts (can have custom actions in future)
+        // TODO(HUMBLE): [W, P1] frontend hardcodes OS category identifiers tied to domain notification categories;
+        // core should supply `os_category_id` and `os_user_info`
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         let emergencyCategory = UNNotificationCategory(
             identifier: "emergencyAlert",
             actions: [],
@@ -74,11 +77,17 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         content.title = notification.title
         content.body = notification.body
         content.sound = .default
+        // TODO(HUMBLE): [T, P1] frontend assembles notification userInfo from domain field names;
+        // core should supply an opaque `os_user_info` map
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         content.userInfo = [
             "contact_id": notification.contactId,
             "event_key": notification.eventKey,
         ]
 
+        // TODO(HUMBLE): [T, P1] frontend maps NotificationCategory to OS presentation ids/sounds;
+        // core should attach `os_category_id` and presentation hints
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         switch notification.category {
         case .emergencyAlert:
             content.categoryIdentifier = "emergencyAlert"

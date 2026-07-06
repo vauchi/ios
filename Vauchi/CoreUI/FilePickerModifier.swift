@@ -83,6 +83,9 @@ struct FilePickerModifier: ViewModifier {
     /// strings still let the picker open. Filters and dedups along the
     /// way; an empty input means "pick any file".
     private var filePickerContentTypes: [UTType] {
+        // TODO(HUMBLE): [T, P1] frontend maps MIME types to OS UTTypes/extensions;
+        // core should provide accepted UTType identifiers or a `FileFilter` token
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         guard let pending = coreVM.pendingFilePick else { return [.data] }
         let types = pending.acceptedMimeTypes.compactMap { UTType(mimeType: $0) }
         return types.isEmpty ? [.data] : types

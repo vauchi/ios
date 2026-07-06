@@ -36,6 +36,9 @@ struct ExchangeHardwareScreen: View {
 
         /// True while `screenId` is a screen this flow's wrapper hosts.
         func hosts(_ screenId: String) -> Bool {
+            // TODO(HUMBLE): [D, P1] frontend matches domain screen_id prefixes/exact strings to choose a hardware wrapper;
+            // core should emit a presentation hint (e.g. requiresNfc) or a dedicated NavigateTo variant
+            // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
             switch self {
             case .multiStage: screenId == "multi_stage_exchange"
             case .nfc: screenId.hasPrefix("exchange_nfc")
@@ -56,6 +59,9 @@ struct ExchangeHardwareScreen: View {
         CoreScreenView(renderingCurrentScreen: ())
             .onDisappear {
                 if let id = coreVM.currentScreen?.screenId, flow.hosts(id) {
+                    // TODO(HUMBLE): [W, P1] frontend hardcodes a generic `cancel` action id;
+                    // core should supply the dismiss action id in the ScreenModel
+                    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                     coreVM.handleAction(.actionPressed(actionId: "cancel"))
                 }
             }

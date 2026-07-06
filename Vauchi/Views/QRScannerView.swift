@@ -88,6 +88,9 @@ struct QRScannerView: View {
 
     private func processScannedCode(_ code: String) {
         // Validate it's a Vauchi QR code
+        // TODO(HUMBLE): [D, P0] frontend rejects QR codes by substring and emits a hardcoded English error;
+        // core should own validity/acceptance and supply a localized result
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         guard code.hasPrefix("wb://") else {
             errorMessage = "Not a valid Vauchi QR code"
             scannedCode = nil

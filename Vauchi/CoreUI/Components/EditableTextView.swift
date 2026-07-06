@@ -36,12 +36,16 @@ struct EditableTextView: View {
                     Spacer()
 
                     Button {
+                        // TODO(HUMBLE): [T, P1] frontend mints an edit action id from the component id;
+                        // core should supply explicit `edit_action_id` (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                         onAction(.actionPressed(actionId: "\(component.id):edit"))
                     } label: {
                         Image(systemName: "pencil")
                             .foregroundColor(.accentColor)
                     }
                     .buttonStyle(.plain)
+                    // TODO(HUMBLE): [W, P2] hardcoded English a11y label embeds an edit action role
+                    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                     .accessibilityLabel("Edit \(component.label)")
                 }
             }

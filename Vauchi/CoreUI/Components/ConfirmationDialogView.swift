@@ -25,8 +25,13 @@ struct ConfirmationDialogView: View {
 
             HStack(spacing: 16) {
                 Button {
+                    // TODO(HUMBLE): [T, P1] frontend hardcodes generic `cancel` action id;
+                    // core should supply explicit action ids in ConfirmationDialogComponent
+                    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                     onAction(.actionPressed(actionId: "cancel"))
                 } label: {
+                    // TODO(HUMBLE): [W, P2] hardcoded English button label
+                    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                     Text("Cancel")
                         .font(.body.weight(.medium))
                         .foregroundColor(.primary)
@@ -38,6 +43,9 @@ struct ConfirmationDialogView: View {
                 .accessibilityLabel("Cancel")
 
                 Button {
+                    // TODO(HUMBLE): [T, P1] frontend hardcodes generic `confirm` action id;
+                    // core should supply explicit action ids in ConfirmationDialogComponent
+                    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                     onAction(.actionPressed(actionId: "confirm"))
                 } label: {
                     Text(component.confirmText)

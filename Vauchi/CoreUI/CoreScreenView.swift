@@ -224,6 +224,9 @@ private struct CoreScreenContent: View {
     /// it everywhere else. Cheap to call unconditionally — both methods are
     /// idempotent.
     private func syncQrFrameTimer(for screenId: String?) {
+        // TODO(HUMBLE): [D, P1] frontend gates timers on domain screen_ids;
+        // core should emit `requiresAnimatedQr` / `requiresPoll` lifecycle hints or Commands
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         if screenId == "exchange_show_qr" {
             coreVM.startQrFrameTimer()
         } else {

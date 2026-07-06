@@ -13,6 +13,9 @@ struct ContentView: View {
 
     /// Determines if we should show onboarding
     private var shouldShowOnboarding: Bool {
+        // TODO(HUMBLE): [D, P0] frontend decides whether to show onboarding from identity + settings flags;
+        // core should emit the onboarding screen or a NavigateTo command
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         // Show onboarding if:
         // 1. No identity exists, OR
         // 2. Identity exists but onboarding wasn't completed (migration scenario)
@@ -160,6 +163,8 @@ struct MainTabView: View {
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .zIndex(99)
                 .accessibilityElement(children: .combine)
+                // TODO(HUMBLE): [W, P2] hardcoded English a11y label names a domain state
+                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                 .accessibilityLabel("Offline")
             }
 
@@ -191,6 +196,8 @@ struct MainTabView: View {
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .zIndex(100)
                 .accessibilityElement(children: .combine)
+                // TODO(HUMBLE): [W, P2] hardcoded English a11y label embeds UI role
+                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                 .accessibilityLabel("Toast: \(message)")
             }
         }
@@ -249,6 +256,9 @@ struct MainTabView: View {
     /// (referenced by manual QA scripts) rather than deriving
     /// "tab.\(id)" from the snake_case canonical id.
     private func accessibilityId(for id: String) -> String {
+        // TODO(HUMBLE): [W, P2] frontend reverse-maps canonical tab ids to hardcoded a11y ids;
+        // core should expose an opaque accessibility_handle in TabInfo
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         switch id {
         case "my_info": "tab.myCard"
         case "contacts": "tab.contacts"
@@ -286,6 +296,9 @@ private struct MainContentView: View {
     /// `exchange_nfc*` → NFC reader. Every other screen renders via the
     /// render-only `CoreScreenView`.
     private var nativeBody: AnyView? {
+        // TODO(HUMBLE): [D, P1] frontend maps domain screen_ids to native hardware wrappers;
+        // core should emit a presentation hint (e.g. requiresCamera/Nfc) or a NavigateTo variant
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         switch coreVM.currentScreen?.screenId {
         case "multi_stage_exchange":
             AnyView(ExchangeHardwareScreen(coreVM: coreVM, flow: .multiStage))

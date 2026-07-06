@@ -26,6 +26,8 @@ struct FieldListView: View {
                 }
             }
         }
+        // TODO(HUMBLE): [W, P2] default a11y label names a domain concept (`Contact fields`)
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         .accessibilityLabel(component.a11y?.label ?? "Contact fields")
         .accessibilityHint(component.a11y?.hint ?? "")
     }
@@ -37,6 +39,8 @@ struct FieldListView: View {
                 .foregroundColor(.secondary)
                 .accessibilityHidden(true)
 
+            // TODO(HUMBLE): [W, P2] hardcoded English empty-state copy leaks domain concept (`fields`)
+            // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
             Text("No fields added yet")
                 .font(.body)
                 .foregroundColor(.secondary)
@@ -95,6 +99,9 @@ struct FieldListRow: View {
 
     @ViewBuilder
     private var visibilityControl: some View {
+        // TODO(HUMBLE): [D/T, P1] frontend interprets `VisibilityMode` and `field.visibility` to render controls;
+        // core should emit generic presentation tokens (e.g. icon_token, visibility_controls)
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         if case .showHide = visibilityMode {
             let isShown: Bool = {
                 if case .shown = field.visibility { return true }
@@ -117,6 +124,9 @@ struct FieldListRow: View {
     }
 
     private var groupChips: some View {
+        // TODO(HUMBLE): [D/T, P1] frontend maps per-group visibility state and group names to UI;
+        // core should supply generic chips with explicit action_ids and labels
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         let visibleGroups: [String] = {
             if case let .groups(groups) = field.visibility {
                 return groups
@@ -150,6 +160,9 @@ struct FieldListRow: View {
     }
 
     private func iconForFieldType(_ type: String) -> String {
+        // TODO(HUMBLE): [T, P1] frontend maps `field_type` strings to SF Symbols;
+        // core's `Field` should include `icon_token`
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         switch type.lowercased() {
         case "phone": "phone"
         case "email": "envelope"

@@ -37,6 +37,8 @@ struct ScreenRendererView: View {
     /// "Pinned" on those versions anyway, so the branch is inert until
     /// the package pin bumps. Switch to `== .pinned` at that bump.
     private var isPinned: Bool {
+        // TODO(HUMBLE): [W, P2] frontend matches a domain layout name string instead of a typed presentation hint
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         screen.layout.rawValue == "Pinned"
     }
 
@@ -52,6 +54,8 @@ struct ScreenRendererView: View {
                     .tint(.cyan)
                     .padding(.horizontal)
                     .padding(.top, CGFloat(spacing.sm))
+                    // TODO(HUMBLE): [W, P2] hardcoded English progress a11y label
+                    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                     .accessibilityLabel("Step \(progress.currentStep) of \(progress.totalSteps)")
                     .accessibilityValue(progress.label ?? "\(progress.currentStep) of \(progress.totalSteps)")
                 }
@@ -209,6 +213,8 @@ struct ToastOverlayView: View {
                 .fill(Color.black.opacity(0.85))
         )
         .accessibilityElement(children: .combine)
+        // TODO(HUMBLE): [W, P2] hardcoded English a11y label embeds UI role
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         .accessibilityLabel("Toast: \(message)")
     }
 }

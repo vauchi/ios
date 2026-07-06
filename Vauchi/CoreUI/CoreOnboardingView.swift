@@ -147,6 +147,9 @@ import SwiftUI
                 // `groups_setup`, `contact_info`, `what_next`,
                 // `backup_password_entry`. Any other id means PAE
                 // navigated past Complete (typically `my_info`).
+                // TODO(HUMBLE): [D, P1] frontend decides onboarding completion by matching domain screen_ids;
+                // core should emit a NavigateTo or onboarding-complete Command
+                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                 if let id = newId, !Self.onboardingScreenIds.contains(id) {
                     onIdentityCreated()
                 }
@@ -160,6 +163,8 @@ import SwiftUI
             )
         }
 
+        // TODO(HUMBLE): [W, P1] frontend hardcodes domain onboarding screen_ids; core should expose an
+        // `isOnboarding` flag or completion Command (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         /// Screen IDs produced by `OnboardingEngine::current_screen()`.
         /// Source: `core/vauchi-app/src/ui/onboarding.rs:173,222,296,334,404,569,581`.
         /// Kept in sync with that set is a structural contract — drift

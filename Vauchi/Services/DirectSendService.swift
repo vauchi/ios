@@ -173,6 +173,9 @@ final class DirectSendService {
 
     // MARK: - VXCH framing
 
+    // TODO(HUMBLE): [T, P1] frontend implements the VXCH wire-protocol framing;
+    // core should emit opaque transport Commands and consume raw hardware events
+    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
     private static let magic: [UInt8] = [0x56, 0x58, 0x43, 0x48] // "VXCH"
     private static let version: UInt8 = 1
     private static let maxPayload: UInt32 = 65536

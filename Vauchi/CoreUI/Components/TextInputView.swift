@@ -80,6 +80,8 @@ struct TextInputView: View {
     }
 
     private func keyboardType(for inputType: InputType) -> UIKeyboardType {
+        // TODO(HUMBLE): [T, P2] frontend interprets `InputType` to choose OS keyboard traits;
+        // core should supply generic input hints (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         switch inputType {
         case .text: .default
         case .phone: .phonePad
@@ -89,6 +91,8 @@ struct TextInputView: View {
     }
 
     private func autocapitalization(for inputType: InputType) -> UITextAutocapitalizationType {
+        // TODO(HUMBLE): [T, P2] frontend interprets `InputType` to choose autocapitalization;
+        // core should supply generic input hints (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         switch inputType {
         case .text: .words
         case .phone, .email, .password: .none

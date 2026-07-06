@@ -45,6 +45,8 @@ struct ListView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.smMd)) {
             if component.searchable {
+                // TODO(HUMBLE): [W, P2] hardcoded English search placeholder and a11y label name a domain list
+                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                 TextField("Search", text: $searchQuery)
                     .textFieldStyle(.plain)
                     .padding(CGFloat(tokens.spacing.sm))
@@ -130,6 +132,8 @@ struct ListView: View {
 /// System SF-Symbol that represents a given list-item action kind.
 /// Shared between context menu + (future) swipe-action rendering.
 func systemIcon(for kind: ListItemActionKind) -> String {
+    // TODO(HUMBLE): [T, P1] frontend maps `ListItemActionKind` domain variants to SF Symbols;
+    // core should supply an `icon_token` per action (see _private problem record 2026-07-06-mobile-domain-shell-violations).
     switch kind {
     case .archive: "archivebox"
     case .unarchive: "tray.and.arrow.up"
@@ -208,6 +212,8 @@ struct ItemRow: View {
                     Image(systemName: "ellipsis.circle")
                         .font(.body)
                         .foregroundColor(.secondary)
+                        // TODO(HUMBLE): [W, P2] hardcoded English a11y label
+                        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                         .accessibilityLabel("More actions for \(item.name)")
                 }
                 .buttonStyle(.plain)

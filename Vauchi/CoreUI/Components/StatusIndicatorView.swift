@@ -58,6 +58,9 @@ struct StatusIndicatorView: View {
     }
 
     private func statusLabel(for status: Status) -> String {
+        // TODO(HUMBLE): [W, P2] hardcoded English status a11y labels;
+        // core should supply localized `a11y.label` values
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         switch status {
         case .pending: "Pending"
         case .inProgress: "In progress"

@@ -192,6 +192,9 @@ struct VauchiApp: App {
                         // The engine-owned responder then drives itself,
                         // emitting RelayEscrow* commands through the standard
                         // ActionResult / pending-commands envelope.
+                        // TODO(HUMBLE): [D/T, P1] frontend assembles the deep-link consent alert copy and
+                        // hardcodes `grant`/`deny` action ids; core should emit a `ShowConsentDialog` result
+                        // with opaque labels/action ids (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                         Button("Accept Exchange") {
                             viewModel.coreViewModel?
                                 .handleAction(.actionPressed(actionId: "grant"))

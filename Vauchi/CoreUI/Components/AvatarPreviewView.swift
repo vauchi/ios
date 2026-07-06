@@ -29,11 +29,16 @@ struct AvatarPreviewView: View {
         .contentShape(Circle())
         .onTapGesture {
             if component.editable {
+                // TODO(HUMBLE): [W, P1] frontend hardcodes `edit_avatar` action id;
+                // core should supply `edit_action_id` in AvatarPreviewComponent
+                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
                 onAction(.actionPressed(actionId: "edit_avatar"))
             }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(component.a11y?.label ?? "Avatar: \(component.initials)")
+        // TODO(HUMBLE): [W, P2] hardcoded English a11y hint names domain concept (`avatar`)
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         .accessibilityHint(component.a11y?.hint ?? (component.editable ? "Tap to edit avatar" : ""))
         .accessibilityAddTraits(component.editable ? [.isButton] : [])
     }
