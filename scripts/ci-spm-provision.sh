@@ -22,7 +22,6 @@ set -euo pipefail
 # section, or a relative path; xcodebuild needs an absolute HOME for its SPM
 # config lookup. build:release intentionally leaves this unset so it keeps the
 # shared config path for signing.
-echo "  [debug] SPM_ISOLATE_HOME raw='${SPM_ISOLATE_HOME:-}' CI_PROJECT_DIR='${CI_PROJECT_DIR:-}' PWD='$PWD'"
 if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
   SPM_ISOLATE_HOME="${SPM_ISOLATE_HOME//\$CI_PROJECT_DIR/${CI_PROJECT_DIR:-$PWD}}"
   case "$SPM_ISOLATE_HOME" in
@@ -30,9 +29,6 @@ if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
     *) SPM_ISOLATE_HOME="$PWD/$SPM_ISOLATE_HOME" ;;
   esac
   export SPM_ISOLATE_HOME
-  echo "  [debug] SPM_ISOLATE_HOME normalized='$SPM_ISOLATE_HOME'"
-else
-  echo "  [debug] SPM_ISOLATE_HOME unset, will use shared config path"
 fi
 
 rm -rf Vauchi.xcodeproj
@@ -282,12 +278,22 @@ rm -rf ~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex
 # project-local .spm-packages/ — likely the user-level cache that
 # mirror config does not redirect cache lookups for.
 rm -rf .spm-packages/repositories/vauchi-platform-swift-*
+rm -rf .spm-packages/repositories/v[0-9]*.*
 rm -rf .spm-packages/checkouts/vauchi-platform-swift
+rm -rf .spm-packages/checkouts/v[0-9]*.*
 rm -rf .spm-packages/manifests/vauchi-platform-swift-*
+rm -rf .spm-packages/manifests/v[0-9]*.*
 rm -rf .spm-packages/artifacts/vauchi-platform-swift
+rm -rf .spm-packages/artifacts/v[0-9]*.*
 rm -f  .spm-packages/workspace-state.json
 rm -rf ~/Library/Caches/org.swift.swiftpm/repositories/vauchi-platform-swift-* 2>/dev/null || true
+rm -rf ~/Library/Caches/org.swift.swiftpm/repositories/v[0-9]*.* 2>/dev/null || true
 rm -rf ~/Library/org.swift.swiftpm/repositories/vauchi-platform-swift-* 2>/dev/null || true
+rm -rf ~/Library/org.swift.swiftpm/repositories/v[0-9]*.* 2>/dev/null || true
+rm -rf ~/.cache/org.swift.swiftpm/repositories/vauchi-platform-swift-* 2>/dev/null || true
+rm -rf ~/.cache/org.swift.swiftpm/repositories/v[0-9]*.* 2>/dev/null || true
+rm -rf ~/.swiftpm/repositories/vauchi-platform-swift-* 2>/dev/null || true
+rm -rf ~/.swiftpm/repositories/v[0-9]*.* 2>/dev/null || true
 rm -rf ~/Library/Developer/Xcode/DerivedData/Vauchi-*/SourcePackages 2>/dev/null || true
 rm -f  Vauchi.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 # SwiftPM TOFU fingerprint storage: when a tag is force-moved
@@ -328,24 +334,16 @@ rm -rf ~/Library/Caches/org.swift.swiftpm/security/fingerprints 2>/dev/null || t
 # SPM_ISOLATE_HOME unset) falls through to the shared+CFGLOCK path below,
 # UNCHANGED: it needs the real HOME for ~/Library/Keychains and is tag-only +
 # barely raced, so single-writer contention on the shared config is fine.
-echo "  [debug] about to choose branch, SPM_ISOLATE_HOME='${SPM_ISOLATE_HOME:-}'"
 if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
-  echo "  [debug] taking isolated branch"
   CFG_DIR="$SPM_ISOLATE_HOME/Library/org.swift.swiftpm/configuration"
   mkdir -p "$CFG_DIR"
   printf '%s' "$MIRROR_JSON" > "$CFG_DIR/mirrors.json"
-  echo "  [debug] wrote mirror config to $CFG_DIR/mirrors.json:"
-  cat "$CFG_DIR/mirrors.json"
-  echo ""
-  echo "  [debug] running xcodebuild with HOME=$SPM_ISOLATE_HOME"
   HOME="$SPM_ISOLATE_HOME" xcodebuild -project Vauchi.xcodeproj -scheme Vauchi \
     -clonedSourcePackagesDirPath .spm-packages \
     -derivedDataPath .derived-data \
     -resolvePackageDependencies
   echo "  SPM resolve OK (private config $CFG_DIR — no shared file, no CFGLOCK)"
   exit 0
-else
-  echo "  [debug] taking shared branch"
 fi
 
 CFGLOCK="$HOME/.cache/vauchi-platform-swift-mirror/.cfg-lock"
