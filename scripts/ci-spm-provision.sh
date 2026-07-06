@@ -17,20 +17,6 @@
 # and 2026-06-28-ios-ci-spm-swift-syntax-checkout-hang.
 set -euo pipefail
 
-# Normalize SPM_ISOLATE_HOME if the caller provided one. CI sometimes passes a
-# literal '$CI_PROJECT_DIR' reference that does not expand in the variables:
-# section, or a relative path; xcodebuild needs an absolute HOME for its SPM
-# config lookup. build:release intentionally leaves this unset so it keeps the
-# shared config path for signing.
-if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
-  SPM_ISOLATE_HOME="${SPM_ISOLATE_HOME//\$CI_PROJECT_DIR/${CI_PROJECT_DIR:-$PWD}}"
-  case "$SPM_ISOLATE_HOME" in
-    /*) ;;
-    *) SPM_ISOLATE_HOME="$PWD/$SPM_ISOLATE_HOME" ;;
-  esac
-  export SPM_ISOLATE_HOME
-fi
-
 rm -rf Vauchi.xcodeproj
 xcodegen generate
 echo "── [$(date +%H:%M:%S)] SPM resolve (file:// mirror + env var) ──"
@@ -324,16 +310,12 @@ rm -rf ~/Library/Caches/org.swift.swiftpm/security/fingerprints 2>/dev/null || t
 # flock on macOS). The section is just write+resolve (~1–2 min), so the
 # 600s stale threshold never false-reclaims.
 #
-# build:debug passes SPM_ISOLATE_HOME and takes the isolated branch below: it
-# writes the config into a JOB-PRIVATE HOME and resolves there — no shared
-# ~/Library file, so no CFGLOCK and no cross-pipeline race
-# (problem 2026-06-29-spm-mirror-config-race). The mirror itself ($MIRROR)
-# stays at the shared real-HOME cache path the private config points to, so
-# isolation costs zero extra mirror builds. The compile step that follows in
-# build:debug MUST also run with HOME=$SPM_ISOLATE_HOME. build:release (signing,
-# SPM_ISOLATE_HOME unset) falls through to the shared+CFGLOCK path below,
-# UNCHANGED: it needs the real HOME for ~/Library/Keychains and is tag-only +
-# barely raced, so single-writer contention on the shared config is fine.
+# build:debug and build:release both use the shared CFGLOCK path below.
+# SPM_ISOLATE_HOME was previously used to avoid a cross-pipeline mirror-config
+# race, but xcodebuild on the nell runner resolves SPM using the real user
+# HOME regardless of the env var, so an isolated config is ineffective.
+# build:debug jobs are already serialized by the ios-spm-v5 resource_group,
+# and the CFGLOCK below also serializes against macos bump pipelines.
 if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
   CFG_DIR="$SPM_ISOLATE_HOME/Library/org.swift.swiftpm/configuration"
   mkdir -p "$CFG_DIR"

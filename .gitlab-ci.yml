@@ -793,26 +793,11 @@ build:debug:
     # autocomplete/cross-reference index here. Cuts 10–30% off
     # incremental compile per Bitrise/Flutter benchmarks.
     COMPILER_INDEX_STORE_ENABLE: "NO"
-    # Per-job SwiftPM config isolation: ci-spm-provision.sh §6 writes the mirror
-    # config into this private HOME (not the shared ~/Library file) and the
-    # compile below runs with HOME pointed here — immune to the shared-config
-    # race (problem 2026-06-29-spm-mirror-config-race). build:release does NOT
-    # set this, so it keeps the shared+CFGLOCK path + real HOME for signing.
-    SPM_ISOLATE_HOME: .spm-home
+
   script:
     - ./scripts/ci-spm-provision.sh
     - echo "── [$(date +%H:%M:%S)] xcodebuild compile ──"
     - |
-      # Compile under the job-private HOME so xcodebuild reads the isolated
-      # mirror config ci-spm-provision.sh wrote (not the shared ~/Library file).
-      # Normalize in case CI passed a relative or unexpanded path.
-      ISOLATE_HOME="${SPM_ISOLATE_HOME:-$CI_PROJECT_DIR/.spm-home}"
-      ISOLATE_HOME="${ISOLATE_HOME//\$CI_PROJECT_DIR/${CI_PROJECT_DIR:-$PWD}}"
-      case "$ISOLATE_HOME" in
-        /*) ;;
-        *) ISOLATE_HOME="$PWD/$ISOLATE_HOME" ;;
-      esac
-      export HOME="$ISOLATE_HOME"
       # Heartbeat: print elapsed time every 120s so CI log shows progress
       ( while true; do sleep 120; printf '  [build heartbeat] %s\n' "$(date +%H:%M:%S)"; done ) &
       HEARTBEAT=$!
