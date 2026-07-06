@@ -2,14 +2,16 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// Tests for Demo Contact feature - based on features/demo_contact.feature Gherkin scenarios
+// Tests for the live demo-contact init hook.
 //
-// Traces to: features/demo_contact.feature
+// Other demo-contact operations (state queries, update trigger, dismiss,
+// restore) are driven by core ScreenModels under Humble-UI; their
+// repository wrappers were only exercised by tests and have been retired.
 
 @testable import Vauchi
 import XCTest
 
-/// Tests for Demo Contact feature
+/// Tests for live demo-contact surface.
 /// Based on: features/demo_contact.feature
 final class DemoContactTests: XCTestCase {
     var tempDir: URL!
@@ -24,22 +26,15 @@ final class DemoContactTests: XCTestCase {
         try? FileManager.default.removeItem(at: tempDir)
     }
 
-    // MARK: - Demo Contact Appearance Tests
+    // MARK: - Demo Contact Init Hook
 
     // Based on: features/demo_contact.feature @demo-appear
 
     /// Scenario: Demo contact appears for users with no contacts
-    /// Given I have no real contacts
-    /// When I complete the onboarding process
-    /// Then a demo contact named "Vauchi Tips" should appear
     func testDemoContactAppearsForUsersWithNoContacts() throws {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
 
-        // User has no contacts
-        XCTAssertEqual(try repo.contactCount(), 0)
-
-        // Initialize demo contact after onboarding
         let demoContact = try XCTUnwrap(
             repo.initDemoContactIfNeeded(),
             "Demo contact should appear for users with no contacts"
@@ -50,9 +45,6 @@ final class DemoContactTests: XCTestCase {
     }
 
     /// Scenario: Demo contact is visually distinct
-    /// Given the demo contact exists
-    /// When I view my contacts list
-    /// Then the demo contact should have a special indicator
     func testDemoContactIsVisuallyDistinct() throws {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
@@ -62,33 +54,7 @@ final class DemoContactTests: XCTestCase {
         XCTAssertTrue(demoContact.isDemo, "Demo contact should have isDemo flag")
     }
 
-    // MARK: - Demo Updates Tests
-
-    // Based on: features/demo_contact.feature @demo-updates
-
-    /// Scenario: Demo updates demonstrate the update flow
-    /// Given the demo contact exists
-    /// When I receive a demo update
-    /// Then the contact card should show updated content
-    func testDemoUpdateShowsNewContent() throws {
-        let repo = try VauchiRepository(dataDir: tempDir.path)
-        try repo.createIdentity(displayName: "Alice")
-
-        let initialDemo = try XCTUnwrap(repo.initDemoContactIfNeeded())
-        let initialTip = initialDemo.tipTitle
-
-        // Trigger an update
-        let updatedDemo = try XCTUnwrap(
-            repo.triggerDemoUpdate(),
-            "Demo update should return updated contact"
-        )
-
-        XCTAssertNotEqual(updatedDemo.tipTitle, initialTip, "Tip should change after update")
-    }
-
     /// Scenario: Demo contact has rotating tips
-    /// Given the demo contact exists
-    /// Then the contact card should contain helpful content
     func testDemoContactHasTips() throws {
         let repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Alice")
@@ -98,206 +64,5 @@ final class DemoContactTests: XCTestCase {
         XCTAssertFalse(demoContact.tipTitle.isEmpty, "Tip title should not be empty")
         XCTAssertFalse(demoContact.tipContent.isEmpty, "Tip content should not be empty")
         XCTAssertFalse(demoContact.tipCategory.isEmpty, "Tip category should not be empty")
-    }
-
-    // MARK: - Demo Contact Dismissal Tests
-
-    // Based on: features/demo_contact.feature @demo-dismiss
-
-    /// Scenario: Demo contact can be manually dismissed
-    /// Given the demo contact exists
-    /// When I choose to dismiss the demo contact
-    /// Then the demo contact should be removed
-    func testDemoContactCanBeManuallyDismissed() throws {
-        let repo = try VauchiRepository(dataDir: tempDir.path)
-        try repo.createIdentity(displayName: "Alice")
-
-        _ = try repo.initDemoContactIfNeeded()
-
-        let beforeDismiss = try XCTUnwrap(repo.getDemoContact())
-        XCTAssertTrue(beforeDismiss.isDemo, "Pre-dismiss contact should still be a demo")
-
-        // Dismiss the demo contact
-        try repo.dismissDemoContact()
-
-        // Demo contact should no longer appear
-        XCTAssertNil(try repo.getDemoContact(), "Demo contact should be removed after dismissal")
-
-        // State should reflect dismissal
-        let state = repo.getDemoContactState()
-        XCTAssertTrue(state.wasDismissed, "State should show was_dismissed")
-        XCTAssertFalse(state.isActive, "State should show not active")
-    }
-
-    /// Scenario: Demo contact can be restored from settings
-    /// Given the demo contact was dismissed
-    /// When I go to Settings > Help > Show Demo Contact
-    /// Then the demo contact should reappear
-    func testDemoContactCanBeRestoredFromSettings() throws {
-        let repo = try VauchiRepository(dataDir: tempDir.path)
-        try repo.createIdentity(displayName: "Alice")
-
-        // Initialize and dismiss demo contact
-        _ = try repo.initDemoContactIfNeeded()
-        try repo.dismissDemoContact()
-
-        XCTAssertNil(try repo.getDemoContact())
-
-        // Restore from settings
-        let restoredDemo = try XCTUnwrap(
-            repo.restoreDemoContact(),
-            "Demo contact should be restored"
-        )
-        XCTAssertEqual(restoredDemo.displayName, "Vauchi Tips")
-
-        let lookupDemo = try XCTUnwrap(
-            repo.getDemoContact(),
-            "getDemoContact should return contact after restore"
-        )
-        XCTAssertEqual(lookupDemo.displayName, restoredDemo.displayName)
-
-        let state = repo.getDemoContactState()
-        XCTAssertTrue(state.isActive, "State should show active after restore")
-        XCTAssertFalse(state.wasDismissed, "State should clear was_dismissed after restore")
-    }
-
-    // MARK: - Demo Contact Privacy Tests
-
-    // Based on: features/demo_contact.feature @demo-privacy
-
-    /// Scenario: Demo contact is local only
-    /// Given the demo contact exists
-    /// Then no data is sent to any server for the demo
-    /// And the demo contact is stored locally
-    func testDemoContactIsLocalOnly() throws {
-        let repo = try VauchiRepository(dataDir: tempDir.path)
-        try repo.createIdentity(displayName: "Alice")
-
-        let demoContact = try XCTUnwrap(repo.initDemoContactIfNeeded())
-        XCTAssertTrue(demoContact.isDemo, "Initialized contact must be flagged as demo")
-
-        // Demo contact should NOT appear in real contacts list
-        let contacts = try repo.listContacts()
-        let hasDemoInRealContacts = contacts.contains { $0.displayName == "Vauchi Tips" }
-        XCTAssertFalse(hasDemoInRealContacts, "Demo contact should not be in real contacts list")
-    }
-
-    /// Scenario: Demo contact does not count as real contact
-    /// Given the demo contact exists
-    /// When I check my contact count
-    /// Then the demo contact should not be counted
-    func testDemoContactDoesNotCountAsRealContact() throws {
-        let repo = try VauchiRepository(dataDir: tempDir.path)
-        try repo.createIdentity(displayName: "Alice")
-
-        _ = try repo.initDemoContactIfNeeded()
-
-        // Contact count should still be 0
-        let count = try repo.contactCount()
-        XCTAssertEqual(count, 0, "Demo contact should not be counted in contact count")
-    }
-
-    // MARK: - Demo Contact Persistence Tests
-
-    // Based on: features/demo_contact.feature @demo-persistence
-
-    /// Scenario: Demo contact state persists across app restarts
-    /// Given the demo contact exists
-    /// When I force quit and relaunch the app
-    /// Then the demo contact should still be present
-    func testDemoContactStatePersistsAcrossRestarts() throws {
-        // First session - create demo contact
-        do {
-            let repo = try VauchiRepository(dataDir: tempDir.path)
-            try repo.createIdentity(displayName: "Alice")
-            _ = try repo.initDemoContactIfNeeded()
-
-            let firstSessionDemo = try XCTUnwrap(repo.getDemoContact())
-            XCTAssertEqual(firstSessionDemo.displayName, "Vauchi Tips")
-        }
-
-        // Second session - demo should persist
-        let repo2 = try VauchiRepository(dataDir: tempDir.path)
-        let demoContact = try XCTUnwrap(
-            repo2.getDemoContact(),
-            "Demo contact should persist across sessions"
-        )
-
-        XCTAssertEqual(demoContact.displayName, "Vauchi Tips")
-    }
-
-    /// Scenario: Dismissal persists across app restarts
-    /// Given I have dismissed the demo contact
-    /// When I force quit and relaunch the app
-    /// Then the demo contact should remain dismissed
-    func testDismissalPersistsAcrossRestarts() throws {
-        // First session - create and dismiss demo contact
-        do {
-            let repo = try VauchiRepository(dataDir: tempDir.path)
-            try repo.createIdentity(displayName: "Alice")
-            _ = try repo.initDemoContactIfNeeded()
-            try repo.dismissDemoContact()
-        }
-
-        // Second session - should still be dismissed
-        let repo2 = try VauchiRepository(dataDir: tempDir.path)
-
-        // Init should not recreate dismissed demo
-        let demoContact = try repo2.initDemoContactIfNeeded()
-        XCTAssertNil(demoContact, "Dismissed demo contact should not reappear after restart")
-
-        let state = repo2.getDemoContactState()
-        XCTAssertTrue(state.wasDismissed, "Dismissal state should persist")
-    }
-
-    // MARK: - Demo Contact State Tests
-
-    /// Test demo contact state properties
-    func testDemoContactStateProperties() throws {
-        let repo = try VauchiRepository(dataDir: tempDir.path)
-        try repo.createIdentity(displayName: "Alice")
-
-        // Initial state - no demo
-        let initialState = repo.getDemoContactState()
-        XCTAssertFalse(initialState.isActive)
-        XCTAssertFalse(initialState.wasDismissed)
-        XCTAssertFalse(initialState.autoRemoved)
-        XCTAssertEqual(initialState.updateCount, 0)
-
-        // After init - active
-        _ = try repo.initDemoContactIfNeeded()
-        let activeState = repo.getDemoContactState()
-        XCTAssertTrue(activeState.isActive)
-        XCTAssertFalse(activeState.wasDismissed)
-        XCTAssertFalse(activeState.autoRemoved)
-    }
-
-    /// Test update count increments
-    func testUpdateCountIncrements() throws {
-        let repo = try VauchiRepository(dataDir: tempDir.path)
-        try repo.createIdentity(displayName: "Alice")
-
-        _ = try repo.initDemoContactIfNeeded()
-
-        let initialCount = repo.getDemoContactState().updateCount
-
-        // Trigger updates
-        _ = try repo.triggerDemoUpdate()
-        _ = try repo.triggerDemoUpdate()
-
-        let newCount = repo.getDemoContactState().updateCount
-        XCTAssertEqual(newCount, initialCount + 2, "Update count should increment with each update")
-    }
-
-    /// Test is_demo_update_available check
-    func testIsDemoUpdateAvailable() throws {
-        let repo = try VauchiRepository(dataDir: tempDir.path)
-        try repo.createIdentity(displayName: "Alice")
-
-        _ = try repo.initDemoContactIfNeeded()
-
-        // Just initialized, update should not be due yet (2 hour interval)
-        let isAvailable = repo.isDemoUpdateAvailable()
-        XCTAssertFalse(isAvailable, "Update should not be available immediately after init")
     }
 }
