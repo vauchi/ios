@@ -106,13 +106,12 @@ final class MultipartCameraView: UIView {
     /// F2-NEW-3 follow-up: make the view's own backing layer the
     /// AVCaptureVideoPreviewLayer (Apple-recommended pattern; same shape
     /// as `AVCameraCaptureSheet.PreviewUIView`). The earlier addSublayer
-    /// approach worked when the view filled the screen (legacy
-    /// `Views/QRScannerView.swift` uses `.ignoresSafeArea()` with no
-    /// SwiftUI clipShape) but failed under the new `QrCodeView` call
-    /// site which pins the preview to 250×250 inside a
-    /// `RoundedRectangle.clipShape`. SwiftUI's clipShape masks the host
-    /// CALayer's contents — when the AVCaptureVideoPreviewLayer was a
-    /// separate sublayer, the mask only applied to the empty host
+    /// approach worked when the preview filled the screen with
+    /// `.ignoresSafeArea()` and no SwiftUI clipShape, but failed under
+    /// the new `QrCodeView` call site which pins the preview to 250×250
+    /// inside a `RoundedRectangle.clipShape`. SwiftUI's clipShape masks
+    /// the host CALayer's contents — when the AVCaptureVideoPreviewLayer
+    /// was a separate sublayer, the mask only applied to the empty host
     /// surface and the live camera frames rendered into a sibling layer
     /// that the mask did not cover, leaving the preview area black even
     /// though the AVCaptureSession was running and metadata callbacks

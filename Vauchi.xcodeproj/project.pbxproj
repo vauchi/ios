@@ -186,7 +186,6 @@
 		E628C8CF5E93C00F170CC3AD /* testGlanceScrollLayoutQrDisplayStaysLarge.1.png in Resources */ = {isa = PBXBuildFile; fileRef = D1E24774BC1F882EBC01A274 /* testGlanceScrollLayoutQrDisplayStaysLarge.1.png */; };
 		E6CA302BE3E3934640945466 /* testCardPreviewNoVisibleFields.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 39F6474DA682103308EE2BFF /* testCardPreviewNoVisibleFields.1.png */; };
 		E7893F4E30D7E6B7E3706323 /* TextInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA79BEC85FC2E70D2E996D7 /* TextInputView.swift */; };
-		E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EBCAF628D08C167C0D9721 /* QRScannerView.swift */; };
 		EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */; };
 		EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F950D6541F912A27DA57D /* BleExchangeService.swift */; };
 		EE2E45E26234B17B707ADED9 /* testInlineConfirmDefault.1.png in Resources */ = {isa = PBXBuildFile; fileRef = E919A41F13031155AC578B3E /* testInlineConfirmDefault.1.png */; };
@@ -278,7 +277,6 @@
 		2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModelTests.swift; sourceTree = "<group>"; };
 		32949B7AFAC3435ABA7D93FD /* testInfoPanelWithoutIcon.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInfoPanelWithoutIcon.1.png; sourceTree = "<group>"; };
 		331706A539BC8824C9067EF5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		36EBCAF628D08C167C0D9721 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		3741052F03E3274B5C209EF6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		388BCB8B838F2D5C9858C087 /* testInlineConfirmNonDestructive.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testInlineConfirmNonDestructive.1.png; sourceTree = "<group>"; };
 		38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiRepositoryTests.swift; sourceTree = "<group>"; };
@@ -696,7 +694,6 @@
 				6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */,
 				644F12D83413B334E234F4AC /* LockScreenView.swift */,
 				AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */,
-				36EBCAF628D08C167C0D9721 /* QRScannerView.swift */,
 				08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */,
 			);
 			path = Views;
@@ -1133,7 +1130,6 @@
 				DCB3E583D86FF3A15C6BE915 /* PlatformAppEngine+DomainDispatch.swift in Sources */,
 				A5C43C3132E90F16D8549877 /* PreviewView.swift in Sources */,
 				655FCE4413340F3FF3F5E5CF /* QRDiagnosticView.swift in Sources */,
-				E9B3175523D0870DDE35D986 /* QRScannerView.swift in Sources */,
 				F3096FD65BB8C411D32ACE99 /* QrCameraTunerView.swift in Sources */,
 				A6AA2ED01F250DDE30A7D2F4 /* QrCodeView.swift in Sources */,
 				14F136822861093402A2A51D /* RenderContextPusher.swift in Sources */,
@@ -1509,7 +1505,7 @@
 			repositoryURL = "https://gitlab.com/vauchi/vauchi-platform-swift.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.52.3;
+				version = 0.52.4;
 			};
 		};
 		D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {

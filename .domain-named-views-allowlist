@@ -16,7 +16,6 @@
 # LockScreenView    — pre-unlock biometric host; runs before core is
 #                     decrypted, so cannot render a core ScreenModel.
 # AppPasswordView   — pre-unlock password entry; same constraint.
-# QRScannerView     — AVCaptureSession host (camera lifecycle owner).
 # WaitingForUnlockView — pre-unlock wait state; same constraint.
 # QRDiagnosticView  — `#if DEBUG`-only diagnostic that intentionally
 #                     exercises the FFI layer (MobileQrEccLevel) to tune
@@ -25,7 +24,6 @@
 # AVCameraCaptureSheet lives in CoreUI/, out of scope for this lint.
 AppPasswordView.swift
 LockScreenView.swift
-QRScannerView.swift
 WaitingForUnlockView.swift
 QRDiagnosticView.swift
 
