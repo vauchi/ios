@@ -328,7 +328,9 @@ rm -rf ~/Library/Caches/org.swift.swiftpm/security/fingerprints 2>/dev/null || t
 # SPM_ISOLATE_HOME unset) falls through to the shared+CFGLOCK path below,
 # UNCHANGED: it needs the real HOME for ~/Library/Keychains and is tag-only +
 # barely raced, so single-writer contention on the shared config is fine.
+echo "  [debug] about to choose branch, SPM_ISOLATE_HOME='${SPM_ISOLATE_HOME:-}'"
 if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
+  echo "  [debug] taking isolated branch"
   CFG_DIR="$SPM_ISOLATE_HOME/Library/org.swift.swiftpm/configuration"
   mkdir -p "$CFG_DIR"
   printf '%s' "$MIRROR_JSON" > "$CFG_DIR/mirrors.json"
@@ -338,6 +340,8 @@ if [ -n "${SPM_ISOLATE_HOME:-}" ]; then
     -resolvePackageDependencies
   echo "  SPM resolve OK (private config $CFG_DIR — no shared file, no CFGLOCK)"
   exit 0
+else
+  echo "  [debug] taking shared branch"
 fi
 
 CFGLOCK="$HOME/.cache/vauchi-platform-swift-mirror/.cfg-lock"
