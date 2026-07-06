@@ -131,6 +131,20 @@ final class CoreUIComponentTests: XCTestCase {
         assertComponentSnapshot(of: view)
     }
 
+    func testTextInputPasswordType() {
+        let component = TextInputComponent(
+            id: "app_password",
+            label: "Password",
+            value: "secret",
+            placeholder: nil,
+            maxLength: 64,
+            validationError: nil,
+            inputType: .password
+        )
+        let view = TextInputView(component: component, onAction: noOp)
+        assertComponentSnapshot(of: view)
+    }
+
     // MARK: - ToggleListView
 
     func testToggleListDefault() {

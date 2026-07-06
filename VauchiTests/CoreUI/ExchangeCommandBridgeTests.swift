@@ -152,6 +152,27 @@ final class ExchangeCommandBridgeTests: XCTestCase {
         XCTAssertFalse(viewModel.showCameraPicker)
     }
 
+    // MARK: - celebrate
+
+    /// Scenario: core emits `Command::Celebrate` on exchange success. The
+    /// bridge stores the command for the animation overlay and also asks
+    /// core for the `firstContactAdded` aha moment.
+    func testCelebrateSetsCelebrateCommandAndRequestsAhaMoment() {
+        XCTAssertNil(viewModel.celebrateCommand)
+
+        viewModel.handleExchangeCommands([
+            .celebrate(haptic: "success", sound: "none", animation: "checkmark"),
+        ])
+
+        guard case let .celebrate(haptic, sound, animation) = viewModel.celebrateCommand else {
+            XCTFail("celebrateCommand should be set after Celebrate command")
+            return
+        }
+        XCTAssertEqual(haptic, "success")
+        XCTAssertEqual(sound, "none")
+        XCTAssertEqual(animation, "checkmark")
+    }
+
     // MARK: - Multiple commands in one batch
 
     /// `handleExchangeCommands` accepts a Vec — the bridge must

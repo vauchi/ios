@@ -166,6 +166,38 @@ private struct CoreScreenContent: View {
                 .zIndex(100)
             }
         }
+        .overlay(alignment: .center) {
+            // M2 S5 exchange-success ceremony overlay. Appears when core
+            // emits `Command::Celebrate` with a non-"none" animation.
+            if case .celebrate = coreVM.celebrateCommand {
+                CelebrateOverlayView()
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(200)
+                    .allowsHitTesting(false)
+            }
+        }
+        .overlay(alignment: .top) {
+            // Aha-moment toast shown when no celebrate animation is playing.
+            // Core has already returned the localized message via
+            // `tryTriggerAhaMoment`; the animation itself carries the moment
+            // when it is playing, so we skip the duplicate toast then.
+            if let moment = coreVM.ahaMoment, coreVM.celebrateCommand == nil {
+                ToastOverlayView(
+                    message: moment.message,
+                    undoActionId: nil,
+                    onAction: { _ in },
+                    onDismiss: {
+                        withAnimation {
+                            coreVM.ahaMoment = nil
+                        }
+                    }
+                )
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .padding(.top, 8)
+                .padding(.horizontal, 16)
+                .zIndex(100)
+            }
+        }
         .sheet(isPresented: imagePickerBinding) {
             ImagePickerSheet { imageData in
                 coreVM.sendImageReceived(data: imageData)
@@ -277,10 +309,33 @@ struct ImagePickerSheet: UIViewControllerRepresentable {
                     DispatchQueue.main.async { self?.onCancel() }
                     return
                 }
+
                 // swiftformat:disable:next spaceAroundBrackets spaceAroundParens
                 let bytes = [UInt8](data)
                 DispatchQueue.main.async { self?.onImageSelected(bytes) }
             }
         }
+    }
+}
+
+/// A one-beat celebration overlay for the exchange-success ceremony.
+/// Mirrors the "clinking glasses" moment: a spring-scale checkmark that
+/// holds for ~600 ms and then stills.
+private struct CelebrateOverlayView: View {
+    @State private var visible = false
+
+    var body: some View {
+        Image(systemName: "checkmark.circle.fill")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 96, height: 96)
+            .foregroundColor(.green)
+            .scaleEffect(visible ? 1.0 : 0.2)
+            .opacity(visible ? 1.0 : 0.0)
+            .onAppear {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.5)) {
+                    visible = true
+                }
+            }
     }
 }

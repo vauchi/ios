@@ -479,6 +479,13 @@ class VauchiViewModel: ObservableObject {
                 updatesSent: Int(result.updatesSent),
                 updatedContactNames: names
             )
+
+            // Surface the first-update-received aha moment when this sync
+            // actually brought in changes.
+            if result.hasChanges, let moment = repository.tryTriggerAhaMoment(.firstUpdateReceived) {
+                showToast(moment.message)
+            }
+
             if !names.isEmpty {
                 let loc = LocalizationService.shared
                 let msg = names.count == 1

@@ -713,6 +713,31 @@ class VauchiRepository {
         }
     }
 
+    /// Try to trigger an aha moment and return the localized milestone if it
+    /// should be shown now, or `nil` if already seen. Errors are swallowed so
+    /// a milestone failure never breaks the calling flow.
+    func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) -> MobileAhaMoment? {
+        do {
+            let result = try appEngine.dispatchDomainCommand(command: .tryTriggerAhaMoment(momentType: momentType))
+            guard case let .ahaMomentOpt(moment) = result else { return nil }
+            return moment
+        } catch {
+            return nil
+        }
+    }
+
+    /// Check whether an aha moment has already been seen. Errors return `true`
+    /// so the caller conservatively skips showing the moment.
+    func hasSeenAhaMoment(_ momentType: MobileAhaMomentType) -> Bool {
+        do {
+            let result = try appEngine.dispatchDomainCommand(command: .hasSeenAhaMoment(momentType: momentType))
+            guard case let .bool(value) = result else { return true }
+            return value
+        } catch {
+            return true
+        }
+    }
+
     // MARK: - Backup Operations
 
     /// Export encrypted backup
@@ -740,8 +765,7 @@ class VauchiRepository {
     /// Non-throwing wrapper that returns `[]` on dispatch failure — the
     /// callers treat social-networks data as a UI hint, so silent
     /// degradation matches the legacy `vauchi.listSocialNetworks()`
-    /// shape. Same convention applies to the other Social/Content/
-    /// Aha/Cert wrappers below where the legacy FFI was non-throwing.
+    /// shape.
     func listSocialNetworks() -> [VauchiSocialNetwork] {
         ((try? appEngine.listSocialNetworks()) ?? []).map { sn in
             VauchiSocialNetwork(

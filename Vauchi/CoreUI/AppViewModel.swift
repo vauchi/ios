@@ -29,6 +29,17 @@ class AppViewModel: ObservableObject {
     /// `2026-05-03-core-file-picker-command`.
     @Published var pendingFilePick: PendingFilePick?
 
+    /// Non-nil while the exchange-success ceremony animation should play.
+    /// Set when core emits `Command::Celebrate`; consumed by the success
+    /// screen overlay. Cleared automatically after the one-beat animation.
+    @Published var celebrateCommand: CommandDTO?
+
+    /// Aha-moment toast request tied to the exchange-success ceremony. When
+    /// `Command::Celebrate` arrives we also ask core for the
+    /// `firstContactAdded` milestone. If reduce-motion is enabled the view
+    /// surfaces this as a toast instead of the animated checkmark.
+    @Published var ahaMoment: MobileAhaMoment?
+
     /// Active camera selector for `Component::QrCode` scan mode.
     /// Flips when core's `MultiStageExchangeEngine` emits
     /// `Command::SwitchCamera { use_front }` in response to the
@@ -471,6 +482,73 @@ class AppViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Aha Moments
+
+    /// Phase 2b screen-presentation lifecycle command. Mirrors
+    /// `MultiStageExchangeEngine::screen_entered/screen_exited` in core:
+    /// `Some(level)` snapshots the prior brightness (so a subsequent `nil`
+    /// restores it), `nil` restores.
+    private func applyScreenBrightness(level: Float?) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            if let level {
+                if savedBrightness == nil {
+                    savedBrightness = UIScreen.main.brightness
+                }
+                UIScreen.main.brightness = max(0.0, min(1.0, CGFloat(level)))
+            } else if let prior = savedBrightness {
+                UIScreen.main.brightness = prior
+                savedBrightness = nil
+            }
+        }
+    }
+
+    /// M2 S5 exchange-success ceremony. Haptic always fires (it is a tiny,
+    /// accessible tap). Animation is skipped when reduce-motion is enabled.
+    /// The first-contact aha moment is stashed for the toast path.
+    private func handleCelebrateCommand(
+        command: CommandDTO,
+        haptic: String,
+        sound: String,
+        animation: String
+    ) {
+        if haptic == "success" {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        }
+        // Silence unused-but-destructured `sound`; Android also skips the
+        // sound axis because no ceremony sound asset is bundled.
+        _ = sound
+        // Mark the first-contact milestone as seen and stash the
+        // returned moment. CoreScreenView renders it as a toast
+        // when reduce-motion is enabled; otherwise the celebrate
+        // animation carries the moment and the toast is skipped.
+        ahaMoment = tryTriggerAhaMoment(.firstContactAdded)
+        if animation != "none", !SettingsService.shared.shouldReduceMotion {
+            celebrateCommand = command
+            // Auto-clear after the ~600 ms beat so the overlay
+            // never outlives the moment.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+                self?.celebrateCommand = nil
+            }
+        }
+    }
+
+    /// Ask core to trigger an aha moment and return the localized milestone
+    /// if it should be shown now, or `nil` if already seen. Errors are logged
+    /// and ignored — a missed milestone is non-fatal.
+    private func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) -> MobileAhaMoment? {
+        do {
+            let result = try appEngine.dispatchDomainCommand(command: .tryTriggerAhaMoment(momentType: momentType))
+            guard case let .ahaMomentOpt(moment) = result else { return nil }
+            return moment
+        } catch {
+            #if DEBUG
+                print("AppViewModel: failed to trigger aha moment \(momentType): \(error)")
+            #endif
+            return nil
+        }
+    }
+
     // MARK: - Private
 
     /// Internal (not private) so tests can pin the ActionResult →
@@ -567,22 +645,7 @@ class AppViewModel: ObservableObject {
                     acceptedMimeTypes: acceptedMimeTypes
                 )
             case let .setScreenBrightness(level):
-                // Phase 2b screen-presentation lifecycle command. Mirrors
-                // `MultiStageExchangeEngine::screen_entered/screen_exited`
-                // in core: `Some(level)` snapshots the prior brightness
-                // (so a subsequent `nil` restores it), `nil` restores.
-                DispatchQueue.main.async { [weak self] in
-                    guard let self else { return }
-                    if let level {
-                        if savedBrightness == nil {
-                            savedBrightness = UIScreen.main.brightness
-                        }
-                        UIScreen.main.brightness = max(0.0, min(1.0, CGFloat(level)))
-                    } else if let prior = savedBrightness {
-                        UIScreen.main.brightness = prior
-                        savedBrightness = nil
-                    }
-                }
+                applyScreenBrightness(level: level)
             case let .setIdleTimerDisabled(disabled):
                 DispatchQueue.main.async {
                     UIApplication.shared.isIdleTimerDisabled = disabled
@@ -607,6 +670,13 @@ class AppViewModel: ObservableObject {
                 // builds a fresh one on the chosen device. Mirrors
                 // Android's CoreAppViewModel.useFrontCamera flow.
                 useFrontCamera = useFront
+            case let .celebrate(haptic, sound, animation):
+                handleCelebrateCommand(
+                    command: command,
+                    haptic: haptic,
+                    sound: sound,
+                    animation: animation
+                )
             case let .nfcActivate(payload):
                 // Open reader mode for the TapTap exchange. The callback
                 // forwards every `MobileEvent` the service emits

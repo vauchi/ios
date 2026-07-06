@@ -19,30 +19,27 @@ struct TextInputView: View {
                 .font(.headline)
                 .foregroundColor(.secondary)
 
-            TextField(
-                component.placeholder ?? component.label,
-                text: $localValue
-            )
-            .textFieldStyle(.plain)
-            .font(.title3)
-            .padding()
-            .background(Color(.systemGray6))
-            .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
-            .keyboardType(keyboardType(for: component.inputType))
-            .autocapitalization(autocapitalization(for: component.inputType))
-            .onChange(of: localValue) { newValue in
-                let value: String
-                if let maxLen = component.maxLength, newValue.count > maxLen {
-                    value = String(newValue.prefix(maxLen))
-                    localValue = value
-                } else {
-                    value = newValue
+            inputField
+                .textFieldStyle(.plain)
+                .font(.title3)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
+                .keyboardType(keyboardType(for: component.inputType))
+                .autocapitalization(autocapitalization(for: component.inputType))
+                .onChange(of: localValue) { newValue in
+                    let value: String
+                    if let maxLen = component.maxLength, newValue.count > maxLen {
+                        value = String(newValue.prefix(maxLen))
+                        localValue = value
+                    } else {
+                        value = newValue
+                    }
+                    onAction(.textChanged(componentId: component.id, value: value))
                 }
-                onAction(.textChanged(componentId: component.id, value: value))
-            }
-            .accessibilityIdentifier(component.id)
-            .accessibilityLabel(component.a11y?.label ?? component.label)
-            .accessibilityHint(component.a11y?.hint ?? component.placeholder ?? "")
+                .accessibilityIdentifier(component.id)
+                .accessibilityLabel(component.a11y?.label ?? component.label)
+                .accessibilityHint(component.a11y?.hint ?? component.placeholder ?? "")
 
             if let error = component.validationError {
                 Text(error)
@@ -61,6 +58,24 @@ struct TextInputView: View {
             if newValue != localValue {
                 localValue = newValue
             }
+        }
+    }
+
+    /// Renders a plain `TextField` for most input types and a `SecureField`
+    /// for `.password` so the lock-screen / password-entry surface masks
+    /// the user's input.
+    @ViewBuilder
+    private var inputField: some View {
+        if component.inputType == .password {
+            SecureField(
+                component.placeholder ?? component.label,
+                text: $localValue
+            )
+        } else {
+            TextField(
+                component.placeholder ?? component.label,
+                text: $localValue
+            )
         }
     }
 
