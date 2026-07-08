@@ -156,6 +156,7 @@ final class ModelsTests: XCTestCase {
                         "field_type": "phone",
                         "label": "Phone",
                         "value": "+1234567890",
+                        "icon": "phone",
                         "visibility": "Shown"
                     }
                 ],
@@ -177,8 +178,24 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(list.fields[0].fieldType, "phone")
         XCTAssertEqual(list.fields[0].label, "Phone")
         XCTAssertEqual(list.fields[0].value, "+1234567890")
+        XCTAssertEqual(list.fields[0].icon, "phone")
         XCTAssertEqual(list.visibilityMode, .showHide)
         XCTAssertEqual(list.availableGroups, ["Family", "Friends"])
+    }
+
+    func testFieldDecodesWithDefaultIconWhenMissing() throws {
+        let json = Data("""
+        {
+            "id": "f1",
+            "field_type": "phone",
+            "label": "Phone",
+            "value": "+1234567890",
+            "visibility": "Shown"
+        }
+        """.utf8)
+
+        let field = try coreJSONDecoder.decode(Field.self, from: json)
+        XCTAssertEqual(field.icon, "")
     }
 
     func testComponentPreviewDecoding() throws {
@@ -192,6 +209,7 @@ final class ModelsTests: XCTestCase {
                         "field_type": "email",
                         "label": "Email",
                         "value": "alice@example.com",
+                        "icon": "envelope",
                         "visibility": "Shown"
                     }
                 ],
@@ -216,6 +234,7 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(preview.name, "Alice")
         XCTAssertEqual(preview.fields.count, 1)
         XCTAssertEqual(preview.fields[0].value, "alice@example.com")
+        XCTAssertEqual(preview.fields[0].icon, "envelope")
         XCTAssertEqual(preview.variants.count, 1)
         XCTAssertEqual(preview.variants[0].variantId, "Family")
         XCTAssertEqual(preview.variants[0].displayName, "Alice (Family)")

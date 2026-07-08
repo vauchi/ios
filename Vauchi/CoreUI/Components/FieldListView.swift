@@ -65,7 +65,7 @@ struct FieldListRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Image(systemName: iconForFieldType(field.fieldType))
+                Image(systemName: sfSymbolForCoreIcon(field.icon))
                     .foregroundColor(.cyan)
                     .frame(width: 24)
                     .accessibilityHidden(true)
@@ -156,21 +156,6 @@ struct FieldListRow: View {
                     .accessibilityLabel("\(group): \(isVisible ? "visible" : "hidden")")
                 }
             }
-        }
-    }
-
-    private func iconForFieldType(_ type: String) -> String {
-        // TODO(HUMBLE): [T, P1] frontend maps `field_type` strings to SF Symbols;
-        // core's `Field` should include `icon_token`
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        switch type.lowercased() {
-        case "phone": "phone"
-        case "email": "envelope"
-        case "website": "globe"
-        case "address": "mappin"
-        case "social": "at"
-        case "birthday": "gift"
-        default: "doc.text"
         }
     }
 }

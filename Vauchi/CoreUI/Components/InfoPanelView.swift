@@ -104,7 +104,7 @@ private let coreIconSymbols: [String: String] = [
     "gesture": "hand.draw.fill",
     "link": "link",
     "cable": "cable.connector",
-    // Field-type glyphs (received-fields list on exchange success).
+    // Contact field glyphs (core `Field.icon` tokens).
     "phone": "phone.fill",
     "envelope": "envelope.fill",
     "globe": "globe",

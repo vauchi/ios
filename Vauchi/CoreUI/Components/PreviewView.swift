@@ -173,7 +173,7 @@ struct PreviewFieldRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: iconForFieldType(field.fieldType))
+            Image(systemName: sfSymbolForCoreIcon(field.icon))
                 .foregroundColor(.cyan)
                 .frame(width: 24)
                 .accessibilityHidden(true)
@@ -192,19 +192,5 @@ struct PreviewFieldRow: View {
         .padding(.vertical, 12)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(field.label): \(field.value)")
-    }
-
-    private func iconForFieldType(_ type: String) -> String {
-        // TODO(HUMBLE): [T, P1] duplicate of FieldListView.iconForFieldType: frontend maps `field_type` strings;
-        // core should supply `icon_token` (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        switch type.lowercased() {
-        case "phone": "phone"
-        case "email": "envelope"
-        case "website": "globe"
-        case "address": "mappin"
-        case "social": "at"
-        case "birthday": "gift"
-        default: "doc.text"
-        }
     }
 }
