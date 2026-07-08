@@ -204,8 +204,8 @@ final class CoreUIComponentTests: XCTestCase {
         let component = FieldListComponent(
             id: "fields",
             fields: [
-                Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .shown),
-                Field(id: "f2", fieldType: "phone", icon: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .hidden),
+                Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .shown),
+                Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .hidden),
             ],
             visibilityMode: .showHide,
             availableGroups: []
@@ -218,8 +218,8 @@ final class CoreUIComponentTests: XCTestCase {
         let component = FieldListComponent(
             id: "fields",
             fields: [
-                Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .groups(["Family", "Friends"])),
-                Field(id: "f2", fieldType: "phone", icon: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .groups(["Family"])),
+                Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .groups(["Family", "Friends"])),
+                Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .groups(["Family"])),
             ],
             visibilityMode: .perGroup,
             availableGroups: ["Family", "Friends", "Coworkers"]
@@ -232,10 +232,10 @@ final class CoreUIComponentTests: XCTestCase {
         let component = FieldListComponent(
             id: "fields",
             fields: [
-                Field(id: "f1", fieldType: "email", icon: "envelope", label: "Work Email", value: "alice@work.com", visibility: .shown),
-                Field(id: "f2", fieldType: "phone", icon: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .shown),
-                Field(id: "f3", fieldType: "website", icon: "globe", label: "Website", value: "https://alice.example.com", visibility: .shown),
-                Field(id: "f4", fieldType: "address", icon: "mappin", label: "Office", value: "Bahnhofstrasse 1, Zurich", visibility: .hidden),
+                Field(id: "f1", fieldType: "email", label: "Work Email", value: "alice@work.com", icon: "envelope", visibility: .shown),
+                Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .shown),
+                Field(id: "f3", fieldType: "website", label: "Website", value: "https://alice.example.com", icon: "globe", visibility: .shown),
+                Field(id: "f4", fieldType: "address", label: "Office", value: "Bahnhofstrasse 1, Zurich", icon: "mappin", visibility: .hidden),
             ],
             visibilityMode: .showHide,
             availableGroups: []
@@ -260,8 +260,8 @@ final class CoreUIComponentTests: XCTestCase {
 
     func testCardPreviewWithFields() {
         let fields = [
-            Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .shown),
-            Field(id: "f2", fieldType: "phone", icon: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .shown),
+            Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .shown),
+            Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .shown),
         ]
         let component = PreviewComponent(
             name: "Alice",
@@ -279,8 +279,8 @@ final class CoreUIComponentTests: XCTestCase {
 
     func testCardPreviewWithGroups() {
         let fields = [
-            Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .groups(["Family", "Friends"])),
-            Field(id: "f2", fieldType: "phone", icon: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .groups(["Family"])),
+            Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .groups(["Family", "Friends"])),
+            Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .groups(["Family"])),
         ]
         let component = PreviewComponent(
             name: "Alice",
@@ -291,15 +291,15 @@ final class CoreUIComponentTests: XCTestCase {
                     variantId: "Family",
                     displayName: "Alice",
                     visibleFields: [
-                        Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .shown),
-                        Field(id: "f2", fieldType: "phone", icon: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .shown),
+                        Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .shown),
+                        Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .shown),
                     ]
                 ),
                 PreviewVariant(
                     variantId: "Friends",
                     displayName: "Ali",
                     visibleFields: [
-                        Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .shown),
+                        Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .shown),
                     ]
                 ),
             ],
@@ -314,13 +314,13 @@ final class CoreUIComponentTests: XCTestCase {
 
     func testCardPreviewGroupSelected() {
         let friendsVisible = [
-            Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .shown),
+            Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .shown),
         ]
         let component = PreviewComponent(
             name: "Alice",
             avatarData: nil,
             fields: [
-                Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .groups(["Friends"])),
+                Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .groups(["Friends"])),
             ],
             variants: [
                 PreviewVariant(
@@ -343,7 +343,7 @@ final class CoreUIComponentTests: XCTestCase {
             name: "Alice",
             avatarData: nil,
             fields: [
-                Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .hidden),
+                Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .hidden),
             ],
             variants: [],
             selectedVariant: nil
@@ -542,8 +542,8 @@ final class CoreUIComponentTests: XCTestCase {
 
     func testCardPreviewDark() {
         let fields = [
-            Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .shown),
-            Field(id: "f2", fieldType: "phone", icon: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .shown),
+            Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .shown),
+            Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .shown),
         ]
         let component = PreviewComponent(
             name: "Alice",
@@ -573,8 +573,8 @@ final class CoreUIComponentTests: XCTestCase {
         let component = FieldListComponent(
             id: "fields",
             fields: [
-                Field(id: "f1", fieldType: "email", icon: "envelope", label: "Email", value: "alice@example.com", visibility: .shown),
-                Field(id: "f2", fieldType: "phone", icon: "phone", label: "Mobile", value: "+41 79 123 45 67", visibility: .hidden),
+                Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .shown),
+                Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .hidden),
             ],
             visibilityMode: .showHide,
             availableGroups: []
