@@ -5,3 +5,4 @@
 # Swift security exemption list for security:swift-analysis.
 # One file path per line. Only add entries that are intentionally allowed.
 .gitlab-ci.yml
+./.gitlab-ci.yml
