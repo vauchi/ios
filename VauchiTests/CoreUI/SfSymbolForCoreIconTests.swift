@@ -22,6 +22,22 @@ final class SfSymbolForCoreIconTests: XCTestCase {
         XCTAssertEqual(sfSymbolForCoreIcon("cable"), "cable.connector")
     }
 
+    func testExchangeSuccessTokensMapToSymbols() {
+        XCTAssertEqual(sfSymbolForCoreIcon("checkmark.circle"), "checkmark.circle.fill")
+        XCTAssertEqual(sfSymbolForCoreIcon("folder"), "folder.fill")
+        XCTAssertEqual(sfSymbolForCoreIcon("more"), "ellipsis.circle")
+    }
+
+    func testFieldTypeTokensMapToSymbols() {
+        XCTAssertEqual(sfSymbolForCoreIcon("phone"), "phone.fill")
+        XCTAssertEqual(sfSymbolForCoreIcon("envelope"), "envelope.fill")
+        XCTAssertEqual(sfSymbolForCoreIcon("globe"), "globe")
+        XCTAssertEqual(sfSymbolForCoreIcon("mappin"), "mappin")
+        XCTAssertEqual(sfSymbolForCoreIcon("at"), "at")
+        XCTAssertEqual(sfSymbolForCoreIcon("gift"), "gift")
+        XCTAssertEqual(sfSymbolForCoreIcon("tag"), "tag.fill")
+    }
+
     func testUnknownTokenFallsBackToInfoCircle() {
         XCTAssertEqual(sfSymbolForCoreIcon("definitely-not-a-real-icon"), "info.circle")
         XCTAssertEqual(sfSymbolForCoreIcon(""), "info.circle")

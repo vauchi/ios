@@ -85,6 +85,9 @@ private let coreIconSymbols: [String: String] = [
     "warning": "exclamationmark.triangle.fill",
     "devices": "laptopcomputer.and.iphone",
     "check": "checkmark.circle.fill",
+    "checkmark.circle": "checkmark.circle.fill",
+    "folder": "folder.fill",
+    "more": "ellipsis.circle",
     "share": "square.and.arrow.up",
     "edit": "pencil",
     "group": "person.3.fill",
@@ -101,6 +104,14 @@ private let coreIconSymbols: [String: String] = [
     "gesture": "hand.draw.fill",
     "link": "link",
     "cable": "cable.connector",
+    // Field-type glyphs (received-fields list on exchange success).
+    "phone": "phone.fill",
+    "envelope": "envelope.fill",
+    "globe": "globe",
+    "mappin": "mappin",
+    "at": "at",
+    "gift": "gift",
+    "tag": "tag.fill",
 ]
 
 /// Maps core icon names to SF Symbols.
