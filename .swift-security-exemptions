@@ -1,2 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
 # Swift security exemption list for security:swift-analysis.
 # One file path per line. Only add entries that are intentionally allowed.
