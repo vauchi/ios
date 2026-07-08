@@ -36,7 +36,7 @@ include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
   - project: 'vauchi/scripts'
-    ref: main
+    ref: ci-templates-v2026.07.1
     file:
       - '/ci-templates/timeouts.yml'
       - '/ci-templates/reuse.yml'
@@ -64,6 +64,7 @@ stages:
   - deploy
 
 variables:
+  VAUCHI_SCRIPTS_REF: "ci-templates-v2026.07.1"
   # GitLab Ultimate Security Configuration
   SAST_EXCLUDED_PATHS: "build/, DerivedData/, Pods/"
   SECRET_DETECTION_EXCLUDED_PATHS: "build/, DerivedData/, Pods/"
@@ -465,38 +466,20 @@ update:bindings-version:
 lint:images:
   extends: .image-lint
 
-# Locale key coverage — extract i18n keys referenced in Swift source
-# (`NSLocalizedString("…")` plus the `<obj>.t("…")` shape used by
-# `LocalizationService.t(_:)` / `localizationManager.t(…)`) and
-# verify each one exists in `en.json`. Catches typos and stale call
-# sites before they ship as the runtime fallback `Missing: <key>`
-# from the LocalizationService path.
+# P3b: combined docker lint/validate jobs.
 #
-# Pattern mirrors `vauchi/core!777`: alpine + apk add the tools,
-# inline-clone `vauchi/locales`, run script via positional API.
-#
-# All 41 referenced keys exist across en/de/fr/es/it after the
-# 4 originally-flagged misses reconciled in `vauchi/locales!61`
-# (3 new keys: action.start, exchange.success_title,
-# sync.offline_banner) + 2 NfcExchangeView.swift heals in this MR
-# (`exchange.failed` → `exchange.failed_title`, `exchange.success`
-# → `exchange.success_title`). The gate now blocks: a typo or
-# stale call site in iOS Swift fails the MR pipeline instead of
-# shipping as the runtime fallback `Missing: <key>` from
-# `LocalizationService.t`.
-#
-# Variable-key call sites (`LocalizationService.t(computedKey)`)
-# are statically unreachable and not validated here — covered by
-# test discipline + runtime fallback.
-#
-# Wired 2026-05-08 as Phase 4-iOS sub-goal B of
-# `_private!2026-05-08-locale-key-coverage-fanout-ios`;
-# tightened to blocking in this MR after `locales!61` merged.
-lint:locale-key-coverage:
+# The three explicitly-listed checks (lint:locale-key-coverage,
+# check:coreuimodels-drift, check:design-tokens) now run sequentially
+# in two bundles on docker runners. Other docker checks that extend
+# external templates (lint:images, check:design-drift, check:removed-symbols)
+# are left separate because their implementations live in vauchi/scripts
+# ci-templates and are not visible in this file.
+lint:cross-cutting-blocking:
   stage: lint
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
   tags: [docker]
   needs: []
+  allow_failure: false
   before_script:
     - apk add --no-cache bash ripgrep jq git findutils
     # Always pull the latest locales/main. GitLab runners can preserve
@@ -511,14 +494,44 @@ lint:locale-key-coverage:
         git clone --depth=1 https://gitlab.com/vauchi/locales.git ../locales
       fi
   script:
+    - echo "── lint:locale-key-coverage ──"
     - bash ../locales/scripts/check-locale-key-coverage.sh
         Vauchi ../locales '*.swift'
+    - echo "── check:coreuimodels-drift ──"
+    - |
+      if [ -e Vauchi/CoreUI/Models.swift ]; then
+        echo "ERROR: Vauchi/CoreUI/Models.swift re-introduced."
+        echo "Shared CoreUIModels types live in vauchi-platform-swift."
+        echo "See _private/docs/problems/2026-04-22-shared-coreui-models-package/"
+        exit 1
+      fi
+      echo "OK: no local Vauchi/CoreUI/Models.swift present."
   rules:
-    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+lint:cross-cutting-advisory:
+  stage: lint
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
+  tags: [docker]
+  needs: []
+  allow_failure: true
+  before_script:
+    - apk add --no-cache bash findutils grep curl
+  script:
+    - echo "── check:design-tokens ──"
+    - |
+      curl --silent --fail \
+        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fcheck-design-tokens.sh/raw?ref=${VAUCHI_SCRIPTS_REF}" \
+        -o check-design-tokens.sh
+      chmod +x check-design-tokens.sh
+    - ./check-design-tokens.sh Vauchi/
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        compare_to: refs/heads/$CI_DEFAULT_BRANCH
+        compare_to: refs/heads/main
         paths:
-          - "Vauchi/**/*.swift"
+          - "**/*.swift"
           - ".gitlab-ci.yml"
 
 lint:swiftlint:
@@ -532,7 +545,7 @@ lint:swiftlint:
     - |
       if command -v swiftlint &> /dev/null; then
         echo "SwiftLint version: $(swiftlint version)"
-        swiftlint lint --strict --config .swiftlint.yml --reporter codeclimate > swiftlint-report.json || true
+        swiftlint lint --strict --config .swiftlint.yml --reporter codeclimate > swiftlint-report.json
         swiftlint lint --strict --config .swiftlint.yml
       else
         echo "SwiftLint not installed — skipping lint"
@@ -604,7 +617,7 @@ check:humble-ui-ratchets:
           check-no-domain-conditionals-in-views.sh \
           check-no-direct-clipboard-writes.sh; do
         curl --silent --fail \
-          "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2F${script}/raw?ref=main" \
+          "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2F${script}/raw?ref=${VAUCHI_SCRIPTS_REF}" \
           -o ".ratchet-scripts/${script}"
         chmod +x ".ratchet-scripts/${script}"
       done
@@ -639,13 +652,13 @@ lint:humble:
     - mkdir -p .ratchet-scripts
     - |
       curl --silent --fail \
-        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check.py/raw?ref=main" \
+        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check.py/raw?ref=${VAUCHI_SCRIPTS_REF}" \
         -o .ratchet-scripts/humble_check.py
       curl --silent --fail \
-        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check_rules.json/raw?ref=main" \
+        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check_rules.json/raw?ref=${VAUCHI_SCRIPTS_REF}" \
         -o .ratchet-scripts/humble_check_rules.json
       curl --silent --fail \
-        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check.baseline.json/raw?ref=main" \
+        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check.baseline.json/raw?ref=${VAUCHI_SCRIPTS_REF}" \
         -o .ratchet-scripts/humble_check.baseline.json
   script:
     - python3 .ratchet-scripts/humble_check.py --repo "${CI_PROJECT_NAME}" --repo-path "${CI_PROJECT_DIR}" --config .ratchet-scripts/humble_check_rules.json --check .ratchet-scripts/humble_check.baseline.json
@@ -714,6 +727,9 @@ check:design-drift:
     DESIGN_DRIFT_COMPONENT_DIR: "Vauchi/CoreUI/Components"
     DESIGN_DRIFT_FILE_EXT: ".swift"
     DESIGN_DRIFT_CASE: "pascal"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
 
 # Removed symbols: detect stale references to removed features
 check:removed-symbols:
@@ -721,54 +737,6 @@ check:removed-symbols:
   variables:
     SEARCH_DIRS: "Vauchi/"
 
-# CoreUIModels drift guard — fails if anyone re-introduces a local
-# `Vauchi/CoreUI/Models.swift` file. The canonical types moved to the
-# `CoreUIModels` SPM product in `vauchi-platform-swift v0.21.11+`
-# (problem: 2026-04-22-shared-coreui-models-package). A local copy would
-# silently shadow the shared package and drift on every core release.
-check:coreuimodels-drift:
-  stage: lint
-  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
-  tags: [docker]
-  needs: []
-  script:
-    - |
-      if [ -e Vauchi/CoreUI/Models.swift ]; then
-        echo "ERROR: Vauchi/CoreUI/Models.swift re-introduced."
-        echo "Shared CoreUIModels types live in vauchi-platform-swift."
-        echo "See _private/docs/problems/2026-04-22-shared-coreui-models-package/"
-        exit 1
-      fi
-      echo "OK: no local Vauchi/CoreUI/Models.swift present."
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == "main"
-
-# Design token drift: warn on hardcoded colors/spacing that bypass tokens.json.
-# Script lives in vauchi/scripts — fetched via API to avoid duplicating it here.
-# allow_failure: true makes this a visibility gate, not a merge blocker.
-check:design-tokens:
-  stage: lint
-  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
-  tags: [docker]
-  needs: []
-  allow_failure: true
-  before_script:
-    - apk add --no-cache bash findutils grep curl
-  script:
-    - |
-      curl --silent --fail \
-        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fcheck-design-tokens.sh/raw?ref=main" \
-        -o check-design-tokens.sh
-      chmod +x check-design-tokens.sh
-    - ./check-design-tokens.sh Vauchi/
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        compare_to: refs/heads/main
-        paths:
-          - "**/*.swift"
-          - ".gitlab-ci.yml"
 
 # ============================================================
 # Build Stage (MR: debug, Tag: release)
@@ -1028,7 +996,7 @@ coverage:unit:
     - xcresultparser --output-format cobertura coverage_result.xcresult > cobertura.xml
     - |
       curl --silent --fail \
-        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fci%2Fpush-coverage.sh/raw?ref=main" \
+        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fci%2Fpush-coverage.sh/raw?ref=${VAUCHI_SCRIPTS_REF}" \
         -o push-coverage.sh
       chmod +x push-coverage.sh
     - ./push-coverage.sh cobertura.xml ios || true
@@ -1284,10 +1252,34 @@ security:swift-analysis:
   stage: security
   needs: []
   script:
-    # Check for common iOS security issues
-    - 'grep -r "NSAllowsArbitraryLoads" . && echo "WARNING: App Transport Security disabled" || true'
-    - 'grep -r "allowsBackup.*true" . && echo "WARNING: Backup enabled" || true'
-    - 'grep -r "NSCameraUsageDescription\|NSPhotoLibraryUsageDescription\|NSLocationWhenInUseUsageDescription" Info.plist || echo "INFO: No privacy permissions declared"'
+    # Check for common iOS security issues. Fail on forbidden patterns unless the
+    # matching file is listed in .swift-security-exemptions (one path per line).
+    - |
+      set -euo pipefail
+      EXEMPTIONS_FILE=".swift-security-exemptions"
+      check_forbidden() {
+        local pattern="$1" message="$2"
+        local hits
+        hits=$(grep -R -l "$pattern" --exclude-dir=.git --exclude-dir=build --exclude-dir=.build --exclude="$EXEMPTIONS_FILE" . 2>/dev/null || true)
+        if [ -z "$hits" ]; then return 0; fi
+        local offending=""
+        while IFS= read -r file; do
+          [ -z "$file" ] && continue
+          if ! grep -qxF "$file" "$EXEMPTIONS_FILE" 2>/dev/null; then
+            offending="$offending$file\n"
+          fi
+        done <<< "$hits"
+        if [ -n "$offending" ]; then
+          echo "ERROR: $message" >&2
+          printf '%b' "$offending" >&2
+          echo "Add intentional exemptions to $EXEMPTIONS_FILE (one path per line)." >&2
+          exit 1
+        fi
+      }
+      check_forbidden 'NSAllowsArbitraryLoads' 'App Transport Security disabled in:'
+      check_forbidden 'allowsBackup.*true' 'Backup enabled in:'
+      echo 'Checking privacy permission declarations...'
+      grep -R "NSCameraUsageDescription\|NSPhotoLibraryUsageDescription\|NSLocationWhenInUseUsageDescription" Info.plist 2>/dev/null || echo 'INFO: No privacy permissions declared'
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -1306,14 +1298,19 @@ security:dependencies:
       artifacts: false
   script:
     - |
+      set -euo pipefail
       if [ -f "Podfile.lock" ]; then
         echo "Checking CocoaPods dependencies..."
-        pod outdated || true
+        outdated=$(pod outdated 2>&1 || true)
+        echo "$outdated"
+        if echo "$outdated" | grep -q "The following pod updates are available"; then
+          echo "ERROR: Outdated CocoaPods dependencies. Update Podfile.lock or document the exemption." >&2
+          exit 1
+        fi
       fi
-    - |
       if [ -f "Package.resolved" ]; then
         echo "Checking Swift Package dependencies..."
-        swift package show-dependencies || true
+        swift package show-dependencies >/dev/null
       fi
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
