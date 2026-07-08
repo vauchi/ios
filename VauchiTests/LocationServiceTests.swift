@@ -7,6 +7,7 @@
 
 import CoreLocation
 @testable import Vauchi
+import VauchiHardware
 import VauchiPlatform
 import XCTest
 

@@ -38,6 +38,8 @@ targets:
       - package: VauchiPlatform
         product: VauchiPlatform
       - package: VauchiPlatform
+        product: VauchiHardware
+      - package: VauchiPlatform
         product: CoreUIModels
     settings:
       base:

@@ -10,6 +10,7 @@ import Foundation
 import PhotosUI
 import SwiftUI
 import UIKit
+import VauchiHardware
 import VauchiPlatform
 
 @MainActor
