@@ -22,7 +22,8 @@
               "label": "Mobile: +1-555-0100",
               "hint": "Visible to specific groups",
               "role": null
-            }
+            },
+            "icon": "phone"
           },
           {
             "id": "f2",
@@ -39,7 +40,8 @@
               "label": "Work: alice@example.com",
               "hint": "Visible to specific groups",
               "role": null
-            }
+            },
+            "icon": "envelope"
           }
         ],
         "variants": [
@@ -61,7 +63,8 @@
                   "label": "Mobile: +1-555-0100",
                   "hint": "Visible to specific groups",
                   "role": null
-                }
+                },
+                "icon": "phone"
               }
             ]
           },
@@ -84,7 +87,8 @@
                   "label": "Work: alice@example.com",
                   "hint": "Visible to specific groups",
                   "role": null
-                }
+                },
+                "icon": "envelope"
               }
             ]
           },
@@ -107,7 +111,8 @@
                   "label": "Work: alice@example.com",
                   "hint": "Visible to specific groups",
                   "role": null
-                }
+                },
+                "icon": "envelope"
               }
             ]
           }

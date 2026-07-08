@@ -183,19 +183,20 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(list.availableGroups, ["Family", "Friends"])
     }
 
-    func testFieldDecodesWithDefaultIconWhenMissing() throws {
+    func testFieldDecodesWithIcon() throws {
         let json = Data("""
         {
             "id": "f1",
             "field_type": "phone",
             "label": "Phone",
             "value": "+1234567890",
+            "icon": "phone",
             "visibility": "Shown"
         }
         """.utf8)
 
         let field = try coreJSONDecoder.decode(Field.self, from: json)
-        XCTAssertEqual(field.icon, "")
+        XCTAssertEqual(field.icon, "phone")
     }
 
     func testComponentPreviewDecoding() throws {

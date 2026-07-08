@@ -5,17 +5,16 @@
   "subtitle": null,
   "components": [
     {
-      "TextInput": {
-        "id": "app_password",
+      "PinInput": {
+        "id": "pin",
         "label": "Password",
-        "value": "",
-        "placeholder": null,
-        "max_length": 64,
+        "length": 6,
+        "filled": 0,
+        "masked": true,
         "validation_error": null,
-        "input_type": "Password",
         "a11y": {
-          "label": "Password entry",
-          "hint": "Enter your password to unlock",
+          "label": "PIN entry",
+          "hint": "Enter your PIN to unlock",
           "role": null
         }
       }

@@ -35,7 +35,8 @@
               "label": "Mobile: +1-555-0100",
               "hint": "Visible to specific groups",
               "role": null
-            }
+            },
+            "icon": "phone"
           },
           {
             "id": "f2",
@@ -52,7 +53,8 @@
               "label": "Work: alice@example.com",
               "hint": "Visible to specific groups",
               "role": null
-            }
+            },
+            "icon": "envelope"
           }
         ],
         "visibility_mode": "ShowHide",
