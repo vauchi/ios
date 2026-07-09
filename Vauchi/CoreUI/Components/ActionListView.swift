@@ -74,6 +74,7 @@ struct ActionListItemRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(item.id)
         .accessibilityLabel(item.a11y?.label ?? item.label)
         .accessibilityHint(item.a11y?.hint ?? item.detail ?? "")
         .accessibilityAddTraits(.isButton)

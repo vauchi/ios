@@ -44,56 +44,7 @@ struct ScreenRendererView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            VStack(spacing: 0) {
-                // Progress bar
-                if let progress = screen.progress {
-                    ProgressView(
-                        value: Double(progress.currentStep),
-                        total: Double(progress.totalSteps)
-                    )
-                    .tint(.cyan)
-                    .padding(.horizontal)
-                    .padding(.top, CGFloat(spacing.sm))
-                    // TODO(HUMBLE): [W, P2] hardcoded English progress a11y label
-                    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-                    .accessibilityLabel("Step \(progress.currentStep) of \(progress.totalSteps)")
-                    .accessibilityValue(progress.label ?? "\(progress.currentStep) of \(progress.totalSteps)")
-                }
-
-                // Content region. `.fixed` (the multi_stage_exchange QR +
-                // camera) must NOT scroll — it fills the viewport so the live
-                // QR/camera size to the available space and never reflow. The
-                // content stack distributes that height itself: the display QR
-                // grows to claim the room while the scan camera stays a small
-                // fixed square. `.scroll` and Pinned keep the scrolling
-                // region; under Pinned the list's rows compose lazily
-                // (LazyVStack) inside this ScrollView — pinning the chrome
-                // instead starved the list under tall action footers,
-                // device-verified on Android
-                // (2026-06-11-contacts-list-windowing-design). The Spacer
-                // pushes the action buttons to the bottom.
-                if screen.layout == .fixed {
-                    scrollableContent
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                } else {
-                    ScrollView {
-                        scrollableContent
-                            .environment(\.listScrollHost, isPinned)
-                    }
-                    Spacer()
-                }
-
-                // Action buttons
-                VStack(spacing: CGFloat(radius.mdLg)) {
-                    ForEach(screen.actions) { action in
-                        ActionButton(action: action) {
-                            onAction(.actionPressed(actionId: action.id))
-                        }
-                    }
-                }
-                .padding(.horizontal, CGFloat(spacing.lg))
-                .padding(.bottom, CGFloat(spacing.lg))
-            }
+            mainContent
 
             // Toast overlay
             if let message = toastMessage {
@@ -114,6 +65,9 @@ struct ScreenRendererView: View {
                 .zIndex(100)
             }
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            actionButtons
+        }
         .onChange(of: screen.screenId) { _ in
             checkForToastComponent()
         }
@@ -124,6 +78,66 @@ struct ScreenRendererView: View {
             checkForToastComponent()
         }
         .environment(\.designTokens, screen.tokens)
+    }
+
+    /// Content area (progress bar + scrollable/fixed body). Kept separate so
+    /// the action footer can be attached via `.safeAreaInset`; this keeps the
+    /// buttons above the software keyboard on iOS instead of letting them be
+    /// covered when a text field is focused.
+    private var mainContent: some View {
+        VStack(spacing: 0) {
+            // Progress bar
+            if let progress = screen.progress {
+                ProgressView(
+                    value: Double(progress.currentStep),
+                    total: Double(progress.totalSteps)
+                )
+                .tint(.cyan)
+                .padding(.horizontal)
+                .padding(.top, CGFloat(spacing.sm))
+                // TODO(HUMBLE): [W, P2] hardcoded English progress a11y label
+                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
+                .accessibilityLabel("Step \(progress.currentStep) of \(progress.totalSteps)")
+                .accessibilityValue(progress.label ?? "\(progress.currentStep) of \(progress.totalSteps)")
+            }
+
+            // Content region. `.fixed` (the multi_stage_exchange QR +
+            // camera) must NOT scroll — it fills the viewport so the live
+            // QR/camera size to the available space and never reflow. The
+            // content stack distributes that height itself: the display QR
+            // grows to claim the room while the scan camera stays a small
+            // fixed square. `.scroll` and Pinned keep the scrolling
+            // region; under Pinned the list's rows compose lazily
+            // (LazyVStack) inside this ScrollView — pinning the chrome
+            // instead starved the list under tall action footers,
+            // device-verified on Android
+            // (2026-06-11-contacts-list-windowing-design).
+            if screen.layout == .fixed {
+                scrollableContent
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            } else {
+                ScrollView {
+                    scrollableContent
+                        .environment(\.listScrollHost, isPinned)
+                }
+            }
+        }
+    }
+
+    /// Action footer rendered above the bottom safe area (including the
+    /// keyboard) so it stays tappable while text inputs are focused.
+    private var actionButtons: some View {
+        VStack(spacing: CGFloat(radius.mdLg)) {
+            ForEach(screen.actions) { action in
+                ActionButton(action: action) {
+                    onAction(.actionPressed(actionId: action.id))
+                }
+            }
+        }
+        .padding(.horizontal, CGFloat(spacing.lg))
+        .padding(.top, CGFloat(spacing.sm))
+        .padding(.bottom, CGFloat(spacing.lg))
+        .background(Color(UIColor.systemBackground).ignoresSafeArea(edges: .bottom))
     }
 
     /// Header + components stack.
