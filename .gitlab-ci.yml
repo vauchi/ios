@@ -1204,6 +1204,10 @@ test:snapshots:record:
       ${CHANGED}
 
       Recorded-By: CI job #${CI_JOB_ID}"
+      # The self-hosted shell runner does not always rewrite the remote URL
+      # for CI_JOB_TOKEN pushes; set it explicitly so the baseline commit can
+      # be pushed back to the MR branch.
+      git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git"
       git push origin HEAD:${CI_COMMIT_REF_NAME}
       echo "✅ Baselines committed and pushed"
       echo "   NOTE: CI_JOB_TOKEN pushes do not trigger pipelines."
