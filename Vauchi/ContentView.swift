@@ -11,27 +11,6 @@ struct ContentView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
 
-    /// Determines if we should show onboarding
-    private var shouldShowOnboarding: Bool {
-        // TODO(HUMBLE): [D, P0] frontend decides whether to show onboarding from identity + settings flags;
-        // core should emit the onboarding screen or a NavigateTo command
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        // Show onboarding if:
-        // 1. No identity exists, OR
-        // 2. Identity exists but onboarding wasn't completed (migration scenario)
-        if !viewModel.hasIdentity {
-            return true
-        }
-        // If identity exists but onboarding flag not set, they're an existing user
-        // who should skip onboarding (migration case)
-        if !SettingsService.shared.hasCompletedOnboarding {
-            // Auto-mark as complete for existing users
-            SettingsService.shared.hasCompletedOnboarding = true
-            return false
-        }
-        return false
-    }
-
     var body: some View {
         Group {
             switch viewModel.appState {
@@ -71,31 +50,12 @@ struct ContentView: View {
                     .padding()
                 } else if viewModel.isLoading {
                     LoadingView()
-                } else if shouldShowOnboarding {
-                    CoreOnboardingView(
-                        onIdentityCreated: {
-                            // Slice 32c: PAE owns onboarding end-to-end
-                            // — `AppEngine::handle_completion` already
-                            // created the identity, persisted groups
-                            // and fields, and flipped the
-                            // onboarding-complete flag in core. No
-                            // frontend `createIdentity` call needed
-                            // (and calling it would now double-create).
-                            // Refresh `hasIdentity` so this branch
-                            // re-evaluates and `MainTabView` takes
-                            // over.
-                            SettingsService.shared.hasCompletedOnboarding = true
-                            viewModel.loadState()
-                        },
-                        onExchangeCommands: { commands in
-                            // Phase 2B `restore_backup` — forward
-                            // ExchangeCommands so FilePickFromUser
-                            // lands on AppViewModel.pendingFilePick,
-                            // which the root `.fileImporter` observes.
-                            viewModel.coreViewModel?.handleExchangeCommands(commands)
-                        }
-                    )
                 } else {
+                    // Core emits the onboarding screen as the initial
+                    // screen when no identity exists; the shell no
+                    // longer decides "onboarding vs ready" from local
+                    // flags (`2026-07-06-mobile-domain-shell-violations`
+                    // I3).
                     MainTabView()
                 }
             }
@@ -282,30 +242,28 @@ struct MainTabView: View {
 
 /// The single core-driven content area for the main shell. Renders core's
 /// current screen generically via the render-only `CoreScreenView`, except
-/// for the exchange hardware screens (`multi_stage_exchange`,
-/// `exchange_nfc*`) which need native wrappers (camera/QR brightness, NFC
-/// reader) presented off `currentScreen.screenId`. Pure Humble UI: one
-/// renderer for every tab; the bottom tab bar drives `NavigateToTab`.
+/// for screens whose `nativeWrapperHint` says they need a native hardware
+/// wrapper (camera/QR brightness for multi-stage exchange, NFC reader for
+/// NFC exchange). Pure Humble UI: one renderer for every tab; the bottom
+/// tab bar drives `NavigateToTab`.
 /// Observes `AppViewModel` directly so inner `@Published` `currentScreen`
 /// updates propagate (same root cause `CoreScreenView` documents).
 private struct MainContentView: View {
     @ObservedObject var coreVM: AppViewModel
 
-    /// `screen_id`s rendered by a native hardware wrapper rather than
-    /// generically. `multi_stage_exchange` → camera/QR + brightness;
-    /// `exchange_nfc*` → NFC reader. Every other screen renders via the
-    /// render-only `CoreScreenView`.
+    /// Screens rendered by a native hardware wrapper rather than the
+    /// generic `CoreScreenView`. Core owns the decision via
+    /// `ScreenModel.nativeWrapperHint`
+    /// (`2026-07-06-mobile-domain-shell-violations` I5/A2).
     private var nativeBody: AnyView? {
-        // TODO(HUMBLE): [D, P1] frontend maps domain screen_ids to native hardware wrappers;
-        // core should emit a presentation hint (e.g. requiresCamera/Nfc) or a NavigateTo variant
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        switch coreVM.currentScreen?.screenId {
-        case "multi_stage_exchange":
-            AnyView(ExchangeHardwareScreen(coreVM: coreVM, flow: .multiStage))
-        case let id? where id.hasPrefix("exchange_nfc"):
-            AnyView(ExchangeHardwareScreen(coreVM: coreVM, flow: .nfc))
-        default:
-            nil
+        guard let screen = coreVM.currentScreen else { return nil }
+        switch screen.nativeWrapperHint {
+        case .multiStageExchange:
+            return AnyView(ExchangeHardwareScreen(coreVM: coreVM, flow: .multiStage))
+        case .nfcExchange:
+            return AnyView(ExchangeHardwareScreen(coreVM: coreVM, flow: .nfc))
+        case .none:
+            return nil
         }
     }
 

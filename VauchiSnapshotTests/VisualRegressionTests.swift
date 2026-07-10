@@ -61,20 +61,17 @@ final class VisualRegressionTests: XCTestCase {
     // testSetupView, testSetupViewDark, testSetupViewGerman removed alongside
     // SetupView retirement (2026-05-03 Phase 1 of
     // 2026-05-02-ios-humble-ui-deep-retirement): the dead SetupView
-    // (no production call site — onboarding routes through CoreOnboardingView
-    // in ContentView, not SetupView) was deleted. Behavioral coverage of
-    // identity creation lives in CoreOnboardingView's own tests + the core
+    // (no production call site — onboarding routes through the shared
+    // `CoreScreenView` in ContentView, not SetupView) was deleted.
+    // Behavioral coverage of identity creation lives in the core
     // engine's reachability walker.
 
     // MARK: - Onboarding
 
-    // Onboarding screens are now rendered by core via CoreOnboardingView,
-    // which is a thin wrapper around the shared `AppViewModel` (PAE).
-    // Snapshot tests for individual step views were removed when the
-    // custom onboarding was replaced with the core-driven flow.
-    // Slice 32c retired the `MobileOnboardingWorkflow` peer object —
-    // CoreOnboardingView now uses the same `coreViewModel` the rest
-    // of the app uses, so a snapshot can be added by injecting a
+    // Onboarding screens are now rendered by core via the shared
+    // `CoreScreenView` (PAE). Snapshot tests for individual step views
+    // were removed when the custom onboarding was replaced with the
+    // core-driven flow. A snapshot can be added by injecting a
     // `VauchiViewModel` whose `coreViewModel` is on an Onboarding
     // screen. Tracked in slice 32c follow-ups.
 

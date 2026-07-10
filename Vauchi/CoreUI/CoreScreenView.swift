@@ -4,6 +4,7 @@
 
 // Generic wrapper that renders any core-driven screen via PlatformAppEngine.
 
+import CoreUIModels
 import PhotosUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -215,9 +216,9 @@ private struct CoreScreenContent: View {
         // Note: the ADR-031 file-picker `.fileImporter` modifier was
         // hoisted out of CoreScreenView in `2026-05-04-ios-file-picker-
         // hoist`. The system document picker now hangs off ContentView
-        // root + CoreOnboardingView so trigger paths from custom-view
-        // tabs (MoreView) and from Onboarding `restore_backup` are
-        // reachable; CoreScreenView no longer needs its own host.
+        // root so trigger paths from custom-view tabs (MoreView) and
+        // from Onboarding `restore_backup` are reachable; CoreScreenView
+        // no longer needs its own host.
     }
 
     /// Start/stop hardware-timer side-effects based on the rendered screen's

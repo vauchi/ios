@@ -41,6 +41,11 @@ class AppViewModel: ObservableObject {
     /// surfaces this as a toast instead of the animated checkmark.
     @Published var ahaMoment: MobileAhaMoment?
 
+    /// Called when core reports `ActionResult.onboardingComplete`. The shell
+    /// uses this to flip app state from "onboarding" to "ready" and refresh
+    /// identity-derived chrome (`2026-07-06-mobile-domain-shell-violations` I7).
+    var onOnboardingComplete: (() -> Void)?
+
     /// Active camera selector for `Component::QrCode` scan mode.
     /// Flips when core's `MultiStageExchangeEngine` emits
     /// `Command::SwitchCamera { use_front }` in response to the
@@ -546,12 +551,18 @@ class AppViewModel: ObservableObject {
             validationErrors[componentId] = message
         case .complete, .wipeComplete:
             loadScreen()
+        case let .onboardingComplete(destination):
+            // Core has created the identity, persisted onboarding data, and
+            // navigated to the chosen destination. Notify the shell so it
+            // can flip app state and refresh identity-derived chrome
+            // (`2026-07-06-mobile-domain-shell-violations` I7).
+            loadScreen()
+            onOnboardingComplete?()
         case .completeWith, .openContact, .editContact, .openEntryDetail:
             // Resolved to NavigateTo by AppEngine.route_result in core —
             // frontends never observe these raw (ADR-043 Am4). CompleteWith
-            // re-emits the post-onboarding destination; OpenContact /
-            // EditContact / OpenEntryDetail re-emit the contact / edit /
-            // entry screens.
+            // is kept for backward compatibility; OpenContact / EditContact /
+            // OpenEntryDetail re-emit the contact / edit / entry screens.
             break
         case let .openUrl(url):
             if let nsUrl = URL(string: url) {
@@ -565,16 +576,10 @@ class AppViewModel: ObservableObject {
             // before returning ShowToast).
             loadScreen()
             showToast(message, undoActionId: undoActionId)
-        case .requestCamera:
-            // TODO(HUMBLE): [D, P1] frontend maps a domain result (`requestCamera`) to a native screen side-effect;
-            // core should emit `NavigateTo` or a camera Command
-            // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-            loadScreen()
-        case .startDeviceLink:
-            // TODO(HUMBLE): [D, P1] frontend swallows `startDeviceLink` and routes to native flows itself;
-            // core should emit `NavigateTo` with the device-link screen
-            // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-            // Handled by native iOS flows.
+        // Deprecated results now routed to `Commands(QrRequestScan)` or
+        // `NavigateTo` in core — frontends no longer need dedicated arms
+        // (`2026-07-06-mobile-domain-shell-violations` I8/I9).
+        case .requestCamera, .startDeviceLink:
             break
         case let .commands(commands):
             handleExchangeCommands(commands)

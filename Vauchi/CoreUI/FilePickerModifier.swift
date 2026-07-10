@@ -3,16 +3,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // Hosts the SwiftUI `.fileImporter` for the ADR-031 file-picker
-// `ExchangeCommand`. Applied at ContentView root + CoreOnboardingView
-// so the system document picker is reachable from any flow that emits
+// `ExchangeCommand`. Applied at ContentView root so the system document
+// picker is reachable from any flow that emits
 // `ExchangeCommand::FilePickFromUser` — Onboarding `restore_backup`,
 // the More-tab "Import Contacts" rewire, and any future caller.
 //
 // Previously the modifier lived on CoreScreenView only, which
 // silently dropped the picker for custom-view tabs (MoreView,
 // HomeView, ContactsView) and for the entire Onboarding flow
-// (CoreOnboardingView, not CoreScreenView). Hoisting closes that
-// reachability gap (see commit message for problem record refs).
+// (which rendered through its own view, not CoreScreenView).
+// Hoisting closes that reachability gap (see commit message for
+// problem record refs).
 
 import CoreUIModels
 import SwiftUI

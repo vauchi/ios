@@ -129,7 +129,14 @@ class VauchiViewModel: ObservableObject {
                 relayUrl: relayUrlOverride ?? SettingsService.shared.relayUrl
             )
             repository = repo
-            coreViewModel = AppViewModel(appEngine: repo.appEngine)
+            let coreVM = AppViewModel(appEngine: repo.appEngine)
+            coreVM.onOnboardingComplete = { [weak self] in
+                // Core has finished onboarding and created the identity.
+                // Refresh shell state so the main chrome reflects the new
+                // identity (`2026-07-06-mobile-domain-shell-violations` I7).
+                self?.loadState()
+            }
+            coreViewModel = coreVM
             // Hand the engine to BackgroundSyncService so its
             // BGTaskScheduler interval comes from core's
             // PERIODIC_SYNC_INTERVAL_SECONDS rather than a frontend
