@@ -125,12 +125,12 @@ private struct CoreScreenContent: View {
         .task(id: target.taskId) {
             navigate()
         }
-        .onChange(of: coreVM.currentScreen?.screenId) { newId in
-            syncQrFrameTimer(for: newId)
+        .onChange(of: coreVM.currentScreen) { newScreen in
+            syncLifecycleTimers(for: newScreen)
         }
         .onAppear {
             navigate()
-            syncQrFrameTimer(for: coreVM.currentScreen?.screenId)
+            syncLifecycleTimers(for: coreVM.currentScreen)
         }
         .onDisappear {
             coreVM.stopQrFrameTimer()
@@ -220,23 +220,17 @@ private struct CoreScreenContent: View {
         // reachable; CoreScreenView no longer needs its own host.
     }
 
-    /// Start the animated-QR timer while the ShowQr screen is visible; stop
-    /// it everywhere else. Cheap to call unconditionally — both methods are
-    /// idempotent.
-    private func syncQrFrameTimer(for screenId: String?) {
-        // TODO(HUMBLE): [D, P1] frontend gates timers on domain screen_ids;
-        // core should emit `requiresAnimatedQr` / `requiresPoll` lifecycle hints or Commands
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        if screenId == "exchange_show_qr" {
+    /// Start/stop hardware-timer side-effects based on the rendered screen's
+    /// lifecycle hints. Core owns the decision; the shell never matches a
+    /// domain `screen_id` to decide timer ownership
+    /// (`2026-07-06-mobile-domain-shell-violations` I4).
+    private func syncLifecycleTimers(for screen: ScreenModel?) {
+        if screen?.requiresAnimatedQr == true {
             coreVM.startQrFrameTimer()
         } else {
             coreVM.stopQrFrameTimer()
         }
-        // Multi-stage (Glance) exchange advances via a separate poll-driven
-        // tick — its machine replaced the legacy `exchange_show_qr` engine
-        // and is driven by `pollNotifications`, not `advanceQrFrameJson`
-        // (Bug 5, `2026-05-30-exchange-screen-nav-visual-bugs`).
-        if screenId == "multi_stage_exchange" {
+        if screen?.requiresPoll == true {
             coreVM.startMultiStagePollTimer()
         } else {
             coreVM.stopMultiStagePollTimer()
