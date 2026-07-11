@@ -54,6 +54,7 @@
 		34F52840713164ECB2872F0A /* security_explanation.json in Resources */ = {isa = PBXBuildFile; fileRef = F0B262096D756FC7E6603C05 /* security_explanation.json */; };
 		394EED0A78B0B861197DC7C6 /* ListWindowPrefetchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700DC47BF39DB896425AACC4 /* ListWindowPrefetchTests.swift */; };
 		3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5484CED84D0E33E917230C9A /* NetworkMonitorTests.swift */; };
+		3D1CBC0C00C370BCFAA0D7A8 /* NotificationServiceDeepLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C515EE1804FDB78832CA0D /* NotificationServiceDeepLinkTests.swift */; };
 		3EE222C1CDE5AA17773953B3 /* testLoadingView.1.png in Resources */ = {isa = PBXBuildFile; fileRef = A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */; };
 		40CA0D251A7EE2861DB81ADE /* testCardPreviewGroupSelected.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 16817F15488300C5EAF304A8 /* testCardPreviewGroupSelected.1.png */; };
 		4235EDCB7DC3862C3F48F194 /* testInfoPanelWithIcon.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 1A85B8272FE7B284D215644A /* testInfoPanelWithIcon.1.png */; };
@@ -104,7 +105,6 @@
 		764FA757EB16C597120D1E93 /* PasscodePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE9581C53B23B46E50E35837 /* PasscodePolicyTests.swift */; };
 		76CE62B95DC53A13516F7D80 /* AppPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B5D3F51CE23F1E358B4A7E6 /* AppPasswordView.swift */; };
 		76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */; };
-		E1D10000000000000000AA01 /* NotificationServiceDeepLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1D10000000000000000AA02 /* NotificationServiceDeepLinkTests.swift */; };
 		78DEE11DBBB312E894650FBF /* LocalizationServiceSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 812EEE5AF140DB98855AF442 /* LocalizationServiceSettingsTests.swift */; };
 		7934FCCF6F474F903773F82C /* ToggleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4DB1FD6C2BEE864FD4A566B /* ToggleListView.swift */; };
 		7C752A3331298ADB01A6DDF9 /* testCardPreviewWithGroups.1.png in Resources */ = {isa = PBXBuildFile; fileRef = 9F9346F7C59019E0E90B13BF /* testCardPreviewWithGroups.1.png */; };
@@ -363,6 +363,7 @@
 		A3A0DA0F1F9BF466F1D07D6E /* testTextComponentSubtitle.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testTextComponentSubtitle.1.png; sourceTree = "<group>"; };
 		A73A60BF23E98F506D8E5A8D /* DropdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownView.swift; sourceTree = "<group>"; };
 		A75DABB058471CE8E0587E20 /* home_empty.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = home_empty.json; sourceTree = "<group>"; };
+		A7C515EE1804FDB78832CA0D /* NotificationServiceDeepLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceDeepLinkTests.swift; sourceTree = "<group>"; };
 		A7F11BA2A21984B44051D431 /* ExchangeHardwareScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeHardwareScreen.swift; sourceTree = "<group>"; };
 		A951E1A622BF087FCB0BFCA3 /* testLoadingView.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testLoadingView.1.png; sourceTree = "<group>"; };
 		A96FE811E67752C2D8F9079E /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
@@ -416,7 +417,6 @@
 		F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEdgeTests.swift; sourceTree = "<group>"; };
 		F94CFFC17D772290645209B3 /* testFieldListWithFieldsPerGroup.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testFieldListWithFieldsPerGroup.1.png; sourceTree = "<group>"; };
 		FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncServiceTests.swift; sourceTree = "<group>"; };
-		E1D10000000000000000AA02 /* NotificationServiceDeepLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceDeepLinkTests.swift; sourceTree = "<group>"; };
 		FF18174363E5C622E2421F97 /* CoreScreenToastHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreScreenToastHostTests.swift; sourceTree = "<group>"; };
 		FF4FD97723ED524DB81F0ACB /* testMultiStageExchangeCompactViewport.1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = testMultiStageExchangeCompactViewport.1.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -536,7 +536,6 @@
 				EEB2B575C59DEDEFBA323040 /* AccelerometerProximityServiceTests.swift */,
 				05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */,
 				FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */,
-				E1D10000000000000000AA02 /* NotificationServiceDeepLinkTests.swift */,
 				EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */,
 				DE470500913747AD36BDE885 /* CameraServiceTests.swift */,
 				7C42CA0EEF4243C65EE1FDAF /* ContentUpdateCycleTests.swift */,
@@ -547,6 +546,7 @@
 				DC20FCD1651B95E823A06410 /* LocationServiceTests.swift */,
 				5484CED84D0E33E917230C9A /* NetworkMonitorTests.swift */,
 				0CBA469A3ED4A4660FA45B6A /* NFCExchangeServiceTransceiveShimTests.swift */,
+				A7C515EE1804FDB78832CA0D /* NotificationServiceDeepLinkTests.swift */,
 				E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */,
 				CE9581C53B23B46E50E35837 /* PasscodePolicyTests.swift */,
 				F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */,
@@ -1025,7 +1025,6 @@
 				BEA34D69912C7558E8710831 /* AnimatedQrTimerTests.swift in Sources */,
 				10E60235A5FD647963680956 /* AudioProximityServiceTests.swift in Sources */,
 				76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */,
-				E1D10000000000000000AA01 /* NotificationServiceDeepLinkTests.swift in Sources */,
 				6F526CBE173AA74F1C620137 /* BleUuidsTests.swift in Sources */,
 				F3145E4E7C9EC869B82C5AA8 /* CameraServiceTests.swift in Sources */,
 				9D3AA48B67B4BBCBFBA6A33C /* ContentUpdateCycleTests.swift in Sources */,
@@ -1047,6 +1046,7 @@
 				A3982E78770B0DA9F0045F95 /* NavTabDenyListTests.swift in Sources */,
 				3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */,
 				710222E18DC609F7457EB5C0 /* NfcCommandDispatchTests.swift in Sources */,
+				3D1CBC0C00C370BCFAA0D7A8 /* NotificationServiceDeepLinkTests.swift in Sources */,
 				B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */,
 				764FA757EB16C597120D1E93 /* PasscodePolicyTests.swift in Sources */,
 				E4FB02EAEE93F3B08E769C64 /* PinnedLayoutDecodeTests.swift in Sources */,
