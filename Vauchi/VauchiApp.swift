@@ -140,6 +140,11 @@ struct VauchiApp: App {
                         if SettingsService.shared.autoSyncEnabled {
                             BackgroundSyncService.shared.scheduleSyncTask()
                         }
+                        // A tapped notification routes through the same core
+                        // forward path as `.onOpenURL`; core owns the destination.
+                        NotificationService.shared.onDeepLinkTapped = { [viewModel] uri in
+                            Task { @MainActor in viewModel.openDeepLink(uri) }
+                        }
                     }
                 #if DEBUG
                     .task {
@@ -170,12 +175,7 @@ struct VauchiApp: App {
                         // to core as UserAction::LinkOpened. Core decides whether
                         // it is an exchange consent gate, a device-link join
                         // invitation, or an unsupported link (ShowAlert).
-                        guard let coreVM = viewModel.coreViewModel else {
-                            viewModel.showError("Invalid Link",
-                                                message: "Please unlock Vauchi first, then re-open the link.")
-                            return
-                        }
-                        coreVM.handleAction(.linkOpened(uri: url.absoluteString))
+                        viewModel.openDeepLink(url.absoluteString)
                     }
                 #if DEBUG
                     .fullScreenCover(isPresented: $showBleDiagnostic) {

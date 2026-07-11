@@ -15,6 +15,26 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         UNUserNotificationCenter.current().delegate = self
     }
 
+    /// Relays a tapped notification's core-supplied deep-link URI to the app,
+    /// which forwards it to core as `UserAction::LinkOpened` (same path as
+    /// `.onOpenURL`). Humble: the service never interprets the URI — core owns
+    /// routing. Buffers a cold-launch tap until the app wires the handler.
+    var onDeepLinkTapped: ((String) -> Void)? {
+        didSet {
+            guard let uri = pendingDeepLinkUri, let handler = onDeepLinkTapped else { return }
+            pendingDeepLinkUri = nil
+            handler(uri)
+        }
+    }
+
+    private var pendingDeepLinkUri: String?
+
+    /// Extracts the deep-link URI stashed in `userInfo` at display time. Pure so
+    /// it is unit-testable without a live `UNUserNotificationCenter`.
+    static func deepLinkUri(from userInfo: [AnyHashable: Any]) -> String? {
+        userInfo["deep_link_uri"] as? String
+    }
+
     /// Request notification permissions from the user.
     func requestPermissions(completion: @escaping (Bool) -> Void) {
         let center = UNUserNotificationCenter.current()
@@ -80,10 +100,16 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         // TODO(HUMBLE): [T, P1] frontend assembles notification userInfo from domain field names;
         // core should supply an opaque `os_user_info` map
         // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        content.userInfo = [
+        var userInfo: [String: Any] = [
             "contact_id": notification.contactId,
             "event_key": notification.eventKey,
         ]
+        // Core supplies the tap target (`vauchi://contact/<id>`); stash it so
+        // `didReceive` can relay it back to core as `LinkOpened`.
+        if let deepLinkUri = notification.deepLinkUri {
+            userInfo["deep_link_uri"] = deepLinkUri
+        }
+        content.userInfo = userInfo
 
         // TODO(HUMBLE): [T, P1] frontend maps NotificationCategory to OS presentation ids/sounds;
         // core should attach `os_category_id` and presentation hints
@@ -132,15 +158,13 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        let userInfo = response.notification.request.content.userInfo
-        let contactId = userInfo["contact_id"] as? String
-
-        #if DEBUG
-            print("NotificationService: User tapped notification for contact: \(contactId ?? "nil")")
-        #endif
-
-        // TODO: Signal app to navigate to contact detail
-        // For now, it just opens the app
+        if let uri = Self.deepLinkUri(from: response.notification.request.content.userInfo) {
+            if let handler = onDeepLinkTapped {
+                handler(uri)
+            } else {
+                pendingDeepLinkUri = uri // cold launch: flush once the app wires the handler
+            }
+        }
 
         completionHandler()
     }

@@ -83,6 +83,19 @@ class VauchiViewModel: ObservableObject {
     /// this single engine instance (one DB connection, shared cache).
     @Published var coreViewModel: AppViewModel?
 
+    /// Relays an opaque `vauchi://` URI to core as `LinkOpened`. Core decides
+    /// the destination (exchange consent, contact detail, device-link join, or a
+    /// core-owned error). Shared by `.onOpenURL` and notification taps so both
+    /// surfaces route identically.
+    func openDeepLink(_ uri: String) {
+        guard let coreVM = coreViewModel else {
+            showError("Invalid Link",
+                      message: "Please unlock Vauchi first, then re-open the link.")
+            return
+        }
+        coreVM.handleAction(.linkOpened(uri: uri))
+    }
+
     // MARK: - Private Properties
 
     private var repository: VauchiRepository?
