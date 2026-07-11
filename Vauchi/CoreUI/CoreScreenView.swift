@@ -126,8 +126,14 @@ private struct CoreScreenContent: View {
         .task(id: target.taskId) {
             navigate()
         }
-        .onChange(of: coreVM.currentScreen) { newScreen in
-            syncLifecycleTimers(for: newScreen)
+        // ScreenModel is not Equatable; the timers only depend on these
+        // two flags, and start/stop are idempotent, so watching the
+        // flags is equivalent to watching the whole screen.
+        .onChange(of: coreVM.currentScreen?.requiresAnimatedQr) { _ in
+            syncLifecycleTimers(for: coreVM.currentScreen)
+        }
+        .onChange(of: coreVM.currentScreen?.requiresPoll) { _ in
+            syncLifecycleTimers(for: coreVM.currentScreen)
         }
         .onAppear {
             navigate()

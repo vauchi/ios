@@ -551,7 +551,7 @@ class AppViewModel: ObservableObject {
             validationErrors[componentId] = message
         case .complete, .wipeComplete:
             loadScreen()
-        case let .onboardingComplete(destination):
+        case .onboardingComplete:
             // Core has created the identity, persisted onboarding data, and
             // navigated to the chosen destination. Notify the shell so it
             // can flip app state and refresh identity-derived chrome
