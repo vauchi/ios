@@ -13,35 +13,35 @@
 // spurious cancel fires.
 //
 // Unifies the former `FaceToFaceExchangeView` / `NfcTapExchangeView`, which
-// were byte-identical apart from their screen-id guard (exact
-// `multi_stage_exchange` vs prefix `exchange_nfc`). Per ADR-021/043 this view
-// holds no domain state, no nav decisions, and no domain types.
+// were byte-identical apart from which screens they hosted. The hosting
+// decision now lives in core: it stamps `native_wrapper_hint` on the
+// `ScreenModel`, the shell selects this wrapper from that hint, and the
+// wrapper's `Flow` merely mirrors the hint it corresponds to. Per ADR-021/043
+// this view holds no domain state, no nav decisions, and no domain types.
 //
 // Brightness + idle-timer presentation is core-driven
 // (`MultiStageExchangeEngine::screen_entered` emits
 // `Command::SetScreenBrightness` / `SetIdleTimerDisabled`, the inverse on
 // exit) and executed by the platform `CommandHandler` — not here.
 
+import CoreUIModels
 import SwiftUI
 
 struct ExchangeHardwareScreen: View {
-    /// Which hardware-exchange flow this wrapper hosts. Owns the screen-id
-    /// match so the only per-flow difference (exact vs prefix) is captured in
-    /// one unit-testable place.
+    /// Which hardware-exchange flow this wrapper hosts. Mirrors the
+    /// `NativeWrapperHint` core stamps on the `ScreenModel`; the shell selects
+    /// this wrapper from that hint, and the on-dismiss guard compares against it.
     enum Flow {
-        /// Multi-stage face-to-face exchange — exact `multi_stage_exchange`.
+        /// Multi-stage face-to-face exchange.
         case multiStage
-        /// NFC (TapTap) exchange — any `exchange_nfc*` sub-screen.
+        /// NFC (TapTap) exchange.
         case nfc
 
-        /// True while `screenId` is a screen this flow's wrapper hosts.
-        func hosts(_ screenId: String) -> Bool {
-            // TODO(HUMBLE): [D, P1] frontend matches domain screen_id prefixes/exact strings to choose a hardware wrapper;
-            // core should emit a presentation hint (e.g. requiresNfc) or a dedicated NavigateTo variant
-            // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
+        /// The core-emitted hint whose screens this flow's wrapper hosts.
+        var wrapperHint: NativeWrapperHint {
             switch self {
-            case .multiStage: screenId == "multi_stage_exchange"
-            case .nfc: screenId.hasPrefix("exchange_nfc")
+            case .multiStage: .multiStageExchange
+            case .nfc: .nfcExchange
             }
         }
     }
@@ -58,7 +58,7 @@ struct ExchangeHardwareScreen: View {
         // `currentScreen.screenId`, so there is no SwiftUI nav stack to pop.
         CoreScreenView(renderingCurrentScreen: ())
             .onDisappear {
-                if let id = coreVM.currentScreen?.screenId, flow.hosts(id) {
+                if coreVM.currentScreen?.nativeWrapperHint == flow.wrapperHint {
                     // TODO(HUMBLE): [W, P1] frontend hardcodes a generic `cancel` action id;
                     // core should supply the dismiss action id in the ScreenModel
                     // (see _private problem record 2026-07-06-mobile-domain-shell-violations).

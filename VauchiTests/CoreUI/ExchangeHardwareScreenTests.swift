@@ -2,34 +2,20 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// Tests for `ExchangeHardwareScreen.Flow.hosts`, the screen-id guard that
-// gates the on-dismiss `cancel` emission. The guard exists so a tab switch
-// (wrapper dismissed while core is STILL on the exchange screen) cancels the
-// flow, while a core-led transition (screenId already changed) does not fire
-// a spurious cancel. The unification of `FaceToFaceExchangeView` /
-// `NfcTapExchangeView` (problem record 2026-05-02-ios-humble-ui-deep-retirement
-// G1) centralised the two flows' only real difference — exact-match vs
-// prefix-match — into this enum, so it is pinned here.
+// Tests for `ExchangeHardwareScreen.Flow.wrapperHint`, the mechanical map from
+// a wrapper flow to the `NativeWrapperHint` core stamps on its `ScreenModel`.
+// The on-dismiss `cancel` guard compares this hint against the current screen's
+// hint, so the flow must mirror core's discriminant exactly. Which `screen_id`s
+// belong to which flow is core's decision (it stamps `native_wrapper_hint`), so
+// that domain knowledge is asserted in core, not re-tested here (CC-24).
 
+import CoreUIModels
 @testable import Vauchi
 import XCTest
 
 final class ExchangeHardwareScreenTests: XCTestCase {
-    func testMultiStageHostsExactScreenOnly() {
-        XCTAssertTrue(ExchangeHardwareScreen.Flow.multiStage.hosts("multi_stage_exchange"))
-        // Exact match, not prefix — a sibling screen must NOT keep the wrapper
-        // hosting (else a core-led transition to it would be read as "still
-        // mine" and fire a spurious cancel).
-        XCTAssertFalse(ExchangeHardwareScreen.Flow.multiStage.hosts("multi_stage_exchange_done"))
-        XCTAssertFalse(ExchangeHardwareScreen.Flow.multiStage.hosts("contacts"))
-    }
-
-    func testNfcHostsAllExchangeNfcSubscreens() {
-        // Prefix match — the NFC flow spans `exchange_nfc_role`,
-        // `exchange_nfc_*` handshake sub-states; all stay hosted by one wrapper.
-        XCTAssertTrue(ExchangeHardwareScreen.Flow.nfc.hosts("exchange_nfc"))
-        XCTAssertTrue(ExchangeHardwareScreen.Flow.nfc.hosts("exchange_nfc_role"))
-        XCTAssertFalse(ExchangeHardwareScreen.Flow.nfc.hosts("multi_stage_exchange"))
-        XCTAssertFalse(ExchangeHardwareScreen.Flow.nfc.hosts("exchange"))
+    func testWrapperHintMirrorsCoreDiscriminant() {
+        XCTAssertEqual(ExchangeHardwareScreen.Flow.multiStage.wrapperHint, .multiStageExchange)
+        XCTAssertEqual(ExchangeHardwareScreen.Flow.nfc.wrapperHint, .nfcExchange)
     }
 }
