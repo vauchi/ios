@@ -10,18 +10,27 @@ struct EditableTextView: View {
     let component: EditableTextComponent
     let onAction: (UserAction) -> Void
 
+    // Display<->edit is presentation state the frontend owns (matches the
+    // web-demo renderer); core is never asked to flip `editing` and receives
+    // only the resulting TextChanged. `draft` holds the in-progress text —
+    // the previous `.constant(component.value)` binding was read-only, so
+    // keystrokes were silently discarded.
+    @State private var isEditing = false
+    @State private var draft = ""
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(component.label)
                 .font(.caption)
                 .foregroundColor(.secondary)
 
-            if component.editing {
-                TextField(component.label, text: .constant(component.value))
+            if isEditing || component.editing {
+                TextField(component.label, text: $draft)
                     .textFieldStyle(.roundedBorder)
-                    .onChange(of: component.value) { newValue in
+                    .onChange(of: draft) { newValue in
                         onAction(.textChanged(componentId: component.id, value: newValue))
                     }
+                    .onAppear { draft = component.value }
 
                 if let error = component.validationError {
                     Text(error)
@@ -36,9 +45,7 @@ struct EditableTextView: View {
                     Spacer()
 
                     Button {
-                        // TODO(HUMBLE): [T, P1] frontend mints an edit action id from the component id;
-                        // core should supply explicit `edit_action_id` (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-                        onAction(.actionPressed(actionId: "\(component.id):edit"))
+                        isEditing = true
                     } label: {
                         Image(systemName: "pencil")
                             .foregroundColor(.accentColor)
