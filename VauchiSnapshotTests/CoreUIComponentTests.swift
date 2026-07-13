@@ -603,4 +603,32 @@ final class CoreUIComponentTests: XCTestCase {
         )
         assertDarkSnapshot(of: EditableTextView(component: component, onAction: noOp), height: 100)
     }
+
+    // MARK: - StatusIndicatorView
+
+    func testStatusIndicatorUsesLocalizedStatusLabel() {
+        let component = StatusIndicatorComponent(
+            id: "status",
+            icon: "checkmark.circle.fill",
+            title: "Exchange Complete",
+            detail: "Contact card saved successfully",
+            status: .success,
+            statusLabel: "Synchronisiert"
+        )
+        let view = StatusIndicatorView(component: component)
+        let hostingController = UIHostingController(rootView: view)
+        hostingController.loadViewIfNeeded()
+
+        XCTAssertTrue(
+            accessibilityLabelContains("Synchronisiert", in: hostingController.view),
+            "Expected view hierarchy to contain accessibility label 'Synchronisiert'"
+        )
+    }
+
+    private func accessibilityLabelContains(_ substring: String, in view: UIView) -> Bool {
+        if let label = view.accessibilityLabel, label.contains(substring) {
+            return true
+        }
+        return view.subviews.contains { accessibilityLabelContains(substring, in: $0) }
+    }
 }
