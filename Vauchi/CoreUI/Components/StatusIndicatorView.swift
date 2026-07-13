@@ -36,7 +36,7 @@ struct StatusIndicatorView: View {
             Circle()
                 .fill(statusColor(for: component.status))
                 .frame(width: 12, height: 12)
-                .accessibilityLabel(statusLabel(for: component.status))
+                .accessibilityLabel(component.statusLabel.isEmpty ? statusLabel(for: component.status) : component.statusLabel)
         }
         .padding(CGFloat(tokens.spacing.md))
         .background(Color(.systemBackground))
@@ -58,9 +58,8 @@ struct StatusIndicatorView: View {
     }
 
     private func statusLabel(for status: Status) -> String {
-        // TODO(HUMBLE): [W, P2] hardcoded English status a11y labels;
-        // core should supply localized `a11y.label` values
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
+        // TODO(HUMBLE): [W, P2] fallback until binding pin carries core!1355 statusLabel.
+        // Remove once vauchi-platform-swift!82 is pinned.
         switch status {
         case .pending: "Pending"
         case .inProgress: "In progress"
