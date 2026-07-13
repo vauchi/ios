@@ -248,9 +248,13 @@ struct VauchiApp: App {
                     viewModel.handleAppBackgrounded()
                     // Foreground DispatchSourceTimers do not survive
                     // backgrounding; cancel so we don't fire stale wakeups
-                    // when the app resumes. Core will reschedule via
-                    // `Command::ScheduleWakeup` on the next foreground tick.
+                    // when the app resumes (re-armed on `.active` below).
                     WakeupService.shared.cancelPendingWakeup()
+                } else if newPhase == .active {
+                    // Re-arm the core-owned poll loop cancelled on background:
+                    // `onWakeup()` makes core emit the next `ScheduleWakeup`,
+                    // restarting the foreground timer (ADR-044 Am2a Option C).
+                    viewModel.coreViewModel?.onWakeup()
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIScreen.capturedDidChangeNotification)) { _ in

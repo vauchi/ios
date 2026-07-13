@@ -124,6 +124,11 @@ class AppViewModel: ObservableObject {
         WakeupService.shared.setOnWakeup { [weak self] in
             self?.onWakeup()
         }
+        // Bootstrap the core-owned poll loop (ADR-044 Am2a Option C): core
+        // only emits `Command::ScheduleWakeup` from `onWakeup`, so without
+        // this first call it never arms the timer and the foreground poll
+        // never starts. Replaces the removed `startCorePollTimer()`.
+        onWakeup()
     }
 
     private func attachEventListener() {
