@@ -104,4 +104,9 @@ final class WakeupService {
         foregroundTimer?.cancel()
         foregroundTimer = nil
     }
+
+    /// Test-only accessor — true while a foreground wakeup is armed.
+    var hasScheduledWakeup: Bool {
+        foregroundTimer != nil
+    }
 }
