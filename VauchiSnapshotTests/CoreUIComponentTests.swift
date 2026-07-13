@@ -619,16 +619,36 @@ final class CoreUIComponentTests: XCTestCase {
         let hostingController = UIHostingController(rootView: view)
         hostingController.loadViewIfNeeded()
 
+        // Accessibility elements are only materialized once the view is in a
+        // window. Use a transient window so the test is independent of the
+        // current app state and works under xcodebuild without a visible UI.
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = hostingController
+        window.makeKeyAndVisible()
+        hostingController.view.setNeedsLayout()
+        hostingController.view.layoutIfNeeded()
+
         XCTAssertTrue(
             accessibilityLabelContains("Synchronisiert", in: hostingController.view),
-            "Expected view hierarchy to contain accessibility label 'Synchronisiert'"
+            "Expected accessibility hierarchy to contain label 'Synchronisiert'"
         )
+
+        window.resignKey()
     }
 
-    private func accessibilityLabelContains(_ substring: String, in view: UIView) -> Bool {
-        if let label = view.accessibilityLabel, label.contains(substring) {
+    private func accessibilityLabelContains(_ substring: String, in element: NSObject) -> Bool {
+        if let label = element.accessibilityLabel, label.contains(substring) {
             return true
         }
-        return view.subviews.contains { accessibilityLabelContains(substring, in: $0) }
+        for child in element.accessibilityElements ?? [] {
+            if let child = child as? NSObject,
+               accessibilityLabelContains(substring, in: child) {
+                return true
+            }
+        }
+        if let view = element as? UIView {
+            return view.subviews.contains { accessibilityLabelContains(substring, in: $0) }
+        }
+        return false
     }
 }
