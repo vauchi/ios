@@ -43,7 +43,9 @@ struct StatusIndicatorView: View {
         .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(component.a11y?.label ?? component.title)
+        .accessibilityLabel(
+            component.a11y?.label ?? "\(component.title), \(component.statusLabel)"
+        )
         .accessibilityHint(component.a11y?.hint ?? "")
     }
 
