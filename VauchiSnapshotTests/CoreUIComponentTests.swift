@@ -194,7 +194,7 @@ final class CoreUIComponentTests: XCTestCase {
             id: "fields",
             fields: [],
             visibilityMode: .showHide,
-            availableGroups: []
+            availableScopes: []
         )
         let view = FieldListView(component: component, onAction: noOp)
         assertComponentSnapshot(of: view)
@@ -208,7 +208,7 @@ final class CoreUIComponentTests: XCTestCase {
                 Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .hidden),
             ],
             visibilityMode: .showHide,
-            availableGroups: []
+            availableScopes: []
         )
         let view = FieldListView(component: component, onAction: noOp)
         assertComponentSnapshot(of: view, height: 250)
@@ -218,11 +218,11 @@ final class CoreUIComponentTests: XCTestCase {
         let component = FieldListComponent(
             id: "fields",
             fields: [
-                Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .groups(["Family", "Friends"])),
-                Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .groups(["Family"])),
+                Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .scopes(["Family", "Friends"])),
+                Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .scopes(["Family"])),
             ],
             visibilityMode: .perGroup,
-            availableGroups: ["Family", "Friends", "Coworkers"]
+            availableScopes: ["Family", "Friends", "Coworkers"]
         )
         let view = FieldListView(component: component, onAction: noOp)
         assertComponentSnapshot(of: view, height: 350)
@@ -238,7 +238,7 @@ final class CoreUIComponentTests: XCTestCase {
                 Field(id: "f4", fieldType: "address", label: "Office", value: "Bahnhofstrasse 1, Zurich", icon: "mappin", visibility: .hidden),
             ],
             visibilityMode: .showHide,
-            availableGroups: []
+            availableScopes: []
         )
         let view = FieldListView(component: component, onAction: noOp)
         assertComponentSnapshot(of: view, height: 450)
@@ -249,7 +249,7 @@ final class CoreUIComponentTests: XCTestCase {
     func testCardPreviewMinimal() {
         let component = PreviewComponent(
             name: "Alice",
-            avatarData: nil,
+            imageData: nil,
             fields: [],
             variants: [],
             selectedVariant: nil
@@ -265,12 +265,12 @@ final class CoreUIComponentTests: XCTestCase {
         ]
         let component = PreviewComponent(
             name: "Alice",
-            avatarData: nil,
+            imageData: nil,
             fields: fields,
             variants: [],
             selectedVariant: nil,
-            // Match what core's `build_visible_fields` emits when no group
-            // is selected: every field with `.shown` or `.groups` visibility.
+            // Match what core's `build_visible_fields` emits when no scope
+            // is selected: every field with `.shown` or `.scopes` visibility.
             visibleFields: fields
         )
         let view = PreviewView(component: component, onAction: noOp)
@@ -279,12 +279,12 @@ final class CoreUIComponentTests: XCTestCase {
 
     func testCardPreviewWithGroups() {
         let fields = [
-            Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .groups(["Family", "Friends"])),
-            Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .groups(["Family"])),
+            Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .scopes(["Family", "Friends"])),
+            Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .scopes(["Family"])),
         ]
         let component = PreviewComponent(
             name: "Alice",
-            avatarData: nil,
+            imageData: nil,
             fields: fields,
             variants: [
                 PreviewVariant(
@@ -304,7 +304,7 @@ final class CoreUIComponentTests: XCTestCase {
                 ),
             ],
             selectedVariant: nil,
-            // Both fields have `.groups` visibility, so the no-group-selected
+            // Both fields have `.scopes` visibility, so the no-scope-selected
             // path through `build_visible_fields` keeps both.
             visibleFields: fields
         )
@@ -318,9 +318,9 @@ final class CoreUIComponentTests: XCTestCase {
         ]
         let component = PreviewComponent(
             name: "Alice",
-            avatarData: nil,
+            imageData: nil,
             fields: [
-                Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .groups(["Friends"])),
+                Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .scopes(["Friends"])),
             ],
             variants: [
                 PreviewVariant(
@@ -341,7 +341,7 @@ final class CoreUIComponentTests: XCTestCase {
     func testCardPreviewNoVisibleFields() {
         let component = PreviewComponent(
             name: "Alice",
-            avatarData: nil,
+            imageData: nil,
             fields: [
                 Field(id: "f1", fieldType: "email", label: "Email", value: "alice@example.com", icon: "envelope", visibility: .hidden),
             ],
@@ -547,7 +547,7 @@ final class CoreUIComponentTests: XCTestCase {
         ]
         let component = PreviewComponent(
             name: "Alice",
-            avatarData: nil,
+            imageData: nil,
             fields: fields,
             variants: [],
             selectedVariant: nil,
@@ -577,7 +577,7 @@ final class CoreUIComponentTests: XCTestCase {
                 Field(id: "f2", fieldType: "phone", label: "Mobile", value: "+41 79 123 45 67", icon: "phone", visibility: .hidden),
             ],
             visibilityMode: .showHide,
-            availableGroups: []
+            availableScopes: []
         )
         assertDarkSnapshot(of: FieldListView(component: component, onAction: noOp), height: 250)
     }

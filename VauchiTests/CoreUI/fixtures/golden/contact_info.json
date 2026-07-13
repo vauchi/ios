@@ -9,7 +9,7 @@
         "id": "fields",
         "fields": [],
         "visibility_mode": "ShowHide",
-        "available_groups": [],
+        "available_scopes": [],
         "a11y": {
           "label": "Contact fields",
           "hint": "Toggle field visibility",

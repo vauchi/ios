@@ -12,7 +12,7 @@
             "id": "c1",
             "name": "Alice",
             "subtitle": "Friend",
-            "avatar_initials": "A",
+            "initials": "A",
             "status": null,
             "a11y": null
           },
@@ -20,7 +20,7 @@
             "id": "c2",
             "name": "Bob",
             "subtitle": null,
-            "avatar_initials": "B",
+            "initials": "B",
             "status": "Updated",
             "a11y": null
           }

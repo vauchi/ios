@@ -81,13 +81,72 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         center.setNotificationCategories([emergencyCategory, updateCategory])
     }
 
-    /// Poll for and display OS notifications (E).
+    /// Poll for and display OS notifications (legacy path used by the
+    /// retired 30-second heartbeat; kept for BackgroundSyncService until
+    /// that path migrates to `on_wakeup`).
     func pollAndDisplayNotifications(repository: VauchiRepository?) {
         guard SettingsService.shared.notificationsEnabled else { return }
         guard let notifications = repository?.pollNotifications(), !notifications.isEmpty else { return }
 
         for notification in notifications {
             showNotification(notification)
+        }
+    }
+
+    /// Display notifications produced by `PlatformAppEngine.onWakeup()`
+    /// (ADR-044 Am2a). Called from `AppViewModel.onWakeup`.
+    func displayWakeupNotifications(_ notifications: [WakeupNotification]) {
+        guard SettingsService.shared.notificationsEnabled else { return }
+        guard !notifications.isEmpty else { return }
+
+        for notification in notifications {
+            showWakeupNotification(notification)
+        }
+    }
+
+    /// Display a single `onWakeup` notification.
+    private func showWakeupNotification(_ notification: WakeupNotification) {
+        let content = UNMutableNotificationContent()
+        content.title = notification.title
+        content.body = notification.body
+        content.sound = .default
+        var userInfo: [String: Any] = [
+            "contact_id": notification.contactId,
+            "event_key": notification.eventKey,
+        ]
+        if let deepLinkUri = notification.deepLinkUri {
+            userInfo["deep_link_uri"] = deepLinkUri
+        }
+        content.userInfo = userInfo
+
+        // Map core category string to the historical OS category identifiers.
+        switch notification.category {
+        case "EmergencyAlert":
+            content.categoryIdentifier = "emergencyAlert"
+            content.sound = .default
+        case "DuressAlert":
+            content.categoryIdentifier = "duressAlert"
+            content.sound = .default
+        case "ContactAdded":
+            content.categoryIdentifier = "contactAdded"
+        case "CardUpdate":
+            content.categoryIdentifier = "cardUpdate"
+        default:
+            break
+        }
+
+        let request = UNNotificationRequest(
+            identifier: notification.eventKey,
+            content: content,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                #if DEBUG
+                    print("NotificationService: Failed to add wakeup notification: \(error)")
+                #endif
+            }
         }
     }
 

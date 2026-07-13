@@ -5,9 +5,9 @@
 import CoreUIModels
 import SwiftUI
 
-/// Renders a core `Component::AvatarPreview` as a circular avatar with optional edit overlay.
+/// Renders a core `Component::ImageCircle` as a circular avatar with optional edit overlay.
 struct AvatarPreviewView: View {
-    let component: AvatarPreviewComponent
+    let component: ImageCircleComponent
     let onAction: (UserAction) -> Void
 
     /// Scales the initials text with the user's Dynamic Type setting. Tied
@@ -28,11 +28,8 @@ struct AvatarPreviewView: View {
         .clipShape(Circle())
         .contentShape(Circle())
         .onTapGesture {
-            if component.editable {
-                // TODO(HUMBLE): [W, P1] frontend hardcodes `edit_avatar` action id;
-                // core should supply `edit_action_id` in AvatarPreviewComponent
-                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-                onAction(.actionPressed(actionId: "edit_avatar"))
+            if component.editable, let editActionId = component.editActionId {
+                onAction(.actionPressed(actionId: editActionId))
             }
         }
         .accessibilityElement(children: .ignore)

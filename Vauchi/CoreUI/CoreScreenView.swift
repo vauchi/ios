@@ -126,22 +126,8 @@ private struct CoreScreenContent: View {
         .task(id: target.taskId) {
             navigate()
         }
-        // ScreenModel is not Equatable; the timers only depend on these
-        // two flags, and start/stop are idempotent, so watching the
-        // flags is equivalent to watching the whole screen.
-        .onChange(of: coreVM.currentScreen?.requiresAnimatedQr) { _ in
-            syncLifecycleTimers(for: coreVM.currentScreen)
-        }
-        .onChange(of: coreVM.currentScreen?.requiresPoll) { _ in
-            syncLifecycleTimers(for: coreVM.currentScreen)
-        }
         .onAppear {
             navigate()
-            syncLifecycleTimers(for: coreVM.currentScreen)
-        }
-        .onDisappear {
-            coreVM.stopQrFrameTimer()
-            coreVM.stopMultiStagePollTimer()
         }
         .alert(item: alertBinding) { alert in
             Alert(
@@ -225,23 +211,6 @@ private struct CoreScreenContent: View {
         // root so trigger paths from custom-view tabs (MoreView) and
         // from Onboarding `restore_backup` are reachable; CoreScreenView
         // no longer needs its own host.
-    }
-
-    /// Start/stop hardware-timer side-effects based on the rendered screen's
-    /// lifecycle hints. Core owns the decision; the shell never matches a
-    /// domain `screen_id` to decide timer ownership
-    /// (`2026-07-06-mobile-domain-shell-violations` I4).
-    private func syncLifecycleTimers(for screen: ScreenModel?) {
-        if screen?.requiresAnimatedQr == true {
-            coreVM.startQrFrameTimer()
-        } else {
-            coreVM.stopQrFrameTimer()
-        }
-        if screen?.requiresPoll == true {
-            coreVM.startMultiStagePollTimer()
-        } else {
-            coreVM.stopMultiStagePollTimer()
-        }
     }
 
     private var alertBinding: Binding<AppViewModel.AlertMessage?> {

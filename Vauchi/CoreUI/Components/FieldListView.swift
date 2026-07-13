@@ -12,15 +12,15 @@ struct FieldListView: View {
     @Environment(\.designTokens) private var tokens
 
     var body: some View {
+        let fields = component.fields
         VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.smMd)) {
-            if component.fields.isEmpty {
+            if fields.isEmpty {
                 emptyState
             } else {
-                ForEach(component.fields) { field in
+                ForEach(fields) { field in
                     FieldListRow(
                         field: field,
                         visibilityMode: component.visibilityMode,
-                        availableGroups: component.availableGroups,
                         onAction: onAction
                     )
                 }
@@ -58,34 +58,27 @@ struct FieldListView: View {
 struct FieldListRow: View {
     let field: Field
     let visibilityMode: VisibilityMode
-    let availableGroups: [String]
     let onAction: (UserAction) -> Void
     @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: sfSymbolForCoreIcon(field.icon))
-                    .foregroundColor(.cyan)
-                    .frame(width: 24)
-                    .accessibilityHidden(true)
+        HStack {
+            Image(systemName: sfSymbolForCoreIcon(field.icon))
+                .foregroundColor(.cyan)
+                .frame(width: 24)
+                .accessibilityHidden(true)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(field.label)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text(field.value)
-                        .font(.body)
-                }
-
-                Spacer()
-
-                visibilityControl
+            VStack(alignment: .leading, spacing: 2) {
+                Text(field.label)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text(field.value)
+                    .font(.body)
             }
 
-            if case .perGroup = visibilityMode, !availableGroups.isEmpty {
-                groupChips
-            }
+            Spacer()
+
+            visibilityControl
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -120,42 +113,6 @@ struct FieldListRow: View {
             }
             .accessibilityLabel(isShown ? "Visible" : "Hidden")
             .accessibilityHint("Toggle field visibility")
-        }
-    }
-
-    private var groupChips: some View {
-        // TODO(HUMBLE): [D/T, P1] frontend maps per-group visibility state and group names to UI;
-        // core should supply generic chips with explicit action_ids and labels
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        let visibleGroups: [String] = {
-            if case let .groups(groups) = field.visibility {
-                return groups
-            }
-            return []
-        }()
-
-        return ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(availableGroups, id: \.self) { group in
-                    let isVisible = visibleGroups.contains(group)
-                    Button {
-                        onAction(.fieldVisibilityChanged(
-                            fieldId: field.id,
-                            groupId: group,
-                            visible: !isVisible
-                        ))
-                    } label: {
-                        Text(group)
-                            .font(.caption)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(isVisible ? Color.cyan.opacity(0.2) : Color(.systemGray5))
-                            .foregroundColor(isVisible ? .cyan : .secondary)
-                            .cornerRadius(8)
-                    }
-                    .accessibilityLabel("\(group): \(isVisible ? "visible" : "hidden")")
-                }
-            }
         }
     }
 }

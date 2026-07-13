@@ -27,13 +27,13 @@
             "label": "Mobile",
             "value": "+1-555-0100",
             "visibility": {
-              "Groups": [
+              "Scopes": [
                 "Family"
               ]
             },
             "a11y": {
               "label": "Mobile: +1-555-0100",
-              "hint": "Visible to specific groups",
+              "hint": "Visible to specific scopes",
               "role": null
             },
             "icon": "phone"
@@ -44,21 +44,21 @@
             "label": "Work",
             "value": "alice@example.com",
             "visibility": {
-              "Groups": [
+              "Scopes": [
                 "Friends",
                 "Work"
               ]
             },
             "a11y": {
               "label": "Work: alice@example.com",
-              "hint": "Visible to specific groups",
+              "hint": "Visible to specific scopes",
               "role": null
             },
             "icon": "envelope"
           }
         ],
         "visibility_mode": "ShowHide",
-        "available_groups": [
+        "available_scopes": [
           "Family",
           "Friends",
           "Work"

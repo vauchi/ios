@@ -4,6 +4,7 @@
 
 // Root navigation for Vauchi iOS app
 
+import CoreUIModels
 import SwiftUI
 import VauchiPlatform
 
@@ -96,12 +97,6 @@ struct LoadingView: View {
 struct MainTabView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
     @ObservedObject private var localizationService = LocalizationService.shared
-    /// Tab-bar highlight, keyed on the opaque canonical tab id from
-    /// `navItems(.mobile)` (ADR-043 Am4). Seeded from core's
-    /// `currentTabId` on appear so the highlight follows wherever core
-    /// booted; the shell never re-derives "which tab first" from
-    /// domain state (the retired `hasContacts` branch did).
-    @State private var selectedTabId: String = ""
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -171,6 +166,10 @@ struct MainTabView: View {
     private var tabBar: some View {
         Group {
             if let coreVM = viewModel.coreViewModel {
+                let screen = coreVM.currentScreen
+                let selectedTabId = screen?.navTabId ?? ""
+                let isTabRoot = screen?.navTabId != nil && screen?.screenId == screen?.navTabId
+
                 VStack(spacing: 0) {
                     // Single core-driven content area: renders core's current
                     // screen generically, swapping in the native hardware
@@ -180,31 +179,24 @@ struct MainTabView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .refreshable { await viewModel.sync() }
 
-                    Divider()
+                    if isTabRoot {
+                        Divider()
 
-                    // Custom bottom tab bar. A native `TabView` cannot host N
-                    // identical generic `CoreScreenView` tabs — its selection
-                    // binding and per-tab lifecycle both break when every tab is
-                    // the same view type (verified on device). The humble shell
-                    // therefore owns a thin tab bar that just dispatches
-                    // `NavigateToTab(action_id)` on tap; labels / icons / ids
-                    // all come from core's `navItems(.mobile)`.
-                    CoreBottomTabBar(
-                        tabs: coreVM.tabs(),
-                        selectedId: selectedTabId,
-                        accessibilityId: accessibilityId(for:)
-                    ) { tab in
-                        selectedTabId = tab.id
-                        coreVM.navigateToTab(actionId: tab.actionId)
+                        // Custom bottom tab bar. A native `TabView` cannot host N
+                        // identical generic `CoreScreenView` tabs — its selection
+                        // binding and per-tab lifecycle both break when every tab is
+                        // the same view type (verified on device). The humble shell
+                        // therefore owns a thin tab bar that just dispatches
+                        // `NavigateToTab(action_id)` on tap; labels / icons / ids
+                        // all come from core's `navItems(.mobile)`.
+                        CoreBottomTabBar(
+                            tabs: coreVM.tabs(),
+                            selectedId: selectedTabId,
+                            accessibilityId: accessibilityId(for:)
+                        ) { tab in
+                            coreVM.navigateToTab(actionId: tab.actionId)
+                        }
                     }
-                }
-                .onAppear {
-                    // Pull, never push: core is already on its
-                    // default/current screen (post-auth self-heal);
-                    // the highlight just follows it.
-                    selectedTabId = coreVM.currentTabId()
-                        ?? coreVM.tabs().first?.id
-                        ?? selectedTabId
                 }
             } else {
                 ProgressView("Loading...")
@@ -273,40 +265,96 @@ private struct MainContentView: View {
                 native
             } else {
                 VStack(spacing: 0) {
-                    // Core-driven back chrome: iOS has no NavigationStack for
-                    // core screens, so the shell renders a back control above
-                    // sub-screens (those the engine reports `can_go_back` for)
-                    // and forwards `navigateBack`. Roots report false, so the
-                    // bar only appears where a back step exists. Replaces the
-                    // per-screen footer "Back" action.
-                    if coreVM.canGoBack() {
-                        BackChromeBar { coreVM.navigateBack() }
-                    }
+                    // Core-driven nav chrome: back/settings actions come from
+                    // `ScreenModel.navActions`. The shell never derives chrome
+                    // from `can_go_back` or hardcoded screen ids
+                    // (ADR-044 Am2a).
+                    NavChromeBar(
+                        navActions: coreVM.currentScreen?.navActions ?? [],
+                        onAction: { coreVM.handleAction($0) }
+                    )
                     CoreScreenView(renderingCurrentScreen: ())
                 }
+                // Edge-swipe back (iOS) and Escape (iPad keyboard / Mac
+                // Catalyst) both forward `UserAction::NavigateBack`
+                // unconditionally; core decides whether to pop or perform
+                // native back (ADR-044 Am2a).
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    DragGesture(minimumDistance: 20, coordinateSpace: .local)
+                        .onEnded { value in
+                            let leadingEdge = value.startLocation.x < 40
+                            let rightward = value.translation.width > 60
+                            if leadingEdge, rightward {
+                                coreVM.navigateBack()
+                            }
+                        }
+                )
+                .background(
+                    EscapeBackButton { coreVM.navigateBack() }
+                )
             }
         }
     }
 }
 
-/// Leading back control shown above core sub-screens when the engine
-/// reports a back step. Chevron + label, dispatching `navigateBack`.
-private struct BackChromeBar: View {
-    let onBack: () -> Void
+/// Core-driven nav chrome bar: renders Back and Settings actions from
+/// `ScreenModel.navActions`. Each action is forwarded via `onAction` so
+/// `UserAction.navigateBack` / `UserAction.actionPressed` flow through
+/// `AppViewModel.handleAction`.
+private struct NavChromeBar: View {
+    let navActions: [ScreenAction]
+    let onAction: (UserAction) -> Void
+
+    private var backAction: ScreenAction? {
+        navActions.first { $0.id == "go_back" }
+    }
+
+    private var settingsAction: ScreenAction? {
+        navActions.first { $0.id == "settings" }
+    }
 
     var body: some View {
         HStack {
-            Button(action: onBack) {
-                HStack(spacing: 4) {
-                    Image(systemName: "chevron.left")
-                    Text(LocalizationService.shared.t("action.back"))
+            if let back = backAction {
+                Button(action: { onAction(.navigateBack) }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                        Text(back.label)
+                    }
                 }
+                .disabled(!back.enabled)
+                .accessibilityIdentifier("nav.back")
             }
-            .accessibilityIdentifier("nav.back")
+
             Spacer()
+
+            if let settings = settingsAction {
+                Button(action: { onAction(.actionPressed(actionId: settings.id)) }) {
+                    Image(systemName: "gear")
+                        .accessibilityLabel(settings.label)
+                }
+                .disabled(!settings.enabled)
+                .accessibilityIdentifier("nav.settings")
+            }
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
+    }
+}
+
+/// Hidden button that captures the Escape key and forwards `navigateBack`.
+/// SwiftUI only routes keyboard shortcuts to views in the responder chain;
+/// placing this inside the main content area covers the core screen tree.
+private struct EscapeBackButton: View {
+    let onBack: () -> Void
+
+    var body: some View {
+        Button(action: onBack) {
+            EmptyView()
+        }
+        .keyboardShortcut(.escape, modifiers: [])
+        .opacity(0)
     }
 }
 

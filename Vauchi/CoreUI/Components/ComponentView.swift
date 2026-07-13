@@ -80,7 +80,7 @@ struct ComponentView: View {
         case let .dropdown(dropdownComponent):
             DropdownView(component: dropdownComponent, onAction: onAction)
 
-        case let .avatarPreview(avatarComponent):
+        case let .imageCircle(avatarComponent):
             AvatarPreviewView(component: avatarComponent, onAction: onAction)
 
         case let .slider(sliderComponent):

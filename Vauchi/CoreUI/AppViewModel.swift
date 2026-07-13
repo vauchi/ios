@@ -74,32 +74,6 @@ class AppViewModel: ObservableObject {
     /// UniFFI callback interface's lifetime is bound to the view model.
     private var eventListener: InvalidationListener?
 
-    /// Timer that drives animated-QR frame advancement (~10fps) while the
-    /// "Share Your Code" screen is visible. See `startQrFrameTimer` /
-    /// `stopQrFrameTimer`; the view layer toggles it via `onChange` of
-    /// `currentScreen?.screenId`.
-    private var qrFrameTimer: Timer?
-
-    /// Count of consecutive decode failures. When the count hits
-    /// `maxConsecutiveQrDecodeFailures` the timer self-stops to avoid
-    /// infinite retry on a persistent decode mismatch (e.g. core
-    /// ScreenModel format drift); the frozen QR is itself the user signal.
-    private var qrFrameDecodeFailures = 0
-    private static let maxConsecutiveQrDecodeFailures = 10 // ~1s at 10 fps
-
-    /// Timer that drives the multi-stage (Glance) exchange machine (~5fps)
-    /// while the `multi_stage_exchange` screen is visible. Post slice-32m
-    /// the core cycle thread is gone; the machine advances only when the
-    /// frontend calls `pollNotifications`, which also fires
-    /// `onScreensInvalidated` (→ `loadScreen`). Without this tick the
-    /// own-QR never appears (Bug 5,
-    /// `2026-05-30-exchange-screen-nav-visual-bugs`). The view toggles it
-    /// via `onChange` of `currentScreen?.screenId`. Distinct from
-    /// `qrFrameTimer`, which drives the legacy `exchange_show_qr` path via
-    /// `advanceQrFrameJson` (gated to `AppScreen::Exchange` in core).
-    private var multiStagePollTimer: Timer?
-    private var corePollTimer: Timer?
-
     /// NFC reader-mode hardware bridge for the TapTap exchange
     /// (`NfcActivate`/`NfcSendApdu`/`NfcDeactivate` commands). Held as
     /// the `NFCExchangeDispatching` protocol so tests can inject a spy
@@ -147,7 +121,9 @@ class AppViewModel: ObservableObject {
         self.appEngine = appEngine
         loadScreen()
         attachEventListener()
-        startCorePollTimer()
+        WakeupService.shared.setOnWakeup { [weak self] in
+            self?.onWakeup()
+        }
     }
 
     private func attachEventListener() {
@@ -277,30 +253,20 @@ class AppViewModel: ObservableObject {
         handleAction(.navigateToTab(actionId: actionId))
     }
 
-    /// Whether the current screen offers a back step, per the engine's
-    /// nav state (`AppScreen` history + in-engine sub-flow back). Drives
-    /// the core-driven back chrome the shell renders above sub-screens,
-    /// so the frontend no longer depends on a footer "Back" action.
-    func canGoBack() -> Bool {
-        (try? appEngine.canGoBack()) ?? false
+    /// Forward the OS back gesture as `UserAction::NavigateBack`. Core
+    /// decides whether to pop (`NavigateTo`) or tell the frontend to
+    /// perform the native back default (`ActionResult::PerformNativeBack`).
+    /// Never gate on `can_go_back` — frontends forward unconditionally
+    /// (ADR-044 Amendment 2a).
+    func navigateBack() {
+        handleAction(.navigateBack)
     }
 
-    func navigateBack() {
-        do {
-            let json = try appEngine.navigateBackJson()
-            guard let data = json.data(using: .utf8) else { return }
-            // Phase 2b envelope shape (see `navigateTo`).
-            let envelope = try coreJSONDecoder.decode(ScreenEnvelope.self, from: data)
-            currentScreen = envelope.screen
-            validationErrors = [:]
-            if !envelope.commands.isEmpty {
-                handleExchangeCommands(envelope.commands)
-            }
-        } catch {
-            #if DEBUG
-                print("AppViewModel: failed to navigate back: \(error)")
-            #endif
-        }
+    /// Core reached a back-stopping root and asked the frontend to perform
+    /// its native back default. On iOS the default is to suspend/minimize
+    /// the app, mirroring Android's BACK-button minimise behaviour.
+    private func performNativeBack() {
+        UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
     }
 
     func invalidateAll() {
@@ -314,140 +280,26 @@ class AppViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Animated QR Frame Cycling
+    // MARK: - Wakeup (ADR-044 Am2a)
 
-    // NOTE: this block is duplicated in vauchi/macos at
-    // `Vauchi/ViewModels/AppViewModel.swift`. Keep the two in sync until the
-    // shared-module decision lands — see `_private/docs/problems/\
-    // 2026-04-19-qr-frame-timer-ios-macos-duplication/`.
-
-    /// Start a 10 fps timer that advances animated-QR frames on the ShowQr screen.
-    ///
-    /// Idempotent: calling while already running is a no-op. The view calls
-    /// this on `.onAppear` / when `screenId` becomes `exchange_show_qr`.
-    func startQrFrameTimer() {
-        guard qrFrameTimer == nil else { return }
-        let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.advanceQrFrame()
-            }
-        }
-        RunLoop.main.add(timer, forMode: .common)
-        qrFrameTimer = timer
-    }
-
-    /// Stop the animated-QR timer if running. The view calls this on
-    /// `.onDisappear` / when `screenId` leaves `exchange_show_qr`.
-    func stopQrFrameTimer() {
-        qrFrameTimer?.invalidate()
-        qrFrameTimer = nil
-    }
-
-    /// Test-only accessor — true while the QR frame timer is active.
-    /// Exposed at `internal` visibility so `@testable` imports can assert
-    /// idempotent start/stop without reaching into the private Timer.
-    var hasActiveQrFrameTimer: Bool {
-        qrFrameTimer != nil
-    }
-
-    // MARK: - Multi-Stage Exchange Polling (Bug 5)
-
-    /// Start a ~5fps timer that drives the multi-stage exchange machine by
-    /// polling core. Each tick runs `advance_multi_stage_session` inside the
-    /// engine and fires `onScreensInvalidated`; the invalidation listener
-    /// refetches the screen so the cycling own-QR + protocol progress
-    /// surface. Idempotent. The view calls this when `screenId` becomes
-    /// `multi_stage_exchange` and stops it on exit. See `multiStagePollTimer`.
-    func startMultiStagePollTimer() {
-        guard multiStagePollTimer == nil else { return }
-        let timer = Timer(timeInterval: 0.2, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            // Side effect is the point — the returned notifications are
-            // drained by the global poll; matches Android's
-            // `tickMultiStageExchange`.
-            _ = try? appEngine.pollNotifications()
-        }
-        RunLoop.main.add(timer, forMode: .common)
-        multiStagePollTimer = timer
-    }
-
-    /// Stop the multi-stage poll timer if running. The view calls this on
-    /// `.onDisappear` / when `screenId` leaves `multi_stage_exchange`.
-    func stopMultiStagePollTimer() {
-        multiStagePollTimer?.invalidate()
-        multiStagePollTimer = nil
-    }
-
-    /// Test-only accessor — true while the multi-stage poll timer is active.
-    var hasActiveMultiStagePollTimer: Bool {
-        multiStagePollTimer != nil
-    }
-
-    // MARK: - Core Cadence Poll (bounded-wait exchange timeout)
-
-    /// Tick the engine on a ~1s app-level cadence so bounded-wait exchanges
-    /// (BLE / NFC / cable discovery) fail at their stall budget instead of
-    /// "Searching…" forever. `pollNotifications` advances the active engine and
-    /// fires `onScreensInvalidated`; the listener refetches, surfacing
-    /// `exchange_failed` once `BLE_STEP_TIMEOUT_SECS` (60s) elapses. The 30s
-    /// notification timer also ticks the engine, but too coarsely to fire the
-    /// deadline on time — this is the iOS counterpart of the Android
-    /// `MainActivity` pump (`CORE_CADENCE_TICK_INTERVAL_MS`). Started in `init`
-    /// and runs on every core screen; the closure self-invalidates on dealloc
-    /// because no view manages its lifecycle (unlike the multi-stage sibling).
-    /// Idempotent.
-    func startCorePollTimer() {
-        guard corePollTimer == nil else { return }
-        let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] timer in
-            guard let self else {
-                timer.invalidate()
-                return
-            }
-            _ = try? appEngine.pollNotifications()
-        }
-        RunLoop.main.add(timer, forMode: .common)
-        corePollTimer = timer
-    }
-
-    func stopCorePollTimer() {
-        corePollTimer?.invalidate()
-        corePollTimer = nil
-    }
-
-    /// Test-only accessor — true while the app-level core pump is active.
-    var hasActiveCorePollTimer: Bool {
-        corePollTimer != nil
-    }
-
-    private func advanceQrFrame() {
+    /// Called when a core-scheduled wakeup fires. Dispatches the returned
+    /// notifications and commands, then reschedules if core emits another
+    /// `ScheduleWakeup` command.
+    func onWakeup() {
         do {
-            guard let frameJson = try appEngine.advanceQrFrameJson() else {
-                qrFrameDecodeFailures = 0
-                return
+            let json = try appEngine.onWakeup()
+            guard let data = json.data(using: .utf8) else { return }
+            let envelope = try coreJSONDecoder.decode(WakeupEnvelope.self, from: data)
+            if !envelope.notifications.isEmpty {
+                NotificationService.shared.displayWakeupNotifications(envelope.notifications)
             }
-            guard let data = frameJson.data(using: .utf8) else {
-                recordQrFrameFailure()
-                return
+            if !envelope.commands.isEmpty {
+                handleExchangeCommands(envelope.commands)
             }
-            let frame = try coreJSONDecoder.decode(ScreenModel.self, from: data)
-            currentScreen = frame
-            qrFrameDecodeFailures = 0
         } catch {
             #if DEBUG
-                print("AppViewModel: failed to advance QR frame: \(error)")
+                print("AppViewModel: onWakeup failed: \(error)")
             #endif
-            recordQrFrameFailure()
-        }
-    }
-
-    /// Record a decode failure and stop the timer once the consecutive-
-    /// failure threshold is crossed. Prevents runaway retries when core's
-    /// ScreenModel format drifts; the frozen QR is itself the visible signal.
-    private func recordQrFrameFailure() {
-        qrFrameDecodeFailures += 1
-        if qrFrameDecodeFailures >= Self.maxConsecutiveQrDecodeFailures {
-            stopQrFrameTimer()
-            qrFrameDecodeFailures = 0
         }
     }
 
@@ -547,6 +399,10 @@ class AppViewModel: ObservableObject {
         case let .navigateTo(screen):
             currentScreen = screen
             validationErrors = [:]
+        case .performNativeBack:
+            // Back-stopping root: no screen to pop. Perform the platform's
+            // native back default (suspend/minimise on iOS).
+            performNativeBack()
         case let .validationError(componentId, message):
             validationErrors[componentId] = message
         case .complete, .wipeComplete:
@@ -686,6 +542,14 @@ class AppViewModel: ObservableObject {
                 startAccelerometerCapture()
             case .accelerometerStop:
                 AccelerometerProximityService.shared.stop()
+            case let .scheduleWakeup(earliestSecs, deadlineSecs, minIntervalSecs):
+                // ADR-044 Am2a: core owns the poll schedule. Arm the platform
+                // wakeup and let it call `onWakeup` when it fires.
+                WakeupService.shared.scheduleWakeup(
+                    earliestSecs: earliestSecs,
+                    deadlineSecs: deadlineSecs,
+                    minIntervalSecs: minIntervalSecs
+                )
             default:
                 // BLE / audio-proximity are handled in `handleBleCommand` /
                 // `handleAudioCommand`. Any remaining command is a no-op on

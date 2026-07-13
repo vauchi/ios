@@ -212,18 +212,18 @@ final class ContractTests: XCTestCase {
         XCTAssertEqual(inner["visible"] as? Bool, true)
     }
 
-    func testUserActionRoundtripGroupViewSelected() throws {
-        let action = UserAction.groupViewSelected(groupName: "Friends")
+    func testUserActionRoundtripVariantSelected() throws {
+        let action = UserAction.variantSelected(variantId: "Friends")
         let data = try coreJSONEncoder.encode(action)
         let json = try XCTUnwrap(
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
         let inner = try XCTUnwrap(
-            json["GroupViewSelected"] as? [String: Any],
-            "Expected 'GroupViewSelected' key"
+            json["VariantSelected"] as? [String: Any],
+            "Expected 'VariantSelected' key"
         )
-        XCTAssertEqual(inner["group_name"] as? String, "Friends")
+        XCTAssertEqual(inner["variant_id"] as? String, "Friends")
     }
 
     func testUserActionRoundtripNavigateToTab() throws {
@@ -247,7 +247,7 @@ final class ContractTests: XCTestCase {
             .itemToggled(componentId: "c", itemId: "i"),
             .actionPressed(actionId: "a"),
             .fieldVisibilityChanged(fieldId: "f", groupId: nil, visible: false),
-            .groupViewSelected(groupName: nil),
+            .variantSelected(variantId: nil),
             .navigateToTab(actionId: "t"),
         ]
 
@@ -256,7 +256,7 @@ final class ContractTests: XCTestCase {
             "ItemToggled",
             "ActionPressed",
             "FieldVisibilityChanged",
-            "GroupViewSelected",
+            "VariantSelected",
             "NavigateToTab",
         ]
 

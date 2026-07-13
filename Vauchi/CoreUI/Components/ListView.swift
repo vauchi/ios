@@ -157,7 +157,7 @@ struct ItemRow: View {
     var body: some View {
         HStack(spacing: 12) {
             // Avatar circle with initials
-            Text(item.avatarInitials)
+            Text(item.initials)
                 .font(.system(size: avatarInitialSize, weight: .semibold))
                 .minimumScaleFactor(0.5)
                 .foregroundColor(.white)

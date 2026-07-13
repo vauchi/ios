@@ -147,6 +147,22 @@ struct ScreenRendererView: View {
         // `lg` rhythm and gutter.
         let isFixed = screen.layout == .fixed
         return VStack(spacing: CGFloat(isFixed ? spacing.sm : spacing.lg)) {
+            // Core-driven nav chrome: render a Back affordance when core
+            // stamps a `go_back` action in `navActions` (ADR-044 Am2a).
+            if let back = screen.navActions.first(where: { $0.id == "go_back" }) {
+                HStack {
+                    Button(action: { onAction(.navigateBack) }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                            Text(back.label)
+                        }
+                    }
+                    .disabled(!back.enabled)
+                    .accessibilityIdentifier("nav.back")
+                    Spacer()
+                }
+            }
+
             // Header
             VStack(spacing: CGFloat(spacing.sm)) {
                 Text(screen.title)

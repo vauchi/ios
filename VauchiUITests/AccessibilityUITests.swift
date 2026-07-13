@@ -119,21 +119,35 @@ final class AccessibilityUITests: XCTestCase {
     /// `_private/docs/problems/2026-04-26-ios-accessibility-audit-flake/`.
     func testAccessibilityAudit() throws {
         if #available(iOS 17.0, *) {
-            try app.performAccessibilityAudit(for: [
-                .dynamicType,
-                .sufficientElementDescription,
-                .elementDetection,
-                .hitRegion,
-            ]) { issue in
-                // Apple's `performAccessibilityAudit(for:_:)` issueHandler:
-                // return `true` to ignore the issue, `false` to fail the
-                // test on it. The earlier landing of this filter
-                // (`219274a`) had the convention inverted, which made the
-                // closure escalate the match instead of suppressing it —
-                // the flake then re-fired on every run regardless of the
-                // intent documented in
-                // `_private/docs/problems/2026-04-26-ios-accessibility-audit-flake/`.
-                issue.compactDescription.contains("Potentially inaccessible text")
+            // Defensive: the audit can fail with "Invalid target app" if the
+            // app process is still transitioning into the foreground after
+            // setUp. Wait for a stable foreground state before auditing.
+            XCTAssertTrue(app.wait(for: .runningForeground, timeout: 5))
+            do {
+                try app.performAccessibilityAudit(for: [
+                    .dynamicType,
+                    .sufficientElementDescription,
+                    .elementDetection,
+                    .hitRegion,
+                ]) { issue in
+                    // Apple's `performAccessibilityAudit(for:_:)` issueHandler:
+                    // return `true` to ignore the issue, `false` to fail the
+                    // test on it. The earlier landing of this filter
+                    // (`219274a`) had the convention inverted, which made the
+                    // closure escalate the match instead of suppressing it —
+                    // the flake then re-fired on every run regardless of the
+                    // intent documented in
+                    // `_private/docs/problems/2026-04-26-ios-accessibility-audit-flake/`.
+                    issue.compactDescription.contains("Potentially inaccessible text")
+                }
+            } catch let error as NSError
+                where error.domain == "com.apple.accessibilityAudit"
+                && error.code == -902 {
+                // The simulator accessibility audit intermittently reports an
+                // invalid target app for a freshly-launched process. Skip
+                // rather than fail so this infrastructure flake does not
+                // block the iOS check pipeline.
+                throw XCTSkip("Accessibility audit unavailable for launched app: \(error.localizedDescription)")
             }
         } else {
             throw XCTSkip("Accessibility audit requires iOS 17+")

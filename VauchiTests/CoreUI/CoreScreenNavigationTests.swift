@@ -159,4 +159,25 @@ final class CoreScreenNavigationTests: XCTestCase {
         XCTAssertEqual(viewModel.currentScreen?.screenId, "my_info",
                        "unknown tab id must not change the current screen")
     }
+
+    /// ADR-044 Am2a: `UserAction::NavigateBack` is forwarded
+    /// unconditionally. On a root screen core returns
+    /// `ActionResult::PerformNativeBack`; the frontend handles it without
+    /// throwing.
+    func testNavigateBackOnRootPerformsNativeBack() {
+        viewModel.navigateToTab(actionId: "my_info")
+        XCTAssertEqual(viewModel.currentScreen?.screenId, "my_info")
+
+        // Should not throw or crash; core decides the outcome.
+        viewModel.navigateBack()
+    }
+
+    /// ADR-044 Am2a: the current screen exposes the tab that owns it via
+    /// `navTabId`. On a canonical tab root the tab id equals the screen id.
+    func testNavTabIdMatchesScreenIdOnTabRoot() throws {
+        viewModel.navigateToTab(actionId: "my_info")
+        let screen = try XCTUnwrap(viewModel.currentScreen)
+        XCTAssertEqual(screen.navTabId, "my_info")
+        XCTAssertEqual(screen.screenId, screen.navTabId)
+    }
 }

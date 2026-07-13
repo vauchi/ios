@@ -35,14 +35,14 @@ struct PreviewView: View {
     }
 
     private var variantSelector: some View {
-        // TODO(HUMBLE): [W, P1] frontend uses `groupViewSelected(groupName:)` and a hardcoded "All" label;
-        // core should emit a generic `variantSelected(actionId:)` with opaque labels
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
+        // ADR-021/043: variant selection is opaque; the shell forwards
+        // `UserAction.variantSelected(variantId:)` and core decides which
+        // variant screen to render.
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 // "All" tab
                 variantTab(name: "All", isSelected: component.selectedVariant == nil) {
-                    onAction(.groupViewSelected(groupName: nil))
+                    onAction(.variantSelected(variantId: nil))
                 }
 
                 ForEach(component.variants) { variant in
@@ -56,7 +56,7 @@ struct PreviewView: View {
                         name: variant.variantId,
                         isSelected: component.selectedVariant == variant.variantId
                     ) {
-                        onAction(.groupViewSelected(groupName: variant.variantId))
+                        onAction(.variantSelected(variantId: variant.variantId))
                     }
                 }
             }
@@ -124,8 +124,8 @@ struct PreviewView: View {
 
     @ViewBuilder
     private var avatarCircle: some View {
-        if let avatarData = component.avatarData,
-           let uiImage = UIImage(data: Data(avatarData)) {
+        if let imageData = component.imageData,
+           let uiImage = UIImage(data: Data(imageData)) {
             Image(uiImage: uiImage)
                 .resizable()
                 .scaledToFill()

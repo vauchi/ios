@@ -123,18 +123,12 @@ struct VauchiApp: App {
     // Screenshot/screen recording prevention (T1-5)
     @Environment(\.scenePhase) private var scenePhase
     @State private var showPrivacyOverlay = false
-    private let timer = Timer.publish(every: 30, on: .main, in: .common).autoconnect()
 
     var body: some Scene {
         WindowGroup {
             ZStack {
                 ContentView()
                     .environmentObject(viewModel)
-                    .onReceive(timer) { _ in
-                        if scenePhase == .active {
-                            viewModel.pollNotifications()
-                        }
-                    }
                     .onAppear {
                         // Schedule background sync if enabled
                         if SettingsService.shared.autoSyncEnabled {
@@ -152,6 +146,13 @@ struct VauchiApp: App {
                             do {
                                 try await viewModel.createIdentity(name: "Test User")
                                 NSLog("[Vauchi] --reset-for-testing: identity created")
+                                // Seed the core engine onto the home tab so the
+                                // custom tab bar renders on the first UI-test
+                                // launch. Without this, core still sits on the
+                                // onboarding screen (no `nav_tab_id`) and the
+                                // tab bar stays hidden (ADR-044 Am2a).
+                                viewModel.coreViewModel?.navigateToTab(actionId: "my_info")
+                                viewModel.loadState()
                             } catch {
                                 NSLog("[Vauchi] --reset-for-testing: failed: %@", "\(error)")
                             }
@@ -245,6 +246,11 @@ struct VauchiApp: App {
                 showPrivacyOverlay = newPhase != .active
                 if newPhase == .background {
                     viewModel.handleAppBackgrounded()
+                    // Foreground DispatchSourceTimers do not survive
+                    // backgrounding; cancel so we don't fire stale wakeups
+                    // when the app resumes. Core will reschedule via
+                    // `Command::ScheduleWakeup` on the next foreground tick.
+                    WakeupService.shared.cancelPendingWakeup()
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIScreen.capturedDidChangeNotification)) { _ in

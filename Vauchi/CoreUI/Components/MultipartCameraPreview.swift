@@ -272,8 +272,12 @@ final class MultipartCameraView: UIView {
     }
 
     private func showCameraFailed(reason: String) {
+        // Keep the user-facing placeholder stable regardless of the underlying
+        // failure so snapshot tests (which run in the simulator with no camera)
+        // get a deterministic baseline. The concrete reason is still logged.
+        NSLog("[Vauchi] [QrCamera] Camera failed: \(reason)")
         let label = UILabel()
-        label.text = "Camera unavailable\n\(reason)"
+        label.text = "Camera unavailable"
         label.textColor = .white
         label.textAlignment = .center
         label.numberOfLines = 0

@@ -422,11 +422,6 @@ class VauchiViewModel: ObservableObject {
         appState = .authenticationRequired
     }
 
-    /// Poll for and display OS notifications (E)
-    func pollNotifications() {
-        NotificationService.shared.pollAndDisplayNotifications(repository: repository)
-    }
-
     // MARK: - Toast
 
     /// Show a toast message with an optional undo handler.
