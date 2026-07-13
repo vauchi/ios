@@ -17,11 +17,9 @@ settings:
 packages:
   VauchiPlatform:
     url: https://gitlab.com/vauchi/vauchi-platform-swift.git
-    branch: "feature/adr044-am2a-models"
-    # ADR-044 Am2a: depends on the vauchi-platform-swift feature branch
-    # that exposes ScreenModel.navActions/navTabId, UserAction.navigateBack,
-    # ActionResult.performNativeBack, and CommandDTO.scheduleWakeup.
-    # Revert to a version pin once that branch is merged and tagged.
+    version: "0.53.0"
+    # The version line must stay immediately below the URL line because
+    # scripts/ci-spm-provision.sh extracts it with sed from the next line.
   SnapshotTesting:
     url: https://github.com/pointfreeco/swift-snapshot-testing.git
     from: "1.17.0"
