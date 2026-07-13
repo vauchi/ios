@@ -36,7 +36,7 @@ struct StatusIndicatorView: View {
             Circle()
                 .fill(statusColor(for: component.status))
                 .frame(width: 12, height: 12)
-                .accessibilityLabel(circleAccessibilityLabel)
+                .accessibilityLabel(component.statusLabel)
         }
         .padding(CGFloat(tokens.spacing.md))
         .background(Color(.systemBackground))
@@ -55,21 +55,5 @@ struct StatusIndicatorView: View {
         case .failed: ThemeService.shared.error
         case .warning: ThemeService.shared.warning
         }
-    }
-
-    private func statusLabel(for status: Status) -> String {
-        // TODO(HUMBLE): [W, P2] fallback until binding pin carries core!1355 statusLabel.
-        // Remove once vauchi-platform-swift!82 is pinned.
-        switch status {
-        case .pending: "Pending"
-        case .inProgress: "In progress"
-        case .success: "Success"
-        case .failed: "Failed"
-        case .warning: "Warning"
-        }
-    }
-
-    private var circleAccessibilityLabel: String {
-        component.statusLabel.isEmpty ? statusLabel(for: component.status) : component.statusLabel
     }
 }
