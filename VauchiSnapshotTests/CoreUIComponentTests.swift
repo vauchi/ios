@@ -620,20 +620,20 @@ final class CoreUIComponentTests: XCTestCase {
         hostingController.loadViewIfNeeded()
 
         // Accessibility elements are only materialized once the view is in a
-        // window. Use a transient window so the test is independent of the
-        // current app state and works under xcodebuild without a visible UI.
-        let window = UIWindow(frame: UIScreen.main.bounds)
+        // window. Match the proven unit-test hosting pattern: fixed canvas,
+        // retained window, run-loop pump.
+        let window = UIWindow(frame: Self.canvas)
         window.rootViewController = hostingController
         window.makeKeyAndVisible()
-        hostingController.view.setNeedsLayout()
+        hostingController.view.frame = Self.canvas
         hostingController.view.layoutIfNeeded()
+        self.window = window
+        pump(seconds: 0.2)
 
         XCTAssertTrue(
             accessibilityLabelContains("Synchronisiert", in: hostingController.view),
             "Expected accessibility hierarchy to contain label 'Synchronisiert'"
         )
-
-        window.resignKey()
     }
 
     private func accessibilityLabelContains(_ substring: String, in element: NSObject) -> Bool {
@@ -651,4 +651,11 @@ final class CoreUIComponentTests: XCTestCase {
         }
         return false
     }
+
+    private func pump(seconds: TimeInterval) {
+        RunLoop.current.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    private static let canvas = CGRect(x: 0, y: 0, width: 390, height: 844)
+    private var window: UIWindow?
 }
