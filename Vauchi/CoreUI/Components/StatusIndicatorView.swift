@@ -36,7 +36,7 @@ struct StatusIndicatorView: View {
             Circle()
                 .fill(statusColor(for: component.status))
                 .frame(width: 12, height: 12)
-                .accessibilityLabel(component.statusLabel.isEmpty ? statusLabel(for: component.status) : component.statusLabel)
+                .accessibilityLabel(circleAccessibilityLabel)
         }
         .padding(CGFloat(tokens.spacing.md))
         .background(Color(.systemBackground))
@@ -67,5 +67,9 @@ struct StatusIndicatorView: View {
         case .failed: "Failed"
         case .warning: "Warning"
         }
+    }
+
+    private var circleAccessibilityLabel: String {
+        component.statusLabel.isEmpty ? statusLabel(for: component.status) : component.statusLabel
     }
 }
