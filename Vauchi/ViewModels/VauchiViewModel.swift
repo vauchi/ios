@@ -71,8 +71,8 @@ class VauchiViewModel: ObservableObject {
         showAlert = true
     }
 
-    // Informational shell toast state. Actionable core toasts are hosted by
-    // CoreUI.AppViewModel and carry their own label/id contract.
+    /// Informational shell toast state. Actionable core toasts are hosted by
+    /// CoreUI.AppViewModel and carry their own label/id contract.
     @Published var toastMessage: String?
 
     // MARK: - Core-Driven UI
