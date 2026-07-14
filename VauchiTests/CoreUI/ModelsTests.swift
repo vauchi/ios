@@ -593,8 +593,8 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(inner["visible"] as? Bool, false)
     }
 
-    func testUserActionGroupViewSelectedEncoding() throws {
-        let action = UserAction.groupViewSelected(groupName: "Family")
+    func testUserActionVariantSelectedEncoding() throws {
+        let action = UserAction.variantSelected(variantId: "Family")
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
@@ -602,14 +602,14 @@ final class ModelsTests: XCTestCase {
         )
 
         let inner = try XCTUnwrap(
-            jsonObject["GroupViewSelected"] as? [String: Any],
-            "Expected 'GroupViewSelected' key at top level"
+            jsonObject["VariantSelected"] as? [String: Any],
+            "Expected 'VariantSelected' key at top level"
         )
-        XCTAssertEqual(inner["group_name"] as? String, "Family")
+        XCTAssertEqual(inner["variant_id"] as? String, "Family")
     }
 
-    func testUserActionGroupViewSelectedNilEncoding() throws {
-        let action = UserAction.groupViewSelected(groupName: nil)
+    func testUserActionVariantSelectedNilEncoding() throws {
+        let action = UserAction.variantSelected(variantId: nil)
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
@@ -617,10 +617,10 @@ final class ModelsTests: XCTestCase {
         )
 
         let inner = try XCTUnwrap(
-            jsonObject["GroupViewSelected"] as? [String: Any],
-            "Expected 'GroupViewSelected' key at top level"
+            jsonObject["VariantSelected"] as? [String: Any],
+            "Expected 'VariantSelected' key at top level"
         )
-        XCTAssertNil(inner["group_name"])
+        XCTAssertNil(inner["variant_id"])
     }
 
     // MARK: - Unknown Variant Handling
@@ -762,7 +762,7 @@ final class ModelsTests: XCTestCase {
             "id": "c1",
             "name": "Alice",
             "subtitle": "alice@example.org",
-            "avatar_initials": "A",
+            "initials": "A",
             "status": null,
             "searchable_fields": ["alice@example.org", "+41 79 123 45 67"],
             "actions": [
@@ -774,7 +774,7 @@ final class ModelsTests: XCTestCase {
         let item = try coreJSONDecoder.decode(Item.self, from: json)
         XCTAssertEqual(item.id, "c1")
         XCTAssertEqual(item.name, "Alice")
-        XCTAssertEqual(item.avatarInitials, "A")
+        XCTAssertEqual(item.initials, "A")
         XCTAssertEqual(item.actions.count, 2)
         XCTAssertEqual(item.actions[0].id, "archive")
         XCTAssertEqual(item.actions[0].kind, .archive)
@@ -787,7 +787,7 @@ final class ModelsTests: XCTestCase {
         // Fixtures written before core!637 omit `actions`. Decoding must
         // still succeed — the Item init provides [] defaults.
         let json = Data("""
-        {"id": "c1", "name": "Bob", "avatar_initials": "B"}
+        {"id": "c1", "name": "Bob", "initials": "B"}
         """.utf8)
         let item = try coreJSONDecoder.decode(Item.self, from: json)
         XCTAssertEqual(item.id, "c1")
