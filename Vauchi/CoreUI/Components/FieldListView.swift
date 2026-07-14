@@ -126,8 +126,8 @@ struct FieldListRow: View {
         // core should supply generic chips with explicit action_ids and labels
         // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         let visibleGroups: [String] = {
-            if case let .groups(groups) = field.visibility {
-                return groups
+            if case let .scopes(scopes) = field.visibility {
+                return scopes
             }
             return []
         }()

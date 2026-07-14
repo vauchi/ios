@@ -331,32 +331,32 @@ final class ModelsTests: XCTestCase {
         }
     }
 
-    func testUiFieldVisibilityGroups() throws {
+    func testUiFieldVisibilityScopes() throws {
         let json = Data("""
-        {"Groups": ["Family", "Friends"]}
+        {"Scopes": ["Family", "Friends"]}
         """.utf8)
 
         let visibility = try coreJSONDecoder.decode(UiFieldVisibility.self, from: json)
 
-        guard case let .groups(groups) = visibility else {
-            XCTFail("Expected .groups variant, got \(visibility)")
+        guard case let .scopes(scopes) = visibility else {
+            XCTFail("Expected .scopes variant, got \(visibility)")
             return
         }
-        XCTAssertEqual(groups, ["Family", "Friends"])
+        XCTAssertEqual(scopes, ["Family", "Friends"])
     }
 
-    func testUiFieldVisibilityGroupsSingleGroup() throws {
+    func testUiFieldVisibilityScopesSingleScope() throws {
         let json = Data("""
-        {"Groups": ["Family"]}
+        {"Scopes": ["Family"]}
         """.utf8)
 
         let visibility = try coreJSONDecoder.decode(UiFieldVisibility.self, from: json)
 
-        guard case let .groups(groups) = visibility else {
-            XCTFail("Expected .groups variant, got \(visibility)")
+        guard case let .scopes(scopes) = visibility else {
+            XCTFail("Expected .scopes variant, got \(visibility)")
             return
         }
-        XCTAssertEqual(groups, ["Family"])
+        XCTAssertEqual(scopes, ["Family"])
     }
 
     // MARK: - ActionResult
