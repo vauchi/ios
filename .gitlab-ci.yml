@@ -151,7 +151,9 @@ workflow:
 #    (shutdown+boot alone does NOT erase disk state — installed apps survive
 #    reboots and cause "Application failed preflight checks" on next launch.)
 .simulator-job:
-  resource_group: ios-simulator
+  # Rotate the key when a canceled simulator job poisons the GitLab lock.
+  # `ios-simulator` was left occupied by canceled recorder job 15337154709.
+  resource_group: ios-simulator-v2
   before_script:
     - !reference [.macos-job, before_script]
     - xcrun simctl shutdown all 2>/dev/null || true
