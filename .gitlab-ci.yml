@@ -1188,7 +1188,11 @@ test:snapshots:record:
     # the same repo via CI_JOB_TOKEN (user's own email is verified).
     - git config user.name "${GITLAB_USER_NAME}"
     - git config user.email "${GITLAB_USER_EMAIL}"
-    - git fetch origin "+refs/heads/${CI_COMMIT_REF_NAME}:refs/heads/${CI_COMMIT_REF_NAME}"
+    # The runner checkout is shallow; keep this branch switch shallow too.
+    # An unrestricted fetch downloads the full image-heavy repository history.
+    - >-
+      git fetch --depth=1 --no-tags origin
+      "+refs/heads/${CI_COMMIT_REF_NAME}:refs/heads/${CI_COMMIT_REF_NAME}"
     - git checkout "${CI_COMMIT_REF_NAME}"
     # Restore recorded snapshots (git checkout resets working directory)
     - cp -r /tmp/__Snapshots__-${CI_JOB_ID}/ VauchiSnapshotTests/__Snapshots__/
