@@ -1,20 +1,44 @@
 {
   "schema_version": 4,
-  "screen_id": "delivery_status",
-  "title": "Delivery Status",
+  "screen_id": "support",
+  "title": "Support Vauchi",
   "subtitle": null,
   "components": [
     {
       "InfoPanel": {
-        "id": "empty",
-        "icon": "checkmark",
-        "title": "All Delivered",
-        "items": [],
+        "id": "support_info",
+        "icon": "heart",
+        "title": "Support the Project",
+        "items": [
+          {
+            "icon": "github",
+            "title": "GitHub Sponsors",
+            "detail": "https://github.com/sponsors/vauchi"
+          },
+          {
+            "icon": "liberapay",
+            "title": "Liberapay",
+            "detail": "https://liberapay.com/vauchi"
+          }
+        ],
         "a11y": null
       }
     }
   ],
-  "actions": [],
+  "actions": [
+    {
+      "id": "open_github_sponsors",
+      "label": "GitHub Sponsors",
+      "style": "Primary",
+      "enabled": true
+    },
+    {
+      "id": "open_liberapay",
+      "label": "Liberapay",
+      "style": "Secondary",
+      "enabled": true
+    }
+  ],
   "progress": null,
   "tokens": {
     "spacing": {

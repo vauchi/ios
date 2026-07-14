@@ -53,7 +53,7 @@ struct QrCodeView: View {
         .background(Color(.systemBackground))
         .cornerRadius(CGFloat(tokens.borderRadius.mdLg))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-        .accessibilityLabel(component.a11y?.label ?? component.label ?? "QR code")
+        .accessibilityLabel(component.a11y?.label ?? component.label ?? "")
         .accessibilityHint(component.a11y?.hint ?? "")
     }
 
@@ -84,15 +84,11 @@ struct QrCodeView: View {
                 // a nil height proposal it collapses to the fitted image, so
                 // the scroll fix above is unaffected.
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                // TODO(HUMBLE): [W, P2] hardcoded English a11y label names domain concept (`QR code`)
-                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-                .accessibilityLabel("QR code")
+                .accessibilityLabel(component.a11y?.label ?? component.label ?? "")
         } else {
-            // TODO(HUMBLE): [W, P2] hardcoded English error copy
-            // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-            Text("Failed to generate QR code")
-                .font(.caption)
+            Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.secondary)
+                .accessibilityLabel(component.a11y?.label ?? component.label ?? "")
         }
     }
 
@@ -206,9 +202,7 @@ private struct QrScannerStaticView: View {
             RoundedRectangle(cornerRadius: CGFloat(tokens.borderRadius.md))
                 .stroke(Color.cyan.opacity(0.5), lineWidth: 2)
         )
-        // TODO(HUMBLE): [W, P2] hardcoded English a11y label/hint name domain concept (`QR code`)
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        .accessibilityLabel(component.a11y?.label ?? "QR code scanner")
-        .accessibilityHint(component.a11y?.hint ?? "Point the camera at a Vauchi QR code to scan it")
+        .accessibilityLabel(component.a11y?.label ?? component.label ?? "")
+        .accessibilityHint(component.a11y?.hint ?? "")
     }
 }

@@ -10,27 +10,33 @@ struct EditableTextView: View {
     let component: EditableTextComponent
     let onAction: (UserAction) -> Void
 
-    // Display<->edit is presentation state the frontend owns (matches the
-    // web-demo renderer); core is never asked to flip `editing` and receives
-    // only the resulting TextChanged. `draft` holds the in-progress text —
-    // the previous `.constant(component.value)` binding was read-only, so
-    // keystrokes were silently discarded.
-    @State private var isEditing = false
-    @State private var draft = ""
-
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(component.label)
                 .font(.caption)
                 .foregroundColor(.secondary)
 
-            if isEditing || component.editing {
-                TextField(component.label, text: $draft)
-                    .textFieldStyle(.roundedBorder)
-                    .onChange(of: draft) { newValue in
-                        onAction(.textChanged(componentId: component.id, value: newValue))
+            if component.editing {
+                TextField(
+                    component.label,
+                    text: Binding(
+                        get: { component.value },
+                        set: { onAction(.textChanged(componentId: component.id, value: $0)) }
+                    )
+                )
+                .textFieldStyle(.roundedBorder)
+
+                HStack {
+                    Button(component.cancelText) {
+                        onAction(.actionPressed(actionId: component.cancelActionId))
                     }
-                    .onAppear { draft = component.value }
+                    .buttonStyle(.bordered)
+
+                    Button(component.saveText) {
+                        onAction(.actionPressed(actionId: component.saveActionId))
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
 
                 if let error = component.validationError {
                     Text(error)
@@ -45,15 +51,13 @@ struct EditableTextView: View {
                     Spacer()
 
                     Button {
-                        isEditing = true
+                        onAction(.actionPressed(actionId: component.editActionId))
                     } label: {
                         Image(systemName: "pencil")
                             .foregroundColor(.accentColor)
                     }
                     .buttonStyle(.plain)
-                    // TODO(HUMBLE): [W, P2] hardcoded English a11y label embeds an edit action role
-                    // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-                    .accessibilityLabel("Edit \(component.label)")
+                    .accessibilityLabel(component.editText)
                 }
             }
         }

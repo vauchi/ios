@@ -1,21 +1,49 @@
 {
   "schema_version": 4,
-  "screen_id": "delivery_status",
-  "title": "Delivery Status",
-  "subtitle": null,
-  "components": [
+  "screen_id": "what_next",
+  "title": "What would you like to do?",
+  "subtitle": "This is what contacts will see",
+  "components": [],
+  "actions": [
     {
-      "InfoPanel": {
-        "id": "empty",
-        "icon": "checkmark",
-        "title": "All Delivered",
-        "items": [],
-        "a11y": null
+      "id": "start_app",
+      "label": "Start using the app",
+      "style": "Primary",
+      "enabled": true,
+      "a11y": {
+        "label": "Start using the app",
+        "hint": null,
+        "role": null
+      }
+    },
+    {
+      "id": "exchange",
+      "label": "Exchange cards",
+      "style": "Secondary",
+      "enabled": true,
+      "a11y": {
+        "label": "Exchange cards",
+        "hint": null,
+        "role": null
+      }
+    },
+    {
+      "id": "import_contacts",
+      "label": "Import existing contacts",
+      "style": "Secondary",
+      "enabled": true,
+      "a11y": {
+        "label": "Import existing contacts",
+        "hint": null,
+        "role": null
       }
     }
   ],
-  "actions": [],
-  "progress": null,
+  "progress": {
+    "current_step": 4,
+    "total_steps": 4,
+    "label": null
+  },
   "tokens": {
     "spacing": {
       "xs": 4,

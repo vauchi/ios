@@ -71,10 +71,9 @@ class VauchiViewModel: ObservableObject {
         showAlert = true
     }
 
-    // Toast state (for undo-able actions like archive/delete)
+    // Informational shell toast state. Actionable core toasts are hosted by
+    // CoreUI.AppViewModel and carry their own label/id contract.
     @Published var toastMessage: String?
-    @Published var toastUndoActionId: String?
-    private var toastUndoHandler: (() async throws -> Void)?
 
     // MARK: - Core-Driven UI
 
@@ -424,12 +423,10 @@ class VauchiViewModel: ObservableObject {
 
     // MARK: - Toast
 
-    /// Show a toast message with an optional undo handler.
-    func showToast(_ message: String, undoHandler: (() async throws -> Void)? = nil) {
+    /// Show a non-actionable shell toast message.
+    func showToast(_ message: String) {
         withAnimation {
             toastMessage = message
-            toastUndoActionId = undoHandler != nil ? UUID().uuidString : nil
-            toastUndoHandler = undoHandler
         }
         let currentMessage = message
         DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) { [weak self] in
@@ -438,26 +435,10 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
-    /// Handle undo action from toast.
-    func handleUndo() {
-        guard let handler = toastUndoHandler else { return }
-        let undoHandler = handler
-        dismissToast()
-        Task {
-            do {
-                try await undoHandler()
-            } catch {
-                showError("Undo Failed", message: error.localizedDescription)
-            }
-        }
-    }
-
     /// Dismiss the current toast.
     func dismissToast() {
         withAnimation {
             toastMessage = nil
-            toastUndoActionId = nil
-            toastUndoHandler = nil
         }
     }
 

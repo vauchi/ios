@@ -1,39 +1,60 @@
 {
   "schema_version": 4,
-  "screen_id": "backup_choose",
-  "title": "Backup & Recovery",
+  "screen_id": "recovery_help",
+  "title": "Help Others",
   "subtitle": null,
   "components": [
     {
       "InfoPanel": {
-        "id": "backup_info",
-        "icon": "drive",
-        "title": "Protect your data",
+        "id": "help_intro",
+        "icon": "lifebuoy",
+        "title": "Help a Contact Recover",
         "items": [
           {
             "icon": null,
-            "title": "Backup",
-            "detail": "Create an encrypted backup of your identity, contacts, and labels."
+            "title": "",
+            "detail": "If a contact lost their device, you can vouch for their identity to help them recover."
           }
         ],
         "a11y": null
       }
     },
     {
-      "ToggleList": {
-        "id": "backup_level",
-        "label": "Backup level",
+      "StatusIndicator": {
+        "id": "verify_warning",
+        "icon": "warning",
+        "title": "Verify in person",
+        "detail": "Only vouch for someone you can verify IN PERSON. This prevents identity theft.",
+        "status": "Warning",
+        "status_label": "Warning",
+        "a11y": null
+      }
+    },
+    {
+      "InfoPanel": {
+        "id": "help_steps",
+        "icon": null,
+        "title": "How to Vouch",
         "items": [
           {
-            "id": "level_toggle",
-            "label": "Full backup (recommended)",
-            "selected": true,
-            "subtitle": null,
-            "a11y": {
-              "label": "Backup level toggle",
-              "hint": "When on, backs up everything. When off, backs up identity only.",
-              "role": "Toggle"
-            }
+            "icon": null,
+            "title": "1. Verify Identity",
+            "detail": "Meet your contact in person. Verify they are who they claim to be."
+          },
+          {
+            "icon": null,
+            "title": "2. Get Their Claim",
+            "detail": "They share their recovery claim data with you."
+          },
+          {
+            "icon": null,
+            "title": "3. Create Voucher",
+            "detail": "Sign a voucher confirming their identity."
+          },
+          {
+            "icon": null,
+            "title": "4. Share Voucher",
+            "detail": "Give them the voucher data to add to their recovery proof."
           }
         ],
         "a11y": null
@@ -42,23 +63,12 @@
   ],
   "actions": [
     {
-      "id": "create",
-      "label": "Create Backup",
+      "id": "vouch",
+      "label": "Vouch for Someone",
       "style": "Primary",
       "enabled": true,
       "a11y": {
-        "label": "Create Backup",
-        "hint": null,
-        "role": null
-      }
-    },
-    {
-      "id": "restore",
-      "label": "Restore Backup",
-      "style": "Secondary",
-      "enabled": true,
-      "a11y": {
-        "label": "Restore Backup",
+        "label": "Vouch for Someone",
         "hint": null,
         "role": null
       }

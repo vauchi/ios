@@ -5,22 +5,25 @@
 import CoreUIModels
 import SwiftUI
 
-/// Renders a core `Component::ImageCircle` as a circular avatar with optional edit overlay.
-struct AvatarPreviewView: View {
+/// Renders core's domain-agnostic `Component::ImageCircle`.
+struct ImageCircleView: View {
     let component: ImageCircleComponent
     let onAction: (UserAction) -> Void
 
-    /// Scales the initials text with the user's Dynamic Type setting. Tied
-    /// to `.largeTitle` so it tracks the accessibility audit's expectations
-    /// for a title-sized element.
+    /// Scales the initials text with the user's Dynamic Type setting.
     @ScaledMetric(relativeTo: .largeTitle) private var initialsFontSize: CGFloat = 40
+
+    private var editActionId: String? {
+        guard component.editable else { return nil }
+        return component.editActionId
+    }
 
     var body: some View {
         ZStack {
-            avatarContent
+            imageContent
                 .brightness(Double(component.brightness))
 
-            if component.editable {
+            if editActionId != nil {
                 editOverlay
             }
         }
@@ -28,20 +31,18 @@ struct AvatarPreviewView: View {
         .clipShape(Circle())
         .contentShape(Circle())
         .onTapGesture {
-            if component.editable, let editActionId = component.editActionId {
+            if let editActionId {
                 onAction(.actionPressed(actionId: editActionId))
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(component.a11y?.label ?? "Avatar: \(component.initials)")
-        // TODO(HUMBLE): [W, P2] hardcoded English a11y hint names domain concept (`avatar`)
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        .accessibilityHint(component.a11y?.hint ?? (component.editable ? "Tap to edit avatar" : ""))
-        .accessibilityAddTraits(component.editable ? [.isButton] : [])
+        .accessibilityLabel(component.a11y?.label ?? component.initials)
+        .accessibilityHint(component.a11y?.hint ?? "")
+        .accessibilityAddTraits(editActionId == nil ? [] : [.isButton])
     }
 
     @ViewBuilder
-    private var avatarContent: some View {
+    private var imageContent: some View {
         if let imageData = component.imageData,
            let uiImage = UIImage(data: Data(imageData)) {
             Image(uiImage: uiImage)

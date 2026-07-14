@@ -1,20 +1,58 @@
 {
   "schema_version": 4,
-  "screen_id": "delivery_status",
-  "title": "Delivery Status",
-  "subtitle": null,
+  "screen_id": "device_link_instructions",
+  "title": "Link this device",
+  "subtitle": "Use your other signed-in device to invite this one.",
   "components": [
     {
       "InfoPanel": {
-        "id": "empty",
-        "icon": "checkmark",
-        "title": "All Delivered",
-        "items": [],
-        "a11y": null
+        "id": "device_link_instructions_info",
+        "icon": "devices",
+        "title": "",
+        "items": [
+          {
+            "icon": "qr",
+            "title": "Scan the QR code",
+            "detail": "On your other signed-in device, go to Settings → Linked Devices and tap “Link a device”. Then scan the code with this camera."
+          },
+          {
+            "icon": "link",
+            "title": "Or open the invitation link",
+            "detail": "Tap the link your other device sent you and Vauchi will continue here."
+          }
+        ],
+        "a11y": {
+          "label": "Link this device",
+          "hint": null,
+          "role": "Heading"
+        }
       }
     }
   ],
-  "actions": [],
+  "actions": [
+    {
+      "id": "scan_qr",
+      "label": "Scan QR Code",
+      "style": "Primary",
+      "enabled": true,
+      "a11y": {
+        "label": "Scan QR Code",
+        "hint": null,
+        "role": null
+      }
+    },
+    {
+      "id": "back",
+      "label": "Back",
+      "style": "Secondary",
+      "enabled": true,
+      "a11y": {
+        "label": "Back",
+        "hint": null,
+        "role": null
+      }
+    }
+  ],
   "progress": null,
   "tokens": {
     "spacing": {

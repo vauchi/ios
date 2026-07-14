@@ -12,23 +12,21 @@ struct FieldListView: View {
     @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        let fields = component.fields
         VStack(alignment: .leading, spacing: CGFloat(tokens.spacing.smMd)) {
-            if fields.isEmpty {
+            if component.fields.isEmpty {
                 emptyState
             } else {
-                ForEach(fields) { field in
+                ForEach(component.fields) { field in
                     FieldListRow(
                         field: field,
                         visibilityMode: component.visibilityMode,
+                        availableGroups: component.availableScopes,
                         onAction: onAction
                     )
                 }
             }
         }
-        // TODO(HUMBLE): [W, P2] default a11y label names a domain concept (`Contact fields`)
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        .accessibilityLabel(component.a11y?.label ?? "Contact fields")
+        .accessibilityLabel(component.a11y?.label ?? component.title)
         .accessibilityHint(component.a11y?.hint ?? "")
     }
 
@@ -58,27 +56,34 @@ struct FieldListView: View {
 struct FieldListRow: View {
     let field: Field
     let visibilityMode: VisibilityMode
+    let availableGroups: [String]
     let onAction: (UserAction) -> Void
     @Environment(\.designTokens) private var tokens
 
     var body: some View {
-        HStack {
-            Image(systemName: sfSymbolForCoreIcon(field.icon))
-                .foregroundColor(.cyan)
-                .frame(width: 24)
-                .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: sfSymbolForCoreIcon(field.icon))
+                    .foregroundColor(.cyan)
+                    .frame(width: 24)
+                    .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(field.label)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Text(field.value)
-                    .font(.body)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(field.label)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(field.value)
+                        .font(.body)
+                }
+
+                Spacer()
+
+                visibilityControl
             }
 
-            Spacer()
-
-            visibilityControl
+            if case .perGroup = visibilityMode, !availableGroups.isEmpty {
+                groupChips
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -113,6 +118,42 @@ struct FieldListRow: View {
             }
             .accessibilityLabel(isShown ? "Visible" : "Hidden")
             .accessibilityHint("Toggle field visibility")
+        }
+    }
+
+    private var groupChips: some View {
+        // TODO(HUMBLE): [D/T, P1] frontend maps per-group visibility state and group names to UI;
+        // core should supply generic chips with explicit action_ids and labels
+        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
+        let visibleGroups: [String] = {
+            if case let .groups(groups) = field.visibility {
+                return groups
+            }
+            return []
+        }()
+
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(availableGroups, id: \.self) { group in
+                    let isVisible = visibleGroups.contains(group)
+                    Button {
+                        onAction(.fieldVisibilityChanged(
+                            fieldId: field.id,
+                            groupId: group,
+                            visible: !isVisible
+                        ))
+                    } label: {
+                        Text(group)
+                            .font(.caption)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(isVisible ? Color.cyan.opacity(0.2) : Color(.systemGray5))
+                            .foregroundColor(isVisible ? .cyan : .secondary)
+                            .cornerRadius(8)
+                    }
+                    .accessibilityLabel("\(group): \(isVisible ? "visible" : "hidden")")
+                }
+            }
         }
     }
 }

@@ -434,6 +434,8 @@ final class CoreUIComponentTests: XCTestCase {
             warning: "Are you sure you want to delete this contact?",
             confirmText: "Delete",
             cancelText: "Cancel",
+            confirmActionId: "opaque.confirm.delete",
+            cancelActionId: "opaque.cancel.delete",
             destructive: true
         )
         let view = InlineConfirmView(component: component, onAction: noOp)
@@ -446,6 +448,8 @@ final class CoreUIComponentTests: XCTestCase {
             warning: "Merge these two contacts?",
             confirmText: "Merge",
             cancelText: "Keep Separate",
+            confirmActionId: "opaque.confirm.merge",
+            cancelActionId: "opaque.cancel.merge",
             destructive: false
         )
         let view = InlineConfirmView(component: component, onAction: noOp)
@@ -459,6 +463,12 @@ final class CoreUIComponentTests: XCTestCase {
             id: "display-name",
             label: "Display Name",
             value: "Alice",
+            editText: "Edit display name",
+            saveText: "Save",
+            cancelText: "Cancel",
+            editActionId: "opaque.edit.name",
+            saveActionId: "opaque.save.name",
+            cancelActionId: "opaque.cancel.name",
             editing: false,
             validationError: nil
         )
@@ -471,6 +481,12 @@ final class CoreUIComponentTests: XCTestCase {
             id: "display-name",
             label: "Display Name",
             value: "Alice",
+            editText: "Edit display name",
+            saveText: "Save",
+            cancelText: "Cancel",
+            editActionId: "opaque.edit.name",
+            saveActionId: "opaque.save.name",
+            cancelActionId: "opaque.cancel.name",
             editing: true,
             validationError: nil
         )
@@ -483,6 +499,12 @@ final class CoreUIComponentTests: XCTestCase {
             id: "display-name",
             label: "Display Name",
             value: "",
+            editText: "Edit display name",
+            saveText: "Save",
+            cancelText: "Cancel",
+            editActionId: "opaque.edit.name",
+            saveActionId: "opaque.save.name",
+            cancelActionId: "opaque.cancel.name",
             editing: true,
             validationError: "Name cannot be empty"
         )
@@ -588,6 +610,8 @@ final class CoreUIComponentTests: XCTestCase {
             warning: "Are you sure you want to delete this contact?",
             confirmText: "Delete",
             cancelText: "Cancel",
+            confirmActionId: "opaque.confirm.delete",
+            cancelActionId: "opaque.cancel.delete",
             destructive: true
         )
         assertDarkSnapshot(of: InlineConfirmView(component: component, onAction: noOp), height: 150)
@@ -598,6 +622,12 @@ final class CoreUIComponentTests: XCTestCase {
             id: "display-name",
             label: "Display Name",
             value: "Alice",
+            editText: "Edit display name",
+            saveText: "Save",
+            cancelText: "Cancel",
+            editActionId: "opaque.edit.name",
+            saveActionId: "opaque.save.name",
+            cancelActionId: "opaque.cancel.name",
             editing: false,
             validationError: nil
         )

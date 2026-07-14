@@ -137,19 +137,19 @@ private struct CoreScreenContent: View {
             )
         }
         .overlay(alignment: .top) {
-            // `ActionResult.ShowToast` host: the renderer's own overlay only
-            // serves `Component.ShowToast`, so each screen tree needs its own.
-            // Onboarding got one in `2026-06-11-ios-onboarding-alert-host-missing`;
-            // the main tree was the remaining gap.
+            // `ActionResult.ShowToast` host. Toast is a result, never a
+            // ScreenModel component; every screen tree presents it here.
             if let message = coreVM.toastMessage {
                 ToastOverlayView(
                     message: message,
                     undoActionId: coreVM.toastUndoActionId,
+                    undoLabel: coreVM.toastUndoLabel,
                     onAction: { coreVM.handleAction($0) },
                     onDismiss: {
                         withAnimation {
                             coreVM.toastMessage = nil
                             coreVM.toastUndoActionId = nil
+                            coreVM.toastUndoLabel = nil
                         }
                     }
                 )
@@ -178,6 +178,7 @@ private struct CoreScreenContent: View {
                 ToastOverlayView(
                     message: moment.message,
                     undoActionId: nil,
+                    undoLabel: nil,
                     onAction: { _ in },
                     onDismiss: {
                         withAnimation {

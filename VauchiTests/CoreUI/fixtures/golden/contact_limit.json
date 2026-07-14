@@ -1,20 +1,44 @@
 {
   "schema_version": 4,
-  "screen_id": "delivery_status",
-  "title": "Delivery Status",
+  "screen_id": "contact_limit",
+  "title": "Contact Limit",
   "subtitle": null,
   "components": [
     {
-      "InfoPanel": {
-        "id": "empty",
-        "icon": "checkmark",
-        "title": "All Delivered",
-        "items": [],
+      "Text": {
+        "id": "info",
+        "content": "Set a maximum number of contacts to manage storage.",
+        "style": "Body"
+      }
+    },
+    {
+      "Text": {
+        "id": "usage",
+        "content": "150 / 150 contacts (100%)",
+        "style": "Subtitle"
+      }
+    },
+    {
+      "TextInput": {
+        "id": "limit_input",
+        "label": "Max Contacts",
+        "value": "150",
+        "placeholder": "Enter limit",
+        "max_length": 6,
+        "validation_error": null,
+        "input_type": "Text",
         "a11y": null
       }
     }
   ],
-  "actions": [],
+  "actions": [
+    {
+      "id": "edit",
+      "label": "Edit Limit",
+      "style": "Primary",
+      "enabled": true
+    }
+  ],
   "progress": null,
   "tokens": {
     "spacing": {

@@ -4,9 +4,8 @@
 
 // Reachability guard: the main core-driven screen tree
 // (`CoreScreenView` → `CoreScreenContent`) must host
-// `ActionResult.ShowToast`. The renderer's own overlay only serves
-// `Component.ShowToast`; each screen tree needs its own
-// `ActionResult.ShowToast` host. The onboarding tree got one in
+// `ActionResult.ShowToast`. Toast is not a ScreenModel component, so each
+// screen tree needs its own result host. The onboarding tree got one in
 // `2026-06-11-ios-onboarding-alert-host-missing`, but the main tree did
 // not — a core-emitted toast (archive contact, device management, …) set
 // `coreVM.toastMessage` with nothing observing it, and was silently dropped

@@ -1,16 +1,28 @@
 {
   "schema_version": 4,
-  "screen_id": "delivery_status",
-  "title": "Delivery Status",
+  "screen_id": "archived_contacts",
+  "title": "Archived Contacts",
   "subtitle": null,
   "components": [
     {
-      "InfoPanel": {
-        "id": "empty",
-        "icon": "checkmark",
-        "title": "All Delivered",
-        "items": [],
-        "a11y": null
+      "ActionList": {
+        "id": "archived_contacts",
+        "items": [
+          {
+            "id": "unarchive_c1",
+            "label": "Alice",
+            "icon": null,
+            "detail": "Tap to unarchive",
+            "a11y": null
+          },
+          {
+            "id": "unarchive_c2",
+            "label": "Bob",
+            "icon": null,
+            "detail": "Tap to unarchive",
+            "a11y": null
+          }
+        ]
       }
     }
   ],

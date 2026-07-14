@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "screen_id": "link_show_qr",
   "title": "Link Device",
   "subtitle": null,
@@ -16,13 +16,6 @@
           "role": "Image"
         }
       }
-    },
-    {
-      "Text": {
-        "id": "join_hint",
-        "content": "To join from another device, use: vauchi device join <qr_data>",
-        "style": "Caption"
-      }
     }
   ],
   "actions": [
@@ -30,7 +23,12 @@
       "id": "cancel",
       "label": "Cancel",
       "style": "Secondary",
-      "enabled": true
+      "enabled": true,
+      "a11y": {
+        "label": "Cancel",
+        "hint": null,
+        "role": null
+      }
     }
   ],
   "progress": {
@@ -59,13 +57,26 @@
       "title_size": 24,
       "subtitle_size": 18,
       "body_size": 16,
-      "caption_size": 14
+      "caption_size": 14,
+      "caption_sm": 12,
+      "title_lg": 20,
+      "display": 32,
+      "medium_size": 20,
+      "title_line": 30,
+      "subtitle_line": 24,
+      "medium_line": 28,
+      "body_line": 24,
+      "caption_line": 20,
+      "text_scale_percent": 100
     },
     "border_radius": {
       "sm": 4,
       "md": 8,
       "md_lg": 12,
-      "lg": 16
+      "lg": 16,
+      "chip": 12,
+      "card": 20,
+      "sheet": 28
     },
     "touch_target": {
       "minimum": 44
@@ -74,6 +85,23 @@
       "enter_duration_ms": 200,
       "exit_duration_ms": 150,
       "emphasis_duration_ms": 300
+    },
+    "font_family": {
+      "display": "Bricolage Grotesque",
+      "body": "Hanken Grotesk",
+      "mono": "JetBrains Mono"
+    },
+    "font_weight": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+      "extrabold": 800
+    },
+    "focus": {
+      "ring_width": 3,
+      "ring_offset": 2
     }
-  }
+  },
+  "presentation_kind": "Page"
 }

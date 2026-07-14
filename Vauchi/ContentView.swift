@@ -123,22 +123,14 @@ struct MainTabView: View {
                 .accessibilityLabel("Offline")
             }
 
-            // Toast overlay for archive/delete undo
+            // Informational shell toast. Core action-result toasts use the
+            // separate CoreUI host and its core-owned action label/id.
             if let message = viewModel.toastMessage {
                 HStack(spacing: 12) {
                     Text(message)
                         .font(.subheadline)
                         .foregroundColor(.white)
                         .lineLimit(2)
-
-                    if viewModel.toastUndoActionId != nil {
-                        Button("Undo") {
-                            viewModel.handleUndo()
-                        }
-                        .font(.subheadline.bold())
-                        .foregroundColor(.cyan)
-                        .buttonStyle(.plain)
-                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)

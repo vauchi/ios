@@ -20,6 +20,7 @@ class AppViewModel: ObservableObject {
     @Published var alertMessage: AlertMessage?
     @Published var toastMessage: String?
     @Published var toastUndoActionId: String?
+    @Published var toastUndoLabel: String?
     @Published var showImagePicker = false
     @Published var showCameraPicker = false
     /// Set when core emits `ExchangeCommand::FilePickFromUser`. The
@@ -310,10 +311,16 @@ class AppViewModel: ObservableObject {
 
     // MARK: - Toast
 
-    func showToast(_ message: String, undoActionId: String? = nil, durationMs: UInt32 = 3000) {
+    func showToast(
+        _ message: String,
+        undoActionId: String? = nil,
+        undoLabel: String? = nil,
+        durationMs: UInt32 = 3000
+    ) {
         withAnimation {
             toastMessage = message
             toastUndoActionId = undoActionId
+            toastUndoLabel = undoLabel
         }
         let duration = max(Double(durationMs) / 1000.0, 1.0)
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
@@ -321,6 +328,7 @@ class AppViewModel: ObservableObject {
             withAnimation {
                 self.toastMessage = nil
                 self.toastUndoActionId = nil
+                self.toastUndoLabel = nil
             }
         }
     }
@@ -431,12 +439,12 @@ class AppViewModel: ObservableObject {
             }
         case let .showAlert(title, message):
             alertMessage = AlertMessage(title: title, message: message)
-        case let .showToast(message, undoActionId):
+        case let .showToast(message, undoActionId, undoLabel):
             // Reload screen — core may have navigated internally
             // (e.g. archive_contact intercept calls navigate_back()
             // before returning ShowToast).
             loadScreen()
-            showToast(message, undoActionId: undoActionId)
+            showToast(message, undoActionId: undoActionId, undoLabel: undoLabel)
         // Deprecated results now routed to `Commands(QrRequestScan)` or
         // `NavigateTo` in core — frontends no longer need dedicated arms
         // (`2026-07-06-mobile-domain-shell-violations` I8/I9).

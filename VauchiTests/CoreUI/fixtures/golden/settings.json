@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "screen_id": "settings",
   "title": "Settings",
   "subtitle": null,
@@ -13,8 +13,8 @@
             "id": "display_name",
             "label": "Display Name",
             "kind": {
-              "Value": {
-                "value": "Alice"
+              "Link": {
+                "detail": "Alice"
               }
             },
             "a11y": {
@@ -42,8 +42,8 @@
     },
     {
       "SettingsGroup": {
-        "id": "privacy",
-        "label": "Privacy",
+        "id": "privacy_notifications",
+        "label": "Privacy & Notifications",
         "items": [
           {
             "id": "delivery_receipts",
@@ -72,15 +72,35 @@
               "hint": "When enabled, hides your online status from contacts",
               "role": null
             }
-          }
-        ]
-      }
-    },
-    {
-      "SettingsGroup": {
-        "id": "notifications",
-        "label": "Notifications",
-        "items": [
+          },
+          {
+            "id": "new_field_default",
+            "label": "New Entries Start Visible",
+            "kind": {
+              "Toggle": {
+                "enabled": false
+              }
+            },
+            "a11y": {
+              "label": "Toggle whether new contact card entries start visible",
+              "hint": "When on, new contact card entries are shared with all contacts. When off, they stay hidden until you share them.",
+              "role": null
+            }
+          },
+          {
+            "id": "card_update",
+            "label": "Card Updates",
+            "kind": {
+              "Toggle": {
+                "enabled": true
+              }
+            },
+            "a11y": {
+              "label": "Card update notifications",
+              "hint": "Notify me when a contact updates their card",
+              "role": null
+            }
+          },
           {
             "id": "contact_added",
             "label": "New Contact Added",
@@ -104,34 +124,56 @@
         "label": "Appearance",
         "items": [
           {
-            "id": "theme",
-            "label": "Theme",
+            "id": "show_help_icons",
+            "label": "Show help icons",
             "kind": {
-              "Value": {
-                "value": ""
+              "Toggle": {
+                "enabled": true
               }
             },
             "a11y": {
-              "label": "Theme",
-              "hint": "The current color theme of the app",
-              "role": null
-            }
-          },
-          {
-            "id": "language",
-            "label": "Language",
-            "kind": {
-              "Value": {
-                "value": ""
-              }
-            },
-            "a11y": {
-              "label": "Language",
-              "hint": "The current display language of the app",
+              "label": null,
+              "hint": "Toggle contextual help icons on form fields",
               "role": null
             }
           }
         ]
+      }
+    },
+    {
+      "Dropdown": {
+        "id": "theme",
+        "label": "Theme",
+        "selected": "",
+        "options": [
+          {
+            "id": "follow_system",
+            "label": "System"
+          }
+        ],
+        "a11y": {
+          "label": "Theme",
+          "hint": "Pick the color theme of the app",
+          "role": null
+        }
+      }
+    },
+    {
+      "Dropdown": {
+        "id": "language",
+        "label": "Language",
+        "selected": "",
+        "options": [
+          {
+            "id": "follow_system",
+            "label": "System"
+          }
+        ],
+        "a11y": {
+          "label": "Language",
+          "hint": "Pick the display language of the app",
+          "role": null
+        }
       }
     },
     {
@@ -154,20 +196,6 @@
             }
           },
           {
-            "id": "high_contrast",
-            "label": "High Contrast",
-            "kind": {
-              "Toggle": {
-                "enabled": false
-              }
-            },
-            "a11y": {
-              "label": "High Contrast toggle",
-              "hint": "When enabled, increases color contrast for better visibility",
-              "role": null
-            }
-          },
-          {
             "id": "large_touch",
             "label": "Large Touch Targets",
             "kind": {
@@ -186,8 +214,8 @@
     },
     {
       "SettingsGroup": {
-        "id": "security",
-        "label": "Security",
+        "id": "security_backup",
+        "label": "Security & Backup",
         "items": [
           {
             "id": "change_password",
@@ -229,16 +257,23 @@
               "label": "Duress PIN",
               "hint": "Opens the duress PIN configuration screen",
               "role": null
+            },
+            "info_key": "duress_pin"
+          },
+          {
+            "id": "decoy_contacts",
+            "label": "Decoy Contacts",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            },
+            "a11y": {
+              "label": "Decoy Contacts",
+              "hint": "Opens the decoy contact list shown in duress mode",
+              "role": null
             }
-          }
-        ]
-      }
-    },
-    {
-      "SettingsGroup": {
-        "id": "backup",
-        "label": "Backup & Recovery",
-        "items": [
+          },
           {
             "id": "backup_export",
             "label": "Create Backup",
@@ -280,76 +315,32 @@
               "hint": "Transfer your contacts to a new device via QR code",
               "role": null
             }
-          }
-        ]
-      }
-    },
-    {
-      "SettingsGroup": {
-        "id": "network",
-        "label": "Network",
-        "items": [
+          },
           {
-            "id": "relay_url",
-            "label": "Relay URL",
+            "id": "last_backup",
+            "label": "Last backup",
             "kind": {
               "Value": {
-                "value": "https://relay.vauchi.app"
+                "value": "Never"
               }
             },
             "a11y": {
-              "label": "Relay URL",
-              "hint": "The relay server used for message delivery",
+              "label": "Last backup date",
+              "hint": null,
               "role": null
             }
-          }
-        ]
-      }
-    },
-    {
-      "SettingsGroup": {
-        "id": "delivery",
-        "label": "Message Delivery",
-        "items": [
+          },
           {
-            "id": "sync",
-            "label": "Sync Status",
+            "id": "backup_reminders",
+            "label": "Backup reminders",
             "kind": {
               "Link": {
-                "detail": ""
+                "detail": "Weekly"
               }
             },
             "a11y": {
-              "label": "Sync Status",
-              "hint": "Opens the sync status detail screen",
-              "role": null
-            }
-          },
-          {
-            "id": "pending_updates",
-            "label": "Pending Updates",
-            "kind": {
-              "Value": {
-                "value": "0"
-              }
-            },
-            "a11y": {
-              "label": "Pending Updates",
-              "hint": "Number of contact updates waiting to be delivered",
-              "role": null
-            }
-          },
-          {
-            "id": "failed_deliveries",
-            "label": "Failed Deliveries",
-            "kind": {
-              "Value": {
-                "value": "0"
-              }
-            },
-            "a11y": {
-              "label": "Failed Deliveries",
-              "hint": "Number of updates that failed to deliver",
+              "label": "Backup reminder frequency",
+              "hint": "Tap to change frequency",
               "role": null
             }
           }
@@ -358,8 +349,8 @@
     },
     {
       "SettingsGroup": {
-        "id": "help",
-        "label": "Help & Support",
+        "id": "help_about",
+        "label": "Help & About",
         "items": [
           {
             "id": "help_center",
@@ -402,15 +393,21 @@
               "hint": "Opens the privacy policy",
               "role": null
             }
-          }
-        ]
-      }
-    },
-    {
-      "SettingsGroup": {
-        "id": "about",
-        "label": "About",
-        "items": [
+          },
+          {
+            "id": "what_is_vauchi",
+            "label": "What is Vauchi?",
+            "kind": {
+              "Link": {
+                "detail": null
+              }
+            },
+            "a11y": {
+              "label": "What is Vauchi?",
+              "hint": "Learn what Vauchi is and how it works",
+              "role": null
+            }
+          },
           {
             "id": "version",
             "label": "Version",
@@ -444,20 +441,20 @@
     },
     {
       "SettingsGroup": {
-        "id": "danger",
-        "label": "Danger Zone",
+        "id": "advanced_nav",
+        "label": "",
         "items": [
           {
-            "id": "emergency_wipe",
-            "label": "Emergency Wipe",
+            "id": "advanced",
+            "label": "Advanced",
             "kind": {
-              "Destructive": {
-                "label": "Wipe All Data"
+              "Link": {
+                "detail": null
               }
             },
             "a11y": {
-              "label": "Emergency Wipe",
-              "hint": "Permanently deletes all app data. This action cannot be undone",
+              "label": "Advanced",
+              "hint": "Network, delivery status, and emergency controls",
               "role": null
             }
           }
@@ -488,13 +485,26 @@
       "title_size": 24,
       "subtitle_size": 18,
       "body_size": 16,
-      "caption_size": 14
+      "caption_size": 14,
+      "caption_sm": 12,
+      "title_lg": 20,
+      "display": 32,
+      "medium_size": 20,
+      "title_line": 30,
+      "subtitle_line": 24,
+      "medium_line": 28,
+      "body_line": 24,
+      "caption_line": 20,
+      "text_scale_percent": 100
     },
     "border_radius": {
       "sm": 4,
       "md": 8,
       "md_lg": 12,
-      "lg": 16
+      "lg": 16,
+      "chip": 12,
+      "card": 20,
+      "sheet": 28
     },
     "touch_target": {
       "minimum": 44
@@ -503,6 +513,23 @@
       "enter_duration_ms": 200,
       "exit_duration_ms": 150,
       "emphasis_duration_ms": 300
+    },
+    "font_family": {
+      "display": "Bricolage Grotesque",
+      "body": "Hanken Grotesk",
+      "mono": "JetBrains Mono"
+    },
+    "font_weight": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+      "extrabold": 800
+    },
+    "focus": {
+      "ring_width": 3,
+      "ring_offset": 2
     }
-  }
+  },
+  "presentation_kind": "Page"
 }

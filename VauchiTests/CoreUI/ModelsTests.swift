@@ -25,11 +25,7 @@ final class ModelsTests: XCTestCase {
                 "current_step": 1,
                 "total_steps": 5,
                 "label": "Step 1 of 5"
-            },
-            "nav_actions": [
-                {"id": "go_back", "label": "Back", "style": "Secondary", "enabled": true}
-            ],
-            "nav_tab_id": "welcome_tab"
+            }
         }
         """.utf8)
 
@@ -47,9 +43,6 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(screen.progress?.currentStep, 1)
         XCTAssertEqual(screen.progress?.totalSteps, 5)
         XCTAssertEqual(screen.progress?.label, "Step 1 of 5")
-        XCTAssertEqual(screen.navActions.count, 1)
-        XCTAssertEqual(screen.navActions[0].id, "go_back")
-        XCTAssertEqual(screen.navTabId, "welcome_tab")
     }
 
     func testScreenModelDecodesWithoutOptionalFields() throws {
@@ -157,6 +150,7 @@ final class ModelsTests: XCTestCase {
         {
             "FieldList": {
                 "id": "fields",
+                "title": "Kontaktfelder",
                 "fields": [
                     {
                         "id": "f1",
@@ -168,7 +162,7 @@ final class ModelsTests: XCTestCase {
                     }
                 ],
                 "visibility_mode": "ShowHide",
-                "available_scopes": []
+                "available_scopes": ["Family", "Friends"]
             }
         }
         """.utf8)
@@ -180,6 +174,7 @@ final class ModelsTests: XCTestCase {
             return
         }
         XCTAssertEqual(list.id, "fields")
+        XCTAssertEqual(list.title, "Kontaktfelder")
         XCTAssertEqual(list.fields.count, 1)
         XCTAssertEqual(list.fields[0].id, "f1")
         XCTAssertEqual(list.fields[0].fieldType, "phone")
@@ -187,6 +182,7 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(list.fields[0].value, "+1234567890")
         XCTAssertEqual(list.fields[0].icon, "phone")
         XCTAssertEqual(list.visibilityMode, .showHide)
+        XCTAssertEqual(list.availableScopes, ["Family", "Friends"])
     }
 
     func testFieldDecodesWithIcon() throws {
@@ -335,6 +331,34 @@ final class ModelsTests: XCTestCase {
         }
     }
 
+    func testUiFieldVisibilityGroups() throws {
+        let json = Data("""
+        {"Groups": ["Family", "Friends"]}
+        """.utf8)
+
+        let visibility = try coreJSONDecoder.decode(UiFieldVisibility.self, from: json)
+
+        guard case let .groups(groups) = visibility else {
+            XCTFail("Expected .groups variant, got \(visibility)")
+            return
+        }
+        XCTAssertEqual(groups, ["Family", "Friends"])
+    }
+
+    func testUiFieldVisibilityGroupsSingleGroup() throws {
+        let json = Data("""
+        {"Groups": ["Family"]}
+        """.utf8)
+
+        let visibility = try coreJSONDecoder.decode(UiFieldVisibility.self, from: json)
+
+        guard case let .groups(groups) = visibility else {
+            XCTFail("Expected .groups variant, got \(visibility)")
+            return
+        }
+        XCTAssertEqual(groups, ["Family"])
+    }
+
     // MARK: - ActionResult
 
     func testActionResultUpdateScreen() throws {
@@ -414,19 +438,6 @@ final class ModelsTests: XCTestCase {
         }
     }
 
-    func testActionResultPerformNativeBackDecodes() throws {
-        let json = Data("""
-        "PerformNativeBack"
-        """.utf8)
-
-        let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
-
-        guard case .performNativeBack = result else {
-            XCTFail("Expected .performNativeBack, got \(result)")
-            return
-        }
-    }
-
     func testActionResultCommands() throws {
         let json = Data("""
         {"Commands": {"commands": ["QrRequestScan", {"QrDisplay": {"data": "test-qr"}}]}}
@@ -452,17 +463,18 @@ final class ModelsTests: XCTestCase {
 
     func testActionResultShowToast() throws {
         let json = Data("""
-        {"ShowToast": {"message": "Saved", "undo_action_id": "undo_1"}}
+        {"ShowToast": {"message": "Saved", "undo_action_id": "undo_1", "undo_label": "Rückgängig"}}
         """.utf8)
 
         let result = try coreJSONDecoder.decode(ActionResult.self, from: json)
 
-        guard case let .showToast(message, undoActionId) = result else {
+        guard case let .showToast(message, undoActionId, undoLabel) = result else {
             XCTFail("Expected .showToast, got \(result)")
             return
         }
         XCTAssertEqual(message, "Saved")
         XCTAssertEqual(undoActionId, "undo_1")
+        XCTAssertEqual(undoLabel, "Rückgängig")
     }
 
     func testActionResultEditContact() throws {
@@ -581,8 +593,8 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(inner["visible"] as? Bool, false)
     }
 
-    func testUserActionVariantSelectedEncoding() throws {
-        let action = UserAction.variantSelected(variantId: "Family")
+    func testUserActionGroupViewSelectedEncoding() throws {
+        let action = UserAction.groupViewSelected(groupName: "Family")
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
@@ -590,14 +602,14 @@ final class ModelsTests: XCTestCase {
         )
 
         let inner = try XCTUnwrap(
-            jsonObject["VariantSelected"] as? [String: Any],
-            "Expected 'VariantSelected' key at top level"
+            jsonObject["GroupViewSelected"] as? [String: Any],
+            "Expected 'GroupViewSelected' key at top level"
         )
-        XCTAssertEqual(inner["variant_id"] as? String, "Family")
+        XCTAssertEqual(inner["group_name"] as? String, "Family")
     }
 
-    func testUserActionVariantSelectedNilEncoding() throws {
-        let action = UserAction.variantSelected(variantId: nil)
+    func testUserActionGroupViewSelectedNilEncoding() throws {
+        let action = UserAction.groupViewSelected(groupName: nil)
 
         let data = try coreJSONEncoder.encode(action)
         let jsonObject = try XCTUnwrap(
@@ -605,37 +617,10 @@ final class ModelsTests: XCTestCase {
         )
 
         let inner = try XCTUnwrap(
-            jsonObject["VariantSelected"] as? [String: Any],
-            "Expected 'VariantSelected' key at top level"
+            jsonObject["GroupViewSelected"] as? [String: Any],
+            "Expected 'GroupViewSelected' key at top level"
         )
-        XCTAssertNil(inner["variant_id"])
-    }
-
-    func testUserActionNavigateBackEncoding() throws {
-        let action = UserAction.navigateBack
-
-        let data = try coreJSONEncoder.encode(action)
-        let jsonObject = try XCTUnwrap(
-            JSONSerialization.jsonObject(with: data) as? [String: Any]
-        )
-
-        XCTAssertNotNil(jsonObject["NavigateBack"], "Expected 'NavigateBack' key at top level")
-    }
-
-    func testCommandScheduleWakeupDecodes() throws {
-        let json = Data("""
-        {"ScheduleWakeup": {"earliest_secs": 1, "deadline_secs": 10, "min_interval_secs": 5}}
-        """.utf8)
-
-        let command = try coreJSONDecoder.decode(CommandDTO.self, from: json)
-
-        guard case let .scheduleWakeup(earliestSecs, deadlineSecs, minIntervalSecs) = command else {
-            XCTFail("Expected .scheduleWakeup, got \(command)")
-            return
-        }
-        XCTAssertEqual(earliestSecs, 1)
-        XCTAssertEqual(deadlineSecs, 10)
-        XCTAssertEqual(minIntervalSecs, 5)
+        XCTAssertNil(inner["group_name"])
     }
 
     // MARK: - Unknown Variant Handling
@@ -777,7 +762,7 @@ final class ModelsTests: XCTestCase {
             "id": "c1",
             "name": "Alice",
             "subtitle": "alice@example.org",
-            "initials": "A",
+            "avatar_initials": "A",
             "status": null,
             "searchable_fields": ["alice@example.org", "+41 79 123 45 67"],
             "actions": [
@@ -789,7 +774,7 @@ final class ModelsTests: XCTestCase {
         let item = try coreJSONDecoder.decode(Item.self, from: json)
         XCTAssertEqual(item.id, "c1")
         XCTAssertEqual(item.name, "Alice")
-        XCTAssertEqual(item.initials, "A")
+        XCTAssertEqual(item.avatarInitials, "A")
         XCTAssertEqual(item.actions.count, 2)
         XCTAssertEqual(item.actions[0].id, "archive")
         XCTAssertEqual(item.actions[0].kind, .archive)
@@ -802,7 +787,7 @@ final class ModelsTests: XCTestCase {
         // Fixtures written before core!637 omit `actions`. Decoding must
         // still succeed — the Item init provides [] defaults.
         let json = Data("""
-        {"id": "c1", "name": "Bob", "initials": "B"}
+        {"id": "c1", "name": "Bob", "avatar_initials": "B"}
         """.utf8)
         let item = try coreJSONDecoder.decode(Item.self, from: json)
         XCTAssertEqual(item.id, "c1")

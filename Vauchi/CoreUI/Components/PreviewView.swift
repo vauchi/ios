@@ -19,7 +19,7 @@ struct PreviewView: View {
     @Environment(\.designTokens) private var tokens
 
     /// Dynamic-Type-aware avatar-initial font size, tied to `.title` since
-    /// the preview avatar circle is smaller than `AvatarPreviewView`'s.
+    /// the preview image circle is smaller than `ImageCircleView`'s.
     @ScaledMetric(relativeTo: .title) private var avatarInitialSize: CGFloat = 36
 
     var body: some View {

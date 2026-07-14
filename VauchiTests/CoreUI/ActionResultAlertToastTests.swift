@@ -50,17 +50,24 @@ final class ActionResultAlertToastTests: XCTestCase {
     func test_show_toast_publishes_message_and_undo_action_id() {
         XCTAssertNil(viewModel.toastMessage)
         XCTAssertNil(viewModel.toastUndoActionId)
+        XCTAssertNil(viewModel.toastUndoLabel)
 
-        viewModel.applyResult(.showToast(message: "Contact archived", undoActionId: "undo_archive_42"))
+        viewModel.applyResult(.showToast(
+            message: "Contact archived",
+            undoActionId: "undo_archive_42",
+            undoLabel: "Rückgängig"
+        ))
 
         XCTAssertEqual(viewModel.toastMessage, "Contact archived")
         XCTAssertEqual(viewModel.toastUndoActionId, "undo_archive_42")
+        XCTAssertEqual(viewModel.toastUndoLabel, "Rückgängig")
     }
 
     func test_show_toast_without_undo_publishes_nil_undo_id() {
-        viewModel.applyResult(.showToast(message: "Saved", undoActionId: nil))
+        viewModel.applyResult(.showToast(message: "Saved", undoActionId: nil, undoLabel: nil))
 
         XCTAssertEqual(viewModel.toastMessage, "Saved")
         XCTAssertNil(viewModel.toastUndoActionId)
+        XCTAssertNil(viewModel.toastUndoLabel)
     }
 }

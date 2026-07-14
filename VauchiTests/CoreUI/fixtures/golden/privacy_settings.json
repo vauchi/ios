@@ -1,64 +1,89 @@
 {
   "schema_version": 4,
-  "screen_id": "backup_choose",
-  "title": "Backup & Recovery",
+  "screen_id": "privacy_settings",
+  "title": "Privacy & Data",
   "subtitle": null,
   "components": [
     {
       "InfoPanel": {
-        "id": "backup_info",
-        "icon": "drive",
-        "title": "Protect your data",
+        "id": "privacy_info",
+        "icon": "shield",
+        "title": "Data Status",
         "items": [
           {
             "icon": null,
-            "title": "Backup",
-            "detail": "Create an encrypted backup of your identity, contacts, and labels."
+            "title": "Deletion Status",
+            "detail": "No deletion requested"
+          },
+          {
+            "icon": null,
+            "title": "Consent",
+            "detail": "2 contacts, 1 group"
           }
         ],
         "a11y": null
       }
     },
     {
-      "ToggleList": {
-        "id": "backup_level",
-        "label": "Backup level",
+      "ActionList": {
+        "id": "consent_actions",
         "items": [
           {
-            "id": "level_toggle",
-            "label": "Full backup (recommended)",
-            "selected": true,
-            "subtitle": null,
+            "id": "view_data",
+            "label": "View My Data",
+            "icon": "folder",
+            "detail": "See what data is stored locally",
             "a11y": {
-              "label": "Backup level toggle",
-              "hint": "When on, backs up everything. When off, backs up identity only.",
-              "role": "Toggle"
+              "label": "View My Data",
+              "hint": null,
+              "role": null
+            }
+          },
+          {
+            "id": "manage_consent",
+            "label": "Manage Consent",
+            "icon": "checkmark.seal",
+            "detail": "Review and update data consent",
+            "a11y": {
+              "label": "Manage Consent",
+              "hint": null,
+              "role": null
             }
           }
-        ],
-        "a11y": null
+        ]
       }
     }
   ],
   "actions": [
     {
-      "id": "create",
-      "label": "Create Backup",
+      "id": "export",
+      "label": "Export My Data",
       "style": "Primary",
       "enabled": true,
       "a11y": {
-        "label": "Create Backup",
+        "label": "Export My Data",
         "hint": null,
         "role": null
       }
     },
     {
-      "id": "restore",
-      "label": "Restore Backup",
-      "style": "Secondary",
+      "id": "delete",
+      "label": "Delete Identity",
+      "style": "Destructive",
       "enabled": true,
       "a11y": {
-        "label": "Restore Backup",
+        "label": "Delete Identity",
+        "hint": null,
+        "role": null
+      }
+    },
+    {
+      "id": "panic_shred",
+      "label": "Panic Shred",
+      "style": "Destructive",
+      "enabled": true,
+      "a11y": {
+        "label": "Panic Shred",
         "hint": null,
         "role": null
       }
