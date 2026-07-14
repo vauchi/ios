@@ -9,6 +9,7 @@
 import CoreUIModels
 import SnapshotTesting
 import SwiftUI
+import UIKit
 @testable import Vauchi
 import XCTest
 
@@ -619,22 +620,22 @@ final class CoreUIComponentTests: XCTestCase {
         let hostingController = UIHostingController(rootView: view)
         hostingController.loadViewIfNeeded()
 
-        // Accessibility elements are only materialized once the view is in a
-        // window. Match the proven unit-test hosting pattern: fixed canvas,
-        // retained window, run-loop pump.
-        let window = UIWindow(frame: Self.canvas)
-        window.rootViewController = hostingController
-        window.makeKeyAndVisible()
-        hostingController.view.frame = Self.canvas
-        hostingController.view.layoutIfNeeded()
-        self.window = window
+        // Present the view in the live app window hierarchy so SwiftUI
+        // materializes the combined accessibility element as VoiceOver would
+        // see it. A detached window is not enough on CI simulators.
+        let rootVC = UIApplication.shared.keyWindow?.rootViewController
+        let presented = expectation(description: "presented")
+        rootVC?.present(hostingController, animated: false) { presented.fulfill() }
+        wait(for: [presented], timeout: 5.0)
 
         XCTAssertTrue(
-            pumpUntil {
-                accessibilityLabelContains("Synchronisiert", in: hostingController.view)
-            },
+            accessibilityLabelContains("Synchronisiert", in: hostingController.view),
             "Expected accessibility hierarchy to contain label 'Synchronisiert'"
         )
+
+        let dismissed = expectation(description: "dismissed")
+        hostingController.dismiss(animated: false) { dismissed.fulfill() }
+        wait(for: [dismissed], timeout: 5.0)
     }
 
     private func accessibilityLabelContains(_ substring: String, in element: NSObject) -> Bool {
@@ -652,19 +653,4 @@ final class CoreUIComponentTests: XCTestCase {
         }
         return false
     }
-
-    /// Pumps the run loop in short slices until `condition` holds or the
-    /// deadline passes. Accessibility labels need a bounded wait to materialize
-    /// under xcodebuild on CI simulators.
-    private func pumpUntil(deadline: TimeInterval = 5.0, _ condition: () -> Bool) -> Bool {
-        let end = Date().addingTimeInterval(deadline)
-        while Date() < end {
-            if condition() { return true }
-            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
-        }
-        return condition()
-    }
-
-    private static let canvas = CGRect(x: 0, y: 0, width: 390, height: 844)
-    private var window: UIWindow?
 }
