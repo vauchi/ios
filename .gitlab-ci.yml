@@ -788,6 +788,7 @@ build:debug:
         CODE_SIGNING_REQUIRED=NO \
         CODE_SIGN_IDENTITY="" \
         CODE_SIGN_ENTITLEMENTS="" \
+        -disableAutomaticPackageResolution \
         -showBuildTimingSummary \
         build > >(tee -a build.log) 2>&1 &
       BUILD_PID=$!
