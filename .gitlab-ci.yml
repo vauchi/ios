@@ -1188,12 +1188,11 @@ test:snapshots:record:
     # the same repo via CI_JOB_TOKEN (user's own email is verified).
     - git config user.name "${GITLAB_USER_NAME}"
     - git config user.email "${GITLAB_USER_EMAIL}"
-    # The runner checkout is shallow; keep this branch switch shallow too.
-    # An unrestricted fetch downloads the full image-heavy repository history.
-    - >-
-      git fetch --depth=1 --no-tags origin
-      "+refs/heads/${CI_COMMIT_REF_NAME}:refs/heads/${CI_COMMIT_REF_NAME}"
-    - git checkout "${CI_COMMIT_REF_NAME}"
+    # A merged-results checkout already contains the source commit. Building
+    # the branch directly from that SHA avoids a redundant network fetch.
+    - SOURCE_BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-${CI_COMMIT_REF_NAME}}"
+    - SOURCE_SHA="${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA:-${CI_COMMIT_SHA}}"
+    - git checkout -B "${SOURCE_BRANCH}" "${SOURCE_SHA}"
     # Restore recorded snapshots (git checkout resets working directory)
     - cp -r /tmp/__Snapshots__-${CI_JOB_ID}/ VauchiSnapshotTests/__Snapshots__/
     # Commit and push baselines (skip if unchanged)
@@ -1213,7 +1212,7 @@ test:snapshots:record:
       # for CI_JOB_TOKEN pushes; push directly to the token-authenticated URL
       # so the baseline commit reaches the MR branch without prompting.
       GIT_TERMINAL_PROMPT=0 \
-        git push "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git" "HEAD:${CI_COMMIT_REF_NAME}"
+        git push "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/${CI_PROJECT_PATH}.git" "HEAD:${SOURCE_BRANCH}"
       echo "✅ Baselines committed and pushed"
       echo "   NOTE: CI_JOB_TOKEN pushes do not trigger pipelines."
       echo "   Push any change or run 'glab ci create' to validate baselines."
