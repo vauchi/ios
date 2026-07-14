@@ -152,8 +152,8 @@ workflow:
 #    reboots and cause "Application failed preflight checks" on next launch.)
 .simulator-job:
   # Rotate the key when a canceled simulator job poisons the GitLab lock.
-  # `ios-simulator` was left occupied by canceled recorder job 15337154709.
-  resource_group: ios-simulator-v2
+  # Recorder jobs 15337154709 and 15337869303 left earlier keys occupied.
+  resource_group: ios-simulator-v3
   before_script:
     - !reference [.macos-job, before_script]
     - xcrun simctl shutdown all 2>/dev/null || true
