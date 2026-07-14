@@ -628,10 +628,11 @@ final class CoreUIComponentTests: XCTestCase {
         hostingController.view.frame = Self.canvas
         hostingController.view.layoutIfNeeded()
         self.window = window
-        pump(seconds: 0.2)
 
         XCTAssertTrue(
-            accessibilityLabelContains("Synchronisiert", in: hostingController.view),
+            pumpUntil {
+                accessibilityLabelContains("Synchronisiert", in: hostingController.view)
+            },
             "Expected accessibility hierarchy to contain label 'Synchronisiert'"
         )
     }
@@ -652,8 +653,16 @@ final class CoreUIComponentTests: XCTestCase {
         return false
     }
 
-    private func pump(seconds: TimeInterval) {
-        RunLoop.current.run(until: Date().addingTimeInterval(seconds))
+    /// Pumps the run loop in short slices until `condition` holds or the
+    /// deadline passes. Accessibility labels need a bounded wait to materialize
+    /// under xcodebuild on CI simulators.
+    private func pumpUntil(deadline: TimeInterval = 5.0, _ condition: () -> Bool) -> Bool {
+        let end = Date().addingTimeInterval(deadline)
+        while Date() < end {
+            if condition() { return true }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+        return condition()
     }
 
     private static let canvas = CGRect(x: 0, y: 0, width: 390, height: 844)
