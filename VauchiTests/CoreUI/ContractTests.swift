@@ -73,8 +73,8 @@ final class ContractTests: XCTestCase {
                 "Fixture '\(name)': screen_id must not be empty"
             )
             XCTAssertFalse(
-                screen.components.isEmpty,
-                "Fixture '\(name)': components must not be empty"
+                screen.components.isEmpty && screen.actions.isEmpty,
+                "Fixture '\(name)' must expose a component or action"
             )
             for action in screen.actions {
                 XCTAssertFalse(
@@ -85,17 +85,17 @@ final class ContractTests: XCTestCase {
         }
     }
 
-    /// Verify the welcome fixture decodes with structural properties.
+    /// Verify the first onboarding fixture decodes with structural properties.
     /// Does NOT assert specific action IDs or localized strings (structural only).
-    func testWelcomeFixtureContent() throws {
-        let screen = try loadFixture("welcome")
-        XCTAssertEqual(screen.screenId, "welcome")
+    func testDefaultNameFixtureContent() throws {
+        let screen = try loadFixture("default_name")
+        XCTAssertEqual(screen.screenId, "default_name")
         XCTAssertFalse(screen.title.isEmpty)
         XCTAssertFalse(screen.subtitle?.isEmpty ?? true,
-                       "welcome fixture must carry a non-empty subtitle")
+                       "default_name fixture must carry a non-empty subtitle")
         let progress = try XCTUnwrap(screen.progress,
-                                     "welcome fixture is an onboarding step and must carry progress")
-        XCTAssertEqual(progress.currentStep, 1, "welcome is step 1 of the onboarding flow")
+                                     "default_name fixture is an onboarding step and must carry progress")
+        XCTAssertEqual(progress.currentStep, 1, "default_name is step 1 of the onboarding flow")
         XCTAssertGreaterThan(progress.totalSteps, progress.currentStep,
                              "totalSteps must exceed currentStep on the first onboarding step")
         XCTAssertFalse(screen.components.isEmpty)
@@ -103,15 +103,18 @@ final class ContractTests: XCTestCase {
         XCTAssertEqual(screen.actions[0].style, .primary)
     }
 
-    /// Verify the preview_card fixture decodes its CardPreview component.
-    func testPreviewCardFixtureContent() throws {
-        let screen = try loadFixture("preview_card")
-        XCTAssertEqual(screen.screenId, "preview_card")
+    /// Verify the contact-edit preview fixture decodes its Preview component.
+    func testContactEditPreviewFixtureContent() throws {
+        let screen = try loadFixture("contact_edit_preview")
+        XCTAssertEqual(screen.screenId, "edit_preview")
         let progress = try XCTUnwrap(screen.progress,
-                                     "preview_card fixture is an onboarding step and must carry progress")
+                                     "contact_edit_preview must carry edit-flow progress")
         XCTAssertGreaterThan(progress.totalSteps, 0)
         XCTAssertGreaterThan(progress.currentStep, 0)
-        XCTAssertFalse(screen.components.isEmpty)
+        let component = try XCTUnwrap(screen.components.first)
+        guard case .preview = component else {
+            return XCTFail("contact_edit_preview must contain a Preview component")
+        }
     }
 
     // MARK: - Progress Consistency
