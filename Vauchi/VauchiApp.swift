@@ -27,6 +27,12 @@ struct VauchiApp: App {
     #endif
 
     init() {
+        // Before anything else: BLE/exchange/sync log::warn!/error! calls
+        // in vauchi-app are silent until this installs the os_log backend
+        // (2026-06-08-magic-audio-proximity-driver deferred this
+        // permanent version).
+        initMobileLogging()
+
         let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let b = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
         NSLog("[Vauchi] Build: v%@ (%@) core=%@", v, b, coreVersion())
