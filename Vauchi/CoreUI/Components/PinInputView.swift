@@ -42,6 +42,7 @@ struct PinInputView: View {
                 }
                 onAction(.textChanged(componentId: component.id, value: value))
             }
+            .accessibilityIdentifier(component.id)
             .accessibilityLabel(component.a11y?.label ?? component.label)
             .accessibilityHint(component.a11y?.hint ?? "")
 

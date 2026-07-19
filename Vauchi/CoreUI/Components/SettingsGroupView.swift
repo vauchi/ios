@@ -132,6 +132,7 @@ struct SettingsItemRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("\(componentId).\(item.id)")
         .accessibilityLabel(item.a11y?.label ?? item.label)
         .accessibilityHint(item.a11y?.hint ?? detail ?? "")
         .accessibilityAddTraits(.isButton)
@@ -154,6 +155,7 @@ struct SettingsItemRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("\(componentId).\(item.id)")
         .accessibilityLabel(item.a11y?.label ?? label)
         .accessibilityHint(item.a11y?.hint ?? "")
         .accessibilityAddTraits(.isButton)

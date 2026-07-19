@@ -53,7 +53,11 @@ struct SectionedActionListView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityIdentifier(component.id)
+        // NO container identifier here: when the parent VStack carries
+        // `accessibilityIdentifier(component.id)`, XCTest merges every
+        // child row under the PARENT's id and the rows' own
+        // identifiers never surface
+        // (problems/2026-07-18-ios-sectioned-action-rows-not-addressable).
     }
 }
 
@@ -67,24 +71,30 @@ private struct SectionedActionRowView: View {
     let onAction: (UserAction) -> Void
 
     var body: some View {
-        Button(action: tap) {
-            HStack(spacing: 12) {
-                leadingIcon
-                Text(item.label).foregroundColor(.primary)
-                Spacer()
-                trailingDetail
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.secondary)
-                    .font(.caption)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .contentShape(Rectangle())
+        HStack(spacing: 12) {
+            leadingIcon
+            Text(item.label).foregroundColor(.primary)
+            Spacer()
+            trailingDetail
+            Image(systemName: "chevron.right")
+                .foregroundColor(.secondary)
+                .font(.caption)
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        .onTapGesture(perform: tap)
+        // NOTE: rows are individually addressable via
+        // `\(componentId).\(sectionId).\(item.id)`. onTapGesture is used
+        // instead of Button(plain): the latter's action is unreliable
+        // under XCTest for custom-content rows
+        // (problems/2026-07-18-ios-sectioned-action-rows-not-addressable).
+        .accessibilityElement(children: .ignore)
         .accessibilityIdentifier("\(componentId).\(sectionId).\(item.id)")
         .accessibilityLabel(item.a11y?.label ?? item.label)
         .accessibilityHint(item.a11y?.hint ?? "")
+        .accessibilityAddTraits(.isButton)
     }
 
     private func tap() {

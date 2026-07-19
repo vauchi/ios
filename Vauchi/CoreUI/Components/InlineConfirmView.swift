@@ -17,6 +17,8 @@ struct InlineConfirmView: View {
                 .font(.callout)
                 .foregroundColor(component.destructive ? .red : .primary)
                 .multilineTextAlignment(.center)
+                .accessibilityLabel(component.a11y?.label ?? component.warning)
+                .accessibilityHint(component.a11y?.hint ?? "")
 
             HStack(spacing: CGFloat(tokens.spacing.smMd)) {
                 Button {
@@ -31,6 +33,7 @@ struct InlineConfirmView: View {
                         .cornerRadius(CGFloat(tokens.borderRadius.md))
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("\(component.id):cancel")
                 .accessibilityLabel(component.cancelText)
 
                 Button {
@@ -45,13 +48,12 @@ struct InlineConfirmView: View {
                         .cornerRadius(CGFloat(tokens.borderRadius.md))
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("\(component.id):confirm")
                 .accessibilityLabel(component.confirmText)
             }
         }
         .padding(CGFloat(tokens.spacing.smMd))
         .background(Color(.systemBackground))
         .cornerRadius(CGFloat(tokens.borderRadius.md))
-        .accessibilityLabel(component.a11y?.label ?? component.warning)
-        .accessibilityHint(component.a11y?.hint ?? "")
     }
 }

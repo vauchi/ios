@@ -39,19 +39,25 @@ struct ScreenRendererView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top) {
+        // Content and footer as layout siblings: the scrollable
+        // content sits above, the action footer below it. The
+        // `.safeAreaInset(edge: .bottom)` footer overlays the last
+        // component on short wizard screens (password confirm,
+        // custom_group) — the fields render UNDER the buttons and
+        // are untappable
+        // (problems/2026-07-18-ios-securefield-not-automatable).
+        // No forced height here so keyboard avoidance still works.
+        VStack(spacing: 0) {
             mainContent
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
             actionButtons
         }
         .environment(\.designTokens, screen.tokens)
     }
 
     /// Content area (progress bar + scrollable/fixed body). Kept separate so
-    /// the action footer can be attached via `.safeAreaInset`; this keeps the
-    /// buttons above the software keyboard on iOS instead of letting them be
-    /// covered when a text field is focused.
+    /// the action footer can be a layout sibling below it in the body
+    /// `VStack`, which keeps the buttons above the software keyboard without
+    /// overlaying the last component.
     private var mainContent: some View {
         VStack(spacing: 0) {
             // Progress bar
@@ -92,8 +98,10 @@ struct ScreenRendererView: View {
         }
     }
 
-    /// Action footer rendered above the bottom safe area (including the
-    /// keyboard) so it stays tappable while text inputs are focused.
+    /// Action footer as a layout sibling below the content; the VStack
+    /// keeps it under the scrollable region instead of overlaying it, and
+    /// keyboard avoidance lifts it above the software keyboard while a
+    /// text input is focused.
     private var actionButtons: some View {
         VStack(spacing: CGFloat(radius.mdLg)) {
             ForEach(screen.actions) { action in
