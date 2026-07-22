@@ -90,11 +90,18 @@ final class BleExchangeService: NSObject {
     /// Mirrors Android's `MainActivity` write routing.
     func writeCharacteristic(uuid: String, data: Data) {
         let normalized = uuid.lowercased()
+        NSLog("[Vauchi] BLE writeCharacteristic uuid=…%@ %dB notifyChar=%d gattReg=%d hasCentral=%d",
+              String(normalized.suffix(2)), data.count,
+              BleUuids.peripheralNotifyChars.contains(uuid) ? 1 : 0,
+              gattCharacteristics[normalized] != nil ? 1 : 0,
+              connectedPeripheral != nil ? 1 : 0)
         if BleUuids.peripheralNotifyChars.contains(uuid), gattCharacteristics[normalized] != nil {
             enqueueNotify(uuid: normalized, data: data)
             return
         }
         guard let peripheral = connectedPeripheral else {
+            NSLog("[Vauchi] BLE MISROUTE→central uuid=…%@ (no connectedPeripheral)",
+                  String(normalized.suffix(2)))
             eventCallback?(.hardwareError(transport: "BLE", error: "No connected device"))
             return
         }
@@ -228,7 +235,11 @@ extension BleExchangeService: CBCentralManagerDelegate {
     }
 
     func centralManager(_: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        eventCallback?(.bleConnected(deviceId: peripheral.identifier.uuidString))
+        // We dialed out → GATT central → Outbound. Core derives the initiator
+        // role from this (role-by-direction, F0).
+        eventCallback?(.bleConnected(
+            deviceId: peripheral.identifier.uuidString, direction: .outbound
+        ))
         peripheral.discoverServices(nil)
     }
 
@@ -320,12 +331,23 @@ extension BleExchangeService: CBPeripheralManagerDelegate {
     /// exchange this is effectively "connected". Mirrors Android's
     /// peripheral-side `onConnected` on the first subscription.
     func peripheralManager(
-        _: CBPeripheralManager, central: CBCentral, didSubscribeTo _: CBCharacteristic
+        _: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic
     ) {
         let id = central.identifier
+        NSLog("[Vauchi] BLE didSubscribeTo char=…%@ subs=%d",
+              String(characteristic.uuid.uuidString.suffix(2)), subscribedCentrals.count + 1)
         if subscribedCentrals.insert(id).inserted {
-            eventCallback?(.bleConnected(deviceId: id.uuidString))
+            // A peer connected to us → GATT peripheral → Inbound. Core derives
+            // the responder role from this (role-by-direction, F0) — so an
+            // inbound-connected device never dials its own KeyOffer over a link
+            // it did not open (the "No connected device" misroute).
+            eventCallback?(.bleConnected(deviceId: id.uuidString, direction: .inbound))
         }
+        // FIX candidate: a central subscribing can unblock a KeyAck/notify that
+        // was enqueued before any subscriber existed — `updateValue` returns
+        // false with no subscribers and only `peripheralManagerIsReady` (queue
+        // space) resumes the drain, never a fresh subscription. Resume here.
+        drainNotifies()
     }
 
     func peripheralManager(
@@ -341,6 +363,9 @@ extension BleExchangeService: CBPeripheralManagerDelegate {
     ) {
         for request in requests {
             if let value = request.value {
+                NSLog("[Vauchi] BLE didReceiveWrite char=…%@ %dB subs=%d",
+                      String(request.characteristic.uuid.uuidString.suffix(2)), value.count,
+                      subscribedCentrals.count)
                 eventCallback?(.bleCharacteristicNotified(
                     uuid: request.characteristic.uuid.uuidString.lowercased(), data: value
                 ))
@@ -367,10 +392,14 @@ extension BleExchangeService: CBPeripheralManagerDelegate {
                 continue
             }
             ch.value = next.data
-            if pm.updateValue(next.data, for: ch, onSubscribedCentrals: nil) {
+            let sent = pm.updateValue(next.data, for: ch, onSubscribedCentrals: nil)
+            NSLog("[Vauchi] BLE notify char=…%@ %dB -> %@ (subs=%d queued=%d)",
+                  String(next.uuid.suffix(2)), next.data.count, sent ? "sent" : "not-sent",
+                  subscribedCentrals.count, pendingNotifies.count)
+            if sent {
                 pendingNotifies.removeFirst()
             } else {
-                return // transmit queue full — wait for peripheralManagerIsReady
+                return // queue full / no subscriber — wait for ready or subscribe
             }
         }
     }
