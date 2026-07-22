@@ -76,6 +76,12 @@ targets:
           - UIInterfaceOrientationLandscapeRight
         UIBackgroundModes:
           - fetch
+          # In-person BLE exchange must survive the screen locking / the app
+          # briefly backgrounding mid-handshake: without these the OS suspends
+          # the GATT peripheral + central and the responder never sends its
+          # KeyAck (flaky cross-platform completion).
+          - bluetooth-central
+          - bluetooth-peripheral
         BGTaskSchedulerPermittedIdentifiers:
           - app.vauchi.sync
         CFBundleURLTypes:
