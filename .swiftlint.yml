@@ -9,6 +9,7 @@ excluded:
   - build
   - .derived-data
   - .spm-packages
+  - .device-spm-packages
   - DerivedData
   - Pods
 
