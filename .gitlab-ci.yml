@@ -269,6 +269,8 @@ auto-tag:version:
       git push origin "${TAG}"
       echo "✓ Created and pushed tag ${TAG}"
   rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
     - if: $CI_COMMIT_BRANCH == "main"
 
 # ============================================================
@@ -605,7 +607,7 @@ lint:swiftformat:
 # Source records:
 #   - 2026-05-02-ios-humble-ui-deep-retirement (G3, G5)
 #   - 2026-04-16-frontend-pure-renderer-violations (umbrella)
-check:humble-ui-ratchets:
+check:humble-ui-ratchets: # vci02-ok: complete script-download setup replaces macOS defaults
   extends: [.macos-job, .timeout-quick]
   stage: lint
   needs: []
@@ -646,7 +648,7 @@ check:humble-ui-ratchets:
 # Humble-UI ratchet: block new domain logic / domain vocabulary leaks
 # into the view layer (ADR-043 Amendment 6). Snapshot counts are
 # tracked in vauchi/scripts; the ratchet may only drop.
-lint:humble:
+lint:humble: # vci02-ok: complete script-download setup replaces macOS defaults
   stage: lint
   extends: [.macos-job, .timeout-quick]
   needs: []
@@ -673,7 +675,7 @@ lint:humble:
           - ".gitlab-ci.yml"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-lint:xcodegen:
+lint:xcodegen: # vci02-ok: xcodegen is the only setup this no-build lint needs
   extends: .macos-job
   stage: lint
   # Independent of swiftformat — runs `xcodegen generate` and diffs.
@@ -1026,7 +1028,7 @@ coverage:unit:
 # deleted tests/classes masquerade as current UI (2026-06-11: 49 found
 # across VisualRegressionTests/CoreUIComponentTests + two whole deleted
 # classes, ScreenSnapshotTests and AccessibilityTests).
-check:orphan-baselines:
+check:orphan-baselines: # vci02-ok: alpine job intentionally installs its complete tool set
   extends: .check-orphan-baselines
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
   tags: [docker]
@@ -1395,8 +1397,22 @@ perf:app-size:
 
 pages:
   extends: .badges-pages
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "api"
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
 
 github-mirror:
   extends: .github-mirror
   variables:
     GITHUB_MIRROR_LFS_INCLUDE: "*.a"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/
