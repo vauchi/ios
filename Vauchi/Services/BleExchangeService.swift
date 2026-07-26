@@ -249,8 +249,11 @@ extension BleExchangeService: CBCentralManagerDelegate {
         ))
     }
 
-    func centralManager(_: CBCentralManager, didDisconnectPeripheral _: CBPeripheral, error: Error?) {
-        eventCallback?(.bleDisconnected(reason: error?.localizedDescription ?? "disconnected"))
+    func centralManager(_: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        eventCallback?(.bleDisconnected(
+            deviceId: peripheral.identifier.uuidString, direction: .outbound,
+            reason: error?.localizedDescription ?? "disconnected"
+        ))
         cleanup()
     }
 }
@@ -293,14 +296,19 @@ extension BleExchangeService: CBPeripheralDelegate {
     }
 
     func peripheral(
-        _: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?
+        _ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?
     ) {
         guard error == nil, let value = characteristic.value else { return }
         let uuid = characteristic.uuid.uuidString.lowercased()
+        let deviceId = peripheral.identifier.uuidString
         if characteristic.isNotifying {
-            eventCallback?(.bleCharacteristicNotified(uuid: uuid, data: value))
+            eventCallback?(.bleCharacteristicNotified(
+                deviceId: deviceId, direction: .outbound, uuid: uuid, data: value
+            ))
         } else {
-            eventCallback?(.bleCharacteristicRead(uuid: uuid, data: value))
+            eventCallback?(.bleCharacteristicRead(
+                deviceId: deviceId, direction: .outbound, uuid: uuid, data: value
+            ))
         }
     }
 
@@ -367,6 +375,7 @@ extension BleExchangeService: CBPeripheralManagerDelegate {
                       String(request.characteristic.uuid.uuidString.suffix(2)), value.count,
                       subscribedCentrals.count)
                 eventCallback?(.bleCharacteristicNotified(
+                    deviceId: request.central.identifier.uuidString, direction: .inbound,
                     uuid: request.characteristic.uuid.uuidString.lowercased(), data: value
                 ))
             }
