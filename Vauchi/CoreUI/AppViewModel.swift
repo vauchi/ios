@@ -269,10 +269,14 @@ class AppViewModel: ObservableObject {
     }
 
     /// Core reached a back-stopping root and asked the frontend to perform
-    /// its native back default. On iOS the default is to suspend/minimize
-    /// the app, mirroring Android's BACK-button minimise behaviour.
+    /// its native back default. iOS has no "minimize" concept: unlike
+    /// Android's BACK button there is no user-expected app-suspend gesture,
+    /// and the previous `NSXPCConnection.suspend` call was PRIVATE API — an
+    /// App Store review-rejection risk. The idiomatic iOS default at a root
+    /// is to do nothing; the user leaves via the Home indicator/gesture.
     private func performNativeBack() {
-        UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
+        // Intentional no-op on iOS (see doc comment). Retained as the explicit
+        // mapping point so core's `PerformNativeBack` result stays handled.
     }
 
     func invalidateAll() {
@@ -413,8 +417,9 @@ class AppViewModel: ObservableObject {
             currentScreen = screen
             validationErrors = [:]
         case .performNativeBack:
-            // Back-stopping root: no screen to pop. Perform the platform's
-            // native back default (suspend/minimise on iOS).
+            // Back-stopping root: no screen to pop. iOS has no native
+            // back/minimise default, so this maps to a no-op (see
+            // `performNativeBack`).
             performNativeBack()
         case let .validationError(componentId, message):
             validationErrors[componentId] = message
