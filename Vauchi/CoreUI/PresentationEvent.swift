@@ -109,15 +109,21 @@ enum PresentationEvent: Encodable {
         let uri: String
     }
 
-    func encode(to encoder: Encoder) throws {
-        if case .appBackgrounded = self {
-            var container = encoder.singleValueContainer()
-            try container.encode("AppBackgrounded")
-            return
+    private var unitCaseName: String? {
+        switch self {
+        case .appBackgrounded:
+            "AppBackgrounded"
+        case .presentationInvalidated:
+            "PresentationInvalidated"
+        default:
+            nil
         }
-        if case .presentationInvalidated = self {
+    }
+
+    func encode(to encoder: Encoder) throws {
+        if let unitCaseName {
             var container = encoder.singleValueContainer()
-            try container.encode("PresentationInvalidated")
+            try container.encode(unitCaseName)
             return
         }
 
