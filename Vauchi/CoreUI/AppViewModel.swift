@@ -311,14 +311,7 @@ class AppViewModel: ObservableObject {
     }
 
     func invalidateAll() {
-        do {
-            try appEngine.invalidateAll()
-            loadInitialPresentation()
-        } catch {
-            #if DEBUG
-                print("AppViewModel: failed to invalidate: \(error)")
-            #endif
-        }
+        dispatchPresentation(.presentationInvalidated)
     }
 
     // MARK: - Wakeup (ADR-044 Am2a)
