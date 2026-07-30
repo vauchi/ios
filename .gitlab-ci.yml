@@ -36,7 +36,7 @@ include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
   - project: 'vauchi/scripts'
-    ref: feature/contextual-command-surface
+    ref: 4e2c91d387aed482b80bd24e1b8d94477152aeef
     file:
       - '/ci-templates/timeouts.yml'
       - '/ci-templates/reuse.yml'
@@ -732,7 +732,7 @@ check:design-drift:
     DESIGN_DRIFT_PROTOCOL: "presentation"
     DESIGN_DRIFT_MATCH_MODE: "grep"
     DESIGN_DRIFT_GREP_FILE: "Vauchi/CoreUI"
-    CORE_REF: "feature/contextual-command-surface"
+    CORE_REF: "v0.59.0"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
@@ -744,8 +744,8 @@ check:parser-parity:
     FRONTEND_NAME: "ios"
     PARSER_FILE: "Vauchi/CoreUI/PresentationNodes.swift"
     PARSER_PROTOCOL: "presentation"
-    PARSER_SCRIPT_REF: "feature/contextual-command-surface"
-    CORE_REF: "feature/contextual-command-surface"
+    PARSER_SCRIPT_REF: "4e2c91d387aed482b80bd24e1b8d94477152aeef"
+    CORE_REF: "v0.59.0"
 
 # Removed symbols: detect stale references to removed features
 check:removed-symbols:
