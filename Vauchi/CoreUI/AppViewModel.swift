@@ -61,7 +61,7 @@ class AppViewModel: ObservableObject {
 
     /// Phase 2A (core-gui-architecture-alignment): listener registered with
     /// `PlatformAppEngine.setEventListener`. Core invokes
-    /// `onScreensInvalidated` off-thread on background sync, delivery
+    /// `onPresentationInvalidated` off-thread on background sync, delivery
     /// receipts, device-link completion, etc. Kept as a property so the
     /// UniFFI callback interface's lifetime is bound to the view model.
     private var eventListener: InvalidationListener?
