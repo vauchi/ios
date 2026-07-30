@@ -124,18 +124,14 @@ class AppViewModel: ObservableObject {
     }
 
     private func attachEventListener() {
-        let listener = InvalidationListener { [weak self] screenIds in
+        let listener = InvalidationListener { [weak self] in
             // Core calls this on whatever thread it dispatched the event
             // on (often the thread that handled a user action). The
             // UniFFI Mutex guarding `PlatformAppEngine` will deadlock if
             // we touch the engine on the same stack — hop to main first.
             DispatchQueue.main.async {
                 guard let self else { return }
-                for id in screenIds {
-                    let quoted = "\"\(id)\""
-                    _ = try? self.appEngine.invalidateScreenJson(screenJson: quoted)
-                }
-                self.loadInitialPresentation()
+                self.dispatchPresentation(.presentationInvalidated)
             }
         }
         do {
@@ -696,18 +692,18 @@ class AppViewModel: ObservableObject {
     }
 }
 
-/// UniFFI callback target for core screen invalidations. Declared as a
+/// UniFFI callback target for core presentation invalidations. Declared as a
 /// `final class` (not a struct) because the binding protocol requires
 /// `AnyObject`. The view model owns the instance so the FFI-held
 /// reference stays alive as long as the engine is in use.
 private final class InvalidationListener: PlatformEventListener {
-    private let handler: ([String]) -> Void
+    private let handler: () -> Void
 
-    init(handler: @escaping ([String]) -> Void) {
+    init(handler: @escaping () -> Void) {
         self.handler = handler
     }
 
-    func onScreensInvalidated(screenIds: [String]) {
-        handler(screenIds)
+    func onPresentationInvalidated() {
+        handler()
     }
 }

@@ -36,7 +36,7 @@ include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
   - project: 'vauchi/scripts'
-    ref: ci-templates-v2026.07.2
+    ref: feature/contextual-command-surface
     file:
       - '/ci-templates/timeouts.yml'
       - '/ci-templates/reuse.yml'
@@ -723,14 +723,15 @@ check:snapshot-recording:
       changes:
         - "VauchiSnapshotTests/**"
 
-# Design drift: verify all design-spec components are implemented
+# Presentation drift: verify every canonical presentation node is rendered.
 check:design-drift:
   extends: .design-drift-job
   allow_failure: false
   variables:
-    DESIGN_DRIFT_COMPONENT_DIR: "Vauchi/CoreUI/Components"
-    DESIGN_DRIFT_FILE_EXT: ".swift"
-    DESIGN_DRIFT_CASE: "pascal"
+    DESIGN_DRIFT_PROTOCOL: "presentation"
+    DESIGN_DRIFT_MATCH_MODE: "grep"
+    DESIGN_DRIFT_GREP_FILE: "Vauchi/CoreUI"
+    CORE_REF: "feature/contextual-command-surface"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"

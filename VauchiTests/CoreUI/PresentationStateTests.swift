@@ -168,6 +168,10 @@ final class PresentationStateTests: XCTestCase {
             try JSONEncoder().encode(PresentationEvent.appBackgrounded),
             Data(#""AppBackgrounded""#.utf8)
         )
+        XCTAssertEqual(
+            try JSONEncoder().encode(PresentationEvent.presentationInvalidated),
+            Data(#""PresentationInvalidated""#.utf8)
+        )
     }
 
     func testNodeIdentityKeepsBindingAndFocusStableAcrossLayoutChanges() throws {

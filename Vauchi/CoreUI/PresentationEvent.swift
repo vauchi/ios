@@ -29,6 +29,7 @@ enum PresentationEvent: Encodable {
     )
     case deepLinkOpened(uri: String)
     case appBackgrounded
+    case presentationInvalidated
 
     fileprivate struct DynamicKey: CodingKey {
         let stringValue: String
@@ -114,6 +115,11 @@ enum PresentationEvent: Encodable {
             try container.encode("AppBackgrounded")
             return
         }
+        if case .presentationInvalidated = self {
+            var container = encoder.singleValueContainer()
+            try container.encode("PresentationInvalidated")
+            return
+        }
 
         var container = encoder.container(keyedBy: DynamicKey.self)
         switch self {
@@ -164,7 +170,7 @@ enum PresentationEvent: Encodable {
                 DeepLinkPayload(uri: uri),
                 forKey: .init(stringValue: "DeepLinkOpened")!
             )
-        case .appBackgrounded:
+        case .appBackgrounded, .presentationInvalidated:
             break
         }
     }

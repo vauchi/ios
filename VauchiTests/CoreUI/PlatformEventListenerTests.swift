@@ -47,10 +47,10 @@ final class PlatformEventListenerTests: XCTestCase {
         )
     }
 
-    /// Scenario: onScreensInvalidated dispatches to the main queue and
-    /// reloads the generic presentation. We simulate the core callback by
+    /// Scenario: onPresentationInvalidated dispatches to the main queue and
+    /// re-enters the generic reducer. We simulate the core callback by
     /// invoking the listener directly, then wait for the main-queue hop.
-    func testOnScreensInvalidatedReloadsPresentation() async throws {
+    func testOnPresentationInvalidatedReloadsPresentation() async throws {
         let listener = try XCTUnwrap(
             viewModel.eventListenerForTesting,
             "event listener must be accessible to tests"
@@ -59,7 +59,7 @@ final class PlatformEventListenerTests: XCTestCase {
 
         // Off-main invocation mirrors how core dispatches the callback.
         await Task.detached {
-            listener.onScreensInvalidated(screenIds: ["home"])
+            listener.onPresentationInvalidated()
         }.value
 
         // Allow the main-queue hop the implementation performs.
