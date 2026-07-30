@@ -450,7 +450,6 @@
 				007F08BF348F3C0C5BA74B92 /* PresentationPrimitives.swift */,
 				9B834D827B063CB9F17CFA86 /* PresentationState.swift */,
 				49B374973D50CCCC7F0EF6DA /* PresentationSurfaceView.swift */,
-				CE42D30F93ED2ECE0C78FB70 /* Components */,
 			);
 			path = CoreUI;
 			sourceTree = "<group>";
@@ -500,13 +499,6 @@
 				CC27001BE792CD487814D16E /* Views */,
 			);
 			path = Vauchi;
-			sourceTree = "<group>";
-		};
-		CE42D30F93ED2ECE0C78FB70 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Components;
 			sourceTree = "<group>";
 		};
 		DE4003224F0F48BD0A224CE5 /* ViewModels */ = {
