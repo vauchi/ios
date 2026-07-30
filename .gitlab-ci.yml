@@ -41,6 +41,7 @@ include:
       - '/ci-templates/timeouts.yml'
       - '/ci-templates/reuse.yml'
       - '/ci-templates/design-drift.yml'
+      - '/ci-templates/parser-parity.yml'
       - '/ci-templates/image-lint.yml'
       - '/ci-templates/removed-symbols.yml'
       - '/ci-templates/badges.yml'
@@ -735,6 +736,16 @@ check:design-drift:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
+
+# Parser parity: verify every canonical presentation node is decoded.
+check:parser-parity:
+  extends: .parser-parity-job
+  variables:
+    FRONTEND_NAME: "ios"
+    PARSER_FILE: "Vauchi/CoreUI/PresentationNodes.swift"
+    PARSER_PROTOCOL: "presentation"
+    PARSER_SCRIPT_REF: "feature/contextual-command-surface"
+    CORE_REF: "feature/contextual-command-surface"
 
 # Removed symbols: detect stale references to removed features
 check:removed-symbols:
