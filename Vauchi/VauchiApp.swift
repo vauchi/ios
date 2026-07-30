@@ -152,12 +152,6 @@ struct VauchiApp: App {
                             do {
                                 try await viewModel.createIdentity(name: "Test User")
                                 NSLog("[Vauchi] --reset-for-testing: identity created")
-                                // Seed the core engine onto the home tab so the
-                                // custom tab bar renders on the first UI-test
-                                // launch. Without this, core still sits on the
-                                // onboarding screen (no `nav_tab_id`) and the
-                                // tab bar stays hidden (ADR-044 Am2a).
-                                viewModel.coreViewModel?.navigateToTab(actionId: "my_info")
                                 viewModel.loadState()
                             } catch {
                                 NSLog("[Vauchi] --reset-for-testing: failed: %@", "\(error)")
@@ -178,10 +172,8 @@ struct VauchiApp: App {
                                 return
                             }
                         #endif
-                        // Humble deep-link surface: forward every vauchi:// URI
-                        // to core as UserAction::LinkOpened. Core decides whether
-                        // it is an exchange consent gate, a device-link join
-                        // invitation, or an unsupported link (ShowAlert).
+                        // Forward the raw URI into Core's reducer. Core decides
+                        // the destination and returns presentation commands.
                         viewModel.openDeepLink(url.absoluteString)
                     }
                 #if DEBUG
@@ -251,7 +243,7 @@ struct VauchiApp: App {
             .onChange(of: scenePhase) { newPhase in
                 showPrivacyOverlay = newPhase != .active
                 if newPhase == .background {
-                    viewModel.handleAppBackgrounded()
+                    viewModel.dispatchAppBackgrounded()
                     // Foreground DispatchSourceTimers do not survive
                     // backgrounding; cancel so we don't fire stale wakeups
                     // when the app resumes (re-armed on `.active` below).

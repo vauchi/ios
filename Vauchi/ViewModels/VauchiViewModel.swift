@@ -92,7 +92,7 @@ class VauchiViewModel: ObservableObject {
                       message: "Please unlock Vauchi first, then re-open the link.")
             return
         }
-        coreVM.handleAction(.linkOpened(uri: uri))
+        coreVM.dispatchPresentation(.deepLinkOpened(uri: uri))
     }
 
     // MARK: - Private Properties
@@ -142,12 +142,6 @@ class VauchiViewModel: ObservableObject {
             )
             repository = repo
             let coreVM = AppViewModel(appEngine: repo.appEngine)
-            coreVM.onOnboardingComplete = { [weak self] in
-                // Core has finished onboarding and created the identity.
-                // Refresh shell state so the main chrome reflects the new
-                // identity (`2026-07-06-mobile-domain-shell-violations` I7).
-                self?.loadState()
-            }
             coreViewModel = coreVM
             // Hand the engine to BackgroundSyncService so its
             // BGTaskScheduler interval comes from core's
@@ -291,20 +285,12 @@ class VauchiViewModel: ObservableObject {
                         // ADR-031: biometric success is reported as a
                         // hardware event; core consults its duress state
                         // (padding to BIOMETRIC_UNLOCK_MIN_DURATION) and
-                        // returns ActionResult.biometricUnlockOutcome.
-                        let resultJson = try? engine?.handleHardwareEvent(event: .biometricUnlockSucceeded)
-                        // TODO(HUMBLE): [D, P0] frontend decides post-biometric duress routing by matching
-                        // an outcome string; core should return a typed NavigateTo or shell state Command
-                        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
+                        // returns a constant-time unlock outcome.
+                        let resultJson = try? engine?.dispatchJson(eventJson: "\"BiometricUnlockSucceeded\"")
                         var promptForDuress = false
-                        // core 0.51.44+: handleHardwareEvent returns the
-                        // {action_result, commands} envelope; the unlock outcome
-                        // rides in action_result.
                         if let resultJson,
-                           let data = resultJson.data(using: .utf8),
-                           let envelope = try? coreJSONDecoder.decode(HardwareEventEnvelope.self, from: data),
-                           case let .biometricUnlockOutcome(outcome)? = envelope.actionResult {
-                            promptForDuress = (outcome == "PromptForDuressPin")
+                           Self.authenticationRequirement(from: resultJson) == "app_password" {
+                            promptForDuress = true
                         }
                         DispatchQueue.main.async {
                             if promptForDuress {
@@ -325,6 +311,26 @@ class VauchiViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    private nonisolated static func authenticationRequirement(from json: String) -> String? {
+        guard
+            let data = json.data(using: .utf8),
+            let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let commands = root["commands"] as? [[String: Any]]
+        else {
+            return nil
+        }
+        for command in commands {
+            guard
+                let authentication = command["SetAuthenticationRequirement"] as? [String: Any],
+                let requirement = authentication["requirement"] as? String
+            else {
+                continue
+            }
+            return requirement
+        }
+        return nil
     }
 
     /// Authenticate with app password (duress-enabled flow).
@@ -348,9 +354,8 @@ class VauchiViewModel: ObservableObject {
     }
 
     private func setupNetworkMonitoring() {
-        // Forward platform reachability into core, which decides
-        // banner rendering (via `Component::Banner` injected into
-        // every emitted ScreenModel) and auto-sync on reconnect.
+        // Forward platform reachability into Core, which decides
+        // presentation updates and auto-sync on reconnect.
         // Frontend just plumbs the platform signal through —
         // no local `isOnline` mirror, no banner switch, no
         // auto-sync closure (audit
@@ -414,11 +419,9 @@ class VauchiViewModel: ObservableObject {
 
     // MARK: - Lifecycle
 
-    /// Triggers auto-lock if enabled when app goes to background (C1)
-    func handleAppBackgrounded() {
-        guard repository?.handleAppBackgrounded() != nil else { return }
-        // Core navigated to Lock screen — require re-authentication
-        appState = .authenticationRequired
+    /// Reports backgrounding through the generic presentation reducer.
+    func dispatchAppBackgrounded() {
+        coreViewModel?.dispatchPresentation(.appBackgrounded)
     }
 
     // MARK: - Toast

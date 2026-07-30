@@ -94,7 +94,7 @@ final class ExchangeCommandBridgeTests: XCTestCase {
 
     /// Scenario: core emits `ExchangeCommand::ImagePickFromLibrary`
     /// (e.g. for avatar set). Bridge flips `showImagePicker = true`,
-    /// which `CoreScreenView` reads to present `ImagePickerSheet`
+    /// which `PresentationHostView` reads to present `ImagePickerSheet`
     /// (PHPickerViewController wrapper).
     func testImagePickFromLibrarySetsShowImagePicker() {
         XCTAssertFalse(viewModel.showImagePicker, "showImagePicker should start false")
@@ -115,7 +115,7 @@ final class ExchangeCommandBridgeTests: XCTestCase {
 
     /// Scenario: core emits `ExchangeCommand::ImageCaptureFromCamera`
     /// (avatar capture). Bridge flips `showCameraPicker = true`,
-    /// which `CoreScreenView` reads to present `AVCameraCaptureSheet`.
+    /// which `PresentationHostView` reads to present `AVCameraCaptureSheet`.
     func testImageCaptureFromCameraSetsShowCameraPicker() {
         XCTAssertFalse(viewModel.showCameraPicker, "showCameraPicker should start false")
 

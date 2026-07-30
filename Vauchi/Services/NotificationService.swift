@@ -15,10 +15,10 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         UNUserNotificationCenter.current().delegate = self
     }
 
-    /// Relays a tapped notification's core-supplied deep-link URI to the app,
-    /// which forwards it to core as `UserAction::LinkOpened` (same path as
-    /// `.onOpenURL`). Humble: the service never interprets the URI — core owns
-    /// routing. Buffers a cold-launch tap until the app wires the handler.
+    /// Relays a tapped notification's Core-supplied deep-link URI to the app,
+    /// which forwards it as a generic `DeepLinkOpened` event (the same path as
+    /// `.onOpenURL`). The service never interprets the URI; Core owns routing.
+    /// Buffers a cold-launch tap until the app wires the handler.
     var onDeepLinkTapped: ((String) -> Void)? {
         didSet {
             guard let uri = pendingDeepLinkUri, let handler = onDeepLinkTapped else { return }

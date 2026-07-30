@@ -2,8 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// Wraps PlatformAppEngine to drive ScreenRendererView for all core screens.
-// Ported from macOS — same pattern, iOS-specific adaptations.
+// Generic presentation state plus native hardware-effect adapters.
 
 import CoreUIModels
 import Foundation
@@ -15,12 +14,9 @@ import VauchiPlatform
 
 @MainActor
 class AppViewModel: ObservableObject {
-    @Published var currentScreen: ScreenModel?
-    @Published var validationErrors: [String: String] = [:]
+    @Published var presentationState = PresentationState()
     @Published var alertMessage: AlertMessage?
     @Published var toastMessage: String?
-    @Published var toastUndoActionId: String?
-    @Published var toastUndoLabel: String?
     @Published var showImagePicker = false
     @Published var showCameraPicker = false
     /// Set when core emits `ExchangeCommand::FilePickFromUser`. The
@@ -42,12 +38,7 @@ class AppViewModel: ObservableObject {
     /// surfaces this as a toast instead of the animated checkmark.
     @Published var ahaMoment: MobileAhaMoment?
 
-    /// Called when core reports `ActionResult.onboardingComplete`. The shell
-    /// uses this to flip app state from "onboarding" to "ready" and refresh
-    /// identity-derived chrome (`2026-07-06-mobile-domain-shell-violations` I7).
-    var onOnboardingComplete: (() -> Void)?
-
-    /// Active camera selector for `Component::QrCode` scan mode.
+    /// Active camera selector for a generic QR capture node.
     /// Flips when core's `MultiStageExchangeEngine` emits
     /// `Command::SwitchCamera { use_front }` in response to the
     /// `switch_camera` action. `QrCodeView.qrScannerView` reads this
@@ -120,7 +111,7 @@ class AppViewModel: ObservableObject {
 
     init(appEngine: PlatformAppEngine) {
         self.appEngine = appEngine
-        loadScreen()
+        loadInitialPresentation()
         attachEventListener()
         WakeupService.shared.setOnWakeup { [weak self] in
             self?.onWakeup()
@@ -144,7 +135,7 @@ class AppViewModel: ObservableObject {
                     let quoted = "\"\(id)\""
                     _ = try? self.appEngine.invalidateScreenJson(screenJson: quoted)
                 }
-                self.loadScreen()
+                self.loadInitialPresentation()
             }
         }
         do {
@@ -166,123 +157,167 @@ class AppViewModel: ObservableObject {
         eventListener
     }
 
-    // MARK: - Screen Loading
+    // MARK: - Generic Presentation
 
-    func loadScreen() {
+    func loadInitialPresentation() {
         do {
-            let json = try appEngine.currentScreenJson()
-            guard let data = json.data(using: .utf8) else { return }
-            currentScreen = try coreJSONDecoder.decode(ScreenModel.self, from: data)
-            validationErrors = [:]
+            try applyPresentationEnvelope(appEngine.initialCommandsJson())
         } catch {
-            #if DEBUG
-                print("AppViewModel: failed to load screen: \(error)")
-            #endif
+            alertMessage = AlertMessage(
+                title: "Presentation error",
+                message: String(describing: error)
+            )
         }
     }
 
-    // MARK: - Action Handling
-
-    func handleAction(_ action: UserAction) {
+    func dispatchPresentation(_ event: PresentationEvent) {
         do {
-            let actionData = try coreJSONEncoder.encode(action)
-            guard let actionJson = String(data: actionData, encoding: .utf8) else { return }
-            let resultJson = try appEngine.handleActionJson(actionJson: actionJson)
-            guard let resultData = resultJson.data(using: .utf8) else { return }
-            // Phase 2b: handleActionJson now returns
-            // `{"action_result": <ActionResult>, "commands": [<CommandDTO>]}`.
-            // The lifecycle commands carry brightness / idle-timer requests
-            // emitted by `WorkflowEngine::screen_entered/screen_exited`.
-            let envelope = try coreJSONDecoder.decode(ActionResultEnvelope.self, from: resultData)
-            applyResult(envelope.actionResult)
-            if !envelope.commands.isEmpty {
-                handleExchangeCommands(envelope.commands)
+            let data = try JSONEncoder().encode(event)
+            guard let eventJSON = String(data: data, encoding: .utf8) else {
+                throw PresentationDispatchError.invalidUTF8
             }
+            try applyPresentationEnvelope(
+                appEngine.dispatchJson(eventJson: eventJSON)
+            )
         } catch {
-            #if DEBUG
-                print("AppViewModel: failed to handle action: \(error)")
-            #endif
+            alertMessage = AlertMessage(
+                title: "Presentation error",
+                message: String(describing: error)
+            )
         }
     }
 
-    // MARK: - Navigation
+    func activateAndDispatch(
+        surfaceID: String,
+        event: PresentationEvent
+    ) {
+        dispatchPresentation(.surfaceActivated(surfaceID: surfaceID))
+        dispatchPresentation(event)
+    }
 
-    // `navigateTo(screenJson:)` (the `appEngine.navigateToJson` wrapper) was
-    // retired in S3 of `2026-06-02-ios-exchange-flow-core-driven` — every iOS
-    // screen now reaches core via the typed `navigateToTab` / `handleAction`
-    // paths or renders the engine's current screen render-only. The core
-    // `navigate_to_json` UniFFI surface is deleted in S5 (core MR) once iOS
-    // ships caller-free.
+    func dismissPresentationOverlay() {
+        guard let overlay = presentationState.overlay else { return }
+        var next = presentationState
+        next.dismissOverlay()
+        presentationState = next
+        dispatchPresentation(
+            .overlayDismissed(
+                surfaceID: overlay.surfaceID,
+                kind: overlay.overlay.kind
+            )
+        )
+    }
 
-    /// The bottom-bar tabs, sourced from core's `nav_items(.mobile)`
-    /// (ADR-043 Am4; ADR-023 Am1). Each carries an opaque `actionId`
-    /// (forward via `navigateToTab`), a core-resolved `label`, and an SF
-    /// Symbol `icon` — replacing the hardcoded `MainTabView` domain
-    /// literals so iOS stays a pure renderer. Returns `[]` only if the
-    /// engine call throws (logged in DEBUG); the bar then renders empty
-    /// rather than crashing.
-    func tabs() -> [MobileTabInfo] {
+    private func applyPresentationEnvelope(_ json: String) throws {
+        let data = Data(json.utf8)
+        let envelope = try JSONDecoder().decode(
+            PresentationCommandEnvelope.self,
+            from: data
+        )
+        var next = presentationState
+        let effects = try next.apply(envelope.commands)
+        presentationState = next
+        for effect in effects {
+            handlePresentationEffect(effect)
+        }
+        try dispatchNativeEffects(from: data)
+    }
+
+    private func handlePresentationEffect(_ command: PresentationCommand) {
+        switch command {
+        case let .presentAlert(alert):
+            alertMessage = AlertMessage(
+                title: alert.title,
+                message: alert.message
+            )
+        case let .showToast(toast):
+            showToast(toast.message)
+        case let .openExternalURL(value):
+            if let url = URL(string: value) {
+                UIApplication.shared.open(url)
+            }
+        case let .exportFile(file):
+            presentExport(file)
+        case .performNativeBack:
+            break
+        case .resetApplication:
+            loadInitialPresentation()
+        case .postNotification, .platformEffect:
+            break
+        default:
+            break
+        }
+    }
+
+    private func presentExport(_ file: PresentationExportFile) {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent(file.suggestedName)
         do {
-            return try appEngine.navItems(layout: .mobile, locale: LocalizationService.shared.currentLocale)
+            try Data(file.data).write(to: url, options: .atomic)
+            guard let scene = UIApplication.shared.connectedScenes.first
+                as? UIWindowScene,
+                let controller = scene.keyWindow?.rootViewController
+            else { return }
+            let activity = UIActivityViewController(
+                activityItems: [url],
+                applicationActivities: nil
+            )
+            activity.popoverPresentationController?.sourceView = controller.view
+            controller.present(activity, animated: true)
         } catch {
-            #if DEBUG
-                print("AppViewModel: failed to load tabs: \(error)")
-            #endif
-            return []
+            alertMessage = AlertMessage(
+                title: "Export failed",
+                message: String(describing: error)
+            )
         }
     }
 
-    /// Core's canonical tab id for the current screen — the bottom-tab
-    /// that owns it (nil when core is on a non-tab screen, e.g. Lock or
-    /// a modal). The shell reads this to keep its highlight in sync
-    /// with core instead of re-deriving "which tab" from domain state
-    /// (ADR-043 Am4). Mirrors Android's `CoreAppViewModel.currentTabId`.
-    func currentTabId() -> String? {
-        (try? appEngine.currentTabId(layout: .mobile)) ?? nil
+    private struct NativeEffectEnvelope: Decodable {
+        let commands: [CommandDTO]
     }
 
-    /// Forward a tab tap as `UserAction::NavigateToTab { action_id }`.
-    ///
-    /// `actionId` is the opaque canonical id handed out by `tabs()` (e.g.
-    /// "groups"); core resolves it to the canonical screen and returns
-    /// `NavigateTo`. The frontend never parses or constructs the domain
-    /// variant — that is the zero-domain-vocab Tier-1 contract (ADR-043
-    /// Am4 / tier0-d plan item 2).
-    ///
-    /// Dispatched through the typed `handleAction(_:)` path (encode →
-    /// `handleActionJson` → apply result + lifecycle commands), then
-    /// refreshes the available-screens list. Requires the
-    /// `UserAction.navigateToTab` case from vauchi-platform-swift (added
-    /// in vauchi-platform-swift!59); does not compile against bindings
-    /// without it.
-    func navigateToTab(actionId: String) {
-        handleAction(.navigateToTab(actionId: actionId))
-    }
-
-    /// Forward the OS back gesture as `UserAction::NavigateBack`. Core
-    /// decides whether to pop (`NavigateTo`) or tell the frontend to
-    /// perform the native back default (`ActionResult::PerformNativeBack`).
-    /// Never gate on `can_go_back` — frontends forward unconditionally
-    /// (ADR-044 Amendment 2a).
-    func navigateBack() {
-        handleAction(.navigateBack)
-    }
-
-    /// Core reached a back-stopping root and asked the frontend to perform
-    /// its native back default. iOS has no "minimize" concept: unlike
-    /// Android's BACK button there is no user-expected app-suspend gesture,
-    /// and the previous `NSXPCConnection.suspend` call was PRIVATE API — an
-    /// App Store review-rejection risk. The idiomatic iOS default at a root
-    /// is to do nothing; the user leaves via the Home indicator/gesture.
-    private func performNativeBack() {
-        // Intentional no-op on iOS (see doc comment). Retained as the explicit
-        // mapping point so core's `PerformNativeBack` result stays handled.
+    private func dispatchNativeEffects(from data: Data) throws {
+        guard var root = try JSONSerialization.jsonObject(with: data)
+            as? [String: Any],
+            let commands = root["commands"] as? [Any]
+        else { return }
+        let presentationVariants: Set = [
+            "ReplaceSurface",
+            "SetContextBar",
+            "PresentOverlay",
+            "SetPresentationProfile",
+            "PresentAlert",
+            "ShowToast",
+            "OpenExternalUrl",
+            "ExportFile",
+            "PerformNativeBack",
+            "ResetApplication",
+            "PostNotification",
+        ]
+        root["commands"] = commands.filter { command in
+            if let variant = command as? String {
+                return !presentationVariants.contains(variant)
+            }
+            guard let object = command as? [String: Any],
+                  let variant = object.keys.first
+            else { return false }
+            return !presentationVariants.contains(variant)
+        }
+        guard let nativeCommands = root["commands"] as? [Any],
+              !nativeCommands.isEmpty
+        else { return }
+        let filtered = try JSONSerialization.data(withJSONObject: root)
+        let envelope = try coreJSONDecoder.decode(
+            NativeEffectEnvelope.self,
+            from: filtered
+        )
+        handleExchangeCommands(envelope.commands)
     }
 
     func invalidateAll() {
         do {
             try appEngine.invalidateAll()
-            loadScreen()
+            loadInitialPresentation()
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to invalidate: \(error)")
@@ -306,6 +341,7 @@ class AppViewModel: ObservableObject {
             if !envelope.commands.isEmpty {
                 handleExchangeCommands(envelope.commands)
             }
+            loadInitialPresentation()
         } catch {
             #if DEBUG
                 print("AppViewModel: onWakeup failed: \(error)")
@@ -317,22 +353,16 @@ class AppViewModel: ObservableObject {
 
     func showToast(
         _ message: String,
-        undoActionId: String? = nil,
-        undoLabel: String? = nil,
         durationMs: UInt32 = 3000
     ) {
         withAnimation {
             toastMessage = message
-            toastUndoActionId = undoActionId
-            toastUndoLabel = undoLabel
         }
         let duration = max(Double(durationMs) / 1000.0, 1.0)
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
             guard let self, toastMessage == message else { return }
             withAnimation {
                 self.toastMessage = nil
-                self.toastUndoActionId = nil
-                self.toastUndoLabel = nil
             }
         }
     }
@@ -374,7 +404,7 @@ class AppViewModel: ObservableObject {
         // sound axis because no ceremony sound asset is bundled.
         _ = sound
         // Mark the first-contact milestone as seen and stash the
-        // returned moment. CoreScreenView renders it as a toast
+        // returned moment. The generic presentation host renders it as a toast
         // when reduce-motion is enabled; otherwise the celebrate
         // animation carries the moment and the toast is skipped.
         ahaMoment = tryTriggerAhaMoment(.firstContactAdded)
@@ -404,75 +434,6 @@ class AppViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Private
-
-    /// Internal (not private) so tests can pin the ActionResult →
-    /// @Published contract directly, same seam as handleExchangeCommands.
-    func applyResult(_ result: ActionResult) {
-        switch result {
-        case let .updateScreen(screen):
-            currentScreen = screen
-            validationErrors = [:]
-        case let .navigateTo(screen):
-            currentScreen = screen
-            validationErrors = [:]
-        case .performNativeBack:
-            // Back-stopping root: no screen to pop. iOS has no native
-            // back/minimise default, so this maps to a no-op (see
-            // `performNativeBack`).
-            performNativeBack()
-        case let .validationError(componentId, message):
-            validationErrors[componentId] = message
-        case .complete, .wipeComplete:
-            loadScreen()
-        case .onboardingComplete:
-            // Core has created the identity, persisted onboarding data, and
-            // navigated to the chosen destination. Notify the shell so it
-            // can flip app state and refresh identity-derived chrome
-            // (`2026-07-06-mobile-domain-shell-violations` I7).
-            loadScreen()
-            onOnboardingComplete?()
-        case .completeWith, .openContact, .editContact, .openEntryDetail:
-            // Resolved to NavigateTo by AppEngine.route_result in core —
-            // frontends never observe these raw (ADR-043 Am4). CompleteWith
-            // is kept for backward compatibility; OpenContact / EditContact /
-            // OpenEntryDetail re-emit the contact / edit / entry screens.
-            break
-        case let .openUrl(url):
-            if let nsUrl = URL(string: url) {
-                UIApplication.shared.open(nsUrl)
-            }
-        case let .showAlert(title, message):
-            alertMessage = AlertMessage(title: title, message: message)
-        case let .showToast(message, undoActionId, undoLabel):
-            // Reload screen — core may have navigated internally
-            // (e.g. archive_contact intercept calls navigate_back()
-            // before returning ShowToast).
-            loadScreen()
-            showToast(message, undoActionId: undoActionId, undoLabel: undoLabel)
-        // Deprecated results now routed to `Commands(QrRequestScan)` or
-        // `NavigateTo` in core — frontends no longer need dedicated arms
-        // (`2026-07-06-mobile-domain-shell-violations` I8/I9).
-        case .requestCamera, .startDeviceLink:
-            break
-        case let .commands(commands):
-            handleExchangeCommands(commands)
-        case .showFormDialog:
-            // Dialog presentation handled by NavigateTo — no separate action needed
-            break
-        case .previewAs:
-            // Card preview handled by NavigateTo — no separate action needed
-            break
-        case .biometricUnlockOutcome:
-            // Consumed by VauchiViewModel.authenticateAndRetry(), which
-            // reports the biometric hardware event and decodes the outcome
-            // directly to drive appState — it never flows through here.
-            break
-        case .unknown:
-            break
-        }
-    }
-
     // MARK: - Exchange Command Handling
 
     /// Snapshot of the platform brightness captured on the first
@@ -481,13 +442,8 @@ class AppViewModel: ObservableObject {
     /// preceding `Some` (no-op then).
     private var savedBrightness: CGFloat?
 
-    /// Dispatch one or more core-emitted `Command`s. Called from
-    /// `applyResult` for `ActionResult.commands` and from the Phase 2b
-    /// envelope-drain path in `handleAction` / `navigateTo` /
-    /// `navigateBack`. Slice 32c retired `OnboardingViewModel`; the
-    /// Onboarding flow now drives this same `AppViewModel`, so the
-    /// envelope-drain path covers Onboarding commands too (no separate
-    /// `OnboardingViewModel.onExchangeCommands` bridge any more).
+    /// Dispatch one or more native effects emitted by Core's generic
+    /// presentation or hardware-event boundary.
     func handleExchangeCommands(_ commands: [CommandDTO]) {
         for command in commands {
             // BLE + audio commands are dispatched in their own helpers to
@@ -727,42 +683,16 @@ class AppViewModel: ObservableObject {
     private func sendHardwareEvent(_ event: MobileEvent) {
         do {
             let resultJson = try appEngine.handleHardwareEvent(event: event)
-            guard let resultData = resultJson.data(using: .utf8) else { return }
-            // core 0.51.44+: handleHardwareEvent returns
-            // `{"action_result": <ActionResult>|null, "commands": [<CommandDTO>]}`.
-            // The commands carry the protocol/lifecycle work the event produced
-            // (previously stranded); action_result is null when the event only
-            // advanced an engine-held machine.
-            let envelope = try coreJSONDecoder.decode(HardwareEventEnvelope.self, from: resultData)
-            if let result = envelope.actionResult {
-                applyResult(result)
-            }
-            if !envelope.commands.isEmpty {
-                handleExchangeCommands(envelope.commands)
-            }
+            try applyPresentationEnvelope(resultJson)
         } catch {
             #if DEBUG
                 print("AppViewModel: failed to send hardware event: \(error)")
             #endif
         }
     }
-}
 
-/// Envelope returned by `PlatformAppEngine.handleHardwareEvent` (core 0.51.44+):
-/// `{"action_result": <ActionResult>|null, "commands": [<CommandDTO>]}`.
-///
-/// `actionResult` is optional — `nil` when the event only advanced an
-/// engine-held machine (e.g. a multi-stage tick). `commands` carries every
-/// `Command` the event produced so the frontend executes it on the hardware
-/// (previously stranded in core's pending queue). Module-internal so the
-/// biometric-unlock caller in `VauchiViewModel` shares it.
-struct HardwareEventEnvelope: Decodable {
-    let actionResult: ActionResult?
-    let commands: [CommandDTO]
-
-    enum CodingKeys: String, CodingKey {
-        case actionResult = "action_result"
-        case commands
+    private enum PresentationDispatchError: Error {
+        case invalidUTF8
     }
 }
 

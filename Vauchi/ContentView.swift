@@ -2,11 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// Root navigation for Vauchi iOS app
-
-import CoreUIModels
 import SwiftUI
-import VauchiPlatform
 
 struct ContentView: View {
     @EnvironmentObject var viewModel: VauchiViewModel
@@ -17,54 +13,15 @@ struct ContentView: View {
             switch viewModel.appState {
             case .waitingForUnlock:
                 WaitingForUnlockView()
-
             case .authenticationRequired:
-                LockScreenView(onUnlock: { viewModel.authenticateAndRetry() })
-
+                LockScreenView(onUnlock: viewModel.authenticateAndRetry)
             case .appPasswordRequired:
                 AppPasswordView(viewModel: viewModel)
-
             default:
-                // Existing logic: error / loading / onboarding / ready
-                if let error = viewModel.errorMessage {
-                    // Show error state prominently for debugging
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 50))
-                            .foregroundColor(ThemeService.shared.error)
-                            .accessibilityHidden(true)
-                        Text(localizationService.t("error.generic"))
-                            .font(Font.title.weight(.bold))
-                            .accessibilityAddTraits(.isHeader)
-                        Text(error)
-                            .font(.body)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                        Button(localizationService.t("action.retry")) {
-                            viewModel.errorMessage = nil
-                            viewModel.loadState()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .accessibilityHint("Dismiss error and reload the app")
-                    }
-                    .padding()
-                } else if viewModel.isLoading {
-                    LoadingView()
-                } else {
-                    // Core emits the onboarding screen as the initial
-                    // screen when no identity exists; the shell no
-                    // longer decides "onboarding vs ready" from local
-                    // flags (`2026-07-06-mobile-domain-shell-violations`
-                    // I3).
-                    MainTabView()
-                }
+                applicationBody
             }
         }
         .onAppear {
-            #if DEBUG
-                print("ContentView: onAppear, appState=\(viewModel.appState), isLoading=\(viewModel.isLoading), hasIdentity=\(viewModel.hasIdentity), errorMessage=\(String(describing: viewModel.errorMessage))")
-            #endif
             viewModel.loadState()
         }
         .alert(viewModel.alertTitle, isPresented: $viewModel.showAlert) {
@@ -72,14 +29,40 @@ struct ContentView: View {
         } message: {
             Text(viewModel.alertMessage)
         }
-        // ADR-031 file-picker host. Applied at ContentView root so the
-        // system document picker is reachable from any flow that emits
-        // `ExchangeCommand::FilePickFromUser` — including custom-view
-        // tabs (MoreView "Import Contacts") that don't render through
-        // CoreScreenView, and the Onboarding `restore_backup` path
-        // which forwards ExchangeCommands via `onExchangeCommands` into
-        // this same `coreViewModel.pendingFilePick` state.
         .corePendingFilePick(viewModel.coreViewModel)
+    }
+
+    @ViewBuilder
+    private var applicationBody: some View {
+        if let error = viewModel.errorMessage {
+            VStack(spacing: 16) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 50))
+                    .foregroundColor(ThemeService.shared.error)
+                    .accessibilityHidden(true)
+                Text(localizationService.t("error.generic"))
+                    .font(.title.bold())
+                    .accessibilityAddTraits(.isHeader)
+                Text(error)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
+                Button(localizationService.t("action.retry")) {
+                    viewModel.errorMessage = nil
+                    viewModel.loadState()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .padding()
+        } else if viewModel.isLoading {
+            LoadingView()
+        } else if let coreViewModel = viewModel.coreViewModel {
+            PresentationHostView(viewModel: coreViewModel)
+                .refreshable {
+                    await viewModel.sync()
+                }
+        } else {
+            LoadingView()
+        }
     }
 }
 
@@ -91,311 +74,5 @@ struct LoadingView: View {
                 .foregroundColor(.secondary)
                 .padding(.top)
         }
-    }
-}
-
-struct MainTabView: View {
-    @EnvironmentObject var viewModel: VauchiViewModel
-    @ObservedObject private var localizationService = LocalizationService.shared
-
-    var body: some View {
-        ZStack(alignment: .top) {
-            tabBar
-
-            // Offline banner
-            if !viewModel.isOnline {
-                HStack(spacing: 6) {
-                    Image(systemName: "wifi.slash")
-                        .font(.subheadline)
-                        .accessibilityHidden(true)
-                    Text(localizationService.t("sync.offline_banner"))
-                        .font(.subheadline.weight(.medium))
-                }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(ThemeService.shared.warning)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .zIndex(99)
-                .accessibilityElement(children: .combine)
-                // TODO(HUMBLE): [W, P2] hardcoded English a11y label names a domain state
-                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-                .accessibilityLabel("Offline")
-            }
-
-            // Informational shell toast. Core action-result toasts use the
-            // separate CoreUI host and its core-owned action label/id.
-            if let message = viewModel.toastMessage {
-                HStack(spacing: 12) {
-                    Text(message)
-                        .font(.subheadline)
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.black.opacity(0.85))
-                )
-                .padding(.top, 8)
-                .padding(.horizontal, 24)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .zIndex(100)
-                .accessibilityElement(children: .combine)
-                // TODO(HUMBLE): [W, P2] hardcoded English a11y label embeds UI role
-                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-                .accessibilityLabel("Toast: \(message)")
-            }
-        }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.toastMessage)
-    }
-
-    /// Bottom-tab bar sourced entirely from core's `navItems(.mobile)` — labels,
-    /// SF Symbol icons and opaque `action_id`s all come from core, so iOS
-    /// holds no hardcoded tab domain literals (ADR-043 Am4). Each tab
-    /// body forwards `NavigateToTab(action_id)` on appear.
-    private var tabBar: some View {
-        Group {
-            if let coreVM = viewModel.coreViewModel {
-                let screen = coreVM.currentScreen
-                let selectedTabId = screen?.navTabId ?? ""
-                let isTabRoot = screen?.navTabId != nil && screen?.screenId == screen?.navTabId
-
-                VStack(spacing: 0) {
-                    // Single core-driven content area: renders core's current
-                    // screen generically, swapping in the native hardware
-                    // wrappers (camera/QR, NFC) for the exchange hardware
-                    // screen_ids. Pure Humble UI — no per-tab domain views.
-                    MainContentView(coreVM: coreVM)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .refreshable { await viewModel.sync() }
-
-                    if isTabRoot {
-                        Divider()
-
-                        // Custom bottom tab bar. A native `TabView` cannot host N
-                        // identical generic `CoreScreenView` tabs — its selection
-                        // binding and per-tab lifecycle both break when every tab is
-                        // the same view type (verified on device). The humble shell
-                        // therefore owns a thin tab bar that just dispatches
-                        // `NavigateToTab(action_id)` on tap; labels / icons / ids
-                        // all come from core's `navItems(.mobile)`.
-                        CoreBottomTabBar(
-                            tabs: coreVM.tabs(),
-                            selectedId: selectedTabId,
-                            accessibilityId: accessibilityId(for:)
-                        ) { tab in
-                            coreVM.navigateToTab(actionId: tab.actionId)
-                        }
-                    }
-                }
-            } else {
-                ProgressView("Loading...")
-            }
-        }
-    }
-
-    /// Preserve the historical camelCase bottom-tab a11y identifiers
-    /// (referenced by manual QA scripts) rather than deriving
-    /// "tab.\(id)" from the snake_case canonical id.
-    private func accessibilityId(for id: String) -> String {
-        // TODO(HUMBLE): [W, P2] frontend reverse-maps canonical tab ids to hardcoded a11y ids;
-        // core should expose an opaque accessibility_handle in TabInfo
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        switch id {
-        case "my_info": "tab.myCard"
-        case "contacts": "tab.contacts"
-        case "exchange": "tab.exchange"
-        case "groups": "tab.groups"
-        case "more": "tab.more"
-        default: "tab.\(id)"
-        }
-    }
-}
-
-#Preview("No contacts") {
-    ContentView()
-        .environmentObject(VauchiViewModel())
-}
-
-#Preview("With contacts") {
-    MainTabView()
-        .environmentObject(VauchiViewModel())
-}
-
-/// The single core-driven content area for the main shell. Renders core's
-/// current screen generically via the render-only `CoreScreenView`, except
-/// for screens whose `nativeWrapperHint` says they need a native hardware
-/// wrapper (camera/QR brightness for multi-stage exchange, NFC reader for
-/// NFC exchange). Pure Humble UI: one renderer for every tab; the bottom
-/// tab bar drives `NavigateToTab`.
-/// Observes `AppViewModel` directly so inner `@Published` `currentScreen`
-/// updates propagate (same root cause `CoreScreenView` documents).
-private struct MainContentView: View {
-    @ObservedObject var coreVM: AppViewModel
-
-    /// Screens rendered by a native hardware wrapper rather than the
-    /// generic `CoreScreenView`. Core owns the decision via
-    /// `ScreenModel.nativeWrapperHint`
-    /// (`2026-07-06-mobile-domain-shell-violations` I5/A2).
-    private var nativeBody: AnyView? {
-        guard let screen = coreVM.currentScreen else { return nil }
-        switch screen.nativeWrapperHint {
-        case .multiStageExchange:
-            return AnyView(ExchangeHardwareScreen(coreVM: coreVM, flow: .multiStage))
-        case .nfcExchange:
-            return AnyView(ExchangeHardwareScreen(coreVM: coreVM, flow: .nfc))
-        case .none:
-            return nil
-        }
-    }
-
-    var body: some View {
-        Group {
-            if let native = nativeBody {
-                native
-            } else {
-                VStack(spacing: 0) {
-                    // Core-driven nav chrome: back/settings actions come from
-                    // `ScreenModel.navActions`. The shell never derives chrome
-                    // from `can_go_back` or hardcoded screen ids
-                    // (ADR-044 Am2a).
-                    NavChromeBar(
-                        navActions: coreVM.currentScreen?.navActions ?? [],
-                        onAction: { coreVM.handleAction($0) }
-                    )
-                    CoreScreenView(renderingCurrentScreen: ())
-                }
-                // Edge-swipe back (iOS) and Escape (iPad keyboard / Mac
-                // Catalyst) both forward `UserAction::NavigateBack`
-                // unconditionally; core decides whether to pop or perform
-                // native back (ADR-044 Am2a).
-                .contentShape(Rectangle())
-                .highPriorityGesture(
-                    DragGesture(minimumDistance: 20, coordinateSpace: .local)
-                        .onEnded { value in
-                            let leadingEdge = value.startLocation.x < 40
-                            let rightward = value.translation.width > 60
-                            if leadingEdge, rightward {
-                                coreVM.navigateBack()
-                            }
-                        }
-                )
-                .background(
-                    EscapeBackButton { coreVM.navigateBack() }
-                )
-            }
-        }
-    }
-}
-
-/// Core-driven nav chrome bar: renders Back and Settings actions from
-/// `ScreenModel.navActions`. Each action is forwarded via `onAction` so
-/// `UserAction.navigateBack` / `UserAction.actionPressed` flow through
-/// `AppViewModel.handleAction`.
-private struct NavChromeBar: View {
-    let navActions: [ScreenAction]
-    let onAction: (UserAction) -> Void
-
-    private var backAction: ScreenAction? {
-        navActions.first { $0.id == "go_back" }
-    }
-
-    private var settingsAction: ScreenAction? {
-        navActions.first { $0.id == "settings" }
-    }
-
-    var body: some View {
-        HStack {
-            if let back = backAction {
-                Button(action: { onAction(.navigateBack) }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                        Text(back.label)
-                    }
-                }
-                .disabled(!back.enabled)
-                .accessibilityIdentifier("nav.back")
-            }
-
-            Spacer()
-
-            if let settings = settingsAction {
-                Button(action: { onAction(.actionPressed(actionId: settings.id)) }) {
-                    Image(systemName: "gear")
-                        .accessibilityLabel(settings.label)
-                }
-                .disabled(!settings.enabled)
-                .accessibilityIdentifier("nav.settings")
-            }
-        }
-        .padding(.horizontal)
-        .padding(.vertical, 8)
-    }
-}
-
-/// Hidden button that captures the Escape key and forwards `navigateBack`.
-/// SwiftUI only routes keyboard shortcuts to views in the responder chain;
-/// placing this inside the main content area covers the core screen tree.
-private struct EscapeBackButton: View {
-    let onBack: () -> Void
-
-    var body: some View {
-        Button(action: onBack) {
-            EmptyView()
-        }
-        .keyboardShortcut(.escape, modifiers: [])
-        .opacity(0)
-    }
-}
-
-/// Custom bottom tab bar rendered from core's `navItems(.mobile)`. Holds no tab
-/// domain literals — labels, SF Symbol icons and selection state all come
-/// from core. Each item dispatches the tap to the shell, which sets the
-/// selection and forwards `NavigateToTab(action_id)` to core. Replaces the
-/// native `TabView`, which cannot host N identical generic `CoreScreenView`
-/// tabs (its selection binding and per-tab lifecycle break — verified on
-/// device).
-private struct CoreBottomTabBar: View {
-    let tabs: [MobileTabInfo]
-    let selectedId: String
-    let accessibilityId: (String) -> String
-    let onTap: (MobileTabInfo) -> Void
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 0) {
-            ForEach(tabs, id: \.id) { tab in
-                Button {
-                    onTap(tab)
-                } label: {
-                    VStack(spacing: 4) {
-                        // Dynamic Type text styles so icon + label scale
-                        // with the user's text-size setting. The custom tab bar
-                        // replaced the native TabView (whose `.tabItem` scaled
-                        // automatically); fixed `.system(size:)` fonts failed
-                        // the `.dynamicType` accessibility audit
-                        // (AccessibilityUITests.testAccessibilityAudit). The
-                        // label uses `.caption`, not the smaller `.caption2`:
-                        // the audit flags caption2-sized text as too small to
-                        // scale legibly ("partially unsupported") — verified by
-                        // bisecting on the iOS 26 simulator (.caption2 fails,
-                        // .caption/.body pass).
-                        Image(systemName: tab.icon)
-                            .font(.title2)
-                        Text(tab.label)
-                            .font(.caption)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .foregroundColor(tab.id == selectedId ? .cyan : .secondary)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier(accessibilityId(tab.id))
-            }
-        }
-        .padding(.top, 8)
-        .padding(.bottom, 4)
-        .background(.bar)
     }
 }
