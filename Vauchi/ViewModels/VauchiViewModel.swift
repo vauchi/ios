@@ -413,6 +413,13 @@ class VauchiViewModel: ObservableObject {
         try repository.createIdentity(displayName: name)
         hasIdentity = true
 
+        // Out-of-band identity creation emits no core event, so nothing
+        // re-enters the presentation reducer on its own — force a full
+        // rebuild or the shell keeps rendering the pre-identity
+        // (onboarding) surface. Production onboarding reaches the home
+        // surface through the dispatch response instead.
+        coreViewModel?.dispatchPresentation(.presentationInvalidated)
+
         // Initialize demo contact for new users with no contacts
         await initDemoContactIfNeeded()
     }

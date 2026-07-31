@@ -66,6 +66,30 @@ final class PresentationStateTests: XCTestCase {
         XCTAssertNil(state.bars["main"])
     }
 
+    /// Core's surface revision advances only on user actions, so racing
+    /// full rebuilds (wakeup re-load, invalidation dispatch, identity
+    /// seeding) legitimately re-emit the same surface at the same
+    /// revision — sometimes with newer content at that revision. Only a
+    /// strictly older revision is stale; equal must re-apply, last-writer
+    /// wins, or a benign duplicate rebuild surfaces as a user-facing
+    /// "Presentation error" alert.
+    func testAppliesSameRevisionRebuildLastWriterWins() throws {
+        var state = PresentationState()
+        _ = try state.apply(decodeCommands("""
+        {"commands":[
+          {"ReplaceSurface":{"surface":\(surfaceJSON(revision: 1, title: "Old"))}}
+        ]}
+        """))
+
+        _ = try state.apply(decodeCommands("""
+        {"commands":[
+          {"ReplaceSurface":{"surface":\(surfaceJSON(revision: 1, title: "New"))}}
+        ]}
+        """))
+
+        XCTAssertEqual(state.surfaces["main"]?.title, "New")
+    }
+
     func testReplacementClearsOldChrome() throws {
         var state = PresentationState()
         _ = try state.apply(decodeCommands("""
@@ -270,13 +294,14 @@ final class PresentationStateTests: XCTestCase {
 
     private func surfaceJSON(
         revision: Int,
+        title: String = "Prepared by Core",
         nodes: String = "[]"
     ) -> String {
         """
         {
           "surface_id":"main",
           "revision":\(revision),
-          "title":"Prepared by Core",
+          "title":"\(title)",
           "subtitle":null,
           "accessibility_label":"Prepared by Core",
           "layout":"scroll",

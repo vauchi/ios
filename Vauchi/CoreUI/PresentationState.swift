@@ -26,8 +26,13 @@ struct PresentationState {
         for command in commands {
             switch command {
             case let .replaceSurface(surface):
+                // Core's revision advances only on user actions, so racing
+                // full rebuilds (wakeup re-load, invalidation dispatch)
+                // legitimately re-emit the same surface at the same
+                // revision. Only a strictly older revision is stale; equal
+                // re-applies, last-writer wins.
                 if let previous = next.surfaces[surface.surfaceID],
-                   surface.revision <= previous.revision {
+                   surface.revision < previous.revision {
                     throw PresentationStateError.staleSurface(surface.surfaceID)
                 }
                 next.surfaces[surface.surfaceID] = surface

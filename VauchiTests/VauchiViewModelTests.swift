@@ -68,6 +68,23 @@ final class VauchiViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.hasIdentity)
     }
 
+    /// Out-of-band identity creation (the `--reset-for-testing` seeding
+    /// path) must re-enter the presentation reducer: the initial
+    /// presentation was loaded before the identity existed, and core
+    /// emits no event for `create_identity`, so without a forced rebuild
+    /// the shell keeps rendering the pre-identity (onboarding) surface.
+    func testCreateIdentityRefreshesPresentation() async throws {
+        let viewModel = makeViewModel()
+        let coreVM = try XCTUnwrap(viewModel.coreViewModel)
+        let preIdentitySurfaces = coreVM.presentationState.visibleSurfaceIDs
+
+        try await viewModel.createIdentity(name: "Alice")
+
+        let surfaces = coreVM.presentationState.visibleSurfaceIDs
+        XCTAssertFalse(surfaces.isEmpty)
+        XCTAssertNotEqual(preIdentitySurfaces, surfaces)
+    }
+
     // Contact-list state is core-owned (rendered via `coreViewModel`
     // ScreenModel); the shell no longer mirrors a `contacts` array.
     // "Fresh identity → empty list" is covered in core; the humble
