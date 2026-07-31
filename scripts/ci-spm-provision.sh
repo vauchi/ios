@@ -30,36 +30,60 @@ if [ -z "$V" ]; then
 fi
 echo "  Resolved version: $V"
 
-# 2. Per-version mirror lives outside the build dir so it survives
-# cache wipes and is shared across ios/macos jobs on this runner.
-MIRROR="$HOME/.cache/vauchi-platform-swift-mirror/v$V"
-# Bumped (-v5) on 2026-05-16 to align with macos's stamp ratchet
-# (macos hit -v5 on 2026-05-04 for an orphaned-SHA cache poison
-# that didn't trip ios; aligning so future invalidations bump both
-# in lockstep — the shared `nell-shell` runner holds both caches).
-# Prior bumps: v4 (gitlab eventual-consistency window after the
-# v0.25.0 force-tag-move — first v3 rebuild ran before the new tag
-# SHA propagated to all git replicas, so `git clone --branch
-# v0.25.0` re-served the broken manifest and sanity checks 1+2
-# didn't catch it because `let version` and the env-var switch
-# survive intact in the broken Package.swift), v3 (force-moved
-# v0.25.0 tag), v2 (symlink-fix invalidation). v5→v6:
-# poisoned-mirror invalidation — the 600s lock-reclaim race let
-# concurrent 0.51.30 bumps (ios!482 / macos!256) commit a torn
-# xcframework that passed the old sanity and poisoned the shared
-# cache; bumped in lockstep with macos (shared $MIRROR + stamp).
-MIRROR_READY="$MIRROR/.ci-mirror-ready-v6"
+# 2. Content-addressed mirror (2026-07-31,
+#    _private/docs/problems/2026-07-31-spm-mirror-orphaned-pins).
+#
+# The mirror directory name binds the exact xcframework bytes it
+# holds: v$V-<zip sha256 prefix>. A completed mirror is NEVER modified
+# or deleted in place — rebuilds build a sibling tmp dir and publish
+# with an atomic mv — so an SPM pin (workspace-state.json, CI-cached
+# .spm-packages) can never reference a destroyed commit. This retires
+# the force-tag orphan class (v0.25.0, daab1b91, 08b68bd) and the
+# torn-read race (readers hold no lock; the old code rm -rf'd the
+# live path). Deletion happens only via the age-based GC at the
+# bottom of this section.
+#
+# Stamp v7 (lockstep with macos, shared runner): v6→v7 invalidates
+# all pre-content-addressing mirrors, whose pins may reference
+# already-orphaned commits. Prior bumps: v6 (torn 0.51.30 mirror),
+# v5/v4/v3/v2 — see git history for the archaeology.
 
-# Concurrency guard for the runner-shared mirror: ios + macos jobs
-# racing through the cache-miss path of the if/else below produced
-# overlapping `rm -rf "$MIRROR" → git clone` invocations on
-# 2026-05-16 (ios!426 + macos!225), surfacing as
-# `could not lock config file: No such file or directory`. mkdir(1)
-# is the POSIX-atomic primitive available on the runner without
-# installing util-linux (macOS lacks flock(1)). Stale-lock timeout
-# 600s = 6× empirical mirror-build time.
-LOCKDIR="$HOME/.cache/vauchi-platform-swift-mirror/.lock-v$V"
-mkdir -p "$(dirname "$LOCKDIR")"
+MIRROR_BASE="$HOME/.cache/vauchi-platform-swift-mirror"
+ZIPSTORE="$HOME/.cache/vauchi-platform-zips"
+ZIPFILE="$ZIPSTORE/v$V.zip"
+mkdir -p "$MIRROR_BASE" "$ZIPSTORE"
+
+# Persistent zip store: the content hash names the mirror, so the zip
+# is needed on every run. Cached zips are self-validating — a corrupt
+# or stale file simply hashes to a fresh mirror path, and is deleted
+# if it fails to unzip so the next run re-downloads.
+# Portable SHA-256 (GNU/BusyBox have sha256sum, macOS has shasum).
+sha256_of() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | cut -c1-12
+  else
+    shasum -a 256 "$1" | cut -c1-12
+  fi
+}
+
+if [ ! -f "$ZIPFILE" ]; then
+  curl -fsSL --max-time 120 --retry 3 --retry-max-time 240 --retry-connrefused \
+    "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
+    -o "$ZIPFILE.tmp.$$"
+  mv "$ZIPFILE.tmp.$$" "$ZIPFILE"
+fi
+ZSHA=$(sha256_of "$ZIPFILE")
+MIRROR="$MIRROR_BASE/v$V-$ZSHA"
+MIRROR_READY="$MIRROR/.ci-mirror-ready-v7"
+LOCKDIR="$MIRROR_BASE/.lock-v$V-$ZSHA"
+echo "  Mirror content key: v$V-$ZSHA"
+
+# mkdir(1) lock — POSIX-atomic (macOS lacks flock). Guards BUILD and
+# PUBLISH of this content path only; readers never take it because a
+# published mirror is immutable. Stale-lock timeout 600s = 6×
+# empirical mirror-build time; a false reclaim now costs a duplicate
+# tmp build, not a torn mirror — the publish step refuses to replace
+# an existing dir, so the loser validates and adopts the winner's.
 LOCK_WAIT=0
 while ! mkdir "$LOCKDIR" 2>/dev/null; do
   if [ "$LOCK_WAIT" -ge 600 ]; then
@@ -73,49 +97,67 @@ while ! mkdir "$LOCKDIR" 2>/dev/null; do
 done
 trap 'rmdir "$LOCKDIR" 2>/dev/null || true' EXIT
 
-# The iOS binary artifact the xcframework must contain. Used both to
-# validate a cache-hit mirror (the guard below) and to fail-fast
-# after a fresh build (Sanity check further down). A mirror can be
-# stamped MIRROR_READY yet be missing this binary if a concurrent
-# same-version bump job reclaimed the lock at the 600s stale
-# threshold and tore the mirror mid-build — observed on macos!256
-# racing ios!482, both bumping 0.51.30: `rm -rf "$MIRROR"` + re-clone
-# of the upstream tag (which gitignores the xcframework) leaves a
-# valid-version checkout with no binary, and SPM resolve fails
-# "does not contain a binary artifact". The cache-hit guard treats a
-# binary-less mirror as a miss and rebuilds, so a torn cache
-# self-heals instead of failing every consumer that hits it.
+# The iOS binary artifact the xcframework must contain, checked by
+# the cache-hit guard and the post-build sanity. A torn mirror (e.g.
+# interrupted clone/unzip) fails the guard and is moved aside — never
+# deleted in place — then rebuilt fresh.
 BIN_PATH="VauchiPlatformFFI.xcframework/ios-arm64/VauchiPlatformFFI.framework/VauchiPlatformFFI"
-if [ -f "$MIRROR_READY" ] && git -C "$MIRROR" cat-file -e "v$V:$BIN_PATH" 2>/dev/null; then
-  echo "  Mirror cache hit at $MIRROR"
+
+mirror_tag_sha() {
+  git -C "$MIRROR" rev-parse "v$V^{commit}" 2>/dev/null || printf ''
+}
+
+# Cache-hit requires the full chain: stamp present, stamp's recorded
+# SHA == the tag's current SHA (a mismatch means the tag moved under
+# us — orphan), binary present. Each failure mode logs its own name
+# so recurrences are attributable from the job log alone.
+if [ -f "$MIRROR_READY" ] \
+  && [ "$(cat "$MIRROR_READY")" = "$(mirror_tag_sha)" ] \
+  && git -C "$MIRROR" cat-file -e "v$V:$BIN_PATH" 2>/dev/null; then
+  echo "  Mirror cache hit at $MIRROR (sha $(cat "$MIRROR_READY"))"
 else
-  if [ -f "$MIRROR_READY" ]; then
-    echo "  Mirror cache STALE (xcframework binary missing) — rebuilding"
+  if [ ! -d "$MIRROR" ]; then
+    echo "  No mirror for v$V-$ZSHA — fresh build"
+  elif [ ! -d "$MIRROR/.git" ]; then
+    echo "  Mirror TORN (no .git — interrupted clone) — rebuilding"
+  elif [ ! -f "$MIRROR_READY" ]; then
+    echo "  Mirror TORN (no ready stamp — interrupted build) — rebuilding"
+  elif [ "$(cat "$MIRROR_READY")" != "$(mirror_tag_sha)" ]; then
+    echo "  Mirror ORPHANED/MOVED (tag sha '$(mirror_tag_sha)' != stamp '$(cat "$MIRROR_READY")') — rebuilding"
+  else
+    echo "  Mirror TORN (xcframework binary missing) — rebuilding"
   fi
-  echo "  Building mirror at $MIRROR"
-  rm -rf "$MIRROR"
-  mkdir -p "$(dirname "$MIRROR")"
+  # Never delete a possibly-read path: move it aside; the GC below
+  # reaps .torn dirs on later runs.
+  if [ -d "$MIRROR" ]; then
+    mv "$MIRROR" "$MIRROR.torn.$$"
+  fi
+
+  TMP_MIRROR="$MIRROR.tmp.$$"
+  echo "  Building mirror at $TMP_MIRROR"
 
   # Shallow clone of the upstream tag.
   git clone --quiet --depth=1 --branch "v$V" \
-    https://gitlab.com/vauchi/vauchi-platform-swift.git "$MIRROR"
+    https://gitlab.com/vauchi/vauchi-platform-swift.git "$TMP_MIRROR"
 
   # Sanity 1: tag's Package.swift declares matching version. Catches
   # the upstream release-CI bug observed for v0.21.8..v0.21.12 where
   # the bump commit forgot to update `let version = ...` — see
   # _private/docs/problems/2026-04-22-phantom-core-registry-artifacts/.
-  PKG_VERSION=$(sed -n 's/^let version = "\([^"]*\)".*/\1/p' "$MIRROR/Package.swift")
+  PKG_VERSION=$(sed -n 's/^let version = "\([^"]*\)".*/\1/p' "$TMP_MIRROR/Package.swift")
   if [ "$PKG_VERSION" != "$V" ]; then
     echo "  ERROR: tag v$V Package.swift declares version=\"$PKG_VERSION\""
+    rm -rf "$TMP_MIRROR"
     exit 1
   fi
 
   # Sanity 2: env-var-aware binaryTarget present. Without Fix C,
   # the manifest unconditionally emits `url:` and SPM hangs.
-  if ! grep -q 'VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK' "$MIRROR/Package.swift"; then
+  if ! grep -q 'VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK' "$TMP_MIRROR/Package.swift"; then
     echo "  ERROR: tag v$V Package.swift is missing the env-var switch."
     echo "  Bump core to a release that includes Fix C — see"
     echo "  _private/docs/problems/2026-04-26-vauchi-platform-swift-resolve-hang/."
+    rm -rf "$TMP_MIRROR"
     exit 1
   fi
 
@@ -129,28 +171,28 @@ else
   # and `useLocalXCFramework`) survive intact in the broken file —
   # only the ternary body is mangled. `swift package dump-package`
   # is the same parser xcodebuild uses, so a green dump means SPM
-  # resolve will not hit "Invalid manifest".
-  if ! (cd "$MIRROR" && swift package dump-package > /dev/null 2>&1); then
+  # resolve will not hit "Invalid manifest". The tmp dir is never
+  # published, so the next run re-clones instead of cache-hitting.
+  if ! (cd "$TMP_MIRROR" && swift package dump-package > /dev/null 2>&1); then
     echo "  ERROR: tag v$V Package.swift fails to parse."
     echo "  This usually means gitlab.com's git replicas have not yet"
     echo "  propagated a recent force-tag-move. Wait 1–2 minutes and"
     echo "  re-trigger the pipeline; the next clone should pick up"
-    echo "  the canonical tag SHA. The (broken) cache directory has"
-    echo "  not been stamped MIRROR_READY, so the next run will"
-    echo "  re-clone instead of cache-hit."
-    rm -rf "$MIRROR"
+    echo "  the canonical tag SHA."
+    rm -rf "$TMP_MIRROR"
     exit 1
   fi
 
-  # Curl xcframework, place inside mirror (will be committed to
-  # mirror tag). Public registry — no JOB-TOKEN needed.
-  ZIP="/tmp/VauchiPlatformFFI-${CI_JOB_ID}-${V}.xcframework.zip"
-  curl -fsSL --max-time 120 --retry 3 --retry-max-time 240 --retry-connrefused \
-    "https://gitlab.com/api/v4/projects/vauchi%2Fcore/packages/generic/vauchi-platform/${V}/VauchiPlatformFFI.xcframework.zip" \
-    -o "$ZIP"
-  echo "  Downloaded $(du -h "$ZIP" | cut -f1)"
-  unzip -o -q "$ZIP" -d "$MIRROR"
-  rm -f "$ZIP"
+  # Unzip the cached xcframework into the mirror (committed to the
+  # mirror tag below). A corrupt cached zip poisons the hash-named
+  # path permanently if left in the store — delete it so the next
+  # run re-downloads.
+  if ! unzip -o -q "$ZIPFILE" -d "$TMP_MIRROR"; then
+    echo "  ERROR: cached zip $ZIPFILE failed to unzip — deleting it."
+    rm -f "$ZIPFILE"
+    rm -rf "$TMP_MIRROR"
+    exit 1
+  fi
 
   # Fix versioned-framework symlinks broken by upstream `zip -r`
   # (missing -y). The published xcframework stores macOS framework
@@ -164,7 +206,7 @@ else
   # is never committed (and therefore never sees SPM resolve).
   # Remove this block once core publishes with `zip -ry` (see
   # core MR !259) and the bumped vauchi-platform-swift consumes it.
-  for fw in "$MIRROR/VauchiPlatformFFI.xcframework"/macos-*/VauchiPlatformFFI.framework; do
+  for fw in "$TMP_MIRROR/VauchiPlatformFFI.xcframework"/macos-*/VauchiPlatformFFI.framework; do
     [ -d "$fw/Versions/A" ] || continue
     if [ -d "$fw/Versions/Current" ] && [ ! -L "$fw/Versions/Current" ]; then
       rm -rf "$fw/Versions/Current"
@@ -182,46 +224,91 @@ else
     fi
   done
 
-  # Commit + force-tag in the mirror so `git clone v$V` restores
+  # Commit + tag inside the tmp mirror so the published dir restores
   # the manifest AND the xcframework as one atomic checkout.
   # `-f` is required: VauchiPlatformFFI.xcframework/ is gitignored
   # upstream (it's a build output) — without -f, `git add` is a
   # silent no-op and the subsequent commit fails with "nothing to
-  # commit, working tree clean".
-  git -C "$MIRROR" add -f VauchiPlatformFFI.xcframework
-  git -C "$MIRROR" -c user.email=ci@vauchi.local -c user.name=ci-mirror \
-    commit -q -m "ci-mirror: bundle xcframework v$V"
-  git -C "$MIRROR" tag -f "v$V"
+  # commit, working tree clean". The -f tag move happens only inside
+  # the unpublished tmp dir (moving the clone's tag onto the new
+  # commit) — never under a reader.
+  git -C "$TMP_MIRROR" add -f VauchiPlatformFFI.xcframework
+  git -C "$TMP_MIRROR" -c user.email=ci@vauchi.local -c user.name=ci-mirror \
+    commit -q -m "ci-mirror: bundle xcframework v$V ($ZSHA)"
+  git -C "$TMP_MIRROR" tag -f "v$V"
 
   # Sanity: the commit must contain the iOS binary artifact path
   # ($BIN_PATH, defined above the cache-hit guard). If the binary is
   # missing (e.g. `git add -f` didn't recurse into the gitignored
   # dir, or the unzip failed silently), SPM resolve will fail with
   # "does not contain a binary artifact" — fail fast here instead.
-  if ! git -C "$MIRROR" cat-file -e "v$V:$BIN_PATH" 2>/dev/null; then
+  if ! git -C "$TMP_MIRROR" cat-file -e "v$V:$BIN_PATH" 2>/dev/null; then
     echo "  ERROR: mirror commit missing $BIN_PATH"
     echo "  Files captured in mirror commit:"
-    git -C "$MIRROR" ls-tree -r "v$V" --name-only | grep VauchiPlatformFFI | head -20
+    git -C "$TMP_MIRROR" ls-tree -r "v$V" --name-only | grep VauchiPlatformFFI | head -20
+    rm -rf "$TMP_MIRROR"
     exit 1
   fi
 
-  touch "$MIRROR_READY"
-  echo "  Mirror built ($(du -sh "$MIRROR" | cut -f1), $(git -C "$MIRROR" ls-tree -r "v$V" --name-only | grep -c '^VauchiPlatformFFI.xcframework/') xcframework files)"
+  # SHA-in-stamp: the ready stamp records the exact commit the tag
+  # resolves to, so a later tag move fails the guard loud (named
+  # ORPHANED/MOVED diagnostic) instead of surfacing as an SPM
+  # "unable to read tree" mystery.
+  git -C "$TMP_MIRROR" rev-parse "v$V^{commit}" > "$TMP_MIRROR/.ci-mirror-ready-v7"
+
+  # Atomic publish. If a false-reclaimed lock let a twin publish
+  # first, the mv would nest instead of replace — so check, then
+  # validate and adopt the winner's dir (same content key, so its
+  # content is by definition what we built).
+  if [ -d "$MIRROR" ]; then
+    echo "  Twin published $MIRROR first — validating and adopting it"
+    rm -rf "$TMP_MIRROR"
+    if [ ! -f "$MIRROR_READY" ] \
+      || [ "$(cat "$MIRROR_READY")" != "$(mirror_tag_sha)" ]; then
+      echo "  ERROR: twin mirror at $MIRROR fails the stamp guard"
+      exit 1
+    fi
+  else
+    mv "$TMP_MIRROR" "$MIRROR"
+    echo "  Mirror published at $MIRROR"
+  fi
+  echo "  Mirror ready ($(du -sh "$MIRROR" | cut -f1), $(git -C "$MIRROR" ls-tree -r "v$V" --name-only | grep -c '^VauchiPlatformFFI.xcframework/') xcframework files, sha $(cat "$MIRROR_READY"))"
 fi
 
-# Release the mirror lock now: the critical section is the BUILD
-# only. The EXIT-trap release (set at lock acquisition) is later
-# OVERWRITTEN by the compile step's heartbeat/watchdog EXIT trap, so
-# today the lock is effectively leaked until the next job's 600s
-# stale-reclaim — which is why every concurrent same-version bump
-# waits out 600s, reclaims the still-live lock, and collides in the
-# build path, tearing the mirror and poisoning the shared cache
-# (ios!482 / macos!256, 0.51.30). Freeing it explicitly here shrinks
-# the critical section to the ~90s build; once READY-stamped the
-# mirror is read-only for resolve, so concurrent jobs proceed in
-# parallel against a stable dir.
+# Release the lock: it guards build+publish only. A stamped mirror is
+# immutable, so concurrent readers proceed in parallel against a
+# stable dir. (History: the EXIT-trap release used to be overwritten
+# by the compile step's trap, leaking the lock into the next job's
+# 600s stale-reclaim — ios!482 / macos!256.)
 rmdir "$LOCKDIR" 2>/dev/null || true
 trap - EXIT
+
+# GC: the only deletion of mirror dirs. Age out published mirrors
+# (30-day horizon — far beyond any CI-cache revival window) and reap
+# torn/tmp leftovers, but never the current job's path and never a
+# path with a live build lock. -prune+-mtime is the portable form
+# (GNU/BSD/BusyBox).
+for d in "$MIRROR_BASE"/v*; do
+  [ -d "$d" ] || continue
+  [ "$d" = "$MIRROR" ] && continue
+  base=$(basename "$d")
+  case "$base" in
+    *.torn.*)
+      rm -rf "$d"
+      ;;
+    *.tmp.*)
+      stem=${base%%.tmp.*}
+      [ -d "$MIRROR_BASE/.lock-$stem" ] || rm -rf "$d"
+      ;;
+    *)
+      [ -d "$MIRROR_BASE/.lock-$base" ] && continue
+      if [ -n "$(find "$d" -prune -mtime +30 -print 2>/dev/null)" ]; then
+        echo "  GC: reaping mirror $base (older than 30 days)"
+        rm -rf "$d"
+      fi
+      ;;
+  esac
+done
 
 # 3. Wire SPM to the local mirror.
 # Write mirror config to BOTH project-local AND user-level paths.
