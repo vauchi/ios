@@ -50,6 +50,11 @@ struct PresentationOverlayView: View {
             ) {
                 actions
             }
+            // Stable frontend a11y anchor for UI tests (NOT a core action
+            // id): lets tests query the destination buttons without
+            // coupling to localized labels.
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("navigationDestinations")
         }
         .frame(
             maxWidth: windowClass == .compact ? .infinity : 680,

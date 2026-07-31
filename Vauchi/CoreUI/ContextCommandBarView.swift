@@ -12,10 +12,10 @@ struct ContextCommandBarView: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            roleButton(bar?.back, systemImage: "chevron.left")
-            roleButton(bar?.navigation, systemImage: "line.3.horizontal")
+            roleButton(bar?.back, systemImage: "chevron.left", identifier: "command.back")
+            roleButton(bar?.navigation, systemImage: "line.3.horizontal", identifier: "command.navigation")
             primaryButton
-            roleButton(bar?.secondary, systemImage: "ellipsis")
+            roleButton(bar?.secondary, systemImage: "ellipsis", identifier: "command.secondary")
         }
         .padding(8)
         .frame(maxWidth: windowClass == .compact ? .infinity : 620)
@@ -41,6 +41,7 @@ struct ContextCommandBarView: View {
             .frame(maxWidth: .infinity, minHeight: 48)
             .disabled(!primary.enabled)
             .accessibilityLabel(primary.accessibilityLabel)
+            .accessibilityIdentifier("command.primary")
             .keyboardShortcut(
                 primary.shortcut == .undo ? "z" : .return,
                 modifiers: .command
@@ -54,7 +55,8 @@ struct ContextCommandBarView: View {
     @ViewBuilder
     private func roleButton(
         _ action: PresentationAction?,
-        systemImage: String
+        systemImage: String,
+        identifier: String
     ) -> some View {
         if let action {
             Button {
@@ -65,6 +67,7 @@ struct ContextCommandBarView: View {
             }
             .disabled(!action.enabled)
             .accessibilityLabel(action.accessibilityLabel)
+            .accessibilityIdentifier(identifier)
         } else {
             Color.clear.frame(width: 44, height: 44)
         }

@@ -7,23 +7,18 @@
 // Uses --reset-for-testing to bypass onboarding (identity seeded by app).
 // Traces to: features/accessibility.feature
 //
-// The bottom tab bar is the custom `CoreBottomTabBar` (not a native
-// `UITabBar` — a native TabView cannot host the generic core-driven tabs;
-// see `2026-06-02-ios-exchange-flow-core-driven`). Its buttons carry the
-// stable frontend a11y identifiers `tab.myCard` / `tab.contacts` /
-// `tab.exchange` / `tab.groups` / `tab.more` (NOT core action ids), so the
-// tests query those instead of `app.tabBars`.
+// The presentation-commands migration replaced the custom bottom tab bar
+// with core-driven surfaces plus a floating contextual command bar
+// (`ContextCommandBarView`). Navigation between sections now goes through
+// the bar's navigation command, which opens an overlay listing the
+// destinations (`PresentationOverlayView`). The tests query the stable
+// frontend a11y identifiers `command.navigation` and
+// `navigationDestinations` (NOT core action ids or localized labels).
 
 import XCTest
 
 final class AccessibilityUITests: XCTestCase {
     var app: XCUIApplication!
-
-    /// Stable frontend a11y identifiers for the bottom-tab buttons
-    /// (`MainTabView.accessibilityId(for:)`). Not core action ids.
-    private let tabIds = [
-        "tab.myCard", "tab.contacts", "tab.exchange", "tab.groups", "tab.more",
-    ]
 
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -32,31 +27,54 @@ final class AccessibilityUITests: XCTestCase {
         app.launch()
 
         // --reset-for-testing creates a test identity, so the app starts on
-        // the home screen with the custom tab bar visible.
-        let firstTab = app.buttons["tab.myCard"]
-        XCTAssertTrue(firstTab.waitForExistence(timeout: 10),
-                      "Tab bar should appear after --reset-for-testing identity seeding")
+        // the home surface with the contextual command bar visible.
+        let navigationCommand = app.buttons["command.navigation"]
+        XCTAssertTrue(navigationCommand.waitForExistence(timeout: 10),
+                      "Command bar should appear after --reset-for-testing identity seeding")
     }
 
     override func tearDownWithError() throws {
         app = nil
     }
 
-    // MARK: - Tab Bar Structure
+    /// Returns the navigation overlay's destination container, opening the
+    /// overlay via the command bar unless it is already open. Tapping the
+    /// navigation command while the overlay is open is not guaranteed to
+    /// be a no-op, so reopen only when closed.
+    @discardableResult
+    private func openNavigationDestinations() -> XCUIElement {
+        let destinations = app.descendants(matching: .any)
+            .matching(identifier: "navigationDestinations")
+            .firstMatch
+        if !destinations.exists {
+            let navigationCommand = app.buttons["command.navigation"]
+            XCTAssertTrue(navigationCommand.waitForExistence(timeout: 3),
+                          "Navigation command should exist on every main destination")
+            navigationCommand.tap()
+        }
+        XCTAssertTrue(destinations.waitForExistence(timeout: 3),
+                      "Navigation overlay should list destinations")
+        return destinations
+    }
 
-    /// The tab bar has the expected tabs, all with non-empty labels.
-    func testTabBarHasCorrectNumberOfTabs() {
-        for id in tabIds {
-            let tab = app.buttons[id]
-            XCTAssertTrue(tab.exists, "Tab '\(id)' should exist in the tab bar")
-            XCTAssertFalse(tab.label.isEmpty,
-                           "Tab '\(id)' should have a non-empty accessibility label")
+    // MARK: - Navigation Structure
+
+    /// The navigation overlay lists the main destinations, all with
+    /// non-empty labels.
+    func testNavigationOverlayListsDestinations() {
+        let destinations = openNavigationDestinations().buttons
+            .allElementsBoundByIndex
+        XCTAssertGreaterThanOrEqual(destinations.count, 5,
+                                    "Navigation overlay should list the main destinations")
+        for destination in destinations {
+            XCTAssertFalse(destination.label.isEmpty,
+                           "Navigation destination should have a non-empty accessibility label")
         }
     }
 
     // MARK: - Interactive Elements
 
-    /// All visible buttons on the home screen have non-empty accessibility labels.
+    /// All visible buttons on the home surface have non-empty accessibility labels.
     func testAllButtonsHaveLabels() {
         let buttons = app.buttons.allElementsBoundByIndex
         for button in buttons where button.exists && button.isHittable {
@@ -67,44 +85,54 @@ final class AccessibilityUITests: XCTestCase {
 
     // MARK: - Screen Navigation
 
-    /// Each tab renders a screen with at least one accessible element.
-    func testEachTabRendersAccessibleContent() {
-        for id in tabIds {
-            let tab = app.buttons[id]
-            XCTAssertTrue(tab.waitForExistence(timeout: 3), "Tab '\(id)' should exist")
-            tab.tap()
+    /// Each navigation destination renders a surface with at least one
+    /// accessible element.
+    func testEachDestinationRendersAccessibleContent() {
+        let count = openNavigationDestinations().buttons.count
+        XCTAssertGreaterThanOrEqual(count, 5,
+                                    "Navigation overlay should list the main destinations")
+        for index in 0 ..< count {
+            let destinations = openNavigationDestinations().buttons
+                .allElementsBoundByIndex
+            let destination = destinations[index]
+            XCTAssertTrue(destination.waitForExistence(timeout: 3),
+                          "Destination \(index) should exist")
+            let label = destination.label
+            destination.tap()
 
-            // Each screen should have at least one descendant element.
+            // Each destination should render at least one descendant element.
             let anyElement = app.descendants(matching: .any).element(boundBy: 0)
             XCTAssertTrue(anyElement.waitForExistence(timeout: 3),
-                          "Tab '\(id)' should render accessible content")
+                          "Destination '\(label)' should render accessible content")
         }
     }
 
-    /// Navigating to each tab and back does not leave the app in a broken state.
-    func testTabNavigationRoundTrip() {
-        // Visit each tab, then return to the first.
-        for id in tabIds {
-            app.buttons[id].tap()
+    /// Navigating to each destination and back does not leave the app in a
+    /// broken state.
+    func testNavigationRoundTrip() {
+        let count = openNavigationDestinations().buttons.count
+        for index in 0 ..< count {
+            openNavigationDestinations().buttons.allElementsBoundByIndex[index].tap()
         }
-        app.buttons["tab.myCard"].tap()
+        // Return to the first destination.
+        openNavigationDestinations().buttons.allElementsBoundByIndex[0].tap()
 
-        XCTAssertTrue(app.buttons["tab.myCard"].exists,
-                      "Tab bar should still exist after round-trip navigation")
+        XCTAssertTrue(app.buttons["command.navigation"].waitForExistence(timeout: 3),
+                      "Command bar should still exist after round-trip navigation")
         let buttons = app.buttons.allElementsBoundByIndex
         let visibleButtons = buttons.filter { $0.exists && $0.isHittable }
         XCTAssertFalse(visibleButtons.isEmpty,
-                       "Home screen should have interactive elements after round-trip")
+                       "Home surface should have interactive elements after round-trip")
     }
 
     // MARK: - VoiceOver Traits
 
-    /// Home screen has visible static text elements with content.
+    /// Home surface has visible static text elements with content.
     func testStaticTextElementsHaveContent() {
         let staticTexts = app.staticTexts.allElementsBoundByIndex
         let visibleTexts = staticTexts.filter { $0.exists && !$0.label.isEmpty }
         XCTAssertFalse(visibleTexts.isEmpty,
-                       "Home screen should have at least one visible static text element")
+                       "Home surface should have at least one visible static text element")
     }
 
     // MARK: - Accessibility Audit
