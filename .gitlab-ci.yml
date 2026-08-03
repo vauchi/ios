@@ -36,7 +36,7 @@ include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
   - project: 'vauchi/scripts'
-    ref: ci-templates-v2026.07.12
+    ref: ci-templates-v2026.07.13
     file:
       - '/ci-templates/timeouts.yml'
       - '/ci-templates/reuse.yml'
@@ -65,7 +65,7 @@ stages:
   - deploy
 
 variables:
-  VAUCHI_SCRIPTS_REF: "ci-templates-v2026.07.12"
+  VAUCHI_SCRIPTS_REF: "ci-templates-v2026.07.13"
   # GitLab Ultimate Security Configuration
   SAST_EXCLUDED_PATHS: "build/, DerivedData/, Pods/"
   SECRET_DETECTION_EXCLUDED_PATHS: "build/, DerivedData/, Pods/"
@@ -744,7 +744,7 @@ check:parser-parity:
     FRONTEND_NAME: "ios"
     PARSER_FILE: "Vauchi/CoreUI/PresentationNodes.swift"
     PARSER_PROTOCOL: "presentation"
-    PARSER_SCRIPT_REF: "ci-templates-v2026.07.12"
+    PARSER_SCRIPT_REF: "ci-templates-v2026.07.13"
     CORE_REF: "v0.59.0"
 
 # Removed symbols: detect stale references to removed features
