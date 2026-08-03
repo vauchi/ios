@@ -18,9 +18,10 @@ struct PresentationNodeView: View {
         switch node {
         case let .text(value):
             Text(value.content)
-                .font(font(for: value.style))
+                .font(textRoleStyle(for: value.style).font)
                 .foregroundStyle(
-                    value.style == .muted ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary)
+                    textRoleStyle(for: value.style).muted
+                        ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary)
                 )
                 .accessibilityLabel(value.accessibility.label)
         case let .input(value):
@@ -298,16 +299,6 @@ struct PresentationNodeView: View {
                 value: value
             )
         )
-    }
-
-    private func font(for style: PresentationTextStyle) -> Font {
-        switch style {
-        case .heading: .title2.bold()
-        case .body: .body
-        case .caption: .caption
-        case .monospace: .system(.body, design: .monospaced)
-        case .muted: .body
-        }
     }
 
     private func toneColor(_ tone: PresentationTone) -> Color {

@@ -32,6 +32,7 @@
 		2F7D817E60BDE6223F5E0484 /* VauchiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */; };
 		2F880F6CCE185990EACF77B9 /* identity_check.json in Resources */ = {isa = PBXBuildFile; fileRef = AF2AD205AD1B75A514B7C2D9 /* identity_check.json */; };
 		345A6E8CFA128DEE17B47EAF /* NfcDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EDBF8DCF3784366CBDEDEF6 /* NfcDiagnosticView.swift */; };
+		372704301C13BD3953C05111 /* TextRoleStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF7B59DC1F3F21EAE1966C19 /* TextRoleStyle.swift */; };
 		37B0045C32255AE32005F23B /* PresentationNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7944347EE6E209E80A5CF30 /* PresentationNodeView.swift */; };
 		3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5484CED84D0E33E917230C9A /* NetworkMonitorTests.swift */; };
 		3D1CBC0C00C370BCFAA0D7A8 /* NotificationServiceDeepLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C515EE1804FDB78832CA0D /* NotificationServiceDeepLinkTests.swift */; };
@@ -45,6 +46,7 @@
 		478EA49E96D2582348C820EC /* settings.json in Resources */ = {isa = PBXBuildFile; fileRef = 8C92250DB74883B6DE9A0792 /* settings.json */; };
 		47C1E3ED0F5525C7C0B866F2 /* PresentationSurfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B374973D50CCCC7F0EF6DA /* PresentationSurfaceView.swift */; };
 		4EAEBFCF75EC10C4B544735E /* PresentationNodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB75683BE92B1B2E80EF559D /* PresentationNodes.swift */; };
+		4EE9B40358253BE51C825BF7 /* TextRoleStyleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5427C4F253C3A904B25AA98 /* TextRoleStyleTests.swift */; };
 		51D407A2D3870435A78044E3 /* WakeupBootstrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446FDB08A3809BE4183F5790 /* WakeupBootstrapTests.swift */; };
 		566C2C33F23B683B8CB8226F /* DeviceCapabilitiesPusherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 653B68CB3B3D86B13D52E63E /* DeviceCapabilitiesPusherTests.swift */; };
 		5680FAB9C220183B0BB3AC03 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E044AD16B5BA923A443ADFC7 /* ContentView.swift */; };
@@ -249,6 +251,7 @@
 		BDB1CEDFBA5AE37F12D5BE39 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		BE32C32136CEB8811C89778C /* VauchiKeychainBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiKeychainBridgeTests.swift; sourceTree = "<group>"; };
 		BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FftAnalyzer.swift; sourceTree = "<group>"; };
+		BF7B59DC1F3F21EAE1966C19 /* TextRoleStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRoleStyle.swift; sourceTree = "<group>"; };
 		C1F55713677327E69AF771F8 /* contact_limit.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contact_limit.json; sourceTree = "<group>"; };
 		C29DE27FD4421553D034E37A /* contact_edit_preview.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = contact_edit_preview.json; sourceTree = "<group>"; };
 		C33B31B7AACDDDA13430257D /* BleDiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleDiagnosticView.swift; sourceTree = "<group>"; };
@@ -270,6 +273,7 @@
 		EEB2B575C59DEDEFBA323040 /* AccelerometerProximityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccelerometerProximityServiceTests.swift; sourceTree = "<group>"; };
 		F0726E87F8B0A43ABC11897A /* MultipartCameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartCameraPreview.swift; sourceTree = "<group>"; };
 		F0A9E6EDE9C2286CB574E056 /* .version */ = {isa = PBXFileReference; path = .version; sourceTree = "<group>"; };
+		F5427C4F253C3A904B25AA98 /* TextRoleStyleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRoleStyleTests.swift; sourceTree = "<group>"; };
 		F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEdgeTests.swift; sourceTree = "<group>"; };
 		FC65E03A5DC0CF895251666C /* privacy_settings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = privacy_settings.json; sourceTree = "<group>"; };
 		FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncServiceTests.swift; sourceTree = "<group>"; };
@@ -315,6 +319,7 @@
 				2665E0EEA673F89A405C5D27 /* NfcCommandDispatchTests.swift */,
 				42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */,
 				DFFE40C221022DBDBD034AF3 /* PresentationStateTests.swift */,
+				F5427C4F253C3A904B25AA98 /* TextRoleStyleTests.swift */,
 				446FDB08A3809BE4183F5790 /* WakeupBootstrapTests.swift */,
 				0795D7BA553D151750EFD399 /* fixtures */,
 			);
@@ -450,6 +455,7 @@
 				007F08BF348F3C0C5BA74B92 /* PresentationPrimitives.swift */,
 				9B834D827B063CB9F17CFA86 /* PresentationState.swift */,
 				49B374973D50CCCC7F0EF6DA /* PresentationSurfaceView.swift */,
+				BF7B59DC1F3F21EAE1966C19 /* TextRoleStyle.swift */,
 			);
 			path = CoreUI;
 			sourceTree = "<group>";
@@ -737,6 +743,7 @@
 				0DDA36A34D79308F42591BA3 /* PlatformEventListenerTests.swift in Sources */,
 				750231F789BE3B2634B7B5FD /* PresentationStateTests.swift in Sources */,
 				585352762DF068CBD6CD1EE8 /* SettingsServiceTests.swift in Sources */,
+				4EE9B40358253BE51C825BF7 /* TextRoleStyleTests.swift in Sources */,
 				60D8E07B9EFB1F102D7518A0 /* ThemeServiceSettingsTests.swift in Sources */,
 				ACB5D66C9DC53BB3DEC7044E /* VauchiKeychainBridgeTests.swift in Sources */,
 				C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */,
@@ -813,6 +820,7 @@
 				14F136822861093402A2A51D /* RenderContextPusher.swift in Sources */,
 				AA3F337ED100BA98F8D5B5E3 /* SettingsService.swift in Sources */,
 				EE61E717891162E1E64D6B6E /* SineWaveGenerator.swift in Sources */,
+				372704301C13BD3953C05111 /* TextRoleStyle.swift in Sources */,
 				2D0728F99D4DBB3C8491C25B /* ThemeService.swift in Sources */,
 				2F7D817E60BDE6223F5E0484 /* VauchiApp.swift in Sources */,
 				AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */,
