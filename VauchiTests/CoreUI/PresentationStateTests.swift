@@ -3,9 +3,35 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 @testable import Vauchi
+import VauchiPlatform
 import XCTest
 
 final class PresentationStateTests: XCTestCase {
+    // @scenario: generic_presentation_protocol.feature :: Every shell renders the same prepared presentation
+    func testSharedPresentationContractReachesExpectedState() throws {
+        let fixture = try JSONDecoder().decode(
+            SharedPresentationContract.self,
+            from: Data(presentationContractFixtureJson().utf8)
+        )
+        XCTAssertEqual(fixture.schemaVersion, 1)
+
+        var state = PresentationState()
+        XCTAssertTrue(try state.apply(fixture.initialCommands).isEmpty)
+        for step in fixture.steps {
+            XCTAssertTrue(try state.apply(step.commands).isEmpty)
+        }
+
+        XCTAssertEqual(state.activeSurfaceID, fixture.expectedState.activeSurfaceID)
+        XCTAssertEqual(
+            state.surfaces[fixture.expectedState.activeSurfaceID],
+            fixture.expectedState.surface
+        )
+        XCTAssertEqual(
+            state.bars[fixture.expectedState.activeSurfaceID]?.bar,
+            fixture.expectedState.contextBar
+        )
+    }
+
     func testAppliesPreparedTransactionAtomically() throws {
         let commands = try decodeCommands("""
         {"commands":[
@@ -283,6 +309,36 @@ final class PresentationStateTests: XCTestCase {
             PresentationCommandEnvelope.self,
             from: Data(json.utf8)
         ).commands
+    }
+
+    private struct SharedPresentationContract: Decodable {
+        let schemaVersion: Int
+        let initialCommands: [PresentationCommand]
+        let steps: [Step]
+        let expectedState: ExpectedState
+
+        enum CodingKeys: String, CodingKey {
+            case schemaVersion = "schema_version"
+            case initialCommands = "initial_commands"
+            case steps
+            case expectedState = "expected_state"
+        }
+
+        struct Step: Decodable {
+            let commands: [PresentationCommand]
+        }
+
+        struct ExpectedState: Decodable {
+            let activeSurfaceID: String
+            let surface: PresentationSurface
+            let contextBar: PresentationContextBar
+
+            enum CodingKeys: String, CodingKey {
+                case activeSurfaceID = "active_surface_id"
+                case surface
+                case contextBar = "context_bar"
+            }
+        }
     }
 
     private func jsonObject(_ value: some Encodable) throws -> NSDictionary {
