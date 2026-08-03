@@ -262,16 +262,8 @@
 				DFFE40C221022DBDBD034AF3 /* PresentationStateTests.swift */,
 				F5427C4F253C3A904B25AA98 /* TextRoleStyleTests.swift */,
 				446FDB08A3809BE4183F5790 /* WakeupBootstrapTests.swift */,
-				0795D7BA553D151750EFD399 /* fixtures */,
 			);
 			path = CoreUI;
-			sourceTree = "<group>";
-		};
-		0795D7BA553D151750EFD399 /* fixtures */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = fixtures;
 			sourceTree = "<group>";
 		};
 		084CDA50E8A47328DA35C07B /* QrTuner */ = {
