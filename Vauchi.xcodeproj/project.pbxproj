@@ -262,16 +262,8 @@
 				DFFE40C221022DBDBD034AF3 /* PresentationStateTests.swift */,
 				F5427C4F253C3A904B25AA98 /* TextRoleStyleTests.swift */,
 				446FDB08A3809BE4183F5790 /* WakeupBootstrapTests.swift */,
-				0795D7BA553D151750EFD399 /* fixtures */,
 			);
 			path = CoreUI;
-			sourceTree = "<group>";
-		};
-		0795D7BA553D151750EFD399 /* fixtures */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = fixtures;
 			sourceTree = "<group>";
 		};
 		084CDA50E8A47328DA35C07B /* QrTuner */ = {
@@ -280,6 +272,13 @@
 				02E118373F3BD2F4E7FC20AB /* QrCameraTunerView.swift */,
 			);
 			path = QrTuner;
+			sourceTree = "<group>";
+		};
+		237CDF99CC9731164A85CC39 /* Libs */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Libs;
 			sourceTree = "<group>";
 		};
 		5B9EAC8491A990983095623D /* VauchiTests */ = {
@@ -403,6 +402,8 @@
 				71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */,
 				A9A5EC2572980F7E8930C6E3 /* CoreUI */,
 				909E60FB02223B078CC3A058 /* Diagnostic */,
+				E8EBF46057A25FC714F70C1E /* Generated */,
+				237CDF99CC9731164A85CC39 /* Libs */,
 				F9FC793A89B3CAD3083ACA25 /* Services */,
 				DE4003224F0F48BD0A224CE5 /* ViewModels */,
 				CC27001BE792CD487814D16E /* Views */,
@@ -416,6 +417,13 @@
 				1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		E8EBF46057A25FC714F70C1E /* Generated */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Generated;
 			sourceTree = "<group>";
 		};
 		F9FC793A89B3CAD3083ACA25 /* Services */ = {
