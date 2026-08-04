@@ -34,7 +34,18 @@ set -euo pipefail
 V=$(sed -n '/vauchi-platform-swift/{n;s/.*"\([^"]*\)".*/\1/p;}' project.yml)
 [ -n "$V" ] || { echo "  ERROR: no VauchiPlatform version in project.yml"; exit 1; }
 
-MIRROR="$HOME/.cache/vauchi-platform-swift-mirror/v$V"
+ZIPFILE="$HOME/.cache/vauchi-platform-zips/v$V.zip"
+if [ ! -f "$ZIPFILE" ]; then
+  echo "  ERROR: cached XCFramework zip $ZIPFILE missing — build:debug should have downloaded it."
+  exit 1
+fi
+
+if command -v sha256sum >/dev/null 2>&1; then
+  ZSHA=$(sha256sum "$ZIPFILE" | cut -c1-12)
+else
+  ZSHA=$(shasum -a 256 "$ZIPFILE" | cut -c1-12)
+fi
+MIRROR="$HOME/.cache/vauchi-platform-swift-mirror/v$V-$ZSHA"
 if [ ! -d "$MIRROR" ]; then
   echo "  ERROR: mirror $MIRROR missing — build:debug should have built it."
   exit 1
