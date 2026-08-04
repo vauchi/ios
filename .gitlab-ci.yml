@@ -875,7 +875,7 @@ build:debug:
     # If a test job lands on a fresh runner without the cache, xcodebuild
     # resolves from the mirror config left in ~/Library/org.swift.swiftpm/
     # configuration/mirrors.json (per-runner, persistent across pipelines).
-    expire_in: 1 hour
+    expire_in: 1 week
   rules:
     # Skip on upstream triggers — update:bindings-version handles the bump,
     # build runs later on the bump MR or main merge.
