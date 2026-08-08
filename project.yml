@@ -174,3 +174,18 @@ schemes:
 # runner cache pinned the dead commit. Touching project.yml changes the
 # cache key so the runner re-resolves v0.51.46 fresh. See problem record
 # 2026-05-08-nell-runner-spm-mirror-corruption.
+#
+# CI SPM cache-bust 2026-08-08: same failure, same shape, on v0.60.1 —
+#
+#   fatal: unable to read tree (3e883eb41957f5c3e128c53d00fc63527aba0fa0)
+#   Couldn't check out revision '3e883eb4...'
+#
+# That commit does not exist in vauchi-platform-swift (`git cat-file -t`
+# cannot find it), so the runner's cached mirror is pinning a revision the
+# remote has since GC'd. Nothing in the MR touches SPM — the branch changes
+# three Swift files — and iOS main was green a day earlier, which is the
+# signature of a stale per-branch cache rather than a code fault.
+#
+# Second occurrence means the cache-bust is a recurring manual step, not a
+# one-off; worth automating the mirror refresh rather than editing this
+# file each time.
