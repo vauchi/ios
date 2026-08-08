@@ -19,7 +19,7 @@ struct PresentationHostView: View {
                             .padding(.horizontal, profileClass == .compact ? 8 : 20)
                             .padding(.bottom, 4)
                     }
-                if let overlay = viewModel.presentationState.activeOverlay {
+                if let overlay = viewModel.presentationState.overlay {
                     PresentationOverlayView(
                         overlay: overlay,
                         windowClass: profileClass,
@@ -46,7 +46,7 @@ struct PresentationHostView: View {
             }
             .animation(
                 reducedMotion ? nil : .easeOut(duration: 0.24),
-                value: viewModel.presentationState.activeOverlay?.overlay.kind
+                value: viewModel.presentationState.overlay?.overlay.kind
             )
             .contentShape(Rectangle())
             .highPriorityGesture(

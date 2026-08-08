@@ -37,9 +37,19 @@ struct PresentationState {
                 }
                 next.surfaces[surface.surfaceID] = surface
                 next.bars.removeValue(forKey: surface.surfaceID)
-                if next.overlay?.surfaceID == surface.surfaceID {
-                    next.overlay = nil
-                }
+                // Any surface replacement means navigation happened, so the
+                // overlay dies with it — not only when the replaced surface is
+                // the one it was raised over. Core clears its own
+                // open-overlay state on every dispatch and sends no dismissal
+                // when an item inside the menu navigates, so a surviving
+                // overlay desynchronises the two: on an iPhone the menu stayed
+                // drawn over the destination and the next menu tap
+                // re-presented it instead of toggling shut.
+                //
+                // Commands arrive with ReplaceSurface before any
+                // PresentOverlay in the same transaction, so this cannot clear
+                // an overlay the same batch just raised.
+                next.overlay = nil
             case let .setContextBar(bar, surfaceID):
                 guard next.surfaces[surfaceID]?.revision == bar.revision else {
                     throw PresentationStateError.mismatchedContextBar(surfaceID)
@@ -92,30 +102,6 @@ struct PresentationState {
 
     var activeBar: PresentationContextBar? {
         activeSurfaceID.flatMap { bars[$0]?.bar }
-    }
-
-    /// The overlay, but only while the surface it was raised over still exists
-    /// at the revision it was raised at.
-    ///
-    /// Core clears its own open-overlay state on every dispatch, so it expects
-    /// an overlay to die with its surface and sends no dismissal when an item
-    /// inside it navigates. Rendering `overlay` unscoped drew the menu over
-    /// the destination, leaving its rows untappable, and the next menu tap
-    /// re-presented instead of toggling shut.
-    ///
-    /// The revision half alone is not enough. `apply` already nils an overlay
-    /// whose *own* surface is replaced, so the case that survives is
-    /// navigation to a **different** surface id — which is what the device
-    /// showed: the menu raised over `main` stayed up over the exchange
-    /// surface. Only the active-surface check catches that.
-    var activeOverlay: RevisionedOverlay? {
-        guard let overlay,
-              overlay.surfaceID == activeSurfaceID,
-              surfaces[overlay.surfaceID]?.revision == overlay.revision
-        else {
-            return nil
-        }
-        return overlay
     }
 
     var visibleSurfaceIDs: [String] {

@@ -192,7 +192,7 @@ class AppViewModel: ObservableObject {
     }
 
     func dismissPresentationOverlay() {
-        guard let overlay = presentationState.activeOverlay else { return }
+        guard let overlay = presentationState.overlay else { return }
         var next = presentationState
         next.dismissOverlay()
         presentationState = next
