@@ -70,6 +70,7 @@ enum PresentationCommand: Decodable {
     case replaceSurface(PresentationSurface)
     case setContextBar(RevisionedContextBar, surfaceID: String)
     case presentOverlay(RevisionedOverlay)
+    case dismissOverlay(surfaceID: String, revision: UInt64, kind: PresentationOverlayKind)
     case setPresentationProfile(PresentationProfile)
     case presentAlert(PresentationAlert)
     case showToast(PresentationToast)
@@ -121,6 +122,18 @@ enum PresentationCommand: Decodable {
         }
     }
 
+    private struct DismissOverlayPayload: Decodable {
+        let surfaceID: String
+        let revision: UInt64
+        let kind: PresentationOverlayKind
+
+        private enum CodingKeys: String, CodingKey {
+            case surfaceID = "surface_id"
+            case revision
+            case kind
+        }
+    }
+
     private struct ProfilePayload: Decodable {
         let profile: PresentationProfile
     }
@@ -165,52 +178,66 @@ enum PresentationCommand: Decodable {
                 .init(codingPath: decoder.codingPath, debugDescription: "Empty command")
             )
         }
+        self = try Self.decodeKeyedVariant(key: key, from: container)
+    }
+
+    private static func decodeKeyedVariant(
+        key: DynamicKey,
+        from container: KeyedDecodingContainer<DynamicKey>
+    ) throws -> Self {
         switch key.stringValue {
         case "ReplaceSurface":
-            self = try .replaceSurface(
+            return try .replaceSurface(
                 container.decode(SurfacePayload.self, forKey: key).surface
             )
         case "SetContextBar":
             let value = try container.decode(BarPayload.self, forKey: key)
-            self = .setContextBar(
+            return .setContextBar(
                 .init(revision: value.revision, bar: value.bar),
                 surfaceID: value.surfaceID
             )
         case "PresentOverlay":
             let value = try container.decode(OverlayPayload.self, forKey: key)
-            self = .presentOverlay(
+            return .presentOverlay(
                 .init(
                     surfaceID: value.surfaceID,
                     revision: value.revision,
                     overlay: value.overlay
                 )
             )
+        case "DismissOverlay":
+            let value = try container.decode(DismissOverlayPayload.self, forKey: key)
+            return .dismissOverlay(
+                surfaceID: value.surfaceID,
+                revision: value.revision,
+                kind: value.kind
+            )
         case "SetPresentationProfile":
-            self = try .setPresentationProfile(
+            return try .setPresentationProfile(
                 container.decode(ProfilePayload.self, forKey: key).profile
             )
         case "PresentAlert":
-            self = try .presentAlert(
+            return try .presentAlert(
                 container.decode(AlertPayload.self, forKey: key).alert
             )
         case "ShowToast":
-            self = try .showToast(
+            return try .showToast(
                 container.decode(ToastPayload.self, forKey: key).toast
             )
         case "OpenExternalUrl":
-            self = try .openExternalURL(
+            return try .openExternalURL(
                 container.decode(URLPayload.self, forKey: key).url
             )
         case "ExportFile":
-            self = try .exportFile(
+            return try .exportFile(
                 container.decode(FilePayload.self, forKey: key).file
             )
         case "PostNotification":
-            self = try .postNotification(
+            return try .postNotification(
                 container.decode(NotificationPayload.self, forKey: key).notification
             )
         default:
-            self = .platformEffect(
+            return .platformEffect(
                 variant: key.stringValue,
                 payload: try? container.decode(JSONValue.self, forKey: key)
             )
