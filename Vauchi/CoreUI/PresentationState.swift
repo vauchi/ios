@@ -37,19 +37,23 @@ struct PresentationState {
                 }
                 next.surfaces[surface.surfaceID] = surface
                 next.bars.removeValue(forKey: surface.surfaceID)
-                // Any surface replacement means navigation happened, so the
-                // overlay dies with it — not only when the replaced surface is
-                // the one it was raised over. Core clears its own
-                // open-overlay state on every dispatch and sends no dismissal
-                // when an item inside the menu navigates, so a surviving
-                // overlay desynchronises the two: on an iPhone the menu stayed
-                // drawn over the destination and the next menu tap
-                // re-presented it instead of toggling shut.
+                // Only the overlay raised over *this* surface dies with it.
+                // A broader "any ReplaceSurface clears" rule was tried and
+                // reverted: it removed an overlay raised earlier in the same
+                // transaction, so the navigation menu never appeared
+                // (vauchi/ios!630, test:ui "Navigation overlay should list
+                // destinations", twice).
                 //
-                // Commands arrive with ReplaceSurface before any
-                // PresentOverlay in the same transaction, so this cannot clear
-                // an overlay the same batch just raised.
-                next.overlay = nil
+                // KNOWN GAP: navigating to a *different* surface id therefore
+                // leaves the overlay drawn over the destination — observed on
+                // an iPhone SE, tracked in
+                // 2026-08-07-ios-stale-overlay-and-raw-error-alert. Fixing it
+                // needs the transaction-aware rule the TUI and GTK get for
+                // free by keying overlays per surface; this shell holds one
+                // unscoped field and cannot express it without that refactor.
+                if next.overlay?.surfaceID == surface.surfaceID {
+                    next.overlay = nil
+                }
             case let .setContextBar(bar, surfaceID):
                 guard next.surfaces[surfaceID]?.revision == bar.revision else {
                     throw PresentationStateError.mismatchedContextBar(surfaceID)
