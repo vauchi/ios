@@ -13,6 +13,7 @@
 // lock/auth routing, identity-presence, the contacts-presence flag, error
 // clearing, and initial sync state.
 
+import Combine
 @testable import Vauchi
 import XCTest
 
@@ -78,7 +79,21 @@ final class VauchiViewModelTests: XCTestCase {
         let coreVM = try XCTUnwrap(viewModel.coreViewModel)
         let preIdentitySurfaces = coreVM.presentationState.visibleSurfaceIDs
 
+        // The rebuild rides `dispatchPresentation`, which now runs the engine
+        // call off the main thread (so a BLE burst cannot starve the UI — see
+        // 2026-08-09-ios-ui-freezes-on-engine-mutex-during-ble). The state
+        // therefore lands after `createIdentity` returns, so wait for the
+        // published change rather than reading it straight away. Event-driven,
+        // not a sleep.
+        let rebuilt = XCTestExpectation(description: "presentation rebuilt after identity creation")
+        var cancellable: AnyCancellable?
+        cancellable = coreVM.$presentationState
+            .first { $0.visibleSurfaceIDs != preIdentitySurfaces && !$0.visibleSurfaceIDs.isEmpty }
+            .sink { _ in rebuilt.fulfill() }
+
         try await viewModel.createIdentity(name: "Alice")
+        await fulfillment(of: [rebuilt], timeout: 5)
+        cancellable?.cancel()
 
         let surfaces = coreVM.presentationState.visibleSurfaceIDs
         XCTAssertFalse(surfaces.isEmpty)

@@ -57,7 +57,24 @@ class AppViewModel: ObservableObject {
         }
     }
 
-    let appEngine: PlatformAppEngine
+    /// Immutable, so it is safe to read from the engine queue. The Rust side
+    /// guards `AppEngine` with its own mutex, which is exactly why no caller
+    /// may take it on the main thread — see `engineQueue`.
+    nonisolated let appEngine: PlatformAppEngine
+
+    /// Serial queue for every engine call.
+    ///
+    /// `PlatformAppEngine` holds one non-reentrant `Mutex<AppEngine>`, so any
+    /// caller blocks until it is free. Calling it on the main thread meant a
+    /// BLE burst — KeyOffer, KeyAck, commitment, every card chunk — starved
+    /// the UI, which is the freeze in
+    /// `2026-08-09-ios-ui-freezes-on-engine-mutex-during-ble`.
+    ///
+    /// Serial, not concurrent, so hardware events reach Core in arrival
+    /// order. This is Android's shape: a single-consumer FIFO plus a
+    /// non-main dispatcher (`FifoEventQueue` + `Dispatchers.IO`), which is
+    /// why Android never exhibited the freeze.
+    nonisolated let engineQueue = DispatchQueue(label: "app.vauchi.engine", qos: .userInitiated)
 
     /// Phase 2A (core-gui-architecture-alignment): listener registered with
     /// `PlatformAppEngine.setEventListener`. Core invokes
@@ -167,20 +184,48 @@ class AppViewModel: ObservableObject {
     }
 
     func dispatchPresentation(_ event: PresentationEvent) {
+        let eventJSON: String
         do {
             let data = try JSONEncoder().encode(event)
-            guard let eventJSON = String(data: data, encoding: .utf8) else {
+            guard let json = String(data: data, encoding: .utf8) else {
                 throw PresentationDispatchError.invalidUTF8
             }
-            try applyPresentationEnvelope(
-                appEngine.dispatchJson(eventJson: eventJSON)
-            )
+            eventJSON = json
         } catch {
-            alertMessage = AlertMessage(
-                title: "Presentation error",
-                message: String(describing: error)
-            )
+            presentError(error)
+            return
         }
+
+        // Off the main thread: the engine mutex may be held by a hardware
+        // event for the length of a BLE operation. Ordering is preserved by
+        // the queue being serial, so two events dispatched in sequence still
+        // reach Core in that sequence.
+        let engine = appEngine
+        engineQueue.async { [weak self] in
+            do {
+                let envelope = try engine.dispatchJson(eventJson: eventJSON)
+                Task { @MainActor in self?.receivePresentationEnvelope(envelope) }
+            } catch {
+                Task { @MainActor in self?.presentError(error) }
+            }
+        }
+    }
+
+    /// Apply an envelope produced off the main thread, surfacing failures the
+    /// way the synchronous path used to.
+    private func receivePresentationEnvelope(_ json: String) {
+        do {
+            try applyPresentationEnvelope(json)
+        } catch {
+            presentError(error)
+        }
+    }
+
+    private func presentError(_ error: Error) {
+        alertMessage = AlertMessage(
+            title: "Presentation error",
+            message: String(describing: error)
+        )
     }
 
     func activateAndDispatch(
@@ -669,14 +714,20 @@ class AppViewModel: ObservableObject {
         }
     }
 
-    private func sendHardwareEvent(_ event: MobileEvent) {
-        do {
-            let resultJson = try appEngine.handleHardwareEvent(event: event)
-            try applyPresentationEnvelope(resultJson)
-        } catch {
-            #if DEBUG
-                print("AppViewModel: failed to send hardware event: \(error)")
-            #endif
+    /// Called from the CoreBluetooth queue. Hops to the engine queue so BLE
+    /// bursts never contend with the main thread, and so events reach Core in
+    /// arrival order.
+    private nonisolated func sendHardwareEvent(_ event: MobileEvent) {
+        let engine = appEngine
+        engineQueue.async { [weak self] in
+            do {
+                let resultJson = try engine.handleHardwareEvent(event: event)
+                Task { @MainActor in self?.receivePresentationEnvelope(resultJson) }
+            } catch {
+                #if DEBUG
+                    print("AppViewModel: failed to send hardware event: \(error)")
+                #endif
+            }
         }
     }
 
