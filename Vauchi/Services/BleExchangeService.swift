@@ -18,6 +18,25 @@ final class BleExchangeService: NSObject {
 
     private var eventCallback: EventCallback?
 
+    /// Serial queue for every CoreBluetooth callback.
+    ///
+    /// CoreBluetooth expects a serial queue: it uses the one it is handed to
+    /// deliver delegate callbacks, and a concurrent queue lets them run
+    /// simultaneously. Both managers previously used
+    /// `.global(qos: .userInitiated)`, which is concurrent, so hardware events
+    /// could reach Core out of arrival order — KeyAck after a card chunk.
+    ///
+    /// Android hit exactly that and fixed it with a single-consumer FIFO
+    /// ("hardware events must reach core in arrival order (BLE KeyAck before
+    /// card chunks) — a launch-per-event dispatch re-ordered notifications
+    /// arriving milliseconds apart", `CoreAppViewModel`). This is the same
+    /// guarantee at the source.
+    ///
+    /// Ordering only: this does NOT stop the engine mutex being taken on the
+    /// main thread for user events, which is the freeze described in
+    /// `2026-08-09-ios-ui-freezes-on-engine-mutex-during-ble`.
+    private let bluetoothQueue = DispatchQueue(label: "app.vauchi.ble", qos: .userInitiated)
+
     // MARK: Central (initiator)
 
     private var centralManager: CBCentralManager?
@@ -44,7 +63,7 @@ final class BleExchangeService: NSObject {
     func activate(callback: @escaping EventCallback) {
         eventCallback = callback
         if centralManager == nil {
-            centralManager = CBCentralManager(delegate: self, queue: .global(qos: .userInitiated))
+            centralManager = CBCentralManager(delegate: self, queue: bluetoothQueue)
         }
     }
 
@@ -68,7 +87,7 @@ final class BleExchangeService: NSObject {
     func startAdvertising(serviceUuid: String, payload: Data) {
         pendingAdvertise = (service: serviceUuid, token: payload)
         if peripheralManager == nil {
-            peripheralManager = CBPeripheralManager(delegate: self, queue: .global(qos: .userInitiated))
+            peripheralManager = CBPeripheralManager(delegate: self, queue: bluetoothQueue)
         } else if peripheralManager?.state == .poweredOn {
             startAdvertisingNow()
         }
