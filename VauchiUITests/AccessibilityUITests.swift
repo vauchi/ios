@@ -77,34 +77,31 @@ final class AccessibilityUITests: XCTestCase {
         return destinations
     }
 
-    /// Opens the overlay, waits for it to list all `expectedCount`
-    /// destinations, then taps the one at `index` and returns its label.
+    /// Opens the overlay and taps the destination at `index`, returning its
+    /// label.
     ///
-    /// The panel publishes destinations as it materializes, so indexing into
-    /// it on arrival can address a list that is still filling. Waiting for
-    /// the full count is the honest settle signal here: the menu offers the
-    /// same destinations from every surface, so a list that never reaches
-    /// `expectedCount` is a real defect and still fails.
+    /// Taps a coordinate rather than calling `XCUIElement.tap()`. The element
+    /// tap path checks hittability first and, when that is not satisfied,
+    /// synthesizes a scroll-to-visible drag — which is what killed job
+    /// 15799437410: the overlay panel does not scroll, so the drag reached
+    /// the dismiss scrim and took the menu down mid-tap. A coordinate tap
+    /// delivers the touch at the element's centre and never scrolls.
     ///
-    /// Deliberately not `isHittable` — an earlier revision gated on it and
-    /// CI (job 15799571433) showed it reporting false for destinations that
-    /// tap perfectly well, because the host `ZStack` carries its own
-    /// `contentShape` and swallows the hit test.
+    /// Two settle signals were tried here and both were wrong, so neither is
+    /// coming back without evidence. `isHittable` reports false for
+    /// destinations that tap fine, because the host `ZStack`'s
+    /// `contentShape` absorbs the hit test (job 15799571433). Waiting for a
+    /// fixed destination count assumed the menu is identical on every
+    /// surface, and it is not (job 15799681642).
     @discardableResult
-    private func tapDestination(at index: Int, of expectedCount: Int) -> String {
-        let container = openNavigationDestinations()
-        XCTAssertTrue(
-            wait(container, until: NSPredicate { element, _ in
-                (element as? XCUIElement)?.buttons.count == expectedCount
-            }),
-            "Navigation overlay should list all \(expectedCount) destinations"
-        )
-        let destinations = container.buttons.allElementsBoundByIndex
+    private func tapDestination(at index: Int) -> String {
+        let destinations = openNavigationDestinations().buttons.allElementsBoundByIndex
         XCTAssertTrue(index < destinations.count,
-                      "Destination \(index) should still be listed")
+                      "Destination \(index) should be listed "
+                          + "(overlay lists \(destinations.count))")
         let destination = destinations[index]
         let label = destination.label
-        destination.tap()
+        destination.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         return label
     }
 
@@ -143,7 +140,7 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(count, 5,
                                     "Navigation overlay should list the main destinations")
         for index in 0 ..< count {
-            let label = tapDestination(at: index, of: count)
+            let label = tapDestination(at: index)
 
             // Each destination should render at least one descendant element.
             let anyElement = app.descendants(matching: .any).element(boundBy: 0)
@@ -157,10 +154,10 @@ final class AccessibilityUITests: XCTestCase {
     func testNavigationRoundTrip() {
         let count = openNavigationDestinations().buttons.count
         for index in 0 ..< count {
-            tapDestination(at: index, of: count)
+            tapDestination(at: index)
         }
         // Return to the first destination.
-        tapDestination(at: 0, of: count)
+        tapDestination(at: 0)
 
         XCTAssertTrue(app.buttons["command.navigation"].waitForExistence(timeout: 3),
                       "Command bar should still exist after round-trip navigation")
