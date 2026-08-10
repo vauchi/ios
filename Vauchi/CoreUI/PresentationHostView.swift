@@ -60,7 +60,14 @@ struct PresentationHostView: View {
                             surfaceID: surfaceID,
                             event: .backRequested(surfaceID: surfaceID)
                         )
-                    }
+                    },
+                // The overlay is modal (`.isModal`), so an edge drag over it
+                // must not reach the surface underneath: back-navigating a
+                // surface the user cannot see leaves the menu drawn over a
+                // destination they never chose — the defect class tracked in
+                // 2026-08-07-ios-stale-overlay-and-raw-error-alert. `.subviews`
+                // keeps the overlay's own gestures working.
+                including: viewModel.presentationState.overlay == nil ? .all : .subviews
             )
         }
         .alert(item: $viewModel.alertMessage) { alert in
