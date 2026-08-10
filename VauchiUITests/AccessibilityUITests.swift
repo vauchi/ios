@@ -37,15 +37,42 @@ final class AccessibilityUITests: XCTestCase {
         app = nil
     }
 
-    /// Returns the navigation overlay's destination container, opening the
-    /// overlay via the command bar unless it is already open. Tapping the
-    /// navigation command while the overlay is open is not guaranteed to
-    /// be a no-op, so reopen only when closed.
-    @discardableResult
-    private func openNavigationDestinations() -> XCUIElement {
-        let destinations = app.descendants(matching: .any)
+    private var navigationDestinations: XCUIElement {
+        app.descendants(matching: .any)
             .matching(identifier: "navigationDestinations")
             .firstMatch
+    }
+
+    /// Waits for `element` to satisfy `predicateFormat`, polling the live
+    /// hierarchy rather than sleeping (CC-06).
+    private func wait(
+        _ element: XCUIElement,
+        until predicateFormat: String,
+        timeout: TimeInterval = 5
+    ) -> Bool {
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: predicateFormat),
+            object: element
+        )
+        return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
+    }
+
+    /// Returns the navigation overlay's destination container, opening the
+    /// overlay via the command bar unless it is already open.
+    ///
+    /// Both edges of the overlay animate (`PresentationHostView` runs a
+    /// 0.24s ease-out), and an `exists` sample taken during either edge is
+    /// a lie the whole helper is built on: mid-dismiss it reports the
+    /// overlay open, so the reopen tap is skipped and the destination list
+    /// is read as it disappears; mid-open it reports closed, so the tap
+    /// toggles the overlay back shut. Settle both edges before deciding —
+    /// first wait out any dismissal in flight, then require a destination
+    /// to be hittable, not merely present, because a half-transitioned
+    /// panel publishes destinations whose frames still land on the scrim.
+    @discardableResult
+    private func openNavigationDestinations() -> XCUIElement {
+        let destinations = navigationDestinations
+        _ = wait(destinations, until: "exists == false", timeout: 2)
         if !destinations.exists {
             let navigationCommand = app.buttons["command.navigation"]
             XCTAssertTrue(navigationCommand.waitForExistence(timeout: 3),
@@ -54,7 +81,27 @@ final class AccessibilityUITests: XCTestCase {
         }
         XCTAssertTrue(destinations.waitForExistence(timeout: 3),
                       "Navigation overlay should list destinations")
+        XCTAssertTrue(wait(destinations.buttons.firstMatch, until: "isHittable == true"),
+                      "Navigation overlay should settle with tappable destinations")
         return destinations
+    }
+
+    /// Opens the overlay and taps the destination at `index`, returning its
+    /// label. Waiting for the destination itself to be hittable keeps the
+    /// assertion honest — a destination that never becomes reachable still
+    /// fails the test — while removing the transition race that made the
+    /// tap land on the scrim and dismiss the overlay.
+    @discardableResult
+    private func tapDestination(at index: Int) -> String {
+        let destinations = openNavigationDestinations().buttons.allElementsBoundByIndex
+        XCTAssertTrue(index < destinations.count,
+                      "Destination \(index) should still be listed")
+        let destination = destinations[index]
+        XCTAssertTrue(wait(destination, until: "isHittable == true"),
+                      "Destination \(index) should be reachable in the navigation overlay")
+        let label = destination.label
+        destination.tap()
+        return label
     }
 
     // MARK: - Navigation Structure
@@ -92,13 +139,7 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(count, 5,
                                     "Navigation overlay should list the main destinations")
         for index in 0 ..< count {
-            let destinations = openNavigationDestinations().buttons
-                .allElementsBoundByIndex
-            let destination = destinations[index]
-            XCTAssertTrue(destination.waitForExistence(timeout: 3),
-                          "Destination \(index) should exist")
-            let label = destination.label
-            destination.tap()
+            let label = tapDestination(at: index)
 
             // Each destination should render at least one descendant element.
             let anyElement = app.descendants(matching: .any).element(boundBy: 0)
@@ -112,10 +153,10 @@ final class AccessibilityUITests: XCTestCase {
     func testNavigationRoundTrip() {
         let count = openNavigationDestinations().buttons.count
         for index in 0 ..< count {
-            openNavigationDestinations().buttons.allElementsBoundByIndex[index].tap()
+            tapDestination(at: index)
         }
         // Return to the first destination.
-        openNavigationDestinations().buttons.allElementsBoundByIndex[0].tap()
+        tapDestination(at: 0)
 
         XCTAssertTrue(app.buttons["command.navigation"].waitForExistence(timeout: 3),
                       "Command bar should still exist after round-trip navigation")
