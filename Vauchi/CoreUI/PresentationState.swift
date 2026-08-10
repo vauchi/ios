@@ -35,16 +35,29 @@ struct PresentationState {
                    surface.revision < previous.revision {
                     throw PresentationStateError.staleSurface(surface.surfaceID)
                 }
+                let rebuiltInPlace = next.surfaces[surface.surfaceID]?.revision
+                    == surface.revision
                 next.surfaces[surface.surfaceID] = surface
                 next.bars.removeValue(forKey: surface.surfaceID)
-                // Only the overlay raised over *this* surface dies with it.
-                // A broader "any ReplaceSurface clears" rule was tried and
-                // reverted: it removed an overlay raised earlier in the same
-                // transaction, so the navigation menu never appeared
-                // (vauchi/ios!630, test:ui "Navigation overlay should list
-                // destinations", twice). Keying by surface keeps that
-                // ordering assumption out of the rule.
-                next.overlays.removeValue(forKey: surface.surfaceID)
+                // Only the overlay raised over *this* surface dies with it,
+                // and only when the surface actually moves on. A broader "any
+                // ReplaceSurface clears" rule was tried and reverted: it
+                // removed an overlay raised earlier in the same transaction,
+                // so the navigation menu never appeared (vauchi/ios!630,
+                // test:ui "Navigation overlay should list destinations",
+                // twice). Keying by surface keeps that ordering assumption out
+                // of the rule.
+                //
+                // The same-revision case is the wakeup/invalidation rebuild
+                // described above, and it must not count as moving on: the
+                // periodic poll re-emits the current surface unchanged, and
+                // clearing on it closed whatever menu the user had open
+                // mid-choice. That is the "Privacy" failure at index 8 in jobs
+                // 15799437410 and 15800681495 — the overlay disappearing
+                // between reading a destination's label and tapping it.
+                if !rebuiltInPlace {
+                    next.overlays.removeValue(forKey: surface.surfaceID)
+                }
             case let .setContextBar(bar, surfaceID):
                 guard next.surfaces[surfaceID]?.revision == bar.revision else {
                     throw PresentationStateError.mismatchedContextBar(surfaceID)

@@ -300,6 +300,43 @@ final class PresentationStateTests: XCTestCase {
         )
     }
 
+    /// The periodic wakeup poll re-emits the current surface at the same
+    /// revision (see `testAppliesSameRevisionRebuildLastWriterWins`). That is
+    /// a redraw, not navigation, so it must not take away a menu the user has
+    /// open — otherwise the menu vanishes under them at whatever moment the
+    /// timer happens to fire.
+    ///
+    /// On CI that read as the overlay disappearing between reading a
+    /// destination's label and tapping it, always at whichever destination the
+    /// tick landed on: "Privacy" at index 8 in jobs 15799437410 and
+    /// 15800681495.
+    func testBenignRebuildKeepsTheOpenOverlay() throws {
+        var state = PresentationState()
+        _ = try state.apply(decodeCommands("""
+        {"commands":[
+          {"ReplaceSurface":{"surface":\(surfaceJSON(revision: 1))}},
+          {"PresentOverlay":{
+            "surface_id":"main",
+            "revision":1,
+            "overlay":{"kind":"navigation","title":"More","items":[]}
+          }}
+        ]}
+        """))
+        XCTAssertEqual(state.activeOverlay?.overlay.kind, .navigation)
+
+        _ = try state.apply(decodeCommands("""
+        {"commands":[
+          {"ReplaceSurface":{"surface":\(surfaceJSON(revision: 1, title: "Redrawn"))}}
+        ]}
+        """))
+
+        XCTAssertEqual(state.surfaces["main"]?.title, "Redrawn")
+        XCTAssertEqual(
+            state.activeOverlay?.overlay.kind, .navigation,
+            "a same-revision redraw must not close a menu the user has open"
+        )
+    }
+
     /// The overlay raised over one surface must not leak into another that
     /// happens to become active — scoping is per surface, not "most recent".
     func testOverlayIsScopedToTheSurfaceItWasRaisedOver() throws {
