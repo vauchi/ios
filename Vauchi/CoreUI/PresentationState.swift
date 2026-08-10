@@ -15,7 +15,7 @@ struct PresentationState {
     private(set) var surfaces: [String: PresentationSurface] = [:]
     private(set) var bars: [String: RevisionedContextBar] = [:]
     private(set) var profile: PresentationProfile?
-    private(set) var overlay: RevisionedOverlay?
+    private(set) var overlays: [String: RevisionedOverlay] = [:]
 
     mutating func apply(
         _ commands: [PresentationCommand]
@@ -42,18 +42,9 @@ struct PresentationState {
                 // reverted: it removed an overlay raised earlier in the same
                 // transaction, so the navigation menu never appeared
                 // (vauchi/ios!630, test:ui "Navigation overlay should list
-                // destinations", twice).
-                //
-                // KNOWN GAP: navigating to a *different* surface id therefore
-                // leaves the overlay drawn over the destination — observed on
-                // an iPhone SE, tracked in
-                // 2026-08-07-ios-stale-overlay-and-raw-error-alert. Fixing it
-                // needs the transaction-aware rule the TUI and GTK get for
-                // free by keying overlays per surface; this shell holds one
-                // unscoped field and cannot express it without that refactor.
-                if next.overlay?.surfaceID == surface.surfaceID {
-                    next.overlay = nil
-                }
+                // destinations", twice). Keying by surface keeps that
+                // ordering assumption out of the rule.
+                next.overlays.removeValue(forKey: surface.surfaceID)
             case let .setContextBar(bar, surfaceID):
                 guard next.surfaces[surfaceID]?.revision == bar.revision else {
                     throw PresentationStateError.mismatchedContextBar(surfaceID)
@@ -63,16 +54,14 @@ struct PresentationState {
                 guard next.surfaces[overlay.surfaceID]?.revision == overlay.revision else {
                     throw PresentationStateError.mismatchedOverlay(overlay.surfaceID)
                 }
-                next.overlay = overlay
+                next.overlays[overlay.surfaceID] = overlay
             case let .dismissOverlay(surfaceID, _, kind):
                 // Core rewrites a repeat PresentOverlay into this so the
                 // context-bar buttons toggle. Matching on kind as well as
                 // surface keeps a stale dismiss from closing an overlay Core
                 // has since replaced.
-                if let open = next.overlay,
-                   open.surfaceID == surfaceID,
-                   open.overlay.kind == kind {
-                    next.overlay = nil
+                if next.overlays[surfaceID]?.overlay.kind == kind {
+                    next.overlays.removeValue(forKey: surfaceID)
                 }
             case let .setPresentationProfile(profile):
                 next.profile = profile
@@ -97,7 +86,8 @@ struct PresentationState {
     }
 
     mutating func dismissOverlay() {
-        overlay = nil
+        guard let activeSurfaceID else { return }
+        overlays.removeValue(forKey: activeSurfaceID)
     }
 
     var activeSurfaceID: String? {
@@ -106,6 +96,16 @@ struct PresentationState {
 
     var activeBar: PresentationContextBar? {
         activeSurfaceID.flatMap { bars[$0]?.bar }
+    }
+
+    /// The overlay to render, resolved through the active surface so a menu
+    /// raised over one surface never stays drawn over the next one. Core
+    /// sends no dismissal when a destination is chosen — it clears its own
+    /// open-overlay state and expects each shell to scope the overlay the
+    /// way `activeBar` already scopes the context bar
+    /// (`2026-08-07-ios-stale-overlay-and-raw-error-alert`).
+    var activeOverlay: RevisionedOverlay? {
+        activeSurfaceID.flatMap { overlays[$0] }
     }
 
     var visibleSurfaceIDs: [String] {

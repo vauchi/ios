@@ -19,7 +19,7 @@ struct PresentationHostView: View {
                             .padding(.horizontal, profileClass == .compact ? 8 : 20)
                             .padding(.bottom, 4)
                     }
-                if let overlay = viewModel.presentationState.overlay {
+                if let overlay = viewModel.presentationState.activeOverlay {
                     PresentationOverlayView(
                         overlay: overlay,
                         windowClass: profileClass,
@@ -46,7 +46,7 @@ struct PresentationHostView: View {
             }
             .animation(
                 reducedMotion ? nil : .easeOut(duration: 0.24),
-                value: viewModel.presentationState.overlay?.overlay.kind
+                value: viewModel.presentationState.activeOverlay?.overlay.kind
             )
             .contentShape(Rectangle())
             .highPriorityGesture(
@@ -67,7 +67,7 @@ struct PresentationHostView: View {
                 // destination they never chose — the defect class tracked in
                 // 2026-08-07-ios-stale-overlay-and-raw-error-alert. `.subviews`
                 // keeps the overlay's own gestures working.
-                including: viewModel.presentationState.overlay == nil ? .all : .subviews
+                including: viewModel.presentationState.activeOverlay == nil ? .all : .subviews
             )
         }
         .alert(item: $viewModel.alertMessage) { alert in
