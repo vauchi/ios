@@ -28,6 +28,14 @@ final class AccessibilityUITests: XCTestCase {
 
         // --reset-for-testing creates a test identity, so the app starts on
         // the home surface with the contextual command bar visible.
+        //
+        // Seeding runs from an async `.task`, so on a slow machine the app can
+        // still be on onboarding here and the destination tests then read its
+        // single entry. Polling the menu in setup to wait that out was tried
+        // and made things worse — the repeated open/close churn broke every
+        // test in the class — so this stays a plain existence check. CI
+        // settles before the first query; a local run may show the two
+        // destination tests reading one entry.
         let navigationCommand = app.buttons["command.navigation"]
         XCTAssertTrue(navigationCommand.waitForExistence(timeout: 10),
                       "Command bar should appear after --reset-for-testing identity seeding")

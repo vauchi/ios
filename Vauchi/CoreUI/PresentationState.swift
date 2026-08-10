@@ -108,6 +108,29 @@ struct PresentationState {
         activeSurfaceID.flatMap { overlays[$0] }
     }
 
+    /// Removes and returns overlays the active surface has left behind, so
+    /// the caller can report each one to Core as dismissed.
+    ///
+    /// Core forgets its own open-overlay state *only* when the shell reports
+    /// `OverlayDismissed` (`AppEngine::clear_open_overlay`); nothing else
+    /// clears it. Scoping an overlay off screen without reporting it would
+    /// leave Core's toggle believing that menu is still open, and
+    /// `resolve_overlay_toggle` would then rewrite the next request for it
+    /// into a dismissal — the menu would stop opening at all. Core's own
+    /// comment names this: "the next activation would toggle closed against
+    /// state that no longer matches the screen".
+    mutating func takeOverlaysLeftBehind() -> [RevisionedOverlay] {
+        guard let activeSurfaceID else { return [] }
+        let leftBehind = overlays
+            .filter { $0.key != activeSurfaceID }
+            .values
+            .sorted { $0.surfaceID < $1.surfaceID }
+        for overlay in leftBehind {
+            overlays.removeValue(forKey: overlay.surfaceID)
+        }
+        return leftBehind
+    }
+
     var visibleSurfaceIDs: [String] {
         guard let profile else {
             return activeSurfaceID.map { [$0] } ?? []
