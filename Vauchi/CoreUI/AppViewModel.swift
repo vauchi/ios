@@ -257,19 +257,7 @@ class AppViewModel: ObservableObject {
         )
         var next = presentationState
         let effects = try next.apply(envelope.commands)
-        let leftBehind = next.takeOverlaysLeftBehind()
         presentationState = next
-        // Navigating away takes the menu off screen without Core hearing
-        // about it; report it so Core's overlay toggle keeps matching what
-        // the user can actually see.
-        for overlay in leftBehind {
-            dispatchPresentation(
-                .overlayDismissed(
-                    surfaceID: overlay.surfaceID,
-                    kind: overlay.overlay.kind
-                )
-            )
-        }
         for effect in effects {
             handlePresentationEffect(effect)
         }

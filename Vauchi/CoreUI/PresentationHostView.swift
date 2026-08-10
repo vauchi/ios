@@ -25,6 +25,17 @@ struct PresentationHostView: View {
                         windowClass: profileClass,
                         reducedMotion: reducedMotion,
                         onAction: { event in
+                            // Choosing an item closes the menu, and Core has
+                            // to hear that: it clears its own open-overlay
+                            // state only on `OverlayDismissed`, so staying
+                            // quiet leaves its toggle rewriting the next
+                            // request for this menu into a dismissal and the
+                            // menu stops opening. Report it *before* the
+                            // action, while this surface is still the active
+                            // one — reporting it afterwards is rejected by
+                            // Core's fail-closed validation and reaches the
+                            // user as a "Presentation error" alert.
+                            viewModel.dismissPresentationOverlay()
                             viewModel.activateAndDispatch(
                                 surfaceID: overlay.surfaceID,
                                 event: event

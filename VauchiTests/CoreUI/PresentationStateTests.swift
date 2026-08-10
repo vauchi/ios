@@ -300,60 +300,6 @@ final class PresentationStateTests: XCTestCase {
         )
     }
 
-    /// Scoping an overlay off screen is invisible to Core: it forgets its own
-    /// open-overlay state only when the shell reports `OverlayDismissed`. If
-    /// the shell stays quiet, `resolve_overlay_toggle` rewrites the next
-    /// request for that menu into a dismissal and the menu stops opening —
-    /// observed as "Navigation overlay should list destinations" in job
-    /// 15800176614, once the scoping fix stopped the stale menu from being
-    /// reused.
-    func testOverlayLeftBehindByNavigationIsHandedBackForReporting() throws {
-        var state = PresentationState()
-        _ = try state.apply(decodeCommands("""
-        {"commands":[
-          {"ReplaceSurface":{"surface":\(surfaceJSON(revision: 1))}},
-          {"SetPresentationProfile":{"profile":{
-            "window_class":"compact",
-            "pane_layout":"single",
-            "primary_surface":"main",
-            "detail_surface":null,
-            "active_surface":"main"
-          }}},
-          {"PresentOverlay":{
-            "surface_id":"main",
-            "revision":1,
-            "overlay":{"kind":"navigation","title":"More","items":[]}
-          }}
-        ]}
-        """))
-        XCTAssertTrue(
-            state.takeOverlaysLeftBehind().isEmpty,
-            "the overlay over the active surface is on screen, not left behind"
-        )
-
-        _ = try state.apply(decodeCommands("""
-        {"commands":[
-          {"ReplaceSurface":{"surface":\(surfaceJSON(revision: 1, surfaceID: "exchange"))}},
-          {"SetPresentationProfile":{"profile":{
-            "window_class":"compact",
-            "pane_layout":"single",
-            "primary_surface":"exchange",
-            "detail_surface":null,
-            "active_surface":"exchange"
-          }}}
-        ]}
-        """))
-
-        let leftBehind = state.takeOverlaysLeftBehind()
-        XCTAssertEqual(leftBehind.map(\.surfaceID), ["main"],
-                       "navigating away must hand back the menu it took off screen")
-        XCTAssertEqual(leftBehind.first?.overlay.kind, .navigation)
-        XCTAssertTrue(
-            state.takeOverlaysLeftBehind().isEmpty,
-            "a reported overlay must not be handed back twice"
-        )
-    }
-
     /// The overlay raised over one surface must not leak into another that
     /// happens to become active — scoping is per surface, not "most recent".
     func testOverlayIsScopedToTheSurfaceItWasRaisedOver() throws {
