@@ -170,16 +170,8 @@ enum PresentationEvent: Encodable {
                 ),
                 forKey: .init(stringValue: "ValueChanged")!
             )
-        case let .inputSubmitted(surfaceID, bindingID):
-            try container.encode(
-                BindingPayload(surfaceID: surfaceID, bindingID: bindingID),
-                forKey: .init(stringValue: "InputSubmitted")!
-            )
-        case let .inputFocusEnded(surfaceID, bindingID):
-            try container.encode(
-                BindingPayload(surfaceID: surfaceID, bindingID: bindingID),
-                forKey: .init(stringValue: "InputFocusEnded")!
-            )
+        case .inputSubmitted, .inputFocusEnded:
+            try encodeBindingEvent(into: &container)
         case let .backRequested(surfaceID):
             try container.encode(
                 SurfacePayload(surfaceID: surfaceID),
@@ -206,6 +198,27 @@ enum PresentationEvent: Encodable {
                 forKey: .init(stringValue: "DeepLinkOpened")!
             )
         case .appBackgrounded, .presentationInvalidated:
+            break
+        }
+    }
+
+    /// The two events that name a binding without carrying a value, split
+    /// out to keep `encode(to:)` inside the body-length limit.
+    private func encodeBindingEvent(
+        into container: inout KeyedEncodingContainer<DynamicKey>
+    ) throws {
+        switch self {
+        case let .inputSubmitted(surfaceID, bindingID):
+            try container.encode(
+                BindingPayload(surfaceID: surfaceID, bindingID: bindingID),
+                forKey: .init(stringValue: "InputSubmitted")!
+            )
+        case let .inputFocusEnded(surfaceID, bindingID):
+            try container.encode(
+                BindingPayload(surfaceID: surfaceID, bindingID: bindingID),
+                forKey: .init(stringValue: "InputFocusEnded")!
+            )
+        default:
             break
         }
     }
