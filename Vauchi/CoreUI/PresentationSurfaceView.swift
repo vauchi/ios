@@ -37,6 +37,13 @@ struct PresentationSurfaceView: View {
         .contentShape(Rectangle())
         .simultaneousGesture(
             TapGesture().onEnded {
+                // Simultaneous so it still fires when a child handles the
+                // tap: focus must leave the field whatever was pressed,
+                // otherwise SwiftUI keeps it and Core never hears that the
+                // user moved on. Tapping the focused field itself clears
+                // and re-takes focus, so one spurious InputFocusEnded can
+                // precede the refocus.
+                focusedBinding.wrappedValue = nil
                 onEvent(.surfaceActivated(surfaceID: surface.surfaceID))
             }
         )

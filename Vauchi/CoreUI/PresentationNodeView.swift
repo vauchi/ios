@@ -13,6 +13,9 @@ struct PresentationNodeView: View {
     let onCameraPermissionDenied: () -> Void
     let focusedBinding: FocusState<String?>.Binding
     let onEvent: (PresentationEvent) -> Void
+    /// Whether this node's field held focus at the last change. Only a
+    /// field that had it can report losing it.
+    @State private var hadFocus = false
 
     var body: some View {
         switch node {
@@ -145,6 +148,31 @@ struct PresentationNodeView: View {
                     .font(.caption)
                     .foregroundStyle(.red)
             }
+        }
+        .submitLabel(.done)
+        .onSubmit {
+            onEvent(
+                .inputSubmitted(
+                    surfaceID: surfaceID,
+                    bindingID: value.bindingID
+                )
+            )
+        }
+        // SwiftUI models focus as one "which binding" value, so a field
+        // learns it lost focus by watching that value move off itself.
+        // The deployment target is iOS 15, where `onChange` reports only
+        // the new value, so the "was it us?" half is tracked here — the
+        // same flag Compose needs for a different reason.
+        .onChange(of: focusedBinding.wrappedValue) { current in
+            if hadFocus, current != value.bindingID {
+                onEvent(
+                    .inputFocusEnded(
+                        surfaceID: surfaceID,
+                        bindingID: value.bindingID
+                    )
+                )
+            }
+            hadFocus = current == value.bindingID
         }
         .disabled(!value.enabled)
         .accessibilityLabel(value.accessibility.label)

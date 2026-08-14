@@ -19,6 +19,13 @@ enum PresentationEvent: Encodable {
         bindingID: String,
         value: PresentationInputValue
     )
+    /// The user pressed the keyboard's submit key in a field. Core
+    /// decides whether it means anything on this surface.
+    case inputSubmitted(surfaceID: String, bindingID: String)
+    /// A field lost focus without the user having submitted, so Core can
+    /// offer a way to commit text left behind rather than committing it
+    /// on the user's behalf.
+    case inputFocusEnded(surfaceID: String, bindingID: String)
     case backRequested(surfaceID: String)
     case overlayDismissed(surfaceID: String, kind: PresentationOverlayKind)
     case environmentChanged(
@@ -59,6 +66,18 @@ enum PresentationEvent: Encodable {
         private enum CodingKeys: String, CodingKey {
             case surfaceID = "surface_id"
             case interactionID = "interaction_id"
+        }
+    }
+
+    /// A binding named without a value — submission and focus loss say
+    /// *that* something happened, not what the field now holds.
+    private struct BindingPayload: Encodable {
+        let surfaceID: String
+        let bindingID: String
+
+        private enum CodingKeys: String, CodingKey {
+            case surfaceID = "surface_id"
+            case bindingID = "binding_id"
         }
     }
 
@@ -150,6 +169,16 @@ enum PresentationEvent: Encodable {
                     value: value
                 ),
                 forKey: .init(stringValue: "ValueChanged")!
+            )
+        case let .inputSubmitted(surfaceID, bindingID):
+            try container.encode(
+                BindingPayload(surfaceID: surfaceID, bindingID: bindingID),
+                forKey: .init(stringValue: "InputSubmitted")!
+            )
+        case let .inputFocusEnded(surfaceID, bindingID):
+            try container.encode(
+                BindingPayload(surfaceID: surfaceID, bindingID: bindingID),
+                forKey: .init(stringValue: "InputFocusEnded")!
             )
         case let .backRequested(surfaceID):
             try container.encode(
