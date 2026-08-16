@@ -139,6 +139,45 @@ final class AccessibilityUITests: XCTestCase {
         }
     }
 
+    // MARK: - Rows
+
+    /// Every activatable row is a button carrying its own label.
+    ///
+    /// Rows used to render as a plain stack with a tap gesture and a
+    /// container-level label. VoiceOver then announced them as text with no
+    /// hint they could be activated, and the label overwrote every line
+    /// inside the row — which left the exchange-mode picker impossible to
+    /// operate by accessibility at all
+    /// (`_private/docs/problems/2026-08-16-ios-rows-are-not-buttons/`).
+    func testPresentationRowsAreLabelledButtons() {
+        let rows = app.descendants(matching: .any)
+            .matching(identifier: "presentationRow")
+
+        // No main destination lists rows on a freshly seeded identity — the
+        // exchange flow is where they live, a couple of primary commands in.
+        // Stepping forward blind beats naming the screens: the labels are
+        // localized and the step count is Core's to change.
+        for _ in 0 ..< 3 where rows.count == 0 {
+            let primary = app.buttons["command.primary"]
+            guard primary.waitForExistence(timeout: 5), primary.isEnabled else { break }
+            primary.tap()
+            _ = rows.element(boundBy: 0).waitForExistence(timeout: 5)
+        }
+
+        let found = rows.allElementsBoundByIndex
+        XCTAssertFalse(found.isEmpty,
+                       "No surface rendered an activatable row, so this test "
+                           + "proved nothing. Hierarchy:\n\(app.debugDescription)")
+
+        for row in found where row.exists {
+            XCTAssertEqual(row.elementType, .button,
+                           "An activatable row should be a button, "
+                               + "not element type \(row.elementType.rawValue)")
+            XCTAssertFalse(row.label.isEmpty,
+                           "An activatable row should carry its own label")
+        }
+    }
+
     // MARK: - Screen Navigation
 
     /// Each navigation destination renders a surface with at least one
