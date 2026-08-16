@@ -70,6 +70,13 @@ struct PresentationNodeView: View {
                     }
                 }
             }
+            // A label on a container that is not itself an accessibility
+            // element propagates down and overwrites every child's label,
+            // so each line reads back as the container's. `.contain` makes
+            // this a container whose children keep their own labels and
+            // stay individually reachable
+            // (`2026-08-16-ios-rows-are-not-buttons`).
+            .accessibilityElement(children: .contain)
             .accessibilityLabel(value.accessibility.label)
         case let .list(value):
             VStack(alignment: .leading, spacing: 8) {
@@ -85,6 +92,7 @@ struct PresentationNodeView: View {
                     )
                 }
             }
+            .accessibilityElement(children: .contain)
             .accessibilityLabel(value.accessibility.label)
         case let .image(value):
             image(value)
@@ -107,8 +115,8 @@ struct PresentationNodeView: View {
                     in: value.minimum ... value.maximum,
                     step: value.step ?? 0.001
                 )
+                .accessibilityLabel(value.accessibility.label)
             }
-            .accessibilityLabel(value.accessibility.label)
         case let .progress(value):
             VStack(alignment: .leading) {
                 if let label = value.label {
@@ -120,6 +128,7 @@ struct PresentationNodeView: View {
                     ProgressView()
                 }
             }
+            .accessibilityElement(children: .ignore)
             .accessibilityLabel(value.accessibility.label)
         case .divider:
             Divider()
@@ -134,6 +143,7 @@ struct PresentationNodeView: View {
                     text: textBinding(value)
                 )
                 .focused(focusedBinding, equals: value.bindingID)
+                .accessibilityLabel(value.accessibility.label)
             } else {
                 TextField(
                     value.label,
@@ -142,6 +152,7 @@ struct PresentationNodeView: View {
                 )
                 .textContentType(textContentType(for: value.inputKind))
                 .focused(focusedBinding, equals: value.bindingID)
+                .accessibilityLabel(value.accessibility.label)
             }
             if let error = value.validationError {
                 Text(error)
@@ -175,7 +186,6 @@ struct PresentationNodeView: View {
             hadFocus = current == value.bindingID
         }
         .disabled(!value.enabled)
-        .accessibilityLabel(value.accessibility.label)
     }
 
     private func textBinding(
@@ -232,6 +242,7 @@ struct PresentationNodeView: View {
         .padding(8)
         .background(toneColor(value.tone).opacity(0.12))
         .clipShape(RoundedRectangle(cornerRadius: 8))
+        .accessibilityElement(children: .contain)
         .accessibilityLabel(value.accessibility.label)
     }
 
@@ -282,6 +293,7 @@ struct PresentationNodeView: View {
         .padding(8)
         .background(Color.orange.opacity(0.12))
         .clipShape(RoundedRectangle(cornerRadius: 8))
+        .accessibilityElement(children: .contain)
         .accessibilityLabel(value.accessibility.label)
     }
 
@@ -391,12 +403,69 @@ private struct PresentationImageContent: View {
 }
 
 private struct PresentationRowView: View {
+    /// Shell-minted handle so tests and device automation can find and
+    /// activate a row without matching localized copy. Core's opaque ids stay
+    /// out of it. Only activatable rows carry it — a static row is content,
+    /// not an affordance.
+    static let identifier = "presentationRow"
+
     let row: PresentationRow
     let surfaceID: String
     let minimumTarget: CGFloat
     let onEvent: (PresentationEvent) -> Void
 
     var body: some View {
+        HStack {
+            rowContent
+            if !row.secondaryActions.isEmpty {
+                Menu {
+                    ForEach(row.secondaryActions) { action in
+                        Button(action.label) {
+                            activate(action)
+                        }
+                        .disabled(!action.enabled)
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                }
+                .accessibilityLabel("Row actions")
+            }
+        }
+        .padding(8)
+        .background(row.selected ? Color.accentColor.opacity(0.12) : .clear)
+    }
+
+    /// The row's own content, as a single accessibility element carrying
+    /// the Core-supplied label.
+    ///
+    /// An activatable row is a real `Button` rather than a tap gesture: the
+    /// gesture form left the row a plain stack, so VoiceOver announced it as
+    /// text with no hint that it could be activated, and the exchange-mode
+    /// picker was unreachable to anything driving the app by accessibility
+    /// (`2026-08-16-ios-rows-are-not-buttons`).
+    @ViewBuilder
+    private var rowContent: some View {
+        if let action = row.activation {
+            Button {
+                activate(action)
+            } label: {
+                summaryContent
+            }
+            .buttonStyle(.plain)
+            .disabled(!row.enabled || !action.enabled)
+            .accessibilityLabel(row.accessibility.label)
+            .accessibilityIdentifier(Self.identifier)
+        } else {
+            summaryContent
+                // Without this the label below would propagate to each child
+                // `Text` instead of describing the row, so every line read
+                // back as the row's label.
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(row.accessibility.label)
+        }
+    }
+
+    private var summaryContent: some View {
         HStack {
             if let data = row.imageData, let image = UIImage(data: Data(data)) {
                 Image(uiImage: image)
@@ -421,29 +490,8 @@ private struct PresentationRowView: View {
             if let detail = row.detail {
                 Text(detail).foregroundStyle(.secondary)
             }
-            if !row.secondaryActions.isEmpty {
-                Menu {
-                    ForEach(row.secondaryActions) { action in
-                        Button(action.label) {
-                            activate(action)
-                        }
-                        .disabled(!action.enabled)
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                }
-                .accessibilityLabel("Row actions")
-            }
         }
-        .padding(8)
-        .background(row.selected ? Color.accentColor.opacity(0.12) : .clear)
         .contentShape(Rectangle())
-        .onTapGesture {
-            if let action = row.activation, row.enabled, action.enabled {
-                activate(action)
-            }
-        }
-        .accessibilityLabel(row.accessibility.label)
     }
 
     private func activate(_ action: PresentationAction) {
