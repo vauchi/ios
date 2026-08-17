@@ -12,6 +12,24 @@ import VauchiPlatform
 /// Service for ultrasonic audio proximity verification.
 /// Uses AVAudioEngine to emit and receive signals at 18-20 kHz.
 class AudioProximityService {
+    /// Why audio proximity could not run.
+    ///
+    /// Named causes rather than AVFoundation's own errors, so a caller can
+    /// report why nothing was emitted instead of the process dying.
+    private enum AudioProximityError: LocalizedError {
+        case microphoneNotGranted
+        case engineNotRunning
+
+        var errorDescription: String? {
+            switch self {
+            case .microphoneNotGranted:
+                "Microphone permission not granted"
+            case .engineNotRunning:
+                "Audio engine did not start"
+            }
+        }
+    }
+
     // MARK: - Audio Engine
 
     private let audioEngine = AVAudioEngine()
@@ -30,24 +48,43 @@ class AudioProximityService {
     // MARK: - Initialization
 
     init() {
-        setupAudioSession()
+        // Best effort at construction; every use site re-establishes the
+        // session and reports its own failure, so a denial here is not fatal.
+        try? ensureSessionActive()
     }
 
     deinit {
         stop()
     }
 
-    private func setupAudioSession() {
-        let session = AVAudioSession.sharedInstance()
-        do {
-            try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
-            try session.setPreferredSampleRate(targetSampleRate)
-            try session.setActive(true)
-        } catch {
-            #if DEBUG
-                print("AudioProximityService: Failed to setup audio session: \(error)")
-            #endif
+    /// Whether the user has actually granted the microphone.
+    ///
+    /// `.playAndRecord` cannot be activated without it, so this is the
+    /// difference between "the hardware exists" and "we may use it" — and
+    /// the two were previously conflated (see `checkCapability`).
+    private var microphoneGranted: Bool {
+        if #available(iOS 17.0, *) {
+            return AVAudioApplication.shared.recordPermission == .granted
         }
+        return AVAudioSession.sharedInstance().recordPermission == .granted
+    }
+
+    /// Bring the audio session up, or throw saying why.
+    ///
+    /// This used to swallow its own failure and print in DEBUG only, while
+    /// both call sites wrote `try setupAudioSession()` against a
+    /// non-throwing function — so a session that never activated looked
+    /// exactly like one that did, and the code proceeded to drive
+    /// AVAudioEngine on it. That is what crashed the app
+    /// (`2026-08-17-ios-audio-proximity-crashes-the-app`).
+    private func ensureSessionActive() throws {
+        guard microphoneGranted else {
+            throw AudioProximityError.microphoneNotGranted
+        }
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
+        try session.setPreferredSampleRate(targetSampleRate)
+        try session.setActive(true)
     }
 
     // MARK: - Audio Methods
@@ -55,6 +92,15 @@ class AudioProximityService {
     /// Check device capability for ultrasonic audio.
     func checkCapability() -> String {
         let session = AVAudioSession.sharedInstance()
+
+        // Reported before the hardware questions on purpose. `isInputAvailable`
+        // answers "is there a microphone", not "may we use it", and answering
+        // the first while Core asks the second is what let Core offer Magic —
+        // which requires audio proximity — on a device that would then fail.
+        // Declining here means Core simply does not choose those modes.
+        guard microphoneGranted else {
+            return "none"
+        }
 
         let hasInput = session.isInputAvailable
         let hasOutput = session.currentRoute.outputs.count > 0
@@ -86,7 +132,7 @@ class AudioProximityService {
         }
 
         do {
-            try setupAudioSession()
+            try ensureSessionActive()
 
             guard let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1) else {
                 return "Failed to create audio format"
@@ -109,6 +155,16 @@ class AudioProximityService {
             audioEngine.connect(player, to: audioEngine.mainMixerNode, format: format)
 
             try audioEngine.start()
+
+            // `play()` raises an Objective-C exception if the engine is not
+            // running. Swift cannot catch that — the surrounding `do/catch`
+            // looks protective but only handles Swift errors, so the raise
+            // goes straight to std::terminate and aborts the process. The
+            // state is therefore checked, because it cannot be caught.
+            guard audioEngine.isRunning else {
+                audioEngine.detach(player)
+                throw AudioProximityError.engineNotRunning
+            }
 
             isPlaying = true
             playerNode = player
@@ -169,7 +225,7 @@ class AudioProximityService {
 
     private func recordSamples(timeoutMs: UInt64) -> (samples: [Float], recordedRate: UInt32) {
         do {
-            try setupAudioSession()
+            try ensureSessionActive()
 
             let inputNode = audioEngine.inputNode
             let inputFormat = inputNode.outputFormat(forBus: 0)
