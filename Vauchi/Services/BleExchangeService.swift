@@ -44,7 +44,30 @@ final class BleExchangeService: NSObject {
     private var connectedPeripheral: CBPeripheral?
     private var discoveredCharacteristics: [String: CBCharacteristic] = [:]
     private var discoveredPeripherals: [String: CBPeripheral] = [:]
-    private var pendingWrite: (uuid: String, data: Data)?
+    /// Central GATT writes waiting to go out, FIFO.
+    ///
+    /// Was a single slot, which dropped every write but the last when more
+    /// than one arrived before discovery finished — the chunked card is
+    /// exactly that case. The responder's notify path already had this queue
+    /// (`pendingNotifies`); this is the same guarantee for the central.
+    private var pendingWrites: [(uuid: String, data: Data)] = []
+    /// A `.withResponse` write is out and unacknowledged. Only one at a time:
+    /// CoreBluetooth will accept more, but then a later chunk can overtake an
+    /// earlier one's acknowledgement.
+    private var writeInFlight = false
+    /// Characteristics whose `setNotifyValue(true)` has not yet been confirmed
+    /// by `didUpdateNotificationStateFor`. Non-empty means the peer cannot
+    /// hear us yet.
+    private var awaitingSubscription: Set<String> = []
+    /// Whether services, characteristics and every notify subscription have
+    /// resolved — i.e. the link can actually carry payload.
+    ///
+    /// This is the fix for the ordering race: iOS reports `didConnect` long
+    /// before subscriptions resolve, so writing on connect can land a card
+    /// chunk ahead of the peer's KeyAck, which the handshake machine treats
+    /// as terminal (`ble_handshake_machine.rs`). Android already waits for
+    /// the same conditions (`BleCentral.kt`).
+    private var gattReady = false
     private var pendingRead: String?
 
     // MARK: Peripheral (responder)
@@ -118,19 +141,48 @@ final class BleExchangeService: NSObject {
             enqueueNotify(uuid: normalized, data: data)
             return
         }
-        guard let peripheral = connectedPeripheral else {
+        guard connectedPeripheral != nil else {
             NSLog("[Vauchi] BLE MISROUTE→central uuid=…%@ (no connectedPeripheral)",
                   String(normalized.suffix(2)))
             eventCallback?(.hardwareError(transport: "BLE", error: "No connected device"))
             return
         }
-        guard let characteristic = discoveredCharacteristics[normalized] else {
-            pendingWrite = (uuid: normalized, data: data)
-            return
+        pendingWrites.append((uuid: normalized, data: data))
+        drainWrites()
+    }
+
+    /// Send queued central writes while the link can carry them.
+    ///
+    /// Stops at the first thing that would make a write unsafe rather than
+    /// merely slow: an unresolved characteristic, an unconfirmed
+    /// subscription, an unacknowledged `.withResponse` write, or a full
+    /// transmit queue. Each of those resumes this from its own callback, so
+    /// nothing is dropped and nothing overtakes.
+    private func drainWrites() {
+        guard let peripheral = connectedPeripheral, gattReady else { return }
+        while let next = pendingWrites.first {
+            guard let characteristic = discoveredCharacteristics[next.uuid] else {
+                return // resumes from didDiscoverCharacteristicsFor
+            }
+            let type: CBCharacteristicWriteType =
+                BleUuids.writeWithResponse.contains(next.uuid) ? .withResponse : .withoutResponse
+            if type == .withResponse {
+                if writeInFlight { return } // resumes from didWriteValueFor
+                writeInFlight = true
+            } else if !peripheral.canSendWriteWithoutResponse {
+                return // resumes from peripheralIsReady(toSendWriteWithoutResponse:)
+            }
+            pendingWrites.removeFirst()
+            peripheral.writeValue(next.data, for: characteristic, type: type)
         }
-        let type: CBCharacteristicWriteType =
-            BleUuids.writeWithResponse.contains(uuid) ? .withResponse : .withoutResponse
-        peripheral.writeValue(data, for: characteristic, type: type)
+    }
+
+    /// Mark the link payload-ready and release anything held back.
+    private func markGattReady() {
+        guard !gattReady, awaitingSubscription.isEmpty else { return }
+        gattReady = true
+        NSLog("[Vauchi] BLE gatt ready (queued=%d)", pendingWrites.count)
+        drainWrites()
     }
 
     func readCharacteristic(uuid: String) {
@@ -202,7 +254,12 @@ final class BleExchangeService: NSObject {
     private func cleanup() {
         connectedPeripheral = nil
         discoveredCharacteristics.removeAll()
-        pendingWrite = nil
+        pendingWrites.removeAll()
+        writeInFlight = false
+        awaitingSubscription.removeAll()
+        // A reconnect rediscovers and resubscribes, so readiness must not
+        // survive the link that established it.
+        gattReady = false
         pendingRead = nil
         subscribedCentrals.removeAll()
     }
@@ -299,19 +356,38 @@ extension BleExchangeService: CBPeripheralDelegate {
             discoveredCharacteristics[uuid] = characteristic
             if characteristic.properties.contains(.notify)
                 || characteristic.properties.contains(.indicate) {
+                // Recorded before subscribing so readiness cannot be declared
+                // in the window between asking and being told it took.
+                awaitingSubscription.insert(uuid)
                 peripheral.setNotifyValue(true, for: characteristic)
             }
         }
-        if let pending = pendingWrite, let char = discoveredCharacteristics[pending.uuid] {
-            let type: CBCharacteristicWriteType =
-                BleUuids.writeWithResponse.contains(pending.uuid) ? .withResponse : .withoutResponse
-            peripheral.writeValue(pending.data, for: char, type: type)
-            pendingWrite = nil
+        // This fires once per service, so a peer with no notify characteristic
+        // in *this* service must not be read as "nothing to wait for".
+        if awaitingSubscription.isEmpty {
+            markGattReady()
         }
+        drainWrites()
         if let uuid = pendingRead, let char = discoveredCharacteristics[uuid] {
             peripheral.readValue(for: char)
             pendingRead = nil
         }
+    }
+
+    /// A notify subscription resolved. The last one makes the link usable.
+    func peripheral(
+        _: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic,
+        error: Error?
+    ) {
+        let uuid = characteristic.uuid.uuidString.lowercased()
+        if let error {
+            // Stop waiting on a subscription that will never arrive, otherwise
+            // the queue is held forever on a peer that refused it.
+            NSLog("[Vauchi] BLE subscribe failed char=…%@: %@",
+                  String(uuid.suffix(2)), error.localizedDescription)
+        }
+        awaitingSubscription.remove(uuid)
+        markGattReady()
     }
 
     func peripheral(
@@ -335,6 +411,16 @@ extension BleExchangeService: CBPeripheralDelegate {
         if let error {
             eventCallback?(.hardwareError(transport: "BLE", error: "Write failed: \(error.localizedDescription)"))
         }
+        // Released whether or not the write succeeded: holding the slot on a
+        // failure would stall every later chunk behind a write that will
+        // never be acknowledged again.
+        writeInFlight = false
+        drainWrites()
+    }
+
+    /// The transmit queue has room again — resume `.withoutResponse` writes.
+    func peripheralIsReady(toSendWriteWithoutResponse _: CBPeripheral) {
+        drainWrites()
     }
 }
 
