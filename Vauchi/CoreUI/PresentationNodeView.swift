@@ -6,6 +6,11 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 
 struct PresentationNodeView: View {
+    /// Floor for a QR another device has to read off this screen. Below
+    /// roughly this size a dense multi-stage exchange payload stops
+    /// resolving at arm's length.
+    static let minimumScannableQr: CGFloat = 200
+
     let node: PresentationNode
     let surfaceID: String
     let minimumTarget: CGFloat
@@ -258,7 +263,20 @@ struct PresentationNodeView: View {
                     .interpolation(.none)
                     .resizable()
                     .scaledToFit()
-                    .frame(maxWidth: 240, maxHeight: 240)
+                    // A peer reads this off the screen with a camera, so it
+                    // must not be the element that yields when the viewport
+                    // is tight. Against a fixed-size camera preview it was
+                    // the only flexible child and collapsed to ~104pt on a
+                    // 667pt screen, well under what a dense multi-stage
+                    // payload resolves at
+                    // (`2026-08-17-ios-exchange-qr-collapses`).
+                    .frame(
+                        minWidth: Self.minimumScannableQr,
+                        maxWidth: 280,
+                        minHeight: Self.minimumScannableQr,
+                        maxHeight: 280
+                    )
+                    .layoutPriority(1)
                     .accessibilityLabel(value.accessibility.label)
             } else if value.purpose == .capture {
                 MultipartCameraPreview(
@@ -269,7 +287,15 @@ struct PresentationNodeView: View {
                     onPermissionDenied: onCameraPermissionDenied
                 )
                 .id(useFrontCamera)
-                .frame(width: 250, height: 250)
+                // Flexible, so the preview is what gives way rather than the
+                // QR beside it — a hard 250pt also squeezed the sibling
+                // action buttons down to one character per line.
+                .frame(
+                    minWidth: 120,
+                    maxWidth: 250,
+                    minHeight: 120,
+                    maxHeight: 250
+                )
                 .background(Color.black)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .accessibilityLabel(value.accessibility.label)
