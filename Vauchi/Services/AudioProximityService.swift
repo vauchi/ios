@@ -93,15 +93,15 @@ class AudioProximityService {
     func checkCapability() -> String {
         let session = AVAudioSession.sharedInstance()
 
-        // Reported before the hardware questions on purpose. `isInputAvailable`
-        // answers "is there a microphone", not "may we use it", and answering
-        // the first while Core asks the second is what let Core offer Magic —
-        // which requires audio proximity — on a device that would then fail.
-        // Declining here means Core simply does not choose those modes.
-        guard microphoneGranted else {
-            return "none"
-        }
-
+        // Deliberately answers only the hardware question. A missing grant is
+        // NOT reported as absent hardware: Core maps absence to
+        // `ModeAvailability::Unavailable`, which has no grant path, so the
+        // audio-proximity modes would disappear from the picker instead of
+        // offering to re-prompt — and on a first run, where the permission is
+        // merely undetermined, they would disappear before the user was ever
+        // asked. Denial belongs in `TransportReadiness`, which yields
+        // `PermissionRequired` and a grant affordance; this shell does not
+        // report that yet (see the record's follow-up).
         let hasInput = session.isInputAvailable
         let hasOutput = session.currentRoute.outputs.count > 0
 
