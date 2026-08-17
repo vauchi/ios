@@ -6,10 +6,12 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 
 struct PresentationNodeView: View {
-    /// Floor for a QR another device has to read off this screen. Below
-    /// roughly this size a dense multi-stage exchange payload stops
-    /// resolving at arm's length.
-    static let minimumScannableQr: CGFloat = 200
+    /// Floor for a QR another device has to read off this screen. A dense
+    /// multi-stage exchange payload has to survive a peer's camera at an
+    /// angle, through screen glare, so this is deliberately generous: on a
+    /// compact device the QR lands exactly on this floor, which makes it
+    /// the real size control.
+    static let minimumScannableQr: CGFloat = 260
 
     let node: PresentationNode
     let surfaceID: String
@@ -272,9 +274,9 @@ struct PresentationNodeView: View {
                     // (`2026-08-17-ios-exchange-qr-collapses`).
                     .frame(
                         minWidth: Self.minimumScannableQr,
-                        maxWidth: 280,
+                        maxWidth: 320,
                         minHeight: Self.minimumScannableQr,
-                        maxHeight: 280
+                        maxHeight: 320
                     )
                     .layoutPriority(1)
                     .accessibilityLabel(value.accessibility.label)
@@ -290,11 +292,15 @@ struct PresentationNodeView: View {
                 // Flexible, so the preview is what gives way rather than the
                 // QR beside it — a hard 250pt also squeezed the sibling
                 // action buttons down to one character per line.
+                // Deliberately small: the viewfinder only has to be big
+                // enough to aim with. Scanning reads the camera's own frames,
+                // not this view, so every point given back here buys QR size
+                // on a compact screen.
                 .frame(
-                    minWidth: 120,
-                    maxWidth: 250,
-                    minHeight: 120,
-                    maxHeight: 250
+                    minWidth: 100,
+                    maxWidth: 180,
+                    minHeight: 100,
+                    maxHeight: 180
                 )
                 .background(Color.black)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
