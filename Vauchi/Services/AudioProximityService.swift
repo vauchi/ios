@@ -32,7 +32,29 @@ class AudioProximityService {
 
     // MARK: - Audio Engine
 
-    private let audioEngine = AVAudioEngine()
+    /// Playback and capture get an engine each, and a queue each.
+    ///
+    /// `emit_proximity_commands` sends `AudioEmitChallenge` and
+    /// `AudioListenForResponse` as one batch — the responder is even told to
+    /// listen first — so emit and listen are always in flight together. They
+    /// used to share one AVAudioEngine, and installing the capture tap
+    /// reconfigures a running engine: the IO unit is torn down and rebuilt
+    /// while `isRunning` still answers `true`. The emit path then passed its
+    /// `isRunning` guard and called `AVAudioPlayerNode.play()` on an engine
+    /// that was not running, which raises an Objective-C exception Swift
+    /// cannot catch, and the process aborts
+    /// (`2026-08-17-ios-audio-proximity-crashes-the-app`).
+    ///
+    /// Serializing the two paths against one engine does not fix this — the
+    /// reconfiguration outlives the critical section, and making them take
+    /// turns would leave the responder emitting only after its own 5-second
+    /// listen expired. Separate engines keep them concurrent and stop either
+    /// one from reconfiguring the other. Each queue then only has to make
+    /// its own engine's start-and-use atomic against `stop()`.
+    private let playbackEngine = AVAudioEngine()
+    private let captureEngine = AVAudioEngine()
+    private let playbackQueue = DispatchQueue(label: "app.vauchi.audioproximity.playback")
+    private let captureQueue = DispatchQueue(label: "app.vauchi.audioproximity.capture")
     private var playerNode: AVAudioPlayerNode?
     private var isRecording = false
     private var isPlaying = false
@@ -125,6 +147,30 @@ class AudioProximityService {
         }
     }
 
+    /// Start `engine`, then run `use` — both while `queue` is held.
+    ///
+    /// `AVAudioPlayerNode.play()` aborts the process when its engine is not
+    /// running, so the readiness check and the call cannot be separated by
+    /// a concurrent `stop()`.
+    private func withEngine(
+        _ engine: AVAudioEngine,
+        on queue: DispatchQueue,
+        prepare: () -> Void,
+        use: () -> Void = {}
+    ) throws {
+        try queue.sync {
+            prepare()
+            if !engine.isRunning {
+                try ensureSessionActive()
+                try engine.start()
+            }
+            guard engine.isRunning else {
+                throw AudioProximityError.engineNotRunning
+            }
+            use()
+        }
+    }
+
     /// Emit ultrasonic signal with given samples.
     func emitSignal(samples: [Float], sampleRate: UInt32) -> String {
         guard !samples.isEmpty else {
@@ -151,38 +197,36 @@ class AudioProximityService {
             }
 
             let player = AVAudioPlayerNode()
-            audioEngine.attach(player)
-            audioEngine.connect(player, to: audioEngine.mainMixerNode, format: format)
 
-            try audioEngine.start()
+            // Attach, connect, start and `play()` are one indivisible step:
+            // `play()` aborts the process if the engine stopped since it was
+            // checked, and only holding the queue across both prevents that.
+            try withEngine(playbackEngine, on: playbackQueue) {
+                playbackEngine.attach(player)
+                playbackEngine.connect(player, to: playbackEngine.mainMixerNode, format: format)
+            } use: {
+                isPlaying = true
+                playerNode = player
 
-            // `play()` raises an Objective-C exception if the engine is not
-            // running. Swift cannot catch that — the surrounding `do/catch`
-            // looks protective but only handles Swift errors, so the raise
-            // goes straight to std::terminate and aborts the process. The
-            // state is therefore checked, because it cannot be caught.
-            guard audioEngine.isRunning else {
-                audioEngine.detach(player)
-                throw AudioProximityError.engineNotRunning
-            }
-
-            isPlaying = true
-            playerNode = player
-
-            player.scheduleBuffer(buffer, at: nil, options: []) { [weak self] in
-                DispatchQueue.main.async {
-                    self?.isPlaying = false
+                player.scheduleBuffer(buffer, at: nil, options: []) { [weak self] in
+                    DispatchQueue.main.async {
+                        self?.isPlaying = false
+                    }
                 }
+                player.play()
             }
-            player.play()
 
+            // Outside the queue: a listen issued alongside this emit must be
+            // able to start while the buffer plays out.
             let duration = Double(samples.count) / Double(sampleRate)
             Thread.sleep(forTimeInterval: duration + 0.1)
 
-            player.stop()
-            audioEngine.stop()
-            audioEngine.detach(player)
-            playerNode = nil
+            playbackQueue.sync {
+                player.stop()
+                playbackEngine.stop()
+                playbackEngine.detach(player)
+                playerNode = nil
+            }
             isPlaying = false
 
             return "" // Success
@@ -227,7 +271,7 @@ class AudioProximityService {
         do {
             try ensureSessionActive()
 
-            let inputNode = audioEngine.inputNode
+            let inputNode = captureEngine.inputNode
             let inputFormat = inputNode.outputFormat(forBus: 0)
             let recordedRate = UInt32(inputFormat.sampleRate)
 
@@ -237,23 +281,27 @@ class AudioProximityService {
 
             isRecording = true
 
-            inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
-                guard let self, isRecording else { return }
+            try withEngine(captureEngine, on: captureQueue, prepare: {
+                inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
+                    guard let self, isRecording else { return }
 
-                let samples = extractSamples(from: buffer)
+                    let samples = extractSamples(from: buffer)
 
-                sampleLock.lock()
-                recordedSamples.append(contentsOf: samples)
-                sampleLock.unlock()
-            }
+                    sampleLock.lock()
+                    recordedSamples.append(contentsOf: samples)
+                    sampleLock.unlock()
+                }
+            })
 
-            try audioEngine.start()
-
+            // Outside the queue: an emit batched with this listen must not
+            // wait out the whole timeout before it can be heard.
             Thread.sleep(forTimeInterval: Double(timeoutMs) / 1000.0)
 
             isRecording = false
-            inputNode.removeTap(onBus: 0)
-            audioEngine.stop()
+            captureQueue.sync {
+                inputNode.removeTap(onBus: 0)
+                captureEngine.stop()
+            }
 
             sampleLock.lock()
             let result = recordedSamples
@@ -278,15 +326,21 @@ class AudioProximityService {
 
     /// Stop any ongoing audio operation.
     func stop() {
+        // Flags first, so a tap or an emit already in flight sees the stop
+        // without waiting for the queue.
         isRecording = false
         isPlaying = false
 
-        playerNode?.stop()
-        playerNode = nil
-
-        if audioEngine.isRunning {
-            audioEngine.inputNode.removeTap(onBus: 0)
-            audioEngine.stop()
+        playbackQueue.sync {
+            playerNode?.stop()
+            playerNode = nil
+            playbackEngine.stop()
+        }
+        captureQueue.sync {
+            if captureEngine.isRunning {
+                captureEngine.inputNode.removeTap(onBus: 0)
+                captureEngine.stop()
+            }
         }
     }
 
