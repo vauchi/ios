@@ -3,8 +3,8 @@
 
 > **Mirror:** This repo is a read-only mirror of [gitlab.com/vauchi/ios](https://gitlab.com/vauchi/ios). Please open issues and merge requests there.
 
-[![Pipeline](https://img.shields.io/endpoint?url=https://vauchi.gitlab.io/ios/badges/pipeline.json&label=pipeline)](https://gitlab.com/vauchi/ios/-/pipelines)
-[![Coverage](https://img.shields.io/endpoint?url=https://vauchi.gitlab.io/ios/badges/coverage.json&label=coverage)](https://gitlab.com/vauchi/ios/-/pipelines)
+[![Pipeline](https://img.shields.io/endpoint?url=https://vauchi.gitlab.io/ios/badges/pipeline.json&label=pipeline)](https://gitlab.com/vauchi/ios)
+[![Coverage](https://img.shields.io/endpoint?url=https://vauchi.gitlab.io/ios/badges/coverage.json&label=coverage)](https://gitlab.com/vauchi/ios)
 [![REUSE](https://api.reuse.software/badge/gitlab.com/vauchi/ios)](https://api.reuse.software/info/gitlab.com/vauchi/ios)
 
 > [!NOTE]
