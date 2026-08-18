@@ -178,6 +178,49 @@ final class AudioProximityServiceTests: XCTestCase {
         XCTAssertFalse(audioService.isActive(), "Should be inactive after stop")
     }
 
+    /// Emitting while a listen is in flight must not abort the process.
+    ///
+    /// Core issues `audioEmitChallenge` and `audioListenForResponse` as
+    /// separate fire-and-forget commands, so on a Magic exchange both run
+    /// at once on global queues against the single shared AVAudioEngine.
+    /// `emitSignal` used to check `audioEngine.isRunning` and then call
+    /// `play()`; `recordSamples` stops the engine between those two lines
+    /// and `play()` answers with an Objective-C exception, which Swift
+    /// cannot catch — the process aborts.
+    ///
+    /// Reproduced on an iPhone SE driving a Magic exchange against a
+    /// Pixel 3a, twice out of two attempts
+    /// (`2026-08-17-ios-audio-proximity-crashes-the-app`). A regression
+    /// here is a SIGABRT, so this test dies with the runner rather than
+    /// failing — the assertion below is reached only when emit and listen
+    /// are serialized.
+    func testEmitDuringListenDoesNotAbort() throws {
+        #if targetEnvironment(simulator)
+            throw XCTSkip("Audio recording not functional in iOS Simulator")
+        #endif
+        let samples = [Float](repeating: 0.5, count: 4410)
+
+        // Several rounds: the window between the check and `play()` is
+        // narrow, and one pass can miss it.
+        for _ in 0 ..< 5 {
+            let listening = XCTestExpectation(description: "listen returned")
+            let emitted = XCTestExpectation(description: "emit returned")
+
+            audioService.receiveSignal(timeoutMs: 300, sampleRate: 44100) { _, _ in
+                listening.fulfill()
+            }
+            DispatchQueue.global(qos: .userInitiated).async {
+                _ = self.audioService.emitSignal(samples: samples, sampleRate: 44100)
+                emitted.fulfill()
+            }
+
+            wait(for: [listening, emitted], timeout: 10.0)
+            audioService.stop()
+        }
+
+        XCTAssertFalse(audioService.isActive(), "Should be inactive after stop")
+    }
+
     /// Scenario: Concurrent operations are handled safely
     func testConcurrentOperationsSafe() {
         let expectation = XCTestExpectation(description: "Concurrent operations complete")
