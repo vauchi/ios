@@ -47,7 +47,12 @@ final class WakeupService {
     private var foregroundTimer: DispatchSourceTimer?
     /// The last schedule core asked for, replayed by `rearmWithLastRequest`
     /// when a tick fails to produce a new one.
-    private var lastRequest: (earliest: UInt32, deadline: UInt32, minInterval: UInt32)?
+    private var lastRequest: (
+        earliest: UInt32,
+        deadline: UInt32,
+        minInterval: UInt32,
+        millis: UInt32?
+    )?
     private var lastWakeupAt: Date?
     private var onWakeup: (() -> Void)?
 
@@ -64,11 +69,22 @@ final class WakeupService {
     ///   - earliestSecs: earliest time from now core wants us to call back.
     ///   - deadlineSecs: latest time from now core is willing to wait.
     ///   - minIntervalSecs: minimum spacing between two wakeup callbacks.
-    func scheduleWakeup(earliestSecs: UInt32, deadlineSecs: UInt32, minIntervalSecs: UInt32) {
+    func scheduleWakeup(
+        earliestSecs: UInt32,
+        deadlineSecs: UInt32,
+        minIntervalSecs: UInt32,
+        earliestMillis: UInt32? = nil
+    ) {
         // Honour the minimum interval by delaying to the earliest allowable
         // moment. This keeps the frontend from waking core more often than
         // core requested (e.g. multiple commands arriving in quick succession).
-        var fireAfter = TimeInterval(earliestSecs)
+        // Seconds cannot express the frame dwell of a live exchange, whose QR
+        // advances from this timer. Android read only the whole-second field
+        // and ran at 1013 ms against a ~300 ms design; this is the same field,
+        // on the same command
+        // (2026-08-18-hover-transfer-stalls-on-the-last-chunk).
+        var fireAfter =
+            earliestMillis.map { TimeInterval($0) / 1000.0 } ?? TimeInterval(earliestSecs)
         if minIntervalSecs > 0, let last = lastWakeupAt {
             let earliestNext = last.addingTimeInterval(TimeInterval(minIntervalSecs))
             let remaining = earliestNext.timeIntervalSinceNow
@@ -95,7 +111,7 @@ final class WakeupService {
         }
         timer.resume()
         foregroundTimer = timer
-        lastRequest = (earliestSecs, deadlineSecs, minIntervalSecs)
+        lastRequest = (earliestSecs, deadlineSecs, minIntervalSecs, earliestMillis)
 
         #if DEBUG
             print("WakeupService: scheduled wakeup in \(fireAfter)s")
@@ -113,10 +129,14 @@ final class WakeupService {
     /// core did not ask for.
     func rearmWithLastRequest() {
         guard let last = lastRequest else { return }
+        // Carries the sub-second value too: replaying only the whole-second
+        // field would quietly drop a live exchange back to one frame a second
+        // the first time a tick failed.
         scheduleWakeup(
             earliestSecs: last.earliest,
             deadlineSecs: last.deadline,
-            minIntervalSecs: last.minInterval
+            minIntervalSecs: last.minInterval,
+            earliestMillis: last.millis
         )
     }
 

@@ -567,13 +567,14 @@ class AppViewModel: ObservableObject {
                 startAccelerometerCapture()
             case .accelerometerStop:
                 AccelerometerProximityService.shared.stop()
-            case let .scheduleWakeup(earliestSecs, deadlineSecs, minIntervalSecs):
+            case let .scheduleWakeup(earliestSecs, deadlineSecs, minIntervalSecs, earliestMillis):
                 // ADR-044 Am2a: core owns the poll schedule. Arm the platform
                 // wakeup and let it call `onWakeup` when it fires.
                 WakeupService.shared.scheduleWakeup(
                     earliestSecs: earliestSecs,
                     deadlineSecs: deadlineSecs,
-                    minIntervalSecs: minIntervalSecs
+                    minIntervalSecs: minIntervalSecs,
+                    earliestMillis: earliestMillis
                 )
             default:
                 // BLE / audio-proximity are handled in `handleBleCommand` /
