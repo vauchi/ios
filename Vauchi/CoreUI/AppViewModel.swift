@@ -365,6 +365,19 @@ class AppViewModel: ObservableObject {
     /// notifications and commands, then reschedules if core emits another
     /// `ScheduleWakeup` command.
     func onWakeup() {
+        // The wakeup is a single-fire timer whose successor is armed only by a
+        // `ScheduleWakeup` in the commands below. Every early exit and every
+        // throw therefore used to end the chain permanently, freezing a live
+        // exchange on the frame last drawn — device-observed as an iPhone
+        // showing one DATA frame while the peer decoded it 468 times
+        // (`2026-08-18-hover-transfer-stalls-on-the-last-chunk`). Re-arm on
+        // core's last terms unless this tick supplied new ones.
+        var scheduled = false
+        defer {
+            if !scheduled {
+                WakeupService.shared.rearmWithLastRequest()
+            }
+        }
         do {
             let json = try appEngine.onWakeup()
             guard let data = json.data(using: .utf8) else { return }
@@ -373,6 +386,10 @@ class AppViewModel: ObservableObject {
                 NotificationService.shared.displayWakeupNotifications(envelope.notifications)
             }
             if !envelope.commands.isEmpty {
+                scheduled = envelope.commands.contains { command in
+                    if case .scheduleWakeup = command { return true }
+                    return false
+                }
                 handleExchangeCommands(envelope.commands)
             }
             loadInitialPresentation()

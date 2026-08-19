@@ -45,6 +45,9 @@ final class WakeupService {
     static let shared = WakeupService()
 
     private var foregroundTimer: DispatchSourceTimer?
+    /// The last schedule core asked for, replayed by `rearmWithLastRequest`
+    /// when a tick fails to produce a new one.
+    private var lastRequest: (earliest: UInt32, deadline: UInt32, minInterval: UInt32)?
     private var lastWakeupAt: Date?
     private var onWakeup: (() -> Void)?
 
@@ -92,10 +95,29 @@ final class WakeupService {
         }
         timer.resume()
         foregroundTimer = timer
+        lastRequest = (earliestSecs, deadlineSecs, minIntervalSecs)
 
         #if DEBUG
             print("WakeupService: scheduled wakeup in \(fireAfter)s")
         #endif
+    }
+
+    /// Re-arm on the terms core last asked for.
+    ///
+    /// The wakeup is a single-fire timer whose successor is only armed by a
+    /// `ScheduleWakeup` coming back from the tick, so any failure — a decode
+    /// error, an empty command list — used to leave it unarmed forever and
+    /// freeze the exchange on whatever frame was last drawn. Android cannot
+    /// do this: its loop catches, falls back and continues. Repeating core's
+    /// last instruction keeps that property here without inventing a cadence
+    /// core did not ask for.
+    func rearmWithLastRequest() {
+        guard let last = lastRequest else { return }
+        scheduleWakeup(
+            earliestSecs: last.earliest,
+            deadlineSecs: last.deadline,
+            minIntervalSecs: last.minInterval
+        )
     }
 
     /// Cancel any pending foreground wakeup. Called when the app is
