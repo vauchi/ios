@@ -473,7 +473,17 @@ private struct PresentationRowView: View {
                         .disabled(!action.enabled)
                     }
                 } label: {
+                    // The glyph alone sized the button to 19x6pt: probing the
+                    // live hierarchy on an iPhone SE, only a tap within a few
+                    // points of dead centre opened the menu and ±5pt missed.
+                    // `contentShape` makes the whole frame hittable rather
+                    // than just the drawn dots.
                     Image(systemName: "ellipsis")
+                        .frame(
+                            minWidth: minimumTarget,
+                            minHeight: minimumTarget
+                        )
+                        .contentShape(Rectangle())
                 }
                 .accessibilityLabel("Row actions")
             }
