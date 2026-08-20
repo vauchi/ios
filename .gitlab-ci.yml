@@ -357,7 +357,11 @@ update:bindings-version:
       REMOVED_WARNING=""
       MARK_DRAFT=false
       PLATFORM_REPO="https://gitlab.com/vauchi/vauchi-platform-swift.git"
-      BINDING_PATH="Sources/VauchiPlatform/vauchi_platform.swift"
+      # Both public surfaces the consumer compiles against. CoreUIModels was
+      # missing until 2026-08-19, when a widened `scheduleWakeup` enum case
+      # shipped a bump MR that could not compile: the check never fetched the
+      # file the change was in.
+      BINDING_PATHS="Sources/VauchiPlatform/vauchi_platform.swift Sources/CoreUIModels/Models.swift"
 
       if [ -n "$OLD_VERSION" ] && [ "$OLD_VERSION" != "$BINDINGS_VERSION" ]; then
         echo "Checking for removed symbols between $OLD_VERSION and $BINDINGS_VERSION..."
@@ -373,10 +377,12 @@ update:bindings-version:
         # GitLab raw endpoint. --max-time bounds each attempt so a hung
         # TLS handshake doesn't burn the whole job timeout silently.
         CURL_FETCH="curl -sf --retry 3 --retry-max-time 60 --max-time 30"
-        $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/v${OLD_VERSION}/${BINDING_PATH}" > "$OLD_BINDING" 2>/dev/null || \
-          $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/${OLD_VERSION}/${BINDING_PATH}" > "$OLD_BINDING" 2>/dev/null || true
-        $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/v${BINDINGS_VERSION}/${BINDING_PATH}" > "$NEW_BINDING" 2>/dev/null || \
-          $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/${BINDINGS_VERSION}/${BINDING_PATH}" > "$NEW_BINDING" 2>/dev/null || true
+        for BINDING_PATH in $BINDING_PATHS; do
+          $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/v${OLD_VERSION}/${BINDING_PATH}" >> "$OLD_BINDING" 2>/dev/null || \
+            $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/${OLD_VERSION}/${BINDING_PATH}" >> "$OLD_BINDING" 2>/dev/null || true
+          $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/v${BINDINGS_VERSION}/${BINDING_PATH}" >> "$NEW_BINDING" 2>/dev/null || \
+            $CURL_FETCH "${PLATFORM_REPO%.git}/-/raw/${BINDINGS_VERSION}/${BINDING_PATH}" >> "$NEW_BINDING" 2>/dev/null || true
+        done
 
         if [ -s "$OLD_BINDING" ] && [ -s "$NEW_BINDING" ]; then
           # Extract public func/var names from each version
@@ -385,6 +391,42 @@ update:bindings-version:
 
           # Find functions removed in the new version
           REMOVED_FUNCS=$(comm -23 "$BINDING_CHECK_DIR/old_funcs" "$BINDING_CHECK_DIR/new_funcs")
+
+          # Enum cases whose parameter list changed. A widened case removes no
+          # function, so the removed-symbol pass above cannot see it, yet a
+          # consumer destructuring the old arity fails to compile — which is
+          # exactly what shipped on 2026-08-19 and turned both this MR and its
+          # companion red, each holding one half of the change.
+          # Flatten first: a case declared across several lines is invisible to
+          # a line-oriented grep, and `scheduleWakeup` is exactly that in
+          # 0.63.0 — the first version of this check found nothing for that
+          # reason. Verified against v0.62.0 and v0.63.0, where it reports
+          # `scheduleWakeup` and nothing else.
+          tr '\n' ' ' < "$OLD_BINDING" | sed 's/  */ /g' \
+            | grep -oE 'case [a-zA-Z_][a-zA-Z0-9_]*\([^)]*\)' | sed 's/  */ /g' \
+            | sort -u > "$BINDING_CHECK_DIR/old_cases"
+          tr '\n' ' ' < "$NEW_BINDING" | sed 's/  */ /g' \
+            | grep -oE 'case [a-zA-Z_][a-zA-Z0-9_]*\([^)]*\)' | sed 's/  */ /g' \
+            | sort -u > "$BINDING_CHECK_DIR/new_cases"
+          CHANGED_CASES=""
+          while IFS= read -r old_case; do
+            [ -z "$old_case" ] && continue
+            case_name=$(echo "$old_case" | sed 's/^case \([a-zA-Z0-9_]*\).*/\1/')
+            # Unchanged if the identical signature survives.
+            grep -qxF "$old_case" "$BINDING_CHECK_DIR/new_cases" && continue
+            # Gone entirely is a removal, not a signature change.
+            grep -q "^case ${case_name}(" "$BINDING_CHECK_DIR/new_cases" || continue
+            if grep -rq "\.${case_name}(" Vauchi/ 2>/dev/null; then
+              CHANGED_CASES="${CHANGED_CASES}- \`${case_name}\` — signature changed and still destructured in consumer code\n"
+              echo "  CHANGED CASE: $case_name"
+            fi
+          done < "$BINDING_CHECK_DIR/old_cases"
+
+          if [ -n "$CHANGED_CASES" ]; then
+            MARK_DRAFT=true
+            REMOVED_WARNING="${REMOVED_WARNING}\\n\\n⚠️ **Enum cases whose signature changed:**\\n${CHANGED_CASES}\\nThis bump cannot compile until the callsites are updated in the same MR."
+            echo "WARNING: Changed enum case signatures — MR will be created as Draft"
+          fi
 
           if [ -n "$REMOVED_FUNCS" ]; then
             echo "Removed functions: $(echo "$REMOVED_FUNCS" | tr '\n' ', ')"
