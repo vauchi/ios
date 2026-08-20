@@ -178,6 +178,47 @@ final class AccessibilityUITests: XCTestCase {
         }
     }
 
+    /// A row control Core parks in `controls` reaches the hierarchy as an
+    /// operable element.
+    ///
+    /// `PresentationRowView` rendered title, subtitle, detail, image and
+    /// `secondaryActions` but never `controls`, so every settings toggle
+    /// decoded and was then discarded — six privacy-affecting settings read
+    /// as plain text that did nothing when tapped, while Contacts rendered
+    /// its standalone toggles fine
+    /// (`_private/docs/problems/2026-08-20-ios-settings-toggles-render-no-control/`).
+    ///
+    /// Sweeps every destination rather than naming the settings screen: its
+    /// label is localized and which surface carries row controls is Core's
+    /// to change.
+    func testRowControlsAreOperable() {
+        let count = openNavigationDestinations().buttons.count
+        var seen = 0
+
+        for index in 0 ..< count {
+            let label = tapDestination(at: index)
+            let controls = app.descendants(matching: .any)
+                .matching(identifier: "presentationRowControl")
+            _ = controls.element(boundBy: 0).waitForExistence(timeout: 2)
+
+            for control in controls.allElementsBoundByIndex where control.exists {
+                seen += 1
+                XCTAssertEqual(control.elementType, .switch,
+                               "Row control on '\(label)' should be a switch, "
+                                   + "not element type \(control.elementType.rawValue)")
+                XCTAssertFalse(control.label.isEmpty,
+                               "Row control on '\(label)' should carry a label")
+                XCTAssertTrue(control.isEnabled,
+                              "Row control on '\(label)' should be operable")
+            }
+        }
+
+        XCTAssertGreaterThan(seen, 0,
+                             "No destination rendered a row control, so this test "
+                                 + "proved nothing. Core sends settings toggles in "
+                                 + "PresentationRow.controls.")
+    }
+
     // MARK: - Screen Navigation
 
     /// Each navigation destination renders a surface with at least one
