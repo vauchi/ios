@@ -38,23 +38,29 @@ struct PresentationOverlayView: View {
 
     private var navigationOverlay: some View {
         panel {
-            LazyVGrid(
-                columns: [
-                    GridItem(
-                        .adaptive(
-                            minimum: windowClass == .compact ? 120 : 180
-                        )
-                    ),
-                ],
-                spacing: 8
-            ) {
-                actions
+            // Core decides how many destinations it sends, so the panel
+            // cannot assume they fit. Android had the same grid unscrolled
+            // and silently dropped three destinations out of the hierarchy
+            // entirely; the grid buys headroom here, not immunity.
+            ScrollView {
+                LazyVGrid(
+                    columns: [
+                        GridItem(
+                            .adaptive(
+                                minimum: windowClass == .compact ? 120 : 180
+                            )
+                        ),
+                    ],
+                    spacing: 8
+                ) {
+                    actions
+                }
+                // Stable frontend a11y anchor for UI tests (NOT a core action
+                // id): lets tests query the destination buttons without
+                // coupling to localized labels.
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("navigationDestinations")
             }
-            // Stable frontend a11y anchor for UI tests (NOT a core action
-            // id): lets tests query the destination buttons without
-            // coupling to localized labels.
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("navigationDestinations")
         }
         .frame(
             maxWidth: windowClass == .compact ? .infinity : 680,
