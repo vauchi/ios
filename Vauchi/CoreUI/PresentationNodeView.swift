@@ -95,6 +95,9 @@ struct PresentationNodeView: View {
                         row: row,
                         surfaceID: surfaceID,
                         minimumTarget: minimumTarget,
+                        useFrontCamera: useFrontCamera,
+                        onCameraPermissionDenied: onCameraPermissionDenied,
+                        focusedBinding: focusedBinding,
                         onEvent: onEvent
                     )
                 }
@@ -441,14 +444,26 @@ private struct PresentationRowView: View {
     /// not an affordance.
     static let identifier = "presentationRow"
 
+    /// Shell-minted handle for the controls Core parks in a row, minted for
+    /// the same reason as `identifier` above: tests need to find them
+    /// without matching localized copy.
+    static let controlIdentifier = "presentationRowControl"
+
     let row: PresentationRow
     let surfaceID: String
     let minimumTarget: CGFloat
+    let useFrontCamera: Bool
+    let onCameraPermissionDenied: () -> Void
+    let focusedBinding: FocusState<String?>.Binding
     let onEvent: (PresentationEvent) -> Void
 
     var body: some View {
         HStack {
             rowContent
+            // Rendered as a sibling of `rowContent`, never inside it: an
+            // activatable row wraps its content in a Button, and a control
+            // nested in a Button is not independently operable.
+            controls
             if !row.secondaryActions.isEmpty {
                 Menu {
                     ForEach(row.secondaryActions) { action in
@@ -465,6 +480,26 @@ private struct PresentationRowView: View {
         }
         .padding(8)
         .background(row.selected ? Color.accentColor.opacity(0.12) : .clear)
+    }
+
+    /// The controls Core attached to this row.
+    ///
+    /// Decoded but never rendered until 2026-08-20, which left every
+    /// settings toggle on iOS as text that did nothing
+    /// (`_private/docs/problems/2026-08-20-ios-settings-toggles-render-no-control/`).
+    private var controls: some View {
+        ForEach(identifyPresentationNodes(row.controls)) { identified in
+            PresentationNodeView(
+                node: identified.node,
+                surfaceID: surfaceID,
+                minimumTarget: minimumTarget,
+                useFrontCamera: useFrontCamera,
+                onCameraPermissionDenied: onCameraPermissionDenied,
+                focusedBinding: focusedBinding,
+                onEvent: onEvent
+            )
+            .accessibilityIdentifier(Self.controlIdentifier)
+        }
     }
 
     /// The row's own content, as a single accessibility element carrying
