@@ -17,6 +17,7 @@
 		1552B5F6D02172C2BA2C691D /* PlatformEdgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */; };
 		161D92EC11DFF0CDAE7B0F29 /* DemoContactTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */; };
 		18DFBC47BE88310909350859 /* VauchiHardware in Frameworks */ = {isa = PBXBuildFile; productRef = 0AB22D05ABC258D050086FBF /* VauchiHardware */; };
+		1BB5832181399F70969847FB /* NavigationIconMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5482743CA87B21CE18C8C3B9 /* NavigationIconMapTests.swift */; };
 		1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */; };
 		23542D8D4771261954AA6A2D /* NFCExchangeServiceTransceiveShimTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBA469A3ED4A4660FA45B6A /* NFCExchangeServiceTransceiveShimTests.swift */; };
 		281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */; };
@@ -154,6 +155,7 @@
 		49509AE0DF70B880F977B015 /* AudioProximityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProximityService.swift; sourceTree = "<group>"; };
 		49B374973D50CCCC7F0EF6DA /* PresentationSurfaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationSurfaceView.swift; sourceTree = "<group>"; };
 		4BF7BC594414EE931756CE54 /* ThemeServiceSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeServiceSettingsTests.swift; sourceTree = "<group>"; };
+		5482743CA87B21CE18C8C3B9 /* NavigationIconMapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationIconMapTests.swift; sourceTree = "<group>"; };
 		5484CED84D0E33E917230C9A /* NetworkMonitorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitorTests.swift; sourceTree = "<group>"; };
 		5FA3C4F656D97F3211554DC4 /* WakeupServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeupServiceTests.swift; sourceTree = "<group>"; };
 		5FC2A1B34A8846BEEE089202 /* BleUuids.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleUuids.swift; sourceTree = "<group>"; };
@@ -259,6 +261,7 @@
 			isa = PBXGroup;
 			children = (
 				C38FE0127E86CB045D89F88E /* ExchangeCommandBridgeTests.swift */,
+				5482743CA87B21CE18C8C3B9 /* NavigationIconMapTests.swift */,
 				2665E0EEA673F89A405C5D27 /* NfcCommandDispatchTests.swift */,
 				42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */,
 				279AA559A7610131C7934D10 /* PresentationQrLayoutTests.swift */,
@@ -595,6 +598,7 @@
 				78DEE11DBBB312E894650FBF /* LocalizationServiceSettingsTests.swift in Sources */,
 				42E8C0D44725B88DB18845CB /* LocationServiceTests.swift in Sources */,
 				23542D8D4771261954AA6A2D /* NFCExchangeServiceTransceiveShimTests.swift in Sources */,
+				1BB5832181399F70969847FB /* NavigationIconMapTests.swift in Sources */,
 				3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */,
 				710222E18DC609F7457EB5C0 /* NfcCommandDispatchTests.swift in Sources */,
 				3D1CBC0C00C370BCFAA0D7A8 /* NotificationServiceDeepLinkTests.swift in Sources */,
