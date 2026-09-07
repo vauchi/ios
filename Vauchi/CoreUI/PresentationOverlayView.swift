@@ -120,13 +120,29 @@ struct PresentationOverlayView: View {
                     )
                 )
             } label: {
-                Text(action.label)
+                actionLabel(action)
                     .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
             }
             .buttonStyle(.bordered)
             .disabled(!action.enabled)
             .foregroundColor(action.tone == .destructive ? .red : .primary)
             .accessibilityLabel(action.accessibilityLabel)
+        }
+    }
+
+    /// Icon *and* label, never icon alone: the symbol is a recognition aid for
+    /// readers who skim rather than read, and dropping the word would trade
+    /// one barrier for another.
+    @ViewBuilder
+    private func actionLabel(_ action: PresentationAction) -> some View {
+        if let symbol = NavigationIconMap.systemImage(
+            forOverlayKind: overlay.overlay.kind,
+            token: action.iconToken
+        ) {
+            Label(action.label, systemImage: symbol)
+                .labelStyle(.titleAndIcon)
+        } else {
+            Text(action.label)
         }
     }
 }
