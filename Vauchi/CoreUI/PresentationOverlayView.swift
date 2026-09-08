@@ -126,7 +126,22 @@ struct PresentationOverlayView: View {
             .buttonStyle(.bordered)
             .disabled(!action.enabled)
             .foregroundColor(action.tone == .destructive ? .red : .primary)
-            .accessibilityLabel(action.accessibilityLabel)
+            // The icon repeats the word beside it, so it must not be its own
+            // VoiceOver stop — left exposed, SwiftUI narrates the symbol and
+            // gets it wrong either way: undescribed symbols read as their raw
+            // identifier, and described ones get a verb chosen without any
+            // context (`folder.fill` beside "Groups" says "Move";
+            // `mappin.and.ellipse` beside "Places" says "Remove Map Pin",
+            // naming a destructive action on a row that only navigates).
+            //
+            // `.accessibilityHidden` on the image does not hold: SwiftUI lifts
+            // it out of the button's subtree and publishes it as a sibling,
+            // where the hide no longer applies. Only replacing the whole
+            // subtree with one synthetic button collapses it to a single stop.
+            .accessibilityRepresentation {
+                Button(action.accessibilityLabel) {}
+                    .disabled(!action.enabled)
+            }
         }
     }
 
