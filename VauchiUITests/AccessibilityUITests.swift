@@ -293,7 +293,7 @@ final class AccessibilityUITests: XCTestCase {
 
         XCTAssertEqual(destinations.images.count, 0,
                        "Destination icons must be decorative — VoiceOver should stop on "
-                       + "the row, not on the row and then its icon")
+                           + "the row, not on the row and then its icon")
     }
 
     /// The label-shaped half of the same defect: whatever elements the
