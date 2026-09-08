@@ -265,6 +265,56 @@ final class AccessibilityUITests: XCTestCase {
                        "Home surface should have at least one visible static text element")
     }
 
+    // MARK: - Navigation Icons Are Decorative
+
+    /// An SF Symbol name, e.g. `person.crop.rectangle.fill` — lowercase
+    /// segments joined by dots, which no human-facing label ever is.
+    private func looksLikeSymbolName(_ label: String) -> Bool {
+        let pattern = "^[a-z][a-z0-9]*(\\.[a-z0-9]+)+$"
+        return label.range(of: pattern, options: .regularExpression) != nil
+    }
+
+    /// Each destination shows an icon beside its word. The icon repeats what
+    /// the word already says, so it must be decorative — otherwise VoiceOver
+    /// stops on it and reads a second, separate thing.
+    ///
+    /// Left exposed, SwiftUI supplies the announcement itself, and both of
+    /// its answers are wrong. For a symbol Apple has not described it reads
+    /// the raw identifier: "person dot crop dot rectangle dot fill". For one
+    /// it has, it reads a generic verb with no idea of the context —
+    /// `folder.fill` beside "Groups" announces "Move", `key.fill` beside
+    /// "Recovery" announces "Passwords", and `mappin.and.ellipse` beside
+    /// "Places" announces "Remove Map Pin", naming a destructive action on a
+    /// row that only navigates.
+    func testNavigationIconsAreNotSeparateElements() {
+        let destinations = openNavigationDestinations()
+        XCTAssertTrue(destinations.waitForExistence(timeout: 5),
+                      "Navigation destinations should be reachable from the command bar")
+
+        XCTAssertEqual(destinations.images.count, 0,
+                       "Destination icons must be decorative — VoiceOver should stop on "
+                       + "the row, not on the row and then its icon")
+    }
+
+    /// The label-shaped half of the same defect: whatever elements the
+    /// overlay does expose, none of them may be announcing an SF Symbol
+    /// identifier. Kept separate from the element-count check so a future
+    /// refactor that changes the element *type* cannot quietly reintroduce
+    /// the gibberish announcement.
+    func testNoDestinationAnnouncesASymbolIdentifier() {
+        let destinations = openNavigationDestinations()
+        XCTAssertTrue(destinations.waitForExistence(timeout: 5),
+                      "Navigation destinations should be reachable from the command bar")
+
+        let offenders = destinations.descendants(matching: .any)
+            .allElementsBoundByIndex
+            .map(\.label)
+            .filter(looksLikeSymbolName)
+
+        XCTAssertTrue(offenders.isEmpty,
+                      "These read back as SF Symbol identifiers: \(offenders)")
+    }
+
     // MARK: - Accessibility Audit
 
     /// Built-in accessibility audit (iOS 17+).
