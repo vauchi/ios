@@ -104,6 +104,40 @@ workflow:
     CI_JOB_KEYCHAIN: ci-spm-${CI_JOB_ID}.keychain-db
   before_script:
     - echo "Xcode $(xcodebuild -version | head -1)"
+    # `testmanagerd` wedges after roughly ninety minutes of uptime and then
+    # refuses every control session, so xcodebuild fails before a single
+    # test runs. On a simulator destination it reports "Failed call to
+    # AXDisableAccessibilityOnTermination: kAXErrorCannotComplete"; on a
+    # macOS destination, "Timed out after 120.0s while initiating control
+    # session with daemon". Neither names the daemon, and the job reports
+    # zero test cases, so it reads as a broken change rather than a broken
+    # host — on 2026-09-09 it failed `test:ui` on two unrelated branches,
+    # one of which only deleted five lines of dead code.
+    #
+    # Measured the same day: one daemon served a passing job at 1 h 10 m of
+    # uptime and had wedged by 1 h 45 m. Clearing it per job is cheaper
+    # than diagnosing a red pipeline that has nothing to do with the MR.
+    #
+    # No sudo: the daemon runs as the runner's own uid. launchd respawns it
+    # on demand. The guard matters here in a way it does not on macos —
+    # `.macos-test-job` deliberately gives each test type its own lock so
+    # they run in parallel, and killing the daemon out from under a running
+    # test would turn this fix into the very failure it prevents.
+    - |
+      if pgrep -x xcodebuild >/dev/null 2>&1; then
+        echo "testmanagerd: xcodebuild is mid-run, leaving the daemon alone"
+      else
+        # Select the host daemon by exact path. `pgrep -n testmanagerd`
+        # returns the newest match, which is a booted simulator's own copy
+        # whenever one is running.
+        host_tm=$(ps -eo pid,comm | awk '$2 == "/usr/libexec/testmanagerd" { print $1; exit }')
+        if [ -n "$host_tm" ]; then
+          echo "testmanagerd: clearing pid $host_tm, age $(ps -o etime= -p "$host_tm" | tr -d ' ')"
+        else
+          echo "testmanagerd: not running, nothing to clear"
+        fi
+        killall -9 testmanagerd 2>/dev/null || true
+      fi
     # Per-job keychain for SPM binary target downloads from GitLab's package registry.
     # URLSession uses the keychain (not .netrc) for HTTP auth challenges.
     # Each concurrent job gets its own keychain to avoid cross-job credential races
