@@ -25,11 +25,11 @@ import VauchiPlatform
 /// `MobilePendingNotification` type, which is not `Decodable`.
 struct WakeupNotification: Decodable {
     let eventKey: String
-    let category: String
     let title: String
     let body: String
     let contactId: String
     let deepLinkUri: String?
+    let osCategoryId: String
 }
 
 /// Envelope returned by `PlatformAppEngine.onWakeup()` (core!1379):

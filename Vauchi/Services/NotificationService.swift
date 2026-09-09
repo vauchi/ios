@@ -55,30 +55,33 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         }
     }
 
-    /// Register notification categories and actions.
+    /// Register the OS categories core addresses through `os_category_id`.
     func registerCategories() {
-        let center = UNUserNotificationCenter.current()
+        UNUserNotificationCenter.current().setNotificationCategories(Set(Self.osCategories()))
+    }
 
-        // Category for emergency alerts (can have custom actions in future)
-        // TODO(HUMBLE): [W, P1] frontend hardcodes OS category identifiers tied to domain notification categories;
-        // core should supply `os_category_id` and `os_user_info`
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        let emergencyCategory = UNNotificationCategory(
-            identifier: "emergencyAlert",
-            actions: [],
-            intentIdentifiers: [],
-            options: .customDismissAction
-        )
-
-        // Category for contact updates
-        let updateCategory = UNNotificationCategory(
-            identifier: "contactAdded",
-            actions: [],
-            intentIdentifiers: [],
-            options: []
-        )
-
-        center.setNotificationCategories([emergencyCategory, updateCategory])
+    /// The `UNNotificationCategory` set keyed by the `os_category_id` values
+    /// core emits. Registration precedes any notification, so the id list
+    /// is fixed here rather than read off a pending notification's
+    /// `os_category_options`.
+    /// TODO(HUMBLE): [W, P1] core should publish the category registry
+    /// (ids + options) so the shell registers without knowing them
+    /// (see _private problem record 2026-07-06-mobile-domain-shell-violations).
+    static func osCategories() -> [UNNotificationCategory] {
+        [
+            UNNotificationCategory(
+                identifier: "emergency_alert",
+                actions: [],
+                intentIdentifiers: [],
+                options: .customDismissAction
+            ),
+            UNNotificationCategory(
+                identifier: "contact_added",
+                actions: [],
+                intentIdentifiers: [],
+                options: []
+            ),
+        ]
     }
 
     /// Poll for and display OS notifications (legacy path used by the
@@ -106,56 +109,47 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
 
     /// Display a single `onWakeup` notification.
     private func showWakeupNotification(_ notification: WakeupNotification) {
-        let content = UNMutableNotificationContent()
-        content.title = notification.title
-        content.body = notification.body
-        content.sound = .default
-        var userInfo: [String: Any] = [
-            "contact_id": notification.contactId,
-            "event_key": notification.eventKey,
-        ]
-        if let deepLinkUri = notification.deepLinkUri {
-            userInfo["deep_link_uri"] = deepLinkUri
-        }
-        content.userInfo = userInfo
-
-        // Map core category string to the historical OS category identifiers.
-        switch notification.category {
-        case "EmergencyAlert":
-            content.categoryIdentifier = "emergencyAlert"
-            content.sound = .default
-        case "DuressAlert":
-            content.categoryIdentifier = "duressAlert"
-            content.sound = .default
-        case "ContactAdded":
-            content.categoryIdentifier = "contactAdded"
-        case "CardUpdate":
-            content.categoryIdentifier = "cardUpdate"
-        default:
-            break
-        }
-
-        let request = UNNotificationRequest(
-            identifier: notification.eventKey,
-            content: content,
-            trigger: nil
-        )
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error {
-                #if DEBUG
-                    print("NotificationService: Failed to add wakeup notification: \(error)")
-                #endif
-            }
-        }
+        deliver(PreparedNotification(
+            title: notification.title,
+            body: notification.body,
+            contactId: notification.contactId,
+            eventKey: notification.eventKey,
+            deepLinkUri: notification.deepLinkUri,
+            osCategoryId: notification.osCategoryId
+        ))
     }
 
     /// Display a single notification.
     func showNotification(_ notification: MobilePendingNotification) {
+        deliver(PreparedNotification(
+            title: notification.title,
+            body: notification.body,
+            contactId: notification.contactId,
+            eventKey: notification.eventKey,
+            deepLinkUri: notification.deepLinkUri,
+            osCategoryId: notification.osCategoryId
+        ))
+    }
+
+    /// The core-prepared values one OS notification is built from, shared
+    /// by the typed (`MobilePendingNotification`) and wakeup-JSON paths.
+    struct PreparedNotification {
+        let title: String
+        let body: String
+        let contactId: String
+        let eventKey: String
+        let deepLinkUri: String?
+        let osCategoryId: String
+    }
+
+    /// Assemble OS content from core-prepared values. Pure so it is
+    /// unit-testable without a live `UNUserNotificationCenter`.
+    static func notificationContent(for notification: PreparedNotification) -> UNMutableNotificationContent {
         let content = UNMutableNotificationContent()
         content.title = notification.title
         content.body = notification.body
         content.sound = .default
+        content.categoryIdentifier = notification.osCategoryId
         // TODO(HUMBLE): [T, P1] frontend assembles notification userInfo from domain field names;
         // core should supply an opaque `os_user_info` map
         // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
@@ -169,26 +163,13 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
             userInfo["deep_link_uri"] = deepLinkUri
         }
         content.userInfo = userInfo
+        return content
+    }
 
-        // TODO(HUMBLE): [T, P1] frontend maps NotificationCategory to OS presentation ids/sounds;
-        // core should attach `os_category_id` and presentation hints
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        switch notification.category {
-        case .emergencyAlert:
-            content.categoryIdentifier = "emergencyAlert"
-            content.sound = .default
-        case .duressAlert:
-            content.categoryIdentifier = "duressAlert"
-            content.sound = .default
-        case .contactAdded:
-            content.categoryIdentifier = "contactAdded"
-        case .cardUpdate:
-            content.categoryIdentifier = "cardUpdate"
-        }
-
+    private func deliver(_ notification: PreparedNotification) {
         let request = UNNotificationRequest(
             identifier: notification.eventKey,
-            content: content,
+            content: Self.notificationContent(for: notification),
             trigger: nil // Deliver immediately
         )
 
