@@ -94,6 +94,7 @@
 		D6F192EAAFA4D534AC285A8E /* ExistingCodeDiagnostic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FE92FFF24932C40ACAA1A02 /* ExistingCodeDiagnostic.swift */; };
 		DA673F09635BBBF9871092A8 /* VauchiUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773C796EDEEFF9B928C04229 /* VauchiUITests.swift */; };
 		DCB3E583D86FF3A15C6BE915 /* PlatformAppEngine+DomainDispatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8809B70A6BEDF6B35461415B /* PlatformAppEngine+DomainDispatch.swift */; };
+		E15D3E295518C2178E26D1A9 /* NotificationServiceContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37CF81D097BBE672CB4C58D4 /* NotificationServiceContentTests.swift */; };
 		EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */; };
 		EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F950D6541F912A27DA57D /* BleExchangeService.swift */; };
 		EE61E717891162E1E64D6B6E /* SineWaveGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */; };
@@ -147,6 +148,7 @@
 		2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModelTests.swift; sourceTree = "<group>"; };
 		331706A539BC8824C9067EF5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3741052F03E3274B5C209EF6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		37CF81D097BBE672CB4C58D4 /* NotificationServiceContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceContentTests.swift; sourceTree = "<group>"; };
 		38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiRepositoryTests.swift; sourceTree = "<group>"; };
 		418F950D6541F912A27DA57D /* BleExchangeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleExchangeService.swift; sourceTree = "<group>"; };
 		423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
@@ -298,6 +300,7 @@
 				DC20FCD1651B95E823A06410 /* LocationServiceTests.swift */,
 				5484CED84D0E33E917230C9A /* NetworkMonitorTests.swift */,
 				0CBA469A3ED4A4660FA45B6A /* NFCExchangeServiceTransceiveShimTests.swift */,
+				37CF81D097BBE672CB4C58D4 /* NotificationServiceContentTests.swift */,
 				A7C515EE1804FDB78832CA0D /* NotificationServiceDeepLinkTests.swift */,
 				E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */,
 				CE9581C53B23B46E50E35837 /* PasscodePolicyTests.swift */,
@@ -604,6 +607,7 @@
 				1BB5832181399F70969847FB /* NavigationIconMapTests.swift in Sources */,
 				3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */,
 				710222E18DC609F7457EB5C0 /* NfcCommandDispatchTests.swift in Sources */,
+				E15D3E295518C2178E26D1A9 /* NotificationServiceContentTests.swift in Sources */,
 				3D1CBC0C00C370BCFAA0D7A8 /* NotificationServiceDeepLinkTests.swift in Sources */,
 				B986446F1F2743EF3E381594 /* OnboardingTests.swift in Sources */,
 				764FA757EB16C597120D1E93 /* PasscodePolicyTests.swift in Sources */,
