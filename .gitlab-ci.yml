@@ -1182,6 +1182,34 @@ test:ui:
     reports:
       junit: build/reports/ui-junit.xml
     expire_in: 1 week
+  # TEMPORARY, 2026-09-09 — revert once the runner can drive the simulator.
+  #
+  # Every run since 15:28 CEST fails before a single test executes:
+  #
+  #   VauchiUITests-Runner encountered an error (The test runner failed to
+  #   initialize for UI testing. (Underlying Error: Failed call to
+  #   AXDisableAccessibilityOnTermination: kAXErrorCannotComplete))
+  #
+  # It is the host, not the code. The job failed identically on five
+  # unrelated branches — including one that deletes five lines of dead
+  # code — while every other job on those pipelines passed, and it passed
+  # three times in a row before today on the same `main` content. Ruled
+  # out by direct test: the wedged `testmanagerd` (clearing it fixed macOS
+  # `test:unit` and not this), a stale `CoreSimulatorService` (restarted,
+  # no change), a second user's simulators on the same host (removed, no
+  # change), and the automation-mode credential (that path is never even
+  # reached — no authentication is requested).
+  #
+  # `when: manual` + `allow_failure` matches what macos/.gitlab-ci.yml
+  # already does with its own `test:ui`, and for the same reason: a job
+  # that cannot pass while the host misbehaves should not dam every
+  # merge request behind it. The cost is real — this gate is what caught
+  # the VoiceOver icon regressions in `ios!649` — so it is worth
+  # restoring as soon as the runner works, and the job can still be
+  # played by hand on any MR in the meantime.
+  #
+  # Investigation:
+  # _private/docs/backlog/2026-09-08-macos-ui-runner-needs-accessibility-grant
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -1191,6 +1219,8 @@ test:ui:
           - "*.xcodeproj/**/*"
           - "project.yml"
           - ".gitlab-ci.yml"
+      when: manual
+      allow_failure: true
 
 # Manual job: record snapshot baselines on CI and commit them to the branch.
 # CI is the single source of truth for baselines — never record locally.
