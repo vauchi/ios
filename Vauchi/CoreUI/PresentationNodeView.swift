@@ -412,7 +412,9 @@ struct PresentationNodeView: View {
     }
 }
 
-private struct PresentationImageContent: View {
+// Not private: `PresentationImageContentTests` renders it directly, because
+// the defect it guards is a missing fill that no XCUITest query can see.
+struct PresentationImageContent: View {
     let value: PresentationNode.Image
 
     var body: some View {
