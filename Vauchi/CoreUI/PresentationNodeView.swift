@@ -412,8 +412,8 @@ struct PresentationNodeView: View {
     }
 }
 
-// Not private: `PresentationImageContentTests` renders it directly, because
-// the defect it guards is a missing fill that no XCUITest query can see.
+/// Not private: `PresentationImageContentTests` renders it directly, because
+/// the defect it guards is a missing fill that no XCUITest query can see.
 struct PresentationImageContent: View {
     /// Side of the box the initials fallback occupies. Core names no size,
     /// so each shell picks one; this is a profile avatar on iOS. It has to
@@ -450,8 +450,8 @@ struct PresentationImageContent: View {
     /// Branching rather than `AnyShape`: this target deploys to iOS 15 and
     /// `AnyShape` arrived in 16.
     @ViewBuilder
-    private func clipped<Content: View>(
-        @ViewBuilder _ content: () -> Content
+    private func clipped(
+        @ViewBuilder _ content: () -> some View
     ) -> some View {
         if value.shape == .circle {
             content().clipShape(Circle())

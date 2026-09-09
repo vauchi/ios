@@ -19,8 +19,8 @@
 // `clipShape(Circle())` was being applied to a bare `Text` — there was no
 // fill for it to clip.
 
-@testable import Vauchi
 import SwiftUI
+@testable import Vauchi
 import XCTest
 
 @MainActor
