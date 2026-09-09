@@ -30,6 +30,7 @@ struct WakeupNotification: Decodable {
     let contactId: String
     let deepLinkUri: String?
     let osCategoryId: String
+    let osCategoryOptions: [String]?
 }
 
 /// Envelope returned by `PlatformAppEngine.onWakeup()` (core!1379):
