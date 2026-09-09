@@ -734,12 +734,14 @@ class AppViewModel: ObservableObject {
 
     /// Called from the CoreBluetooth queue. Hops to the engine queue so BLE
     /// bursts never contend with the main thread, and so events reach Core in
-    /// arrival order.
+    /// arrival order. Encoded there too: a picked backup is the largest
+    /// payload the shell ever hands Core, and its JSON must not be built on
+    /// the main thread.
     private nonisolated func sendHardwareEvent(_ event: MobileEvent) {
         let engine = appEngine
         engineQueue.async { [weak self] in
             do {
-                let resultJson = try engine.handleHardwareEvent(event: event)
+                let resultJson = try engine.dispatchJson(eventJson: event.toEventJson())
                 Task { @MainActor in self?.receivePresentationEnvelope(resultJson) }
             } catch {
                 #if DEBUG
