@@ -79,16 +79,18 @@ struct FilePickerModifier: ViewModifier {
         )
     }
 
-    /// Translate core's advisory MIME types into iOS UTTypes. Falls back
-    /// to `.data` (the universal "any file" type) so unfamiliar MIME
-    /// strings still let the picker open. Filters and dedups along the
-    /// way; an empty input means "pick any file".
     private var filePickerContentTypes: [UTType] {
-        // TODO(HUMBLE): [T, P1] frontend maps MIME types to OS UTTypes/extensions;
-        // core should provide accepted UTType identifiers or a `FileFilter` token
-        // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
         guard let pending = coreVM.pendingFilePick else { return [.data] }
-        let types = pending.acceptedMimeTypes.compactMap { UTType(mimeType: $0) }
+        return Self.contentTypes(forAcceptedExtensions: pending.acceptedExtensions)
+    }
+
+    /// Maps core's lowercase, dot-less extension filter (core!1582
+    /// `accepted_extensions`) to `UTType`s. Falls back to `.data` — the
+    /// universal "any file" type — when the list is empty (an
+    /// any-file purpose) or absent (the pinned core build predates the
+    /// field): the picker still opens, just without a filter.
+    static func contentTypes(forAcceptedExtensions extensions: [String]) -> [UTType] {
+        let types = extensions.compactMap { UTType(filenameExtension: $0) }
         return types.isEmpty ? [.data] : types
     }
 }

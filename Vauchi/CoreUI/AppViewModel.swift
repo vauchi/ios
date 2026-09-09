@@ -52,6 +52,12 @@ class AppViewModel: ObservableObject {
     struct PendingFilePick: Identifiable {
         let purpose: FilePickPurpose
         let acceptedMimeTypes: [String]
+        /// Core's lowercase, dot-less extension filter (core!1582
+        /// `Command::FilePickFromUser.accepted_extensions`). Empty when
+        /// the purpose accepts any file, or when the raw command JSON
+        /// predates the field — see `AppViewModel
+        /// .acceptedExtensionsByCommandIndex(fromCommandsJSON:)`.
+        let acceptedExtensions: [String]
         var id: String {
             String(describing: purpose)
         }
@@ -317,6 +323,28 @@ class AppViewModel: ObservableObject {
         let commands: [CommandDTO]
     }
 
+    /// Sidecar decode for `Command::FilePickFromUser.accepted_extensions`
+    /// (core!1582): the field is absent from `CommandDTO.filePickFromUser`
+    /// in the pinned vauchi-platform-swift build, so it can't be read off
+    /// the decoded DTO. Re-reads the same "commands" JSON `CommandDTO`
+    /// decodes from and returns one extension list per command, aligned
+    /// by index — empty for every non-file-pick command and for a
+    /// file-pick command whose JSON has no `accepted_extensions` key.
+    /// Delete once the core pin carries #1582 and `CommandDTO
+    /// .filePickFromUser` gains the field itself.
+    static func acceptedExtensionsByCommandIndex(fromCommandsJSON data: Data) -> [[String]] {
+        guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let commands = root["commands"] as? [Any]
+        else { return [] }
+        return commands.map { entry in
+            guard let object = entry as? [String: Any],
+                  let payload = object["FilePickFromUser"] as? [String: Any],
+                  let extensions = payload["accepted_extensions"] as? [String]
+            else { return [] }
+            return extensions
+        }
+    }
+
     private func dispatchNativeEffects(from data: Data) throws {
         guard var root = try JSONSerialization.jsonObject(with: data)
             as? [String: Any],
@@ -352,7 +380,10 @@ class AppViewModel: ObservableObject {
             NativeEffectEnvelope.self,
             from: filtered
         )
-        handleExchangeCommands(envelope.commands)
+        handleExchangeCommands(
+            envelope.commands,
+            acceptedExtensionsByCommandIndex: Self.acceptedExtensionsByCommandIndex(fromCommandsJSON: filtered)
+        )
     }
 
     func invalidateAll() {
@@ -390,7 +421,10 @@ class AppViewModel: ObservableObject {
                     if case .scheduleWakeup = command { return true }
                     return false
                 }
-                handleExchangeCommands(envelope.commands)
+                handleExchangeCommands(
+                    envelope.commands,
+                    acceptedExtensionsByCommandIndex: Self.acceptedExtensionsByCommandIndex(fromCommandsJSON: data)
+                )
             }
             loadInitialPresentation()
         } catch {
@@ -495,8 +529,11 @@ class AppViewModel: ObservableObject {
 
     /// Dispatch one or more native effects emitted by Core's generic
     /// presentation or hardware-event boundary.
-    func handleExchangeCommands(_ commands: [CommandDTO]) {
-        for command in commands {
+    func handleExchangeCommands(
+        _ commands: [CommandDTO],
+        acceptedExtensionsByCommandIndex: [[String]] = []
+    ) {
+        for (index, command) in commands.enumerated() {
             // BLE + audio commands are dispatched in their own helpers to
             // keep this switch within SwiftLint's complexity budget.
             if handleTransportCommand(command) { continue }
@@ -513,9 +550,13 @@ class AppViewModel: ObservableObject {
                 // the parameters so the view layer can present a
                 // `.fileImporter`. Selection / cancel route back via
                 // `sendFilePicked` / `sendFilePickCancelled`.
+                let acceptedExtensions = acceptedExtensionsByCommandIndex.indices.contains(index)
+                    ? acceptedExtensionsByCommandIndex[index]
+                    : []
                 pendingFilePick = PendingFilePick(
                     purpose: purpose,
-                    acceptedMimeTypes: acceptedMimeTypes
+                    acceptedMimeTypes: acceptedMimeTypes,
+                    acceptedExtensions: acceptedExtensions
                 )
             case let .setScreenBrightness(level):
                 applyScreenBrightness(level: level)
