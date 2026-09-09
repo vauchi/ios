@@ -141,11 +141,6 @@ final class SettingsService {
         highContrast || UIAccessibility.isDarkerSystemColorsEnabled
     }
 
-    /// Minimum touch target size based on settings
-    var minimumTouchTargetSize: CGFloat {
-        largeTouchTargets ? 56 : 44
-    }
-
     // MARK: - Reset
 
     /// Resets all settings to defaults
