@@ -415,26 +415,48 @@ struct PresentationNodeView: View {
 // Not private: `PresentationImageContentTests` renders it directly, because
 // the defect it guards is a missing fill that no XCUITest query can see.
 struct PresentationImageContent: View {
+    /// Side of the box the initials fallback occupies. Core names no size,
+    /// so each shell picks one; this is a profile avatar on iOS. It has to
+    /// be square for the circle case — a circle clipped from a box as wide
+    /// as the surface is a stadium, not an avatar.
+    private static let fallbackSide: CGFloat = 96
+
     let value: PresentationNode.Image
 
     var body: some View {
-        if value.shape == .circle {
-            content.clipShape(Circle())
-        } else {
-            content.clipShape(RoundedRectangle(cornerRadius: 8))
-        }
-    }
-
-    private var content: some View {
-        Group {
-            if let data = value.data, let image = UIImage(data: Data(data)) {
+        if let data = value.data, let image = UIImage(data: Data(data)) {
+            clipped {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
                     .brightness(Double(value.brightness - 1))
-            } else {
-                Text(value.fallbackText ?? "")
             }
+        } else if let fallback = value.fallbackText, !fallback.isEmpty {
+            // The fill is the point. `clipShape` on a bare `Text` clips
+            // nothing, because a `Text` paints no body — which is why the
+            // initials read as a stray letter on the page rather than as an
+            // avatar. Nothing to show still shows nothing: an absent
+            // fallback must not leave a filled blank behind.
+            clipped {
+                Text(fallback)
+                    .font(.title2.weight(.semibold))
+                    .foregroundColor(.primary)
+                    .frame(width: Self.fallbackSide, height: Self.fallbackSide)
+                    .background(Color.secondary.opacity(0.18))
+            }
+        }
+    }
+
+    /// Branching rather than `AnyShape`: this target deploys to iOS 15 and
+    /// `AnyShape` arrived in 16.
+    @ViewBuilder
+    private func clipped<Content: View>(
+        @ViewBuilder _ content: () -> Content
+    ) -> some View {
+        if value.shape == .circle {
+            content().clipShape(Circle())
+        } else {
+            content().clipShape(RoundedRectangle(cornerRadius: 8))
         }
     }
 }
