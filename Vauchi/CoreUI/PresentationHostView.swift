@@ -15,9 +15,12 @@ struct PresentationHostView: View {
                 surfaces
                     .padding(profileClass == .compact ? 0 : 16)
                     .safeAreaInset(edge: .bottom) {
-                        commandBar
-                            .padding(.horizontal, profileClass == .compact ? 8 : 20)
-                            .padding(.bottom, 4)
+                        VStack(spacing: 0) {
+                            commandBar
+                                .padding(.horizontal, profileClass == .compact ? 8 : 20)
+                                .padding(.bottom, 4)
+                            navigationBar
+                        }
                     }
                 if let overlay = viewModel.presentationState.activeOverlay {
                     // Same dismiss-before-dispatch ordering as the modal
@@ -37,8 +40,7 @@ struct PresentationHostView: View {
                             Spacer()
                             CoreBottomTabBar(
                                 surfaceID: overlay.surfaceID,
-                                items: overlay.overlay.items,
-                                selectedInteractionID: nil,
+                                items: overlay.overlay.items.map(PresentationNavigationItem.init(overlayAction:)),
                                 onEvent: onTabAction
                             )
                         }
@@ -176,6 +178,24 @@ struct PresentationHostView: View {
                 minimumTarget: PresentationTokens.minimumTargetSize(
                     from: viewModel.presentationState.surfaces[surfaceID]?.tokens
                 ),
+                onEvent: { event in
+                    viewModel.activateAndDispatch(
+                        surfaceID: surfaceID,
+                        event: event
+                    )
+                }
+            )
+        }
+    }
+
+    @ViewBuilder
+    private var navigationBar: some View {
+        if let surfaceID = viewModel.presentationState.activeSurfaceID,
+           let items = viewModel.presentationState.activeNavigation?.navigation.items,
+           CoreBottomTabBarLayout.isVisible(items: items) {
+            CoreBottomTabBar(
+                surfaceID: surfaceID,
+                items: items,
                 onEvent: { event in
                     viewModel.activateAndDispatch(
                         surfaceID: surfaceID,

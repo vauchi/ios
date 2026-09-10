@@ -14,46 +14,39 @@
 import XCTest
 
 final class CoreBottomTabBarLayoutTests: XCTestCase {
-    /// `PresentationAction` only decodes from Core's wire JSON (its
-    /// `init(from:)` suppresses the synthesized memberwise initializer), so
-    /// fixtures go through the same decoder production code uses.
-    private func action(
+    private func item(
         interactionID: String = "nav.destination",
-        iconToken: String?
-    ) throws -> PresentationAction {
-        var wire: [String: Any] = [
-            "interaction_id": interactionID,
-            "label": "Destination",
-            "accessibility_label": "Destination",
-            "enabled": true,
-            "tone": "standard",
-        ]
-        if let iconToken {
-            wire["icon_token"] = iconToken
-        }
-        let data = try JSONSerialization.data(withJSONObject: wire)
-        return try JSONDecoder().decode(PresentationAction.self, from: data)
+        iconToken: String? = "person.2",
+        selected: Bool = false,
+        badgeCount: UInt32 = 0
+    ) -> PresentationNavigationItem {
+        PresentationNavigationItem(
+            interactionID: interactionID,
+            label: "Destination",
+            accessibilityLabel: "Destination",
+            iconToken: iconToken,
+            selected: selected,
+            badgeCount: badgeCount
+        )
     }
 
     // MARK: - isCentreAction
 
-    func testTheQrcodeIconedTabIsTheCentreAction() throws {
-        XCTAssertTrue(
-            try CoreBottomTabBarLayout.isCentreAction(tab: action(iconToken: "qrcode"))
-        )
+    func testTheQrcodeIconedTabIsTheCentreAction() {
+        XCTAssertTrue(CoreBottomTabBarLayout.isCentreAction(tab: item(iconToken: "qrcode")))
     }
 
-    func testEveryOtherIconedTabIsNotTheCentreAction() throws {
+    func testEveryOtherIconedTabIsNotTheCentreAction() {
         for token in ["person.2", "person.crop.rectangle", "laptopcomputer", "gearshape"] {
             XCTAssertFalse(
-                try CoreBottomTabBarLayout.isCentreAction(tab: action(iconToken: token)),
+                CoreBottomTabBarLayout.isCentreAction(tab: item(iconToken: token)),
                 "'\(token)' must not be treated as the raised centre action"
             )
         }
     }
 
-    func testATabWithNoIconTokenIsNotTheCentreAction() throws {
-        XCTAssertFalse(try CoreBottomTabBarLayout.isCentreAction(tab: action(iconToken: nil)))
+    func testATabWithNoIconTokenIsNotTheCentreAction() {
+        XCTAssertFalse(CoreBottomTabBarLayout.isCentreAction(tab: item(iconToken: nil)))
     }
 
     // MARK: - accessibilityValue(position:of:)
@@ -76,29 +69,30 @@ final class CoreBottomTabBarLayoutTests: XCTestCase {
         )
     }
 
-    // MARK: - isSelected(tab:selectedInteractionID:)
+    // MARK: - isSelected(tab:)
 
-    func testATabMatchingTheSelectedInteractionIDIsSelected() throws {
-        let tab = try action(interactionID: "nav.contacts", iconToken: "person.2")
+    /// Selection now arrives on the item itself (`SetNavigation`), not from
+    /// a separately-tracked interaction id — so the layout decision is a
+    /// direct read of the command's own field.
+    func testATabCoreMarksSelectedIsSelected() {
+        let tab = item(interactionID: "nav.contacts", iconToken: "person.2", selected: true)
 
-        XCTAssertTrue(
-            CoreBottomTabBarLayout.isSelected(tab: tab, selectedInteractionID: "nav.contacts")
-        )
+        XCTAssertTrue(CoreBottomTabBarLayout.isSelected(tab: tab))
     }
 
-    func testATabNotMatchingTheSelectedInteractionIDIsNotSelected() throws {
-        let tab = try action(interactionID: "nav.contacts", iconToken: "person.2")
+    func testATabCoreDoesNotMarkSelectedIsNotSelected() {
+        let tab = item(interactionID: "nav.contacts", iconToken: "person.2", selected: false)
 
-        XCTAssertFalse(
-            CoreBottomTabBarLayout.isSelected(tab: tab, selectedInteractionID: "nav.settings")
-        )
+        XCTAssertFalse(CoreBottomTabBarLayout.isSelected(tab: tab))
     }
 
-    func testNoSelectionMeansNoTabIsSelected() throws {
-        let tab = try action(interactionID: "nav.contacts", iconToken: "person.2")
+    // MARK: - isVisible(items:)
 
-        XCTAssertFalse(
-            CoreBottomTabBarLayout.isSelected(tab: tab, selectedInteractionID: nil)
-        )
+    func testAnEmptyNavigationListIsNotVisible() {
+        XCTAssertFalse(CoreBottomTabBarLayout.isVisible(items: []))
+    }
+
+    func testANonEmptyNavigationListIsVisible() {
+        XCTAssertTrue(CoreBottomTabBarLayout.isVisible(items: [item()]))
     }
 }

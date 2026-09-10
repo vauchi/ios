@@ -14,7 +14,7 @@ enum CoreBottomTabBarLayout {
     /// the icon token Core already sends, the same vocabulary
     /// `NavigationIconMap` resolves, so the shell reacts to presentation
     /// vocabulary rather than inventing a domain rule about "Exchange".
-    static func isCentreAction(tab: PresentationAction) -> Bool {
+    static func isCentreAction(tab: PresentationNavigationItem) -> Bool {
         tab.iconToken == "qrcode"
     }
 
@@ -24,26 +24,30 @@ enum CoreBottomTabBarLayout {
         "tab \(position + 1) of \(count)"
     }
 
-    static func isSelected(tab: PresentationAction, selectedInteractionID: String?) -> Bool {
-        selectedInteractionID != nil && tab.interactionID == selectedInteractionID
+    /// Core reports which destination is current directly on each item
+    /// (`SetNavigation`), so the shell reflects it rather than deriving it
+    /// from any local state.
+    static func isSelected(tab: PresentationNavigationItem) -> Bool {
+        tab.selected
+    }
+
+    /// An empty `items` list means the surface offers no destinations (a
+    /// locked app) — Core's contract for `NavigationSpec`, mirrored so the
+    /// bar hides instead of rendering with nothing in it.
+    static func isVisible(items: [PresentationNavigationItem]) -> Bool {
+        !items.isEmpty
     }
 }
 
-/// Renders Core's `navigation`-kind overlay as persistent-looking bottom
-/// chrome instead of `PresentationOverlayView`'s full-screen sheet — the
+/// Renders Core's persistent navigation surface (`SetNavigation`) as the
 /// native bottom-tab-bar idiom Option A asks for, and the fix for
 /// `2026-06-02-ios-custom-tabbar-accessibility`: a plain row of buttons
-/// reads to VoiceOver as ungrouped generic buttons, not as a tab bar.
-///
-/// `selectedInteractionID` exists for forward compatibility. Core does not
-/// yet report which destination is current — the overlay's items carry no
-/// such flag, and deriving it from the active surface would be the shell
-/// interpreting domain state ADR-066 reserves to Core — so every call site
-/// today passes `nil` and `.isSelected` stays inert until Core adds it.
+/// reads to VoiceOver as ungrouped generic buttons, not as a tab bar. The
+/// same view also renders Core's `navigation`-kind overlay for shells/
+/// screens that still open it, via `PresentationNavigationItem(overlayAction:)`.
 struct CoreBottomTabBar: View {
     let surfaceID: String
-    let items: [PresentationAction]
-    let selectedInteractionID: String?
+    let items: [PresentationNavigationItem]
     let onEvent: (PresentationEvent) -> Void
 
     private static let centreDiameter: CGFloat = 64
@@ -62,7 +66,7 @@ struct CoreBottomTabBar: View {
         .tabBarTrait()
     }
 
-    private func tabButton(_ tab: PresentationAction, position: Int) -> some View {
+    private func tabButton(_ tab: PresentationNavigationItem, position: Int) -> some View {
         Button {
             onEvent(.actionActivated(surfaceID: surfaceID, interactionID: tab.interactionID))
         } label: {
@@ -73,7 +77,6 @@ struct CoreBottomTabBar: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .disabled(!tab.enabled)
         // One VoiceOver stop per destination. Modifying the button's own
         // label is not enough: SwiftUI lifts the `Image` out of the button's
         // subtree and publishes it as a sibling button named after the SF
@@ -82,23 +85,16 @@ struct CoreBottomTabBar: View {
         // collapses it, the same way `PresentationOverlayView` does.
         .accessibilityRepresentation {
             Button(tab.accessibilityLabel) {}
-                .disabled(!tab.enabled)
                 .accessibilityValue(
                     CoreBottomTabBarLayout.accessibilityValue(position: position, of: items.count)
                 )
-                .accessibilityAddTraits(
-                    CoreBottomTabBarLayout.isSelected(
-                        tab: tab,
-                        selectedInteractionID: selectedInteractionID
-                    ) ? .isSelected : []
-                )
+                .accessibilityAddTraits(CoreBottomTabBarLayout.isSelected(tab: tab) ? .isSelected : [])
         }
     }
 
-    private func centreLabel(_ tab: PresentationAction) -> some View {
+    private func centreLabel(_ tab: PresentationNavigationItem) -> some View {
         VStack(spacing: 4) {
-            Image(systemName: NavigationIconMap.systemImage(for: tab.iconToken))
-                .font(.title2)
+            icon(tab, font: .title2)
                 .foregroundColor(.white)
                 .frame(width: Self.centreDiameter, height: Self.centreDiameter)
                 .background(Color.accentColor)
@@ -111,14 +107,56 @@ struct CoreBottomTabBar: View {
         }
     }
 
-    private func sideLabel(_ tab: PresentationAction) -> some View {
+    private func sideLabel(_ tab: PresentationNavigationItem) -> some View {
         VStack(spacing: 2) {
-            Image(systemName: NavigationIconMap.systemImage(for: tab.iconToken))
-                .font(.title3)
+            icon(tab, font: .title3)
             Text(tab.label)
                 .font(.caption2)
         }
         .padding(.vertical, 6)
+        .foregroundColor(tab.selected ? .accentColor : .primary)
+    }
+
+    private func icon(_ tab: PresentationNavigationItem, font: Font) -> some View {
+        Image(systemName: NavigationIconMap.systemImage(for: tab.iconToken))
+            .font(font)
+            .overlay(alignment: .topTrailing) {
+                if tab.badgeCount > 0 {
+                    TabBarBadge(count: tab.badgeCount)
+                        .offset(x: 10, y: -8)
+                }
+            }
+    }
+}
+
+private struct TabBarBadge: View {
+    let count: UInt32
+
+    var body: some View {
+        Text("\(count)")
+            .font(.caption2)
+            .foregroundColor(.white)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 1)
+            .background(Color.red, in: Capsule())
+            .accessibilityHidden(true)
+    }
+}
+
+extension PresentationNavigationItem {
+    /// The navigation overlay still carries destinations as
+    /// `PresentationAction` — mapped here so the overlay path renders
+    /// through the same `CoreBottomTabBar` as the persistent bar, reporting
+    /// no selection and no badge because the overlay's items carry neither.
+    init(overlayAction action: PresentationAction) {
+        self.init(
+            interactionID: action.interactionID,
+            label: action.label,
+            accessibilityLabel: action.accessibilityLabel,
+            iconToken: action.iconToken,
+            selected: false,
+            badgeCount: 0
+        )
     }
 }
 
