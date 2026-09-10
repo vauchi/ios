@@ -164,6 +164,9 @@ struct PresentationHostView: View {
                 surfaceID: surfaceID,
                 bar: viewModel.presentationState.activeBar,
                 windowClass: profileClass,
+                minimumTarget: PresentationTokens.minimumTargetSize(
+                    from: viewModel.presentationState.surfaces[surfaceID]?.tokens
+                ),
                 onEvent: { event in
                     viewModel.activateAndDispatch(
                         surfaceID: surfaceID,

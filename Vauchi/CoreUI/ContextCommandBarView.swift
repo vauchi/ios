@@ -8,6 +8,7 @@ struct ContextCommandBarView: View {
     let surfaceID: String
     let bar: PresentationContextBar?
     let windowClass: PresentationWindowClass
+    let minimumTarget: CGFloat
     let onEvent: (PresentationEvent) -> Void
 
     var body: some View {
@@ -38,7 +39,7 @@ struct ContextCommandBarView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-            .frame(maxWidth: .infinity, minHeight: 48)
+            .frame(maxWidth: .infinity, minHeight: minimumTarget)
             .disabled(!primary.enabled)
             .accessibilityLabel(primary.accessibilityLabel)
             .accessibilityIdentifier("command.primary")
@@ -48,7 +49,7 @@ struct ContextCommandBarView: View {
             )
         } else {
             Spacer()
-                .frame(maxWidth: .infinity, minHeight: 48)
+                .frame(maxWidth: .infinity, minHeight: minimumTarget)
         }
     }
 
@@ -63,13 +64,13 @@ struct ContextCommandBarView: View {
                 activate(action)
             } label: {
                 Image(systemName: systemImage)
-                    .frame(width: 44, height: 44)
+                    .frame(width: minimumTarget, height: minimumTarget)
             }
             .disabled(!action.enabled)
             .accessibilityLabel(action.accessibilityLabel)
             .accessibilityIdentifier(identifier)
         } else {
-            Color.clear.frame(width: 44, height: 44)
+            Color.clear.frame(width: minimumTarget, height: minimumTarget)
         }
     }
 
