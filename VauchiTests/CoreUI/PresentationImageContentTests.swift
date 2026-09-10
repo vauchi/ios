@@ -52,8 +52,12 @@ final class PresentationImageContentTests: XCTestCase {
         of node: PresentationNode.Image,
         at point: CGPoint
     ) throws -> (r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
+        // `diameter: side` keeps the fallback filling the hosting box, so
+        // the hand-calibrated sample point below still lands inside the
+        // painted avatar rather than in the margin a smaller token would
+        // leave around it.
         let host = UIHostingController(
-            rootView: PresentationImageContent(value: node)
+            rootView: PresentationImageContent(value: node, diameter: side)
                 .frame(width: side, height: side)
         )
         host.view.frame = CGRect(x: 0, y: 0, width: side, height: side)
