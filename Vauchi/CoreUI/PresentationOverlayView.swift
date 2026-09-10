@@ -125,7 +125,7 @@ struct PresentationOverlayView: View {
             }
             .buttonStyle(.bordered)
             .disabled(!action.enabled)
-            .foregroundColor(action.tone == .destructive ? .red : .primary)
+            .foregroundColor(action.tone.foregroundColor)
             // The icon repeats the word beside it, so it must not be its own
             // VoiceOver stop — left exposed, SwiftUI narrates the symbol and
             // gets it wrong either way: undescribed symbols read as their raw

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import Foundation
+import SwiftUI
 
 struct PresentationAccessibility: Codable, Equatable {
     let label: String
@@ -17,7 +18,18 @@ enum PresentationShortcut: String, Codable {
 
 enum PresentationActionTone: String, Codable {
     case standard
+    /// Consequential but not destructive (verify a fingerprint, schedule a
+    /// deletion): warning colour, never the destructive red.
+    case serious
     case destructive
+
+    var foregroundColor: Color {
+        switch self {
+        case .standard: .primary
+        case .serious: .orange
+        case .destructive: .red
+        }
+    }
 }
 
 struct PresentationAction: Codable, Equatable, Identifiable {
