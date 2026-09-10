@@ -20,7 +20,7 @@ final class CoreBottomTabBarLayoutTests: XCTestCase {
     private func action(
         interactionID: String = "nav.destination",
         iconToken: String?
-    ) -> PresentationAction {
+    ) throws -> PresentationAction {
         var wire: [String: Any] = [
             "interaction_id": interactionID,
             "label": "Destination",
@@ -31,29 +31,29 @@ final class CoreBottomTabBarLayoutTests: XCTestCase {
         if let iconToken {
             wire["icon_token"] = iconToken
         }
-        let data = try! JSONSerialization.data(withJSONObject: wire)
-        return try! JSONDecoder().decode(PresentationAction.self, from: data)
+        let data = try JSONSerialization.data(withJSONObject: wire)
+        return try JSONDecoder().decode(PresentationAction.self, from: data)
     }
 
     // MARK: - isCentreAction
 
-    func testTheQrcodeIconedTabIsTheCentreAction() {
+    func testTheQrcodeIconedTabIsTheCentreAction() throws {
         XCTAssertTrue(
-            CoreBottomTabBarLayout.isCentreAction(tab: action(iconToken: "qrcode"))
+            try CoreBottomTabBarLayout.isCentreAction(tab: action(iconToken: "qrcode"))
         )
     }
 
-    func testEveryOtherIconedTabIsNotTheCentreAction() {
+    func testEveryOtherIconedTabIsNotTheCentreAction() throws {
         for token in ["person.2", "person.crop.rectangle", "laptopcomputer", "gearshape"] {
             XCTAssertFalse(
-                CoreBottomTabBarLayout.isCentreAction(tab: action(iconToken: token)),
+                try CoreBottomTabBarLayout.isCentreAction(tab: action(iconToken: token)),
                 "'\(token)' must not be treated as the raised centre action"
             )
         }
     }
 
-    func testATabWithNoIconTokenIsNotTheCentreAction() {
-        XCTAssertFalse(CoreBottomTabBarLayout.isCentreAction(tab: action(iconToken: nil)))
+    func testATabWithNoIconTokenIsNotTheCentreAction() throws {
+        XCTAssertFalse(try CoreBottomTabBarLayout.isCentreAction(tab: action(iconToken: nil)))
     }
 
     // MARK: - accessibilityValue(position:of:)
@@ -78,24 +78,24 @@ final class CoreBottomTabBarLayoutTests: XCTestCase {
 
     // MARK: - isSelected(tab:selectedInteractionID:)
 
-    func testATabMatchingTheSelectedInteractionIDIsSelected() {
-        let tab = action(interactionID: "nav.contacts", iconToken: "person.2")
+    func testATabMatchingTheSelectedInteractionIDIsSelected() throws {
+        let tab = try action(interactionID: "nav.contacts", iconToken: "person.2")
 
         XCTAssertTrue(
             CoreBottomTabBarLayout.isSelected(tab: tab, selectedInteractionID: "nav.contacts")
         )
     }
 
-    func testATabNotMatchingTheSelectedInteractionIDIsNotSelected() {
-        let tab = action(interactionID: "nav.contacts", iconToken: "person.2")
+    func testATabNotMatchingTheSelectedInteractionIDIsNotSelected() throws {
+        let tab = try action(interactionID: "nav.contacts", iconToken: "person.2")
 
         XCTAssertFalse(
             CoreBottomTabBarLayout.isSelected(tab: tab, selectedInteractionID: "nav.settings")
         )
     }
 
-    func testNoSelectionMeansNoTabIsSelected() {
-        let tab = action(interactionID: "nav.contacts", iconToken: "person.2")
+    func testNoSelectionMeansNoTabIsSelected() throws {
+        let tab = try action(interactionID: "nav.contacts", iconToken: "person.2")
 
         XCTAssertFalse(
             CoreBottomTabBarLayout.isSelected(tab: tab, selectedInteractionID: nil)
