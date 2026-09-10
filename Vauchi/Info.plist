@@ -49,6 +49,14 @@
 	<string>Vauchi can record where you met a contact during an in-person exchange. This is stored privately on your device and never shared.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Vauchi uses the microphone for ultrasonic proximity verification during contact exchange.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>BricolageGrotesque[opsz,wdth,wght].ttf</string>
+		<string>HankenGrotesk[wght].ttf</string>
+		<string>HankenGrotesk-Italic[wght].ttf</string>
+		<string>JetBrainsMono[wght].ttf</string>
+		<string>JetBrainsMono-Italic[wght].ttf</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

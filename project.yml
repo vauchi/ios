@@ -67,6 +67,12 @@ targets:
         CFBundleShortVersionString: "1.0.0"
         CFBundleVersion: "1"
         UILaunchScreen: {}
+        UIAppFonts:
+          - "BricolageGrotesque[opsz,wdth,wght].ttf"
+          - "HankenGrotesk[wght].ttf"
+          - "HankenGrotesk-Italic[wght].ttf"
+          - "JetBrainsMono[wght].ttf"
+          - "JetBrainsMono-Italic[wght].ttf"
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         UISupportedInterfaceOrientations~ipad:

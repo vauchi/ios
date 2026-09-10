@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import SwiftUI
+import UIKit
 
 /// How a `PresentationTextStyle` role is presented natively.
 ///
@@ -25,10 +26,39 @@ struct TextRoleStyle: Equatable {
 /// resolved correctly — which is what `TextRoleStyleTests` covers.
 func textRoleStyle(for style: PresentationTextStyle) -> TextRoleStyle {
     switch style {
-    case .heading: TextRoleStyle(font: .title2.bold(), muted: false)
-    case .body: TextRoleStyle(font: .body, muted: false)
-    case .caption: TextRoleStyle(font: .caption, muted: false)
-    case .monospace: TextRoleStyle(font: .system(.body, design: .monospaced), muted: false)
-    case .muted: TextRoleStyle(font: .body, muted: true)
+    case .heading:
+        TextRoleStyle(font: brandFont(named: headingFace, matching: .title2, relativeTo: .title2), muted: false)
+    case .body:
+        TextRoleStyle(font: brandFont(named: bodyFace, matching: .body, relativeTo: .body), muted: false)
+    case .caption:
+        TextRoleStyle(font: brandFont(named: bodyFace, matching: .caption1, relativeTo: .caption), muted: false)
+    case .monospace:
+        TextRoleStyle(font: brandFont(named: monospaceFace, matching: .body, relativeTo: .body), muted: false)
+    case .muted:
+        TextRoleStyle(font: brandFont(named: bodyFace, matching: .body, relativeTo: .body), muted: true)
     }
+}
+
+/// Bricolage Grotesque's default (non-instanced) master sits at ExtraBold,
+/// so its named instances register on iOS under that master's PostScript
+/// name rather than under the family's Regular weight — the Bold (700)
+/// instance used for `.heading` is `BricolageGrotesque-96ptExtraBold_Bold`,
+/// confirmed against `UIFont.fontNames(forFamilyName:)` at registration.
+private let headingFace = "BricolageGrotesque-96ptExtraBold_Bold"
+private let bodyFace = "HankenGrotesk-Regular"
+private let monospaceFace = "JetBrainsMono-Regular"
+
+/// `Font.custom(_:size:relativeTo:)` needs an unscaled base size; reading
+/// it from `UIFont.preferredFont` at the `.large` (default) content size
+/// category avoids hardcoding HIG point values that Apple could change.
+private func brandFont(
+    named postScriptName: String,
+    matching uiTextStyle: UIFont.TextStyle,
+    relativeTo textStyle: Font.TextStyle
+) -> Font {
+    let baseSize = UIFont.preferredFont(
+        forTextStyle: uiTextStyle,
+        compatibleWith: UITraitCollection(preferredContentSizeCategory: .large)
+    ).pointSize
+    return .custom(postScriptName, size: baseSize, relativeTo: textStyle)
 }
