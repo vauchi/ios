@@ -214,7 +214,7 @@ struct PresentationNodeView: View {
 
     @ViewBuilder
     private func image(_ value: PresentationNode.Image) -> some View {
-        let content = PresentationImageContent(value: value)
+        let content = PresentationImageContent(value: value, diameter: minimumTarget)
             .frame(minWidth: minimumTarget, minHeight: minimumTarget)
         if let action = value.activation {
             Button {
@@ -412,16 +412,29 @@ struct PresentationNodeView: View {
     }
 }
 
+/// Pure sizing decision for the `Image` node's initials fallback, pulled out
+/// of the view so `AvatarFallbackSpecTests` can assert diameter and initials
+/// without rendering — the defect this guards (a fill with no size) is
+/// otherwise only visible as pixels.
+struct AvatarFallbackSpec: Equatable {
+    let initials: String
+    let diameter: CGFloat
+}
+
 /// Not private: `PresentationImageContentTests` renders it directly, because
 /// the defect it guards is a missing fill that no XCUITest query can see.
 struct PresentationImageContent: View {
-    /// Side of the box the initials fallback occupies. Core names no size,
-    /// so each shell picks one; this is a profile avatar on iOS. It has to
-    /// be square for the circle case — a circle clipped from a box as wide
-    /// as the surface is a stadium, not an avatar.
-    private static let fallbackSide: CGFloat = 96
-
     let value: PresentationNode.Image
+    /// Core names no size for the standalone `Image` node, so the caller
+    /// passes the same tappable-target floor every row avatar uses
+    /// (`surface.tokens.minimumTargetSize`) rather than a shell-picked
+    /// constant.
+    let diameter: CGFloat
+
+    private var fallbackSpec: AvatarFallbackSpec? {
+        guard let fallback = value.fallbackText, !fallback.isEmpty else { return nil }
+        return AvatarFallbackSpec(initials: fallback, diameter: diameter)
+    }
 
     var body: some View {
         if let data = value.data, let image = UIImage(data: Data(data)) {
@@ -431,19 +444,23 @@ struct PresentationImageContent: View {
                     .scaledToFit()
                     .brightness(Double(value.brightness - 1))
             }
-        } else if let fallback = value.fallbackText, !fallback.isEmpty {
+        } else if let spec = fallbackSpec {
             // The fill is the point. `clipShape` on a bare `Text` clips
             // nothing, because a `Text` paints no body — which is why the
             // initials read as a stray letter on the page rather than as an
             // avatar. Nothing to show still shows nothing: an absent
             // fallback must not leave a filled blank behind.
-            clipped {
-                Text(fallback)
-                    .font(.title2.weight(.semibold))
-                    .foregroundColor(.primary)
-                    .frame(width: Self.fallbackSide, height: Self.fallbackSide)
-                    .background(Color.secondary.opacity(0.18))
-            }
+            //
+            // Always a circle, unlike the image-data branch below: a
+            // missing photo reads as a person regardless of what Core asked
+            // the *photo* to look like, the same choice `PresentationRowView`
+            // makes for its own fallback (same fill colour, `0.15`).
+            Text(spec.initials)
+                .font(.system(size: spec.diameter * 0.4, weight: .semibold))
+                .foregroundColor(.primary)
+                .frame(width: spec.diameter, height: spec.diameter)
+                .background(Color.secondary.opacity(0.15))
+                .clipShape(Circle())
         }
     }
 
