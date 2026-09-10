@@ -58,6 +58,7 @@ struct CoreBottomTabBar: View {
         .padding(.top, 8)
         .background(.regularMaterial)
         .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("navigationDestinations")
         .tabBarTrait()
     }
 
