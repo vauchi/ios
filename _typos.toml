@@ -16,3 +16,5 @@ UDID = "UDID"
 mappin = "mappin"
 # CBAttributePermissions.writeable is the Apple API spelling
 writeable = "writeable"
+# OpenType variable-font axis tag (width) in the Bricolage file name
+wdth = "wdth"
