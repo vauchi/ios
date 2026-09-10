@@ -232,38 +232,13 @@ enum PresentationCommand: Decodable {
         key: DynamicKey,
         from container: KeyedDecodingContainer<DynamicKey>
     ) throws -> Self {
+        if let surfaceScoped = try decodeSurfaceVariant(key: key, from: container) {
+            return surfaceScoped
+        }
         switch key.stringValue {
         case "ReplaceSurface":
             return try .replaceSurface(
                 container.decode(SurfacePayload.self, forKey: key).surface
-            )
-        case "SetContextBar":
-            let value = try container.decode(BarPayload.self, forKey: key)
-            return .setContextBar(
-                .init(revision: value.revision, bar: value.bar),
-                surfaceID: value.surfaceID
-            )
-        case "SetNavigation":
-            let value = try container.decode(NavigationPayload.self, forKey: key)
-            return .setNavigation(
-                .init(revision: value.revision, navigation: value.navigation),
-                surfaceID: value.surfaceID
-            )
-        case "PresentOverlay":
-            let value = try container.decode(OverlayPayload.self, forKey: key)
-            return .presentOverlay(
-                .init(
-                    surfaceID: value.surfaceID,
-                    revision: value.revision,
-                    overlay: value.overlay
-                )
-            )
-        case "DismissOverlay":
-            let value = try container.decode(DismissOverlayPayload.self, forKey: key)
-            return .dismissOverlay(
-                surfaceID: value.surfaceID,
-                revision: value.revision,
-                kind: value.kind
             )
         case "SetPresentationProfile":
             return try .setPresentationProfile(
@@ -294,6 +269,45 @@ enum PresentationCommand: Decodable {
                 variant: key.stringValue,
                 payload: try? container.decode(JSONValue.self, forKey: key)
             )
+        }
+    }
+
+    /// The commands that address one surface by id and revision.
+    private static func decodeSurfaceVariant(
+        key: DynamicKey,
+        from container: KeyedDecodingContainer<DynamicKey>
+    ) throws -> Self? {
+        switch key.stringValue {
+        case "SetContextBar":
+            let value = try container.decode(BarPayload.self, forKey: key)
+            return .setContextBar(
+                .init(revision: value.revision, bar: value.bar),
+                surfaceID: value.surfaceID
+            )
+        case "SetNavigation":
+            let value = try container.decode(NavigationPayload.self, forKey: key)
+            return .setNavigation(
+                .init(revision: value.revision, navigation: value.navigation),
+                surfaceID: value.surfaceID
+            )
+        case "PresentOverlay":
+            let value = try container.decode(OverlayPayload.self, forKey: key)
+            return .presentOverlay(
+                .init(
+                    surfaceID: value.surfaceID,
+                    revision: value.revision,
+                    overlay: value.overlay
+                )
+            )
+        case "DismissOverlay":
+            let value = try container.decode(DismissOverlayPayload.self, forKey: key)
+            return .dismissOverlay(
+                surfaceID: value.surfaceID,
+                revision: value.revision,
+                kind: value.kind
+            )
+        default:
+            return nil
         }
     }
 }
