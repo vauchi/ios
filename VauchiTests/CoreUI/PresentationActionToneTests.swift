@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import SwiftUI
-import XCTest
 @testable import Vauchi
+import XCTest
 
 /// Core sends three action tones; the shell must decode every one and
 /// colour it distinctly, so a serious action never looks destructive.
