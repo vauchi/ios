@@ -19,6 +19,40 @@ struct RevisionedOverlay: Equatable {
     let overlay: PresentationOverlay
 }
 
+struct RevisionedNavigation: Equatable {
+    let revision: UInt64
+    let navigation: PresentationNavigation
+}
+
+/// One destination in Core's persistent navigation surface (bottom bar on
+/// phone, sidebar on desktop). Mirrors `NavigationItem` in
+/// `vauchi-core/src/platform/presentation.rs`.
+struct PresentationNavigationItem: Decodable, Equatable, Identifiable {
+    let interactionID: String
+    let label: String
+    let accessibilityLabel: String
+    let iconToken: String?
+    let selected: Bool
+    let badgeCount: UInt32
+
+    var id: String {
+        interactionID
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case interactionID = "interaction_id"
+        case label
+        case accessibilityLabel = "accessibility_label"
+        case iconToken = "icon_token"
+        case selected
+        case badgeCount = "badge_count"
+    }
+}
+
+struct PresentationNavigation: Decodable, Equatable {
+    let items: [PresentationNavigationItem]
+}
+
 struct PresentationAlert: Decodable {
     let title: String
     let message: String
@@ -69,6 +103,7 @@ indirect enum JSONValue: Decodable {
 enum PresentationCommand: Decodable {
     case replaceSurface(PresentationSurface)
     case setContextBar(RevisionedContextBar, surfaceID: String)
+    case setNavigation(RevisionedNavigation, surfaceID: String)
     case presentOverlay(RevisionedOverlay)
     case dismissOverlay(surfaceID: String, revision: UInt64, kind: PresentationOverlayKind)
     case setPresentationProfile(PresentationProfile)
@@ -107,6 +142,18 @@ enum PresentationCommand: Decodable {
             case surfaceID = "surface_id"
             case revision
             case bar
+        }
+    }
+
+    private struct NavigationPayload: Decodable {
+        let surfaceID: String
+        let revision: UInt64
+        let navigation: PresentationNavigation
+
+        private enum CodingKeys: String, CodingKey {
+            case surfaceID = "surface_id"
+            case revision
+            case navigation
         }
     }
 
@@ -194,6 +241,12 @@ enum PresentationCommand: Decodable {
             let value = try container.decode(BarPayload.self, forKey: key)
             return .setContextBar(
                 .init(revision: value.revision, bar: value.bar),
+                surfaceID: value.surfaceID
+            )
+        case "SetNavigation":
+            let value = try container.decode(NavigationPayload.self, forKey: key)
+            return .setNavigation(
+                .init(revision: value.revision, navigation: value.navigation),
                 surfaceID: value.surfaceID
             )
         case "PresentOverlay":

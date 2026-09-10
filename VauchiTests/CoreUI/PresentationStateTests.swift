@@ -65,6 +65,52 @@ final class PresentationStateTests: XCTestCase {
         XCTAssertTrue(effects.isEmpty)
     }
 
+    func testAppliesSetNavigationIntoState() throws {
+        let commands = try decodeCommands("""
+        {"commands":[
+          {"ReplaceSurface":{"surface":\(surfaceJSON(revision: 1, surfaceID: "contacts"))}},
+          {"SetNavigation":{
+            "surface_id":"contacts",
+            "revision":1,
+            "navigation":{"items":[
+              {"interaction_id":"nav.contacts","label":"Contacts",
+               "accessibility_label":"Contacts","icon_token":"person.2",
+               "selected":true,"badge_count":0},
+              {"interaction_id":"nav.exchange","label":"Exchange",
+               "accessibility_label":"Exchange","icon_token":"qrcode",
+               "selected":false,"badge_count":3}
+            ]}
+          }}
+        ]}
+        """)
+
+        var state = PresentationState()
+        _ = try state.apply(commands)
+
+        let items = try XCTUnwrap(state.activeNavigation?.navigation.items)
+        XCTAssertEqual(items.map(\.interactionID), ["nav.contacts", "nav.exchange"])
+        XCTAssertEqual(items.first?.selected, true)
+        XCTAssertEqual(items.last?.badgeCount, 3)
+    }
+
+    func testEmptyNavigationItemsDecodesToEmptyList() throws {
+        let commands = try decodeCommands("""
+        {"commands":[
+          {"ReplaceSurface":{"surface":\(surfaceJSON(revision: 1))}},
+          {"SetNavigation":{
+            "surface_id":"main",
+            "revision":1,
+            "navigation":{"items":[]}
+          }}
+        ]}
+        """)
+
+        var state = PresentationState()
+        _ = try state.apply(commands)
+
+        XCTAssertEqual(state.activeNavigation?.navigation.items, [])
+    }
+
     func testRejectsWholeStaleTransaction() throws {
         var state = PresentationState()
         _ = try state.apply(decodeCommands("""

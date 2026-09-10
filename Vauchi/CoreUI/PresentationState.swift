@@ -7,6 +7,7 @@ import Foundation
 enum PresentationStateError: Error, Equatable {
     case staleSurface(String)
     case mismatchedContextBar(String)
+    case mismatchedNavigation(String)
     case mismatchedOverlay(String)
     case unknownProfileSurface(String)
 }
@@ -14,6 +15,7 @@ enum PresentationStateError: Error, Equatable {
 struct PresentationState {
     private(set) var surfaces: [String: PresentationSurface] = [:]
     private(set) var bars: [String: RevisionedContextBar] = [:]
+    private(set) var navigations: [String: RevisionedNavigation] = [:]
     private(set) var profile: PresentationProfile?
     private(set) var overlays: [String: RevisionedOverlay] = [:]
 
@@ -39,6 +41,7 @@ struct PresentationState {
                     == surface.revision
                 next.surfaces[surface.surfaceID] = surface
                 next.bars.removeValue(forKey: surface.surfaceID)
+                next.navigations.removeValue(forKey: surface.surfaceID)
                 // Only the overlay raised over *this* surface dies with it,
                 // and only when the surface actually moves on. A broader "any
                 // ReplaceSurface clears" rule was tried and reverted: it
@@ -63,6 +66,11 @@ struct PresentationState {
                     throw PresentationStateError.mismatchedContextBar(surfaceID)
                 }
                 next.bars[surfaceID] = bar
+            case let .setNavigation(navigation, surfaceID):
+                guard next.surfaces[surfaceID]?.revision == navigation.revision else {
+                    throw PresentationStateError.mismatchedNavigation(surfaceID)
+                }
+                next.navigations[surfaceID] = navigation
             case let .presentOverlay(overlay):
                 guard next.surfaces[overlay.surfaceID]?.revision == overlay.revision else {
                     throw PresentationStateError.mismatchedOverlay(overlay.surfaceID)
@@ -109,6 +117,10 @@ struct PresentationState {
 
     var activeBar: PresentationContextBar? {
         activeSurfaceID.flatMap { bars[$0]?.bar }
+    }
+
+    var activeNavigation: RevisionedNavigation? {
+        activeSurfaceID.flatMap { navigations[$0] }
     }
 
     /// The overlay to render, resolved through the active surface so a menu
