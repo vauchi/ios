@@ -20,30 +20,39 @@ struct PresentationHostView: View {
                             .padding(.bottom, 4)
                     }
                 if let overlay = viewModel.presentationState.activeOverlay {
-                    PresentationOverlayView(
-                        overlay: overlay,
-                        windowClass: profileClass,
-                        reducedMotion: reducedMotion,
-                        onAction: { event in
-                            // Choosing an item closes the menu, and Core has
-                            // to hear that: it clears its own open-overlay
-                            // state only on `OverlayDismissed`, so staying
-                            // quiet leaves its toggle rewriting the next
-                            // request for this menu into a dismissal and the
-                            // menu stops opening. Report it *before* the
-                            // action, while this surface is still the active
-                            // one — reporting it afterwards is rejected by
-                            // Core's fail-closed validation and reaches the
-                            // user as a "Presentation error" alert.
-                            viewModel.dismissPresentationOverlay()
-                            viewModel.activateAndDispatch(
+                    // Same dismiss-before-dispatch ordering as the modal
+                    // overlay below: Core clears its own open-overlay state
+                    // only on `OverlayDismissed`, so reporting the choice
+                    // first keeps this surface the active one for
+                    // fail-closed validation.
+                    let onTabAction: (PresentationEvent) -> Void = { event in
+                        viewModel.dismissPresentationOverlay()
+                        viewModel.activateAndDispatch(
+                            surfaceID: overlay.surfaceID,
+                            event: event
+                        )
+                    }
+                    if overlay.overlay.kind == .navigation {
+                        VStack {
+                            Spacer()
+                            CoreBottomTabBar(
                                 surfaceID: overlay.surfaceID,
-                                event: event
+                                items: overlay.overlay.items,
+                                selectedInteractionID: nil,
+                                onEvent: onTabAction
                             )
-                        },
-                        onDismiss: viewModel.dismissPresentationOverlay
-                    )
-                    .zIndex(20)
+                        }
+                        .zIndex(20)
+                    } else {
+                        PresentationOverlayView(
+                            overlay: overlay,
+                            windowClass: profileClass,
+                            reducedMotion: reducedMotion,
+                            onAction: onTabAction,
+                            onDismiss: viewModel.dismissPresentationOverlay
+                        )
+                        .zIndex(20)
+                    }
                 }
             }
             .onAppear {
