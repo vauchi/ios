@@ -43,8 +43,8 @@ enum CoreBottomTabBarLayout {
 /// native bottom-tab-bar idiom Option A asks for, and the fix for
 /// `2026-06-02-ios-custom-tabbar-accessibility`: a plain row of buttons
 /// reads to VoiceOver as ungrouped generic buttons, not as a tab bar. The
-/// same view also renders Core's `navigation`-kind overlay for shells/
-/// screens that still open it, via `PresentationNavigationItem(overlayAction:)`.
+/// `navigation`-kind overlay keeps its own panel (`PresentationOverlayView`);
+/// stacking a second bar over this one hid the command bar behind it.
 struct CoreBottomTabBar: View {
     let surfaceID: String
     let items: [PresentationNavigationItem]
@@ -140,23 +140,6 @@ private struct TabBarBadge: View {
             .padding(.vertical, 1)
             .background(Color.red, in: Capsule())
             .accessibilityHidden(true)
-    }
-}
-
-extension PresentationNavigationItem {
-    /// The navigation overlay still carries destinations as
-    /// `PresentationAction` — mapped here so the overlay path renders
-    /// through the same `CoreBottomTabBar` as the persistent bar, reporting
-    /// no selection and no badge because the overlay's items carry neither.
-    init(overlayAction action: PresentationAction) {
-        self.init(
-            interactionID: action.interactionID,
-            label: action.label,
-            accessibilityLabel: action.accessibilityLabel,
-            iconToken: action.iconToken,
-            selected: false,
-            badgeCount: 0
-        )
     }
 }
 

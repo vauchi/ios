@@ -35,26 +35,14 @@ struct PresentationHostView: View {
                             event: event
                         )
                     }
-                    if overlay.overlay.kind == .navigation {
-                        VStack {
-                            Spacer()
-                            CoreBottomTabBar(
-                                surfaceID: overlay.surfaceID,
-                                items: overlay.overlay.items.map(PresentationNavigationItem.init(overlayAction:)),
-                                onEvent: onTabAction
-                            )
-                        }
-                        .zIndex(20)
-                    } else {
-                        PresentationOverlayView(
-                            overlay: overlay,
-                            windowClass: profileClass,
-                            reducedMotion: reducedMotion,
-                            onAction: onTabAction,
-                            onDismiss: viewModel.dismissPresentationOverlay
-                        )
-                        .zIndex(20)
-                    }
+                    PresentationOverlayView(
+                        overlay: overlay,
+                        windowClass: profileClass,
+                        reducedMotion: reducedMotion,
+                        onAction: onTabAction,
+                        onDismiss: viewModel.dismissPresentationOverlay
+                    )
+                    .zIndex(20)
                 }
             }
             .onAppear {
