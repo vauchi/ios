@@ -125,14 +125,16 @@ final class TextRoleStyleTests: XCTestCase {
         }
     }
 
-    func testUnknownWireValueIsRejectedOnDecode() {
-        // The role enum is String-backed and carries no `unknown` case, so
-        // Swift's synthesized decoder fails closed. "title" is the retired
-        // variant Core now projects as "heading".
+    func testUnknownWireValueFallsBackToBody() throws {
+        // A style this shell does not know (here "title", the retired
+        // variant Core now projects as "heading") must not fail the whole
+        // command batch: a Core-main screen catalog replayed through an
+        // older shell renders it as body copy instead.
         let payload = Data(#""title""#.utf8)
 
-        XCTAssertThrowsError(
-            try JSONDecoder().decode(PresentationTextStyle.self, from: payload)
+        XCTAssertEqual(
+            try JSONDecoder().decode(PresentationTextStyle.self, from: payload),
+            .body
         )
     }
 }
