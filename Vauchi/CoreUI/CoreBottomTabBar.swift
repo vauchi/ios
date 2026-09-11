@@ -74,16 +74,25 @@ struct CoreBottomTabBar: View {
         }
         .frame(maxWidth: .infinity)
         .disabled(!tab.enabled)
-        .accessibilityLabel(tab.accessibilityLabel)
-        .accessibilityValue(
-            CoreBottomTabBarLayout.accessibilityValue(position: position, of: items.count)
-        )
-        .accessibilityAddTraits(
-            CoreBottomTabBarLayout.isSelected(
-                tab: tab,
-                selectedInteractionID: selectedInteractionID
-            ) ? .isSelected : []
-        )
+        // One VoiceOver stop per destination. Modifying the button's own
+        // label is not enough: SwiftUI lifts the `Image` out of the button's
+        // subtree and publishes it as a sibling button named after the SF
+        // Symbol ("person.crop.rectangle.fill"), so every destination read
+        // twice. Only replacing the subtree with one synthetic button
+        // collapses it, the same way `PresentationOverlayView` does.
+        .accessibilityRepresentation {
+            Button(tab.accessibilityLabel) {}
+                .disabled(!tab.enabled)
+                .accessibilityValue(
+                    CoreBottomTabBarLayout.accessibilityValue(position: position, of: items.count)
+                )
+                .accessibilityAddTraits(
+                    CoreBottomTabBarLayout.isSelected(
+                        tab: tab,
+                        selectedInteractionID: selectedInteractionID
+                    ) ? .isSelected : []
+                )
+        }
     }
 
     private func centreLabel(_ tab: PresentationAction) -> some View {
