@@ -1347,6 +1347,76 @@ test:screenshots:
           - ".gitlab-ci.yml"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
+# Screen catalog render — replays Core's screen catalog fixture (every app
+# screen as the command batch Core emits for it) through the real SwiftUI
+# host from a unit test, no UI automation, and publishes one PNG per
+# screen and appearance. Advisory like the walk: a changed screen is news.
+test:screen-catalog:
+  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
+  stage: test
+  needs:
+    - job: build:debug
+      artifacts: true
+  allow_failure: true
+  variables:
+    VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
+    VRT_PLATFORM: ios
+    VRT_SCREENSHOT_DIR: build/screen-catalog
+    # xcodebuild forwards `TEST_RUNNER_*` to the test process, which
+    # reads them back as `VAUCHI_SCREEN_CATALOG` / `VAUCHI_SCREENSHOT_DIR`.
+    TEST_RUNNER_VAUCHI_SCREEN_CATALOG: $CI_PROJECT_DIR/build/screen_catalog_v1.json
+    TEST_RUNNER_VAUCHI_SCREENSHOT_DIR: $CI_PROJECT_DIR/build/screen-catalog
+  script:
+    # Per-job SPM mirror-config isolation — immune to the shared-config race
+    # (problem 2026-06-29-spm-mirror-config-race).
+    - ./scripts/ci-spm-isolate-config.sh
+    - mkdir -p build/screen-catalog
+    # Core main's catalog, or the contract fixture folded into one until
+    # the catalog lands there; the script prints which one it used.
+    - ./scripts/fetch-screen-catalog.sh build/screen_catalog_v1.json main
+    - |
+      export HOME="$CI_PROJECT_DIR/.spm-home"
+      XCODEBUILD_EXIT=0
+      xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
+        -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+        -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data \
+        -skipPackageUpdates \
+        ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
+        CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" \
+        -disableAutomaticPackageResolution \
+        test -only-testing:VauchiSnapshotTests/ScreenCatalogRenderTests \
+        -resultBundlePath build/screen_catalog.xcresult \
+        || XCODEBUILD_EXIT=$?
+    - |
+      SHOT_COUNT=$(find build/screen-catalog -type f -name '*.png' | wc -l | tr -d ' ')
+      echo "screen catalog PNGs rendered: $SHOT_COUNT"
+      find build/screen-catalog -type f -name '*.png' | sort
+    - exit $XCODEBUILD_EXIT
+  after_script:
+    - !reference [.vrt-upload-script, script]
+    - !reference [.simulator-job, after_script]
+  artifacts:
+    when: always
+    paths:
+      - build/screen-catalog/
+      - build/screen_catalog_v1.json
+      - build/screen_catalog.xcresult
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "api"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - "*.xcodeproj/**/*"
+          - "project.yml"
+          - ".gitlab-ci.yml"
+          - "scripts/fetch-screen-catalog.sh"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
 # Manual job: record snapshot baselines on CI and commit them to the branch.
 # CI is the single source of truth for baselines — never record locally.
 # Click "Record baselines" in the pipeline UI after pushing view changes.
