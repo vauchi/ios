@@ -1278,6 +1278,75 @@ test:ui:
           - "project.yml"
           - ".gitlab-ci.yml"
 
+# Screenshot walk — publishes a gallery of every screen and the onboarding
+# flow as job artifacts on every MR and on main, and to the VRT service
+# when a key is configured. Advisory: a screen that moved is news, not a
+# gate — `test:ui` owns the structural assertions.
+test:screenshots:
+  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
+  stage: test
+  needs:
+    - job: build:debug
+      artifacts: true
+  allow_failure: true
+  variables:
+    VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
+    VRT_PLATFORM: ios
+    VRT_SCREENSHOT_DIR: build/screenshots
+    # xcodebuild forwards `TEST_RUNNER_*` to the UI test runner, which
+    # reads it back as `VAUCHI_SCREENSHOT_DIR`; the simulator shares the
+    # host filesystem so the PNGs land straight in the artifact path.
+    TEST_RUNNER_VAUCHI_SCREENSHOT_DIR: $CI_PROJECT_DIR/build/screenshots
+  script:
+    # Per-job SPM mirror-config isolation — immune to the shared-config race
+    # (problem 2026-06-29-spm-mirror-config-race).
+    - ./scripts/ci-spm-isolate-config.sh
+    - mkdir -p build/screenshots
+    # Capture the exit code so the gallery listing runs even when the walk
+    # fails part-way — the screenshots it did take are the diagnosis.
+    - |
+      export HOME="$CI_PROJECT_DIR/.spm-home"
+      XCODEBUILD_EXIT=0
+      xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
+        -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+        -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data \
+        -skipPackageUpdates \
+        ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
+        CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" \
+        -disableAutomaticPackageResolution \
+        test -only-testing:VauchiUITests/ScreenshotWalkUITests \
+        -resultBundlePath build/screenshot_walk.xcresult \
+        || XCODEBUILD_EXIT=$?
+    - |
+      SHOT_COUNT=$(find build/screenshots -type f -name '*.png' | wc -l | tr -d ' ')
+      echo "screenshots captured: $SHOT_COUNT"
+      find build/screenshots -type f -name '*.png' | sort
+    - exit $XCODEBUILD_EXIT
+  after_script:
+    - !reference [.vrt-upload-script, script]
+    - !reference [.simulator-job, after_script]
+  artifacts:
+    when: always
+    paths:
+      - build/screenshots/
+      - build/screenshot_walk.xcresult
+    expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "api"
+      when: never
+    # Same change filter as build:debug on MRs — `needs` it, and it only
+    # runs there when these paths moved.
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - "*.xcodeproj/**/*"
+          - "project.yml"
+          - ".gitlab-ci.yml"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
 # Manual job: record snapshot baselines on CI and commit them to the branch.
 # CI is the single source of truth for baselines — never record locally.
 # Click "Record baselines" in the pipeline UI after pushing view changes.
