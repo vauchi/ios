@@ -4,12 +4,16 @@
 
 import Foundation
 
-enum PresentationAxis: String, Codable {
+enum PresentationAxis: String, Codable, PresentationTolerantEnum {
+    static let decodingFallback = Self.vertical
+
     case horizontal
     case vertical
 }
 
-enum PresentationTextStyle: String, Codable {
+enum PresentationTextStyle: String, Codable, PresentationTolerantEnum {
+    static let decodingFallback = Self.body
+
     case heading
     case body
     case caption
@@ -17,7 +21,9 @@ enum PresentationTextStyle: String, Codable {
     case muted
 }
 
-enum PresentationInputKind: String, Codable {
+enum PresentationInputKind: String, Codable, PresentationTolerantEnum {
+    static let decodingFallback = Self.text
+
     case text
     case email
     case phone
@@ -28,7 +34,9 @@ enum PresentationInputKind: String, Codable {
     case pin
 }
 
-enum PresentationTone: String, Codable {
+enum PresentationTone: String, Codable, PresentationTolerantEnum {
+    static let decodingFallback = Self.neutral
+
     case neutral
     case accent
     case success
@@ -36,12 +44,16 @@ enum PresentationTone: String, Codable {
     case error
 }
 
-enum PresentationImageShape: String, Codable {
+enum PresentationImageShape: String, Codable, PresentationTolerantEnum {
+    static let decodingFallback = Self.natural
+
     case natural
     case circle
 }
 
-enum PresentationQRPurpose: String, Codable {
+enum PresentationQRPurpose: String, Codable, PresentationTolerantEnum {
+    static let decodingFallback = Self.display
+
     case display
     case capture
 }
@@ -371,13 +383,22 @@ indirect enum PresentationNode: Codable, Equatable {
         case "Slider": self = try .slider(container.decode(Slider.self, forKey: key))
         case "Progress": self = try .progress(container.decode(Progress.self, forKey: key))
         default:
-            throw DecodingError.dataCorrupted(
-                .init(
-                    codingPath: decoder.codingPath,
-                    debugDescription: "Unknown presentation node \(key.stringValue)"
-                )
-            )
+            // A node kind newer than this shell renders as a labelled
+            // placeholder rather than failing the surface around it.
+            self = .text(Self.unsupportedPlaceholder(kind: key.stringValue))
         }
+    }
+}
+
+extension PresentationNode {
+    static func unsupportedPlaceholder(kind: String) -> Text {
+        let content = "Unsupported node: \(kind)"
+        return Text(
+            id: nil,
+            content: content,
+            style: .muted,
+            accessibility: PresentationAccessibility(label: content, description: nil)
+        )
     }
 }
 

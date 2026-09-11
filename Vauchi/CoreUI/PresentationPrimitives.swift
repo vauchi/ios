@@ -5,6 +5,20 @@
 import Foundation
 import SwiftUI
 
+/// Core may emit enum values newer than this shell knows. Falling back
+/// keeps one unfamiliar value from failing the whole command batch, which
+/// is what a screen-catalog replay against a Core-main fixture needs.
+protocol PresentationTolerantEnum: RawRepresentable, Decodable where RawValue == String {
+    static var decodingFallback: Self { get }
+}
+
+extension PresentationTolerantEnum {
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        self = Self(rawValue: raw) ?? Self.decodingFallback
+    }
+}
+
 struct PresentationAccessibility: Codable, Equatable {
     let label: String
     let description: String?
@@ -16,7 +30,9 @@ enum PresentationShortcut: String, Codable {
     case undo
 }
 
-enum PresentationActionTone: String, Codable {
+enum PresentationActionTone: String, Codable, PresentationTolerantEnum {
+    static let decodingFallback = Self.standard
+
     case standard
     /// Consequential but not destructive (verify a fingerprint, schedule a
     /// deletion): warning colour, never the destructive red.
@@ -69,10 +85,11 @@ struct PresentationAction: Codable, Equatable, Identifiable {
             PresentationActionTone.self,
             forKey: .tone
         ) ?? .standard
-        shortcut = try container.decodeIfPresent(
+        // A shortcut this shell has no key for is simply not bound.
+        shortcut = (try? container.decodeIfPresent(
             PresentationShortcut.self,
             forKey: .shortcut
-        )
+        )) ?? nil
     }
 }
 
@@ -105,13 +122,17 @@ enum PresentationMotion: String, Codable {
     case reduced
 }
 
-enum PresentationWindowClass: String, Codable {
+enum PresentationWindowClass: String, Codable, PresentationTolerantEnum {
+    static let decodingFallback = Self.compact
+
     case compact
     case medium
     case expanded
 }
 
-enum PresentationPaneLayout: String, Codable {
+enum PresentationPaneLayout: String, Codable, PresentationTolerantEnum {
+    static let decodingFallback = Self.single
+
     case single
     case split
 }
@@ -132,7 +153,9 @@ struct PresentationProfile: Codable, Equatable {
     }
 }
 
-enum PresentationSurfaceLayout: String, Codable {
+enum PresentationSurfaceLayout: String, Codable, PresentationTolerantEnum {
+    static let decodingFallback = Self.scroll
+
     case scroll
     case fixed
     case pinned
