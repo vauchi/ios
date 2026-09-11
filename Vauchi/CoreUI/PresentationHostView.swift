@@ -7,44 +7,18 @@ import SwiftUI
 struct PresentationHostView: View {
     @ObservedObject var viewModel: AppViewModel
     @Environment(\.accessibilityReduceMotion) private var reducedMotion
-    @FocusState private var focusedBindingID: String?
 
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
-                surfaces
-                    .padding(profileClass == .compact ? 0 : 16)
-                    .safeAreaInset(edge: .bottom) {
-                        VStack(spacing: 0) {
-                            commandBar
-                                .padding(.horizontal, profileClass == .compact ? 8 : 20)
-                                .padding(.bottom, 4)
-                            navigationBar
-                        }
-                    }
-                if let overlay = viewModel.presentationState.activeOverlay {
-                    // Same dismiss-before-dispatch ordering as the modal
-                    // overlay below: Core clears its own open-overlay state
-                    // only on `OverlayDismissed`, so reporting the choice
-                    // first keeps this surface the active one for
-                    // fail-closed validation.
-                    let onTabAction: (PresentationEvent) -> Void = { event in
-                        viewModel.dismissPresentationOverlay()
-                        viewModel.activateAndDispatch(
-                            surfaceID: overlay.surfaceID,
-                            event: event
-                        )
-                    }
-                    PresentationOverlayView(
-                        overlay: overlay,
-                        windowClass: profileClass,
-                        reducedMotion: reducedMotion,
-                        onAction: onTabAction,
-                        onDismiss: viewModel.dismissPresentationOverlay
-                    )
-                    .zIndex(20)
-                }
-            }
+            PresentationHostContent(
+                state: viewModel.presentationState,
+                useFrontCamera: viewModel.useFrontCamera,
+                onCameraPermissionDenied: viewModel.sendCameraPermissionDenied,
+                onEvent: { surfaceID, event in
+                    viewModel.activateAndDispatch(surfaceID: surfaceID, event: event)
+                },
+                onDismissOverlay: viewModel.dismissPresentationOverlay
+            )
             .onAppear {
                 reportEnvironment(geometry.size)
             }
@@ -114,83 +88,6 @@ struct PresentationHostView: View {
             } onCancel: {
                 viewModel.sendImagePickCancelled()
             }
-        }
-    }
-
-    private var profileClass: PresentationWindowClass {
-        viewModel.presentationState.profile?.windowClass ?? .compact
-    }
-
-    @ViewBuilder
-    private var surfaces: some View {
-        let state = viewModel.presentationState
-        let ids = state.visibleSurfaceIDs
-        if state.profile?.paneLayout == .split {
-            HStack(spacing: 16) {
-                surfaceViews(ids)
-            }
-        } else {
-            VStack {
-                surfaceViews(ids)
-            }
-        }
-    }
-
-    private func surfaceViews(_ ids: [String]) -> some View {
-        ForEach(ids, id: \.self) { surfaceID in
-            if let surface = viewModel.presentationState.surfaces[surfaceID] {
-                PresentationSurfaceView(
-                    surface: surface,
-                    active: viewModel.presentationState.activeSurfaceID == surfaceID,
-                    useFrontCamera: viewModel.useFrontCamera,
-                    onCameraPermissionDenied: viewModel.sendCameraPermissionDenied,
-                    focusedBinding: $focusedBindingID,
-                    onEvent: { event in
-                        viewModel.activateAndDispatch(
-                            surfaceID: surfaceID,
-                            event: event
-                        )
-                    }
-                )
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var commandBar: some View {
-        if let surfaceID = viewModel.presentationState.activeSurfaceID {
-            ContextCommandBarView(
-                surfaceID: surfaceID,
-                bar: viewModel.presentationState.activeBar,
-                windowClass: profileClass,
-                minimumTarget: PresentationTokens.minimumTargetSize(
-                    from: viewModel.presentationState.surfaces[surfaceID]?.tokens
-                ),
-                onEvent: { event in
-                    viewModel.activateAndDispatch(
-                        surfaceID: surfaceID,
-                        event: event
-                    )
-                }
-            )
-        }
-    }
-
-    @ViewBuilder
-    private var navigationBar: some View {
-        if let surfaceID = viewModel.presentationState.activeSurfaceID,
-           let items = viewModel.presentationState.activeNavigation?.navigation.items,
-           CoreBottomTabBarLayout.isVisible(items: items) {
-            CoreBottomTabBar(
-                surfaceID: surfaceID,
-                items: items,
-                onEvent: { event in
-                    viewModel.activateAndDispatch(
-                        surfaceID: surfaceID,
-                        event: event
-                    )
-                }
-            )
         }
     }
 
