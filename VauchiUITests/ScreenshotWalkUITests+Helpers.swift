@@ -63,12 +63,20 @@ extension ScreenshotWalkUITests {
         return title ?? "step"
     }
 
-    func makeOutputDirectory() throws -> URL? {
+    /// Best effort: a sandboxed test runner (the macOS CI host) cannot
+    /// write outside its container, and the kept attachments still carry
+    /// the gallery, so CI exports those from the xcresult instead.
+    func makeOutputDirectory() -> URL? {
         guard let path = ProcessInfo.processInfo.environment["VAUCHI_SCREENSHOT_DIR"],
               !path.isEmpty
         else { return nil }
         let url = URL(fileURLWithPath: path).appendingPathComponent(testDirectoryName)
-        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        } catch {
+            print("[screenshots] \(url.path) is not writable (\(error.localizedDescription)); attachments only")
+            return nil
+        }
         return url
     }
 
