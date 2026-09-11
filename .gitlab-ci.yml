@@ -1195,6 +1195,11 @@ test:ui:
     - ./scripts/ci-spm-isolate-config.sh
     - |
       export HOME="$CI_PROJECT_DIR/.spm-home"
+      # `tee` below writes here, and this block runs before the
+      # `mkdir -p build/reports` further down. Without this, tee
+      # fails on a missing directory and set -e kills the job
+      # AFTER the tests have already passed (job 16450301348).
+      mkdir -p build
       XCODEBUILD_EXIT=0
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
         -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
