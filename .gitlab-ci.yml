@@ -1206,7 +1206,33 @@ test:ui:
         -disableAutomaticPackageResolution \
         test -only-testing VauchiUITests \
         -resultBundlePath build/ui_test_result.xcresult \
-        || XCODEBUILD_EXIT=$?
+        2>&1 | tee build/ui-run.log
+      XCODEBUILD_EXIT=${PIPESTATUS[0]}
+    # This failure is host state, not the diff, and it reads like neither.
+    # Say so at the point of failure rather than leaving the next person to
+    # rediscover it: the suite reports "the test runner failed to
+    # initialize" and every test fails, which looks like a broken change.
+    - |
+      if grep -q "AXDisableAccessibilityOnTermination" build/ui-run.log 2>/dev/null; then
+        echo "════════════════════════════════════════════════════════════"
+        echo "This is rdar://FB8924923, not your change."
+        echo
+        echo "The simulator's accessibility bring-up is broken on this host."
+        echo "It breaks when xcodebuild UI or simulator tests are run over"
+        echo "SSH as a non-console user, and it stays broken until the GUI"
+        echo "session restarts. Killing testmanagerd, restarting"
+        echo "CoreSimulatorService and erasing simulators all do nothing,"
+        echo "because none of them restarts that session."
+        echo
+        echo "Remedy, on the runner, when no job is running:"
+        echo "    sudo launchctl reboot userspace"
+        echo
+        echo "Verified 2026-09-11: recovers the session without a hardware"
+        echo "reboot. It tears down ALL userspace though — every SSH"
+        echo "session on the host dies with it, so warn anyone connected."
+        echo "A full reboot works too and is no better."
+        echo "════════════════════════════════════════════════════════════"
+      fi
     - command -v xcresultparser >/dev/null 2>&1 || brew install a7ex/formulae/xcresultparser
     - mkdir -p build/reports
     - xcresultparser --output-format junit build/ui_test_result.xcresult > build/reports/ui-junit.xml
@@ -1226,7 +1252,11 @@ test:ui:
   # accessibility bring-up breaks when `xcodebuild` UI tests run **over SSH
   # as a non-console user**, especially alongside another test process —
   # and it stays broken until the GUI session restarts, which is why
-  # killing daemons did nothing and only a reboot cleared it.
+  # killing daemons did nothing. A hardware reboot clears it; so does
+  # `sudo launchctl reboot userspace`, verified 2026-09-11 — same effect,
+  # far quicker, but it tears down all userspace and kills every SSH
+  # session on the host, so it is a deliberate manual action and NOT
+  # wired into this job.
   #
   # So the rule this job depends on is a human one, and it belongs next to
   # the job rather than only in a backlog record: **never run xcodebuild
