@@ -133,7 +133,14 @@ extension ScreenshotWalkUITests {
             // index during the fade-in resolved to nothing once.
             settle()
         }
+        // The overlay is the container that was not there at rest. Since
+        // Core lists the same destinations in the sheet and the bottom bar,
+        // "the one with the most buttons" can resolve to the bar underneath
+        // the sheet, and every tap then lands on the sheet's backdrop.
         let containers = destinationContainers.allElementsBoundByIndex
+        if containers.count > containersAtRest, let overlay = containers.last {
+            return overlay
+        }
         let richest = containers.max { $0.buttons.count < $1.buttons.count }
         return richest ?? navigationDestinations
     }
