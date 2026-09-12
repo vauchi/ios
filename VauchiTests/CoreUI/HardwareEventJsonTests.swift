@@ -13,6 +13,20 @@ import XCTest
 /// cases are pinned by Android's `HardwareEventJsonTest`, so the shells
 /// cannot drift from each other or from Core.
 final class HardwareEventJsonTests: XCTestCase {
+    func testNfcApduEncodesAsUnsignedIntegerArray() {
+        XCTAssertEqual(
+            MobileEvent.nfcApduReceived(bytes: Data([0, 164, 4, 0])).toEventJson(),
+            #"{"NfcApduReceived":{"bytes":[0,164,4,0]}}"#
+        )
+    }
+
+    func testNfcFailureCarriesItsReason() {
+        XCTAssertEqual(
+            MobileEvent.nfcFailed(reason: "tag left the field").toEventJson(),
+            #"{"NfcFailed":{"reason":"tag left the field"}}"#
+        )
+    }
+
     func testBytePayloadsEncodeAsUnsignedIntegerArrays() {
         XCTAssertEqual(
             MobileEvent.nfcDataReceived(data: Data([0, 255, 16])).toEventJson(),
