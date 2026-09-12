@@ -21,7 +21,7 @@ extension MobileEvent {
         case .bleDeviceDiscovered, .bleConnected, .bleCharacteristicRead, .bleCharacteristicNotified,
              .bleDisconnected:
             bleEventJson()
-        case .qrScanned, .localNetworkAddressChanged, .nfcDataReceived, .audioSamplesRecorded,
+        case .qrScanned, .localNetworkAddressChanged, .nfcDataReceived, .nfcApduReceived, .nfcFailed, .audioSamplesRecorded,
              .accelerometerData, .impactDetected, .locationResult:
             sensorEventJson()
         case .relayEscrowReady, .relayEscrowBlobReceived, .relayEscrowFailed, .linkShared, .linkOpened,
@@ -75,6 +75,10 @@ extension MobileEvent {
             variant("LocalNetworkAddressChanged", ("address", nullable(address, string)))
         case let .nfcDataReceived(data):
             variant("NfcDataReceived", ("data", bytes(data)))
+        case let .nfcApduReceived(apdu):
+            variant("NfcApduReceived", ("bytes", bytes(apdu)))
+        case let .nfcFailed(reason):
+            variant("NfcFailed", ("reason", string(reason)))
         case let .audioSamplesRecorded(samples, sampleRate):
             variant("AudioSamplesRecorded", ("samples", floats(samples)), ("sample_rate", String(sampleRate)))
         case let .accelerometerData(timestampMs, xMilliG, yMilliG, zMilliG):
