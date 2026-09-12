@@ -44,6 +44,57 @@ final class NavigationIconMapTests: XCTestCase {
         ("house", "house.fill"),
     ]
 
+    /// Every token Core puts on a `Status` node (`icon_token` in
+    /// `core/vauchi-app/src`), paired with the glyph the row leads with.
+    /// A status glyph is the whole message on the lock screen, so an
+    /// unmapped token would leave "Locked" without its lock.
+    private static let expectedStatusSymbolsByToken: [(token: String, symbol: String)] = [
+        ("lock", "lock.fill"),
+        ("warning", "exclamationmark.triangle.fill"),
+        ("exclamationmark.triangle", "exclamationmark.triangle.fill"),
+        ("info", "info.circle.fill"),
+        ("checkmark.seal", "checkmark.seal.fill"),
+        ("checkmark.shield", "checkmark.shield.fill"),
+        ("exclamationmark.shield", "exclamationmark.shield.fill"),
+        ("shield", "shield.fill"),
+        ("checkmark.circle", "checkmark.circle.fill"),
+        ("checkmark.circle.fill", "checkmark.circle.fill"),
+        ("checkmark", "checkmark"),
+        ("xmark", "xmark"),
+        ("xmark.circle", "xmark.circle.fill"),
+        ("delete", "trash.fill"),
+        ("trash", "trash.fill"),
+        ("devices", "laptopcomputer.and.iphone"),
+        ("eye", "eye.fill"),
+        ("key", "key.fill"),
+        ("people", "person.2.fill"),
+        ("person", "person.fill"),
+        ("swap", "arrow.left.arrow.right"),
+        ("arrow.left.arrow.right", "arrow.left.arrow.right"),
+        ("link", "link"),
+        ("lifebuoy", "lifepreserver.fill"),
+        ("heart", "heart.fill"),
+        ("liberapay", "heart.fill"),
+        ("github", "chevron.left.forwardslash.chevron.right"),
+        ("wifi", "wifi"),
+        ("cloud", "cloud.fill"),
+        ("clock", "clock.fill"),
+        ("clock.arrow.circlepath", "clock.arrow.circlepath"),
+        ("camera", "camera.fill"),
+        ("camera.slash", "camera.fill"),
+        ("photo", "photo.fill"),
+        ("qr", "qrcode"),
+        ("drive", "externaldrive.fill"),
+        ("more", "ellipsis"),
+        ("id_card", "person.text.rectangle.fill"),
+        ("sparkles", "sparkles"),
+        ("sun.max", "sun.max.fill"),
+        ("sun.min", "sun.min.fill"),
+        ("textformat", "textformat"),
+        ("dot.radiowaves.left.and.right", "dot.radiowaves.left.and.right"),
+        ("move.3d", "move.3d"),
+    ]
+
     private func symbolExists(_ name: String) -> Bool {
         UIImage(systemName: name) != nil
     }
@@ -189,5 +240,26 @@ final class NavigationIconMapTests: XCTestCase {
             NavigationIconMap.systemImage(forOverlayKind: .actionMenu, token: "house"),
             "house.fill"
         )
+    }
+
+    func testEveryCoreStatusTokenResolvesToItsSymbol() {
+        for (token, expected) in Self.expectedStatusSymbolsByToken {
+            XCTAssertEqual(
+                NavigationIconMap.systemImage(for: token),
+                expected,
+                "status token '\(token)' resolved to the wrong symbol"
+            )
+            XCTAssertTrue(symbolExists(expected), "'\(expected)' is not an SF Symbol on this OS")
+        }
+    }
+
+    func testStatusTokensNeverFallBackToThePlaceholderGlyph() {
+        for (token, _) in Self.expectedStatusSymbolsByToken {
+            XCTAssertNotEqual(
+                NavigationIconMap.systemImage(for: token),
+                NavigationIconMap.fallbackSymbol,
+                "status token '\(token)' would draw the placeholder"
+            )
+        }
     }
 }
