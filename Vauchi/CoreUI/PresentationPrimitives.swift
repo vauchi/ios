@@ -176,3 +176,10 @@ struct PresentationTokens: Codable, Equatable {
         case minimumTargetSize = "minimum_target_size"
     }
 }
+
+/// How the shell draws a `Choice` node; picked by option count in
+/// `PresentationNodeView.choiceStyle(optionCount:)`.
+enum PresentationChoiceStyle: Equatable {
+    case segmented
+    case menu
+}

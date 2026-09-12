@@ -49,22 +49,7 @@ struct PresentationNodeView: View {
             .disabled(!value.enabled)
             .accessibilityLabel(value.accessibility.label)
         case let .choice(value):
-            Picker(
-                value.label,
-                selection: Binding(
-                    get: { value.selected },
-                    set: { changed in
-                        sendValue(value.bindingID, .choice(changed))
-                    }
-                )
-            ) {
-                Text("—").tag(String?.none)
-                ForEach(value.options) { option in
-                    Text(option.label).tag(String?.some(option.id))
-                }
-            }
-            .disabled(!value.enabled)
-            .accessibilityLabel(value.accessibility.label)
+            choice(value)
         case let .group(value):
             GroupBox(value.label ?? "") {
                 if value.axis == .horizontal {
@@ -227,6 +212,42 @@ struct PresentationNodeView: View {
             .accessibilityLabel(action.accessibilityLabel)
         } else {
             content.accessibilityLabel(value.accessibility.label)
+        }
+    }
+
+    /// A short choice is a segmented control, a long one a menu: the canvas
+    /// draws Perspective and the Groups view mode as segments, while
+    /// Settings' fifteen themes would not fit a phone width as segments.
+    static func choiceStyle(optionCount: Int) -> PresentationChoiceStyle {
+        (2 ... 3).contains(optionCount) ? .segmented : .menu
+    }
+
+    /// Only Core's own options are offered: the engine rejects `Choice(None)`
+    /// (`ValueTypeMismatch`), so a "no selection" row would let the user pick
+    /// a value Core refuses.
+    @ViewBuilder
+    private func choice(_ value: PresentationNode.Choice) -> some View {
+        let picker = Picker(
+            value.label,
+            selection: Binding(
+                get: { value.selected },
+                set: { changed in
+                    sendValue(value.bindingID, .choice(changed))
+                }
+            )
+        ) {
+            ForEach(value.options) { option in
+                Text(option.label).tag(String?.some(option.id))
+            }
+        }
+        .disabled(!value.enabled)
+        .accessibilityLabel(value.accessibility.label)
+
+        switch Self.choiceStyle(optionCount: value.options.count) {
+        case .segmented:
+            picker.pickerStyle(.segmented)
+        case .menu:
+            picker.pickerStyle(.menu)
         }
     }
 
