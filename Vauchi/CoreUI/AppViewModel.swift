@@ -118,6 +118,11 @@ class AppViewModel: ObservableObject {
         }
     }
 
+    /// Platform biometric prompt for the lock screen's
+    /// `RequestBiometricUnlock` command. Held as the protocol so tests inject
+    /// a spy instead of driving `LAContext`.
+    lazy var biometricUnlockService: BiometricUnlockPrompting = LocalAuthenticationBiometricUnlock()
+
     /// One-shot location capture for the exchange "where we met" annotation
     /// (ADR-051). Driven by `Command::LocationRequest` in `handleExchangeCommands`.
     lazy var locationService = LocationService()
@@ -219,7 +224,7 @@ class AppViewModel: ObservableObject {
 
     /// Apply an envelope produced off the main thread, surfacing failures the
     /// way the synchronous path used to.
-    private func receivePresentationEnvelope(_ json: String) {
+    func receivePresentationEnvelope(_ json: String) {
         do {
             try applyPresentationEnvelope(json)
         } catch {
@@ -289,10 +294,22 @@ class AppViewModel: ObservableObject {
             break
         case .resetApplication:
             loadInitialPresentation()
+        case .requestBiometricUnlock:
+            requestBiometricUnlock()
         case .postNotification, .platformEffect:
             break
         default:
             break
+        }
+    }
+
+    /// Runs the prompt and reports its outcome to Core as a hardware event;
+    /// a cancel reports nothing so the lock screen simply stays.
+    private func requestBiometricUnlock() {
+        let reason = LocalizationService.shared.t("auth.required_body")
+        biometricUnlockService.prompt(reason: reason) { [weak self] result in
+            guard let event = result.mobileEvent else { return }
+            self?.sendHardwareEvent(event)
         }
     }
 
@@ -361,6 +378,7 @@ class AppViewModel: ObservableObject {
             "ExportFile",
             "PerformNativeBack",
             "ResetApplication",
+            "RequestBiometricUnlock",
             "PostNotification",
         ]
         root["commands"] = commands.filter { command in

@@ -104,6 +104,7 @@
 		C203528C657D885D7A4474FC /* CoreBottomTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830BD2C6362917F9CAB6F480 /* CoreBottomTabBar.swift */; };
 		C2BF1FC510A65D73DD722C95 /* VauchiPlatform in Frameworks */ = {isa = PBXBuildFile; productRef = BE415B866BE8E26F05791810 /* VauchiPlatform */; };
 		C518EB2400DE022447B7E1E3 /* WakeupServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA3C4F656D97F3211554DC4 /* WakeupServiceTests.swift */; };
+		C60BC31397F503FD0D2BEFA0 /* BiometricUnlockService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036343C21A16BE4560CAAE4B /* BiometricUnlockService.swift */; };
 		C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */; };
 		C8C4DCDB890AEB912C9440F3 /* PresentationOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F9A4DAC6D203C61E58BF054 /* PresentationOverlayView.swift */; };
 		C943C882B3CE2E999B5FABD7 /* AccelerometerProximityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D14544B64B5B788B50E9DA /* AccelerometerProximityService.swift */; };
@@ -155,6 +156,7 @@
 		007F08BF348F3C0C5BA74B92 /* PresentationPrimitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationPrimitives.swift; sourceTree = "<group>"; };
 		013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticView.swift; sourceTree = "<group>"; };
 		02E118373F3BD2F4E7FC20AB /* QrCameraTunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrCameraTunerView.swift; sourceTree = "<group>"; };
+		036343C21A16BE4560CAAE4B /* BiometricUnlockService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricUnlockService.swift; sourceTree = "<group>"; };
 		03B14F6FC09C0E3B70E2A824 /* HardwareEventJsonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareEventJsonTests.swift; sourceTree = "<group>"; };
 		05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioProximityServiceTests.swift; sourceTree = "<group>"; };
 		08AA656B6516F9B5A62F32DC /* WaitingForUnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitingForUnlockView.swift; sourceTree = "<group>"; };
@@ -513,6 +515,7 @@
 				84D14544B64B5B788B50E9DA /* AccelerometerProximityService.swift */,
 				49509AE0DF70B880F977B015 /* AudioProximityService.swift */,
 				44506B768565C7F52A328D17 /* BackgroundSyncService.swift */,
+				036343C21A16BE4560CAAE4B /* BiometricUnlockService.swift */,
 				418F950D6541F912A27DA57D /* BleExchangeService.swift */,
 				5FC2A1B34A8846BEEE089202 /* BleUuids.swift */,
 				95DAE4A89BF1E2A04935E05F /* CameraService.swift */,
@@ -757,6 +760,7 @@
 				0FC8C1248458C98DAE402799 /* AppViewModel.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
 				04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */,
+				C60BC31397F503FD0D2BEFA0 /* BiometricUnlockService.swift in Sources */,
 				7532FD4076FE6E6670E901E6 /* BleDiagnosticView.swift in Sources */,
 				EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */,
 				45E1E6E04A9322ECC7C87DFE /* BleUuids.swift in Sources */,

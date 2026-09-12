@@ -113,6 +113,7 @@ enum PresentationCommand: Decodable {
     case exportFile(PresentationExportFile)
     case performNativeBack
     case resetApplication
+    case requestBiometricUnlock
     case postNotification(JSONValue)
     case platformEffect(variant: String, payload: JSONValue?)
 
@@ -209,6 +210,7 @@ enum PresentationCommand: Decodable {
         switch variant {
         case "PerformNativeBack": .performNativeBack
         case "ResetApplication": .resetApplication
+        case "RequestBiometricUnlock": .requestBiometricUnlock
         default: .platformEffect(variant: variant, payload: nil)
         }
     }

@@ -88,23 +88,27 @@ final class BiometricUnlockDispatchTests: XCTestCase {
 
     func testSuccessReportsTheBiometricUnlockSucceededEvent() {
         XCTAssertEqual(
-            BiometricUnlockResult.succeeded.mobileEvent.toEventJson(),
+            BiometricUnlockResult.succeeded.mobileEvent?.toEventJson(),
             #""BiometricUnlockSucceeded""#
         )
     }
 
     func testMissingHardwareReportsHardwareUnavailable() {
         XCTAssertEqual(
-            BiometricUnlockResult.unavailable.mobileEvent.toEventJson(),
+            BiometricUnlockResult.unavailable.mobileEvent?.toEventJson(),
             #"{"HardwareUnavailable":{"transport":"biometric"}}"#
         )
     }
 
     func testFailureReportsHardwareErrorWithItsMessage() {
         XCTAssertEqual(
-            BiometricUnlockResult.failed("Biometry is locked out").mobileEvent.toEventJson(),
+            BiometricUnlockResult.failed("Biometry is locked out").mobileEvent?.toEventJson(),
             #"{"HardwareError":{"transport":"biometric","error":"Biometry is locked out"}}"#
         )
+    }
+
+    func testCancelReportsNothingSoTheLockScreenStaysPut() {
+        XCTAssertNil(BiometricUnlockResult.cancelled.mobileEvent)
     }
 
     /// The completion forwards into the engine without trapping; Core's
