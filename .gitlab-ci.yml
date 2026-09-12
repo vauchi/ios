@@ -130,7 +130,13 @@ workflow:
         # Select the host daemon by exact path. `pgrep -n testmanagerd`
         # returns the newest match, which is a booted simulator's own copy
         # whenever one is running.
-        host_tm=$(ps -eo pid,comm | awk '$2 == "/usr/libexec/testmanagerd" { print $1; exit }')
+        #
+        # A flag, not `exit`: awk exiting early closes the pipe while `ps`
+        # is still writing, `ps` takes SIGPIPE, and under `set -eo pipefail`
+        # the whole job dies with 141 — after the tests have already passed.
+        # Reproduced on nell 2026-09-12: the `exit` form returns 141, this
+        # one returns 0. macos/.gitlab-ci.yml carries the same fix.
+        host_tm=$(ps -eo pid,comm | awk '$2 == "/usr/libexec/testmanagerd" && !found { print $1; found=1 }')
         if [ -n "$host_tm" ]; then
           echo "testmanagerd: clearing pid $host_tm, age $(ps -o etime= -p "$host_tm" | tr -d ' ')"
         else
