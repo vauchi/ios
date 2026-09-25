@@ -32,14 +32,15 @@ final class PresentationImageContentTests: XCTestCase {
     private func imageNode(
         data: [UInt8]?,
         fallbackText: String?,
-        shape: PresentationImageShape
+        shape: PresentationImageShape,
+        brightness: Float = 0
     ) -> PresentationNode.Image {
         PresentationNode.Image(
             id: nil,
             data: data,
             fallbackText: fallbackText,
             shape: shape,
-            brightness: 1,
+            brightness: brightness,
             activation: nil,
             accessibility: PresentationAccessibility(label: "Avatar", description: nil)
         )
@@ -155,6 +156,29 @@ final class PresentationImageContentTests: XCTestCase {
         let sampled = try pixel(of: node, at: insideTheAvatarOutsideTheGlyph)
 
         XCTAssertGreaterThan(sampled.a, opaqueEnoughToRead, "natural-shaped fallback has no fill")
+    }
+
+    private func solidWhitePNG() throws -> [UInt8] {
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 8, height: 8), format: format)
+            .image { context in
+                UIColor.white.setFill()
+                context.fill(CGRect(x: 0, y: 0, width: 8, height: 8))
+            }
+        return [UInt8](try XCTUnwrap(image.pngData()))
+    }
+
+    /// Core's `brightness` is an offset where 0 means unchanged (the avatar
+    /// editor slider runs -0.3...0.3). Reading it as a multiplier turned
+    /// every picture Core sends at 0, avatars and the onboarding mark, black.
+    func testAPictureAtNeutralBrightnessKeepsItsColour() throws {
+        let node = imageNode(data: try solidWhitePNG(), fallbackText: nil, shape: .natural)
+
+        let sampled = try pixel(of: node, at: CGPoint(x: side / 2, y: side / 2))
+
+        XCTAssertGreaterThan(sampled.a, 200, "the picture was not drawn at all")
+        XCTAssertGreaterThan(sampled.r, 200, "a white picture at brightness 0 rendered as \(sampled)")
     }
 
     /// Guards the test itself: the sampled point must be transparent when
