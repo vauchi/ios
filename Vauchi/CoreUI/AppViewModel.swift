@@ -564,17 +564,12 @@ class AppViewModel: ObservableObject {
                 // iOS uses photo library instead of file picker for images
                 sendImagePickCancelled()
             case let .filePickFromUser(acceptedMimeTypes, purpose):
-                // Phase 3 of 2026-05-03-core-file-picker-command. Stash
-                // the parameters so the view layer can present a
-                // `.fileImporter`. Selection / cancel route back via
-                // `sendFilePicked` / `sendFilePickCancelled`.
-                let acceptedExtensions = acceptedExtensionsByCommandIndex.indices.contains(index)
-                    ? acceptedExtensionsByCommandIndex[index]
-                    : []
-                pendingFilePick = PendingFilePick(
+                requestFilePick(
                     purpose: purpose,
                     acceptedMimeTypes: acceptedMimeTypes,
-                    acceptedExtensions: acceptedExtensions
+                    acceptedExtensions: acceptedExtensionsByCommandIndex.indices.contains(index)
+                        ? acceptedExtensionsByCommandIndex[index]
+                        : []
                 )
             case let .setScreenBrightness(level):
                 applyScreenBrightness(level: level)
@@ -736,6 +731,22 @@ class AppViewModel: ObservableObject {
             return false
         }
         return true
+    }
+
+    /// Phase 3 of 2026-05-03-core-file-picker-command. Stash the
+    /// parameters so the view layer can present a `.fileImporter`.
+    /// Selection / cancel route back via `sendFilePicked` /
+    /// `sendFilePickCancelled`.
+    private func requestFilePick(
+        purpose: FilePickPurpose,
+        acceptedMimeTypes: [String],
+        acceptedExtensions: [String]
+    ) {
+        pendingFilePick = PendingFilePick(
+            purpose: purpose,
+            acceptedMimeTypes: acceptedMimeTypes,
+            acceptedExtensions: acceptedExtensions
+        )
     }
 
     /// Send picked file bytes back to core. Called from the view layer's
