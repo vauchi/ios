@@ -471,7 +471,7 @@ struct PresentationImageContent: View {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
-                    .brightness(Double(value.brightness - 1))
+                    .brightness(Double(value.brightness))
             }
         } else if let spec = fallbackSpec {
             // The fill is the point. `clipShape` on a bare `Text` clips
