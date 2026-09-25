@@ -481,6 +481,56 @@ final class PresentationStateTests: XCTestCase {
         XCTAssertEqual(node.focusIdentity, "display_name")
     }
 
+    /// Core sets `size` only for the onboarding mark today (88 logical
+    /// units); every avatar still omits it. The shell must round-trip
+    /// whatever Core sends without interpreting it (ADR-066).
+    func testImageNodeDecodesAnExplicitSize() throws {
+        let node = try JSONDecoder().decode(
+            PresentationNode.self,
+            from: Data("""
+            {"Image":{
+              "id":"onboarding.mark",
+              "data":null,
+              "fallback_text":null,
+              "shape":"natural",
+              "brightness":0,
+              "size":88,
+              "activation":null,
+              "accessibility":{"label":"Vauchi","description":null}
+            }}
+            """.utf8)
+        )
+
+        guard case let .image(image) = node else {
+            return XCTFail("expected an image node")
+        }
+        XCTAssertEqual(image.size, 88)
+    }
+
+    /// Every avatar's JSON has no `size` key at all — absence, not a
+    /// zero or null literal — and decoding must keep accepting that.
+    func testImageNodeWithoutASizeKeyDecodesToNilNotZero() throws {
+        let node = try JSONDecoder().decode(
+            PresentationNode.self,
+            from: Data("""
+            {"Image":{
+              "id":"avatar.contact-1",
+              "data":null,
+              "fallback_text":"TU",
+              "shape":"circle",
+              "brightness":0,
+              "activation":null,
+              "accessibility":{"label":"Avatar","description":null}
+            }}
+            """.utf8)
+        )
+
+        guard case let .image(image) = node else {
+            return XCTFail("expected an image node")
+        }
+        XCTAssertNil(image.size)
+    }
+
     func testResponsiveProfilePreservesPreparedSelectionAndCausalUndo() throws {
         let selectedNodes = #"""
         [{"Choice":{
