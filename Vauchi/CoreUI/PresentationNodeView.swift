@@ -199,8 +199,19 @@ struct PresentationNodeView: View {
 
     @ViewBuilder
     private func image(_ value: PresentationNode.Image) -> some View {
-        let content = PresentationImageContent(value: value, diameter: minimumTarget)
-            .frame(minWidth: minimumTarget, minHeight: minimumTarget)
+        let spec = PresentationImageFrameSpec(size: value.size, minimumTarget: minimumTarget)
+        let sized = PresentationImageContent(value: value, diameter: spec.diameter)
+        let content = spec.capsToAvailableWidth
+            // Core named an exact square: cap there and shrink with the
+            // row rather than flooring and growing to fill it, then
+            // centre — the unsized branch below keeps the left-aligned,
+            // grow-to-fill behaviour every avatar already relies on.
+            ? AnyView(
+                sized
+                    .frame(maxWidth: spec.diameter, maxHeight: spec.diameter)
+                    .frame(maxWidth: .infinity)
+            )
+            : AnyView(sized.frame(minWidth: spec.diameter, minHeight: spec.diameter))
         if let action = value.activation {
             Button {
                 sendAction(action)
@@ -448,6 +459,28 @@ struct PresentationNodeView: View {
 struct AvatarFallbackSpec: Equatable {
     let initials: String
     let diameter: CGFloat
+}
+
+/// Pure sizing decision for `image(_:)`, split out so
+/// `PresentationImageFrameSpecTests` can assert the frame Core's optional
+/// `size` produces without a SwiftUI layout pass — the same reasoning
+/// `AvatarFallbackSpec` above documents for the fallback-initials sizing.
+struct PresentationImageFrameSpec: Equatable {
+    let diameter: CGFloat
+    /// True once Core names an explicit square (`size`): the frame caps
+    /// at `diameter` and shrinks with the row instead of flooring and
+    /// growing to fill it, the way every unsized avatar still does.
+    let capsToAvailableWidth: Bool
+
+    init(size: UInt16?, minimumTarget: CGFloat) {
+        if let size {
+            diameter = CGFloat(size)
+            capsToAvailableWidth = true
+        } else {
+            diameter = minimumTarget
+            capsToAvailableWidth = false
+        }
+    }
 }
 
 /// Not private: `PresentationImageContentTests` renders it directly, because

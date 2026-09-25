@@ -41,6 +41,7 @@ final class PresentationImageContentTests: XCTestCase {
             fallbackText: fallbackText,
             shape: shape,
             brightness: brightness,
+            size: nil,
             activation: nil,
             accessibility: PresentationAccessibility(label: "Avatar", description: nil)
         )

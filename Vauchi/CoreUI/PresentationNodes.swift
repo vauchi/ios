@@ -261,6 +261,11 @@ indirect enum PresentationNode: Codable, Equatable {
         let fallbackText: String?
         let shape: PresentationImageShape
         let brightness: Float
+        /// Absent for every avatar, where sizing stays the shell's call
+        /// (`minimumTarget`); Core sets it only where it needs an exact
+        /// square, currently just the onboarding mark (88). Pure
+        /// presentation data passed through, never interpreted (ADR-066).
+        let size: UInt16?
         let activation: PresentationAction?
         let accessibility: PresentationAccessibility
 
@@ -270,6 +275,7 @@ indirect enum PresentationNode: Codable, Equatable {
             case fallbackText = "fallback_text"
             case shape
             case brightness
+            case size
             case activation
             case accessibility
         }
