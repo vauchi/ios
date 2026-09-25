@@ -166,14 +166,14 @@ final class PresentationImageContentTests: XCTestCase {
                 UIColor.white.setFill()
                 context.fill(CGRect(x: 0, y: 0, width: 8, height: 8))
             }
-        return [UInt8](try XCTUnwrap(image.pngData()))
+        return try [UInt8](XCTUnwrap(image.pngData()))
     }
 
     /// Core's `brightness` is an offset where 0 means unchanged (the avatar
     /// editor slider runs -0.3...0.3). Reading it as a multiplier turned
     /// every picture Core sends at 0, avatars and the onboarding mark, black.
     func testAPictureAtNeutralBrightnessKeepsItsColour() throws {
-        let node = imageNode(data: try solidWhitePNG(), fallbackText: nil, shape: .natural)
+        let node = try imageNode(data: solidWhitePNG(), fallbackText: nil, shape: .natural)
 
         let sampled = try pixel(of: node, at: CGPoint(x: side / 2, y: side / 2))
 
