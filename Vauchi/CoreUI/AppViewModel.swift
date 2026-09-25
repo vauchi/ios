@@ -742,6 +742,9 @@ class AppViewModel: ObservableObject {
         acceptedMimeTypes: [String],
         acceptedExtensions: [String]
     ) {
+        #if DEBUG
+            if answerFilePickFromFixture(purpose: purpose) { return }
+        #endif
         pendingFilePick = PendingFilePick(
             purpose: purpose,
             acceptedMimeTypes: acceptedMimeTypes,
