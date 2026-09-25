@@ -1353,6 +1353,56 @@ test:screenshots:
           - ".gitlab-ci.yml"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
+# App Store screenshots — restores the fictional seed fixture and captures
+# the store set on the 6.9" simulator (App Store Connect's required size).
+# Manual: store assets are cut per release, not per commit. The status bar
+# is overridden after an explicit boot, so the simulator must be booted
+# before xcodebuild reuses it.
+screenshots:store:
+  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
+  stage: test
+  needs:
+    - job: build:debug
+      artifacts: true
+  variables:
+    VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
+    STORE_SIMULATOR: iPhone 17 Pro Max
+    TEST_RUNNER_VAUCHI_SCREENSHOT_DIR: $CI_PROJECT_DIR/build/screenshots
+  script:
+    - ./scripts/ci-spm-isolate-config.sh
+    - mkdir -p build/screenshots
+    - xcrun simctl boot "$STORE_SIMULATOR"
+    - xcrun simctl bootstatus "$STORE_SIMULATOR" -b
+    - >-
+      xcrun simctl status_bar "$STORE_SIMULATOR" override
+      --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3
+      --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
+    - |
+      export HOME="$CI_PROJECT_DIR/.spm-home"
+      xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
+        -destination "platform=iOS Simulator,name=$STORE_SIMULATOR" \
+        -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data \
+        -skipPackageUpdates \
+        ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO \
+        CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" \
+        -disableAutomaticPackageResolution \
+        test -only-testing:VauchiUITests/StoreScreenshotsUITests \
+        -resultBundlePath build/store_screenshots.xcresult
+    - find build/screenshots -type f -name '*.png' | sort
+  artifacts:
+    when: always
+    paths:
+      - build/screenshots/
+      - build/store_screenshots.xcresult
+    expire_in: 1 month
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "api"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+      allow_failure: true
+
 # Screen catalog render — replays Core's screen catalog fixture (every app
 # screen as the command batch Core emits for it) through the real SwiftUI
 # host from a unit test, no UI automation, and publishes one PNG per
