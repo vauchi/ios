@@ -66,13 +66,18 @@ final class StoreScreenshotsUITests: XCTestCase {
         tapLabel("Contacts")
         settle()
         capture("contacts")
-        // `app.swipeUp` left the list where it was (store job 16751290838);
-        // swiping the scroll view itself moves it.
-        let list = app.scrollViews.firstMatch
-        list.swipeUp(velocity: .slow)
+        // `app.swipeUp` left the list where it was (store job 16751290838)
+        // and the list is not a ScrollView (job 16751448023). A swipe on a
+        // row scrolls whatever container holds it.
+        let row = app.staticTexts["Alexander Conroy"]
+        row.swipeUp(velocity: .slow)
         settle()
         capture("contacts-scrolled")
-        list.swipeDown(velocity: .slow)
+        // Scroll back by position: which rows are still on screen is unknown.
+        let window = app.windows.firstMatch
+        window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.35))
+            .press(forDuration: 0.1, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85)))
+        settle()
 
         tapLabel("Alexander Conroy")
         settle()
