@@ -92,6 +92,7 @@
 		9D5D4424B928F2AE4C789950 /* ScreenCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8691393CE57A5898A62A9B08 /* ScreenCatalogTests.swift */; };
 		9E2BD59979752A9C670AF34A /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95DAE4A89BF1E2A04935E05F /* CameraService.swift */; };
 		9EFD805310188B4C902B23F0 /* BiometricUnlockDispatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9288A1ED8B92F30A45A7805 /* BiometricUnlockDispatchTests.swift */; };
+		9FDDCA59B0C30858AD64134E /* DeviceCapabilitiesPusher+Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97F0E05FC9F51A7F19CEDAE /* DeviceCapabilitiesPusher+Debug.swift */; };
 		A11583580003772B4514642B /* ScreenshotWalkUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C3F3532A6BDC5F1212AF860 /* ScreenshotWalkUITests.swift */; };
 		A177B7FD2ED08BFFD03A0F56 /* ScreenshotWalkUITests+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67B69481786D9E06CC1F32D9 /* ScreenshotWalkUITests+Helpers.swift */; };
 		A20441612CDA08A586DADCC0 /* DirectSendService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A701A0C348B6758EED1D949 /* DirectSendService.swift */; };
@@ -273,6 +274,7 @@
 		D3A48EA2C7DE011AEE833EA2 /* PresentationActionToneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationActionToneTests.swift; sourceTree = "<group>"; };
 		D5A795D0FCDE3726CBB528F8 /* OrientationLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationLock.swift; sourceTree = "<group>"; };
 		D7E1798719172168B0EBBBD3 /* PasscodePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodePolicy.swift; sourceTree = "<group>"; };
+		D97F0E05FC9F51A7F19CEDAE /* DeviceCapabilitiesPusher+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceCapabilitiesPusher+Debug.swift"; sourceTree = "<group>"; };
 		DC20FCD1651B95E823A06410 /* LocationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationServiceTests.swift; sourceTree = "<group>"; };
 		DE470500913747AD36BDE885 /* CameraServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraServiceTests.swift; sourceTree = "<group>"; };
 		DFFE40C221022DBDBD034AF3 /* PresentationStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationStateTests.swift; sourceTree = "<group>"; };
@@ -549,6 +551,7 @@
 				5FC2A1B34A8846BEEE089202 /* BleUuids.swift */,
 				95DAE4A89BF1E2A04935E05F /* CameraService.swift */,
 				7A01546D222F8024BB3E0009 /* DeviceCapabilitiesPusher.swift */,
+				D97F0E05FC9F51A7F19CEDAE /* DeviceCapabilitiesPusher+Debug.swift */,
 				7A701A0C348B6758EED1D949 /* DirectSendService.swift */,
 				B31DFE6F23CEA01F0437957B /* KeychainService.swift */,
 				6C859B6215BADD6A45480D9F /* LocalizationService.swift */,
@@ -812,6 +815,7 @@
 				5680FAB9C220183B0BB3AC03 /* ContentView.swift in Sources */,
 				45EB912C9310E6DC89131A5F /* ContextCommandBarView.swift in Sources */,
 				C203528C657D885D7A4474FC /* CoreBottomTabBar.swift in Sources */,
+				9FDDCA59B0C30858AD64134E /* DeviceCapabilitiesPusher+Debug.swift in Sources */,
 				4389AD09A1FCCD8661B98FE6 /* DeviceCapabilitiesPusher.swift in Sources */,
 				C9C86FD0A30B8E8FBAD1245C /* DiagnosticLogger.swift in Sources */,
 				AD01F0575CCEB6301F6F7834 /* DiagnosticView.swift in Sources */,

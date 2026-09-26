@@ -137,7 +137,11 @@ func mapBiometryType(_ type: LABiometryType) -> DeviceBiometricType? {
 /// simply overwrites the stored capabilities.
 func pushDeviceCapabilities(engine: PlatformAppEngine?) {
     guard let engine else { return }
-    let json = buildDeviceCapabilitiesJson(detectDeviceHardware())
+    var hardware = detectDeviceHardware()
+    #if DEBUG
+        hardware = applyDebugCapabilityOverrides(hardware, arguments: ProcessInfo.processInfo.arguments)
+    #endif
+    let json = buildDeviceCapabilitiesJson(hardware)
     do {
         try engine.setDeviceCapabilitiesJson(capabilitiesJson: json)
     } catch {
