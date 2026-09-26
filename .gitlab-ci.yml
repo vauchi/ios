@@ -49,6 +49,9 @@ include:
       - '/ci-templates/orphan-baselines.yml'
       - '/ci-templates/vrt-upload.yml'
       - '/ci-templates/perf.yml'
+      - '/ci-templates/verified-fetch.yml'
+      - '/ci-templates/tool-install.yml'
+      - '/ci-templates/cross-cutting-lint.yml'
 
 # Stub anchor required by perf.yml templates (defined in rust-base.yml for Rust repos)
 .self-hosted:
@@ -757,6 +760,13 @@ lint:humble: # vci02-ok: complete script-download setup replaces macOS defaults
           - "Vauchi/**/*.swift"
           - ".gitlab-ci.yml"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Exact-zero release gate (ADR-066): a release tag may carry no boundary
+# violations, live or stored — MR-time lint:humble above still allows
+# existing debt to shrink gradually. deploy:testflight needs this job so
+# a failing gate blocks the TestFlight upload.
+release:ratchet-zero:
+  extends: .release-ratchet-zero
 
 lint:xcodegen: # vci02-ok: xcodegen is the only setup this no-build lint needs
   extends: .macos-job
@@ -1681,6 +1691,7 @@ deploy:testflight:
   needs:
     - job: build:release
       artifacts: true
+    - job: release:ratchet-zero
   script:
     - ./scripts/setup-signing.sh
     # Export IPA from archive
