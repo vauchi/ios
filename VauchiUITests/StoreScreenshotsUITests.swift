@@ -66,10 +66,13 @@ final class StoreScreenshotsUITests: XCTestCase {
         tapLabel("Contacts")
         settle()
         capture("contacts")
-        app.swipeUp(velocity: .slow)
+        // `app.swipeUp` left the list where it was (store job 16751290838);
+        // swiping the scroll view itself moves it.
+        let list = app.scrollViews.firstMatch
+        list.swipeUp(velocity: .slow)
         settle()
         capture("contacts-scrolled")
-        app.swipeDown(velocity: .slow)
+        list.swipeDown(velocity: .slow)
 
         tapLabel("Alexander Conroy")
         settle()
@@ -77,12 +80,20 @@ final class StoreScreenshotsUITests: XCTestCase {
 
         tapLabel("Exchange")
         settle()
-        if primary.waitForExistence(timeout: 5), primary.label == "Skip" { primary.tap() }
+        // The exchange flow may open on a group-assignment step whose primary
+        // action skips it. Its label is Core's copy, so the step is recognised
+        // by Glance's absence rather than by the button's name.
+        let glance = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Glance")).firstMatch
+        if !glance.waitForExistence(timeout: 3) {
+            capture("exchange-entry")
+            if primary.waitForExistence(timeout: 5) { primary.tap() }
+            settle()
+        }
         tapLabel("Glance")
         settle()
         capture("exchange-qr")
 
-        XCTAssertEqual(captureCount, 7, "Every store screen should have been captured")
+        XCTAssertGreaterThanOrEqual(captureCount, 7, "Every store screen should have been captured")
     }
 
     private func wait(for element: XCUIElement, enabled: Bool, timeout: TimeInterval) -> Bool {
