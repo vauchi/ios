@@ -1378,10 +1378,6 @@ screenshots:store:
       xcrun simctl status_bar "$STORE_SIMULATOR" override
       --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3
       --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
-    # Glance asks for the camera, and its permission alert covered the QR
-    # (store job 16752204982). UI tests may not drive system alerts (CC-23),
-    # so the permission is granted up front.
-    - xcrun simctl privacy "$STORE_SIMULATOR" grant camera app.vauchi.ios
     - |
       export HOME="$CI_PROJECT_DIR/.spm-home"
       xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug \
