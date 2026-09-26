@@ -27,6 +27,10 @@ final class StoreScreenshotsUITests: XCTestCase {
     }
 
     func testStoreScreenshots() throws {
+        // Needs a freshly erased simulator; `test:ui` runs the whole target
+        // on a simulator that already holds an identity.
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["VAUCHI_STORE_SCREENSHOTS"] == "1",
+                          "Runs only in the screenshots:store job")
         let fixture = try XCTUnwrap(
             Bundle(for: Self.self).url(forResource: "store-screens", withExtension: "vauchibackup"),
             "The fixture backup must be bundled with the UI tests"
@@ -45,13 +49,17 @@ final class StoreScreenshotsUITests: XCTestCase {
         XCTAssertTrue(password.waitForExistence(timeout: 10),
                       "The fixture should stand in for the file pick and reach the password step")
         password.tap()
-        password.typeText(fixturePassword + "\n")
-        XCTAssertTrue(primary.waitForExistence(timeout: 5))
+        // No trailing Return: submitting re-renders the step and the typed
+        // password never reaches Restore (store job 16742956860).
+        password.typeText(fixturePassword)
+        XCTAssertTrue(wait(for: primary, enabled: true, timeout: 5),
+                      "Restore should enable once the password is typed")
         primary.tap()
 
-        let destinations = app.descendants(matching: .any).matching(identifier: "navigationDestinations")
-        XCTAssertTrue(destinations.firstMatch.waitForExistence(timeout: 30),
-                      "Restoring the fixture should land on the main destinations")
+        // Onboarding already shows a one-tab bar, so the restored home is
+        // recognised by the fixture's own name.
+        XCTAssertTrue(app.staticTexts["Alex Morgan"].waitForExistence(timeout: 30),
+                      "Restoring the fixture should land on Alex Morgan's card")
         settle()
         capture("my-card")
 
@@ -75,6 +83,14 @@ final class StoreScreenshotsUITests: XCTestCase {
         capture("exchange-qr")
 
         XCTAssertEqual(captureCount, 7, "Every store screen should have been captured")
+    }
+
+    private func wait(for element: XCUIElement, enabled: Bool, timeout: TimeInterval) -> Bool {
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "exists == true AND isEnabled == %@", NSNumber(value: enabled)),
+            object: element
+        )
+        return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
     }
 
     private func tapLabel(_ label: String) {

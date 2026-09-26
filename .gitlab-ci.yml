@@ -1368,6 +1368,7 @@ screenshots:store:
     VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
     STORE_SIMULATOR: iPhone 17 Pro Max
     TEST_RUNNER_VAUCHI_SCREENSHOT_DIR: $CI_PROJECT_DIR/build/screenshots
+    TEST_RUNNER_VAUCHI_STORE_SCREENSHOTS: "1"
   script:
     - ./scripts/ci-spm-isolate-config.sh
     - mkdir -p build/screenshots
