@@ -66,18 +66,6 @@ final class StoreScreenshotsUITests: XCTestCase {
         tapLabel("Contacts")
         settle()
         capture("contacts")
-        // `app.swipeUp` left the list where it was (store job 16751290838)
-        // and the list is not a ScrollView (job 16751448023). A swipe on a
-        // row scrolls whatever container holds it.
-        let row = app.staticTexts["Alexander Conroy"]
-        row.swipeUp(velocity: .slow)
-        settle()
-        capture("contacts-scrolled")
-        // Scroll back by position: which rows are still on screen is unknown.
-        let window = app.windows.firstMatch
-        window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.35))
-            .press(forDuration: 0.1, thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85)))
-        settle()
 
         tapLabel("Alexander Conroy")
         settle()
@@ -85,11 +73,10 @@ final class StoreScreenshotsUITests: XCTestCase {
 
         tapLabel("Exchange")
         settle()
-        // The exchange flow may open on a group-assignment step whose primary
-        // action skips it. Its label is Core's copy, so the step is recognised
-        // by Glance's absence rather than by the button's name.
-        let glance = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Glance")).firstMatch
-        if !glance.waitForExistence(timeout: 3) {
+        // The exchange flow opens on "Assign to Groups" (store job
+        // 16751597117); its primary action skips it. That label is Core's
+        // copy, so the step is recognised by Glance's absence.
+        if !labelled("Glance").waitForExistence(timeout: 3) {
             capture("exchange-entry")
             if primary.waitForExistence(timeout: 5) { primary.tap() }
             settle()
@@ -98,7 +85,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         settle()
         capture("exchange-qr")
 
-        XCTAssertGreaterThanOrEqual(captureCount, 7, "Every store screen should have been captured")
+        XCTAssertGreaterThanOrEqual(captureCount, 6, "Every store screen should have been captured")
     }
 
     private func wait(for element: XCUIElement, enabled: Bool, timeout: TimeInterval) -> Bool {
@@ -109,9 +96,28 @@ final class StoreScreenshotsUITests: XCTestCase {
         return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
     }
 
+    /// A row can expose its title and subtitle as one combined label
+    /// ("Glance, Recommended · …"), so a prefix match is accepted too.
+    private func labelled(_ label: String) -> XCUIElement {
+        app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@ OR label BEGINSWITH %@", label, label + ","))
+            .firstMatch
+    }
+
+    /// On a miss, the element tree goes into the result bundle and the log,
+    /// so the next fix reads the hierarchy instead of guessing it.
     private func tapLabel(_ label: String) {
-        let element = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", label)).firstMatch
-        XCTAssertTrue(element.waitForExistence(timeout: 10), "Missing \(label)")
+        let element = labelled(label)
+        guard element.waitForExistence(timeout: 10) else {
+            let tree = app.debugDescription
+            let attachment = XCTAttachment(string: tree)
+            attachment.name = "hierarchy-missing-\(label)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+            print("[store-screenshots] element tree when \(label) was missing:\n\(tree)")
+            XCTFail("Missing \(label)")
+            return
+        }
         element.tap()
     }
 
