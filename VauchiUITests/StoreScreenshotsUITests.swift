@@ -74,18 +74,17 @@ final class StoreScreenshotsUITests: XCTestCase {
         tapLabel("Exchange")
         settle()
         // The exchange flow opens on "Assign to Groups" (store job
-        // 16751597117); its primary action skips it. That label is Core's
-        // copy, so the step is recognised by Glance's absence.
-        if !labelled("Glance").waitForExistence(timeout: 3) {
-            capture("exchange-entry")
-            if primary.waitForExistence(timeout: 5) { primary.tap() }
-            settle()
-        }
-        tapLabel("Glance")
+        // 16751597117); its primary action skips it.
+        if primary.waitForExistence(timeout: 5) { primary.tap() }
         settle()
-        capture("exchange-qr")
+        // The simulator reports no camera, so Core recommends Link and offers
+        // no Glance/QR mode (element tree, store job 16751717284). The mode
+        // picker is the last screen the simulator can show.
+        XCTAssertTrue(labelled("Other ways to connect").waitForExistence(timeout: 10),
+                      "Skipping group assignment should reach the exchange mode picker")
+        capture("exchange-mode")
 
-        XCTAssertGreaterThanOrEqual(captureCount, 6, "Every store screen should have been captured")
+        XCTAssertEqual(captureCount, 5, "Every store screen should have been captured")
     }
 
     private func wait(for element: XCUIElement, enabled: Bool, timeout: TimeInterval) -> Bool {
