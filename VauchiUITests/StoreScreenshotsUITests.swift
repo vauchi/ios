@@ -35,7 +35,9 @@ final class StoreScreenshotsUITests: XCTestCase {
             Bundle(for: Self.self).url(forResource: "store-screens", withExtension: "vauchibackup"),
             "The fixture backup must be bundled with the UI tests"
         )
-        app.launchArguments = ["--import-backup", fixture.path]
+        // The simulator has no camera, so without `--simulate-camera` Core
+        // offers no Glance/QR mode (store job 16751717284).
+        app.launchArguments = ["--import-backup", fixture.path, "--simulate-camera"]
         app.launch()
 
         let primary = app.buttons["command.primary"]
@@ -77,14 +79,15 @@ final class StoreScreenshotsUITests: XCTestCase {
         // 16751597117); its primary action skips it.
         if primary.waitForExistence(timeout: 5) { primary.tap() }
         settle()
-        // The simulator reports no camera, so Core recommends Link and offers
-        // no Glance/QR mode (element tree, store job 16751717284). The mode
-        // picker is the last screen the simulator can show.
         XCTAssertTrue(labelled("Other ways to connect").waitForExistence(timeout: 10),
                       "Skipping group assignment should reach the exchange mode picker")
         capture("exchange-mode")
 
-        XCTAssertEqual(captureCount, 5, "Every store screen should have been captured")
+        tapLabel("Glance")
+        settle()
+        capture("exchange-qr")
+
+        XCTAssertEqual(captureCount, 6, "Every store screen should have been captured")
     }
 
     private func wait(for element: XCUIElement, enabled: Bool, timeout: TimeInterval) -> Bool {
