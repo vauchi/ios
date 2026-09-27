@@ -11,7 +11,7 @@ struct PresentationNodeView: View {
     /// angle, through screen glare, so this is deliberately generous: on a
     /// compact device the QR lands exactly on this floor, which makes it
     /// the real size control.
-    static let minimumScannableQr: CGFloat = 260
+    static let minimumScannableQr: CGFloat = 320
 
     let node: PresentationNode
     let surfaceID: String
