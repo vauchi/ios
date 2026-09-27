@@ -10,6 +10,15 @@ enum PresentationStateError: Error, Equatable {
     case mismatchedNavigation(String)
     case mismatchedOverlay(String)
     case unknownProfileSurface(String)
+
+    /// An envelope that arrived after a newer one for the same surface.
+    /// Envelopes are applied from separate main-actor Tasks, so this is an
+    /// ordering race, not a fault: the newer state is already applied and
+    /// the late envelope is dropped rather than shown as an alert.
+    var isOutOfOrderDelivery: Bool {
+        if case .staleSurface = self { return true }
+        return false
+    }
 }
 
 struct PresentationState {

@@ -187,10 +187,7 @@ class AppViewModel: ObservableObject {
         do {
             try applyPresentationEnvelope(appEngine.initialCommandsJson())
         } catch {
-            alertMessage = AlertMessage(
-                title: "Presentation error",
-                message: String(describing: error)
-            )
+            handleEnvelopeFailure(error)
         }
     }
 
@@ -228,8 +225,20 @@ class AppViewModel: ObservableObject {
         do {
             try applyPresentationEnvelope(json)
         } catch {
-            presentError(error)
+            handleEnvelopeFailure(error)
         }
+    }
+
+    /// A late envelope (older revision than what is on screen) is dropped;
+    /// every other failure is still surfaced.
+    private func handleEnvelopeFailure(_ error: Error) {
+        if let stateError = error as? PresentationStateError, stateError.isOutOfOrderDelivery {
+            #if DEBUG
+                print("AppViewModel: dropped out-of-order envelope: \(stateError)")
+            #endif
+            return
+        }
+        presentError(error)
     }
 
     private func presentError(_ error: Error) {
