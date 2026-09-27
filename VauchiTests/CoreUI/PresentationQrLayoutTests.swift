@@ -49,6 +49,18 @@ final class PresentationQrLayoutTests: XCTestCase {
         )
     }
 
+    /// 320pt is the smallest size at which a Pixel 3a's front camera read
+    /// an iPhone SE's Glance QR (version 11) across the table; at 260pt it
+    /// read nothing (`2026-09-26-exchange-baseline` GXP-10/11 vs GXP-13).
+    func testDisplayQrIsLargeEnoughForADensePayloadOnACompactScreen() throws {
+        let node = try JSONDecoder().decode(
+            PresentationNode.self,
+            from: Data(displayQrJson.utf8)
+        )
+
+        XCTAssertGreaterThanOrEqual(renderedQrHeight(for: node), 320)
+    }
+
     /// Lays the node out in a viewport too small for both it and a
     /// 250pt sibling, and reports the height the QR actually got.
     private func renderedQrHeight(for node: PresentationNode) -> CGFloat {
