@@ -111,6 +111,21 @@ final class PresentationStateTests: XCTestCase {
         XCTAssertEqual(state.activeNavigation?.navigation.items, [])
     }
 
+    /// Envelopes are applied on the main actor from separate Tasks, so an
+    /// older revision can land after a newer one. The newer state is already
+    /// on screen; alerting on the late one put a modal over the Hover QR
+    /// mid-transfer (vauchi/private#9, run HX-1).
+    /// @internal
+    func testStaleSurfaceIsAnOutOfOrderDeliveryNotAnAlert() {
+        XCTAssertTrue(PresentationStateError.staleSurface("multi_stage_exchange").isOutOfOrderDelivery)
+    }
+
+    /// @internal
+    func testMismatchedChromeStillAlerts() {
+        XCTAssertFalse(PresentationStateError.mismatchedContextBar("home").isOutOfOrderDelivery)
+        XCTAssertFalse(PresentationStateError.unknownProfileSurface("home").isOutOfOrderDelivery)
+    }
+
     func testRejectsWholeStaleTransaction() throws {
         var state = PresentationState()
         _ = try state.apply(decodeCommands("""
