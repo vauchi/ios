@@ -241,10 +241,16 @@ class AppViewModel: ObservableObject {
         presentError(error)
     }
 
+    /// Core owns user-facing copy (ADR-045 Am1), and an error's own
+    /// description can carry internal state (DC-05), so the user sees
+    /// Core's generic strings and only the error type is logged
+    /// (vauchi/private#308).
     private func presentError(_ error: Error) {
+        NSLog("[Vauchi] Presentation failed: %@", String(describing: type(of: error)))
+        let localization = LocalizationService.shared
         alertMessage = AlertMessage(
-            title: "Presentation error",
-            message: String(describing: error)
+            title: localization.t("error.title"),
+            message: localization.t("error.generic")
         )
     }
 
@@ -338,10 +344,7 @@ class AppViewModel: ObservableObject {
             activity.popoverPresentationController?.sourceView = controller.view
             controller.present(activity, animated: true)
         } catch {
-            alertMessage = AlertMessage(
-                title: "Export failed",
-                message: String(describing: error)
-            )
+            presentError(error)
         }
     }
 
