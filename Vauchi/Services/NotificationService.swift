@@ -35,18 +35,43 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         userInfo["deep_link_uri"] as? String
     }
 
-    /// Request notification permissions from the user.
-    func requestPermissions(completion: @escaping (Bool) -> Void) {
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            if let error {
-                #if DEBUG
-                    print("NotificationService: requestAuthorization failed: \(error)")
-                #endif
-            }
+    var authorizer: NotificationAuthorizing = SystemNotificationAuthorizer()
 
-            DispatchQueue.main.async {
-                completion(granted)
+    /// What the OS authorization status allows for a notification about to
+    /// be shown (vauchi/private#278).
+    enum AuthorizationStep: Equatable {
+        case deliver
+        case requestFirst
+        case drop
+    }
+
+    static func authorizationStep(for status: UNAuthorizationStatus) -> AuthorizationStep {
+        switch status {
+        case .authorized, .provisional, .ephemeral: .deliver
+        case .notDetermined: .requestFirst
+        case .denied: .drop
+        @unknown default: .drop
+        }
+    }
+
+    /// Asks for permission at the moment a notification is about to be shown,
+    /// when the user can see why, rather than at launch; drops it silently if
+    /// the user has not allowed notifications (vauchi/private#278).
+    static func deliverIfAuthorized(
+        _ notification: PreparedNotification,
+        authorizer: NotificationAuthorizing,
+        deliver: @escaping (PreparedNotification) -> Void
+    ) {
+        authorizer.currentStatus { status in
+            switch authorizationStep(for: status) {
+            case .deliver:
+                deliver(notification)
+            case .requestFirst:
+                authorizer.requestAuthorization { granted in
+                    if granted { deliver(notification) }
+                }
+            case .drop:
+                break
             }
         }
     }
@@ -76,7 +101,7 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
 
     /// Display a single `onWakeup` notification.
     private func showWakeupNotification(_ notification: WakeupNotification) {
-        deliver(PreparedNotification(
+        deliverIfAuthorized(PreparedNotification(
             title: notification.title,
             body: notification.body,
             eventKey: notification.eventKey,
@@ -88,7 +113,7 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
 
     /// Display a single notification.
     func showNotification(_ notification: MobilePendingNotification) {
-        deliver(PreparedNotification(
+        deliverIfAuthorized(PreparedNotification(
             title: notification.title,
             body: notification.body,
             eventKey: notification.eventKey,
@@ -158,6 +183,12 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         return merged
     }
 
+    private func deliverIfAuthorized(_ notification: PreparedNotification) {
+        Self.deliverIfAuthorized(notification, authorizer: authorizer) { [weak self] in
+            self?.deliver($0)
+        }
+    }
+
     private func deliver(_ notification: PreparedNotification) {
         let request = UNNotificationRequest(
             identifier: notification.eventKey,
@@ -207,5 +238,29 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         }
 
         completionHandler()
+    }
+}
+
+/// The OS authorization calls `NotificationService` needs, behind a seam
+/// because unit tests cannot drive `UNUserNotificationCenter`.
+protocol NotificationAuthorizing {
+    func currentStatus(_ completion: @escaping (UNAuthorizationStatus) -> Void)
+    func requestAuthorization(_ completion: @escaping (Bool) -> Void)
+}
+
+struct SystemNotificationAuthorizer: NotificationAuthorizing {
+    func currentStatus(_ completion: @escaping (UNAuthorizationStatus) -> Void) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            completion(settings.authorizationStatus)
+        }
+    }
+
+    func requestAuthorization(_ completion: @escaping (Bool) -> Void) {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if error != nil {
+                NSLog("[Vauchi] NotificationService Failed: requestAuthorization")
+            }
+            completion(granted)
+        }
     }
 }
