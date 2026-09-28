@@ -11,8 +11,8 @@
 // `ThemeServiceSettingsTests.swift` and Android's
 // `ThemeManagerSharedPrefsTest.kt`.
 
-@testable import Vauchi
 import SwiftUI
+@testable import Vauchi
 import XCTest
 
 final class ThemeServiceSettingsTests: XCTestCase {
@@ -95,8 +95,8 @@ final class ThemeServiceSettingsTests: XCTestCase {
     }
 }
 
-// themes.json writes alpha colours as CSS RRGGBBAA (the scrim is
-// #00000080); color(from:) has to read them, not drop them to .clear.
+/// themes.json writes alpha colours as CSS RRGGBBAA (the scrim is
+/// #00000080); color(from:) has to read them, not drop them to .clear.
 final class ThemeServiceHexColorTests: XCTestCase {
     private func components(_ color: Color) -> (r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat) {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
