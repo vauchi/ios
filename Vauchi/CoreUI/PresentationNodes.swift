@@ -253,6 +253,16 @@ indirect enum PresentationNode: Codable, Equatable {
         let searchable: Bool
         let paging: PresentationPaging?
         let accessibility: PresentationAccessibility
+        /// Absent for an ordinary list. Kept as a string so a style this
+        /// build does not know still draws as rows instead of failing the
+        /// whole surface.
+        var style: String? = nil
+
+        /// Core asked for these rows as native buttons: a short set of
+        /// commands that must read as tappable at a glance.
+        var drawsButtons: Bool {
+            style == "buttons"
+        }
     }
 
     struct Image: Codable, Equatable {

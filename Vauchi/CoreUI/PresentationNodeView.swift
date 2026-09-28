@@ -12,6 +12,8 @@ struct PresentationNodeView: View {
     /// compact device the QR lands exactly on this floor, which makes it
     /// the real size control.
     static let minimumScannableQr: CGFloat = 320
+    static let capturePreviewAspect: CGFloat = 9.0 / 16.0
+    static let capturePreviewMaxHeight: CGFloat = 240
 
     let node: PresentationNode
     let surfaceID: String
@@ -68,6 +70,23 @@ struct PresentationNodeView: View {
             // this a container whose children keep their own labels and
             // stay individually reachable
             // (`2026-08-16-ios-rows-are-not-buttons`).
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(value.accessibility.label)
+        case let .list(value) where value.drawsButtons:
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(value.rows) { row in
+                    if let action = row.activation {
+                        Button(action.label) {
+                            sendAction(action)
+                        }
+                        .buttonStyle(.bordered)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
+                        .disabled(!action.enabled)
+                        .accessibilityLabel(action.accessibilityLabel)
+                    }
+                }
+            }
             .accessibilityElement(children: .contain)
             .accessibilityLabel(value.accessibility.label)
         case let .list(value):
@@ -298,7 +317,9 @@ struct PresentationNodeView: View {
 
     private func qr(_ value: PresentationNode.QrCode) -> some View {
         VStack {
-            if let label = value.label {
+            // A capture node's label rides on its preview (below) so the
+            // camera keeps the height a separate heading line would take.
+            if value.purpose == .display, let label = value.label {
                 Text(label).font(.headline)
             }
             if value.purpose == .display,
@@ -338,14 +359,24 @@ struct PresentationNodeView: View {
                 // Deliberately small: the viewfinder only has to be big
                 // enough to aim with. Scanning reads the camera's own frames,
                 // not this view, so every point given back here buys QR size
-                // on a compact screen.
-                .frame(
-                    minWidth: 100,
-                    maxWidth: 180,
-                    minHeight: 100,
-                    maxHeight: 180
-                )
+                // on a compact screen. Shaped like the portrait 1280×720
+                // capture so the aspect-fit preview shows the whole frame
+                // the scanner reads, without letterbox bars.
+                .aspectRatio(Self.capturePreviewAspect, contentMode: .fit)
+                .frame(maxHeight: Self.capturePreviewMaxHeight)
                 .background(Color.black) // design-token-ok: letterbox behind the live camera preview
+                .overlay(alignment: .bottom) {
+                    if let label = value.label {
+                        Text(label)
+                            .font(.caption2)
+                            .foregroundStyle(.white) // design-token-ok: caption over the live camera image, not themed chrome
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(Color.black.opacity(0.55)) // design-token-ok: legibility scrim over the live camera image
+                    }
+                }
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .accessibilityLabel(value.accessibility.label)
             }

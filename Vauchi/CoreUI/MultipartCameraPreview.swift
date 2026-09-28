@@ -72,6 +72,7 @@ struct MultipartCameraPreview: UIViewRepresentable {
 
             lastScannedCode = code
             lastScanTime = Date()
+            NSLog("[Vauchi] [QrScan] decoded type=\(code.prefix(4)) len=\(code.count)")
 
             DispatchQueue.main.async {
                 self.onChunkScanned(code)
@@ -227,7 +228,11 @@ final class MultipartCameraView: UIView {
         // auto-resizes the host layer with the view's bounds — no
         // manual frame management needed.
         previewLayer.session = session
-        previewLayer.videoGravity = .resizeAspectFill
+        // Aspect-fit, not fill: the viewfinder is how a person lines the
+        // phones up, and a cropped preview shows less than the scanner
+        // reads, so a peer QR partly out of frame still looked whole
+        // (vauchi/private#9, 7–9 cm runs).
+        previewLayer.videoGravity = .resizeAspect
         captureSession = session
 
         // AVCaptureSession surfaces *runtime* failures (camera released
