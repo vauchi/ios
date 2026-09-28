@@ -136,6 +136,7 @@
 		F3096FD65BB8C411D32ACE99 /* QrCameraTunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E118373F3BD2F4E7FC20AB /* QrCameraTunerView.swift */; };
 		F3145E4E7C9EC869B82C5AA8 /* CameraServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE470500913747AD36BDE885 /* CameraServiceTests.swift */; };
 		F8818B9E78A3E1A875E04227 /* PresentationCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6BB9A87C49A6D79E266DFD /* PresentationCommand.swift */; };
+		F8BCBB565C70BBFE139A2B93 /* PresentationListStyleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424C7A5D4B866DD681B8F0E8 /* PresentationListStyleTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -197,6 +198,7 @@
 		38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiRepositoryTests.swift; sourceTree = "<group>"; };
 		418F950D6541F912A27DA57D /* BleExchangeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleExchangeService.swift; sourceTree = "<group>"; };
 		423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
+		424C7A5D4B866DD681B8F0E8 /* PresentationListStyleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationListStyleTests.swift; sourceTree = "<group>"; };
 		42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEventListenerTests.swift; sourceTree = "<group>"; };
 		44506B768565C7F52A328D17 /* BackgroundSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncService.swift; sourceTree = "<group>"; };
 		446FDB08A3809BE4183F5790 /* WakeupBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeupBootstrapTests.swift; sourceTree = "<group>"; };
@@ -347,6 +349,7 @@
 				0715A583D3BB57070852E320 /* PresentationErrorAlertTests.swift */,
 				B53FDA1302B12D2357E476DB /* PresentationImageContentTests.swift */,
 				90C2F7C347C991030CADC674 /* PresentationImageFrameSpecTests.swift */,
+				424C7A5D4B866DD681B8F0E8 /* PresentationListStyleTests.swift */,
 				279AA559A7610131C7934D10 /* PresentationQrLayoutTests.swift */,
 				DFFE40C221022DBDBD034AF3 /* PresentationStateTests.swift */,
 				A1725621574A64F614246D2C /* PresentationTargetSizeTests.swift */,
@@ -767,6 +770,7 @@
 				041EA6A47AFF5EFB26E7787D /* PresentationErrorAlertTests.swift in Sources */,
 				C08F19A01CA887CE179DB156 /* PresentationImageContentTests.swift in Sources */,
 				17ABD6784C9A89F651F8E6C7 /* PresentationImageFrameSpecTests.swift in Sources */,
+				F8BCBB565C70BBFE139A2B93 /* PresentationListStyleTests.swift in Sources */,
 				4E6F0E6CA37A6D5F3A4C4A70 /* PresentationQrLayoutTests.swift in Sources */,
 				750231F789BE3B2634B7B5FD /* PresentationStateTests.swift in Sources */,
 				48F391F27EE3BBAD1AB5DDD7 /* PresentationTargetSizeTests.swift in Sources */,
