@@ -76,12 +76,18 @@ struct PresentationNodeView: View {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(value.rows) { row in
                     if let action = row.activation {
-                        Button(action.label) {
+                        Button {
                             sendAction(action)
+                        } label: {
+                            // Wraps rather than truncating: beside a camera
+                            // preview the column is narrow, and "Use Rear…"
+                            // no longer says which camera.
+                            Text(action.label)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.8)
                         .disabled(!action.enabled)
                         .accessibilityLabel(action.accessibilityLabel)
                     }
@@ -381,7 +387,10 @@ struct PresentationNodeView: View {
                 .accessibilityLabel(value.accessibility.label)
             }
         }
-        .frame(maxWidth: .infinity)
+        // A camera takes its width from its height; claiming the full
+        // width left an empty band beside it and squeezed the commands
+        // next to it.
+        .frame(maxWidth: value.purpose == .display ? .infinity : nil)
     }
 
     private func confirmation(
