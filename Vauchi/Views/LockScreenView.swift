@@ -22,7 +22,7 @@ struct LockScreenView: View {
 
             Image(systemName: "lock.shield.fill")
                 .font(.system(size: 64))
-                .foregroundColor(.cyan)
+                .foregroundColor(ThemeService.shared.accent)
                 .accessibilityHidden(true)
 
             Text(localizationService.t("lock.title"))
@@ -44,7 +44,7 @@ struct LockScreenView: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.cyan)
+            .tint(ThemeService.shared.accent)
             .padding(.horizontal, 48)
             .accessibilityHint(localizationService.t("lock.a11y_hint"))
 

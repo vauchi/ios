@@ -152,7 +152,7 @@ struct PresentationNodeView: View {
             if let error = value.validationError {
                 Text(error)
                     .font(.caption)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(ThemeService.shared.error)
             }
         }
         .submitLabel(.done)
@@ -345,7 +345,7 @@ struct PresentationNodeView: View {
                     minHeight: 100,
                     maxHeight: 180
                 )
-                .background(Color.black)
+                .background(Color.black) // design-token-ok: letterbox behind the live camera preview
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .accessibilityLabel(value.accessibility.label)
             }
@@ -366,7 +366,7 @@ struct PresentationNodeView: View {
             }
         }
         .padding(8)
-        .background(Color.orange.opacity(0.12))
+        .background(ThemeService.shared.warning.opacity(0.12))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .accessibilityElement(children: .contain)
         .accessibilityLabel(value.accessibility.label)
@@ -420,9 +420,9 @@ struct PresentationNodeView: View {
         switch tone {
         case .neutral: .secondary
         case .accent: .accentColor
-        case .success: .green
-        case .warning: .orange
-        case .error: .red
+        case .success: ThemeService.shared.success
+        case .warning: ThemeService.shared.warning
+        case .error: ThemeService.shared.error
         }
     }
 

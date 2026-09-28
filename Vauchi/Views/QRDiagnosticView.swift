@@ -200,7 +200,7 @@
                             ForEach(Array(autoTestLines.enumerated()), id: \.offset) { _, line in
                                 Text(line)
                                     .font(.system(.caption2, design: .monospaced))
-                                    .foregroundColor(line.contains("FAIL") ? .red : line.contains("PASS") ? .green : .primary)
+                                    .foregroundColor(line.contains("FAIL") ? .red : line.contains("PASS") ? .green : .primary) // design-token-ok: developer diagnostic log
                             }
                         }
                         .padding()
@@ -365,11 +365,11 @@
                         .interpolation(.none)
                         .resizable()
                         .scaledToFit()
-                        .background(Color.white)
+                        .background(Color.white) // design-token-ok: QR quiet zone must be white
                         .cornerRadius(4)
                 } else {
                     Text("QR generation failed")
-                        .foregroundColor(.red)
+                        .foregroundColor(ThemeService.shared.error)
                 }
             }
         }
@@ -474,7 +474,7 @@
                 } else if cameraGranted {
                     HStack {
                         Image(systemName: "camera.viewfinder")
-                            .foregroundColor(.green)
+                            .foregroundColor(.green) // design-token-ok: developer diagnostic status
                         Text("Front camera scanning active")
                             .font(.caption)
                             .foregroundColor(.secondary)

@@ -68,7 +68,7 @@ struct PresentationHostView: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(Color.black.opacity(0.85))
+                    .background(Color.black.opacity(0.85)) // design-token-ok: toast bubble, no theme role yet (design pass pending)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .padding(.top, 8)
                     .padding(.horizontal, 24)

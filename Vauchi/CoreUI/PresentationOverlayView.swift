@@ -13,7 +13,7 @@ struct PresentationOverlayView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.32)
+            ThemeService.shared.scrim
                 .ignoresSafeArea()
                 .onTapGesture(perform: onDismiss)
             if overlay.overlay.kind == .navigation {

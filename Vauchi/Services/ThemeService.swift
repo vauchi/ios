@@ -129,18 +129,21 @@ final class ThemeService: ObservableObject {
             hexSanitized.removeFirst()
         }
 
-        guard hexSanitized.count == 6 else {
+        // themes.json writes alpha colours in CSS order, RRGGBBAA.
+        guard hexSanitized.count == 6 || hexSanitized.count == 8 else {
             return .clear
         }
 
-        var rgb: UInt64 = 0
-        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+        var value: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&value)
+        let rgba = hexSanitized.count == 8 ? value : (value << 8) | 0xFF
 
-        let r = Double((rgb & 0xFF0000) >> 16) / 255.0
-        let g = Double((rgb & 0x00FF00) >> 8) / 255.0
-        let b = Double(rgb & 0x0000FF) / 255.0
+        let r = Double((rgba >> 24) & 0xFF) / 255.0
+        let g = Double((rgba >> 16) & 0xFF) / 255.0
+        let b = Double((rgba >> 8) & 0xFF) / 255.0
+        let a = Double(rgba & 0xFF) / 255.0
 
-        return Color(red: r, green: g, blue: b)
+        return Color(red: r, green: g, blue: b, opacity: a)
     }
 
     /// Get background primary color
@@ -191,6 +194,18 @@ final class ThemeService: ObservableObject {
     var warning: Color {
         guard let theme = currentTheme else { return .orange }
         return color(from: theme.colors.warning)
+    }
+
+    /// Get the text colour drawn on top of accent and status fills
+    var textOnAccent: Color {
+        guard let hex = currentTheme?.colors.textOnAccent else { return .white }
+        return color(from: hex)
+    }
+
+    /// Get the backdrop colour behind modal overlays
+    var scrim: Color {
+        guard let hex = currentTheme?.colors.scrim else { return Color.black.opacity(0.32) }
+        return color(from: hex)
     }
 
     /// Get border color

@@ -42,8 +42,8 @@ enum PresentationActionTone: String, Codable, PresentationTolerantEnum {
     var foregroundColor: Color {
         switch self {
         case .standard: .primary
-        case .serious: .orange
-        case .destructive: .red
+        case .serious: ThemeService.shared.warning
+        case .destructive: ThemeService.shared.error
         }
     }
 }

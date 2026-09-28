@@ -374,7 +374,7 @@
 
                 if let error = errorMessage {
                     Text(error)
-                        .foregroundColor(.red)
+                        .foregroundColor(ThemeService.shared.error)
                         .font(.caption)
                 }
 
@@ -483,7 +483,7 @@
                         Spacer()
                         Text(String(format: "%.1f%% / %.3f", result.decodeRate, result.score))
                             .font(.caption.monospacedDigit())
-                            .foregroundColor(result.score > 0.5 ? .green : .orange)
+                            .foregroundColor(result.score > 0.5 ? .green : .orange) // design-token-ok: developer diagnostic score
                     }
                 }
             }

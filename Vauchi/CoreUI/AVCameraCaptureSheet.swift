@@ -20,7 +20,7 @@ struct AVCameraCaptureSheet: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.black.ignoresSafeArea() // design-token-ok: camera viewfinder backdrop
 
             CameraPreviewView(session: coordinator.session)
                 .ignoresSafeArea()
@@ -37,9 +37,9 @@ struct AVCameraCaptureSheet: View {
 
                 Button { coordinator.capturePhoto() } label: {
                     Circle()
-                        .fill(Color.white)
+                        .fill(Color.white) // design-token-ok: system-camera shutter button
                         .frame(width: 70, height: 70)
-                        .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 4).frame(width: 80, height: 80))
+                        .overlay(Circle().stroke(Color.white.opacity(0.5), lineWidth: 4).frame(width: 80, height: 80)) // design-token-ok: shutter ring
                 }
                 .padding(.bottom, 40)
             }

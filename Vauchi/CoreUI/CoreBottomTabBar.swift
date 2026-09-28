@@ -135,10 +135,10 @@ private struct TabBarBadge: View {
     var body: some View {
         Text("\(count)")
             .font(.caption2)
-            .foregroundColor(.white)
+            .foregroundColor(ThemeService.shared.textOnAccent)
             .padding(.horizontal, 4)
             .padding(.vertical, 1)
-            .background(Color.red, in: Capsule())
+            .background(ThemeService.shared.error, in: Capsule())
             .accessibilityHidden(true)
     }
 }

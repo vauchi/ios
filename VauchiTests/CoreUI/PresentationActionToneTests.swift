@@ -27,7 +27,7 @@ final class PresentationActionToneTests: XCTestCase {
             decode("standard"), decode("serious"), decode("destructive"),
         ].map(\.tone.foregroundColor)
         XCTAssertEqual(Set(colours).count, 3)
-        XCTAssertEqual(PresentationActionTone.destructive.foregroundColor, .red)
-        XCTAssertEqual(PresentationActionTone.serious.foregroundColor, .orange)
+        XCTAssertEqual(PresentationActionTone.destructive.foregroundColor, ThemeService.shared.error)
+        XCTAssertEqual(PresentationActionTone.serious.foregroundColor, ThemeService.shared.warning)
     }
 }
