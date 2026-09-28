@@ -200,7 +200,7 @@
                             ForEach(Array(autoTestLines.enumerated()), id: \.offset) { _, line in
                                 Text(line)
                                     .font(.system(.caption2, design: .monospaced))
-                                    .foregroundColor(line.contains("FAIL") ? .red : line.contains("PASS") ? .green : .primary) // design-token-ok: developer diagnostic log
+                                    .foregroundColor(line.contains("FAIL") ? .red : line.contains("PASS") ? .green : .primary) // design-token-ok: dev diagnostics
                             }
                         }
                         .padding()
