@@ -12,6 +12,7 @@
 // `ThemeManagerSharedPrefsTest.kt`.
 
 @testable import Vauchi
+import SwiftUI
 import XCTest
 
 final class ThemeServiceSettingsTests: XCTestCase {
@@ -91,5 +92,33 @@ final class ThemeServiceSettingsTests: XCTestCase {
         )
         XCTAssertTrue(service.followSystem, "service state reflects reset")
         XCTAssertNil(service.selectedThemeId, "service state reflects reset")
+    }
+}
+
+// themes.json writes alpha colours as CSS RRGGBBAA (the scrim is
+// #00000080); color(from:) has to read them, not drop them to .clear.
+final class ThemeServiceHexColorTests: XCTestCase {
+    private func components(_ color: Color) -> (r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat) {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(color).getRed(&r, green: &g, blue: &b, alpha: &a)
+        return (r, g, b, a)
+    }
+
+    func test_eight_digit_theme_colour_reads_as_rrggbbaa() {
+        let scrim = components(ThemeService.shared.color(from: "#00000080"))
+        XCTAssertEqual(scrim.r, 0, accuracy: 0.01)
+        XCTAssertEqual(scrim.b, 0, accuracy: 0.01)
+        XCTAssertEqual(scrim.a, 128.0 / 255.0, accuracy: 0.01)
+    }
+
+    func test_six_digit_theme_colour_reads_as_opaque() {
+        let red = components(ThemeService.shared.color(from: "#b3261e"))
+        XCTAssertEqual(red.r, 0xB3 / 255.0, accuracy: 0.01)
+        XCTAssertEqual(red.g, 0x26 / 255.0, accuracy: 0.01)
+        XCTAssertEqual(red.a, 1, accuracy: 0.01)
+    }
+
+    func test_malformed_theme_colour_is_clear() {
+        XCTAssertEqual(components(ThemeService.shared.color(from: "#12345")).a, 0, accuracy: 0.01)
     }
 }
