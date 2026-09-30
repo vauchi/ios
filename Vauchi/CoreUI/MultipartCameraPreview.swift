@@ -34,18 +34,27 @@ struct MultipartCameraPreview: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_: UIView, context _: Context) {}
+    func updateUIView(_: UIView, context: Context) {
+        context.coordinator.adopt(onChunkScanned: onChunkScanned)
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(onChunkScanned: onChunkScanned)
     }
 
     class Coordinator: NSObject, AVCaptureMetadataOutputObjectsDelegate {
-        let onChunkScanned: (String) -> Void
+        private var onChunkScanned: (String) -> Void
         private var lastScannedCode: String?
         private var lastScanTime: Date?
 
         init(onChunkScanned: @escaping (String) -> Void) {
+            self.onChunkScanned = onChunkScanned
+        }
+
+        /// The view outlives surface updates, and each update's callback
+        /// reports under that revision's binding; Core drops a scan sent
+        /// under an older one as stale (issue #9, D14).
+        func adopt(onChunkScanned: @escaping (String) -> Void) {
             self.onChunkScanned = onChunkScanned
         }
 
@@ -59,7 +68,10 @@ struct MultipartCameraPreview: UIViewRepresentable {
             else {
                 return
             }
+            deliver(code)
+        }
 
+        func deliver(_ code: String) {
             // Short debounce: drop the same payload within 100 ms so a single
             // visible frame is not delivered twice, while still allowing the
             // ~333 ms-per-chunk cadence used during multipart exchange.
