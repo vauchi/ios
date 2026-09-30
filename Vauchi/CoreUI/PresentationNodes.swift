@@ -161,7 +161,10 @@ indirect enum PresentationNode: Codable, Equatable {
         case let .list(value): "list:\(value.id)"
         case let .image(value): value.id.map { "image:\($0)" }
         case let .status(value): value.id.map { "status:\($0)" }
-        case let .qr(value): "qr:\(value.id)"
+        // A camera's id is a per-revision binding, so as an identity it
+        // rebuilt the preview and its capture session on every surface
+        // update (issue #9, D14); its position is stable instead.
+        case let .qr(value): value.purpose == .capture ? nil : "qr:\(value.id)"
         case let .confirmation(value): "confirmation:\(value.id)"
         case let .slider(value): "binding:\(value.bindingID)"
         case .progress, .divider: nil
