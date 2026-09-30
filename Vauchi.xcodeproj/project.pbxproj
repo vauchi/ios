@@ -32,6 +32,7 @@
 		281DEAD00427E5BF2993DAFC /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */; };
 		28ABEAE77D5BC15063202DCC /* PresentationEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F0B112148ABCC1933D659A4 /* PresentationEvent.swift */; };
 		2D0728F99D4DBB3C8491C25B /* ThemeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CF989EA84DBE8A9F43E05D /* ThemeService.swift */; };
+		2D963D20CF07F44059717E00 /* PresentationCaptureIdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81695D56952C25AF52486D7D /* PresentationCaptureIdentityTests.swift */; };
 		2E32911FDD537E5F664BF57C /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */; };
 		2F7D817E60BDE6223F5E0484 /* VauchiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71E5FB136BF29B1F9D9B7F04 /* VauchiApp.swift */; };
 		345A6E8CFA128DEE17B47EAF /* NfcDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EDBF8DCF3784366CBDEDEF6 /* NfcDiagnosticView.swift */; };
@@ -44,6 +45,7 @@
 		3FEEF96814D965F74AD0A42D /* PresentationHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A437D369672857F52C06E24 /* PresentationHostView.swift */; };
 		42E8C0D44725B88DB18845CB /* LocationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC20FCD1651B95E823A06410 /* LocationServiceTests.swift */; };
 		4389AD09A1FCCD8661B98FE6 /* DeviceCapabilitiesPusher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A01546D222F8024BB3E0009 /* DeviceCapabilitiesPusher.swift */; };
+		43A02557B62FE7C361CB6A7E /* MultipartCameraCallbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E265CE89A8A40837FD8047 /* MultipartCameraCallbackTests.swift */; };
 		45E1E6E04A9322ECC7C87DFE /* BleUuids.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC2A1B34A8846BEEE089202 /* BleUuids.swift */; };
 		45EB912C9310E6DC89131A5F /* ContextCommandBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24602CA31C0CE84313D9F229 /* ContextCommandBarView.swift */; };
 		47C1E3ED0F5525C7C0B866F2 /* PresentationSurfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B374973D50CCCC7F0EF6DA /* PresentationSurfaceView.swift */; };
@@ -233,6 +235,7 @@
 		80D908420E7769CC3225282C /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
 		80DDC053D23535FB6DEDE01E /* PresentationTargetSize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationTargetSize.swift; sourceTree = "<group>"; };
 		812EEE5AF140DB98855AF442 /* LocalizationServiceSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationServiceSettingsTests.swift; sourceTree = "<group>"; };
+		81695D56952C25AF52486D7D /* PresentationCaptureIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationCaptureIdentityTests.swift; sourceTree = "<group>"; };
 		830BD2C6362917F9CAB6F480 /* CoreBottomTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBottomTabBar.swift; sourceTree = "<group>"; };
 		84CF989EA84DBE8A9F43E05D /* ThemeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeService.swift; sourceTree = "<group>"; };
 		84D14544B64B5B788B50E9DA /* AccelerometerProximityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccelerometerProximityService.swift; sourceTree = "<group>"; };
@@ -288,6 +291,7 @@
 		E0B846E20C7A377BE6FC0277 /* PresentationChoiceStyleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationChoiceStyleTests.swift; sourceTree = "<group>"; };
 		E17FD049E1582776B08D1899 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E1DBB7D1E042D84C5557E188 /* OnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTests.swift; sourceTree = "<group>"; };
+		E2E265CE89A8A40837FD8047 /* MultipartCameraCallbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartCameraCallbackTests.swift; sourceTree = "<group>"; };
 		E7944347EE6E209E80A5CF30 /* PresentationNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationNodeView.swift; sourceTree = "<group>"; };
 		EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleUuidsTests.swift; sourceTree = "<group>"; };
 		EEB2B575C59DEDEFBA323040 /* AccelerometerProximityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccelerometerProximityServiceTests.swift; sourceTree = "<group>"; };
@@ -341,10 +345,12 @@
 				C38FE0127E86CB045D89F88E /* ExchangeCommandBridgeTests.swift */,
 				350622DF2E8A1B902DFA0A85 /* FilePickerAcceptedExtensionsTests.swift */,
 				03B14F6FC09C0E3B70E2A824 /* HardwareEventJsonTests.swift */,
+				E2E265CE89A8A40837FD8047 /* MultipartCameraCallbackTests.swift */,
 				5482743CA87B21CE18C8C3B9 /* NavigationIconMapTests.swift */,
 				2665E0EEA673F89A405C5D27 /* NfcCommandDispatchTests.swift */,
 				42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */,
 				D3A48EA2C7DE011AEE833EA2 /* PresentationActionToneTests.swift */,
+				81695D56952C25AF52486D7D /* PresentationCaptureIdentityTests.swift */,
 				E0B846E20C7A377BE6FC0277 /* PresentationChoiceStyleTests.swift */,
 				0715A583D3BB57070852E320 /* PresentationErrorAlertTests.swift */,
 				B53FDA1302B12D2357E476DB /* PresentationImageContentTests.swift */,
@@ -754,6 +760,7 @@
 				2E32911FDD537E5F664BF57C /* KeychainServiceTests.swift in Sources */,
 				78DEE11DBBB312E894650FBF /* LocalizationServiceSettingsTests.swift in Sources */,
 				42E8C0D44725B88DB18845CB /* LocationServiceTests.swift in Sources */,
+				43A02557B62FE7C361CB6A7E /* MultipartCameraCallbackTests.swift in Sources */,
 				23542D8D4771261954AA6A2D /* NFCExchangeServiceTransceiveShimTests.swift in Sources */,
 				1BB5832181399F70969847FB /* NavigationIconMapTests.swift in Sources */,
 				3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */,
@@ -766,6 +773,7 @@
 				1552B5F6D02172C2BA2C691D /* PlatformEdgeTests.swift in Sources */,
 				0DDA36A34D79308F42591BA3 /* PlatformEventListenerTests.swift in Sources */,
 				0D568A3271482CEABA444A7F /* PresentationActionToneTests.swift in Sources */,
+				2D963D20CF07F44059717E00 /* PresentationCaptureIdentityTests.swift in Sources */,
 				3CBCA6653407F8CF9A8D9531 /* PresentationChoiceStyleTests.swift in Sources */,
 				041EA6A47AFF5EFB26E7787D /* PresentationErrorAlertTests.swift in Sources */,
 				C08F19A01CA887CE179DB156 /* PresentationImageContentTests.swift in Sources */,
