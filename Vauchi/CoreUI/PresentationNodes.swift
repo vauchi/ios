@@ -324,7 +324,15 @@ indirect enum PresentationNode: Codable, Equatable {
         /// Where in the node's square a display code is drawn; absent
         /// means the full square.
         let placement: QrPlacement?
+        /// Core's error-correction level for a display code; absent leaves
+        /// it to the shell.
+        let errorCorrection: String?
         let accessibility: PresentationAccessibility
+
+        private enum CodingKeys: String, CodingKey {
+            case id, payloads, purpose, label, placement, accessibility
+            case errorCorrection = "error_correction"
+        }
     }
 
     struct Confirmation: Codable, Equatable {
@@ -483,4 +491,12 @@ struct QrFrameSpec: Equatable {
             top: scaled(min(max(placement.y, 0), room))
         )
     }
+}
+
+/// The `CIQRCodeGenerator` correction level for Core's error-correction
+/// name. Only "low" changes anything: Core asks for it during an exchange,
+/// where fewer, larger modules read from closer. Anything else, absent
+/// included, is the default.
+func qrCorrectionLevel(_ errorCorrection: String?) -> String {
+    errorCorrection == "low" ? "L" : "M"
 }

@@ -335,11 +335,11 @@ struct PresentationNodeView: View {
             if value.purpose == .display,
                let placement = value.placement,
                let payload = value.payloads.first,
-               let image = qrImage(payload) {
+               let image = qrImage(payload, errorCorrection: value.errorCorrection) {
                 placedQr(image, at: placement, label: value.accessibility.label)
             } else if value.purpose == .display,
                       let payload = value.payloads.first,
-                      let image = qrImage(payload) {
+                      let image = qrImage(payload, errorCorrection: value.errorCorrection) {
                 Image(uiImage: image)
                     .interpolation(.none)
                     .resizable()
@@ -508,9 +508,10 @@ struct PresentationNodeView: View {
             .accessibilityLabel(label)
     }
 
-    private func qrImage(_ value: String) -> UIImage? {
+    private func qrImage(_ value: String, errorCorrection: String?) -> UIImage? {
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(value.utf8)
+        filter.correctionLevel = qrCorrectionLevel(errorCorrection)
         guard let output = filter.outputImage else { return nil }
         let representation = CIContext().createCGImage(
             output.transformed(by: .init(scaleX: 10, y: 10)),
