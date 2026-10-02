@@ -123,7 +123,11 @@ final class WakeupService {
         // Honour the minimum interval by delaying to the earliest allowable
         // moment. This keeps the frontend from waking core more often than
         // core requested (e.g. multiple commands arriving in quick succession).
-        if minIntervalSecs > 0, let sinceLastWakeup {
+        // A millisecond dwell replaces every whole-second field, because core
+        // can't put less than one second in them: applying the minimum here
+        // held a live exchange at one frame a second (device-measured
+        // 1001 ms against a 100 ms request, 2026-10-02, #9).
+        if earliestMillis == nil, minIntervalSecs > 0, let sinceLastWakeup {
             let remaining = TimeInterval(minIntervalSecs) - sinceLastWakeup
             if remaining > fireAfter {
                 fireAfter = remaining
