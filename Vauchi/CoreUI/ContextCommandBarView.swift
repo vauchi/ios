@@ -138,9 +138,8 @@ struct ContextCommandBarView: View {
                         .accessibilityHidden(true)
                     Text(action.label)
                         .font(.caption2)
-                        .lineLimit(1)
                 }
-                .fixedSize(horizontal: true, vertical: false)
+                .fixedSize()
                 .frame(minWidth: minimumTarget, minHeight: minimumTarget)
             } else {
                 Image(systemName: systemImage)
