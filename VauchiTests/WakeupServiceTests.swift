@@ -44,4 +44,42 @@ final class WakeupServiceTests: XCTestCase {
 
         wait(for: [expectation], timeout: 0.5)
     }
+
+    func testASubSecondWakeupIsNotStretchedToTheWholeSecondMinimum() {
+        // Core's terms for a live exchange: the frame dwell in milliseconds,
+        // with one second in every whole-second field.
+        let delay = WakeupService.fireDelay(
+            earliestSecs: 1,
+            deadlineSecs: 1,
+            minIntervalSecs: 1,
+            earliestMillis: 100,
+            sinceLastWakeup: 0.002
+        )
+
+        XCTAssertEqual(delay, 0.1, accuracy: 0.0001)
+    }
+
+    func testAWholeSecondWakeupWaitsOutTheMinimumInterval() {
+        let delay = WakeupService.fireDelay(
+            earliestSecs: 10,
+            deadlineSecs: 90,
+            minIntervalSecs: 30,
+            earliestMillis: nil,
+            sinceLastWakeup: 5
+        )
+
+        XCTAssertEqual(delay, 25, accuracy: 0.0001)
+    }
+
+    func testAWakeupNeverWaitsPastTheDeadline() {
+        let delay = WakeupService.fireDelay(
+            earliestSecs: 30,
+            deadlineSecs: 10,
+            minIntervalSecs: 0,
+            earliestMillis: nil,
+            sinceLastWakeup: nil
+        )
+
+        XCTAssertEqual(delay, 10, accuracy: 0.0001)
+    }
 }
