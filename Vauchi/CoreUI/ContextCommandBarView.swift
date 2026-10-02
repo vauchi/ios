@@ -16,6 +16,10 @@ enum ContextCommandBarLayout {
 
     static let restingClearance: CGFloat = 4
 
+    /// Air between the row and a raised centre action: at 4 the primary
+    /// button and the circle read as touching in the catalogue render.
+    static let centreActionGap: CGFloat = 12
+
     /// The slots Core filled, in drawing order. An absent action takes no
     /// space: a held-open gap pushed the whole row off-centre.
     static func slots(bar: PresentationContextBar?) -> [Slot] {
@@ -42,7 +46,7 @@ enum ContextCommandBarLayout {
 
     static func bottomClearance(above tabs: [PresentationNavigationItem]) -> CGFloat {
         if tabs.contains(where: CoreBottomTabBarLayout.isCentreAction(tab:)) {
-            return CoreBottomTabBarLayout.centreOverhang + restingClearance
+            return CoreBottomTabBarLayout.centreOverhang + centreActionGap
         }
         return restingClearance
     }
