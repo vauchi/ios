@@ -13,8 +13,12 @@
 import XCTest
 
 final class PresentationQrPlacementTests: XCTestCase {
-    private func decodeQr(placement: String?) throws -> PresentationNode.QrCode {
-        let field = placement.map { "\"placement\": \($0)," } ?? ""
+    private func decodeQr(
+        placement: String?,
+        errorCorrection: String? = nil
+    ) throws -> PresentationNode.QrCode {
+        let field = (placement.map { "\"placement\": \($0)," } ?? "")
+            + (errorCorrection.map { "\"error_correction\": \"\($0)\"," } ?? "")
         let json = """
         {"Qr": {
           "id": "own_qr",
@@ -86,5 +90,19 @@ final class PresentationQrPlacementTests: XCTestCase {
             QrFrameSpec(placement: QrPlacement(size: -5, x: 0, y: 0), squareSide: 320),
             QrFrameSpec(side: 320, left: 0, top: 0)
         )
+    }
+
+    func testALowErrorCorrectionLevelIsDecodedAndDrawnAsSuch() throws {
+        let value = try decodeQr(placement: nil, errorCorrection: "low")
+
+        XCTAssertEqual(value.errorCorrection, "low")
+        XCTAssertEqual(qrCorrectionLevel(value.errorCorrection), "L")
+    }
+
+    func testAnAbsentOrUnrecognisedLevelDrawsAtMedium() throws {
+        XCTAssertNil(try decodeQr(placement: nil).errorCorrection)
+        XCTAssertEqual(qrCorrectionLevel(nil), "M")
+        XCTAssertEqual(qrCorrectionLevel("medium"), "M")
+        XCTAssertEqual(qrCorrectionLevel("ultra"), "M")
     }
 }
