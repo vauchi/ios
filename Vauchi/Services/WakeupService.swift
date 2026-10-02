@@ -76,29 +76,13 @@ final class WakeupService {
         minIntervalSecs: UInt32,
         earliestMillis: UInt32? = nil
     ) {
-        // Honour the minimum interval by delaying to the earliest allowable
-        // moment. This keeps the frontend from waking core more often than
-        // core requested (e.g. multiple commands arriving in quick succession).
-        // Seconds cannot express the frame dwell of a live exchange, whose QR
-        // advances from this timer. Android read only the whole-second field
-        // and ran at 1013 ms against a ~300 ms design; this is the same field,
-        // on the same command
-        // (2026-08-18-hover-transfer-stalls-on-the-last-chunk).
-        var fireAfter =
-            earliestMillis.map { TimeInterval($0) / 1000.0 } ?? TimeInterval(earliestSecs)
-        if minIntervalSecs > 0, let last = lastWakeupAt {
-            let earliestNext = last.addingTimeInterval(TimeInterval(minIntervalSecs))
-            let remaining = earliestNext.timeIntervalSinceNow
-            if remaining > fireAfter {
-                fireAfter = remaining
-            }
-        }
-
-        // Clamp to the deadline so we never oversleep past what core asked.
-        let deadline = TimeInterval(deadlineSecs)
-        if fireAfter > deadline {
-            fireAfter = deadline
-        }
+        let fireAfter = Self.fireDelay(
+            earliestSecs: earliestSecs,
+            deadlineSecs: deadlineSecs,
+            minIntervalSecs: minIntervalSecs,
+            earliestMillis: earliestMillis,
+            sinceLastWakeup: lastWakeupAt.map { -$0.timeIntervalSinceNow }
+        )
 
         foregroundTimer?.cancel()
 
@@ -117,6 +101,36 @@ final class WakeupService {
         #if DEBUG
             print("WakeupService: scheduled wakeup in \(fireAfter)s")
         #endif
+    }
+
+    /// How long to wait before the next wakeup, from core's terms and the
+    /// time since the previous one. Pure, so the cadence is testable without
+    /// a timer.
+    nonisolated static func fireDelay(
+        earliestSecs: UInt32,
+        deadlineSecs: UInt32,
+        minIntervalSecs: UInt32,
+        earliestMillis: UInt32?,
+        sinceLastWakeup: TimeInterval?
+    ) -> TimeInterval {
+        // Seconds cannot express the frame dwell of a live exchange, whose QR
+        // advances from this timer. Android read only the whole-second field
+        // and ran at 1013 ms against a ~300 ms design; this is the same field,
+        // on the same command
+        // (2026-08-18-hover-transfer-stalls-on-the-last-chunk).
+        var fireAfter =
+            earliestMillis.map { TimeInterval($0) / 1000.0 } ?? TimeInterval(earliestSecs)
+        // Honour the minimum interval by delaying to the earliest allowable
+        // moment. This keeps the frontend from waking core more often than
+        // core requested (e.g. multiple commands arriving in quick succession).
+        if minIntervalSecs > 0, let sinceLastWakeup {
+            let remaining = TimeInterval(minIntervalSecs) - sinceLastWakeup
+            if remaining > fireAfter {
+                fireAfter = remaining
+            }
+        }
+        // Clamp to the deadline so we never oversleep past what core asked.
+        return min(fireAfter, TimeInterval(deadlineSecs))
     }
 
     /// Re-arm on the terms core last asked for.
