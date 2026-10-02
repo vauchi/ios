@@ -14,7 +14,7 @@ struct PresentationSurfaceView: View {
 
     var body: some View {
         Group {
-            if surface.layout == .scroll {
+            if surface.layout.scrollsContent {
                 ScrollView {
                     content
                 }
