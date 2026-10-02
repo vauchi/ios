@@ -8,6 +8,15 @@ import SwiftUI
 /// of the view so `CoreBottomTabBarLayoutTests` can assert them without
 /// rendering.
 enum CoreBottomTabBarLayout {
+    static let centreDiameter: CGFloat = 64
+    static let topPadding: CGFloat = 8
+
+    /// How far the raised centre action reaches above the bar's top edge;
+    /// whatever sits above the bar keeps clear of it.
+    static var centreOverhang: CGFloat {
+        centreDiameter / 4 - topPadding
+    }
+
     /// Exchange is the raised centre action among Core's navigation
     /// destinations (Option A, 2026-09-07 familiar-simple-interface
     /// review) — the app's purpose, not a peer of the other four. Keyed on
@@ -50,8 +59,6 @@ struct CoreBottomTabBar: View {
     let items: [PresentationNavigationItem]
     let onEvent: (PresentationEvent) -> Void
 
-    private static let centreDiameter: CGFloat = 64
-
     var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, tab in
@@ -59,7 +66,7 @@ struct CoreBottomTabBar: View {
             }
         }
         .padding(.horizontal, 4)
-        .padding(.top, 8)
+        .padding(.top, CoreBottomTabBarLayout.topPadding)
         .background(.regularMaterial)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("navigationDestinations")
@@ -96,14 +103,17 @@ struct CoreBottomTabBar: View {
         VStack(spacing: 4) {
             icon(tab, font: .title2)
                 .foregroundColor(.white)
-                .frame(width: Self.centreDiameter, height: Self.centreDiameter)
+                .frame(
+                    width: CoreBottomTabBarLayout.centreDiameter,
+                    height: CoreBottomTabBarLayout.centreDiameter
+                )
                 .background(Color.accentColor)
                 .clipShape(Circle())
                 .shadow(color: .black.opacity(0.2), radius: 6, y: 2)
-                .offset(y: -Self.centreDiameter / 4)
+                .offset(y: -CoreBottomTabBarLayout.centreDiameter / 4)
             Text(tab.label)
                 .font(.caption2)
-                .offset(y: -Self.centreDiameter / 4)
+                .offset(y: -CoreBottomTabBarLayout.centreDiameter / 4)
         }
     }
 

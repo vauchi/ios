@@ -24,8 +24,6 @@ struct PresentationHostContent: View {
                 .safeAreaInset(edge: .bottom) {
                     VStack(spacing: 0) {
                         commandBar
-                            .padding(.horizontal, profileClass == .compact ? 8 : 20)
-                            .padding(.bottom, 4)
                         navigationBar
                     }
                 }
@@ -93,6 +91,9 @@ struct PresentationHostContent: View {
                 windowClass: profileClass,
                 minimumTarget: PresentationTokens.minimumTargetSize(
                     from: state.surfaces[surfaceID]?.tokens
+                ),
+                bottomClearance: ContextCommandBarLayout.bottomClearance(
+                    above: state.activeNavigation?.navigation.items ?? []
                 ),
                 onEvent: { event in
                     onEvent(surfaceID, event)
