@@ -28,4 +28,37 @@ final class MultipartCameraCallbackTests: XCTestCase {
         wait(for: [delivered], timeout: 1)
         XCTAssertEqual(firstCallback, [])
     }
+
+    /// The phone's own code can share the frame with the peer's; both must
+    /// reach Core, which tells them apart (#450).
+    func testEveryCodeInAFrameIsDelivered() {
+        var received: [String] = []
+        let delivered = expectation(description: "both codes are delivered")
+        delivered.expectedFulfillmentCount = 2
+        let coordinator = MultipartCameraPreview.Coordinator(onChunkScanned: {
+            received.append($0)
+            delivered.fulfill()
+        })
+
+        coordinator.deliverAll(["own-frame", "peer-frame"])
+
+        wait(for: [delivered], timeout: 1)
+        XCTAssertEqual(received, ["own-frame", "peer-frame"])
+    }
+
+    func testTheSameCodeTwiceInOneFrameBurstIsDeliveredOnce() {
+        var received: [String] = []
+        let delivered = expectation(description: "each distinct code is delivered")
+        delivered.expectedFulfillmentCount = 2
+        let coordinator = MultipartCameraPreview.Coordinator(onChunkScanned: {
+            received.append($0)
+            delivered.fulfill()
+        })
+
+        coordinator.deliverAll(["own-frame", "peer-frame"])
+        coordinator.deliverAll(["own-frame", "peer-frame"])
+
+        wait(for: [delivered], timeout: 1)
+        XCTAssertEqual(received, ["own-frame", "peer-frame"])
+    }
 }
