@@ -333,8 +333,13 @@ struct PresentationNodeView: View {
                 Text(label).font(.headline)
             }
             if value.purpose == .display,
+               let placement = value.placement,
                let payload = value.payloads.first,
                let image = qrImage(payload) {
+                placedQr(image, at: placement, label: value.accessibility.label)
+            } else if value.purpose == .display,
+                      let payload = value.payloads.first,
+                      let image = qrImage(payload) {
                 Image(uiImage: image)
                     .interpolation(.none)
                     .resizable()
@@ -480,6 +485,27 @@ struct PresentationNodeView: View {
         case .password, .pin: .password
         default: nil
         }
+    }
+
+    /// A placed code leaves part of the square empty. That part is white,
+    /// so the peer's camera sees one bright square whatever the theme.
+    private func placedQr(
+        _ image: UIImage,
+        at placement: QrPlacement,
+        label: String
+    ) -> some View {
+        let frame = QrFrameSpec(placement: placement, squareSide: Self.minimumScannableQr)
+        return Color.white
+            .frame(width: Self.minimumScannableQr, height: Self.minimumScannableQr)
+            .overlay(alignment: .topLeading) {
+                Image(uiImage: image)
+                    .interpolation(.none)
+                    .resizable()
+                    .frame(width: frame.side, height: frame.side)
+                    .offset(x: frame.left, y: frame.top)
+            }
+            .layoutPriority(1)
+            .accessibilityLabel(label)
     }
 
     private func qrImage(_ value: String) -> UIImage? {

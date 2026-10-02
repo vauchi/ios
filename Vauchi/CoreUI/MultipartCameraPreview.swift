@@ -44,8 +44,10 @@ struct MultipartCameraPreview: UIViewRepresentable {
 
     class Coordinator: NSObject, AVCaptureMetadataOutputObjectsDelegate {
         private var onChunkScanned: (String) -> Void
-        private var lastScannedCode: String?
-        private var lastScanTime: Date?
+        /// When each payload was last delivered, kept for the debounce
+        /// window only. Per payload: with two codes in view a single
+        /// "last code" would never match and nothing would be debounced.
+        private var recentScans: [String: Date] = [:]
 
         init(onChunkScanned: @escaping (String) -> Void) {
             self.onChunkScanned = onChunkScanned
@@ -63,27 +65,31 @@ struct MultipartCameraPreview: UIViewRepresentable {
             didOutput metadataObjects: [AVMetadataObject],
             from _: AVCaptureConnection
         ) {
-            guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
-                  let code = metadataObject.stringValue
-            else {
-                return
-            }
-            deliver(code)
+            // Every code in the frame, not only the first: this phone's own
+            // code can be in view too (a reflection, the peer's preview), and
+            // taking one would drop the peer's whenever ours came first.
+            // Core tells them apart by session id (#450).
+            deliverAll(
+                metadataObjects.compactMap {
+                    ($0 as? AVMetadataMachineReadableCodeObject)?.stringValue
+                }
+            )
+        }
+
+        func deliverAll(_ codes: [String]) {
+            codes.forEach(deliver)
         }
 
         func deliver(_ code: String) {
             // Short debounce: drop the same payload within 100 ms so a single
             // visible frame is not delivered twice, while still allowing the
             // ~333 ms-per-chunk cadence used during multipart exchange.
-            if let lastCode = lastScannedCode,
-               let lastTime = lastScanTime,
-               lastCode == code,
-               Date().timeIntervalSince(lastTime) < 0.1 {
+            let now = Date()
+            recentScans = recentScans.filter { now.timeIntervalSince($0.value) < 0.1 }
+            if recentScans[code] != nil {
                 return
             }
-
-            lastScannedCode = code
-            lastScanTime = Date()
+            recentScans[code] = now
             NSLog("[Vauchi] [QrScan] decoded type=\(code.prefix(4)) len=\(code.count)")
 
             DispatchQueue.main.async {

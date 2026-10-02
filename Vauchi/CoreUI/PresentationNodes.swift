@@ -321,6 +321,9 @@ indirect enum PresentationNode: Codable, Equatable {
         let payloads: [String]
         let purpose: PresentationQRPurpose
         let label: String?
+        /// Where in the node's square a display code is drawn; absent
+        /// means the full square.
+        let placement: QrPlacement?
         let accessibility: PresentationAccessibility
     }
 
@@ -433,6 +436,51 @@ func identifyPresentationNodes(
         IdentifiedPresentationNode(
             id: node.identityID ?? "position:\(index)",
             node: node
+        )
+    }
+}
+
+/// Where Core asks a display code to be drawn inside its square: the
+/// code's side and the offset of its top-left corner, in permille of the
+/// square's side.
+struct QrPlacement: Codable, Equatable {
+    let size: Int
+    let x: Int
+    let y: Int
+}
+
+/// A code's side and top-left corner inside a square, in points. Pure, so
+/// `PresentationQrPlacementTests` can assert the numbers without rendering.
+struct QrFrameSpec: Equatable {
+    let side: CGFloat
+    let left: CGFloat
+    let top: CGFloat
+
+    init(side: CGFloat, left: CGFloat, top: CGFloat) {
+        self.side = side
+        self.left = left
+        self.top = top
+    }
+
+    /// No placement is the full square. Core only sends placements inside
+    /// the square; a value outside it is pulled back in, so the code is
+    /// never drawn past its node.
+    init(placement: QrPlacement?, squareSide: CGFloat) {
+        guard let placement, placement.size > 0 else {
+            self.init(side: squareSide, left: 0, top: 0)
+            return
+        }
+        let full = 1000
+        let size = min(placement.size, full)
+        let room = full - size
+        /// Multiply before dividing: 650 × 320 / 1000 is exact.
+        func scaled(_ permille: Int) -> CGFloat {
+            CGFloat(permille) * squareSide / CGFloat(full)
+        }
+        self.init(
+            side: scaled(size),
+            left: scaled(min(max(placement.x, 0), room)),
+            top: scaled(min(max(placement.y, 0), room))
         )
     }
 }
