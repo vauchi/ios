@@ -161,10 +161,11 @@ enum PresentationSurfaceLayout: String, Codable, PresentationTolerantEnum {
     case pinned
 
     /// Only `fixed` must hold still: a moving QR breaks the peer camera's
-    /// lock. `pinned` asks for the list to be the scroll host; until the
-    /// list is one, the whole surface scrolls, as it does on Android.
-    /// Drawn at full height instead, a long list ran past the bottom edge
-    /// and took the context bar and the tab bar with it.
+    /// lock. A `pinned` surface is one scroll host whose header scrolls
+    /// away with the rows; what stays pinned is the bar and the tab bar
+    /// below it (2026-06-11 list-windowing design: pinning the header left
+    /// the list no height on a small phone). Drawn at full height instead,
+    /// a long list ran past the bottom edge and took both bars with it.
     var scrollsContent: Bool {
         self != .fixed
     }
