@@ -13,16 +13,13 @@
 import XCTest
 
 final class ContextCommandBarLayoutTests: XCTestCase {
-    private func action(_ interactionID: String) -> PresentationAction {
-        PresentationAction(
-            interactionID: interactionID,
-            label: "Label",
-            accessibilityLabel: "Label",
-            iconToken: nil,
-            enabled: true,
-            tone: .standard,
-            shortcut: nil
-        )
+    /// `PresentationAction` only decodes, as it does from Core's batch.
+    private func action(_ interactionID: String) -> PresentationAction? {
+        let json = """
+        {"interaction_id":"\(interactionID)","label":"Label",
+         "accessibility_label":"Label","enabled":true}
+        """
+        return try? JSONDecoder().decode(PresentationAction.self, from: Data(json.utf8))
     }
 
     private func bar(
