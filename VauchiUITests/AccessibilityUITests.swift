@@ -346,7 +346,20 @@ final class AccessibilityUITests: XCTestCase {
                     // the flake then re-fired on every run regardless of the
                     // intent documented in
                     // `_private/docs/problems/2026-04-26-ios-accessibility-audit-flake/`.
-                    issue.compactDescription.contains("Potentially inaccessible text")
+                    //
+                    // Every issue is written to the test log with the element
+                    // it is about: the failure message alone names neither.
+                    let element = issue.element
+                    let summary = [
+                        "type=\(issue.auditType.rawValue)",
+                        "compact=\(issue.compactDescription)",
+                        "detail=\(issue.detailedDescription)",
+                        "label=\(element?.label ?? "-")",
+                        "identifier=\(element?.identifier ?? "-")",
+                        "frame=\(element.map { "\($0.frame)" } ?? "-")",
+                    ].joined(separator: " | ")
+                    XCTContext.runActivity(named: "Accessibility audit issue: \(summary)") { _ in }
+                    return issue.compactDescription.contains("Potentially inaccessible text")
                 }
             } catch let error as NSError
                 where error.domain == "com.apple.accessibilityAudit"
