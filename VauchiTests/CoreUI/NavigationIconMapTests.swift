@@ -352,4 +352,19 @@ final class NavigationIconMapTests: XCTestCase {
             .symbol(NavigationIconMap.fallbackSymbol)
         )
     }
+
+    /// List rows carry an `icon_token` on many screens, but only the
+    /// exchange-mode picker's pictograms are meant to be drawn: a row gains a
+    /// leading glyph for a pictogram and for nothing else, so no other list
+    /// suddenly sprouts SF Symbols or placeholder grids.
+    func testRowIconDrawsOnlyBundledPictograms() {
+        XCTAssertEqual(
+            NavigationIconMap.rowIcon(for: "pictogram.exchange.tap_tap"),
+            .asset("pictogram.exchange.tap_tap")
+        )
+        XCTAssertNil(NavigationIconMap.rowIcon(for: "gearshape"))
+        XCTAssertNil(NavigationIconMap.rowIcon(for: "not.a.known.token"))
+        XCTAssertNil(NavigationIconMap.rowIcon(for: nil))
+        XCTAssertNil(NavigationIconMap.rowIcon(for: "pictogram.exchange.not_shipped"))
+    }
 }
