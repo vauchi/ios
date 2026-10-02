@@ -159,6 +159,13 @@ enum NavigationIconMap {
         return icon(for: token)
     }
 
+    /// List rows draw only pictograms: many rows carry a token, and drawing
+    /// all of them would change every list, not just the ones Core gave a
+    /// pictogram to.
+    static func rowIcon(for token: String?) -> NavigationIcon? {
+        pictogramAsset(for: token).map(NavigationIcon.asset)
+    }
+
     /// The token goes to an image lookup that also searches bundle paths, so
     /// only a plain lowercase dotted name is ever handed over.
     private static func pictogramAsset(for token: String?) -> String? {

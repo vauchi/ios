@@ -703,6 +703,10 @@ private struct PresentationRowView: View {
                     .frame(width: minimumTarget, height: minimumTarget)
                     .background(Color.secondary.opacity(0.15))
                     .clipShape(Circle())
+            } else if let icon = NavigationIconMap.rowIcon(for: row.iconToken) {
+                // Decorative: the row's accessibility label already names it.
+                NavigationIconImage(icon, pointSize: 28, relativeTo: .headline)
+                    .accessibilityHidden(true)
             }
             VStack(alignment: .leading) {
                 Text(row.title).font(.headline)
