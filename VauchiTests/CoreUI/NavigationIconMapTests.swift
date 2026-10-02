@@ -262,4 +262,94 @@ final class NavigationIconMapTests: XCTestCase {
             )
         }
     }
+
+    // MARK: - Pictogram tokens
+
+    /// Every pictogram Core can name for an exchange mode
+    /// (`pictogram.exchange.<name>`). Core owns the vocabulary; the shell
+    /// only owes each one a bundled asset of the same name.
+    private static let corePictogramTokens = [
+        "pictogram.exchange.glance",
+        "pictogram.exchange.hover",
+        "pictogram.exchange.bump",
+        "pictogram.exchange.shake",
+        "pictogram.exchange.magic",
+        "pictogram.exchange.tap_tap",
+        "pictogram.exchange.tap_hover_shake",
+        "pictogram.exchange.link",
+        "pictogram.exchange.cable",
+    ]
+
+    private func bundledImageExists(_ name: String) -> Bool {
+        UIImage(named: name, in: .main, compatibleWith: nil) != nil
+    }
+
+    private func bundledImageIsTemplate(_ name: String) -> Bool {
+        UIImage(named: name, in: .main, compatibleWith: nil)?.renderingMode == .alwaysTemplate
+    }
+
+    /// A pictogram token draws Vauchi's own glyph, not the apps-grid
+    /// placeholder: the shell resolves it by name, without knowing what an
+    /// exchange mode is (ADR-066).
+    func testPictogramTokensResolveToTheirBundledAsset() {
+        for token in Self.corePictogramTokens {
+            XCTAssertEqual(
+                NavigationIconMap.icon(for: token),
+                .asset(token),
+                "pictogram token '\(token)' did not resolve to its bundled asset"
+            )
+        }
+    }
+
+    /// The asset has to ship in the app bundle and be tinted by the
+    /// surrounding foreground colour like an SF Symbol, or it would draw
+    /// black on a dark background.
+    func testEveryPictogramAssetIsBundledAsATemplateImage() {
+        for token in Self.corePictogramTokens {
+            XCTAssertTrue(bundledImageExists(token), "no bundled image named '\(token)'")
+            XCTAssertTrue(bundledImageIsTemplate(token), "'\(token)' is not template-rendered")
+        }
+    }
+
+    func testNonPictogramTokensStillResolveToSFSymbols() {
+        XCTAssertEqual(NavigationIconMap.icon(for: "gearshape"), .symbol("gearshape.fill"))
+        XCTAssertEqual(
+            NavigationIconMap.icon(for: "not.a.known.token"),
+            .symbol(NavigationIconMap.fallbackSymbol)
+        )
+        XCTAssertEqual(NavigationIconMap.icon(for: nil), .symbol(NavigationIconMap.fallbackSymbol))
+    }
+
+    /// Core can name a pictogram before this build ships it; a missing asset
+    /// must still draw the placeholder rather than an empty gap. Names that
+    /// could reach outside the asset catalog never resolve to an asset.
+    func testUnknownOrMalformedPictogramFallsBackToTheNeutralSymbol() {
+        let unresolvable = [
+            "pictogram.exchange.not_shipped",
+            "pictogram.",
+            "pictogram",
+            "pictogram.../../etc/passwd",
+            "pictogram.exchange/hover",
+            "PICTOGRAM.EXCHANGE.HOVER",
+        ]
+        for token in unresolvable {
+            XCTAssertEqual(
+                NavigationIconMap.icon(for: token),
+                .symbol(NavigationIconMap.fallbackSymbol),
+                "token '\(token)' should fall back to the neutral symbol"
+            )
+        }
+    }
+
+    func testOverlayIconResolvesPictogramsAndKeepsActionMenusSparse() {
+        XCTAssertEqual(
+            NavigationIconMap.icon(forOverlayKind: .actionMenu, token: "pictogram.exchange.hover"),
+            .asset("pictogram.exchange.hover")
+        )
+        XCTAssertNil(NavigationIconMap.icon(forOverlayKind: .actionMenu, token: nil))
+        XCTAssertEqual(
+            NavigationIconMap.icon(forOverlayKind: .navigation, token: nil),
+            .symbol(NavigationIconMap.fallbackSymbol)
+        )
+    }
 }
