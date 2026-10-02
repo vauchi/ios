@@ -63,6 +63,12 @@ struct ContextCommandBarView: View {
     let bottomClearance: CGFloat
     let onEvent: (PresentationEvent) -> Void
 
+    /// The launcher labels match the tab bar's caption size at the default
+    /// text size. `.caption2` itself stays at 11 points from the smallest
+    /// setting up to the default one, so it does not follow the text size
+    /// there; scaled against `.subheadline` the label changes at every step.
+    @ScaledMetric(relativeTo: .subheadline) private var launcherLabelSize: CGFloat = 11
+
     var body: some View {
         let slots = ContextCommandBarLayout.slots(bar: bar)
         if !slots.isEmpty {
@@ -141,7 +147,7 @@ struct ContextCommandBarView: View {
                         .font(.title3)
                         .accessibilityHidden(true)
                     Text(action.label)
-                        .font(.caption2)
+                        .font(.system(size: launcherLabelSize))
                 }
                 .fixedSize()
                 .frame(minWidth: minimumTarget, minHeight: minimumTarget)
