@@ -118,7 +118,7 @@ struct CoreBottomTabBar: View {
     }
 
     private func icon(_ tab: PresentationNavigationItem, font: Font) -> some View {
-        Image(systemName: NavigationIconMap.systemImage(for: tab.iconToken))
+        NavigationIconImage(NavigationIconMap.icon(for: tab.iconToken), pointSize: 24, relativeTo: .title3)
             .font(font)
             .overlay(alignment: .topTrailing) {
                 if tab.badgeCount > 0 {

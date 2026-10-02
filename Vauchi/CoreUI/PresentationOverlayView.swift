@@ -150,12 +150,16 @@ struct PresentationOverlayView: View {
     /// one barrier for another.
     @ViewBuilder
     private func actionLabel(_ action: PresentationAction) -> some View {
-        if let symbol = NavigationIconMap.systemImage(
+        if let icon = NavigationIconMap.icon(
             forOverlayKind: overlay.overlay.kind,
             token: action.iconToken
         ) {
-            Label(action.label, systemImage: symbol)
-                .labelStyle(.titleAndIcon)
+            Label {
+                Text(action.label)
+            } icon: {
+                NavigationIconImage(icon)
+            }
+            .labelStyle(.titleAndIcon)
         } else {
             Text(action.label)
         }

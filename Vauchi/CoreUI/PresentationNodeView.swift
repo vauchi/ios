@@ -292,10 +292,14 @@ struct PresentationNodeView: View {
             if let token = value.iconToken {
                 // Decorative: the row already carries the node's accessibility
                 // label, and a symbol's own name ("Lock") would be read twice.
-                Image(systemName: NavigationIconMap.systemImage(for: token))
-                    .font(.title2)
-                    .foregroundStyle(toneColor(value.tone))
-                    .accessibilityHidden(true)
+                NavigationIconImage(
+                    NavigationIconMap.icon(for: token),
+                    pointSize: 28,
+                    relativeTo: .title2
+                )
+                .font(.title2)
+                .foregroundStyle(toneColor(value.tone))
+                .accessibilityHidden(true)
             }
             VStack(alignment: .leading) {
                 Text(value.title).font(.headline)
