@@ -95,6 +95,9 @@ struct PresentationHostContent: View {
                 bottomClearance: ContextCommandBarLayout.bottomClearance(
                     above: state.activeNavigation?.navigation.items ?? []
                 ),
+                navigationShown: CoreBottomTabBarLayout.isVisible(
+                    items: state.activeNavigation?.navigation.items ?? []
+                ),
                 onEvent: { event in
                     onEvent(surfaceID, event)
                 }

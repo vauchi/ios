@@ -21,14 +21,17 @@ enum ContextCommandBarLayout {
     static let centreActionGap: CGFloat = 12
 
     /// The slots Core filled, in drawing order. An absent action takes no
-    /// space: a held-open gap pushed the whole row off-centre.
-    static func slots(bar: PresentationContextBar?) -> [Slot] {
+    /// space: a held-open gap pushed the whole row off-centre. While the
+    /// navigation is on screen as a tab bar, its launcher is left out: both
+    /// open the same destinations, and a second control for one list was
+    /// the one readers could not name.
+    static func slots(bar: PresentationContextBar?, navigationShown: Bool = false) -> [Slot] {
         guard let bar else { return [] }
         var slots: [Slot] = []
         if bar.back != nil {
             slots.append(.back)
         }
-        if bar.navigation != nil {
+        if bar.navigation != nil, !navigationShown {
             slots.append(.navigation)
         }
         if bar.primary != nil {
@@ -69,6 +72,7 @@ struct ContextCommandBarView: View {
     let windowClass: PresentationWindowClass
     let minimumTarget: CGFloat
     let bottomClearance: CGFloat
+    let navigationShown: Bool
     let onEvent: (PresentationEvent) -> Void
 
     /// The launcher labels match the tab bar's caption size at the default
@@ -78,13 +82,13 @@ struct ContextCommandBarView: View {
     @ScaledMetric(relativeTo: .subheadline) private var launcherLabelSize: CGFloat = 11
 
     var body: some View {
-        let slots = ContextCommandBarLayout.slots(bar: bar)
+        let slots = ContextCommandBarLayout.slots(bar: bar, navigationShown: navigationShown)
         if !slots.isEmpty {
             HStack(spacing: 8) {
                 if let back = bar?.back {
                     roleButton(back, slot: .back, systemImage: "chevron.left", identifier: "command.back")
                 }
-                if let navigation = bar?.navigation {
+                if let navigation = bar?.navigation, slots.contains(.navigation) {
                     roleButton(
                         navigation,
                         slot: .navigation,
