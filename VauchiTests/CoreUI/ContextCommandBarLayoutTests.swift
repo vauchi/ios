@@ -69,6 +69,21 @@ final class ContextCommandBarLayoutTests: XCTestCase {
         )
     }
 
+    /// The launcher opens the same destinations the tab bar shows; two
+    /// controls for one list is what readers tripped over.
+    func testTheNavigationLauncherIsLeftOutWhileTheNavigationIsOnScreen() {
+        let full = bar(back: true, navigation: true, primary: true, secondary: true)
+
+        XCTAssertEqual(
+            ContextCommandBarLayout.slots(bar: full, navigationShown: true),
+            [.back, .primary, .secondary]
+        )
+        XCTAssertEqual(
+            ContextCommandBarLayout.slots(bar: full, navigationShown: false),
+            [.back, .navigation, .primary, .secondary]
+        )
+    }
+
     func testNoBarAndABarWithNoActionsDrawNothing() {
         XCTAssertEqual(ContextCommandBarLayout.slots(bar: nil), [])
         XCTAssertEqual(ContextCommandBarLayout.slots(bar: bar()), [])

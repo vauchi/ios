@@ -7,13 +7,13 @@
 // Uses --reset-for-testing to bypass onboarding (identity seeded by app).
 // Traces to: features/accessibility.feature
 //
-// The presentation-commands migration replaced the custom bottom tab bar
-// with core-driven surfaces plus a floating contextual command bar
-// (`ContextCommandBarView`). Navigation between sections now goes through
-// the bar's navigation command, which opens an overlay listing the
-// destinations (`PresentationOverlayView`). The tests query the stable
-// frontend a11y identifiers `command.navigation` and
-// `navigationDestinations` (NOT core action ids or localized labels).
+// Core-driven surfaces sit above a contextual command bar
+// (`ContextCommandBarView`) and the persistent tab bar (`CoreBottomTabBar`,
+// identifier `navigationDestinations`). Navigation between sections goes
+// through the tab bar; the bar's navigation launcher (`command.navigation`)
+// opens the same destinations as an overlay and is drawn only where no tab
+// bar is on screen (vauchi/private#479). The tests query the stable
+// frontend a11y identifiers (NOT core action ids or localized labels).
 
 import XCTest
 
@@ -27,18 +27,16 @@ final class AccessibilityUITests: XCTestCase {
         app.launch()
 
         // --reset-for-testing creates a test identity, so the app starts on
-        // the home surface with the contextual command bar visible.
+        // the home surface with the tab bar visible.
         //
         // Seeding runs from an async `.task`, so on a slow machine the app can
         // still be on onboarding here and the destination tests then read its
-        // single entry. Polling the menu in setup to wait that out was tried
-        // and made things worse — the repeated open/close churn broke every
-        // test in the class — so this stays a plain existence check. CI
-        // settles before the first query; a local run may show the two
-        // destination tests reading one entry.
-        let navigationCommand = app.buttons["command.navigation"]
-        XCTAssertTrue(navigationCommand.waitForExistence(timeout: 10),
-                      "Command bar should appear after --reset-for-testing identity seeding")
+        // single entry. Polling in setup to wait that out was tried and made
+        // things worse, so this stays a plain existence check. CI settles
+        // before the first query; a local run may show the two destination
+        // tests reading one entry.
+        XCTAssertTrue(navigationDestinations.waitForExistence(timeout: 10),
+                      "Tab bar should appear after --reset-for-testing identity seeding")
     }
 
     override func tearDownWithError() throws {
@@ -62,8 +60,9 @@ final class AccessibilityUITests: XCTestCase {
         return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
     }
 
-    /// Returns the navigation overlay's destination container, opening the
-    /// overlay via the command bar unless it is already open.
+    /// Returns the container listing the destinations: the persistent tab
+    /// bar where one is on screen, else the overlay the command bar's
+    /// navigation launcher opens.
     ///
     /// The overlay's dismissal animates (`PresentationHostView` runs a 0.24s
     /// ease-out), and an `exists` sample taken during it reports the overlay
@@ -73,6 +72,9 @@ final class AccessibilityUITests: XCTestCase {
     @discardableResult
     private func openNavigationDestinations() -> XCUIElement {
         let destinations = navigationDestinations
+        if destinations.waitForExistence(timeout: 3), !app.buttons["command.navigation"].exists {
+            return destinations
+        }
         _ = wait(destinations, until: NSPredicate(format: "exists == false"), timeout: 2)
         if !destinations.exists {
             let navigationCommand = app.buttons["command.navigation"]
@@ -114,6 +116,16 @@ final class AccessibilityUITests: XCTestCase {
     }
 
     // MARK: - Navigation Structure
+
+    /// With the tab bar on screen, the command bar draws no navigation
+    /// launcher: both open the same five destinations, and readers could
+    /// not say what the second control was for (vauchi/private#479).
+    func testNoNavigationLauncherWhileTheTabBarShows() {
+        XCTAssertTrue(navigationDestinations.waitForExistence(timeout: 3),
+                      "Tab bar should be on screen")
+        XCTAssertFalse(app.buttons["command.navigation"].exists,
+                       "The navigation launcher duplicates the tab bar")
+    }
 
     /// The navigation overlay lists the main destinations, all with
     /// non-empty labels.
@@ -247,8 +259,8 @@ final class AccessibilityUITests: XCTestCase {
         // Return to the first destination.
         tapDestination(at: 0)
 
-        XCTAssertTrue(app.buttons["command.navigation"].waitForExistence(timeout: 3),
-                      "Command bar should still exist after round-trip navigation")
+        XCTAssertTrue(navigationDestinations.waitForExistence(timeout: 3),
+                      "Tab bar should still exist after round-trip navigation")
         let buttons = app.buttons.allElementsBoundByIndex
         let visibleButtons = buttons.filter { $0.exists && $0.isHittable }
         XCTAssertFalse(visibleButtons.isEmpty,

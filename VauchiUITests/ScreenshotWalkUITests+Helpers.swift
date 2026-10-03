@@ -122,14 +122,18 @@ extension ScreenshotWalkUITests {
         return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
     }
 
-    /// Opens the navigation overlay unless it is already open and returns the
-    /// container listing the most destinations — the overlay, when a shorter
-    /// persistent tab bar also carries the identifier.
+    /// Returns the container listing the destinations: the persistent tab
+    /// bar where the command bar draws no navigation launcher, else the
+    /// overlay that launcher opens — the container with the most
+    /// destinations, when a shorter tab bar also carries the identifier.
     func openOverlay(containersAtRest: Int) -> XCUIElement {
         if destinationContainers.count <= containersAtRest {
             let navigation = app.buttons["command.navigation"]
-            XCTAssertTrue(navigation.waitForExistence(timeout: 5),
-                          "Navigation command should exist on every main destination")
+            guard navigation.exists else {
+                XCTAssertTrue(navigationDestinations.waitForExistence(timeout: 5),
+                              "Without a navigation launcher the tab bar lists the destinations")
+                return navigationDestinations
+            }
             navigation.tap()
             XCTAssertTrue(wait(destinationContainers, until: "count > \(containersAtRest)", timeout: 5),
                           "Navigation overlay should list destinations")
