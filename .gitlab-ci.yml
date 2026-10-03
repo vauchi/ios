@@ -1412,7 +1412,23 @@ screenshots:store:
   rules:
     - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "api"
       when: never
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    # Same paths as build:debug, which this job needs: without them a
+    # merge request touching neither would schedule it with no build and
+    # GitLab would reject the whole pipeline.
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.swift"
+          - "**/*.xib"
+          - "**/*.storyboard"
+          - "*.xcodeproj/**/*"
+          - "Package.swift"
+          - "project.yml"
+          - ".gitlab-ci.yml"
+      when: manual
+      allow_failure: true
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
       allow_failure: true
 
