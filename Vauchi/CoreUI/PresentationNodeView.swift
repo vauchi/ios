@@ -495,7 +495,7 @@ struct PresentationNodeView: View {
         label: String
     ) -> some View {
         let frame = QrFrameSpec(placement: placement, squareSide: Self.minimumScannableQr)
-        return Color.white
+        return Color.white // design-token-ok: a QR code needs a white quiet zone for the peer's camera
             .frame(width: Self.minimumScannableQr, height: Self.minimumScannableQr)
             .overlay(alignment: .topLeading) {
                 Image(uiImage: image)

@@ -481,8 +481,8 @@ struct QrFrameSpec: Equatable {
         let full = 1000
         let size = min(placement.size, full)
         let room = full - size
-        /// Multiply before dividing: 650 × 320 / 1000 is exact.
-        func scaled(_ permille: Int) -> CGFloat {
+        // Multiply before dividing: 650 × 320 / 1000 is exact.
+        let scaled = { (permille: Int) -> CGFloat in
             CGFloat(permille) * squareSide / CGFloat(full)
         }
         self.init(
