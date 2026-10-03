@@ -25,10 +25,18 @@ enum ContextCommandBarLayout {
     static func slots(bar: PresentationContextBar?) -> [Slot] {
         guard let bar else { return [] }
         var slots: [Slot] = []
-        if bar.back != nil { slots.append(.back) }
-        if bar.navigation != nil { slots.append(.navigation) }
-        if bar.primary != nil { slots.append(.primary) }
-        if bar.secondary != nil { slots.append(.secondary) }
+        if bar.back != nil {
+            slots.append(.back)
+        }
+        if bar.navigation != nil {
+            slots.append(.navigation)
+        }
+        if bar.primary != nil {
+            slots.append(.primary)
+        }
+        if bar.secondary != nil {
+            slots.append(.secondary)
+        }
         return slots
     }
 

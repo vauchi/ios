@@ -56,7 +56,9 @@ final class LocalAuthenticationBiometricUnlock: BiometricUnlockPrompting {
     }
 
     private static func result(success: Bool, error: Error?) -> BiometricUnlockResult {
-        if success { return .succeeded }
+        if success {
+            return .succeeded
+        }
         guard let laError = error as? LAError else {
             return .failed(error?.localizedDescription ?? "Biometric authentication failed")
         }

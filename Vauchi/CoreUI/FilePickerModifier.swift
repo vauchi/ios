@@ -48,7 +48,11 @@ struct FilePickerModifier: ViewModifier {
             // for the read, then release. Without this, sandboxed builds
             // raise `NSCocoaErrorDomain 257` on `Data(contentsOf:)`.
             let didStart = url.startAccessingSecurityScopedResource()
-            defer { if didStart { url.stopAccessingSecurityScopedResource() } }
+            defer {
+                if didStart {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
             do {
                 let data = try Data(contentsOf: url)
                 coreVM.sendFilePicked(bytes: Array(data), filename: url.lastPathComponent)

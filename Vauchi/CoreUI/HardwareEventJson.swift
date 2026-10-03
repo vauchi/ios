@@ -176,7 +176,9 @@ private func unit(_ name: String) -> String {
 private func variant(_ name: String, _ fields: (key: String, value: String)...) -> String {
     var json = "{" + string(name) + ":{"
     for (index, field) in fields.enumerated() {
-        if index > 0 { json += "," }
+        if index > 0 {
+            json += ","
+        }
         json += string(field.key) + ":" + field.value
     }
     json += "}}"
@@ -203,9 +205,15 @@ private func bytes(_ data: Data) -> String {
         }
         put(UInt8(ascii: "["))
         for (index, byte) in data.enumerated() {
-            if index > 0 { put(UInt8(ascii: ",")) }
-            if byte >= 100 { put(UInt8(ascii: "0") + byte / 100) }
-            if byte >= 10 { put(UInt8(ascii: "0") + (byte / 10) % 10) }
+            if index > 0 {
+                put(UInt8(ascii: ","))
+            }
+            if byte >= 100 {
+                put(UInt8(ascii: "0") + byte / 100)
+            }
+            if byte >= 10 {
+                put(UInt8(ascii: "0") + (byte / 10) % 10)
+            }
             put(UInt8(ascii: "0") + byte % 10)
         }
         put(UInt8(ascii: "]"))

@@ -93,9 +93,13 @@ final class PresentationChoiceStyleTests: XCTestCase {
     }
 
     private func firstSegmentedControl(in view: UIView) -> UISegmentedControl? {
-        if let control = view as? UISegmentedControl { return control }
+        if let control = view as? UISegmentedControl {
+            return control
+        }
         for child in view.subviews {
-            if let found = firstSegmentedControl(in: child) { return found }
+            if let found = firstSegmentedControl(in: child) {
+                return found
+            }
         }
         return nil
     }

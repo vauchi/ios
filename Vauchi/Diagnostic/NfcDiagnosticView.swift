@@ -181,8 +181,12 @@
 
         func tagReaderSession(_: NFCTagReaderSession, didInvalidateWithError error: Error) {
             let nsError = error as NSError
-            if nsError.code == NFCReaderError.readerSessionInvalidationErrorUserCanceled.rawValue { return }
-            if nsError.code == NFCReaderError.readerSessionInvalidationErrorFirstNDEFTagRead.rawValue { return }
+            if nsError.code == NFCReaderError.readerSessionInvalidationErrorUserCanceled.rawValue {
+                return
+            }
+            if nsError.code == NFCReaderError.readerSessionInvalidationErrorFirstNDEFTagRead.rawValue {
+                return
+            }
             logFn?("Session error: \(error.localizedDescription)")
             completionFn?()
         }
@@ -369,7 +373,9 @@
                     if sw1 == 0x90, sw2 == 0x00 {
                         let match = data == payload
                         logFn?("  \(size)B: \(String(format: "%.1f", elapsed))ms echo=\(match ? "match" : "MISMATCH(\(data.count))")")
-                        if match { maxSuccess = size }
+                        if match {
+                            maxSuccess = size
+                        }
                     } else {
                         logFn?("  \(size)B: REJECTED (SW: \(String(format: "%02X%02X", sw1, sw2)))")
                     }

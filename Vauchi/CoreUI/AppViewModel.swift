@@ -448,7 +448,9 @@ class AppViewModel: ObservableObject {
             }
             if !envelope.commands.isEmpty {
                 scheduled = envelope.commands.contains { command in
-                    if case .scheduleWakeup = command { return true }
+                    if case .scheduleWakeup = command {
+                        return true
+                    }
                     return false
                 }
                 handleExchangeCommands(
@@ -566,7 +568,9 @@ class AppViewModel: ObservableObject {
         for (index, command) in commands.enumerated() {
             // BLE + audio commands are dispatched in their own helpers to
             // keep this switch within SwiftLint's complexity budget.
-            if handleTransportCommand(command) { continue }
+            if handleTransportCommand(command) || handleNfcOrMotionCommand(command) {
+                continue
+            }
             switch command {
             case .imagePickFromLibrary:
                 showImagePicker = true
@@ -616,23 +620,6 @@ class AppViewModel: ObservableObject {
                     sound: sound,
                     animation: animation
                 )
-            case let .nfcActivate(payload):
-                // Open reader mode for the TapTap exchange. The callback
-                // forwards every `MobileEvent` the service emits
-                // (`.nfcDataReceived`, hardware errors) back into core via
-                // `sendHardwareEvent` — this closure IS the T2.2 event
-                // wiring. Core's `NfcExchangeFlow` owns the handshake.
-                nfcService.activate(payload: Data(payload)) { [weak self] event in
-                    self?.sendHardwareEvent(event)
-                }
-            case let .nfcSendApdu(data):
-                nfcService.sendApdu(data: Data(data))
-            case .nfcDeactivate:
-                nfcService.deactivate()
-            case .accelerometerStart:
-                startAccelerometerCapture()
-            case .accelerometerStop:
-                AccelerometerProximityService.shared.stop()
             case let .scheduleWakeup(earliestSecs, deadlineSecs, minIntervalSecs, earliestMillis):
                 // ADR-044 Am2a: core owns the poll schedule. Arm the platform
                 // wakeup and let it call `onWakeup` when it fires.
@@ -649,6 +636,34 @@ class AppViewModel: ObservableObject {
                 break
             }
         }
+    }
+
+    /// NFC and accelerometer commands, out of the main switch for the same
+    /// SwiftLint budget as the transport helpers. Returns `true` when
+    /// `command` was one of them.
+    private func handleNfcOrMotionCommand(_ command: CommandDTO) -> Bool {
+        switch command {
+        case let .nfcActivate(payload):
+            // Open reader mode for the TapTap exchange. The callback
+            // forwards every `MobileEvent` the service emits
+            // (`.nfcDataReceived`, hardware errors) back into core via
+            // `sendHardwareEvent` — this closure IS the T2.2 event
+            // wiring. Core's `NfcExchangeFlow` owns the handshake.
+            nfcService.activate(payload: Data(payload)) { [weak self] event in
+                self?.sendHardwareEvent(event)
+            }
+        case let .nfcSendApdu(data):
+            nfcService.sendApdu(data: Data(data))
+        case .nfcDeactivate:
+            nfcService.deactivate()
+        case .accelerometerStart:
+            startAccelerometerCapture()
+        case .accelerometerStop:
+            AccelerometerProximityService.shared.stop()
+        default:
+            return false
+        }
+        return true
     }
 
     /// Try the out-of-switch command helpers (BLE, audio, then location) in
@@ -755,7 +770,9 @@ class AppViewModel: ObservableObject {
         acceptedExtensions: [String]
     ) {
         #if DEBUG
-            if answerFilePickFromFixture(purpose: purpose) { return }
+            if answerFilePickFromFixture(purpose: purpose) {
+                return
+            }
         #endif
         pendingFilePick = PendingFilePick(
             purpose: purpose,

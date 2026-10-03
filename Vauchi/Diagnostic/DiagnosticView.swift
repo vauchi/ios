@@ -380,7 +380,9 @@
             let result = recordedSamples
             recordLock.unlock()
 
-            if result.isEmpty { return nil }
+            if result.isEmpty {
+                return nil
+            }
 
             // Resample if input format differs from target sample rate
             if Int(inputFormat.sampleRate) != sampleRate {
@@ -460,7 +462,9 @@
             let result = recordedSamples
             recordLock.unlock()
 
-            if result.isEmpty { return nil }
+            if result.isEmpty {
+                return nil
+            }
 
             if Int(inputFormat.sampleRate) != sampleRate {
                 return resample(result, from: Int(inputFormat.sampleRate), to: sampleRate)

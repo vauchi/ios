@@ -16,7 +16,9 @@ enum PresentationStateError: Error, Equatable {
     /// ordering race, not a fault: the newer state is already applied and
     /// the late envelope is dropped rather than shown as an alert.
     var isOutOfOrderDelivery: Bool {
-        if case .staleSurface = self { return true }
+        if case .staleSurface = self {
+            return true
+        }
         return false
     }
 }

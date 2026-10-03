@@ -77,7 +77,9 @@ final class StoreScreenshotsUITests: XCTestCase {
         settle()
         // The exchange flow opens on "Assign to Groups" (store job
         // 16751597117); its primary action skips it.
-        if primary.waitForExistence(timeout: 5) { primary.tap() }
+        if primary.waitForExistence(timeout: 5) {
+            primary.tap()
+        }
         settle()
         XCTAssertTrue(labelled("Glance").waitForExistence(timeout: 10),
                       "With --simulate-camera the mode picker should offer Glance")

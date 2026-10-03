@@ -21,12 +21,24 @@
                 "device": UIDevice.current.model,
                 "ts": ISO8601DateFormatter().string(from: Date()),
             ]
-            if let f = frequencyHz { dict["freq_hz"] = f }
-            if let s = snrDb { dict["snr_db"] = String(format: "%.1f", s) }
-            if let m = magnitudeDb { dict["magnitude_db"] = String(format: "%.1f", m) }
-            if let d = detected { dict["detected"] = d }
-            if let a = audioMode { dict["audio_mode"] = a }
-            if let msg = message { dict["message"] = msg }
+            if let f = frequencyHz {
+                dict["freq_hz"] = f
+            }
+            if let s = snrDb {
+                dict["snr_db"] = String(format: "%.1f", s)
+            }
+            if let m = magnitudeDb {
+                dict["magnitude_db"] = String(format: "%.1f", m)
+            }
+            if let d = detected {
+                dict["detected"] = d
+            }
+            if let a = audioMode {
+                dict["audio_mode"] = a
+            }
+            if let msg = message {
+                dict["message"] = msg
+            }
 
             if let data = try? JSONSerialization.data(withJSONObject: dict),
                let json = String(data: data, encoding: .utf8) {

@@ -65,7 +65,9 @@ final class DirectSendService {
 
         guard let listenFd = createListenerSocket() else { return }
         defer {
-            if listenerSocket == listenFd { listenerSocket = -1 }
+            if listenerSocket == listenFd {
+                listenerSocket = -1
+            }
             close(listenFd)
         }
 
@@ -130,7 +132,9 @@ final class DirectSendService {
             }
         }
         guard clientFd >= 0 else {
-            if errno == EBADF || errno == EINVAL { return nil }
+            if errno == EBADF || errno == EINVAL {
+                return nil
+            }
             reportError("accept() failed: \(errno)")
             return nil
         }

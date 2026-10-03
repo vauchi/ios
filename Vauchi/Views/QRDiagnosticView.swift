@@ -457,30 +457,29 @@
 
         // MARK: - Camera Status
 
+        @ViewBuilder
         private var cameraStatus: some View {
-            Group {
-                if !cameraGranted, permissionsChecked {
-                    VStack(spacing: 8) {
-                        Image(systemName: "camera.fill")
-                            .font(.title)
-                            .foregroundColor(.secondary)
-                        Text("Camera permission required")
-                            .font(.callout)
-                        Button("Grant Permission") {
-                            requestPermissions()
-                        }
+            if !cameraGranted, permissionsChecked {
+                VStack(spacing: 8) {
+                    Image(systemName: "camera.fill")
+                        .font(.title)
+                        .foregroundColor(.secondary)
+                    Text("Camera permission required")
+                        .font(.callout)
+                    Button("Grant Permission") {
+                        requestPermissions()
                     }
-                    .padding()
-                } else if cameraGranted {
-                    HStack {
-                        Image(systemName: "camera.viewfinder")
-                            .foregroundColor(.green) // design-token-ok: developer diagnostic status
-                        Text("Front camera scanning active")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.vertical, 8)
                 }
+                .padding()
+            } else if cameraGranted {
+                HStack {
+                    Image(systemName: "camera.viewfinder")
+                        .foregroundColor(.green) // design-token-ok: developer diagnostic status
+                    Text("Front camera scanning active")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 8)
             }
         }
 

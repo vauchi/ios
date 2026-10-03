@@ -167,7 +167,9 @@ final class BleExchangeService: NSObject {
             let type: CBCharacteristicWriteType =
                 BleUuids.writeWithResponse.contains(next.uuid) ? .withResponse : .withoutResponse
             if type == .withResponse {
-                if writeInFlight { return } // resumes from didWriteValueFor
+                if writeInFlight {
+                    return
+                } // resumes from didWriteValueFor
                 writeInFlight = true
             } else if !peripheral.canSendWriteWithoutResponse {
                 return // resumes from peripheralIsReady(toSendWriteWithoutResponse:)
