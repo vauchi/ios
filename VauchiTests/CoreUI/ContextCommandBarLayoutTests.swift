@@ -26,13 +26,15 @@ final class ContextCommandBarLayoutTests: XCTestCase {
         back: Bool = false,
         navigation: Bool = false,
         primary: Bool = false,
-        secondary: Bool = false
+        secondary: Bool = false,
+        info: Bool = false
     ) -> PresentationContextBar {
         PresentationContextBar(
             back: back ? action("back") : nil,
             navigation: navigation ? action("navigation") : nil,
             primary: primary ? action("primary") : nil,
-            secondary: secondary ? action("secondary") : nil
+            secondary: secondary ? action("secondary") : nil,
+            info: info ? action("info") : nil
         )
     }
 
@@ -87,6 +89,20 @@ final class ContextCommandBarLayoutTests: XCTestCase {
     func testNoBarAndABarWithNoActionsDrawNothing() {
         XCTAssertEqual(ContextCommandBarLayout.slots(bar: nil), [])
         XCTAssertEqual(ContextCommandBarLayout.slots(bar: bar()), [])
+    }
+
+    /// Core's fifth slot explains the surface (vauchi/private#479); it sits
+    /// after Actions, and an older batch without it changes nothing.
+    func testTheInfoSlotComesLastAndOnlyWhenCoreSendsIt() {
+        XCTAssertEqual(
+            ContextCommandBarLayout.slots(bar: bar(back: true, primary: true, secondary: true, info: true)),
+            [.back, .primary, .secondary, .info]
+        )
+        XCTAssertEqual(
+            ContextCommandBarLayout.slots(bar: bar(primary: true, secondary: true)),
+            [.primary, .secondary]
+        )
+        XCTAssertTrue(ContextCommandBarLayout.showsLabel(.info))
     }
 
     // MARK: - showsLabel(_:)
