@@ -8,3 +8,7 @@
 
 # Exclude build artifacts and dependency checkouts
 --exclude build,Vauchi/Generated
+
+# CI and every developer run the same swiftformat; an older one fails
+# here instead of passing code CI then rejects (#489).
+--minversion 0.63.1
