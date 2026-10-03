@@ -1765,3 +1765,36 @@ github-mirror:
       when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/
+
+# Pictogram copies match the vauchi/assets commit in pictograms/REVISION
+# (#476): a hand edit or a half update fails here, while assets moving on
+# never turns an unrelated MR red; the second job says when it has.
+.pictogram-copies:
+  stage: lint
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
+  tags: [docker]
+  needs: []
+  variables:
+    PICTOGRAM_FORMAT: "svg"
+    PICTOGRAM_COPIES: "Vauchi/Assets.xcassets/Pictograms/pictogram.{group}.{name}.imageset/{name}.svg"
+  before_script:
+    - apk add --no-cache python3 git
+    - git clone --quiet https://gitlab.com/vauchi/assets.git /tmp/assets
+
+check:pictogram-copies:
+  extends: .pictogram-copies
+  script:
+    - git -C /tmp/assets checkout --quiet "$(cat pictograms/REVISION)"
+    - python3 /tmp/assets/pictograms/check-copies.py --assets /tmp/assets --format "$PICTOGRAM_FORMAT" --copies "$PICTOGRAM_COPIES"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+check:pictogram-copies-current:
+  extends: .pictogram-copies
+  allow_failure: true
+  script:
+    - python3 /tmp/assets/pictograms/check-copies.py --assets /tmp/assets --format "$PICTOGRAM_FORMAT" --copies "$PICTOGRAM_COPIES" --behind "$(cat pictograms/REVISION)"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "schedule"
