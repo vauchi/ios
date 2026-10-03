@@ -23,6 +23,13 @@ struct PresentationOverlayView: View {
                             ? .identity
                             : .move(edge: .leading).combined(with: .opacity)
                     )
+            } else if overlay.overlay.kind == .information {
+                informationOverlay
+                    .transition(
+                        reducedMotion
+                            ? .identity
+                            : .move(edge: .bottom).combined(with: .opacity)
+                    )
             } else {
                 actionOverlay
                     .transition(
@@ -71,6 +78,25 @@ struct PresentationOverlayView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    /// Core's words about the surface, read in full; dismissing is the only
+    /// action, through the close button or the scrim.
+    private var informationOverlay: some View {
+        panel {
+            ScrollView {
+                Text(overlay.overlay.body ?? "")
+                    .font(.body)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("informationBody")
+            }
+            .frame(maxHeight: 320)
+        }
+        .frame(maxWidth: windowClass == .compact ? .infinity : 420)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        .padding(.bottom, 82)
+        .padding(.horizontal, windowClass == .compact ? 0 : 20)
+    }
+
     private var actionOverlay: some View {
         panel {
             VStack(spacing: 8) {
@@ -88,13 +114,8 @@ struct PresentationOverlayView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(
-                    overlay.overlay.title
-                        ?? (overlay.overlay.kind == .navigation
-                            ? "Navigation"
-                            : "Actions")
-                )
-                .font(.headline)
+                Text(overlay.overlay.title ?? "")
+                    .font(.headline)
                 Spacer()
                 Button(action: onDismiss) {
                     Image(systemName: "xmark")

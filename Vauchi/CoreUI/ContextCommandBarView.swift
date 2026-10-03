@@ -12,6 +12,7 @@ enum ContextCommandBarLayout {
         case navigation
         case primary
         case secondary
+        case info
     }
 
     static let restingClearance: CGFloat = 4
@@ -40,13 +41,16 @@ enum ContextCommandBarLayout {
         if bar.secondary != nil {
             slots.append(.secondary)
         }
+        if bar.info != nil {
+            slots.append(.info)
+        }
         return slots
     }
 
     /// The launchers open a menu, and their icons alone were not understood
     /// (vauchi/private#479); the back chevron is the platform's own.
     static func showsLabel(_ slot: Slot) -> Bool {
-        slot == .navigation || slot == .secondary
+        slot == .navigation || slot == .secondary || slot == .info
     }
 
     /// The primary button fills the row; without one a gap takes its place
@@ -108,6 +112,14 @@ struct ContextCommandBarView: View {
                         slot: .secondary,
                         systemImage: "ellipsis",
                         identifier: "command.secondary"
+                    )
+                }
+                if let info = bar?.info {
+                    roleButton(
+                        info,
+                        slot: .info,
+                        systemImage: "info.circle",
+                        identifier: "command.info"
                     )
                 }
             }

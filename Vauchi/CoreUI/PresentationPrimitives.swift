@@ -98,17 +98,23 @@ struct PresentationContextBar: Codable, Equatable {
     let navigation: PresentationAction?
     let primary: PresentationAction?
     let secondary: PresentationAction?
+    /// Explains the surface (vauchi/private#479); absent from a Core that
+    /// has no text for it or predates the slot.
+    let info: PresentationAction?
 }
 
 enum PresentationOverlayKind: String, Codable {
     case navigation
     case actionMenu = "action_menu"
+    /// Text about the surface; `items` is empty.
+    case information
 }
 
 struct PresentationOverlay: Codable, Equatable {
     let kind: PresentationOverlayKind
     let title: String?
     let items: [PresentationAction]
+    let body: String?
 }
 
 enum PresentationInputMode: String, Codable {
