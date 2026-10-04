@@ -634,6 +634,20 @@ private struct PresentationRowView: View {
     var body: some View {
         HStack {
             rowContent
+            if let info = row.info {
+                // Explains this one item (vauchi/private#479); Core names it
+                // "About <item>" so VoiceOver says what the icon is for.
+                Button {
+                    activate(info)
+                } label: {
+                    Image(systemName: "info.circle")
+                        .frame(minWidth: minimumTarget, minHeight: minimumTarget)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.borderless)
+                .disabled(!info.enabled)
+                .accessibilityLabel(info.accessibilityLabel)
+            }
             // Rendered as a sibling of `rowContent`, never inside it: an
             // activatable row wraps its content in a Button, and a control
             // nested in a Button is not independently operable.

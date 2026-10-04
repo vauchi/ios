@@ -88,6 +88,8 @@ struct PresentationRow: Codable, Equatable, Identifiable {
     let secondaryActions: [PresentationAction]
     let controls: [PresentationNode]
     let accessibility: PresentationAccessibility
+    /// Explains this item (vauchi/private#479); absent from an older Core.
+    let info: PresentationAction?
 
     var id: String {
         activation?.interactionID
@@ -107,6 +109,7 @@ struct PresentationRow: Codable, Equatable, Identifiable {
         case secondaryActions = "secondary_actions"
         case controls
         case accessibility
+        case info
     }
 }
 
