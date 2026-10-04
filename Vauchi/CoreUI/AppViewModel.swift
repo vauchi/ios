@@ -191,6 +191,24 @@ class AppViewModel: ObservableObject {
         }
     }
 
+    /// `loadInitialPresentation` on `engineQueue`, for paths that run while an
+    /// exchange may hold the engine mutex (vauchi/private#313). Init and
+    /// reset keep the synchronous version: nothing contends for it then.
+    func reloadPresentation() {
+        let engine = appEngine
+        engineQueue.async { [weak self] in
+            let outcome = Result { try engine.initialCommandsJson() }
+            DispatchQueue.main.async {
+                switch outcome {
+                case let .success(json):
+                    self?.receivePresentationEnvelope(json)
+                case let .failure(error):
+                    self?.handleEnvelopeFailure(error)
+                }
+            }
+        }
+    }
+
     func dispatchPresentation(_ event: PresentationEvent) {
         let eventJSON: String
         do {
@@ -426,6 +444,18 @@ class AppViewModel: ObservableObject {
     /// notifications and commands, then reschedules if core emits another
     /// `ScheduleWakeup` command.
     func onWakeup() {
+        // Fires every frame during a Hover exchange, so it takes its turn on
+        // `engineQueue` like every other engine call rather than waiting on
+        // the main thread for a BLE burst to release the engine mutex
+        // (vauchi/private#313).
+        let engine = appEngine
+        engineQueue.async { [weak self] in
+            let outcome = Result { try engine.onWakeup() }
+            DispatchQueue.main.async { self?.applyWakeup(outcome) }
+        }
+    }
+
+    private func applyWakeup(_ outcome: Result<String, Error>) {
         // The wakeup is a single-fire timer whose successor is armed only by a
         // `ScheduleWakeup` in the commands below. Every early exit and every
         // throw therefore used to end the chain permanently, freezing a live
@@ -440,7 +470,7 @@ class AppViewModel: ObservableObject {
             }
         }
         do {
-            let json = try appEngine.onWakeup()
+            let json = try outcome.get()
             guard let data = json.data(using: .utf8) else { return }
             let envelope = try coreJSONDecoder.decode(WakeupEnvelope.self, from: data)
             if !envelope.notifications.isEmpty {
@@ -458,7 +488,7 @@ class AppViewModel: ObservableObject {
                     acceptedExtensionsByCommandIndex: Self.acceptedExtensionsByCommandIndex(fromCommandsJSON: data)
                 )
             }
-            loadInitialPresentation()
+            reloadPresentation()
         } catch {
             #if DEBUG
                 print("AppViewModel: onWakeup failed: \(error)")
@@ -524,7 +554,7 @@ class AppViewModel: ObservableObject {
         // returned moment. The generic presentation host renders it as a toast
         // when reduce-motion is enabled; otherwise the celebrate
         // animation carries the moment and the toast is skipped.
-        ahaMoment = tryTriggerAhaMoment(.firstContactAdded)
+        requestAhaMoment(.firstContactAdded)
         if animation != "none", !SettingsService.shared.shouldReduceMotion {
             celebrateCommand = command
             // Auto-clear after the ~600 ms beat so the overlay
@@ -535,19 +565,30 @@ class AppViewModel: ObservableObject {
         }
     }
 
-    /// Ask core to trigger an aha moment and return the localized milestone
-    /// if it should be shown now, or `nil` if already seen. Errors are logged
-    /// and ignored — a missed milestone is non-fatal.
-    private func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) -> MobileAhaMoment? {
-        do {
-            let result = try appEngine.dispatchDomainCommand(command: .tryTriggerAhaMoment(momentType: momentType))
-            guard case let .ahaMomentOpt(moment) = result else { return nil }
-            return moment
-        } catch {
-            #if DEBUG
-                print("AppViewModel: failed to trigger aha moment \(momentType): \(error)")
-            #endif
-            return nil
+    /// Ask core to trigger an aha moment and store the localized milestone in
+    /// `ahaMoment` if it should be shown now. Runs on `engineQueue`: it fires
+    /// as an exchange completes, when BLE work may still hold the engine
+    /// mutex (vauchi/private#313). Errors are logged and ignored — a missed
+    /// milestone is non-fatal.
+    private func requestAhaMoment(_ momentType: MobileAhaMomentType) {
+        let engine = appEngine
+        engineQueue.async { [weak self] in
+            let outcome = Result {
+                try engine.dispatchDomainCommand(command: .tryTriggerAhaMoment(momentType: momentType))
+            }
+            DispatchQueue.main.async {
+                switch outcome {
+                case let .success(.ahaMomentOpt(moment)):
+                    self?.ahaMoment = moment
+                case .success:
+                    break
+                case let .failure(error):
+                    #if DEBUG
+                        print("AppViewModel: failed to trigger aha moment \(momentType): \(error)")
+                    #endif
+                    _ = error
+                }
+            }
         }
     }
 
