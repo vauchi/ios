@@ -173,6 +173,27 @@ final class ExchangeCommandBridgeTests: XCTestCase {
         XCTAssertEqual(animation, "checkmark")
     }
 
+    /// The aha-moment request behind `Celebrate` goes through the engine
+    /// queue: it arrives the moment an exchange completes, when BLE work may
+    /// still hold the engine mutex, and must not block the main thread
+    /// waiting for it (vauchi/private#313).
+    func testCelebrateAsksForTheAhaMomentOnTheEngineQueue() async {
+        await viewModel.drainEngineQueue()
+        let busy = viewModel.blockEngineQueue()
+
+        viewModel.handleExchangeCommands([
+            .celebrate(haptic: "success", sound: "none", animation: "checkmark"),
+        ])
+
+        XCTAssertNil(
+            viewModel.ahaMoment,
+            "the aha moment was fetched on the main thread instead of the engine queue"
+        )
+        busy.signal()
+        await viewModel.drainEngineQueue()
+        XCTAssertEqual(viewModel.ahaMoment?.momentType, .firstContactAdded)
+    }
+
     // MARK: - Multiple commands in one batch
 
     /// `handleExchangeCommands` accepts a Vec — the bridge must

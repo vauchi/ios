@@ -40,7 +40,8 @@ final class WakeupBootstrapTests: XCTestCase {
     /// Constructing the view model arms the loop: `init` calls `onWakeup`,
     /// core emits the first `ScheduleWakeup`, and the shell schedules it.
     /// Without the init kick the timer would never arm.
-    func testInitBootstrapsWakeupLoop() {
+    func testInitBootstrapsWakeupLoop() async {
+        await viewModel.drainEngineQueue()
         XCTAssertTrue(
             WakeupService.shared.hasScheduledWakeup,
             "AppViewModel.init must bootstrap the core-owned poll loop"
@@ -49,7 +50,8 @@ final class WakeupBootstrapTests: XCTestCase {
 
     /// After a background cancel disarms the loop, `onWakeup` re-arms it —
     /// the exact guarantee the `.active` scenePhase handler depends on.
-    func testOnWakeupReArmsAfterBackgroundCancel() {
+    func testOnWakeupReArmsAfterBackgroundCancel() async {
+        await viewModel.drainEngineQueue()
         WakeupService.shared.cancelPendingWakeup()
         XCTAssertFalse(
             WakeupService.shared.hasScheduledWakeup,
@@ -57,10 +59,54 @@ final class WakeupBootstrapTests: XCTestCase {
         )
 
         viewModel.onWakeup()
+        await viewModel.drainEngineQueue()
 
         XCTAssertTrue(
             WakeupService.shared.hasScheduledWakeup,
             "onWakeup (foreground re-arm) must re-schedule the loop"
         )
+    }
+
+    /// A wakeup takes its turn on the engine queue instead of calling the
+    /// engine on the main thread, where it would wait out a BLE burst holding
+    /// the engine mutex (vauchi/private#313). While the queue is busy the
+    /// wakeup has not run; once the queue drains, it has.
+    func testOnWakeupWaitsItsTurnOnTheEngineQueue() async {
+        await viewModel.drainEngineQueue()
+        WakeupService.shared.cancelPendingWakeup()
+        let busy = viewModel.blockEngineQueue()
+
+        viewModel.onWakeup()
+
+        XCTAssertFalse(
+            WakeupService.shared.hasScheduledWakeup,
+            "onWakeup ran on the main thread instead of queueing behind engine work"
+        )
+        busy.signal()
+        await viewModel.drainEngineQueue()
+        XCTAssertTrue(
+            WakeupService.shared.hasScheduledWakeup,
+            "the queued wakeup must still run once the engine queue is free"
+        )
+    }
+}
+
+extension AppViewModel {
+    /// Holds `engineQueue` until the returned semaphore is signalled, standing
+    /// in for a long engine call such as a BLE burst.
+    func blockEngineQueue() -> DispatchSemaphore {
+        let release = DispatchSemaphore(value: 0)
+        engineQueue.async { release.wait() }
+        return release
+    }
+
+    /// Returns once everything queued on `engineQueue` before the call has
+    /// run, together with the main-queue hop each item makes afterwards.
+    func drainEngineQueue() async {
+        await withCheckedContinuation { (done: CheckedContinuation<Void, Never>) in
+            engineQueue.async {
+                DispatchQueue.main.async { done.resume() }
+            }
+        }
     }
 }
