@@ -121,7 +121,7 @@ struct PresentationOverlayView: View {
                     Image(systemName: "xmark")
                         .frame(width: 44, height: 44)
                 }
-                .accessibilityLabel("Close")
+                .accessibilityLabel(overlay.overlay.closeAccessibilityLabel)
             }
             content()
         }

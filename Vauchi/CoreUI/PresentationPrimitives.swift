@@ -115,6 +115,18 @@ struct PresentationOverlay: Codable, Equatable {
     let title: String?
     let items: [PresentationAction]
     let body: String?
+    /// Core's label for the way out, in the person's language
+    /// (vauchi/private#479); absent from an older Core.
+    let closeLabel: String?
+
+    enum CodingKeys: String, CodingKey {
+        case kind, title, items, body
+        case closeLabel = "close_label"
+    }
+
+    var closeAccessibilityLabel: String {
+        closeLabel ?? "Close"
+    }
 }
 
 enum PresentationInputMode: String, Codable {
