@@ -23,6 +23,25 @@ final class PresentationInformationOverlayTests: XCTestCase {
         XCTAssertTrue(overlay.items.isEmpty)
     }
 
+    /// Core names the way out of an overlay in the person's language; an
+    /// older Core sends none and the shell keeps its own word.
+    func testAnOverlayNamesItsCloseWithCoresLabel() throws {
+        let current = """
+        {"kind":"information","title":"Kontakte","items":[],
+         "body":"Text.","close_label":"Schließen"}
+        """
+        let overlay = try JSONDecoder().decode(PresentationOverlay.self, from: Data(current.utf8))
+        XCTAssertEqual(overlay.closeLabel, "Schließen")
+        XCTAssertEqual(overlay.closeAccessibilityLabel, "Schließen")
+
+        let older = """
+        {"kind":"action_menu","title":"Actions","items":[]}
+        """
+        let olderOverlay = try JSONDecoder().decode(PresentationOverlay.self, from: Data(older.utf8))
+        XCTAssertNil(olderOverlay.closeLabel)
+        XCTAssertEqual(olderOverlay.closeAccessibilityLabel, "Close")
+    }
+
     func testAnOverlayWithoutABodyStillDecodes() throws {
         let json = """
         {"kind":"action_menu","title":"Actions","items":[]}
