@@ -48,9 +48,11 @@ struct MultipartCameraPreview: UIViewRepresentable {
         /// window only. Per payload: with two codes in view a single
         /// "last code" would never match and nothing would be debounced.
         private var recentScans: [String: Date] = [:]
+        private let now: () -> Date
 
-        init(onChunkScanned: @escaping (String) -> Void) {
+        init(onChunkScanned: @escaping (String) -> Void, now: @escaping () -> Date = Date.init) {
             self.onChunkScanned = onChunkScanned
+            self.now = now
         }
 
         /// The view outlives surface updates, and each update's callback
@@ -84,12 +86,12 @@ struct MultipartCameraPreview: UIViewRepresentable {
             // Short debounce: drop the same payload within 100 ms so a single
             // visible frame is not delivered twice, while still allowing the
             // ~333 ms-per-chunk cadence used during multipart exchange.
-            let now = Date()
-            recentScans = recentScans.filter { now.timeIntervalSince($0.value) < 0.1 }
+            let scannedAt = now()
+            recentScans = recentScans.filter { scannedAt.timeIntervalSince($0.value) < 0.1 }
             if recentScans[code] != nil {
                 return
             }
-            recentScans[code] = now
+            recentScans[code] = scannedAt
             NSLog("[Vauchi] [QrScan] decoded type=\(code.prefix(4)) len=\(code.count)")
 
             DispatchQueue.main.async {
