@@ -50,15 +50,40 @@ final class MultipartCameraCallbackTests: XCTestCase {
         var received: [String] = []
         let delivered = expectation(description: "each distinct code is delivered")
         delivered.expectedFulfillmentCount = 2
-        let coordinator = MultipartCameraPreview.Coordinator(onChunkScanned: {
-            received.append($0)
-            delivered.fulfill()
-        })
+        let frameTime = Date(timeIntervalSince1970: 1000)
+        let coordinator = MultipartCameraPreview.Coordinator(
+            onChunkScanned: {
+                received.append($0)
+                delivered.fulfill()
+            },
+            now: { frameTime }
+        )
 
         coordinator.deliverAll(["own-frame", "peer-frame"])
         coordinator.deliverAll(["own-frame", "peer-frame"])
 
         wait(for: [delivered], timeout: 1)
         XCTAssertEqual(received, ["own-frame", "peer-frame"])
+    }
+
+    func testTheSameCodeAfterTheDebounceWindowIsDeliveredAgain() {
+        var received: [String] = []
+        let delivered = expectation(description: "a later frame is delivered again")
+        delivered.expectedFulfillmentCount = 2
+        var clock = Date(timeIntervalSince1970: 1000)
+        let coordinator = MultipartCameraPreview.Coordinator(
+            onChunkScanned: {
+                received.append($0)
+                delivered.fulfill()
+            },
+            now: { clock }
+        )
+
+        coordinator.deliver("own-frame")
+        clock = clock.addingTimeInterval(0.2)
+        coordinator.deliver("own-frame")
+
+        wait(for: [delivered], timeout: 1)
+        XCTAssertEqual(received, ["own-frame", "own-frame"])
     }
 }
