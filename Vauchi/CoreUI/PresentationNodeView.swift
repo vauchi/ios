@@ -74,7 +74,7 @@ struct PresentationNodeView: View {
             .accessibilityLabel(value.accessibility.label)
         case let .list(value) where value.drawsButtons:
             VStack(alignment: .leading, spacing: 8) {
-                ForEach(value.rows) { row in
+                ForEach(Array(zip(buttonKeys(value.rows), value.rows)), id: \.0) { _, row in
                     if let action = row.activation {
                         Button {
                             sendAction(action)

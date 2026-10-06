@@ -513,3 +513,11 @@ func qrCorrectionLevel(_ errorCorrection: String?) -> String {
 func qrSquareSide(_ size: String?) -> CGFloat {
     size == "compact" ? 240 : PresentationNodeView.minimumScannableQr
 }
+
+/// Identity for a button list's rows, by position and title. A row's own id
+/// is its interaction, which Core mints per revision; on a surface replaced
+/// every frame (Hover) that rebuilt each button mid-tap and lost the tap
+/// (vauchi/private#532).
+func buttonKeys(_ rows: [PresentationRow]) -> [String] {
+    rows.enumerated().map { "\($0.offset):\($0.element.title)" }
+}
