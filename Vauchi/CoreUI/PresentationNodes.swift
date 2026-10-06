@@ -330,10 +330,13 @@ indirect enum PresentationNode: Codable, Equatable {
         /// Core's error-correction level for a display code; absent leaves
         /// it to the shell.
         let errorCorrection: String?
+        /// Core's size for a display code's square: "compact" on a short
+        /// window, absent for the standard square.
+        let size: String?
         let accessibility: PresentationAccessibility
 
         private enum CodingKeys: String, CodingKey {
-            case id, payloads, purpose, label, placement, accessibility
+            case id, payloads, purpose, label, placement, size, accessibility
             case errorCorrection = "error_correction"
         }
     }
@@ -502,4 +505,11 @@ struct QrFrameSpec: Equatable {
 /// included, is the default.
 func qrCorrectionLevel(_ errorCorrection: String?) -> String {
     errorCorrection == "low" ? "L" : "M"
+}
+
+/// The side of a display code's square for Core's size name. "compact" is
+/// for a short window, where 320 pt left the camera under the code no room
+/// (vauchi/private#513); anything else, absent included, is standard.
+func qrSquareSide(_ size: String?) -> CGFloat {
+    size == "compact" ? 240 : PresentationNodeView.minimumScannableQr
 }

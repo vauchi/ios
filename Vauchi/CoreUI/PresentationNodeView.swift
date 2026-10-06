@@ -336,7 +336,12 @@ struct PresentationNodeView: View {
                let placement = value.placement,
                let payload = value.payloads.first,
                let image = qrImage(payload, errorCorrection: value.errorCorrection) {
-                placedQr(image, at: placement, label: value.accessibility.label)
+                placedQr(
+                    image,
+                    at: placement,
+                    side: qrSquareSide(value.size),
+                    label: value.accessibility.label
+                )
             } else if value.purpose == .display,
                       let payload = value.payloads.first,
                       let image = qrImage(payload, errorCorrection: value.errorCorrection) {
@@ -352,10 +357,10 @@ struct PresentationNodeView: View {
                     // payload resolves at
                     // (`2026-08-17-ios-exchange-qr-collapses`).
                     .frame(
-                        minWidth: Self.minimumScannableQr,
-                        maxWidth: 320,
-                        minHeight: Self.minimumScannableQr,
-                        maxHeight: 320
+                        minWidth: qrSquareSide(value.size),
+                        maxWidth: qrSquareSide(value.size),
+                        minHeight: qrSquareSide(value.size),
+                        maxHeight: qrSquareSide(value.size)
                     )
                     .layoutPriority(1)
                     .accessibilityLabel(value.accessibility.label)
@@ -492,11 +497,12 @@ struct PresentationNodeView: View {
     private func placedQr(
         _ image: UIImage,
         at placement: QrPlacement,
+        side: CGFloat,
         label: String
     ) -> some View {
-        let frame = QrFrameSpec(placement: placement, squareSide: Self.minimumScannableQr)
+        let frame = QrFrameSpec(placement: placement, squareSide: side)
         return Color.white // design-token-ok: a QR code needs a white quiet zone for the peer's camera
-            .frame(width: Self.minimumScannableQr, height: Self.minimumScannableQr)
+            .frame(width: side, height: side)
             .overlay(alignment: .topLeading) {
                 Image(uiImage: image)
                     .interpolation(.none)
