@@ -34,6 +34,11 @@ struct PresentationSurfaceView: View {
                         .frame(maxHeight: .infinity, alignment: .top)
                 }
             }
+            if !SurfacePrimaryButtonLayout.scrollsWithContent(
+                scrollsContent: surface.layout.scrollsContent
+            ) {
+                primaryButton
+            }
         }
         .padding(CGFloat(surface.tokens.spacingLarge))
         .background(Color(uiColor: .secondarySystemBackground))
@@ -64,10 +69,8 @@ struct PresentationSurfaceView: View {
         .accessibilityLabel(surface.accessibilityLabel)
     }
 
-    /// Everything below the title row: Core's nodes, then `primary` (if
-    /// any) at the bottom — pinned there on a `fixed` surface that cannot
-    /// scroll to it, following the last row otherwise
-    /// (`SurfacePrimaryButtonLayout`).
+    /// Everything between the title row and the primary button: Core's
+    /// nodes.
     private var content: some View {
         VStack(alignment: .leading, spacing: CGFloat(surface.tokens.spacingMedium)) {
             if let subtitle = surface.subtitle {
@@ -85,18 +88,20 @@ struct PresentationSurfaceView: View {
                     onEvent: onEvent
                 )
             }
-            if SurfacePrimaryButtonLayout.pinsToBottom(scrollsContent: surface.layout.scrollsContent) {
-                Spacer(minLength: 0)
-            }
-            if let primary = bar?.primary {
-                SurfacePrimaryActionButtonView(
-                    surfaceID: surface.surfaceID,
-                    action: primary,
-                    minimumTarget: CGFloat(surface.tokens.minimumTargetSize),
-                    onEvent: onEvent
-                )
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Core's `primary` slot under the content area, in view on every
+    /// surface (`SurfacePrimaryButtonLayout`).
+    @ViewBuilder private var primaryButton: some View {
+        if let primary = bar?.primary {
+            SurfacePrimaryActionButtonView(
+                surfaceID: surface.surfaceID,
+                action: primary,
+                minimumTarget: CGFloat(surface.tokens.minimumTargetSize),
+                onEvent: onEvent
+            )
+        }
     }
 }

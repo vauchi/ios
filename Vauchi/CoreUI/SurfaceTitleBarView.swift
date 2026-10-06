@@ -48,11 +48,11 @@ enum SurfaceTitleBarLayout {
 /// Where Core's `primary` slot goes: a full-width button at the bottom of
 /// the surface's own content, never in the title row.
 enum SurfacePrimaryButtonLayout {
-    /// A `fixed` surface never scrolls, so only pinning the button to the
-    /// bottom itself keeps it in view regardless of how little content sits
-    /// above it. A scrolling surface lets it follow the last row instead.
-    static func pinsToBottom(scrollsContent: Bool) -> Bool {
-        !scrollsContent
+    /// Whether the button scrolls with the surface's content. Never: it sits
+    /// under the content area, so on a scrolling surface it stays in view
+    /// instead of waiting at the end of the list, as on Android.
+    static func scrollsWithContent(scrollsContent _: Bool) -> Bool {
+        false
     }
 }
 
