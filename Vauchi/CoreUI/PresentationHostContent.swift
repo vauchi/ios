@@ -4,10 +4,11 @@
 
 import SwiftUI
 
-/// The visible composition of one `PresentationState`: surfaces, context
-/// bar, persistent tab bar and any overlay. `PresentationHostView` wraps it
-/// with the live view model, gestures and sheets; the screen-catalog
-/// render replays a state through it without an engine.
+/// The visible composition of one `PresentationState`: surfaces (each
+/// drawing its own title row from Core's context bar), persistent tab bar
+/// and any overlay. `PresentationHostView` wraps it with the live view
+/// model, gestures and sheets; the screen-catalog render replays a state
+/// through it without an engine.
 struct PresentationHostContent: View {
     let state: PresentationState
     let useFrontCamera: Bool
@@ -22,10 +23,7 @@ struct PresentationHostContent: View {
             surfaces
                 .padding(profileClass == .compact ? 0 : 16)
                 .safeAreaInset(edge: .bottom) {
-                    VStack(spacing: 0) {
-                        commandBar
-                        navigationBar
-                    }
+                    navigationBar
                 }
             if let overlay = state.activeOverlay {
                 // Dismiss before dispatch: Core clears its own open-overlay
@@ -71,6 +69,10 @@ struct PresentationHostContent: View {
                 PresentationSurfaceView(
                     surface: surface,
                     active: state.activeSurfaceID == surfaceID,
+                    bar: state.bars[surfaceID]?.bar,
+                    navigationShown: CoreBottomTabBarLayout.isVisible(
+                        items: state.navigations[surfaceID]?.navigation.items ?? []
+                    ),
                     useFrontCamera: useFrontCamera,
                     onCameraPermissionDenied: onCameraPermissionDenied,
                     focusedBinding: $focusedBindingID,
@@ -79,29 +81,6 @@ struct PresentationHostContent: View {
                     }
                 )
             }
-        }
-    }
-
-    @ViewBuilder
-    private var commandBar: some View {
-        if let surfaceID = state.activeSurfaceID {
-            ContextCommandBarView(
-                surfaceID: surfaceID,
-                bar: state.activeBar,
-                windowClass: profileClass,
-                minimumTarget: PresentationTokens.minimumTargetSize(
-                    from: state.surfaces[surfaceID]?.tokens
-                ),
-                bottomClearance: ContextCommandBarLayout.bottomClearance(
-                    above: state.activeNavigation?.navigation.items ?? []
-                ),
-                navigationShown: CoreBottomTabBarLayout.isVisible(
-                    items: state.activeNavigation?.navigation.items ?? []
-                ),
-                onEvent: { event in
-                    onEvent(surfaceID, event)
-                }
-            )
         }
     }
 

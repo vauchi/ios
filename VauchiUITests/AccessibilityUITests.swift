@@ -7,13 +7,15 @@
 // Uses --reset-for-testing to bypass onboarding (identity seeded by app).
 // Traces to: features/accessibility.feature
 //
-// Core-driven surfaces sit above a contextual command bar
-// (`ContextCommandBarView`) and the persistent tab bar (`CoreBottomTabBar`,
-// identifier `navigationDestinations`). Navigation between sections goes
-// through the tab bar; the bar's navigation launcher (`command.navigation`)
-// opens the same destinations as an overlay and is drawn only where no tab
-// bar is on screen (vauchi/private#479). The tests query the stable
-// frontend a11y identifiers (NOT core action ids or localized labels).
+// Core's back/navigation/secondary/info slots draw inline in each
+// surface's own title row (`SurfaceTitleBarView`), above the persistent
+// tab bar (`CoreBottomTabBar`, identifier `navigationDestinations`).
+// Navigation between sections goes through the tab bar; the title row's
+// navigation launcher (`command.navigation`) opens the same destinations
+// as an overlay and is drawn only where no tab bar is on screen
+// (vauchi/private#479, 2026-10-06 retire-the-context-bar design). The
+// tests query the stable frontend a11y identifiers (NOT core action ids
+// or localized labels).
 
 import XCTest
 

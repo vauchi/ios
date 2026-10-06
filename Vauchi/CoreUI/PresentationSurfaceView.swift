@@ -7,19 +7,32 @@ import SwiftUI
 struct PresentationSurfaceView: View {
     let surface: PresentationSurface
     let active: Bool
+    let bar: PresentationContextBar?
+    let navigationShown: Bool
     let useFrontCamera: Bool
     let onCameraPermissionDenied: () -> Void
     let focusedBinding: FocusState<String?>.Binding
     let onEvent: (PresentationEvent) -> Void
 
     var body: some View {
-        Group {
-            if surface.layout.scrollsContent {
-                ScrollView {
+        VStack(alignment: .leading, spacing: CGFloat(surface.tokens.spacingMedium)) {
+            SurfaceTitleBarView(
+                surfaceID: surface.surfaceID,
+                title: surface.title,
+                bar: bar,
+                navigationShown: navigationShown,
+                minimumTarget: CGFloat(surface.tokens.minimumTargetSize),
+                onEvent: onEvent
+            )
+            Group {
+                if surface.layout.scrollsContent {
+                    ScrollView {
+                        content
+                    }
+                } else {
                     content
+                        .frame(maxHeight: .infinity, alignment: .top)
                 }
-            } else {
-                content
             }
         }
         .padding(CGFloat(surface.tokens.spacingLarge))
@@ -51,10 +64,12 @@ struct PresentationSurfaceView: View {
         .accessibilityLabel(surface.accessibilityLabel)
     }
 
+    /// Everything below the title row: Core's nodes, then `primary` (if
+    /// any) at the bottom — pinned there on a `fixed` surface that cannot
+    /// scroll to it, following the last row otherwise
+    /// (`SurfacePrimaryButtonLayout`).
     private var content: some View {
         VStack(alignment: .leading, spacing: CGFloat(surface.tokens.spacingMedium)) {
-            Text(surface.title)
-                .font(.title2.bold())
             if let subtitle = surface.subtitle {
                 Text(subtitle)
                     .foregroundStyle(.secondary)
@@ -67,6 +82,17 @@ struct PresentationSurfaceView: View {
                     useFrontCamera: useFrontCamera,
                     onCameraPermissionDenied: onCameraPermissionDenied,
                     focusedBinding: focusedBinding,
+                    onEvent: onEvent
+                )
+            }
+            if SurfacePrimaryButtonLayout.pinsToBottom(scrollsContent: surface.layout.scrollsContent) {
+                Spacer(minLength: 0)
+            }
+            if let primary = bar?.primary {
+                SurfacePrimaryActionButtonView(
+                    surfaceID: surface.surfaceID,
+                    action: primary,
+                    minimumTarget: CGFloat(surface.tokens.minimumTargetSize),
                     onEvent: onEvent
                 )
             }
