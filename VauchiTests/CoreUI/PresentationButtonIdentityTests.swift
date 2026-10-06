@@ -13,7 +13,69 @@ import XCTest
 ///
 /// Traces to: features/generic_presentation_protocol.feature
 final class PresentationButtonIdentityTests: XCTestCase {
-    private let hoverActions = #"{"id": "exchange_actions", "label": null, "rows": [{"title": "Use Rear Camera", "subtitle": null, "detail": null, "icon_token": null, "image_data": null, "fallback_text": null, "selected": false, "enabled": true, "activation": {"interaction_id": "surface.1.interaction.0", "label": "Use Rear Camera", "accessibility_label": "Use Rear Camera", "icon_token": null, "enabled": true, "shortcut": null}, "secondary_actions": [], "controls": [], "accessibility": {"label": "Use Rear Camera", "description": null}}, {"title": "Cancel", "subtitle": null, "detail": null, "icon_token": null, "image_data": null, "fallback_text": null, "selected": false, "enabled": true, "activation": {"interaction_id": "surface.1.interaction.1", "label": "Cancel", "accessibility_label": "Cancel", "icon_token": null, "enabled": true, "shortcut": null}, "secondary_actions": [], "controls": [], "accessibility": {"label": "Cancel", "description": null}}], "searchable": false, "paging": null, "accessibility": {"label": "", "description": null}, "style": "buttons"}"#
+    private let hoverActions = #"""
+    {
+      "id": "exchange_actions",
+      "label": null,
+      "rows": [
+        {
+          "title": "Use Rear Camera",
+          "subtitle": null,
+          "detail": null,
+          "icon_token": null,
+          "image_data": null,
+          "fallback_text": null,
+          "selected": false,
+          "enabled": true,
+          "activation": {
+            "interaction_id": "surface.1.interaction.0",
+            "label": "Use Rear Camera",
+            "accessibility_label": "Use Rear Camera",
+            "icon_token": null,
+            "enabled": true,
+            "shortcut": null
+          },
+          "secondary_actions": [],
+          "controls": [],
+          "accessibility": {
+            "label": "Use Rear Camera",
+            "description": null
+          }
+        },
+        {
+          "title": "Cancel",
+          "subtitle": null,
+          "detail": null,
+          "icon_token": null,
+          "image_data": null,
+          "fallback_text": null,
+          "selected": false,
+          "enabled": true,
+          "activation": {
+            "interaction_id": "surface.1.interaction.1",
+            "label": "Cancel",
+            "accessibility_label": "Cancel",
+            "icon_token": null,
+            "enabled": true,
+            "shortcut": null
+          },
+          "secondary_actions": [],
+          "controls": [],
+          "accessibility": {
+            "label": "Cancel",
+            "description": null
+          }
+        }
+      ],
+      "searchable": false,
+      "paging": null,
+      "accessibility": {
+        "label": "",
+        "description": null
+      },
+      "style": "buttons"
+    }
+    """#
 
     private func decode(revision: Int) throws -> PresentationNode.ListNode {
         let json = hoverActions.replacingOccurrences(of: "surface.1.", with: "surface.\(revision).")
