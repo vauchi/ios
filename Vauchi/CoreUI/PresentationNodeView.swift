@@ -248,8 +248,11 @@ struct PresentationNodeView: View {
         (2 ... 3).contains(optionCount) ? .segmented : .menu
     }
 
-    static func groupDrawsBox(label _: String?) -> Bool {
-        true
+    /// Only a titled section is a box. An unlabeled group just lays out its
+    /// children, as on Android; boxing it added padding that never gave way
+    /// and pushed Hover's tab bar off an iPhone SE (#534).
+    static func groupDrawsBox(label: String?) -> Bool {
+        !(label ?? "").isEmpty
     }
 
     @ViewBuilder
