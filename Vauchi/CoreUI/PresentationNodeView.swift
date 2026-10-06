@@ -53,25 +53,15 @@ struct PresentationNodeView: View {
         case let .choice(value):
             choice(value)
         case let .group(value):
-            GroupBox(value.label ?? "") {
-                if value.axis == .horizontal {
-                    HStack {
-                        children(value.children)
-                    }
-                } else {
-                    VStack(alignment: .leading) {
-                        children(value.children)
-                    }
-                }
-            }
-            // A label on a container that is not itself an accessibility
-            // element propagates down and overwrites every child's label,
-            // so each line reads back as the container's. `.contain` makes
-            // this a container whose children keep their own labels and
-            // stay individually reachable
-            // (`2026-08-16-ios-rows-are-not-buttons`).
-            .accessibilityElement(children: .contain)
-            .accessibilityLabel(value.accessibility.label)
+            group(value)
+                // A label on a container that is not itself an accessibility
+                // element propagates down and overwrites every child's label,
+                // so each line reads back as the container's. `.contain` makes
+                // this a container whose children keep their own labels and
+                // stay individually reachable
+                // (`2026-08-16-ios-rows-are-not-buttons`).
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(value.accessibility.label)
         case let .list(value) where value.drawsButtons:
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(Array(zip(buttonKeys(value.rows), value.rows)), id: \.0) { _, row in
@@ -256,6 +246,34 @@ struct PresentationNodeView: View {
     /// Settings' fifteen themes would not fit a phone width as segments.
     static func choiceStyle(optionCount: Int) -> PresentationChoiceStyle {
         (2 ... 3).contains(optionCount) ? .segmented : .menu
+    }
+
+    static func groupDrawsBox(label _: String?) -> Bool {
+        true
+    }
+
+    @ViewBuilder
+    private func group(_ value: PresentationNode.Group) -> some View {
+        if Self.groupDrawsBox(label: value.label) {
+            GroupBox(value.label ?? "") {
+                groupStack(value)
+            }
+        } else {
+            groupStack(value)
+        }
+    }
+
+    @ViewBuilder
+    private func groupStack(_ value: PresentationNode.Group) -> some View {
+        if value.axis == .horizontal {
+            HStack {
+                children(value.children)
+            }
+        } else {
+            VStack(alignment: .leading) {
+                children(value.children)
+            }
+        }
     }
 
     /// Only Core's own options are offered: the engine rejects `Choice(None)`
