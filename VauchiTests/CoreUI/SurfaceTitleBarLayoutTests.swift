@@ -128,17 +128,14 @@ final class SurfaceTitleBarLayoutTests: XCTestCase {
         )
     }
 
-    // MARK: - SurfacePrimaryButtonLayout.pinsToBottom(scrollsContent:)
+    // MARK: - SurfacePrimaryButtonLayout.scrollsWithContent(scrollsContent:)
 
-    /// A fixed surface never scrolls, so only pinning the button itself
-    /// keeps it in view regardless of how little content sits above it.
-    func testAFixedSurfacePinsThePrimaryButtonToTheBottom() {
-        XCTAssertTrue(SurfacePrimaryButtonLayout.pinsToBottom(scrollsContent: false))
-    }
-
-    /// A scrolling surface lets the button follow the last row instead —
-    /// the design's "pin it under the content".
-    func testAScrollingSurfaceLetsThePrimaryButtonFollowTheContent() {
-        XCTAssertFalse(SurfacePrimaryButtonLayout.pinsToBottom(scrollsContent: true))
+    /// The primary button never scrolls away: on a scrolling surface it sits
+    /// under the scroll view, as on Android. Following the last row hid
+    /// "Add Contact" until the list was scrolled to its end (iPhone SE,
+    /// 2026-10-06).
+    func testThePrimaryButtonNeverScrollsWithTheContent() {
+        XCTAssertFalse(SurfacePrimaryButtonLayout.scrollsWithContent(scrollsContent: true))
+        XCTAssertFalse(SurfacePrimaryButtonLayout.scrollsWithContent(scrollsContent: false))
     }
 }
