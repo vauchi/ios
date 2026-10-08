@@ -52,7 +52,8 @@ final class WakeupService {
         earliest: UInt32,
         deadline: UInt32,
         minInterval: UInt32,
-        millis: UInt32?
+        millis: UInt32?,
+        delay: UInt32
     )?
     private var lastWakeupAt: Date?
     private var onWakeup: (() -> Void)?
@@ -74,13 +75,14 @@ final class WakeupService {
         earliestSecs: UInt32,
         deadlineSecs: UInt32,
         minIntervalSecs: UInt32,
-        earliestMillis: UInt32? = nil
+        earliestMillis: UInt32? = nil,
+        delayMillis: UInt32
     ) {
         let fireAfter = Self.fireDelay(
-            earliestSecs: earliestSecs,
             deadlineSecs: deadlineSecs,
             minIntervalSecs: minIntervalSecs,
             earliestMillis: earliestMillis,
+            delayMillis: delayMillis,
             sinceLastWakeup: lastWakeupAt.map { -$0.timeIntervalSinceNow }
         )
 
@@ -96,7 +98,7 @@ final class WakeupService {
         }
         timer.resume()
         foregroundTimer = timer
-        lastRequest = (earliestSecs, deadlineSecs, minIntervalSecs, earliestMillis)
+        lastRequest = (earliestSecs, deadlineSecs, minIntervalSecs, earliestMillis, delayMillis)
 
         #if DEBUG
             print("WakeupService: scheduled wakeup in \(fireAfter)s")
@@ -107,19 +109,16 @@ final class WakeupService {
     /// time since the previous one. Pure, so the cadence is testable without
     /// a timer.
     nonisolated static func fireDelay(
-        earliestSecs: UInt32,
         deadlineSecs: UInt32,
         minIntervalSecs: UInt32,
         earliestMillis: UInt32?,
+        delayMillis: UInt32,
         sinceLastWakeup: TimeInterval?
     ) -> TimeInterval {
-        // Seconds cannot express the frame dwell of a live exchange, whose QR
-        // advances from this timer. Android read only the whole-second field
-        // and ran at 1013 ms against a ~300 ms design; this is the same field,
-        // on the same command
-        // (2026-08-18-hover-transfer-stalls-on-the-last-chunk).
-        var fireAfter =
-            earliestMillis.map { TimeInterval($0) / 1000.0 } ?? TimeInterval(earliestSecs)
+        // Core computes the wait — earliest, sub-second during a live
+        // exchange, never past the deadline — and sends it as delay_millis
+        // (vauchi/private#548). iOS adds only its min-interval guard.
+        var fireAfter = TimeInterval(delayMillis) / 1000.0
         // Honour the minimum interval by delaying to the earliest allowable
         // moment. This keeps the frontend from waking core more often than
         // core requested (e.g. multiple commands arriving in quick succession).
@@ -155,7 +154,8 @@ final class WakeupService {
             earliestSecs: last.earliest,
             deadlineSecs: last.deadline,
             minIntervalSecs: last.minInterval,
-            earliestMillis: last.millis
+            earliestMillis: last.millis,
+            delayMillis: last.delay
         )
     }
 

@@ -661,14 +661,15 @@ class AppViewModel: ObservableObject {
                     sound: sound,
                     animation: animation
                 )
-            case let .scheduleWakeup(earliestSecs, deadlineSecs, minIntervalSecs, earliestMillis):
+            case let .scheduleWakeup(earliestSecs, deadlineSecs, minIntervalSecs, earliestMillis, delayMillis):
                 // ADR-044 Am2a: core owns the poll schedule. Arm the platform
                 // wakeup and let it call `onWakeup` when it fires.
                 WakeupService.shared.scheduleWakeup(
                     earliestSecs: earliestSecs,
                     deadlineSecs: deadlineSecs,
                     minIntervalSecs: minIntervalSecs,
-                    earliestMillis: earliestMillis
+                    earliestMillis: earliestMillis,
+                    delayMillis: delayMillis
                 )
             default:
                 // BLE / audio-proximity are handled in `handleBleCommand` /

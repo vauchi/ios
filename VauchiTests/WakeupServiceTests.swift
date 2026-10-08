@@ -51,7 +51,6 @@ final class WakeupServiceTests: XCTestCase {
         // Core's terms for a live exchange: the frame dwell in milliseconds,
         // with one second in every whole-second field.
         let delay = WakeupService.fireDelay(
-            earliestSecs: 1,
             deadlineSecs: 1,
             minIntervalSecs: 1,
             earliestMillis: 100,
@@ -64,7 +63,6 @@ final class WakeupServiceTests: XCTestCase {
 
     func testAWholeSecondWakeupWaitsOutTheMinimumInterval() {
         let delay = WakeupService.fireDelay(
-            earliestSecs: 10,
             deadlineSecs: 90,
             minIntervalSecs: 30,
             earliestMillis: nil,
@@ -77,7 +75,6 @@ final class WakeupServiceTests: XCTestCase {
 
     func testAWakeupNeverWaitsPastTheDeadline() {
         let delay = WakeupService.fireDelay(
-            earliestSecs: 30,
             deadlineSecs: 10,
             minIntervalSecs: 0,
             earliestMillis: nil,
@@ -93,7 +90,6 @@ final class WakeupServiceTests: XCTestCase {
     /// guard and the deadline cap (vauchi/private#548).
     func testTheWaitStartsFromCoresDelay() {
         let delay = WakeupService.fireDelay(
-            earliestSecs: 30,
             deadlineSecs: 90,
             minIntervalSecs: 0,
             earliestMillis: nil,
