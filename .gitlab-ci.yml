@@ -362,7 +362,10 @@ update:bindings-version:
       # Capture old version before updating.
       # Update VauchiPlatform dependency to exact version pin.
       # Handles: branch: main, from: "x.y.z", or version: "x.y.z"
-      LINE=$(grep -n "vauchi-platform-swift" project.yml | head -1 | cut -d: -f1)
+      # One awk, no pipe: `grep | head -1` can kill grep with SIGPIPE once
+      # head has its line, which pipefail turns into a failed job; android's
+      # bump job died that way with exit 141 (vauchi/private#546).
+      LINE=$(awk '/vauchi-platform-swift/ { print NR; exit }' project.yml)
       NEXT=$((LINE + 1))
       OLD_VERSION=$(sed -n "${NEXT}p" project.yml | sed 's/.*"\(.*\)"/\1/')
       echo "Old version: $OLD_VERSION → New version: $BINDINGS_VERSION"
