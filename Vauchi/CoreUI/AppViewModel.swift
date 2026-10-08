@@ -884,7 +884,7 @@ class AppViewModel: ObservableObject {
         let engine = appEngine
         engineQueue.async { [weak self] in
             do {
-                let resultJson = try engine.dispatchJson(eventJson: event.toEventJson())
+                let resultJson = try engine.dispatchJson(eventJson: hardwareEventJson(event: event))
                 Task { @MainActor in self?.receivePresentationEnvelope(resultJson) }
             } catch {
                 #if DEBUG
