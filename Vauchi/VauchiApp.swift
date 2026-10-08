@@ -117,12 +117,32 @@ struct VauchiApp: App {
         let urls = [
             fileManager.urls(for: .documentDirectory, in: .userDomainMask).first,
             fileManager.urls(for: .libraryDirectory, in: .userDomainMask).first,
-        ]
-        for case let url? in urls {
-            var resourceValues = URLResourceValues()
-            resourceValues.isExcludedFromBackup = true
+        ].compactMap { $0 }
+        for error in excludeFromBackup(urls) {
+            // A failure leaves app data eligible for backup, so it is
+            // reported rather than swallowed (vauchi/private#287 P1.I1).
+            // The error type only — no paths (logging rules).
+            NSLog("[Vauchi] Backup exclusion failed: %@", String(describing: type(of: error)))
+        }
+    }
+
+    /// Marks each URL excluded from backup and returns the errors it met.
+    static func excludeFromBackup(
+        _ urls: [URL],
+        setValues: (URL, URLResourceValues) throws -> Void = { url, values in
             var mutableURL = url
-            try? mutableURL.setResourceValues(resourceValues)
+            try mutableURL.setResourceValues(values)
+        }
+    ) -> [Error] {
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        return urls.compactMap { url in
+            do {
+                try setValues(url, resourceValues)
+                return nil
+            } catch {
+                return error
+            }
         }
     }
 
