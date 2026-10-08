@@ -22,7 +22,8 @@ final class WakeupServiceTests: XCTestCase {
         WakeupService.shared.scheduleWakeup(
             earliestSecs: 0,
             deadlineSecs: 1,
-            minIntervalSecs: 0
+            minIntervalSecs: 0,
+            delayMillis: 0
         )
 
         wait(for: [expectation], timeout: 1.5)
@@ -38,7 +39,8 @@ final class WakeupServiceTests: XCTestCase {
         WakeupService.shared.scheduleWakeup(
             earliestSecs: 0,
             deadlineSecs: 1,
-            minIntervalSecs: 0
+            minIntervalSecs: 0,
+            delayMillis: 0
         )
         WakeupService.shared.cancelPendingWakeup()
 
@@ -53,6 +55,7 @@ final class WakeupServiceTests: XCTestCase {
             deadlineSecs: 1,
             minIntervalSecs: 1,
             earliestMillis: 100,
+            delayMillis: 100,
             sinceLastWakeup: 0.002
         )
 
@@ -65,6 +68,7 @@ final class WakeupServiceTests: XCTestCase {
             deadlineSecs: 90,
             minIntervalSecs: 30,
             earliestMillis: nil,
+            delayMillis: 10000,
             sinceLastWakeup: 5
         )
 
@@ -77,9 +81,26 @@ final class WakeupServiceTests: XCTestCase {
             deadlineSecs: 10,
             minIntervalSecs: 0,
             earliestMillis: nil,
+            delayMillis: 10000,
             sinceLastWakeup: nil
         )
 
         XCTAssertEqual(delay, 10, accuracy: 0.0001)
+    }
+
+    /// Core computes the wait and sends it as `delay_millis`; iOS starts
+    /// from it instead of deriving its own, keeping only its min-interval
+    /// guard and the deadline cap (vauchi/private#548).
+    func testTheWaitStartsFromCoresDelay() {
+        let delay = WakeupService.fireDelay(
+            earliestSecs: 30,
+            deadlineSecs: 90,
+            minIntervalSecs: 0,
+            earliestMillis: nil,
+            delayMillis: 2000,
+            sinceLastWakeup: nil
+        )
+
+        XCTAssertEqual(delay, 2, accuracy: 0.0001)
     }
 }
