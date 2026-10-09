@@ -332,7 +332,11 @@ struct VauchiDemoContact {
 /// Adapts `KeychainService` to the `MobilePlatformKeychain` callback interface
 /// expected by core's crypto-shredding operations (SMK management).
 class VauchiKeychainBridge: MobilePlatformKeychain {
-    private let keychain = KeychainService.shared
+    private let keychain: KeychainStoring
+
+    init(keychain: KeychainStoring = KeychainService.shared) {
+        self.keychain = keychain
+    }
 
     func saveKey(name: String, key: Data) throws {
         do {

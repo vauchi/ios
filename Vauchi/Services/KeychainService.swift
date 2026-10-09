@@ -15,7 +15,14 @@ enum KeychainServiceError: Error {
     case deviceLocked // errSecInteractionNotAllowed (-25308)
 }
 
-class KeychainService {
+/// Name-addressed secret storage; `KeychainService` in the app, a fake in tests.
+protocol KeychainStoring {
+    func save(key: String, data: Data) throws
+    func load(key: String) throws -> Data
+    func delete(key: String) throws
+}
+
+class KeychainService: KeychainStoring {
     static let shared = KeychainService()
 
     private let service = "app.vauchi.ios"
