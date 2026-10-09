@@ -136,10 +136,17 @@ class VauchiViewModel: ObservableObject {
             #if DEBUG
                 print("VauchiViewModel: initializing repository...")
             #endif
-            let repo = try VauchiRepository(
-                dataDir: dataDirOverride,
-                relayUrl: relayUrlOverride ?? SettingsService.shared.relayUrl
-            )
+            let makeRepository = { [dataDirOverride, relayUrlOverride] in
+                try VauchiRepository(
+                    dataDir: dataDirOverride,
+                    relayUrl: relayUrlOverride ?? SettingsService.shared.relayUrl
+                )
+            }
+            // One repository for the app and background sync; an overridden
+            // data directory or relay (tests, debug) gets its own.
+            let repo = dataDirOverride == nil && relayUrlOverride == nil
+                ? try VauchiRepository.shared.get(orMake: makeRepository)
+                : try makeRepository()
             repository = repo
             let coreVM = AppViewModel(appEngine: repo.appEngine)
             coreViewModel = coreVM

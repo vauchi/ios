@@ -92,7 +92,12 @@ struct VauchiApp: App {
         // closure constructs a fresh repository when invoked from the
         // BGTask so it is independent of the foreground app lifecycle.
         BackgroundSyncService.shared.setSyncHandler {
-            guard let repository = try? VauchiRepository(relayUrl: SettingsService.shared.relayUrl) else {
+            // The foreground's repository when it exists: a second engine
+            // would go stale when the first moves the data to another key
+            // (vauchi/private#580).
+            guard let repository = try? VauchiRepository.shared.get(orMake: {
+                try VauchiRepository(relayUrl: SettingsService.shared.relayUrl)
+            }) else {
                 return
             }
             // Drive the tick through the engine so policy decisions

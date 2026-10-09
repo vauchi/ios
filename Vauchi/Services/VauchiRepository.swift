@@ -89,6 +89,10 @@ struct VauchiSyncResult {
 
 /// Repository class wrapping the single `PlatformAppEngine` UniFFI handle
 class VauchiRepository {
+    /// The app's one repository, shared by the foreground and background
+    /// sync so one engine holds the database (vauchi/private#580).
+    static let shared = SharedInstance<VauchiRepository>()
+
     // MARK: - Properties
 
     let appEngine: PlatformAppEngine
