@@ -24,7 +24,6 @@ enum VauchiRepositoryError: LocalizedError {
     case invalidInput(String)
     case internalError(String)
     case rateLimited(UInt64)
-    case deviceLocked
 
     var errorDescription: String? {
         switch self {
@@ -42,8 +41,6 @@ enum VauchiRepositoryError: LocalizedError {
             "Internal error: \(msg)"
         case let .rateLimited(retryAfterSecs):
             "Rate limited — please wait \(retryAfterSecs)s before trying again"
-        case .deviceLocked:
-            "Device is locked — unlock your device to access Vauchi"
         }
     }
 
@@ -52,7 +49,7 @@ enum VauchiRepositoryError: LocalizedError {
     /// `MobileError` was collapsed to 8 variants in vauchi-platform 0.20.3.
     /// We preserve the richer `VauchiRepositoryError` surface because several
     /// call sites and tests still discriminate on specific cases
-    /// (`.rateLimited`, `.deviceLocked`).
+    /// (`.rateLimited`).
     static func from(_ error: MobileError) -> VauchiRepositoryError {
         switch error {
         case .WrongPassword:

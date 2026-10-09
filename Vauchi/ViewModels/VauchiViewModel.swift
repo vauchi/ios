@@ -175,12 +175,6 @@ class VauchiViewModel: ObservableObject {
             #if DEBUG
                 print("VauchiViewModel: repository initialized successfully")
             #endif
-        } catch VauchiRepositoryError.deviceLocked {
-            // Layer C: Keychain accessible but auth required
-            #if DEBUG
-                print("VauchiViewModel: device locked, authentication required")
-            #endif
-            appState = .authenticationRequired
         } catch {
             let msg = "Failed to initialize: \(error.localizedDescription) (\(String(describing: error)))"
             #if DEBUG

@@ -198,15 +198,6 @@ final class VauchiViewModelTests: XCTestCase {
                        "isLoading should be false when appState is authenticationRequired")
     }
 
-    /// Scenario: VauchiRepositoryError.deviceLocked has correct description
-    func testDeviceLockedErrorDescription() {
-        let error = VauchiRepositoryError.deviceLocked
-
-        XCTAssertEqual(error.errorDescription,
-                       "Device is locked \u{2014} unlock your device to access Vauchi",
-                       "deviceLocked error should have a user-friendly description")
-    }
-
     // MARK: - Core's unlock answer (vauchi/private#580)
 
     /// Core answers the unlock prompt on its own lock screen with an
