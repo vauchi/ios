@@ -9,6 +9,7 @@
 // identity bootstrap and the identity-presence flag.
 
 @testable import Vauchi
+import VauchiPlatform
 import XCTest
 
 /// Tests for VauchiRepository live surface.
@@ -68,5 +69,23 @@ final class VauchiRepositoryTests: XCTestCase {
                 "Expected detail to mention 'already', got \(detail)"
             )
         }
+    }
+
+    // MARK: - Install from before #580
+
+    /// An install from before vauchi/private#580 kept its own storage key in
+    /// the keychain; Core opens its database under that key.
+    func testAnInstallFromBeforeOpensUnderItsOldKey() throws {
+        let oldKey = mobileGenerateStorageKey()
+        do {
+            let before = try PlatformAppEngine(dataDir: tempDir.path, relayUrl: "https://relay.test", storageKeyBytes: oldKey)
+            try before.createIdentity(displayName: "Before")
+        }
+        let store = FakeKeychainStore()
+        store.items["storage_key"] = oldKey
+
+        let repo = try VauchiRepository(dataDir: tempDir.path, keychain: VauchiKeychainBridge(keychain: store))
+
+        XCTAssertTrue(repo.hasIdentity())
     }
 }

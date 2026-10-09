@@ -69,6 +69,7 @@
 		60E998DA97685A7D68404600 /* SurfaceTitleBarLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498D7F22AC60EF0DA4C1780C /* SurfaceTitleBarLayoutTests.swift */; };
 		61A6ADF2FEA95610D52C9ACD /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C0558C6550E4B58C71798 /* AccessibilityUITests.swift */; };
 		61AFDF005E50ACA601C79A92 /* store-screens.vauchibackup.license in Resources */ = {isa = PBXBuildFile; fileRef = FF6D9F5CDBD0D932C6D60EE7 /* store-screens.vauchibackup.license */; };
+		62599578493FDDEC0B2996CA /* FakeKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1710F96007D89158A39B53E /* FakeKeychainStore.swift */; };
 		655FCE4413340F3FF3F5E5CF /* QRDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */; };
 		657B005AE09FDFE3AEE0ED58 /* AVCameraCaptureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75191060DEDFC1C531D132FE /* AVCameraCaptureSheet.swift */; };
 		6C3BF8542A2953DB82A45322 /* FilePickerModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDBAB28CCA0714450AC2B99 /* FilePickerModifier.swift */; };
@@ -124,6 +125,7 @@
 		C8C4DCDB890AEB912C9440F3 /* PresentationOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F9A4DAC6D203C61E58BF054 /* PresentationOverlayView.swift */; };
 		C943C882B3CE2E999B5FABD7 /* AccelerometerProximityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D14544B64B5B788B50E9DA /* AccelerometerProximityService.swift */; };
 		C9C86FD0A30B8E8FBAD1245C /* DiagnosticLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F79BD1F4A165335E472E06C /* DiagnosticLogger.swift */; };
+		CDD9B39CBE0D8354161D2E71 /* VauchiKeychainBridgeHandoverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9DDC142AE1FF7267B32DD39 /* VauchiKeychainBridgeHandoverTests.swift */; };
 		CE9939C111B3A86EE5259A29 /* ImagePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B79C9104498AB6120226DF33 /* ImagePickerSheet.swift */; };
 		CFDA26CC1929A7F7EAAC2E6F /* FilePickerAcceptedExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 350622DF2E8A1B902DFA0A85 /* FilePickerAcceptedExtensionsTests.swift */; };
 		D19AF7984F8C37FAB5F7CE45 /* StoreScreenshotsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017A337B974C4836100C9802 /* StoreScreenshotsUITests.swift */; };
@@ -267,6 +269,7 @@
 		9B834D827B063CB9F17CFA86 /* PresentationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationState.swift; sourceTree = "<group>"; };
 		9E037C4EB031C6A373594095 /* JetBrainsMono-Italic[wght].ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMono-Italic[wght].ttf"; sourceTree = "<group>"; };
 		9FE92FFF24932C40ACAA1A02 /* ExistingCodeDiagnostic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExistingCodeDiagnostic.swift; sourceTree = "<group>"; };
+		A1710F96007D89158A39B53E /* FakeKeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeKeychainStore.swift; sourceTree = "<group>"; };
 		A7C515EE1804FDB78832CA0D /* NotificationServiceDeepLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceDeepLinkTests.swift; sourceTree = "<group>"; };
 		A96FE811E67752C2D8F9079E /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
 		AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRDiagnosticView.swift; sourceTree = "<group>"; };
@@ -299,6 +302,7 @@
 		D5A795D0FCDE3726CBB528F8 /* OrientationLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationLock.swift; sourceTree = "<group>"; };
 		D7E1798719172168B0EBBBD3 /* PasscodePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasscodePolicy.swift; sourceTree = "<group>"; };
 		D97F0E05FC9F51A7F19CEDAE /* DeviceCapabilitiesPusher+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceCapabilitiesPusher+Debug.swift"; sourceTree = "<group>"; };
+		D9DDC142AE1FF7267B32DD39 /* VauchiKeychainBridgeHandoverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiKeychainBridgeHandoverTests.swift; sourceTree = "<group>"; };
 		DC20FCD1651B95E823A06410 /* LocationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationServiceTests.swift; sourceTree = "<group>"; };
 		DE470500913747AD36BDE885 /* CameraServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraServiceTests.swift; sourceTree = "<group>"; };
 		DFFE40C221022DBDBD034AF3 /* PresentationStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationStateTests.swift; sourceTree = "<group>"; };
@@ -437,6 +441,7 @@
 				D1B18A4BEA7DD24A3923BE9A /* DebugCapabilityOverrideTests.swift */,
 				7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */,
 				653B68CB3B3D86B13D52E63E /* DeviceCapabilitiesPusherTests.swift */,
+				A1710F96007D89158A39B53E /* FakeKeychainStore.swift */,
 				423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */,
 				812EEE5AF140DB98855AF442 /* LocalizationServiceSettingsTests.swift */,
 				DC20FCD1651B95E823A06410 /* LocationServiceTests.swift */,
@@ -451,6 +456,7 @@
 				852C63AD7ECE19A3177E137A /* SettingsServiceTests.swift */,
 				20464883C60F18E442737B7F /* SharedInstanceTests.swift */,
 				4BF7BC594414EE931756CE54 /* ThemeServiceSettingsTests.swift */,
+				D9DDC142AE1FF7267B32DD39 /* VauchiKeychainBridgeHandoverTests.swift */,
 				BE32C32136CEB8811C89778C /* VauchiKeychainBridgeTests.swift */,
 				38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */,
 				2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */,
@@ -780,6 +786,7 @@
 				161D92EC11DFF0CDAE7B0F29 /* DemoContactTests.swift in Sources */,
 				566C2C33F23B683B8CB8226F /* DeviceCapabilitiesPusherTests.swift in Sources */,
 				99D8ED2B60D43F62A79B0317 /* ExchangeCommandBridgeTests.swift in Sources */,
+				62599578493FDDEC0B2996CA /* FakeKeychainStore.swift in Sources */,
 				CFDA26CC1929A7F7EAAC2E6F /* FilePickerAcceptedExtensionsTests.swift in Sources */,
 				2E32911FDD537E5F664BF57C /* KeychainServiceTests.swift in Sources */,
 				78DEE11DBBB312E894650FBF /* LocalizationServiceSettingsTests.swift in Sources */,
@@ -817,6 +824,7 @@
 				60E998DA97685A7D68404600 /* SurfaceTitleBarLayoutTests.swift in Sources */,
 				4EE9B40358253BE51C825BF7 /* TextRoleStyleTests.swift in Sources */,
 				60D8E07B9EFB1F102D7518A0 /* ThemeServiceSettingsTests.swift in Sources */,
+				CDD9B39CBE0D8354161D2E71 /* VauchiKeychainBridgeHandoverTests.swift in Sources */,
 				ACB5D66C9DC53BB3DEC7044E /* VauchiKeychainBridgeTests.swift in Sources */,
 				C8010E2F57254C76268D5367 /* VauchiRepositoryTests.swift in Sources */,
 				EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */,

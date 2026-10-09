@@ -206,4 +206,28 @@ final class VauchiViewModelTests: XCTestCase {
                        "Device is locked \u{2014} unlock your device to access Vauchi",
                        "deviceLocked error should have a user-friendly description")
     }
+
+    // MARK: - Core's unlock answer (vauchi/private#580)
+
+    /// Core answers the unlock prompt on its own lock screen with an
+    /// app-password requirement when a duress PIN is set up (ADR-032); the
+    /// app must show the app-password screen rather than drop it.
+    func testCoresAppPasswordRequirementShowsTheAppPasswordScreen() throws {
+        let viewModel = makeViewModel()
+        let core = try XCTUnwrap(viewModel.coreViewModel)
+
+        core.receivePresentationEnvelope(#"{"commands":[{"SetAuthenticationRequirement":{"requirement":"app_password"}}]}"#)
+
+        XCTAssertEqual(viewModel.appState, .appPasswordRequired)
+    }
+
+    func testCoresUnlockedRequirementLeavesTheAppAsItIs() throws {
+        let viewModel = makeViewModel()
+        let core = try XCTUnwrap(viewModel.coreViewModel)
+        let before = viewModel.appState
+
+        core.receivePresentationEnvelope(#"{"commands":[{"SetAuthenticationRequirement":{"requirement":"unlocked"}}]}"#)
+
+        XCTAssertEqual(viewModel.appState, before)
+    }
 }
