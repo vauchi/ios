@@ -149,6 +149,11 @@ class VauchiViewModel: ObservableObject {
                 : try makeRepository()
             repository = repo
             let coreVM = AppViewModel(appEngine: repo.appEngine)
+            coreVM.onAuthenticationRequirement = { [weak self] requirement in
+                if requirement == "app_password" {
+                    self?.appState = .appPasswordRequired
+                }
+            }
             coreViewModel = coreVM
             // Hand the engine to BackgroundSyncService so its
             // BGTaskScheduler interval comes from core's
