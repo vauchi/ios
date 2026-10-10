@@ -10,9 +10,12 @@ import Foundation
 final class FakeKeychainStore: KeychainStoring {
     var items: [String: Data] = [:]
     var failure: Error?
+    /// Fails writes only: the keychain reads, and takes a write only after
+    /// the person unlocks.
+    var saveFailure: Error?
 
     func save(key: String, data: Data) throws {
-        if let failure {
+        if let failure = failure ?? saveFailure {
             throw failure
         }
         items[key] = data
