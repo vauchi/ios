@@ -83,6 +83,13 @@ default:
 workflow:
   auto_cancel:
     on_new_commit: interruptible
+  rules:
+    # Core's release triggers a pipeline on main whose last job opens the
+    # binding bump MR; a merge must not cancel it (vauchi/private#632, VCI05).
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      auto_cancel:
+        on_new_commit: none
+    - when: always
 
 # Timeout templates provided by vauchi/scripts ci-templates/timeouts.yml
 
