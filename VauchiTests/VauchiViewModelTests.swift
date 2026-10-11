@@ -198,18 +198,19 @@ final class VauchiViewModelTests: XCTestCase {
                        "isLoading should be false when appState is authenticationRequired")
     }
 
-    // MARK: - Core's unlock answer (vauchi/private#580)
+    // MARK: - Core's unlock answer (vauchi/private#580, #591)
 
-    /// Core answers the unlock prompt on its own lock screen with an
-    /// app-password requirement when a duress PIN is set up (ADR-032); the
-    /// app must show the app-password screen rather than drop it.
-    func testCoresAppPasswordRequirementShowsTheAppPasswordScreen() throws {
+    /// Since Core 0.79.0 an app-password requirement keeps Core's own lock
+    /// screen, which takes the password and picks normal or duress mode
+    /// (ADR-032). The app shows no screen of its own over it (#591).
+    func testCoresAppPasswordRequirementLeavesCoresLockScreenInPlace() throws {
         let viewModel = makeViewModel()
         let core = try XCTUnwrap(viewModel.coreViewModel)
+        let before = viewModel.appState
 
         core.receivePresentationEnvelope(#"{"commands":[{"SetAuthenticationRequirement":{"requirement":"app_password"}}]}"#)
 
-        XCTAssertEqual(viewModel.appState, .appPasswordRequired)
+        XCTAssertEqual(viewModel.appState, before)
     }
 
     func testCoresUnlockedRequirementLeavesTheAppAsItIs() throws {
