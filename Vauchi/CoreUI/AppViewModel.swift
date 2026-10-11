@@ -123,10 +123,6 @@ class AppViewModel: ObservableObject {
     /// a spy instead of driving `LAContext`.
     lazy var biometricUnlockService: BiometricUnlockPrompting = LocalAuthenticationBiometricUnlock()
 
-    /// Core's `SetAuthenticationRequirement`, which answers the unlock prompt:
-    /// `app_password` means the app asks for the app password first (ADR-032).
-    var onAuthenticationRequirement: ((String) -> Void)?
-
     /// One-shot location capture for the exchange "where we met" annotation
     /// (ADR-051). Driven by `Command::LocationRequest` in `handleExchangeCommands`.
     lazy var locationService = LocationService()
@@ -333,10 +329,6 @@ class AppViewModel: ObservableObject {
             loadInitialPresentation()
         case .requestBiometricUnlock:
             requestBiometricUnlock()
-        case let .platformEffect(variant, payload) where variant == "SetAuthenticationRequirement":
-            if case let .object(fields)? = payload, case let .string(requirement)? = fields["requirement"] {
-                onAuthenticationRequirement?(requirement)
-            }
         case .postNotification, .platformEffect:
             break
         default:

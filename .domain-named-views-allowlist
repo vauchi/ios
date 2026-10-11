@@ -13,17 +13,13 @@
 # ignored.
 #
 # --- Platform-required / kept (permanent) ----------------------------
-# LockScreenView    — pre-unlock biometric host; runs before core is
+# WaitingForUnlockView — pre-unlock wait state; runs before core is
 #                     decrypted, so cannot render a core ScreenModel.
-# AppPasswordView   — pre-unlock password entry; same constraint.
-# WaitingForUnlockView — pre-unlock wait state; same constraint.
 # QRDiagnosticView  — `#if DEBUG`-only diagnostic that intentionally
 #                     exercises the FFI layer (MobileQrEccLevel) to tune
 #                     the multi-stage exchange protocol. Active dev tool,
 #                     not a retirement target (G8 of the problem record).
 # AVCameraCaptureSheet lives in CoreUI/, out of scope for this lint.
-AppPasswordView.swift
-LockScreenView.swift
 WaitingForUnlockView.swift
 QRDiagnosticView.swift
 

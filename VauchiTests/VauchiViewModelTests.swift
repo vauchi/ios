@@ -138,20 +138,15 @@ final class VauchiViewModelTests: XCTestCase {
         // Verify all expected cases exist and are distinct
         let loading = AppState.loading
         let waiting = AppState.waitingForUnlock
-        let authRequired = AppState.authenticationRequired
         let ready = AppState.ready
 
         XCTAssertEqual(loading, AppState.loading)
         XCTAssertEqual(waiting, AppState.waitingForUnlock)
-        XCTAssertEqual(authRequired, AppState.authenticationRequired)
         XCTAssertEqual(ready, AppState.ready)
 
         XCTAssertNotEqual(loading, waiting)
-        XCTAssertNotEqual(loading, authRequired)
         XCTAssertNotEqual(loading, ready)
-        XCTAssertNotEqual(waiting, authRequired)
         XCTAssertNotEqual(waiting, ready)
-        XCTAssertNotEqual(authRequired, ready)
     }
 
     /// Scenario: ViewModel initial appState is loading
@@ -160,12 +155,10 @@ final class VauchiViewModelTests: XCTestCase {
 
         // On simulator with protected data available, it should initialize successfully
         // and move to .ready (or stay .loading briefly then .ready)
-        // The important check: it should NOT be .waitingForUnlock or .authenticationRequired
-        // since the simulator has protected data available
+        // The important check: it should NOT be .waitingForUnlock since the
+        // simulator has protected data available
         XCTAssertNotEqual(viewModel.appState, .waitingForUnlock,
                           "Should not be waiting for unlock on simulator")
-        XCTAssertNotEqual(viewModel.appState, .authenticationRequired,
-                          "Should not require authentication on simulator")
     }
 
     /// Scenario: loadState bails out when appState is waitingForUnlock
@@ -181,21 +174,6 @@ final class VauchiViewModelTests: XCTestCase {
         // loadState should bail out immediately, setting isLoading to false
         XCTAssertFalse(viewModel.isLoading,
                        "isLoading should be false when appState is waitingForUnlock")
-    }
-
-    /// Scenario: loadState bails out when appState is authenticationRequired
-    func testLoadStateBailsOutWhenAuthenticationRequired() {
-        let viewModel = makeViewModel()
-
-        // Force the state to authenticationRequired
-        viewModel.appState = .authenticationRequired
-        viewModel.isLoading = true
-
-        viewModel.loadState()
-
-        // loadState should bail out immediately, setting isLoading to false
-        XCTAssertFalse(viewModel.isLoading,
-                       "isLoading should be false when appState is authenticationRequired")
     }
 
     // MARK: - Core's unlock answer (vauchi/private#580, #591)

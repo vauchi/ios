@@ -18,7 +18,6 @@
 import Combine
 import CoreUIModels
 import Foundation
-import LocalAuthentication
 import SwiftUI
 import VauchiPlatform
 
@@ -34,8 +33,6 @@ enum SyncState: Equatable {
 enum AppState: Equatable {
     case loading
     case waitingForUnlock // Layer B: protected data unavailable (prewarming)
-    case authenticationRequired // Layer C: auth window expired
-    case appPasswordRequired // Biometric OK, duress enabled — show app PIN
     case ready // Normal operation
 }
 
@@ -149,11 +146,6 @@ class VauchiViewModel: ObservableObject {
                 : try makeRepository()
             repository = repo
             let coreVM = AppViewModel(appEngine: repo.appEngine)
-            coreVM.onAuthenticationRequirement = { [weak self] requirement in
-                if requirement == "app_password" {
-                    self?.appState = .appPasswordRequired
-                }
-            }
             coreViewModel = coreVM
             // Hand the engine to BackgroundSyncService so its
             // BGTaskScheduler interval comes from core's
@@ -262,103 +254,6 @@ class VauchiViewModel: ObservableObject {
         }
     }
 
-    /// Trigger system authentication (Face ID / Touch ID / passcode) and retry initialization
-    func authenticateAndRetry() {
-        let context = LAContext()
-        context.evaluatePolicy(
-            .deviceOwnerAuthentication,
-            localizedReason: NSLocalizedString(
-                "Unlock Vauchi to access your contacts",
-                comment: "Biometric/passcode prompt reason"
-            )
-        ) { [weak self] success, error in
-            DispatchQueue.main.async {
-                if success {
-                    self?.initializeRepository()
-                    // Hold on loading state during the constant-time
-                    // duress decision so real contacts don't flash if
-                    // initializeRepository() set .ready.
-                    self?.appState = .loading
-                    // Core owns the post-biometric duress decision and
-                    // the constant-time floor that hides whether duress
-                    // is configured (audit
-                    // `2026-04-28-lifecycle-session-residue-umbrella`
-                    // P2-B). The call sleeps in Rust for ≥
-                    // BIOMETRIC_UNLOCK_MIN_DURATION (300 ms), so dispatch
-                    // off main to avoid blocking the UI.
-                    let engine = self?.coreViewModel?.appEngine
-                    DispatchQueue.global(qos: .userInitiated).async {
-                        // ADR-031: biometric success is reported as a
-                        // hardware event; core consults its duress state
-                        // (padding to BIOMETRIC_UNLOCK_MIN_DURATION) and
-                        // returns a constant-time unlock outcome.
-                        let resultJson = try? engine?.dispatchJson(eventJson: "\"BiometricUnlockSucceeded\"")
-                        var promptForDuress = false
-                        if let resultJson,
-                           Self.authenticationRequirement(from: resultJson) == "app_password" {
-                            promptForDuress = true
-                        }
-                        DispatchQueue.main.async {
-                            if promptForDuress {
-                                self?.appState = .appPasswordRequired
-                            } else {
-                                // Unlocked, or no/undecodable outcome —
-                                // proceed, matching the prior .none behavior.
-                                self?.appState = .ready
-                                self?.loadState()
-                            }
-                        }
-                    }
-                } else {
-                    // If cancelled/failed, stay on lock screen — user can tap again
-                    #if DEBUG
-                        print("VauchiViewModel: authentication failed or cancelled: \(String(describing: error))")
-                    #endif
-                }
-            }
-        }
-    }
-
-    private nonisolated static func authenticationRequirement(from json: String) -> String? {
-        guard
-            let data = json.data(using: .utf8),
-            let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-            let commands = root["commands"] as? [[String: Any]]
-        else {
-            return nil
-        }
-        for command in commands {
-            guard
-                let authentication = command["SetAuthenticationRequirement"] as? [String: Any],
-                let requirement = authentication["requirement"] as? String
-            else {
-                continue
-            }
-            return requirement
-        }
-        return nil
-    }
-
-    /// Authenticate with app password (duress-enabled flow).
-    /// Core decides Normal vs Duress based on which PIN matches.
-    /// Runs Argon2 verification off main thread to avoid UI freeze.
-    func authenticateAppPassword(_ pin: String) async throws {
-        guard let repo = repository else {
-            throw NSError(
-                domain: "Vauchi", code: -1,
-                userInfo: [
-                    NSLocalizedDescriptionKey:
-                        "Repository not initialized",
-                ]
-            )
-        }
-        try await Task.detached(priority: .userInitiated) {
-            _ = try repo.authenticate(password: pin)
-        }.value
-        loadState()
-        appState = .ready
-    }
-
     private func setupNetworkMonitoring() {
         // Forward platform reachability into Core, which decides
         // presentation updates and auto-sync on reconnect.
@@ -389,7 +284,7 @@ class VauchiViewModel: ObservableObject {
 
     func loadState() {
         // Don't attempt to load if we're waiting for unlock or auth
-        if appState == .waitingForUnlock || appState == .authenticationRequired {
+        if appState == .waitingForUnlock {
             isLoading = false
             return
         }

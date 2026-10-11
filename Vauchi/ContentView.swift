@@ -13,10 +13,6 @@ struct ContentView: View {
             switch viewModel.appState {
             case .waitingForUnlock:
                 WaitingForUnlockView()
-            case .authenticationRequired:
-                LockScreenView(onUnlock: viewModel.authenticateAndRetry)
-            case .appPasswordRequired:
-                AppPasswordView(viewModel: viewModel)
             default:
                 applicationBody
             }
