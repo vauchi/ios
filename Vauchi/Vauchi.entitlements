@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Exchange links and QRs (vauchi/private#277). vauchi.app's
+	     apple-app-site-association limits the claim to /x. -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:vauchi.app</string>
+	</array>
 	<!-- NDEF intentionally omitted: App Store Connect rejects it (upload error
 	     90778, "NDEF is disallowed") for this SDK/min-OS combination — a
 	     long-standing Apple validation bug. TAG/PACE cover the planned NFC
