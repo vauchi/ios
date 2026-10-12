@@ -64,8 +64,8 @@ targets:
       path: Vauchi/Info.plist
       properties:
         CFBundleDisplayName: Vauchi
-        CFBundleShortVersionString: "1.0.0"
-        CFBundleVersion: "1"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
         UIAppFonts:
           - "BricolageGrotesque[opsz,wdth,wght].ttf"
