@@ -25,6 +25,7 @@
 		17EF975214DA250E994E2222 /* HankenGrotesk[wght].ttf in Resources */ = {isa = PBXBuildFile; fileRef = 663F5CD6B507E5D1F03BEA92 /* HankenGrotesk[wght].ttf */; };
 		18DFBC47BE88310909350859 /* VauchiHardware in Frameworks */ = {isa = PBXBuildFile; productRef = 0AB22D05ABC258D050086FBF /* VauchiHardware */; };
 		1BB5832181399F70969847FB /* NavigationIconMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5482743CA87B21CE18C8C3B9 /* NavigationIconMapTests.swift */; };
+		1DC86F1A0179CC71605FE2F6 /* BundleVersionContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200E59D28296103D0A19BBFD /* BundleVersionContractTests.swift */; };
 		1F71EBFA28269CCF402DB8FA /* FftAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA424D9813208ABE829A8BE /* FftAnalyzer.swift */; };
 		2236F8109A06F4C4FB40526C /* DebugFilePickFixtureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDBB537B04F0ACE29C8AC4B9 /* DebugFilePickFixtureTests.swift */; };
 		23542D8D4771261954AA6A2D /* NFCExchangeServiceTransceiveShimTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CBA469A3ED4A4660FA45B6A /* NFCExchangeServiceTransceiveShimTests.swift */; };
@@ -196,6 +197,7 @@
 		1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModel.swift; sourceTree = "<group>"; };
 		1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SineWaveGenerator.swift; sourceTree = "<group>"; };
 		1FF78143E85F40617060C709 /* PresentationRowInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationRowInfoTests.swift; sourceTree = "<group>"; };
+		200E59D28296103D0A19BBFD /* BundleVersionContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleVersionContractTests.swift; sourceTree = "<group>"; };
 		20464883C60F18E442737B7F /* SharedInstanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedInstanceTests.swift; sourceTree = "<group>"; };
 		219A7195BEAC47A808D8F852 /* NotificationServiceAuthorizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceAuthorizationTests.swift; sourceTree = "<group>"; };
 		23F5C7A0037A012F2FDAFA7B /* AppViewModel+DebugFilePickFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppViewModel+DebugFilePickFixture.swift"; sourceTree = "<group>"; };
@@ -433,6 +435,7 @@
 				FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */,
 				2BE3B422CC80908DA4B20A2B /* BackupExclusionTests.swift */,
 				EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */,
+				200E59D28296103D0A19BBFD /* BundleVersionContractTests.swift */,
 				DE470500913747AD36BDE885 /* CameraServiceTests.swift */,
 				7C42CA0EEF4243C65EE1FDAF /* ContentUpdateCycleTests.swift */,
 				D1B18A4BEA7DD24A3923BE9A /* DebugCapabilityOverrideTests.swift */,
@@ -773,6 +776,7 @@
 				EAA16636F400850E4CF05932 /* BackupExclusionTests.swift in Sources */,
 				9EFD805310188B4C902B23F0 /* BiometricUnlockDispatchTests.swift in Sources */,
 				6F526CBE173AA74F1C620137 /* BleUuidsTests.swift in Sources */,
+				1DC86F1A0179CC71605FE2F6 /* BundleVersionContractTests.swift in Sources */,
 				F3145E4E7C9EC869B82C5AA8 /* CameraServiceTests.swift in Sources */,
 				9D3AA48B67B4BBCBFBA6A33C /* ContentUpdateCycleTests.swift in Sources */,
 				A4CE7EAD9B655B69E21073D9 /* CoreBottomTabBarLayoutTests.swift in Sources */,
