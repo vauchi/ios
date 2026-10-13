@@ -326,6 +326,7 @@ class AppViewModel: ObservableObject {
         case .performNativeBack:
             break
         case .resetApplication:
+            presentationState = PresentationState()
             loadInitialPresentation()
         case .requestBiometricUnlock:
             requestBiometricUnlock()
