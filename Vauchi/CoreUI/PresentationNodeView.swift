@@ -147,11 +147,21 @@ struct PresentationNodeView: View {
 
     private func input(_ value: PresentationNode.Input) -> some View {
         VStack(alignment: .leading, spacing: 4) {
+            // A TextField's title is only a placeholder, so a field holding a
+            // value showed no label (vauchi/private#421). The field keeps
+            // Core's accessibility label; this one is for sight only.
+            if !value.label.isEmpty {
+                Text(value.label)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+            }
             if value.inputKind == .password || value.inputKind == .pin {
                 SecureField(
                     value.label,
                     text: textBinding(value)
                 )
+                .textFieldStyle(.roundedBorder)
                 .focused(focusedBinding, equals: value.bindingID)
                 .accessibilityLabel(value.accessibility.label)
             } else {
@@ -160,6 +170,7 @@ struct PresentationNodeView: View {
                     text: textBinding(value),
                     prompt: value.placeholder.map(Text.init)
                 )
+                .textFieldStyle(.roundedBorder)
                 .textContentType(textContentType(for: value.inputKind))
                 .focused(focusedBinding, equals: value.bindingID)
                 .accessibilityLabel(value.accessibility.label)
