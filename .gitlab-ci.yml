@@ -291,7 +291,9 @@ auto-tag:version:
   script:
     - apk add --no-cache git
     - |
-      VERSION=$(grep 'MARKETING_VERSION' project.yml | sed 's/.*"\(.*\)"/\1/')
+      # Only the setting line: Info.plist's "$(MARKETING_VERSION)" placeholder
+      # also names it, and two matches make an invalid tag (vauchi/private#665).
+      VERSION=$(grep -E '^[[:space:]]*MARKETING_VERSION:' project.yml | head -1 | sed 's/.*"\(.*\)"/\1/')
       TAG="v${VERSION}"
       echo "project.yml MARKETING_VERSION: ${VERSION}"
       echo "Expected tag: ${TAG}"
