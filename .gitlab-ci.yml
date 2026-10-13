@@ -1157,6 +1157,24 @@ check:orphan-baselines: # vci02-ok: alpine job intentionally installs its comple
     ORPHAN_BASELINE_ROOT: VauchiSnapshotTests/__Snapshots__
     ORPHAN_TEST_SRC: VauchiSnapshotTests
 
+test:signing-scripts: # vci02-ok: alpine job intentionally installs its complete tool set
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
+  tags: [docker]
+  before_script:
+    - apk add --no-cache bash curl openssl
+  script:
+    - scripts/tests/test-fetch-wwdr-g3.sh
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "scripts/fetch-wwdr-g3.sh"
+          - "scripts/setup-signing.sh"
+          - "scripts/tests/test-fetch-wwdr-g3.sh"
+          - ".gitlab-ci.yml"
+
 test:snapshots:
   extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
   stage: test

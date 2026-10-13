@@ -42,6 +42,13 @@ security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_NAME"
 # shellcheck disable=SC2046
 security list-keychains -d user -s "$KEYCHAIN_NAME" $(security list-keychains -d user | tr -d '"')
 
+# Without the G3 intermediate the identity reads "0 valid identities"
+# (vauchi/private#665), so bring it rather than rely on the runner host.
+WWDR_DIR=$(mktemp -d)
+"$(dirname "$0")/fetch-wwdr-g3.sh" "$WWDR_DIR/AppleWWDRCAG3.cer"
+security import "$WWDR_DIR/AppleWWDRCAG3.cer" -k "$KEYCHAIN_NAME"
+rm -rf "$WWDR_DIR"
+
 # Import distribution certificate. Use a temp dir for the .p12: BSD mktemp
 # (the macOS runner) requires the Xs to be trailing, so a
 # "cert.XXXXXX.p12" template yields a non-random, colliding name and fails
