@@ -998,6 +998,10 @@ build:debug:
           - "Package.swift"
           - "project.yml"
           - ".gitlab-ci.yml"
+          # test:screen-catalog hard-needs build:debug and also runs for this
+          # script; without it here, an MR touching only the script gets a
+          # zero-job pipeline (VCI06, vauchi/private#490).
+          - "scripts/fetch-screen-catalog.sh"
     - if: $CI_COMMIT_BRANCH == "main"  # seed SPM cache for MR fallback keys
 
 build:release:
