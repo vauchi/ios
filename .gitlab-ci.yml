@@ -209,6 +209,17 @@ workflow:
     - !reference [.macos-job, before_script]
     - xcrun simctl shutdown all 2>/dev/null || true
     - xcrun simctl erase all
+    # An erased simulator's first boot finishes setup after it reports
+    # booted, and a launch in that window is refused with "Busy /
+    # Application failed preflight checks" (8 of ~140 jobs, 2026-10-11..14,
+    # vauchi/private#588). Boot it once and wait for setup to finish, so
+    # xcodebuild's clones start from a set-up device.
+    - |
+      SIM_UDID=$(xcrun simctl list devices available | grep -m1 "iPhone 17 Pro (" | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/')
+      test -n "$SIM_UDID" || { echo "no available iPhone 17 Pro simulator"; exit 1; }
+      xcrun simctl boot "$SIM_UDID"
+      xcrun simctl bootstatus "$SIM_UDID" -b
+      xcrun simctl shutdown "$SIM_UDID"
   after_script:
     - xcrun simctl shutdown all 2>/dev/null || true
     - !reference [.macos-job, after_script]
