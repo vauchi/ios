@@ -18,3 +18,5 @@ mappin = "mappin"
 writeable = "writeable"
 # OpenType variable-font axis tag (width) in the Bricolage file name
 wdth = "wdth"
+# App Store Connect error codes are ITMS-NNNNN
+ITMS = "ITMS"
