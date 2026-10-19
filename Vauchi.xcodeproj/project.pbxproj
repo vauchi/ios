@@ -1056,7 +1056,7 @@
 				CODE_SIGN_ENTITLEMENTS = Vauchi/Vauchi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = L2853TNSJ4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Vauchi/Info.plist;
@@ -1065,7 +1065,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.13;
+				MARKETING_VERSION = 0.1.14;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vauchi.ios;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1081,7 +1081,7 @@
 				CODE_SIGN_ENTITLEMENTS = Vauchi/Vauchi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = L2853TNSJ4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Vauchi/Info.plist;
@@ -1090,7 +1090,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.13;
+				MARKETING_VERSION = 0.1.14;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vauchi.ios;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
