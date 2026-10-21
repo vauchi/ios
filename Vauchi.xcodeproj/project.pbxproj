@@ -75,6 +75,7 @@
 		61A6ADF2FEA95610D52C9ACD /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C0558C6550E4B58C71798 /* AccessibilityUITests.swift */; };
 		61AFDF005E50ACA601C79A92 /* store-screens.vauchibackup.license in Resources */ = {isa = PBXBuildFile; fileRef = FF6D9F5CDBD0D932C6D60EE7 /* store-screens.vauchibackup.license */; };
 		62599578493FDDEC0B2996CA /* FakeKeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1710F96007D89158A39B53E /* FakeKeychainStore.swift */; };
+		62F4C21108066CA3CFD47F8D /* legacy-before.db in Resources */ = {isa = PBXBuildFile; fileRef = 0179C0B17649A2FB9929EF1F /* legacy-before.db */; };
 		655FCE4413340F3FF3F5E5CF /* QRDiagnosticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2DBB18898D290BA8CCD896 /* QRDiagnosticView.swift */; };
 		657B005AE09FDFE3AEE0ED58 /* AVCameraCaptureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75191060DEDFC1C531D132FE /* AVCameraCaptureSheet.swift */; };
 		6C3BF8542A2953DB82A45322 /* FilePickerModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDBAB28CCA0714450AC2B99 /* FilePickerModifier.swift */; };
@@ -97,6 +98,7 @@
 		98B637198F857654600E968C /* SharedInstanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20464883C60F18E442737B7F /* SharedInstanceTests.swift */; };
 		99D8ED2B60D43F62A79B0317 /* ExchangeCommandBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38FE0127E86CB045D89F88E /* ExchangeCommandBridgeTests.swift */; };
 		9B12926FA62EF78944BBD659 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */; };
+		9D080F452127462F10AB6C97 /* LegacyInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F6D78047B754BD931AC481 /* LegacyInstall.swift */; };
 		9D3AA48B67B4BBCBFBA6A33C /* ContentUpdateCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C42CA0EEF4243C65EE1FDAF /* ContentUpdateCycleTests.swift */; };
 		9D5D4424B928F2AE4C789950 /* ScreenCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8691393CE57A5898A62A9B08 /* ScreenCatalogTests.swift */; };
 		9E2BD59979752A9C670AF34A /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95DAE4A89BF1E2A04935E05F /* CameraService.swift */; };
@@ -182,6 +184,7 @@
 /* Begin PBXFileReference section */
 		007F08BF348F3C0C5BA74B92 /* PresentationPrimitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationPrimitives.swift; sourceTree = "<group>"; };
 		013078FC938DB8BD6A0F73B2 /* DiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticView.swift; sourceTree = "<group>"; };
+		0179C0B17649A2FB9929EF1F /* legacy-before.db */ = {isa = PBXFileReference; path = "legacy-before.db"; sourceTree = "<group>"; };
 		017A337B974C4836100C9802 /* StoreScreenshotsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreScreenshotsUITests.swift; sourceTree = "<group>"; };
 		02E118373F3BD2F4E7FC20AB /* QrCameraTunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrCameraTunerView.swift; sourceTree = "<group>"; };
 		036343C21A16BE4560CAAE4B /* BiometricUnlockService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricUnlockService.swift; sourceTree = "<group>"; };
@@ -235,6 +238,7 @@
 		5FA3C4F656D97F3211554DC4 /* WakeupServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeupServiceTests.swift; sourceTree = "<group>"; };
 		5FC2A1B34A8846BEEE089202 /* BleUuids.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleUuids.swift; sourceTree = "<group>"; };
 		61A7A127143B62F2DDA0FBD4 /* PresentationGroupChromeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationGroupChromeTests.swift; sourceTree = "<group>"; };
+		63F6D78047B754BD931AC481 /* LegacyInstall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyInstall.swift; sourceTree = "<group>"; };
 		653B68CB3B3D86B13D52E63E /* DeviceCapabilitiesPusherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilitiesPusherTests.swift; sourceTree = "<group>"; };
 		663F5CD6B507E5D1F03BEA92 /* HankenGrotesk[wght].ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "HankenGrotesk[wght].ttf"; sourceTree = "<group>"; };
 		67B69481786D9E06CC1F32D9 /* ScreenshotWalkUITests+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScreenshotWalkUITests+Helpers.swift"; sourceTree = "<group>"; };
@@ -477,6 +481,7 @@
 				2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */,
 				5FA3C4F656D97F3211554DC4 /* WakeupServiceTests.swift */,
 				0551E4C6C31A1EF46B1DE22E /* CoreUI */,
+				BA91C304C85FD8BB9F5E8EB8 /* LegacyInstall */,
 			);
 			path = VauchiTests;
 			sourceTree = "<group>";
@@ -545,6 +550,15 @@
 				8691393CE57A5898A62A9B08 /* ScreenCatalogTests.swift */,
 			);
 			path = VauchiSnapshotTests;
+			sourceTree = "<group>";
+		};
+		BA91C304C85FD8BB9F5E8EB8 /* LegacyInstall */ = {
+			isa = PBXGroup;
+			children = (
+				0179C0B17649A2FB9929EF1F /* legacy-before.db */,
+				63F6D78047B754BD931AC481 /* LegacyInstall.swift */,
+			);
+			path = LegacyInstall;
 			sourceTree = "<group>";
 		};
 		C9DFA1127C049CB0C36BDF57 /* VauchiUITests */ = {
@@ -695,6 +709,7 @@
 			buildConfigurationList = BCE5DB128EA3C8AD7DC194AE /* Build configuration list for PBXNativeTarget "VauchiTests" */;
 			buildPhases = (
 				2D236A0B9A67BAB3A7ADBA9B /* Sources */,
+				BA1091392C838747B6CA78FE /* Resources */,
 			);
 			buildRules = (
 			);
@@ -776,6 +791,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BA1091392C838747B6CA78FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				62F4C21108066CA3CFD47F8D /* legacy-before.db in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -803,6 +826,7 @@
 				62599578493FDDEC0B2996CA /* FakeKeychainStore.swift in Sources */,
 				CFDA26CC1929A7F7EAAC2E6F /* FilePickerAcceptedExtensionsTests.swift in Sources */,
 				2E32911FDD537E5F664BF57C /* KeychainServiceTests.swift in Sources */,
+				9D080F452127462F10AB6C97 /* LegacyInstall.swift in Sources */,
 				78DEE11DBBB312E894650FBF /* LocalizationServiceSettingsTests.swift in Sources */,
 				42E8C0D44725B88DB18845CB /* LocationServiceTests.swift in Sources */,
 				43A02557B62FE7C361CB6A7E /* MultipartCameraCallbackTests.swift in Sources */,

@@ -13,29 +13,15 @@ import VauchiPlatform
 import XCTest
 
 final class StorageKeyUpgradeTests: XCTestCase {
-    private static let importedContact =
-        "BEGIN:VCARD\r\nVERSION:3.0\r\nUID:before-580\r\nFN:Carol\r\nEND:VCARD\r\n"
-
     private var tempDir: URL!
     private var store: FakeKeychainStore!
 
     override func setUpWithError() throws {
         tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        let oldKey = Data((0 ..< 32).map { _ in UInt8.random(in: 0 ... 255) })
-        do {
-            let before = try PlatformAppEngine(
-                dataDir: tempDir.path,
-                relayUrl: "https://relay.test",
-                storageKeyBytes: oldKey
-            )
-            try before.createIdentity(displayName: "Before")
-            _ = try before.dispatchDomainCommand(
-                command: .importContactsFromVcf(data: Data(Self.importedContact.utf8))
-            )
-        }
+        try LegacyInstall.before.copy(into: tempDir)
         store = FakeKeychainStore()
-        store.items["storage_key"] = oldKey
+        store.items["storage_key"] = LegacyInstall.storageKey
     }
 
     override func tearDownWithError() throws {

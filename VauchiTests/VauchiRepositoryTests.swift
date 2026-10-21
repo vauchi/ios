@@ -76,13 +76,9 @@ final class VauchiRepositoryTests: XCTestCase {
     /// An install from before vauchi/private#580 kept its own storage key in
     /// the keychain; Core opens its database under that key.
     func testAnInstallFromBeforeOpensUnderItsOldKey() throws {
-        let oldKey = mobileGenerateStorageKey()
-        do {
-            let before = try PlatformAppEngine(dataDir: tempDir.path, relayUrl: "https://relay.test", storageKeyBytes: oldKey)
-            try before.createIdentity(displayName: "Before")
-        }
+        try LegacyInstall.before.copy(into: tempDir)
         let store = FakeKeychainStore()
-        store.items["storage_key"] = oldKey
+        store.items["storage_key"] = LegacyInstall.storageKey
 
         let repo = try VauchiRepository(dataDir: tempDir.path, keychain: VauchiKeychainBridge(keychain: store))
 
