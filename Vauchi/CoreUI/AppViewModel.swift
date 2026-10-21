@@ -123,6 +123,10 @@ class AppViewModel: ObservableObject {
     /// a spy instead of driving `LAContext`.
     lazy var biometricUnlockService: BiometricUnlockPrompting = LocalAuthenticationBiometricUnlock()
 
+    /// Keychain-sealed secret behind the OS user-presence check, for Core's
+    /// `CreateUserPresenceSecret` / `RevealUserPresenceSecret` (#712).
+    lazy var userPresenceSecretService = UserPresenceSecretService()
+
     /// One-shot location capture for the exchange "where we met" annotation
     /// (ADR-051). Driven by `Command::LocationRequest` in `handleExchangeCommands`.
     lazy var locationService = LocationService()
@@ -330,6 +334,14 @@ class AppViewModel: ObservableObject {
             loadInitialPresentation()
         case .requestBiometricUnlock:
             requestBiometricUnlock()
+        case let .createUserPresenceSecret(prompt):
+            userPresenceSecretService.create(prompt: prompt) { [weak self] outcome in
+                self?.sendHardwareEventJson(outcome.eventJson)
+            }
+        case let .revealUserPresenceSecret(prompt):
+            userPresenceSecretService.reveal(prompt: prompt) { [weak self] outcome in
+                self?.sendHardwareEventJson(outcome.eventJson)
+            }
         case .postNotification, .platformEffect:
             break
         default:
@@ -410,6 +422,8 @@ class AppViewModel: ObservableObject {
             "PerformNativeBack",
             "ResetApplication",
             "RequestBiometricUnlock",
+            "CreateUserPresenceSecret",
+            "RevealUserPresenceSecret",
             "PostNotification",
         ]
         root["commands"] = commands.filter { command in
@@ -883,10 +897,14 @@ class AppViewModel: ObservableObject {
     /// payload the shell ever hands Core, and its JSON must not be built on
     /// the main thread.
     private nonisolated func sendHardwareEvent(_ event: MobileEvent) {
+        sendHardwareEventJson(hardwareEventJson(event: event))
+    }
+
+    private nonisolated func sendHardwareEventJson(_ eventJson: @autoclosure @escaping () -> String) {
         let engine = appEngine
         engineQueue.async { [weak self] in
             do {
-                let resultJson = try engine.dispatchJson(eventJson: hardwareEventJson(event: event))
+                let resultJson = try engine.dispatchJson(eventJson: eventJson())
                 Task { @MainActor in self?.receivePresentationEnvelope(resultJson) }
             } catch {
                 #if DEBUG

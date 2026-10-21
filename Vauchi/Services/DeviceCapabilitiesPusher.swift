@@ -53,6 +53,7 @@ struct DeviceHardware {
     var hasAccelerometer: Bool
     var hasInternet: Bool
     var hasUsbPort: Bool
+    var canSealUserPresence: Bool = false
 }
 
 /// Build the JSON object core's `DeviceCapabilities` deserializes
@@ -76,6 +77,7 @@ func buildDeviceCapabilitiesJson(_ hw: DeviceHardware) -> String {
     parts.append("\"has_accelerometer\":\(jsonBool(hw.hasAccelerometer))")
     parts.append("\"has_internet\":\(jsonBool(hw.hasInternet))")
     parts.append("\"has_usb_port\":\(jsonBool(hw.hasUsbPort))")
+    parts.append("\"can_seal_user_presence\":\(jsonBool(hw.canSealUserPresence))")
     return "{" + parts.joined(separator: ",") + "}"
 }
 
@@ -116,7 +118,8 @@ func detectDeviceHardware() -> DeviceHardware {
         hasSecureEnclave: true,
         hasAccelerometer: CMMotionManager().isAccelerometerAvailable,
         hasInternet: true,
-        hasUsbPort: false
+        hasUsbPort: false,
+        canSealUserPresence: UserPresenceSecretService.canSealUserPresence()
     )
 }
 

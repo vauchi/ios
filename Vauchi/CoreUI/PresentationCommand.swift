@@ -114,6 +114,8 @@ enum PresentationCommand: Decodable {
     case performNativeBack
     case resetApplication
     case requestBiometricUnlock
+    case createUserPresenceSecret(prompt: String)
+    case revealUserPresenceSecret(prompt: String)
     case postNotification(JSONValue)
     case platformEffect(variant: String, payload: JSONValue?)
 
@@ -206,6 +208,10 @@ enum PresentationCommand: Decodable {
         let notification: JSONValue
     }
 
+    private struct PromptPayload: Decodable {
+        let prompt: String
+    }
+
     private static func decodeStringVariant(_ variant: String) -> Self {
         switch variant {
         case "PerformNativeBack": .performNativeBack
@@ -265,6 +271,14 @@ enum PresentationCommand: Decodable {
         case "PostNotification":
             return try .postNotification(
                 container.decode(NotificationPayload.self, forKey: key).notification
+            )
+        case "CreateUserPresenceSecret":
+            return try .createUserPresenceSecret(
+                prompt: container.decode(PromptPayload.self, forKey: key).prompt
+            )
+        case "RevealUserPresenceSecret":
+            return try .revealUserPresenceSecret(
+                prompt: container.decode(PromptPayload.self, forKey: key).prompt
             )
         default:
             return .platformEffect(

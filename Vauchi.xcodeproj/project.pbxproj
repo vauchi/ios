@@ -151,6 +151,7 @@
 		EEE8584577C53BC02A1FC797 /* PresentationSurfaceScrollingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7586008CD98DB8B84FAAB96F /* PresentationSurfaceScrollingTests.swift */; };
 		EFBE8A0E7445D2672D4C4C42 /* SurfaceTitleBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC96B3841EF40B6C73E53561 /* SurfaceTitleBarView.swift */; };
 		F05A78B995EB8456A4B310F3 /* PresentationContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE718E95F174F15A52F1FCEC /* PresentationContractTests.swift */; };
+		F2463A46BF7063821644ADC3 /* UserPresenceSecretService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3662D38A1F3BE583D18676 /* UserPresenceSecretService.swift */; };
 		F2FC2277E2D91400062C4620 /* UserPresenceSecretDispatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FB4EBDD74C49A27C220FA4 /* UserPresenceSecretDispatchTests.swift */; };
 		F3096FD65BB8C411D32ACE99 /* QrCameraTunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E118373F3BD2F4E7FC20AB /* QrCameraTunerView.swift */; };
 		F3145E4E7C9EC869B82C5AA8 /* CameraServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE470500913747AD36BDE885 /* CameraServiceTests.swift */; };
@@ -332,6 +333,7 @@
 		F0726E87F8B0A43ABC11897A /* MultipartCameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartCameraPreview.swift; sourceTree = "<group>"; };
 		F5427C4F253C3A904B25AA98 /* TextRoleStyleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRoleStyleTests.swift; sourceTree = "<group>"; };
 		F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformEdgeTests.swift; sourceTree = "<group>"; };
+		FA3662D38A1F3BE583D18676 /* UserPresenceSecretService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPresenceSecretService.swift; sourceTree = "<group>"; };
 		FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSyncServiceTests.swift; sourceTree = "<group>"; };
 		FF6D9F5CDBD0D932C6D60EE7 /* store-screens.vauchibackup.license */ = {isa = PBXFileReference; path = "store-screens.vauchibackup.license"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -637,6 +639,7 @@
 				A96FE811E67752C2D8F9079E /* SettingsService.swift */,
 				0CF5E9D9F31DCDFCB8D0F6B5 /* SharedInstance.swift */,
 				84CF989EA84DBE8A9F43E05D /* ThemeService.swift */,
+				FA3662D38A1F3BE583D18676 /* UserPresenceSecretService.swift */,
 				95373D9E6440FED4B532EBDD /* VauchiRepository.swift */,
 				B339287991D7CFE125A0B554 /* WakeupService.swift */,
 			);
@@ -960,6 +963,7 @@
 				EFBE8A0E7445D2672D4C4C42 /* SurfaceTitleBarView.swift in Sources */,
 				372704301C13BD3953C05111 /* TextRoleStyle.swift in Sources */,
 				2D0728F99D4DBB3C8491C25B /* ThemeService.swift in Sources */,
+				F2463A46BF7063821644ADC3 /* UserPresenceSecretService.swift in Sources */,
 				2F7D817E60BDE6223F5E0484 /* VauchiApp.swift in Sources */,
 				AE6ED32C72587A0283C520D2 /* VauchiRepository.swift in Sources */,
 				5DB1F56C8F6BC86226B8180F /* VauchiViewModel.swift in Sources */,
