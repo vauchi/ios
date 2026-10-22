@@ -27,8 +27,8 @@ final class LocalizationService: ObservableObject {
     private let defaults: UserDefaults
     private var appEngine: PlatformAppEngine?
 
-    /// Published current locale
-    @Published var currentLocale: MobileLocale = .english
+    /// Language code of the locale in effect
+    @Published var currentLocale: String = "en"
 
     /// Published list of available locales
     @Published var availableLocales: [MobileLocaleInfo] = []
@@ -111,7 +111,7 @@ final class LocalizationService: ObservableObject {
         if let locale = parseLocaleCode(code: systemLanguage) {
             currentLocale = locale
         } else {
-            currentLocale = .english
+            currentLocale = "en"
         }
     }
 
@@ -120,12 +120,6 @@ final class LocalizationService: ObservableObject {
         followSystem = false
         selectedLocaleCode = code
         pushRenderContext(engine: appEngine)
-    }
-
-    /// Select a locale directly
-    func selectLocale(_ locale: MobileLocale) {
-        let info = getLocaleInfo(locale: locale)
-        selectLocale(code: info.code)
     }
 
     /// Reset to follow system language
