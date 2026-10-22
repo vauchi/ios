@@ -15,29 +15,22 @@ enum UserPresenceOutcome: Equatable {
     case cancelled
     case unavailable
 
-    /// Core's canonical `Event` JSON. Written out here because the pinned
-    /// `MobileEvent` (0.85.0) has no user-presence variants for
-    /// `hardwareEventJson` to encode; `SealedSecret` is serde-transparent
-    /// bytes, so the secret is a JSON array of numbers. Replace with
-    /// `hardwareEventJson` once the bindings carry the variants.
+    /// Core's canonical `Event` JSON.
     var eventJson: String {
-        switch self {
-        case let .created(secret):
-            Self.secretEvent("UserPresenceSecretCreated", secret)
-        case let .revealed(secret):
-            Self.secretEvent("UserPresenceSecretRevealed", secret)
-        case .cancelled:
-            #""UserPresenceCheckCancelled""#
-        case .unavailable:
-            hardwareEventJson(event: .hardwareUnavailable(transport: Self.transport))
-        }
+        hardwareEventJson(event: event)
     }
 
-    private static let transport = "user_presence"
-
-    private static func secretEvent(_ variant: String, _ secret: [UInt8]) -> String {
-        let bytes = secret.map(String.init).joined(separator: ",")
-        return #"{"\#(variant)":{"secret":[\#(bytes)]}}"#
+    private var event: MobileEvent {
+        switch self {
+        case let .created(secret):
+            .userPresenceSecretCreated(secret: Data(secret))
+        case let .revealed(secret):
+            .userPresenceSecretRevealed(secret: Data(secret))
+        case .cancelled:
+            .userPresenceCheckCancelled
+        case .unavailable:
+            .hardwareUnavailable(transport: "user_presence")
+        }
     }
 }
 
