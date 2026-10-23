@@ -123,6 +123,10 @@ class AppViewModel: ObservableObject {
     /// a spy instead of driving `LAContext`.
     lazy var biometricUnlockService: BiometricUnlockPrompting = LocalAuthenticationBiometricUnlock()
 
+    /// Answers Core's `ReloadTheme`, queued when a content update applies
+    /// themes. Replaceable so tests observe it without the shared theme.
+    var reloadTheme: () -> Void = { ThemeService.shared.reloadThemes() }
+
     /// Keychain-sealed secret behind the OS user-presence check, for Core's
     /// `CreateUserPresenceSecret` / `RevealUserPresenceSecret` (#712).
     lazy var userPresenceSecretService = UserPresenceSecretService()
@@ -334,6 +338,8 @@ class AppViewModel: ObservableObject {
             loadInitialPresentation()
         case .requestBiometricUnlock:
             requestBiometricUnlock()
+        case .reloadTheme:
+            reloadTheme()
         case let .createUserPresenceSecret(prompt):
             userPresenceSecretService.create(prompt: prompt) { [weak self] outcome in
                 self?.sendHardwareEventJson(outcome.eventJson)
@@ -422,6 +428,7 @@ class AppViewModel: ObservableObject {
             "PerformNativeBack",
             "ResetApplication",
             "RequestBiometricUnlock",
+            "ReloadTheme",
             "CreateUserPresenceSecret",
             "RevealUserPresenceSecret",
             "PostNotification",
@@ -896,6 +903,11 @@ class AppViewModel: ObservableObject {
     /// arrival order. Encoded there too: a picked backup is the largest
     /// payload the shell ever hands Core, and its JSON must not be built on
     /// the main thread.
+    /// Core holds content downloads back on a metered network (D6).
+    func reportNetworkCost(_ cost: MobileNetworkCost) {
+        sendHardwareEvent(.networkCostChanged(cost: cost))
+    }
+
     private nonisolated func sendHardwareEvent(_ event: MobileEvent) {
         sendHardwareEventJson(hardwareEventJson(event: event))
     }

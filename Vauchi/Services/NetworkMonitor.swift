@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 import Network
+import VauchiPlatform
 
 /// Monitors network connectivity and provides current connection state
 final class NetworkMonitor: ObservableObject {
@@ -22,6 +23,10 @@ final class NetworkMonitor: ObservableObject {
 
     /// The type of network connection currently available
     @Published private(set) var connectionType: ConnectionType = .unknown
+
+    /// What a download costs on the current path, for Core's content
+    /// updates (private#733, D6)
+    @Published private(set) var cost: MobileNetworkCost = .unknown
 
     // MARK: - Connection Types
 
@@ -57,6 +62,25 @@ final class NetworkMonitor: ObservableObject {
         monitor.cancel()
     }
 
+    /// The cost of the path right now, for a background wakeup that runs
+    /// before any update reached the published `cost`
+    func currentCost() -> MobileNetworkCost {
+        Self.cost(of: monitor.currentPath)
+    }
+
+    static func cost(isSatisfied: Bool, isExpensive: Bool, isConstrained: Bool) -> MobileNetworkCost {
+        guard isSatisfied else { return .unknown }
+        return isExpensive || isConstrained ? .metered : .unmetered
+    }
+
+    private static func cost(of path: NWPath) -> MobileNetworkCost {
+        cost(
+            isSatisfied: path.status == .satisfied,
+            isExpensive: path.isExpensive,
+            isConstrained: path.isConstrained
+        )
+    }
+
     // MARK: - Private Methods
 
     private func setupMonitor() {
@@ -71,6 +95,7 @@ final class NetworkMonitor: ObservableObject {
 
     private func updateConnectionStatus(_ path: NWPath) {
         isConnected = path.status == .satisfied
+        cost = Self.cost(of: path)
 
         if path.usesInterfaceType(.wifi) {
             connectionType = .wifi

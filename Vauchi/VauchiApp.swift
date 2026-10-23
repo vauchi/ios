@@ -109,6 +109,13 @@ struct VauchiApp: App {
             // piggyback on this existing background wakeup — no new
             // BGTask. Best-effort; the applied content lands on disk for
             // the next foreground read, so no UI refresh is needed here.
+            // Core counts an unknown network as metered, so it hears the
+            // cost first (private#733).
+            _ = try? repository.appEngine.dispatchJson(
+                eventJson: hardwareEventJson(
+                    event: .networkCostChanged(cost: NetworkMonitor.shared.currentCost())
+                )
+            )
             _ = try? repository.appEngine.runContentUpdateCycle()
 
             // Poll for notifications (E)

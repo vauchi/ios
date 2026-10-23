@@ -100,7 +100,6 @@
 		99D8ED2B60D43F62A79B0317 /* ExchangeCommandBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38FE0127E86CB045D89F88E /* ExchangeCommandBridgeTests.swift */; };
 		9B12926FA62EF78944BBD659 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */; };
 		9D080F452127462F10AB6C97 /* LegacyInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F6D78047B754BD931AC481 /* LegacyInstall.swift */; };
-		9D3AA48B67B4BBCBFBA6A33C /* ContentUpdateCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C42CA0EEF4243C65EE1FDAF /* ContentUpdateCycleTests.swift */; };
 		9D5D4424B928F2AE4C789950 /* ScreenCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8691393CE57A5898A62A9B08 /* ScreenCatalogTests.swift */; };
 		9E2BD59979752A9C670AF34A /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95DAE4A89BF1E2A04935E05F /* CameraService.swift */; };
 		9EFD805310188B4C902B23F0 /* BiometricUnlockDispatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9288A1ED8B92F30A45A7805 /* BiometricUnlockDispatchTests.swift */; };
@@ -257,7 +256,6 @@
 		7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoContactTests.swift; sourceTree = "<group>"; };
 		7A01546D222F8024BB3E0009 /* DeviceCapabilitiesPusher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilitiesPusher.swift; sourceTree = "<group>"; };
 		7A701A0C348B6758EED1D949 /* DirectSendService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectSendService.swift; sourceTree = "<group>"; };
-		7C42CA0EEF4243C65EE1FDAF /* ContentUpdateCycleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentUpdateCycleTests.swift; sourceTree = "<group>"; };
 		7D255A687EB281C01D297ED7 /* VauchiSnapshotTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7ECC96545C3966B83B1D1AC7 /* VauchiTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		80D908420E7769CC3225282C /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
@@ -462,7 +460,6 @@
 				EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */,
 				200E59D28296103D0A19BBFD /* BundleVersionContractTests.swift */,
 				DE470500913747AD36BDE885 /* CameraServiceTests.swift */,
-				7C42CA0EEF4243C65EE1FDAF /* ContentUpdateCycleTests.swift */,
 				D1B18A4BEA7DD24A3923BE9A /* DebugCapabilityOverrideTests.swift */,
 				7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */,
 				653B68CB3B3D86B13D52E63E /* DeviceCapabilitiesPusherTests.swift */,
@@ -825,7 +822,6 @@
 				6F526CBE173AA74F1C620137 /* BleUuidsTests.swift in Sources */,
 				1DC86F1A0179CC71605FE2F6 /* BundleVersionContractTests.swift in Sources */,
 				F3145E4E7C9EC869B82C5AA8 /* CameraServiceTests.swift in Sources */,
-				9D3AA48B67B4BBCBFBA6A33C /* ContentUpdateCycleTests.swift in Sources */,
 				A4CE7EAD9B655B69E21073D9 /* CoreBottomTabBarLayoutTests.swift in Sources */,
 				09BDA3191A35B68A90B2E8A9 /* DebugCapabilityOverrideTests.swift in Sources */,
 				2236F8109A06F4C4FB40526C /* DebugFilePickFixtureTests.swift in Sources */,

@@ -147,22 +147,12 @@ class VauchiViewModel: ObservableObject {
             repository = repo
             let coreVM = AppViewModel(appEngine: repo.appEngine)
             coreViewModel = coreVM
+            coreVM.reportNetworkCost(NetworkMonitor.shared.cost)
             // Hand the engine to BackgroundSyncService so its
             // BGTaskScheduler interval comes from core's
             // PERIODIC_SYNC_INTERVAL_SECONDS rather than a frontend
             // magic number (audit P2-C).
             BackgroundSyncService.shared.setAppEngine(repo.appEngine)
-            // The content cycle does real CDN network I/O, which the
-            // headless test-sim sandbox cannot service — it aborts the
-            // app process (unit tests via the injected XCTest bundle, UI
-            // tests via the separately-launched app). Core handles a real
-            // offline device gracefully (`check_for_updates` →
-            // `CheckFailed`, no panic), so this guard is a test-sandbox
-            // carve-out, not a production path. Mirrors macOS `AppState`
-            // skipping its network-heavy init under test.
-            if !VauchiViewModel.isRunningUnderTest {
-                runContentUpdateCycle(appEngine: repo.appEngine)
-            }
             appState = .ready
             #if DEBUG
                 print("VauchiViewModel: repository initialized successfully")
@@ -173,64 +163,6 @@ class VauchiViewModel: ObservableObject {
                 print("VauchiViewModel: \(msg)")
             #endif
             errorMessage = msg
-        }
-    }
-
-    /// True when the app is hosting an automated test run, in either
-    /// mode: unit/snapshot tests inject the XCTest bundle
-    /// (`XCTestConfigurationFilePath` set in this process), while UI
-    /// tests launch the app separately with `--reset-for-testing`.
-    /// Startup network work (the content cycle) is skipped in both.
-    nonisolated static var isRunningUnderTest: Bool {
-        let env = ProcessInfo.processInfo.environment
-        return env["XCTestConfigurationFilePath"] != nil
-            || ProcessInfo.processInfo.arguments.contains("--reset-for-testing")
-    }
-
-    /// Native follow-ups for a content-update cycle outcome. Pure so the
-    /// decision is unit-testable (`ContentUpdateCycleTests`) without an
-    /// engine; the domain check→apply sequencing lives in core
-    /// (`RunContentUpdateCycle`). `refreshAppearance` implies `applied`
-    /// (core invariant), so the `applied` guard alone gates both.
-    nonisolated static func contentCycleActions(
-        _ outcome: MobileContentCycleOutcome
-    ) -> (refreshTheme: Bool, reloadUI: Bool) {
-        // TODO(HUMBLE): [T, P1] frontend interprets domain outcome flags to decide native refresh actions;
-        // core should emit a lifecycle Command instead (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-        guard outcome.applied else { return (false, false) }
-        return (outcome.refreshAppearance, true)
-    }
-
-    /// Run the remote content-update cycle in the background at startup.
-    /// Core owns the whole check→apply→invalidate sequence
-    /// (`RunContentUpdateCycle`); iOS only performs the native
-    /// consequences — re-applying the theme when the appearance changed
-    /// and reloading the UI when anything was applied. Best effort:
-    /// fired once on launch (matching macOS `AppState`), no retry;
-    /// failures return a no-op outcome, logged in debug without
-    /// disrupting startup. A periodic mobile cadence is a separate
-    /// product decision (see the content-update-cycle-adoption MRs).
-    private func runContentUpdateCycle(appEngine: PlatformAppEngine) {
-        Task.detached(priority: .utility) { [weak self] in
-            let outcome: MobileContentCycleOutcome
-            do {
-                outcome = try appEngine.runContentUpdateCycle()
-            } catch {
-                #if DEBUG
-                    print("VauchiViewModel: runContentUpdateCycle failed: \(error)")
-                #endif
-                return
-            }
-            let actions = VauchiViewModel.contentCycleActions(outcome)
-            guard actions.reloadUI else { return }
-            await MainActor.run {
-                if actions.refreshTheme {
-                    ThemeService.shared.applySelectedTheme()
-                }
-                // Locale store is hot-reloaded by core — reload picks up
-                // any new social-network labels / locale strings.
-                self?.coreViewModel?.invalidateAll()
-            }
         }
     }
 
@@ -261,6 +193,14 @@ class VauchiViewModel: ObservableObject {
         // no local `isOnline` mirror, no banner switch, no
         // auto-sync closure (audit
         // `2026-04-28-lifecycle-session-residue-umbrella` P2-D).
+        NetworkMonitor.shared.$cost
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] cost in
+                self?.coreViewModel?.reportNetworkCost(cost)
+            }
+            .store(in: &cancellables)
+
         NetworkMonitor.shared.$isConnected
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isConnected in

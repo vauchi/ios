@@ -114,6 +114,7 @@ enum PresentationCommand: Decodable {
     case performNativeBack
     case resetApplication
     case requestBiometricUnlock
+    case reloadTheme
     case createUserPresenceSecret(prompt: String)
     case revealUserPresenceSecret(prompt: String)
     case postNotification(JSONValue)
@@ -217,6 +218,7 @@ enum PresentationCommand: Decodable {
         case "PerformNativeBack": .performNativeBack
         case "ResetApplication": .resetApplication
         case "RequestBiometricUnlock": .requestBiometricUnlock
+        case "ReloadTheme": .reloadTheme
         default: .platformEffect(variant: variant, payload: nil)
         }
     }
