@@ -6,6 +6,7 @@
 // Based on: features/sync_updates.feature - network connectivity requirements
 
 @testable import Vauchi
+import VauchiPlatform
 import XCTest
 
 final class NetworkMonitorTests: XCTestCase {
@@ -70,5 +71,39 @@ final class NetworkMonitorTests: XCTestCase {
         // Should not crash
         monitor.start()
         monitor.stop()
+    }
+
+    // MARK: - Network Cost (private#733, D6)
+
+    /// Core holds content downloads back on a metered network and counts an
+    /// unknown network as metered, so only a path that is up and neither
+    /// expensive nor constrained reports unmetered.
+    func testAnOpenPathThatIsNeitherExpensiveNorConstrainedIsUnmetered() {
+        XCTAssertEqual(
+            NetworkMonitor.cost(isSatisfied: true, isExpensive: false, isConstrained: false),
+            .unmetered
+        )
+    }
+
+    func testAnExpensivePathIsMetered() {
+        XCTAssertEqual(
+            NetworkMonitor.cost(isSatisfied: true, isExpensive: true, isConstrained: false),
+            .metered
+        )
+    }
+
+    /// Low Data Mode marks the path constrained even on Wi-Fi.
+    func testAConstrainedPathIsMetered() {
+        XCTAssertEqual(
+            NetworkMonitor.cost(isSatisfied: true, isExpensive: false, isConstrained: true),
+            .metered
+        )
+    }
+
+    func testNoPathIsUnknown() {
+        XCTAssertEqual(
+            NetworkMonitor.cost(isSatisfied: false, isExpensive: false, isConstrained: false),
+            .unknown
+        )
     }
 }
