@@ -269,6 +269,33 @@ final class AccessibilityUITests: XCTestCase {
                        "Home surface should have interactive elements after round-trip")
     }
 
+    // MARK: - Keyboard
+
+    /// The keyboard covers the tab bar instead of lifting it: on an iPhone
+    /// SE the lifted bar hid a form's second field and caught taps meant
+    /// for it (vauchi/private#754). Reaches a form through the seeded home
+    /// surface's primary command and its first row.
+    func testKeyboardCoversTheTabBar() {
+        let primary = app.buttons["command.primary"]
+        XCTAssertTrue(primary.waitForExistence(timeout: 5), "Home surface should offer a primary command")
+        primary.tap()
+        let firstRow = app.buttons.matching(identifier: "presentationRow").firstMatch
+        XCTAssertTrue(firstRow.waitForExistence(timeout: 5), "The primary command should list rows")
+        firstRow.tap()
+        let field = app.textFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5), "The chosen row should open a form with a text field")
+        field.tap()
+        let keyboard = app.keyboards.firstMatch
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5), "Focusing the field should show the keyboard")
+
+        let tabBar = navigationDestinations
+        XCTAssertFalse(
+            tabBar.exists && tabBar.frame.minY < keyboard.frame.minY,
+            "The tab bar should stay under the keyboard, not sit above it "
+                + "(tab bar \(tabBar.frame), keyboard \(keyboard.frame))"
+        )
+    }
+
     // MARK: - VoiceOver Traits
 
     /// Home surface has visible static text elements with content.
