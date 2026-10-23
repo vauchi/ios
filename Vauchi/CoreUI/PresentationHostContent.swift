@@ -17,14 +17,26 @@ struct PresentationHostContent: View {
     let onDismissOverlay: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reducedMotion
     @FocusState private var focusedBindingID: String?
+    @State private var isKeyboardShown = false
 
     var body: some View {
         ZStack {
             surfaces
                 .padding(profileClass == .compact ? 0 : 16)
                 .safeAreaInset(edge: .bottom) {
-                    navigationBar
+                    // The bottom safe area includes the keyboard, so an inset
+                    // bar would ride above it and cover the form; a native tab
+                    // bar stays under the keyboard instead (vauchi/private#754).
+                    if !isKeyboardShown {
+                        navigationBar
+                    }
                 }
+                .onReceive(NotificationCenter.default.publisher(
+                    for: UIResponder.keyboardWillShowNotification
+                )) { _ in isKeyboardShown = true }
+                .onReceive(NotificationCenter.default.publisher(
+                    for: UIResponder.keyboardWillHideNotification
+                )) { _ in isKeyboardShown = false }
             if let overlay = state.activeOverlay {
                 // Dismiss before dispatch: Core clears its own open-overlay
                 // state only on `OverlayDismissed`, so reporting the choice
