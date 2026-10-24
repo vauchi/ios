@@ -102,7 +102,7 @@ targets:
         NSLocationWhenInUseUsageDescription: "Vauchi can record where you met a contact during an in-person exchange. This is stored privately on your device and never shared."
         # Export-compliance declaration App Store Connect requires at
         # submission. false = the app's encryption qualifies for export
-        # exemption (vauchi-core is GPL / publicly-available crypto), so no
+        # exemption (vauchi-core is AGPL / publicly-available crypto), so no
         # ASC compliance docs are required — assessment "exemption applies"
         # in problem 2026-06-11-ios-encryption-export-compliance. Kept here
         # (not just Info.plist) so xcodegen regen doesn't strip it — see
