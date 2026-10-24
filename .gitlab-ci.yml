@@ -69,6 +69,7 @@ stages:
 
 variables:
   VAUCHI_SCRIPTS_REF: "ci-templates-v2026.10.04"
+  VAUCHI_BOUNDARY_RULES_REF: "5ac148ed753d9cd5ff4aaec01d40f14c13ab33ad"
   # GitLab Ultimate Security Configuration
   SAST_EXCLUDED_PATHS: "build/, DerivedData/, Pods/"
   SECRET_DETECTION_EXCLUDED_PATHS: "build/, DerivedData/, Pods/"
@@ -765,13 +766,13 @@ lint:humble: # vci02-ok: complete script-download setup replaces macOS defaults
     - mkdir -p .ratchet-scripts
     - |
       curl --silent --fail \
-        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check.py/raw?ref=${VAUCHI_SCRIPTS_REF}" \
+        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check.py/raw?ref=${VAUCHI_BOUNDARY_RULES_REF}" \
         -o .ratchet-scripts/humble_check.py
       curl --silent --fail \
-        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check_rules.json/raw?ref=${VAUCHI_SCRIPTS_REF}" \
+        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check_rules.json/raw?ref=${VAUCHI_BOUNDARY_RULES_REF}" \
         -o .ratchet-scripts/humble_check_rules.json
       curl --silent --fail \
-        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check.baseline.json/raw?ref=${VAUCHI_SCRIPTS_REF}" \
+        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fhumble_check.baseline.json/raw?ref=${VAUCHI_BOUNDARY_RULES_REF}" \
         -o .ratchet-scripts/humble_check.baseline.json
   script:
     - python3 .ratchet-scripts/humble_check.py --repo "${CI_PROJECT_NAME}" --repo-path "${CI_PROJECT_DIR}" --config .ratchet-scripts/humble_check_rules.json --check .ratchet-scripts/humble_check.baseline.json

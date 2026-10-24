@@ -22,8 +22,6 @@ private enum SettingsKey: String {
     case autoSyncEnabled = "vauchi.autoSyncEnabled"
     case syncOnLaunch = "vauchi.syncOnLaunch"
     case notificationsEnabled = "vauchi.notificationsEnabled"
-    case hasCompletedOnboarding = "vauchi.hasCompletedOnboarding"
-    case hasDismissedDemoContact = "vauchi.hasDismissedDemoContact"
 
     // Accessibility settings
     case reduceMotion = "vauchi.accessibility.reduceMotion"
@@ -97,20 +95,6 @@ final class SettingsService {
         set { defaults.set(newValue, forKey: SettingsKey.notificationsEnabled.rawValue) }
     }
 
-    // MARK: - Onboarding Settings
-
-    /// Whether the user has completed the onboarding flow
-    var hasCompletedOnboarding: Bool {
-        get { defaults.bool(forKey: SettingsKey.hasCompletedOnboarding.rawValue) }
-        set { defaults.set(newValue, forKey: SettingsKey.hasCompletedOnboarding.rawValue) }
-    }
-
-    /// Whether the user has dismissed the demo contact
-    var hasDismissedDemoContact: Bool {
-        get { defaults.bool(forKey: SettingsKey.hasDismissedDemoContact.rawValue) }
-        set { defaults.set(newValue, forKey: SettingsKey.hasDismissedDemoContact.rawValue) }
-    }
-
     // MARK: - Accessibility Settings
 
     /// Whether to reduce motion/animations (supplements system setting)
@@ -150,18 +134,11 @@ final class SettingsService {
             SettingsKey.autoSyncEnabled,
             SettingsKey.syncOnLaunch,
             SettingsKey.notificationsEnabled,
-            SettingsKey.hasCompletedOnboarding,
-            SettingsKey.hasDismissedDemoContact,
             SettingsKey.reduceMotion,
             SettingsKey.highContrast,
             SettingsKey.largeTouchTargets,
         ] {
             defaults.removeObject(forKey: key.rawValue)
         }
-    }
-
-    /// Reset onboarding state (for replay from settings)
-    func resetOnboarding() {
-        defaults.removeObject(forKey: SettingsKey.hasCompletedOnboarding.rawValue)
     }
 }
