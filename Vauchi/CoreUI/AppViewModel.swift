@@ -340,8 +340,8 @@ class AppViewModel: ObservableObject {
             requestBiometricUnlock()
         case .reloadTheme:
             reloadTheme()
-        case let .createUserPresenceSecret(prompt):
-            userPresenceSecretService.create(prompt: prompt) { [weak self] outcome in
+        case let .createUserPresenceSecret(prompt, binding):
+            userPresenceSecretService.create(prompt: prompt, binding: binding) { [weak self] outcome in
                 self?.sendHardwareEventJson(outcome.eventJson)
             }
         case let .revealUserPresenceSecret(prompt):

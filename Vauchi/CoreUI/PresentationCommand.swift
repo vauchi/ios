@@ -115,7 +115,7 @@ enum PresentationCommand: Decodable {
     case resetApplication
     case requestBiometricUnlock
     case reloadTheme
-    case createUserPresenceSecret(prompt: String)
+    case createUserPresenceSecret(prompt: String, binding: UserPresenceBinding?)
     case revealUserPresenceSecret(prompt: String)
     case postNotification(JSONValue)
     case platformEffect(variant: String, payload: JSONValue?)
@@ -213,6 +213,21 @@ enum PresentationCommand: Decodable {
         let prompt: String
     }
 
+    private struct SealPayload: Decodable {
+        let prompt: String
+        let binding: UserPresenceBinding?
+
+        private enum CodingKeys: String, CodingKey { case prompt, binding }
+
+        /// An unknown binding decodes to `nil` instead of failing the whole
+        /// envelope; the service then seals nothing (vauchi/private#778).
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            prompt = try container.decode(String.self, forKey: .prompt)
+            binding = try? container.decode(UserPresenceBinding.self, forKey: .binding)
+        }
+    }
+
     private static func decodeStringVariant(_ variant: String) -> Self {
         switch variant {
         case "PerformNativeBack": .performNativeBack
@@ -275,9 +290,8 @@ enum PresentationCommand: Decodable {
                 container.decode(NotificationPayload.self, forKey: key).notification
             )
         case "CreateUserPresenceSecret":
-            return try .createUserPresenceSecret(
-                prompt: container.decode(PromptPayload.self, forKey: key).prompt
-            )
+            let payload = try container.decode(SealPayload.self, forKey: key)
+            return .createUserPresenceSecret(prompt: payload.prompt, binding: payload.binding)
         case "RevealUserPresenceSecret":
             return try .revealUserPresenceSecret(
                 prompt: container.decode(PromptPayload.self, forKey: key).prompt

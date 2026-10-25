@@ -14,6 +14,8 @@ enum UserPresenceOutcome: Equatable {
     case revealed(secret: [UInt8])
     case cancelled
     case unavailable
+    /// The sealed item is gone or no longer opens (vauchi/private#778).
+    case missing
 
     /// Core's canonical `Event` JSON.
     var eventJson: String {
@@ -30,8 +32,18 @@ enum UserPresenceOutcome: Equatable {
             .userPresenceCheckCancelled
         case .unavailable:
             .hardwareUnavailable(transport: "user_presence")
+        case .missing:
+            .userPresenceSecretMissing
         }
     }
+}
+
+/// Which OS check guards a sealed secret (Core 0.88.0, vauchi/private#778).
+enum UserPresenceBinding: String, Decodable, Equatable {
+    /// Only the biometrics enrolled when the secret was sealed.
+    case biometry
+    /// The device passcode.
+    case deviceCredential = "device_credential"
 }
 
 struct UserPresenceKeychainRead {
@@ -42,8 +54,9 @@ struct UserPresenceKeychainRead {
 /// The keychain item whose every read needs the operating system's
 /// user-presence check. Faked in tests: no unit test can pass that check.
 protocol UserPresenceKeychain: AnyObject {
-    /// Delete any previous item and store `secret` behind `.userPresence`.
-    func replaceSecret(_ secret: Data) -> OSStatus
+    /// Delete any previous item and store `secret` behind the check
+    /// `binding` names.
+    func replaceSecret(_ secret: Data, binding: UserPresenceBinding) -> OSStatus
     /// Read the item, which runs the OS check with `prompt` as its reason.
     func readSecret(prompt: String) -> UserPresenceKeychainRead
 }
@@ -76,20 +89,28 @@ final class UserPresenceSecretService {
         return LAContext().canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
     }
 
-    func create(prompt: String, completion: @escaping (UserPresenceOutcome) -> Void) {
+    func create(
+        prompt: String,
+        binding: UserPresenceBinding?,
+        completion: @escaping (UserPresenceOutcome) -> Void
+    ) {
+        guard let binding else {
+            completion(.unavailable)
+            return
+        }
         perform { [keychain, randomBytes] in
             guard var fresh = randomBytes(Self.secretLength), fresh.count == Self.secretLength else {
                 completion(.unavailable)
                 return
             }
             defer { Self.zero(&fresh) }
-            guard keychain.replaceSecret(Data(fresh)) == errSecSuccess else {
+            guard keychain.replaceSecret(Data(fresh), binding: binding) == errSecSuccess else {
                 completion(.unavailable)
                 return
             }
             // The read-back is the OS check Core asked to run now; a
             // mismatch means the item is not the one just sealed.
-            let outcome = Self.outcome(of: keychain.readSecret(prompt: prompt)) { secret in
+            let outcome = Self.outcome(of: keychain.readSecret(prompt: prompt), whenMissing: .unavailable) { secret in
                 secret == fresh ? .created(secret: secret) : .unavailable
             }
             completion(outcome)
@@ -98,19 +119,24 @@ final class UserPresenceSecretService {
 
     func reveal(prompt: String, completion: @escaping (UserPresenceOutcome) -> Void) {
         perform { [keychain] in
-            completion(Self.outcome(of: keychain.readSecret(prompt: prompt)) { .revealed(secret: $0) })
+            completion(Self.outcome(of: keychain.readSecret(prompt: prompt), whenMissing: .missing) {
+                .revealed(secret: $0)
+            })
         }
     }
 
     /// A cancel and a failed check both leave the user unconfirmed and free
     /// to retry, so both answer `UserPresenceCheckCancelled`
     /// (`LAError.userCancel` / `.appCancel` / `.systemCancel` reach the
-    /// keychain caller as `errSecUserCanceled`). A missing or wrong-sized
-    /// item, a locked keychain, or any other failure cannot produce the
-    /// secret, so it answers `HardwareUnavailable` rather than handing Core
-    /// bytes it would count as a wrong secret.
+    /// keychain caller as `errSecUserCanceled`). A reveal that finds no item
+    /// answers `UserPresenceSecretMissing`: it is gone, or a biometric seal
+    /// stopped opening when the enrolment changed (#778). A wrong-sized item,
+    /// a locked keychain, or any other failure cannot produce the secret, so
+    /// it answers `HardwareUnavailable` rather than handing Core bytes it
+    /// would count as a wrong secret.
     private static func outcome(
         of read: UserPresenceKeychainRead,
+        whenMissing missing: UserPresenceOutcome,
         success: ([UInt8]) -> UserPresenceOutcome
     ) -> UserPresenceOutcome {
         switch read.status {
@@ -119,6 +145,8 @@ final class UserPresenceSecretService {
             return success([UInt8](data))
         case errSecUserCanceled, errSecAuthFailed:
             return .cancelled
+        case errSecItemNotFound:
+            return missing
         default:
             return .unavailable
         }
@@ -137,10 +165,9 @@ func secureRandomBytes(count: Int) -> [UInt8]? {
     return status == errSecSuccess ? bytes : nil
 }
 
-/// `.userPresence` admits biometrics or the device passcode, matching the
-/// `deviceOwnerAuthentication` capability check (plan D4). `ThisDeviceOnly`
+/// The access control is the one Core's binding names (#778). `ThisDeviceOnly`
 /// keeps the item out of backups and device migration: a restored Core asks
-/// to reveal, finds nothing, and answers unavailable instead of trusting a
+/// to reveal, finds nothing, and answers missing instead of trusting a
 /// copied secret.
 final class SystemUserPresenceKeychain: UserPresenceKeychain {
     private let service = "app.vauchi.ios"
@@ -154,11 +181,21 @@ final class SystemUserPresenceKeychain: UserPresenceKeychain {
         ]
     }
 
-    func replaceSecret(_ secret: Data) -> OSStatus {
+    /// `.biometryCurrentSet` stops opening when a face or finger is added or
+    /// removed, which needs only the passcode; `.userPresence` would let that
+    /// passcode open a biometric seal.
+    static func accessFlags(for binding: UserPresenceBinding) -> SecAccessControlCreateFlags {
+        switch binding {
+        case .biometry: .biometryCurrentSet
+        case .deviceCredential: .devicePasscode
+        }
+    }
+
+    func replaceSecret(_ secret: Data, binding: UserPresenceBinding) -> OSStatus {
         guard let access = SecAccessControlCreateWithFlags(
             nil,
             kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
-            .userPresence,
+            Self.accessFlags(for: binding),
             nil
         ) else {
             return errSecParam
