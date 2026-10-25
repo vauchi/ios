@@ -3,14 +3,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // Core asks for the operating system's user-presence check with
-// `Command::CreateUserPresenceSecret { prompt }` (first time on this device)
+// `Command::CreateUserPresenceSecret { prompt, binding }` (first time on this
+// device; `binding` names the check, vauchi/private#778)
 // and `Command::RevealUserPresenceSecret { prompt }` (after that), and reads
 // the answer as `Event::UserPresenceSecretCreated { secret }`,
-// `UserPresenceSecretRevealed { secret }`, `UserPresenceCheckCancelled`, or
-// `HardwareUnavailable { transport: "user_presence" }`
+// `UserPresenceSecretRevealed { secret }`, `UserPresenceCheckCancelled`,
+// `UserPresenceSecretMissing`, or `HardwareUnavailable { transport:
+// "user_presence" }`
 // (`core/vauchi-core/src/platform.rs`, ADR-066, vauchi/private#712).
 //
-// CC-23: the keychain item with `.userPresence` access control is the true
+// CC-23: the keychain item with its access control is the true
 // boundary — no unit test can satisfy the OS check — so it is faked at the
 // `SecItemAdd` / `SecItemCopyMatching` status level and these pin the
 // decode, the dispatch, and the exact event JSON each outcome hands Core.
@@ -31,9 +33,11 @@ final class FakeUserPresenceKeychain: UserPresenceKeychain {
     var readOverride: Data?
     private(set) var replaceCount = 0
     private(set) var readPrompts: [String] = []
+    private(set) var sealedBindings: [UserPresenceBinding] = []
 
-    func replaceSecret(_ secret: Data) -> OSStatus {
+    func replaceSecret(_ secret: Data, binding: UserPresenceBinding) -> OSStatus {
         replaceCount += 1
+        sealedBindings.append(binding)
         guard replaceStatus == errSecSuccess else { return replaceStatus }
         stored = secret
         return errSecSuccess
@@ -80,9 +84,9 @@ final class UserPresenceSecretDispatchTests: XCTestCase {
         )
     }
 
-    private func create() -> UserPresenceOutcome? {
+    private func create(binding: UserPresenceBinding? = .biometry) -> UserPresenceOutcome? {
         var outcome: UserPresenceOutcome?
-        makeService().create(prompt: prompt) { outcome = $0 }
+        makeService().create(prompt: prompt, binding: binding) { outcome = $0 }
         return outcome
     }
 
@@ -94,15 +98,31 @@ final class UserPresenceSecretDispatchTests: XCTestCase {
 
     // MARK: - Decode
 
-    func testCreateUserPresenceSecretDecodesWithItsPrompt() throws {
-        let commands = try decodeCommands(
-            #"{"commands":[{"CreateUserPresenceSecret":{"prompt":"Confirm it is you"}}]}"#
-        )
+    func testCreateUserPresenceSecretDecodesWithItsPromptAndBinding() throws {
+        for (wire, binding) in [("biometry", UserPresenceBinding.biometry),
+                                ("device_credential", .deviceCredential)] {
+            let commands = try decodeCommands(
+                #"{"commands":[{"CreateUserPresenceSecret":{"prompt":"Confirm it is you","binding":"\#(wire)"}}]}"#
+            )
 
-        guard case let .createUserPresenceSecret(prompt) = try XCTUnwrap(commands.first) else {
-            return XCTFail("expected .createUserPresenceSecret, got \(commands)")
+            guard case let .createUserPresenceSecret(prompt, decoded) = try XCTUnwrap(commands.first) else {
+                return XCTFail("expected .createUserPresenceSecret, got \(commands)")
+            }
+            XCTAssertEqual(prompt, "Confirm it is you", wire)
+            XCTAssertEqual(decoded, binding, wire)
         }
-        XCTAssertEqual(prompt, "Confirm it is you")
+    }
+
+    /// An unknown binding must not fail the whole envelope, nor pick a seal.
+    func testAnUnknownOrMissingBindingDecodesToNone() throws {
+        for payload in [#"{"prompt":"p","binding":"face_or_passcode"}"#, #"{"prompt":"p"}"#] {
+            let commands = try decodeCommands(#"{"commands":[{"CreateUserPresenceSecret":\#(payload)}]}"#)
+
+            guard case let .createUserPresenceSecret(_, decoded) = try XCTUnwrap(commands.first) else {
+                return XCTFail("expected .createUserPresenceSecret, got \(commands)")
+            }
+            XCTAssertNil(decoded, payload)
+        }
     }
 
     func testRevealUserPresenceSecretDecodesWithItsPrompt() throws {
@@ -129,10 +149,11 @@ final class UserPresenceSecretDispatchTests: XCTestCase {
         viewModel.userPresenceSecretService = makeService()
 
         viewModel.receivePresentationEnvelope(
-            #"{"commands":[{"CreateUserPresenceSecret":{"prompt":"Confirm it is you"}}]}"#
+            #"{"commands":[{"CreateUserPresenceSecret":{"prompt":"Confirm it is you","binding":"biometry"}}]}"#
         )
 
         XCTAssertEqual(keychain.stored, Data(firstSecret))
+        XCTAssertEqual(keychain.sealedBindings, [.biometry])
         XCTAssertEqual(keychain.readPrompts, ["Confirm it is you"])
         XCTAssertNil(viewModel.alertMessage, "the command must not surface as a presentation error")
     }
@@ -163,6 +184,33 @@ final class UserPresenceSecretDispatchTests: XCTestCase {
         XCTAssertEqual(create(), .created(secret: firstSecret))
         XCTAssertEqual(keychain.stored, Data(firstSecret))
         XCTAssertEqual(keychain.readPrompts, [prompt], "the OS check runs now, with Core's prompt")
+    }
+
+    /// A biometric seal stops opening when the enrolled fingers or faces
+    /// change, so one added with only the passcode cannot read it
+    /// (vauchi/private#778).
+    func testCreateSealsUnderTheCheckCoreNames() {
+        XCTAssertEqual(create(binding: .biometry), .created(secret: firstSecret))
+        XCTAssertEqual(create(binding: .deviceCredential), .created(secret: secondSecret))
+
+        XCTAssertEqual(keychain.sealedBindings, [.biometry, .deviceCredential])
+    }
+
+    func testCreateWithoutABindingSealsNothingAndAnswersUnavailable() {
+        XCTAssertEqual(create(binding: nil), .unavailable)
+        XCTAssertEqual(keychain.replaceCount, 0)
+        XCTAssertEqual(keychain.readPrompts, [])
+    }
+
+    func testTheSystemKeychainSealsBiometryToTheCurrentEnrolmentAndTheCredentialToThePasscode() {
+        XCTAssertEqual(SystemUserPresenceKeychain.accessFlags(for: .biometry), .biometryCurrentSet)
+        XCTAssertEqual(SystemUserPresenceKeychain.accessFlags(for: .deviceCredential), .devicePasscode)
+    }
+
+    func testCreateWhoseReadBackFindsNoItemAnswersUnavailable() {
+        keychain.readStatus = errSecItemNotFound
+
+        XCTAssertEqual(create(), .unavailable)
     }
 
     func testCreatedEventIsCoresCanonicalJson() {
@@ -239,8 +287,15 @@ final class UserPresenceSecretDispatchTests: XCTestCase {
         XCTAssertEqual(reveal(), .cancelled)
     }
 
-    func testRevealWithoutAnItemAnswersUnavailable() {
-        XCTAssertEqual(reveal(), .unavailable)
+    /// The item is gone, or a biometric seal no longer opens after the
+    /// enrolment changed: Core refuses there instead of falling back as it
+    /// does for a device that cannot run the check (vauchi/private#778).
+    func testRevealWithoutAnItemAnswersMissing() {
+        XCTAssertEqual(reveal(), .missing)
+    }
+
+    func testMissingEventIsCoresCanonicalJson() {
+        XCTAssertEqual(UserPresenceOutcome.missing.eventJson, #""UserPresenceSecretMissing""#)
     }
 
     func testRevealOfAWrongSizedItemAnswersUnavailable() {
