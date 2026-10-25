@@ -792,6 +792,30 @@ lint:humble: # vci02-ok: complete script-download setup replaces macOS defaults
 release:ratchet-zero:
   extends: .release-ratchet-zero
 
+# A stable tag signs and ships, so it must point at a commit that reached
+# main through review: any Maintainer token can tag an arbitrary commit
+# (private#807). The explicit refspec is needed because a tag pipeline's
+# checkout does not reliably carry origin/main.
+release:verify:
+  stage: lint
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/alpine:3.21
+  tags: [docker]
+  needs: []
+  interruptible: false
+  before_script:
+    - apk add --no-cache git
+  script:
+    - git fetch --depth=200 origin "+refs/heads/${CI_DEFAULT_BRANCH}:refs/remotes/origin/${CI_DEFAULT_BRANCH}"
+    - |
+      if git merge-base --is-ancestor "$CI_COMMIT_SHA" "origin/${CI_DEFAULT_BRANCH}"; then
+        echo "release:verify: $CI_COMMIT_TAG ($CI_COMMIT_SHA) is on ${CI_DEFAULT_BRANCH}"
+      else
+        echo "release:verify: $CI_COMMIT_TAG ($CI_COMMIT_SHA) is not on ${CI_DEFAULT_BRANCH}; a stable tag must point at a reviewed commit" >&2
+        exit 1
+      fi
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+
 lint:xcodegen: # vci02-ok: xcodegen is the only setup this no-build lint needs
   extends: .macos-job
   stage: lint
