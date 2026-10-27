@@ -35,7 +35,8 @@ enum PresentationEvent: Encodable {
         availableWidth: UInt32,
         availableHeight: UInt32,
         inputModes: [PresentationInputMode],
-        motion: PresentationMotion
+        motion: PresentationMotion,
+        colorScheme: PresentationColorScheme? = nil
     )
     case deepLinkOpened(uri: String)
     case appBackgrounded
@@ -118,12 +119,15 @@ enum PresentationEvent: Encodable {
         let availableHeight: UInt32
         let inputModes: [PresentationInputMode]
         let motion: PresentationMotion
+        /// Left out when unknown, so Core paints its dark default.
+        let colorScheme: PresentationColorScheme?
 
         private enum CodingKeys: String, CodingKey {
             case availableWidth = "available_width"
             case availableHeight = "available_height"
             case inputModes = "input_modes"
             case motion
+            case colorScheme = "color_scheme"
         }
     }
 
@@ -184,13 +188,14 @@ enum PresentationEvent: Encodable {
                 OverlayPayload(surfaceID: surfaceID, kind: kind),
                 forKey: .init(stringValue: "OverlayDismissed")!
             )
-        case let .environmentChanged(width, height, inputModes, motion):
+        case let .environmentChanged(width, height, inputModes, motion, colorScheme):
             try container.encode(
                 EnvironmentPayload(
                     availableWidth: width,
                     availableHeight: height,
                     inputModes: inputModes,
-                    motion: motion
+                    motion: motion,
+                    colorScheme: colorScheme
                 ),
                 forKey: .init(stringValue: "PresentationEnvironmentChanged")!
             )

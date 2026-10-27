@@ -124,8 +124,11 @@ class AppViewModel: ObservableObject {
     lazy var biometricUnlockService: BiometricUnlockPrompting = LocalAuthenticationBiometricUnlock()
 
     /// Answers Core's `ReloadTheme`, queued when a content update applies
-    /// themes. Replaceable so tests observe it without the shared theme.
-    var reloadTheme: () -> Void = { ThemeService.shared.reloadThemes() }
+    /// themes: the re-presented surface carries the new colours
+    /// (vauchi/private#814). Replaceable so tests observe it.
+    lazy var reloadTheme: () -> Void = { [weak self] in
+        self?.dispatchPresentation(.presentationInvalidated)
+    }
 
     /// Keychain-sealed secret behind the OS user-presence check, for Core's
     /// `CreateUserPresenceSecret` / `RevealUserPresenceSecret` (#712).

@@ -10,10 +10,13 @@ struct PresentationOverlayView: View {
     let reducedMotion: Bool
     let onAction: (PresentationEvent) -> Void
     let onDismiss: () -> Void
+    @Environment(\.presentationPalette) private var palette
 
     var body: some View {
         ZStack {
-            ThemeService.shared.scrim
+            // The scrim is no theme role Core sends; the dimming stays the
+            // same under every theme.
+            Color.black.opacity(0.28) // design-token-ok: modal scrim, no theme role (vauchi/private#814)
                 .ignoresSafeArea()
                 .onTapGesture(perform: onDismiss)
             if overlay.overlay.kind == .navigation {
@@ -146,7 +149,7 @@ struct PresentationOverlayView: View {
             }
             .buttonStyle(.bordered)
             .disabled(!action.enabled)
-            .foregroundColor(action.tone.foregroundColor)
+            .foregroundColor(action.tone.foregroundColor(in: palette))
             // The icon repeats the word beside it, so it must not be its own
             // VoiceOver stop — left exposed, SwiftUI narrates the symbol and
             // gets it wrong either way: undescribed symbols read as their raw

@@ -34,7 +34,7 @@ struct ContentView: View {
             VStack(spacing: 16) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 50))
-                    .foregroundColor(ThemeService.shared.error)
+                    .foregroundColor(Color(uiColor: .systemRed))
                     .accessibilityHidden(true)
                 Text(localizationService.t("error.generic"))
                     .font(.title.bold())

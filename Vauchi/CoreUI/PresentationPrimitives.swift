@@ -39,11 +39,11 @@ enum PresentationActionTone: String, Codable, PresentationTolerantEnum {
     case serious
     case destructive
 
-    var foregroundColor: Color {
+    func foregroundColor(in palette: PresentationPalette) -> Color {
         switch self {
-        case .standard: .primary
-        case .serious: ThemeService.shared.warning
-        case .destructive: ThemeService.shared.error
+        case .standard: palette.text
+        case .serious: palette.warning
+        case .destructive: palette.error
         }
     }
 }
@@ -135,6 +135,13 @@ enum PresentationInputMode: String, Codable {
     case keyboard
 }
 
+/// The OS light/dark appearance, reported so "follow system" paints Core's
+/// default theme for it (Core 0.90.0, vauchi/private#814).
+enum PresentationColorScheme: String, Codable {
+    case light
+    case dark
+}
+
 enum PresentationMotion: String, Codable {
     case full
     case reduced
@@ -195,6 +202,9 @@ struct PresentationTokens: Codable, Equatable {
     let spacingLarge: UInt16
     let cornerRadius: UInt16
     let minimumTargetSize: UInt16
+    /// Absent from a Core older than 0.90.0; the palette then paints the
+    /// system's colours.
+    let colors: PresentationColors?
 
     private enum CodingKeys: String, CodingKey {
         case spacingSmall = "spacing_small"
@@ -202,6 +212,36 @@ struct PresentationTokens: Codable, Equatable {
         case spacingLarge = "spacing_large"
         case cornerRadius = "corner_radius"
         case minimumTargetSize = "minimum_target_size"
+        case colors
+    }
+}
+
+/// The active theme's colours by role, as `#rrggbb`. A `nil` role is one the
+/// theme leaves out; `PresentationPalette` paints its nearest required role.
+struct PresentationColors: Codable, Equatable {
+    let background: String
+    let surface: String
+    let text: String
+    let textMuted: String
+    let accent: String
+    let border: String
+    let success: String
+    let warning: String
+    let error: String
+    let surfaceInput: String?
+    let surfaceMuted: String?
+    let surfaceElevated: String?
+    let textOnAccent: String?
+    let focusRing: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case background, surface, text, accent, border, success, warning, error
+        case textMuted = "text_muted"
+        case surfaceInput = "surface_input"
+        case surfaceMuted = "surface_muted"
+        case surfaceElevated = "surface_elevated"
+        case textOnAccent = "text_on_accent"
+        case focusRing = "focus_ring"
     }
 }
 

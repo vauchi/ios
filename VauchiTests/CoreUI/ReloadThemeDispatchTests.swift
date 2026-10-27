@@ -3,9 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // Core queues `Command::ReloadTheme` once a content update applies themes
-// (core!1937, private#733); the shell answers by applying the selected
-// theme again, so a theme downloaded from the CDN reaches native theming
-// without a restart.
+// (core!1937, private#733); the shell answers by asking Core to present
+// the surface again, which carries the new theme's colours (private#814).
 //
 // Traces to: features/remote_content.feature
 
@@ -45,7 +44,7 @@ final class ReloadThemeDispatchTests: XCTestCase {
         }
     }
 
-    func testReloadThemeAppliesTheSelectedThemeOnce() {
+    func testReloadThemeAnswersOnce() {
         viewModel.receivePresentationEnvelope(#"{"commands":["ReloadTheme"]}"#)
 
         XCTAssertEqual(reloads, 1)

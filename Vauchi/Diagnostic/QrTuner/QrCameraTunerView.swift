@@ -374,7 +374,7 @@
 
                 if let error = errorMessage {
                     Text(error)
-                        .foregroundColor(ThemeService.shared.error)
+                        .foregroundColor(Color(uiColor: .systemRed))
                         .font(.caption)
                 }
 

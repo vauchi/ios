@@ -7,6 +7,9 @@ import SwiftUI
 struct PresentationHostView: View {
     @ObservedObject var viewModel: AppViewModel
     @Environment(\.accessibilityReduceMotion) private var reducedMotion
+    /// The OS appearance: Core paints its default theme for it under
+    /// "follow system" (vauchi/private#814).
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         GeometryReader { geometry in
@@ -26,6 +29,9 @@ struct PresentationHostView: View {
                 reportEnvironment(size)
             }
             .onChange(of: reducedMotion) { _ in
+                reportEnvironment(geometry.size)
+            }
+            .onChange(of: colorScheme) { _ in
                 reportEnvironment(geometry.size)
             }
             .animation(
@@ -97,7 +103,8 @@ struct PresentationHostView: View {
                 availableWidth: UInt32(max(0, size.width.rounded())),
                 availableHeight: UInt32(max(0, size.height.rounded())),
                 inputModes: [.touch],
-                motion: reducedMotion ? .reduced : .full
+                motion: reducedMotion ? .reduced : .full,
+                colorScheme: colorScheme == .dark ? .dark : .light
             )
         )
     }

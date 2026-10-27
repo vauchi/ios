@@ -55,6 +55,19 @@ struct PresentationHostContent: View {
                 .zIndex(20)
             }
         }
+        .background(palette.background.ignoresSafeArea())
+        .foregroundStyle(palette.text)
+        .tint(palette.accent)
+        .environment(\.presentationPalette, palette)
+    }
+
+    /// The active surface's colours. Overlays carry no tokens of their own,
+    /// so they and the window around the surfaces paint with these
+    /// (vauchi/private#814).
+    private var palette: PresentationPalette {
+        PresentationPalette(
+            colors: state.activeSurfaceID.flatMap { state.surfaces[$0] }?.tokens.colors
+        )
     }
 
     private var profileClass: PresentationWindowClass {
@@ -91,6 +104,10 @@ struct PresentationHostContent: View {
                     onEvent: { event in
                         onEvent(surfaceID, event)
                     }
+                )
+                .environment(
+                    \.presentationPalette,
+                    PresentationPalette(colors: surface.tokens.colors)
                 )
             }
         }

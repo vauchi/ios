@@ -369,7 +369,7 @@
                         .cornerRadius(4)
                 } else {
                     Text("QR generation failed")
-                        .foregroundColor(ThemeService.shared.error)
+                        .foregroundColor(Color(uiColor: .systemRed))
                 }
             }
         }

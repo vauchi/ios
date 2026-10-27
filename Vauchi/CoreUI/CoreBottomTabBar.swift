@@ -141,14 +141,15 @@ struct CoreBottomTabBar: View {
 
 private struct TabBarBadge: View {
     let count: UInt32
+    @Environment(\.presentationPalette) private var palette
 
     var body: some View {
         Text("\(count)")
             .font(.caption2)
-            .foregroundColor(ThemeService.shared.textOnAccent)
+            .foregroundColor(palette.textOnAccent)
             .padding(.horizontal, 4)
             .padding(.vertical, 1)
-            .background(ThemeService.shared.error, in: Capsule())
+            .background(palette.error, in: Capsule())
             .accessibilityHidden(true)
     }
 }

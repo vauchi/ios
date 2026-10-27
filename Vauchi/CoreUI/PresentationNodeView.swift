@@ -6,6 +6,7 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 
 struct PresentationNodeView: View {
+    @Environment(\.presentationPalette) private var palette
     /// Floor for a QR another device has to read off this screen. A dense
     /// multi-stage exchange payload has to survive a peer's camera at an
     /// angle, through screen glare, so this is deliberately generous: on a
@@ -178,7 +179,7 @@ struct PresentationNodeView: View {
             if let error = value.validationError {
                 Text(error)
                     .font(.caption)
-                    .foregroundStyle(ThemeService.shared.error)
+                    .foregroundStyle(palette.error)
             }
         }
         .submitLabel(.done)
@@ -452,7 +453,7 @@ struct PresentationNodeView: View {
             }
         }
         .padding(8)
-        .background(ThemeService.shared.warning.opacity(0.12))
+        .background(palette.warning.opacity(0.12))
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .accessibilityElement(children: .contain)
         .accessibilityLabel(value.accessibility.label)
@@ -504,11 +505,11 @@ struct PresentationNodeView: View {
 
     private func toneColor(_ tone: PresentationTone) -> Color {
         switch tone {
-        case .neutral: .secondary
-        case .accent: .accentColor
-        case .success: ThemeService.shared.success
-        case .warning: ThemeService.shared.warning
-        case .error: ThemeService.shared.error
+        case .neutral: palette.textMuted
+        case .accent: palette.accent
+        case .success: palette.success
+        case .warning: palette.warning
+        case .error: palette.error
         }
     }
 
