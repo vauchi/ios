@@ -54,7 +54,11 @@ struct ContentView: View {
         } else if let coreViewModel = viewModel.coreViewModel {
             PresentationHostView(viewModel: coreViewModel)
                 .refreshable {
-                    await viewModel.sync()
+                    guard let surfaceID = coreViewModel.presentationState.activeSurfaceID else { return }
+                    coreViewModel.activateAndDispatch(
+                        surfaceID: surfaceID,
+                        event: .refreshRequested(surfaceID: surfaceID)
+                    )
                 }
         } else {
             LoadingView()

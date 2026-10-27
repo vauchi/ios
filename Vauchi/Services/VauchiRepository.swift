@@ -47,9 +47,8 @@ enum VauchiRepositoryError: LocalizedError {
     /// Convert from MobileError to VauchiRepositoryError.
     ///
     /// `MobileError` was collapsed to 8 variants in vauchi-platform 0.20.3.
-    /// We preserve the richer `VauchiRepositoryError` surface because several
-    /// call sites and tests still discriminate on specific cases
-    /// (`.rateLimited`).
+    /// We preserve the richer `VauchiRepositoryError` surface because tests
+    /// still discriminate on specific cases (`.internalError`).
     static func from(_ error: MobileError) -> VauchiRepositoryError {
         switch error {
         case .WrongPassword:
@@ -72,16 +71,6 @@ enum VauchiRepositoryError: LocalizedError {
             return .internalError("Unknown error")
         }
     }
-}
-
-/// Sync result
-struct VauchiSyncResult {
-    let contactsAdded: UInt32
-    let cardsUpdated: UInt32
-    let updatesSent: UInt32
-    let total: UInt32
-    let hasChanges: Bool
-    let updatedContactNames: [String]
 }
 
 /// Repository class wrapping the single `PlatformAppEngine` UniFFI handle
@@ -200,50 +189,6 @@ class VauchiRepository {
             }
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    // MARK: - Sync Operations
-
-    /// Sync with relay server.
-    ///
-    /// Routes through the single engine handle. The engine lazily connects
-    /// and honors the C1/C2 timing throttle: a throttled (`TooSoon`) call
-    /// returns a benign no-change result (`hasChanges == false`), not an
-    /// error.
-    func sync() throws -> VauchiSyncResult {
-        do {
-            let dcResult = try appEngine.dispatchDomainCommand(command: .sync)
-            guard case let .syncResult(result) = dcResult else {
-                throw VauchiRepositoryError.from(
-                    MobileError.Other(detail: "Sync: unexpected result variant")
-                )
-            }
-            return VauchiSyncResult(
-                contactsAdded: result.contactsAdded,
-                cardsUpdated: result.cardsUpdated,
-                updatesSent: result.updatesSent,
-                total: result.total,
-                hasChanges: result.hasChanges,
-                updatedContactNames: result.updatedContactNames
-            )
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-
-    // MARK: - Aha Moments
-
-    /// Try to trigger an aha moment and return the localized milestone if it
-    /// should be shown now, or `nil` if already seen. Errors are swallowed so
-    /// a milestone failure never breaks the calling flow.
-    func tryTriggerAhaMoment(_ momentType: MobileAhaMomentType) -> MobileAhaMoment? {
-        do {
-            let result = try appEngine.dispatchDomainCommand(command: .tryTriggerAhaMoment(momentType: momentType))
-            guard case let .ahaMomentOpt(moment) = result else { return nil }
-            return moment
-        } catch {
-            return nil
         }
     }
 

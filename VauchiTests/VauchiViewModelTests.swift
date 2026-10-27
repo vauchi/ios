@@ -118,17 +118,6 @@ final class VauchiViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.errorMessage)
     }
 
-    // MARK: - Sync State Tests
-
-    // Based on: features/sync_updates.feature
-
-    /// Scenario: Initial sync state is idle
-    func testInitialSyncStateIsIdle() {
-        let viewModel = makeViewModel()
-
-        XCTAssertEqual(viewModel.syncState, .idle)
-    }
-
     // MARK: - App State Tests (Locked Device)
 
     // Based on: _private/docs/problems/2026-03-02-locked-device-startup-error/

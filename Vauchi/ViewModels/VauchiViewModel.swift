@@ -21,14 +21,6 @@ import Foundation
 import SwiftUI
 import VauchiPlatform
 
-/// Sync state enum
-enum SyncState: Equatable {
-    case idle
-    case syncing
-    case success(contactsAdded: Int, cardsUpdated: Int, updatesSent: Int, updatedContactNames: [String])
-    case error(String)
-}
-
 /// App-level state for device lock handling
 enum AppState: Equatable {
     case loading
@@ -44,7 +36,6 @@ class VauchiViewModel: ObservableObject {
     @Published var isLoading = true
     @Published var hasIdentity = false
     @Published var errorMessage: String?
-    @Published var syncState: SyncState = .idle
 
     /// Network state
     @Published var isOnline = false
@@ -60,17 +51,6 @@ class VauchiViewModel: ObservableObject {
         alertMessage = message
         showAlert = true
     }
-
-    /// Shows a success alert to the user
-    func showSuccess(_ title: String, message: String) {
-        alertTitle = title
-        alertMessage = message
-        showAlert = true
-    }
-
-    /// Informational shell toast state. Actionable core toasts are hosted by
-    /// CoreUI.AppViewModel and carry their own label/id contract.
-    @Published var toastMessage: String?
 
     // MARK: - Core-Driven UI
 
@@ -205,14 +185,8 @@ class VauchiViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isConnected in
                 self?.isOnline = isConnected
+                // Core syncs when the network comes back (vauchi/private#762).
                 try? self?.coreViewModel?.appEngine.setNetworkOnline(online: isConnected)
-
-                // Auto-sync when connection restored (if enabled and has identity)
-                if isConnected, SettingsService.shared.autoSyncEnabled, self?.hasIdentity ?? false {
-                    Task {
-                        await self?.sync()
-                    }
-                }
             }
             .store(in: &cancellables)
 
@@ -272,27 +246,6 @@ class VauchiViewModel: ObservableObject {
         coreViewModel?.dispatchPresentation(.appBackgrounded)
     }
 
-    // MARK: - Toast
-
-    /// Show a non-actionable shell toast message.
-    func showToast(_ message: String) {
-        withAnimation {
-            toastMessage = message
-        }
-        let currentMessage = message
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) { [weak self] in
-            guard let self, toastMessage == currentMessage else { return }
-            dismissToast()
-        }
-    }
-
-    /// Dismiss the current toast.
-    func dismissToast() {
-        withAnimation {
-            toastMessage = nil
-        }
-    }
-
     // MARK: - Demo Contact
 
     // Based on: features/demo_contact.feature
@@ -309,51 +262,6 @@ class VauchiViewModel: ObservableObject {
             #if DEBUG
                 print("VauchiViewModel: Failed to init demo contact: \(error)")
             #endif
-        }
-    }
-
-    // MARK: - Sync
-
-    func sync() async {
-        guard let repository else {
-            syncState = .error("Not initialized")
-            return
-        }
-
-        syncState = .syncing
-
-        do {
-            let result = try repository.sync()
-            let names = result.updatedContactNames
-            syncState = .success(
-                contactsAdded: Int(result.contactsAdded),
-                cardsUpdated: Int(result.cardsUpdated),
-                updatesSent: Int(result.updatesSent),
-                updatedContactNames: names
-            )
-
-            // Surface the first-update-received aha moment when this sync
-            // actually brought in changes.
-            if result.hasChanges, let moment = repository.tryTriggerAhaMoment(.firstUpdateReceived) {
-                showToast(moment.message)
-            }
-
-            if !names.isEmpty {
-                // TODO(HUMBLE): [T, P1] frontend assembles sync-summary copy from raw domain result fields;
-                // core should return a localized Banner/Toast or summary Command
-                // (see _private problem record 2026-07-06-mobile-domain-shell-violations).
-                let loc = LocalizationService.shared
-                let msg = names.count == 1
-                    ? loc.t("sync.updated_single", args: ["name": names.first!])
-                    : loc.t("sync.updated_contacts", args: ["names": names.joined(separator: ", ")])
-                showSuccess("Sync", message: msg)
-            }
-        } catch let VauchiRepositoryError.rateLimited(retryAfterSecs) {
-            let loc = LocalizationService.shared
-            syncState = .error(loc.t("rate_limit.message"))
-            showError("Sync", message: loc.t("rate_limit.retry_in", args: ["seconds": String(retryAfterSecs)]))
-        } catch {
-            syncState = .error(error.localizedDescription)
         }
     }
 }

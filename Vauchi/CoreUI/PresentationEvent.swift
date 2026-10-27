@@ -27,6 +27,9 @@ enum PresentationEvent: Encodable {
     /// on the user's behalf.
     case inputFocusEnded(surfaceID: String, bindingID: String)
     case backRequested(surfaceID: String)
+    /// The platform's refresh gesture on a surface; Core validates the
+    /// surface and syncs through its own timing gate (vauchi/private#762).
+    case refreshRequested(surfaceID: String)
     case overlayDismissed(surfaceID: String, kind: PresentationOverlayKind)
     case environmentChanged(
         availableWidth: UInt32,
@@ -173,10 +176,9 @@ enum PresentationEvent: Encodable {
         case .inputSubmitted, .inputFocusEnded:
             try encodeBindingEvent(into: &container)
         case let .backRequested(surfaceID):
-            try container.encode(
-                SurfacePayload(surfaceID: surfaceID),
-                forKey: .init(stringValue: "BackRequested")!
-            )
+            try encodeSurfaceEvent("BackRequested", surfaceID: surfaceID, into: &container)
+        case let .refreshRequested(surfaceID):
+            try encodeSurfaceEvent("RefreshRequested", surfaceID: surfaceID, into: &container)
         case let .overlayDismissed(surfaceID, kind):
             try container.encode(
                 OverlayPayload(surfaceID: surfaceID, kind: kind),
@@ -221,6 +223,17 @@ enum PresentationEvent: Encodable {
         default:
             break
         }
+    }
+
+    private func encodeSurfaceEvent(
+        _ name: String,
+        surfaceID: String,
+        into container: inout KeyedEncodingContainer<DynamicKey>
+    ) throws {
+        try container.encode(
+            SurfacePayload(surfaceID: surfaceID),
+            forKey: .init(stringValue: name)!
+        )
     }
 }
 
