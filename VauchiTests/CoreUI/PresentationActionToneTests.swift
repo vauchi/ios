@@ -23,11 +23,13 @@ final class PresentationActionToneTests: XCTestCase {
     }
 
     func testEachToneHasItsOwnColour() throws {
+        let palette = PresentationPalette.system
         let colours = try [
             decode("standard"), decode("serious"), decode("destructive"),
-        ].map(\.tone.foregroundColor)
+        ].map { $0.tone.foregroundColor(in: palette) }
         XCTAssertEqual(Set(colours).count, 3)
-        XCTAssertEqual(PresentationActionTone.destructive.foregroundColor, ThemeService.shared.error)
-        XCTAssertEqual(PresentationActionTone.serious.foregroundColor, ThemeService.shared.warning)
+        XCTAssertEqual(PresentationActionTone.standard.foregroundColor(in: palette), palette.text)
+        XCTAssertEqual(PresentationActionTone.destructive.foregroundColor(in: palette), palette.error)
+        XCTAssertEqual(PresentationActionTone.serious.foregroundColor(in: palette), palette.warning)
     }
 }

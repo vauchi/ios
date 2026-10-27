@@ -650,6 +650,29 @@ final class PresentationStateTests: XCTestCase {
         }
     }
 
+    /// The OS appearance travels with the environment, so "follow system"
+    /// paints the default theme for it (vauchi/private#814).
+    func testEnvironmentCarriesTheOSAppearance() throws {
+        XCTAssertEqual(
+            try jsonObject(PresentationEvent.environmentChanged(
+                availableWidth: 390,
+                availableHeight: 844,
+                inputModes: [.touch],
+                motion: .full,
+                colorScheme: .light
+            )),
+            [
+                "PresentationEnvironmentChanged": [
+                    "available_width": 390,
+                    "available_height": 844,
+                    "input_modes": ["touch"],
+                    "motion": "full",
+                    "color_scheme": "light",
+                ],
+            ] as NSDictionary
+        )
+    }
+
     private func jsonObject(_ value: some Encodable) throws -> NSDictionary {
         let data = try JSONEncoder().encode(value)
         return try XCTUnwrap(
