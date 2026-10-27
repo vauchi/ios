@@ -127,7 +127,11 @@ class AppViewModel: ObservableObject {
     /// themes: the re-presented surface carries the new colours
     /// (vauchi/private#814). Replaceable so tests observe it.
     lazy var reloadTheme: () -> Void = { [weak self] in
-        self?.dispatchPresentation(.presentationInvalidated)
+        // After the envelope that carried the command is applied, not
+        // inside it.
+        DispatchQueue.main.async {
+            self?.dispatchPresentation(.presentationInvalidated)
+        }
     }
 
     /// Keychain-sealed secret behind the OS user-presence check, for Core's
