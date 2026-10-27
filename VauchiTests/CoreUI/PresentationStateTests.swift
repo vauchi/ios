@@ -474,6 +474,15 @@ final class PresentationStateTests: XCTestCase {
         )
     }
 
+    /// Pull to refresh reports the gesture on the surface it was made on;
+    /// Core validates that surface and runs its own sync (vauchi/private#762).
+    func testARefreshGestureNamesItsSurface() throws {
+        XCTAssertEqual(
+            try jsonObject(PresentationEvent.refreshRequested(surfaceID: "opaque/surface")),
+            ["RefreshRequested": ["surface_id": "opaque/surface"]] as NSDictionary
+        )
+    }
+
     func testNodeIdentityKeepsBindingAndFocusStableAcrossLayoutChanges() throws {
         let node = try JSONDecoder().decode(
             PresentationNode.self,
