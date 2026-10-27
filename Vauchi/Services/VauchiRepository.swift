@@ -6,8 +6,7 @@
 //
 // This file is strictly frontend infrastructure: keychain bootstrapping,
 // protected-data lifecycle, notification polling, error mapping, identity
-// creation, authentication, periodic sync, aha-moment surfacing, and the
-// demo-contact init hook.
+// creation and authentication.
 // All domain CRUD wrappers that were only exercised by tests have been
 // retired; those actions now flow through core via `AppViewModel` and
 // `dispatchDomainCommand` under the Humble-UI architecture (ADR-021/043).
@@ -190,53 +189,6 @@ class VauchiRepository {
         } catch let error as MobileError {
             throw VauchiRepositoryError.from(error)
         }
-    }
-
-    // MARK: - Demo Contact Operations
-
-    // Based on: features/demo_contact.feature
-
-    /// Initialize demo contact if user has no real contacts.
-    /// Call this after onboarding completes.
-    ///
-    /// - Returns: The demo contact if created, nil if user has contacts or demo was dismissed
-    func initDemoContactIfNeeded() throws -> VauchiDemoContact? {
-        do {
-            guard let mobile = try appEngine.initDemoContactIfNeeded() else {
-                return nil
-            }
-            return VauchiDemoContact(from: mobile)
-        } catch let error as MobileError {
-            throw VauchiRepositoryError.from(error)
-        }
-    }
-}
-
-// MARK: - Demo Contact Types
-
-/// Demo contact for solo users demonstrating update flow
-/// Based on: features/demo_contact.feature
-struct VauchiDemoContact {
-    /// Contact ID (always "demo-vauchi-tips")
-    let id: String
-    /// Display name (always "Vauchi Tips")
-    let displayName: String
-    /// Flag indicating this is a demo contact
-    let isDemo: Bool
-    /// Current tip title
-    let tipTitle: String
-    /// Current tip content
-    let tipContent: String
-    /// Tip category (e.g., "GettingStarted", "Privacy", "Updates")
-    let tipCategory: String
-
-    init(from mobile: MobileDemoContact) {
-        id = mobile.id
-        displayName = mobile.displayName
-        isDemo = mobile.isDemo
-        tipTitle = mobile.tipTitle
-        tipContent = mobile.tipContent
-        tipCategory = mobile.tipCategory
     }
 }
 

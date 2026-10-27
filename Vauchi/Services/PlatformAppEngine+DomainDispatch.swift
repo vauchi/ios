@@ -38,16 +38,4 @@ extension PlatformAppEngine {
         }
         return mode
     }
-
-    // MARK: - Demo Contact (C8 partial)
-
-    func initDemoContactIfNeeded() throws -> MobileDemoContact? {
-        let result = try dispatchDomainCommand(command: .initDemoContactIfNeeded)
-        guard case let .demoContactOpt(contact) = result else {
-            throw MobileError.Other(
-                detail: "InitDemoContactIfNeeded: unexpected result variant"
-            )
-        }
-        return contact
-    }
 }

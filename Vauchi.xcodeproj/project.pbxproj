@@ -20,7 +20,6 @@
 		13CA1DF2E5D9A7B112881653 /* NavigationIconMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BBE7769F241AC83AF919601 /* NavigationIconMap.swift */; };
 		14F136822861093402A2A51D /* RenderContextPusher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A594A2A3929ED3F36E46FBD /* RenderContextPusher.swift */; };
 		1552B5F6D02172C2BA2C691D /* PlatformEdgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77E69BCF0509A327C33CBEB /* PlatformEdgeTests.swift */; };
-		161D92EC11DFF0CDAE7B0F29 /* DemoContactTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */; };
 		17ABD6784C9A89F651F8E6C7 /* PresentationImageFrameSpecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90C2F7C347C991030CADC674 /* PresentationImageFrameSpecTests.swift */; };
 		17EF975214DA250E994E2222 /* HankenGrotesk[wght].ttf in Resources */ = {isa = PBXBuildFile; fileRef = 663F5CD6B507E5D1F03BEA92 /* HankenGrotesk[wght].ttf */; };
 		18DFBC47BE88310909350859 /* VauchiHardware in Frameworks */ = {isa = PBXBuildFile; productRef = 0AB22D05ABC258D050086FBF /* VauchiHardware */; };
@@ -252,7 +251,6 @@
 		75191060DEDFC1C531D132FE /* AVCameraCaptureSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVCameraCaptureSheet.swift; sourceTree = "<group>"; };
 		7586008CD98DB8B84FAAB96F /* PresentationSurfaceScrollingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationSurfaceScrollingTests.swift; sourceTree = "<group>"; };
 		773C796EDEEFF9B928C04229 /* VauchiUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiUITests.swift; sourceTree = "<group>"; };
-		7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoContactTests.swift; sourceTree = "<group>"; };
 		7A01546D222F8024BB3E0009 /* DeviceCapabilitiesPusher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceCapabilitiesPusher.swift; sourceTree = "<group>"; };
 		7A701A0C348B6758EED1D949 /* DirectSendService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectSendService.swift; sourceTree = "<group>"; };
 		7D255A687EB281C01D297ED7 /* VauchiSnapshotTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VauchiSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -459,7 +457,6 @@
 				200E59D28296103D0A19BBFD /* BundleVersionContractTests.swift */,
 				DE470500913747AD36BDE885 /* CameraServiceTests.swift */,
 				D1B18A4BEA7DD24A3923BE9A /* DebugCapabilityOverrideTests.swift */,
-				7772C0A67B1A7BE1832FEA5F /* DemoContactTests.swift */,
 				653B68CB3B3D86B13D52E63E /* DeviceCapabilitiesPusherTests.swift */,
 				A1710F96007D89158A39B53E /* FakeKeychainStore.swift */,
 				423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */,
@@ -822,7 +819,6 @@
 				A4CE7EAD9B655B69E21073D9 /* CoreBottomTabBarLayoutTests.swift in Sources */,
 				09BDA3191A35B68A90B2E8A9 /* DebugCapabilityOverrideTests.swift in Sources */,
 				2236F8109A06F4C4FB40526C /* DebugFilePickFixtureTests.swift in Sources */,
-				161D92EC11DFF0CDAE7B0F29 /* DemoContactTests.swift in Sources */,
 				566C2C33F23B683B8CB8226F /* DeviceCapabilitiesPusherTests.swift in Sources */,
 				99D8ED2B60D43F62A79B0317 /* ExchangeCommandBridgeTests.swift in Sources */,
 				62599578493FDDEC0B2996CA /* FakeKeychainStore.swift in Sources */,

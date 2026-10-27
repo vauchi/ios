@@ -234,9 +234,6 @@ class VauchiViewModel: ObservableObject {
         // (onboarding) surface. Production onboarding reaches the home
         // surface through the dispatch response instead.
         coreViewModel?.dispatchPresentation(.presentationInvalidated)
-
-        // Initialize demo contact for new users with no contacts
-        await initDemoContactIfNeeded()
     }
 
     // MARK: - Lifecycle
@@ -244,24 +241,5 @@ class VauchiViewModel: ObservableObject {
     /// Reports backgrounding through the generic presentation reducer.
     func dispatchAppBackgrounded() {
         coreViewModel?.dispatchPresentation(.appBackgrounded)
-    }
-
-    // MARK: - Demo Contact
-
-    // Based on: features/demo_contact.feature
-
-    /// Initialize demo contact if needed (called by `createIdentity`
-    /// for new users with no contacts). Core's
-    /// `apply_demo_contact_overlay` reads the demo state at render time
-    /// and emits the banner — the view-model no longer holds a copy.
-    func initDemoContactIfNeeded() async {
-        guard let repository else { return }
-        do {
-            _ = try repository.initDemoContactIfNeeded()
-        } catch {
-            #if DEBUG
-                print("VauchiViewModel: Failed to init demo contact: \(error)")
-            #endif
-        }
     }
 }
