@@ -22,6 +22,9 @@ struct PresentationPalette: Equatable {
     let success: Color
     let warning: Color
     let error: Color
+    /// The window style that keeps the status bar and native controls
+    /// readable on the background; nil follows the OS.
+    let appearance: PresentationColorScheme?
 
     static let system = PresentationPalette(
         background: Color(uiColor: .systemBackground),
@@ -37,7 +40,8 @@ struct PresentationPalette: Equatable {
         focusRing: .accentColor,
         success: Color(uiColor: .systemGreen),
         warning: Color(uiColor: .systemOrange),
-        error: Color(uiColor: .systemRed)
+        error: Color(uiColor: .systemRed),
+        appearance: nil
     )
 }
 
@@ -71,8 +75,23 @@ extension PresentationPalette {
             focusRing: paint(colors.focusRing, else: accent),
             success: paint(colors.success, else: system.success),
             warning: paint(colors.warning, else: system.warning),
-            error: paint(colors.error, else: system.error)
+            error: paint(colors.error, else: system.error),
+            appearance: Self.appearance(onBackground: colors.background)
         )
+    }
+
+    /// Light above half relative luminance, as Android picks its bar icons.
+    private static func appearance(onBackground hex: String) -> PresentationColorScheme? {
+        guard color(hex: hex) != nil, let value = UInt32(hex.dropFirst(), radix: 16) else {
+            return nil
+        }
+        func linear(_ channel: UInt32) -> Double {
+            let srgb = Double(channel & 0xFF) / 255
+            return srgb <= 0.04045 ? srgb / 12.92 : pow((srgb + 0.055) / 1.055, 2.4)
+        }
+        let luminance = 0.2126 * linear(value >> 16) + 0.7152 * linear(value >> 8)
+            + 0.0722 * linear(value)
+        return luminance > 0.5 ? .light : .dark
     }
 
     /// `#rrggbb`, the only form Core sends.
