@@ -34,7 +34,7 @@ struct PresentationNodeView: View {
                 .font(textRoleStyle(for: value.style).font)
                 .foregroundStyle(
                     textRoleStyle(for: value.style).muted
-                        ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary)
+                        ? palette.textMuted : palette.text
                 )
                 .accessibilityLabel(value.accessibility.label)
         case let .input(value):
@@ -154,7 +154,7 @@ struct PresentationNodeView: View {
             if !value.label.isEmpty {
                 Text(value.label)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(palette.textMuted)
                     .accessibilityHidden(true)
             }
             if value.inputKind == .password || value.inputKind == .pin {
@@ -273,6 +273,7 @@ struct PresentationNodeView: View {
             GroupBox(value.label ?? "") {
                 groupStack(value)
             }
+            .groupBoxStyle(PaletteGroupBoxStyle(palette: palette))
         } else {
             groupStack(value)
         }
@@ -337,7 +338,7 @@ struct PresentationNodeView: View {
             VStack(alignment: .leading) {
                 Text(value.title).font(.headline)
                 if let detail = value.detail {
-                    Text(detail).foregroundStyle(.secondary)
+                    Text(detail).foregroundStyle(palette.textMuted)
                 }
             }
             Spacer()
@@ -566,6 +567,23 @@ struct PresentationNodeView: View {
 /// of the view so `AvatarFallbackSpecTests` can assert diameter and initials
 /// without rendering — the defect this guards (a fill with no size) is
 /// otherwise only visible as pixels.
+/// The platform's box fills with system grey whatever the theme
+/// (vauchi/private#814).
+private struct PaletteGroupBoxStyle: GroupBoxStyle {
+    let palette: PresentationPalette
+
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            configuration.label
+                .font(.headline)
+            configuration.content
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(palette.surfaceElevated, in: RoundedRectangle(cornerRadius: 8))
+    }
+}
+
 struct AvatarFallbackSpec: Equatable {
     let initials: String
     let diameter: CGFloat
@@ -597,6 +615,7 @@ struct PresentationImageFrameSpec: Equatable {
 /// the defect it guards is a missing fill that no XCUITest query can see.
 struct PresentationImageContent: View {
     let value: PresentationNode.Image
+    @Environment(\.presentationPalette) private var palette
     /// Core names no size for the standalone `Image` node, so the caller
     /// passes the same tappable-target floor every row avatar uses
     /// (`surface.tokens.minimumTargetSize`) rather than a shell-picked
@@ -629,9 +648,9 @@ struct PresentationImageContent: View {
             // makes for its own fallback (same fill colour, `0.15`).
             Text(spec.initials)
                 .font(.system(size: spec.diameter * 0.4, weight: .semibold))
-                .foregroundColor(.primary)
+                .foregroundColor(palette.text)
                 .frame(width: spec.diameter, height: spec.diameter)
-                .background(Color.secondary.opacity(0.15))
+                .background(palette.textMuted.opacity(0.15))
                 .clipShape(Circle())
         }
     }
@@ -656,6 +675,7 @@ private struct PresentationRowView: View {
     /// out of it. Only activatable rows carry it — a static row is content,
     /// not an affordance.
     static let identifier = "presentationRow"
+    @Environment(\.presentationPalette) private var palette
 
     /// Shell-minted handle for the controls Core parks in a row, minted for
     /// the same reason as `identifier` above: tests need to find them
@@ -716,7 +736,7 @@ private struct PresentationRowView: View {
             }
         }
         .padding(8)
-        .background(row.selected ? Color.accentColor.opacity(0.12) : .clear)
+        .background(row.selected ? palette.accent.opacity(0.12) : .clear)
     }
 
     /// The controls Core attached to this row.
@@ -781,7 +801,7 @@ private struct PresentationRowView: View {
             } else if let fallback = row.fallbackText {
                 Text(fallback)
                     .frame(width: minimumTarget, height: minimumTarget)
-                    .background(Color.secondary.opacity(0.15))
+                    .background(palette.textMuted.opacity(0.15))
                     .clipShape(Circle())
             } else if let icon = NavigationIconMap.rowIcon(for: row.iconToken) {
                 // Decorative: the row's accessibility label already names it.
@@ -791,12 +811,12 @@ private struct PresentationRowView: View {
             VStack(alignment: .leading) {
                 Text(row.title).font(.headline)
                 if let subtitle = row.subtitle {
-                    Text(subtitle).foregroundStyle(.secondary)
+                    Text(subtitle).foregroundStyle(palette.textMuted)
                 }
             }
             Spacer()
             if let detail = row.detail {
-                Text(detail).foregroundStyle(.secondary)
+                Text(detail).foregroundStyle(palette.textMuted)
             }
         }
         .contentShape(Rectangle())

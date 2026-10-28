@@ -58,6 +58,7 @@ struct CoreBottomTabBar: View {
     let surfaceID: String
     let items: [PresentationNavigationItem]
     let onEvent: (PresentationEvent) -> Void
+    @Environment(\.presentationPalette) private var palette
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 0) {
@@ -67,7 +68,7 @@ struct CoreBottomTabBar: View {
         }
         .padding(.horizontal, 4)
         .padding(.top, CoreBottomTabBarLayout.topPadding)
-        .background(.regularMaterial)
+        .background(palette.surface)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("navigationDestinations")
         .tabBarTrait()
@@ -102,12 +103,12 @@ struct CoreBottomTabBar: View {
     private func centreLabel(_ tab: PresentationNavigationItem) -> some View {
         VStack(spacing: 4) {
             icon(tab, font: .title2)
-                .foregroundColor(.white)
+                .foregroundColor(palette.textOnAccent)
                 .frame(
                     width: CoreBottomTabBarLayout.centreDiameter,
                     height: CoreBottomTabBarLayout.centreDiameter
                 )
-                .background(Color.accentColor)
+                .background(palette.accent)
                 .clipShape(Circle())
                 .shadow(color: .black.opacity(0.2), radius: 6, y: 2)
                 .offset(y: -CoreBottomTabBarLayout.centreDiameter / 4)
@@ -124,7 +125,7 @@ struct CoreBottomTabBar: View {
                 .font(.caption2)
         }
         .padding(.vertical, 6)
-        .foregroundColor(tab.selected ? .accentColor : .primary)
+        .foregroundColor(tab.selected ? palette.accent : palette.text)
     }
 
     private func icon(_ tab: PresentationNavigationItem, font: Font) -> some View {

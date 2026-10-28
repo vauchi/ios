@@ -13,6 +13,7 @@ struct PresentationSurfaceView: View {
     let onCameraPermissionDenied: () -> Void
     let focusedBinding: FocusState<String?>.Binding
     let onEvent: (PresentationEvent) -> Void
+    @Environment(\.presentationPalette) private var palette
 
     var body: some View {
         VStack(alignment: .leading, spacing: CGFloat(surface.tokens.spacingMedium)) {
@@ -41,14 +42,14 @@ struct PresentationSurfaceView: View {
             }
         }
         .padding(CGFloat(surface.tokens.spacingLarge))
-        .background(Color(uiColor: .secondarySystemBackground))
+        .background(palette.surface)
         .clipShape(
             RoundedRectangle(cornerRadius: CGFloat(surface.tokens.cornerRadius))
         )
         .overlay {
             RoundedRectangle(cornerRadius: CGFloat(surface.tokens.cornerRadius))
                 .stroke(
-                    active ? Color.accentColor : Color.secondary.opacity(0.25),
+                    active ? palette.accent : palette.border,
                     lineWidth: 1
                 )
         }
@@ -75,7 +76,7 @@ struct PresentationSurfaceView: View {
         VStack(alignment: .leading, spacing: CGFloat(surface.tokens.spacingMedium)) {
             if let subtitle = surface.subtitle {
                 Text(subtitle)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(palette.textMuted)
             }
             ForEach(identifyPresentationNodes(surface.nodes)) { identified in
                 PresentationNodeView(

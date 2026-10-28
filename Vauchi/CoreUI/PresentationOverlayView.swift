@@ -129,7 +129,7 @@ struct PresentationOverlayView: View {
             content()
         }
         .padding(16)
-        .background(.regularMaterial)
+        .background(palette.surfaceElevated)
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .shadow(radius: 24)
     }
