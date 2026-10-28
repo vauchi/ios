@@ -59,6 +59,7 @@ struct PresentationHostContent: View {
         .foregroundStyle(palette.text)
         .tint(palette.accent)
         .environment(\.presentationPalette, palette)
+        .preferredColorScheme(palette.appearance.map { $0 == .dark ? .dark : .light })
     }
 
     /// The active surface's colours. Overlays carry no tokens of their own,

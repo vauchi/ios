@@ -7,9 +7,9 @@ import SwiftUI
 struct PresentationHostView: View {
     @ObservedObject var viewModel: AppViewModel
     @Environment(\.accessibilityReduceMotion) private var reducedMotion
-    /// The OS appearance: Core paints its default theme for it under
-    /// "follow system" (vauchi/private#814).
-    @Environment(\.colorScheme) private var colorScheme
+    /// Core paints its default theme for the OS appearance under "follow
+    /// system" (vauchi/private#814).
+    @StateObject private var systemAppearance = SystemAppearance()
 
     var body: some View {
         GeometryReader { geometry in
@@ -28,14 +28,13 @@ struct PresentationHostView: View {
             .onChange(of: geometry.size) { size in
                 reportEnvironment(size)
             }
-            // `self` still holds the values from before the change, so each
-            // report takes the new one from its closure; reading `self`
-            // reported the previous appearance (vauchi/private#814).
+            // `self` still holds the value from before the change, so the
+            // report takes the new one from the closure (vauchi/private#814).
             .onChange(of: reducedMotion) { reduced in
                 reportEnvironment(geometry.size, reducedMotion: reduced)
             }
-            .onChange(of: colorScheme) { scheme in
-                reportEnvironment(geometry.size, colorScheme: scheme)
+            .onChange(of: systemAppearance.colorScheme) { _ in
+                reportEnvironment(geometry.size)
             }
             .animation(
                 reducedMotion ? nil : .easeOut(duration: 0.24),
@@ -102,18 +101,16 @@ struct PresentationHostView: View {
 
     private func reportEnvironment(
         _ size: CGSize,
-        reducedMotion: Bool? = nil,
-        colorScheme: ColorScheme? = nil
+        reducedMotion: Bool? = nil
     ) {
         let reducedMotion = reducedMotion ?? self.reducedMotion
-        let colorScheme = colorScheme ?? self.colorScheme
         viewModel.dispatchPresentation(
             .environmentChanged(
                 availableWidth: UInt32(max(0, size.width.rounded())),
                 availableHeight: UInt32(max(0, size.height.rounded())),
                 inputModes: [.touch],
                 motion: reducedMotion ? .reduced : .full,
-                colorScheme: colorScheme == .dark ? .dark : .light
+                colorScheme: systemAppearance.colorScheme
             )
         )
     }
