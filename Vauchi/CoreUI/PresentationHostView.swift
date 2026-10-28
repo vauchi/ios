@@ -28,11 +28,14 @@ struct PresentationHostView: View {
             .onChange(of: geometry.size) { size in
                 reportEnvironment(size)
             }
-            .onChange(of: reducedMotion) { _ in
-                reportEnvironment(geometry.size)
+            // `self` still holds the values from before the change, so each
+            // report takes the new one from its closure; reading `self`
+            // reported the previous appearance (vauchi/private#814).
+            .onChange(of: reducedMotion) { reduced in
+                reportEnvironment(geometry.size, reducedMotion: reduced)
             }
-            .onChange(of: colorScheme) { _ in
-                reportEnvironment(geometry.size)
+            .onChange(of: colorScheme) { scheme in
+                reportEnvironment(geometry.size, colorScheme: scheme)
             }
             .animation(
                 reducedMotion ? nil : .easeOut(duration: 0.24),
@@ -97,7 +100,13 @@ struct PresentationHostView: View {
         }
     }
 
-    private func reportEnvironment(_ size: CGSize) {
+    private func reportEnvironment(
+        _ size: CGSize,
+        reducedMotion: Bool? = nil,
+        colorScheme: ColorScheme? = nil
+    ) {
+        let reducedMotion = reducedMotion ?? self.reducedMotion
+        let colorScheme = colorScheme ?? self.colorScheme
         viewModel.dispatchPresentation(
             .environmentChanged(
                 availableWidth: UInt32(max(0, size.width.rounded())),
