@@ -2,10 +2,11 @@
 # SPDX-FileCopyrightText: 2026 Mattia Egloff <mattia.egloff@pm.me>
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Fetches Core's screen catalog fixture into <out>. Falls back to the
-# presentation contract fixture, cumulatively folded into one catalog
-# entry per step, while the catalog has not landed on Core main — the
-# render test then still exercises every screen the contract walks.
+# Fetches the screen catalog fixture from the contract repository
+# (vauchi/contract, ADR-078) into <out>. Falls back to the presentation
+# contract fixture, cumulatively folded into one catalog entry per step,
+# when the catalog cannot be read — the render test then still exercises
+# every screen the contract walks.
 #
 # Usage: fetch-screen-catalog.sh <out.json> [ref]
 # Needs CI_JOB_TOKEN + CI_API_V4_URL (GitLab CI); locally, set
@@ -18,12 +19,12 @@ mkdir -p "$(dirname "$out")"
 
 fetch() {
   local fixture="$1" dest="$2"
-  if [ -n "${VAUCHI_CORE_DIR:-}" ]; then
-    cp "$VAUCHI_CORE_DIR/vauchi-app/fixtures/$fixture" "$dest"
+  if [ -n "${VAUCHI_CONTRACT_DIR:-}" ]; then
+    cp "$VAUCHI_CONTRACT_DIR/fixtures/$fixture" "$dest"
     return
   fi
   curl -fsSL -u "gitlab-ci-token:${CI_JOB_TOKEN}" \
-    "${CI_API_V4_URL}/projects/vauchi%2Fcore/repository/files/vauchi-app%2Ffixtures%2F${fixture}/raw?ref=${ref}" \
+    "${CI_API_V4_URL}/projects/vauchi%2Fcontract/repository/files/fixtures%2F${fixture}/raw?ref=${ref}" \
     -o "$dest"
 }
 
