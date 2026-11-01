@@ -11,6 +11,6 @@ enum PermissionGrantEvent {
     static func json(transport: String) -> String {
         let event = ["PermissionGranted": ["transport": transport]]
         guard let data = try? JSONSerialization.data(withJSONObject: event) else { return "" }
-        return String(decoding: data, as: UTF8.self)
+        return String(data: data, encoding: .utf8) ?? ""
     }
 }
