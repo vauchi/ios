@@ -13,6 +13,7 @@ struct PresentationHostContent: View {
     let state: PresentationState
     let useFrontCamera: Bool
     let onCameraPermissionDenied: () -> Void
+    var onCameraPermissionGranted: () -> Void = {}
     let onEvent: (_ surfaceID: String, _ event: PresentationEvent) -> Void
     let onDismissOverlay: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reducedMotion
@@ -101,6 +102,7 @@ struct PresentationHostContent: View {
                     ),
                     useFrontCamera: useFrontCamera,
                     onCameraPermissionDenied: onCameraPermissionDenied,
+                    onCameraPermissionGranted: onCameraPermissionGranted,
                     focusedBinding: $focusedBindingID,
                     onEvent: { event in
                         onEvent(surfaceID, event)

@@ -116,6 +116,9 @@ class AppViewModel: ObservableObject {
     private func activateBleIfNeeded() {
         guard !bleActivated else { return }
         bleActivated = true
+        bleService.onPermissionGranted = { [weak self] in
+            self?.sendPermissionGranted(transport: "ble")
+        }
         bleService.activate { [weak self] event in
             self?.sendHardwareEvent(event)
         }
@@ -919,6 +922,14 @@ class AppViewModel: ObservableObject {
     /// is pending, never on grant (design §4). Keeps `sendHardwareEvent` private.
     func sendCameraPermissionDenied() {
         sendHardwareEvent(.permissionDenied(transport: CameraService.transport))
+    }
+
+    func sendCameraPermissionGranted() {
+        sendPermissionGranted(transport: CameraService.transport)
+    }
+
+    private nonisolated func sendPermissionGranted(transport: String) {
+        sendHardwareEventJson(PermissionGrantEvent.json(transport: transport))
     }
 
     /// TapHoverShake shake stage: stream accelerometer readings and route each

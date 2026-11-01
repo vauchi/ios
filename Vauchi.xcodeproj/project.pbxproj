@@ -145,6 +145,7 @@
 		DE076706E6BC601DB3422EF2 /* BricolageGrotesque[opsz,wdth,wght].ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1090A53B8F5BB603FA5A7F69 /* BricolageGrotesque[opsz,wdth,wght].ttf */; };
 		E15D3E295518C2178E26D1A9 /* NotificationServiceContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37CF81D097BBE672CB4C58D4 /* NotificationServiceContentTests.swift */; };
 		E29B99A31BAD9EA2FC154C0F /* PresentationRowInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF78143E85F40617060C709 /* PresentationRowInfoTests.swift */; };
+		E726B863A5776667805A1A63 /* PermissionGrantEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBC9238C6D276EB4863B096 /* PermissionGrantEvent.swift */; };
 		EAA16636F400850E4CF05932 /* BackupExclusionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE3B422CC80908DA4B20A2B /* BackupExclusionTests.swift */; };
 		EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */; };
 		EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F950D6541F912A27DA57D /* BleExchangeService.swift */; };
@@ -224,6 +225,7 @@
 		3741052F03E3274B5C209EF6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		37CF81D097BBE672CB4C58D4 /* NotificationServiceContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceContentTests.swift; sourceTree = "<group>"; };
 		38ABD84EABC0544AB89F2569 /* VauchiRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiRepositoryTests.swift; sourceTree = "<group>"; };
+		3FBC9238C6D276EB4863B096 /* PermissionGrantEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionGrantEvent.swift; sourceTree = "<group>"; };
 		418F950D6541F912A27DA57D /* BleExchangeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleExchangeService.swift; sourceTree = "<group>"; };
 		423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
 		424C7A5D4B866DD681B8F0E8 /* PresentationListStyleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationListStyleTests.swift; sourceTree = "<group>"; };
@@ -532,6 +534,7 @@
 				918D2994A02A3E0DB31A6A80 /* NavigationIconImage.swift */,
 				4BBE7769F241AC83AF919601 /* NavigationIconMap.swift */,
 				D5A795D0FCDE3726CBB528F8 /* OrientationLock.swift */,
+				3FBC9238C6D276EB4863B096 /* PermissionGrantEvent.swift */,
 				8A6BB9A87C49A6D79E266DFD /* PresentationCommand.swift */,
 				6F0B112148ABCC1933D659A4 /* PresentationEvent.swift */,
 				AFC86DEE36EE0BDC2B729FF6 /* PresentationHostContent.swift */,
@@ -945,6 +948,7 @@
 				345A6E8CFA128DEE17B47EAF /* NfcDiagnosticView.swift in Sources */,
 				138BEFDCC908871EDE97D333 /* NotificationService.swift in Sources */,
 				B2FC70839C3AEFBE5C15753F /* OrientationLock.swift in Sources */,
+				E726B863A5776667805A1A63 /* PermissionGrantEvent.swift in Sources */,
 				DCB3E583D86FF3A15C6BE915 /* PlatformAppEngine+DomainDispatch.swift in Sources */,
 				F8818B9E78A3E1A875E04227 /* PresentationCommand.swift in Sources */,
 				28ABEAE77D5BC15063202DCC /* PresentationEvent.swift in Sources */,

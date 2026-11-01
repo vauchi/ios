@@ -17,6 +17,7 @@ struct PresentationHostView: View {
                 state: viewModel.presentationState,
                 useFrontCamera: viewModel.useFrontCamera,
                 onCameraPermissionDenied: viewModel.sendCameraPermissionDenied,
+                onCameraPermissionGranted: viewModel.sendCameraPermissionGranted,
                 onEvent: { surfaceID, event in
                     viewModel.activateAndDispatch(surfaceID: surfaceID, event: event)
                 },

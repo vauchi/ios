@@ -27,10 +27,15 @@ struct MultipartCameraPreview: UIViewRepresentable {
     /// AppViewModel.
     var onPermissionDenied: () -> Void = {}
 
+    /// Report a camera grant from the prompt this view raised, so Core can
+    /// restart a search the prompt held up (vauchi/private#1022).
+    var onPermissionGranted: () -> Void = {}
+
     func makeUIView(context: Context) -> UIView {
         let view = MultipartCameraView(useFrontCamera: useFrontCamera)
         view.delegate = context.coordinator
         view.onPermissionDenied = onPermissionDenied
+        view.onPermissionGranted = onPermissionGranted
         return view
     }
 
@@ -109,6 +114,7 @@ final class MultipartCameraView: UIView {
     /// `setupCamera` re-entry (captureSession stays nil on denial) can't fire it
     /// — or stack permission overlays — more than once.
     var onPermissionDenied: (() -> Void)?
+    var onPermissionGranted: (() -> Void)?
     private var permissionDenialReported = false
     private let useFrontCamera: Bool
 
@@ -175,6 +181,7 @@ final class MultipartCameraView: UIView {
                     guard let self else { return }
                     switch CameraService.decision(forGranted: granted) {
                     case .proceed:
+                        self.onPermissionGranted?()
                         self.initializeCamera()
                     case .finish:
                         self.handlePermissionDenied()

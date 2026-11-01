@@ -21,6 +21,7 @@ struct PresentationNodeView: View {
     let minimumTarget: CGFloat
     let useFrontCamera: Bool
     let onCameraPermissionDenied: () -> Void
+    var onCameraPermissionGranted: () -> Void = {}
     let focusedBinding: FocusState<String?>.Binding
     let onEvent: (PresentationEvent) -> Void
     /// Whether this node's field held focus at the last change. Only a
@@ -98,6 +99,7 @@ struct PresentationNodeView: View {
                         minimumTarget: minimumTarget,
                         useFrontCamera: useFrontCamera,
                         onCameraPermissionDenied: onCameraPermissionDenied,
+                        onCameraPermissionGranted: onCameraPermissionGranted,
                         focusedBinding: focusedBinding,
                         onEvent: onEvent
                     )
@@ -404,7 +406,8 @@ struct PresentationNodeView: View {
                         sendValue(value.id, .text($0))
                     },
                     useFrontCamera: useFrontCamera,
-                    onPermissionDenied: onCameraPermissionDenied
+                    onPermissionDenied: onCameraPermissionDenied,
+                    onPermissionGranted: onCameraPermissionGranted
                 )
                 .id(useFrontCamera)
                 // Flexible, so the preview is what gives way rather than the
@@ -476,6 +479,7 @@ struct PresentationNodeView: View {
                 minimumTarget: minimumTarget,
                 useFrontCamera: useFrontCamera,
                 onCameraPermissionDenied: onCameraPermissionDenied,
+                onCameraPermissionGranted: onCameraPermissionGranted,
                 focusedBinding: focusedBinding,
                 onEvent: onEvent
             )
@@ -687,6 +691,7 @@ private struct PresentationRowView: View {
     let minimumTarget: CGFloat
     let useFrontCamera: Bool
     let onCameraPermissionDenied: () -> Void
+    var onCameraPermissionGranted: () -> Void = {}
     let focusedBinding: FocusState<String?>.Binding
     let onEvent: (PresentationEvent) -> Void
 
@@ -752,6 +757,7 @@ private struct PresentationRowView: View {
                 minimumTarget: minimumTarget,
                 useFrontCamera: useFrontCamera,
                 onCameraPermissionDenied: onCameraPermissionDenied,
+                onCameraPermissionGranted: onCameraPermissionGranted,
                 focusedBinding: focusedBinding,
                 onEvent: onEvent
             )

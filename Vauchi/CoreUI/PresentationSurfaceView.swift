@@ -11,6 +11,7 @@ struct PresentationSurfaceView: View {
     let navigationShown: Bool
     let useFrontCamera: Bool
     let onCameraPermissionDenied: () -> Void
+    var onCameraPermissionGranted: () -> Void = {}
     let focusedBinding: FocusState<String?>.Binding
     let onEvent: (PresentationEvent) -> Void
     @Environment(\.presentationPalette) private var palette
@@ -85,6 +86,7 @@ struct PresentationSurfaceView: View {
                     minimumTarget: CGFloat(surface.tokens.minimumTargetSize),
                     useFrontCamera: useFrontCamera,
                     onCameraPermissionDenied: onCameraPermissionDenied,
+                    onCameraPermissionGranted: onCameraPermissionGranted,
                     focusedBinding: focusedBinding,
                     onEvent: onEvent
                 )

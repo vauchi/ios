@@ -17,6 +17,10 @@ final class BleExchangeService: NSObject {
     typealias EventCallback = (MobileEvent) -> Void
 
     private var eventCallback: EventCallback?
+    /// Called once the Bluetooth prompt this service raised was granted, so
+    /// Core can restart a search the prompt held up (vauchi/private#1022).
+    var onPermissionGranted: (() -> Void)?
+    private var authorizationWasPending = false
 
     /// Serial queue for every CoreBluetooth callback.
     ///
@@ -86,6 +90,7 @@ final class BleExchangeService: NSObject {
     func activate(callback: @escaping EventCallback) {
         eventCallback = callback
         if centralManager == nil {
+            authorizationWasPending = CBManager.authorization == .notDetermined
             centralManager = CBCentralManager(delegate: self, queue: bluetoothQueue)
         }
     }
@@ -267,10 +272,22 @@ final class BleExchangeService: NSObject {
     }
 }
 
+extension BleExchangeService {
+    /// A grant is reported only when the prompt was still undecided at
+    /// activation; a radio that was already allowed powering on is not one.
+    static func reportsGrant(authorizationWasPending: Bool, state: CBManagerState) -> Bool {
+        authorizationWasPending && state == .poweredOn
+    }
+}
+
 // MARK: - CBCentralManagerDelegate
 
 extension BleExchangeService: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        if Self.reportsGrant(authorizationWasPending: authorizationWasPending, state: central.state) {
+            authorizationWasPending = false
+            onPermissionGranted?()
+        }
         switch central.state {
         case .poweredOn:
             if let service = targetService {
