@@ -194,6 +194,28 @@ final class ExchangeCommandBridgeTests: XCTestCase {
         XCTAssertEqual(viewModel.ahaMoment?.momentType, .firstContactAdded)
     }
 
+    // MARK: - showShareSheet
+
+    /// Scenario: the link-exchange Share button. Core answers it with
+    /// `Command::ShowShareSheet { url }` and moves the exchange on to
+    /// waiting for the response, so iOS must hand the URL to the system
+    /// share sheet; the default arm used to drop it (vauchi/private#272).
+    func testShowShareSheetHandsTheUrlToTheShareSheet() {
+        let url = "https://vauchi.app/x#link-exchange-token"
+
+        viewModel.handleExchangeCommands([.showShareSheet(url: url)])
+
+        XCTAssertEqual(viewModel.shareUrlRequest, url)
+    }
+
+    func testAShareUrlRequestIsClearedOnceConsumed() {
+        viewModel.handleExchangeCommands([.showShareSheet(url: "https://vauchi.app/x")])
+
+        viewModel.consumeShareUrlRequest()
+
+        XCTAssertNil(viewModel.shareUrlRequest)
+    }
+
     // MARK: - Multiple commands in one batch
 
     /// `handleExchangeCommands` accepts a Vec — the bridge must
