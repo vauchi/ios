@@ -19,6 +19,9 @@ class AppViewModel: ObservableObject {
     @Published var toastMessage: String?
     @Published var showImagePicker = false
     @Published var showCameraPicker = false
+    /// A link Core asks the system share sheet to send
+    /// (`Command::ShowShareSheet`, vauchi/private#272).
+    @Published var shareUrlRequest: String?
     /// Set when core emits `ExchangeCommand::FilePickFromUser`. The
     /// view layer presents a `.fileImporter` keyed on this state; on
     /// pick / cancel it calls back into `sendFilePicked` /
@@ -638,7 +641,8 @@ class AppViewModel: ObservableObject {
         for (index, command) in commands.enumerated() {
             // BLE + audio commands are dispatched in their own helpers to
             // keep this switch within SwiftLint's complexity budget.
-            if handleTransportCommand(command) || handleNfcOrMotionCommand(command) {
+            if handleTransportCommand(command) || handleNfcOrMotionCommand(command)
+                || handleShareCommand(command) {
                 continue
             }
             switch command {
@@ -707,6 +711,36 @@ class AppViewModel: ObservableObject {
                 break
             }
         }
+    }
+
+    /// The link-exchange Share button: Core hands over the URL, iOS only
+    /// opens the system share sheet with it (vauchi/private#272). Out of
+    /// the main switch for the same SwiftLint budget as the other helpers.
+    private func handleShareCommand(_ command: CommandDTO) -> Bool {
+        guard case let .showShareSheet(url) = command else { return false }
+        shareUrlRequest = url
+        presentShare(url)
+        return true
+    }
+
+    func consumeShareUrlRequest() {
+        shareUrlRequest = nil
+    }
+
+    private func presentShare(_ url: String) {
+        guard let scene = UIApplication.shared.connectedScenes.first
+            as? UIWindowScene,
+            let controller = scene.keyWindow?.rootViewController
+        else { return }
+        let activity = UIActivityViewController(
+            activityItems: [url],
+            applicationActivities: nil
+        )
+        activity.popoverPresentationController?.sourceView = controller.view
+        activity.completionWithItemsHandler = { [weak self] _, _, _, _ in
+            self?.consumeShareUrlRequest()
+        }
+        controller.present(activity, animated: true)
     }
 
     /// NFC and accelerometer commands, out of the main switch for the same
