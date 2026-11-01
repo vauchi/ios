@@ -45,8 +45,12 @@ final class ShredDestroysTheStorageKeyTests: XCTestCase {
         try FileManager.default.copyItem(at: dataDir, to: copyDir)
     }
 
+    /// The shred may remove the data directory itself, so only what is
+    /// left of it goes before the copy comes back.
     private func putTheCopyBack() throws {
-        try FileManager.default.removeItem(at: dataDir)
+        if FileManager.default.fileExists(atPath: dataDir.path) {
+            try FileManager.default.removeItem(at: dataDir)
+        }
         try FileManager.default.copyItem(at: copyDir, to: dataDir)
     }
 
