@@ -1545,12 +1545,11 @@ screenshots:store:
 # screen as the command batch Core emits for it) through the real SwiftUI
 # host from a unit test, no UI automation, and publishes one PNG per
 # screen and appearance. Advisory like the walk: a changed screen is news.
+# In a Tart guest (vauchi/private#309). Rollback: `extends: [.macos-job,
+# .simulator-job, .spm-cache-readonly, .timeout-long]`, `stage: test`,
+# the build:debug need, and .simulator-job/.macos-job in its hooks.
 test:screen-catalog:
-  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
-  stage: test
-  needs:
-    - job: build:debug
-      artifacts: true
+  extends: [.tart-sim-guest, .timeout-long]
   allow_failure: true
   variables:
     VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
@@ -1589,7 +1588,7 @@ test:screen-catalog:
     - exit $XCODEBUILD_EXIT
   after_script:
     - !reference [.vrt-upload-script, script]
-    - !reference [.simulator-job, after_script]
+    - !reference [.tart-sim-guest, after_script]
   artifacts:
     when: always
     paths:
