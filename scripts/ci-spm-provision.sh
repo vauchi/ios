@@ -213,7 +213,7 @@ else
       (cd "$fw/Versions" && ln -sf A Current)
       for link in Headers Modules Resources; do
         if [ -e "$fw/$link" ] && [ ! -L "$fw/$link" ]; then
-          rm -rf "$fw/$link"
+          rm -rf "${fw:?}/$link"
         fi
         (cd "$fw" && ln -sf "Versions/Current/$link" "$link")
       done
