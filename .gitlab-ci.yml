@@ -688,8 +688,21 @@ lint:swiftformat:
   # Independent of lint:swiftlint — different tool, different config.
   needs: []
   script:
-    # Not in the image, and the step below skips silently without it.
-    - command -v swiftformat >/dev/null 2>&1 || brew install swiftformat
+    # The guest's own swiftformat is older than .swiftformat's --minversion
+    # (job 17671116580: "--min-version of 0.63.1", status 70), so the
+    # pinned release goes first on PATH. sha256 is GitHub's published
+    # asset digest.
+    - |
+      set -euo pipefail
+      SWIFTFORMAT_VERSION="0.63.1"
+      SWIFTFORMAT_SHA256="385ef1a263ba28685157b98c5536b9c9105e124518f28b7ef8a2bee4b167eaeb"
+      mkdir -p .tools
+      curl -fsSL "https://github.com/nicklockwood/SwiftFormat/releases/download/${SWIFTFORMAT_VERSION}/swiftformat.zip" -o .tools/swiftformat.zip
+      printf '%s  %s\n' "$SWIFTFORMAT_SHA256" .tools/swiftformat.zip | shasum -a 256 -c -
+      unzip -oq .tools/swiftformat.zip -d .tools
+      chmod 755 .tools/swiftformat
+    - export PATH="$CI_PROJECT_DIR/.tools:$PATH"
+    - swiftformat --version
     - if command -v swiftformat &> /dev/null; then swiftformat --lint .; else echo "SwiftFormat not installed, skipping"; fi
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
