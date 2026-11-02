@@ -345,8 +345,10 @@ auto-tag:version:
 # Automatically bump vauchi-platform-swift dependency and create MR
 update:bindings-version:
   stage: update
+  # Runs only when Core releases, pushing a bump branch with a bot
+  # token, so no MR can rehearse it: it stays on the host (private#309).
   tags:
-    - macos
+    - macos-host
     - self-hosted
   resource_group: bindings-version-update
   rules:
@@ -649,13 +651,15 @@ check:design-tokens:
           - ".gitlab-ci.yml"
 
 lint:swiftlint:
-  extends: [.macos-job, .timeout-quick]
+  extends: [.tart-guest-quick, .timeout-quick]
   stage: lint
   # Independent of lint:reuse — both can run in parallel. Original
   # `needs: [lint:reuse]` was for "fail header issues first" aesthetics
   # but cost ~63s of serial wait for a 6s job.
   needs: []
   script:
+    # Not in the image, and the step below skips silently without it.
+    - command -v swiftlint >/dev/null 2>&1 || brew install swiftlint
     - |
       if command -v swiftlint &> /dev/null; then
         echo "SwiftLint version: $(swiftlint version)"
@@ -679,11 +683,13 @@ lint:swiftlint:
           - ".gitlab-ci.yml"
 
 lint:swiftformat:
-  extends: [.macos-job, .timeout-quick]
+  extends: [.tart-guest-quick, .timeout-quick]
   stage: lint
   # Independent of lint:swiftlint — different tool, different config.
   needs: []
   script:
+    # Not in the image, and the step below skips silently without it.
+    - command -v swiftformat >/dev/null 2>&1 || brew install swiftformat
     - if command -v swiftformat &> /dev/null; then swiftformat --lint .; else echo "SwiftFormat not installed, skipping"; fi
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -718,7 +724,7 @@ lint:swiftformat:
 #   - 2026-05-02-ios-humble-ui-deep-retirement (G3, G5)
 #   - 2026-04-16-frontend-pure-renderer-violations (umbrella)
 check:humble-ui-ratchets: # vci02-ok: complete script-download setup replaces macOS defaults
-  extends: [.macos-job, .timeout-quick]
+  extends: [.tart-guest-quick, .timeout-quick]
   stage: lint
   needs: []
   before_script:
@@ -760,7 +766,7 @@ check:humble-ui-ratchets: # vci02-ok: complete script-download setup replaces ma
 # tracked in vauchi/scripts; the ratchet may only drop.
 lint:humble: # vci02-ok: complete script-download setup replaces macOS defaults
   stage: lint
-  extends: [.macos-job, .timeout-quick]
+  extends: [.tart-guest-quick, .timeout-quick]
   needs: []
   before_script:
     - mkdir -p .ratchet-scripts
@@ -817,7 +823,7 @@ release:verify:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
 
 lint:xcodegen: # vci02-ok: xcodegen is the only setup this no-build lint needs
-  extends: .macos-job
+  extends: .tart-guest-quick
   stage: lint
   # Independent of swiftformat — runs `xcodegen generate` and diffs.
   needs: []
@@ -845,7 +851,7 @@ lint:xcodegen: # vci02-ok: xcodegen is the only setup this no-build lint needs
 # Guard: block if isRecording is hardcoded instead of using environment variable
 check:snapshot-recording:
   stage: lint
-  extends: .macos-job
+  extends: .tart-guest-quick
   script:
     - |
       MISSING=""
@@ -901,7 +907,8 @@ check:removed-symbols:
 # ============================================================
 
 build:debug:
-  extends: [.macos-job, .spm-cache, .timeout-extended]
+  # A Tart guest with the SPM mirror cache and no simulator (private#309).
+  extends: [.tart-guest-quick, .tart-spm-cache, .timeout-extended]
   stage: build
   # Don't gate on the lint stage — build:debug has no dependency on
   # swiftlint/swiftformat/reuse output, only on the source tree itself.
@@ -1041,7 +1048,7 @@ build:debug:
     - if: $CI_COMMIT_BRANCH == "main"  # seed SPM cache for MR fallback keys
 
 build:release:
-  extends: [.macos-job, .spm-cache, .timeout-extended]
+  extends: [.macos-host-job, .spm-cache, .timeout-extended]
   stage: build
   variables:
     # Same fix build:debug uses: emit a path: binaryTarget against the
@@ -1087,13 +1094,29 @@ build:release:
 # provides on the host, then readies the simulator as .simulator-job does.
 # diag:tart-sim-probe (job 17666809842) found iOS 26.4 in the image and
 # started the iPhone 17 Pro in 47 s.
-.tart-sim-guest:
-  stage: test
+# Guest basics for jobs that need no Xcode project or SPM state: lints
+# and security scans. Each boot costs ~30 s and one of nell's two VM slots.
+.tart-guest-quick:
   needs: []
   tags:
     - macos-tart
     - self-hosted
   image: vauchi-macos-ci-tools
+  variables:
+    TART_EXECUTOR_ALWAYS_PULL: "false"
+    HOMEBREW_NO_AUTO_UPDATE: "1"
+    HOMEBREW_NO_INSTALL_CLEANUP: "1"
+
+# Jobs that must stay on nell's shell runner: the release path, which only
+# a release tag exercises, and the Core-triggered bindings bump
+# (maintainer, 2026-11-02).
+.macos-host-job:
+  extends: [.macos-job]
+  tags:
+    - macos-host
+    - self-hosted
+
+.tart-spm-cache:
   # The VM dies with the job, so the platform zip and the file:// mirror
   # ci-spm-provision.sh builds live in a GitLab cache; nell-tart's
   # `--cache-dir` keeps it on the host. Keyed on project.yml, which pins
@@ -1109,10 +1132,11 @@ build:release:
       policy: pull-push
   variables:
     VAUCHI_SPM_CACHE_ROOT: "$CI_PROJECT_DIR/.vauchi-spm-cache"
-    TART_EXECUTOR_ALWAYS_PULL: "false"
     COMPILER_INDEX_STORE_ENABLE: "NO"
-    HOMEBREW_NO_AUTO_UPDATE: "1"
-    HOMEBREW_NO_INSTALL_CLEANUP: "1"
+
+.tart-sim-guest: # vci02-ok: .tart-guest-quick and .tart-spm-cache have no before_script
+  extends: [.tart-guest-quick, .tart-spm-cache]
+  stage: test
   before_script:
     - command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
     - ./scripts/ci-spm-provision.sh
@@ -1744,7 +1768,7 @@ secret_detection:
 
 # Swift-specific security analysis
 security:swift-analysis:
-  extends: [.macos-job, .timeout-quick]
+  extends: [.tart-guest-quick, .timeout-quick]
   stage: security
   needs: []
   script:
@@ -1786,7 +1810,7 @@ security:swift-analysis:
 
 # Dependency check for CocoaPods/SPM (runs on dependency changes)
 security:dependencies:
-  extends: [.macos-job, .timeout-quick]
+  extends: [.tart-guest-quick, .timeout-quick]
   stage: security
   needs:
     - job: security:swift-analysis
@@ -1823,7 +1847,7 @@ security:dependencies:
 # ============================================================
 
 deploy:testflight:
-  extends: [.macos-job, .timeout-extended]
+  extends: [.macos-host-job, .timeout-extended]
   stage: deploy
   interruptible: false
   needs:
@@ -1859,7 +1883,7 @@ deploy:testflight:
 
 perf:app-size:
   extends: .mobile-size-tracking-job
-  tags: [macos, self-hosted]
+  tags: [macos-host, self-hosted]
   # The .ipa is produced by deploy:testflight's exportArchive — build:release
   # only archives the .xcarchive, so a `needs: build:release` never sees
   # build/export and the size check fails "Directory build/export does not
