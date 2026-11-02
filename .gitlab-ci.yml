@@ -1081,12 +1081,40 @@ build:release:
 # Test Stage (MR only, change-based)
 # ============================================================
 
-test:unit:
-  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
+# A fresh Tart VM on nell (vauchi/private#309): its own console and
+# simulators, no shared ios-simulator lock, up to two at once. The guest
+# has none of nell's caches, so before_script does what build:debug
+# provides on the host, then readies the simulator as .simulator-job does.
+# diag:tart-sim-probe (job 17666809842) found iOS 26.4 in the image and
+# started the iPhone 17 Pro in 47 s.
+.tart-sim-guest:
   stage: test
-  needs:
-    - job: build:debug
-      artifacts: true
+  needs: []
+  tags:
+    - macos-tart
+    - self-hosted
+  image: vauchi-macos-ci-tools
+  variables:
+    TART_EXECUTOR_ALWAYS_PULL: "false"
+    COMPILER_INDEX_STORE_ENABLE: "NO"
+    HOMEBREW_NO_AUTO_UPDATE: "1"
+    HOMEBREW_NO_INSTALL_CLEANUP: "1"
+  before_script:
+    - command -v xcodegen >/dev/null 2>&1 || brew install xcodegen
+    - ./scripts/ci-spm-provision.sh
+    - |
+      SIM_UDID=$(xcrun simctl list devices available | grep -m1 "iPhone 17 Pro (" | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/')
+      test -n "$SIM_UDID" || { echo "no available iPhone 17 Pro simulator"; exit 1; }
+      xcrun simctl boot "$SIM_UDID"
+      xcrun simctl bootstatus "$SIM_UDID" -b
+      xcrun simctl shutdown "$SIM_UDID"
+  after_script:
+    - xcrun simctl shutdown all 2>/dev/null || true
+
+# Rollback: restore `extends: [.macos-job, .simulator-job,
+# .spm-cache-readonly, .timeout-long]` and the build:debug need.
+test:unit:
+  extends: [.tart-sim-guest, .timeout-long]
   variables:
     # Mirror build:debug's env var: vauchi-platform-swift's manifest
     # emits `path:` binaryTarget when set (Fix C). Without this,
