@@ -1257,12 +1257,11 @@ test:signing-scripts: # vci02-ok: alpine job intentionally installs its complete
           - "scripts/tests/test-fetch-wwdr-g3.sh"
           - ".gitlab-ci.yml"
 
+# In a Tart guest (vauchi/private#309). Rollback: `extends: [.macos-job,
+# .simulator-job, .spm-cache-readonly, .timeout-long]`, `stage: test`,
+# the build:debug need, and .simulator-job/.macos-job in its hooks.
 test:snapshots:
-  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
-  stage: test
-  needs:
-    - job: build:debug
-      artifacts: true
+  extends: [.tart-sim-guest, .timeout-long]
   variables:
     VRT_PLATFORM: ios
     VRT_SCREENSHOT_DIR: VauchiSnapshotTests/__Snapshots__/VisualRegressionTests
@@ -1290,7 +1289,7 @@ test:snapshots:
     - HOME="$CI_PROJECT_DIR/.spm-home" xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" -disableAutomaticPackageResolution test -only-testing VauchiSnapshotTests -parallel-testing-worker-count 1
   after_script:
     - !reference [.vrt-upload-script, script]
-    - !reference [.macos-job, after_script]
+    - !reference [.tart-sim-guest, after_script]
   # allow_failure removed: resource_group serialization prevents simulator contention
   artifacts:
     when: always
