@@ -1094,7 +1094,21 @@ build:release:
     - macos-tart
     - self-hosted
   image: vauchi-macos-ci-tools
+  # The VM dies with the job, so the platform zip and the file:// mirror
+  # ci-spm-provision.sh builds live in a GitLab cache; nell-tart's
+  # `--cache-dir` keeps it on the host. Keyed on project.yml, which pins
+  # the platform version; no fallback, as for .spm-cache. Same shape as
+  # macos's test:unit (macos!502).
+  cache:
+    - key:
+        prefix: ios-tart-spm-mirror
+        files:
+          - project.yml
+      paths:
+        - .vauchi-spm-cache/
+      policy: pull-push
   variables:
+    VAUCHI_SPM_CACHE_ROOT: "$CI_PROJECT_DIR/.vauchi-spm-cache"
     TART_EXECUTOR_ALWAYS_PULL: "false"
     COMPILER_INDEX_STORE_ENABLE: "NO"
     HOMEBREW_NO_AUTO_UPDATE: "1"

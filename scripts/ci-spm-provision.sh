@@ -48,8 +48,11 @@ echo "  Resolved version: $V"
 # already-orphaned commits. Prior bumps: v6 (torn 0.51.30 mirror),
 # v5/v4/v3/v2 — see git history for the archaeology.
 
-MIRROR_BASE="$HOME/.cache/vauchi-platform-swift-mirror"
-ZIPSTORE="$HOME/.cache/vauchi-platform-zips"
+# A Tart VM keeps nothing between jobs, so its job points this at a
+# GitLab-cached directory inside the project (private#309).
+SPM_CACHE_ROOT="${VAUCHI_SPM_CACHE_ROOT:-$HOME/.cache}"
+MIRROR_BASE="$SPM_CACHE_ROOT/vauchi-platform-swift-mirror"
+ZIPSTORE="$SPM_CACHE_ROOT/vauchi-platform-zips"
 ZIPFILE="$ZIPSTORE/v$V.zip"
 mkdir -p "$MIRROR_BASE" "$ZIPSTORE"
 
