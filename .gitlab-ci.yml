@@ -1183,17 +1183,15 @@ test:unit:
           - "project.yml"
           - ".gitlab-ci.yml"
 
+# In a Tart guest (vauchi/private#309). Rollback: `extends: [.macos-job,
+# .simulator-job, .spm-cache-readonly, .timeout-long]`, `stage: test`,
+# the build:debug need (optional), and .simulator-job/.macos-job in its hooks.
 coverage:unit:
-  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
-  stage: test
-  needs:
-    - job: build:debug
-      artifacts: true
-      optional: true
+  extends: [.tart-sim-guest, .timeout-long]
   variables:
     VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
   before_script:
-    - !reference [.simulator-job, before_script]
+    - !reference [.tart-sim-guest, before_script]
     - command -v xcresultparser >/dev/null 2>&1 || brew install a7ex/formulae/xcresultparser
   script:
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" test -enableCodeCoverage YES -resultBundlePath coverage_result -skip-testing VauchiSnapshotTests -skip-testing VauchiUITests -parallel-testing-enabled YES -parallel-testing-worker-count 4
