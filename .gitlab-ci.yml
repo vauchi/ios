@@ -1479,12 +1479,11 @@ test:screenshots:
 # Manual: store assets are cut per release, not per commit. The status bar
 # is overridden after an explicit boot, so the simulator must be booted
 # before xcodebuild reuses it.
+# In a Tart guest (vauchi/private#309). Rollback: `extends: [.macos-job,
+# .simulator-job, .spm-cache-readonly, .timeout-long]`, `stage: test`,
+# the build:debug need, and .simulator-job/.macos-job in its hooks.
 screenshots:store:
-  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
-  stage: test
-  needs:
-    - job: build:debug
-      artifacts: true
+  extends: [.tart-sim-guest, .timeout-long]
   variables:
     VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
     STORE_SIMULATOR: iPhone 17 Pro Max
