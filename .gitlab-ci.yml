@@ -1614,12 +1614,11 @@ test:screen-catalog:
 # Click "Record baselines" in the pipeline UI after pushing view changes.
 # Also re-run it when baselines lag main — view changes merged without
 # re-recording leave the VRT gallery stale (observed 2026-06-11).
+# In a Tart guest (vauchi/private#309). Rollback: `extends: [.macos-job,
+# .simulator-job, .spm-cache-readonly, .timeout-long]`, `stage: test`,
+# the build:debug need, and .simulator-job/.macos-job in its hooks.
 test:snapshots:record:
-  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
-  stage: test
-  needs:
-    - job: build:debug
-      artifacts: true
+  extends: [.tart-sim-guest, .timeout-long]
   when: manual
   allow_failure: true  # manual jobs should not block the pipeline
   variables:
