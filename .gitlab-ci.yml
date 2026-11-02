@@ -1308,12 +1308,11 @@ test:snapshots:
           - ".gitlab-ci.yml"
 
 # XCUITest accessibility tests — run on simulator, sequential (UI tests are not parallelizable)
+# In a Tart guest (vauchi/private#309). Rollback: `extends: [.macos-job,
+# .simulator-job, .spm-cache-readonly, .timeout-long]`, `stage: test`,
+# the build:debug need, and .simulator-job/.macos-job in its hooks.
 test:ui:
-  extends: [.macos-job, .simulator-job, .spm-cache-readonly, .timeout-long]
-  stage: test
-  needs:
-    - job: build:debug
-      artifacts: true
+  extends: [.tart-sim-guest, .timeout-long]
   variables:
     VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
   script:
