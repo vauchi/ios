@@ -1197,12 +1197,23 @@ coverage:unit:
     - xcodebuild -project Vauchi.xcodeproj -scheme Vauchi -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -clonedSourcePackagesDirPath .spm-packages -derivedDataPath .derived-data ENABLE_APPINTENTS_DEPLOYMENT_AWARE_PROCESSING=NO CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" CODE_SIGN_ENTITLEMENTS="" test -enableCodeCoverage YES -resultBundlePath coverage_result -skip-testing VauchiSnapshotTests -skip-testing VauchiUITests -parallel-testing-enabled YES -parallel-testing-worker-count 4
     - xcrun xccov view --report coverage_result.xcresult
     - xcresultparser --output-format cobertura coverage_result.xcresult > cobertura.xml
+    # Fetched into the scripts repository's layout, because push-coverage.sh
+    # sources ../lib/common.sh (private#520); fetched alone it never pushed.
     - |
-      curl --silent --fail \
-        "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2Fci%2Fpush-coverage.sh/raw?ref=${VAUCHI_SCRIPTS_REF}" \
-        -o push-coverage.sh
-      chmod +x push-coverage.sh
-    - ./push-coverage.sh cobertura.xml ios || true
+      for f in ci/push-coverage.sh ci/pushgateway-push.sh lib/common.sh; do
+        mkdir -p ".vauchi-scripts/$(dirname "$f")"
+        curl --silent --fail \
+          "${CI_API_V4_URL}/projects/vauchi%2Fscripts/repository/files/scripts%2F$(printf '%s' "$f" | sed 's|/|%2F|g')/raw?ref=${VAUCHI_SCRIPTS_REF}" \
+          -o ".vauchi-scripts/$f"
+      done
+      chmod +x .vauchi-scripts/ci/*.sh
+    # The pushed series carries no branch, so only main may write it.
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        .vauchi-scripts/ci/push-coverage.sh cobertura.xml ios || true
+      else
+        .vauchi-scripts/ci/push-coverage.sh cobertura.xml ios --dry-run || true
+      fi
   coverage: '/Line Coverage:\s+(\d+(?:\.\d+)?%)/'
   artifacts:
     reports:
@@ -1217,6 +1228,11 @@ coverage:unit:
       when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_PIPELINE_SOURCE == "schedule"
+    # Playable on an MR that changes this job, which could otherwise only
+    # be checked after merging.
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true
 
 # Visual regression snapshot tests (swift-snapshot-testing)
 # Captures reference images for all SwiftUI views and compares against baselines.
