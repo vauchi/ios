@@ -1612,7 +1612,7 @@ screenshots:store:
 # the build:debug need, and .simulator-job/.macos-job in its hooks.
 test:screen-catalog:
   extends: [.tart-sim-guest, .timeout-long]
-  allow_failure: true
+  allow_failure: false
   variables:
     VAUCHI_PLATFORM_USE_LOCAL_XCFRAMEWORK: "1"
     VRT_PLATFORM: ios
@@ -1626,9 +1626,7 @@ test:screen-catalog:
     # (problem 2026-06-29-spm-mirror-config-race).
     - ./scripts/ci-spm-isolate-config.sh
     - mkdir -p build/screen-catalog
-    # Core main's catalog, or the contract fixture folded into one until
-    # the catalog lands there; the script prints which one it used.
-    - ./scripts/fetch-screen-catalog.sh build/screen_catalog_v1.json main
+    - ./scripts/fetch-screen-catalog.sh build/screen_catalog_v1.json
     - |
       export HOME="$CI_PROJECT_DIR/.spm-home"
       XCODEBUILD_EXIT=0
@@ -1654,22 +1652,15 @@ test:screen-catalog:
   artifacts:
     when: always
     paths:
-      - build/screen-catalog/
       - build/screen_catalog_v1.json
+      - build/screen_catalog_v1.provenance.json
+      - build/screen-catalog/
       - build/screen_catalog.xcresult
     expire_in: 1 week
   rules:
     - if: $CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "api"
       when: never
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      changes:
-        compare_to: refs/heads/main
-        paths:
-          - "**/*.swift"
-          - "*.xcodeproj/**/*"
-          - "project.yml"
-          - ".gitlab-ci.yml"
-          - "scripts/fetch-screen-catalog.sh"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 # Manual job: record snapshot baselines on CI and commit them to the branch.
