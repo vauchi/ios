@@ -1143,6 +1143,18 @@ build:release:
       paths:
         - .vauchi-spm-cache/
       policy: pull-push
+    # Third-party packages (swift-snapshot-testing, swift-syntax, …) as
+    # nell's .spm-cache kept them: without it every guest job fetched
+    # them from GitHub, 38 s in job 17669511237 (private#1042).
+    # ci-spm-provision.sh still deletes the vauchi-platform-swift entries
+    # in it on every run, the 2026-04-26 resolve-hang fix.
+    - key:
+        prefix: ios-tart-spm-packages
+        files:
+          - project.yml
+      paths:
+        - .spm-packages/
+      policy: pull-push
   variables:
     VAUCHI_SPM_CACHE_ROOT: "$CI_PROJECT_DIR/.vauchi-spm-cache"
     COMPILER_INDEX_STORE_ENABLE: "NO"
