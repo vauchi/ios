@@ -2017,6 +2017,24 @@ diag:spm-mirror-fetch:
         start=$(date +%s)
         git clone --quiet --mirror "${m%/}" "$dest.local"
         echo "plain git clone --mirror (local path, hardlinks): $(( $(date +%s) - start )) s"
+        # Run 1 (job 17714026328): 27 loose objects, 264 MiB, 54 s per clone at
+        # full CPU. Does a pack made once let clones reuse it as-is?
+        packed="$(mktemp -d)/packed"
+        cp -R "${m%/}" "$packed"
+        start=$(date +%s)
+        git -C "$packed" -c pack.window=0 repack -a -d -q
+        echo "repack -a -d (pack.window=0): $(( $(date +%s) - start )) s"
+        git -C "$packed" count-objects -vH | grep -E '^(count|size-pack):'
+        start=$(date +%s)
+        git clone --quiet --mirror "file://$packed" "$packed.clone"
+        echo "git clone --mirror file:// of the packed copy: $(( $(date +%s) - start )) s"
+        bigfile="$(mktemp -d)/bigfile"
+        cp -R "${m%/}" "$bigfile"
+        git -C "$bigfile" config core.bigFileThreshold 1m
+        git -C "$bigfile" config pack.compression 0
+        start=$(date +%s)
+        git clone --quiet --mirror "file://$bigfile" "$bigfile.clone"
+        echo "git clone --mirror file:// with bigFileThreshold 1m, compression 0, still loose: $(( $(date +%s) - start )) s"
       done
     - time ./scripts/ci-spm-provision.sh
     - du -sh .spm-packages/repositories/* .spm-packages/checkouts/* 2>&1 || true
