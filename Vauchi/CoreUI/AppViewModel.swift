@@ -361,7 +361,9 @@ class AppViewModel: ObservableObject {
             userPresenceSecretService.reveal(prompt: prompt) { [weak self] outcome in
                 self?.sendHardwareEventJson(outcome.eventJson)
             }
-        case .postNotification, .platformEffect:
+        case let .postNotification(notification):
+            NotificationService.shared.showNotification(notification)
+        case .platformEffect:
             break
         default:
             break

@@ -4,6 +4,23 @@
 
 import Foundation
 
+struct PresentationNotification: Decodable {
+    let notificationID: String?
+    let title: String
+    let body: String
+    let deepLinkURI: String?
+    let categoryID: String
+    let categoryOptions: [String]?
+
+    private enum CodingKeys: String, CodingKey {
+        case notificationID = "notification_id"
+        case title, body
+        case deepLinkURI = "deep_link_uri"
+        case categoryID = "category_id"
+        case categoryOptions = "category_options"
+    }
+}
+
 struct PresentationCommandEnvelope: Decodable {
     let commands: [PresentationCommand]
 }
@@ -117,7 +134,7 @@ enum PresentationCommand: Decodable {
     case reloadTheme
     case createUserPresenceSecret(prompt: String, binding: UserPresenceBinding?)
     case revealUserPresenceSecret(prompt: String)
-    case postNotification(JSONValue)
+    case postNotification(PresentationNotification)
     case platformEffect(variant: String, payload: JSONValue?)
 
     private struct DynamicKey: CodingKey {
@@ -206,7 +223,7 @@ enum PresentationCommand: Decodable {
     }
 
     private struct NotificationPayload: Decodable {
-        let notification: JSONValue
+        let notification: PresentationNotification
     }
 
     private struct PromptPayload: Decodable {

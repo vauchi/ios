@@ -113,6 +113,22 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
         ))
     }
 
+    func showNotification(_ notification: PresentationNotification) {
+        guard SettingsService.shared.notificationsEnabled else { return }
+        deliverIfAuthorized(Self.preparedNotification(for: notification))
+    }
+
+    static func preparedNotification(for notification: PresentationNotification) -> PreparedNotification {
+        PreparedNotification(
+            title: notification.title,
+            body: notification.body,
+            eventKey: notification.notificationID ?? UUID().uuidString,
+            deepLinkUri: notification.deepLinkURI,
+            osCategoryId: notification.categoryID,
+            osCategoryOptions: notification.categoryOptions ?? []
+        )
+    }
+
     /// Display a single notification.
     func showNotification(_ notification: MobilePendingNotification) {
         deliverIfAuthorized(PreparedNotification(

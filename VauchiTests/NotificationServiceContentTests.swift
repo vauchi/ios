@@ -108,3 +108,69 @@ final class NotificationServiceContentTests: XCTestCase {
         XCTAssertEqual(byId["contact_added"]?.options, [])
     }
 }
+
+extension NotificationServiceContentTests {
+    func testGenericNotificationCommandPreservesCoreContentAndTapTarget() throws {
+        let notification = try preparedCommand("""
+        {
+          "notification_id": "opaque/notification/17",
+          "title": "Card updated",
+          "body": "Alice changed an email address",
+          "deep_link_uri": "vauchi://contact/alice",
+          "category_id": "opaque-category",
+          "channel_id": "opaque-channel",
+          "urgency": "high",
+          "category_options": ["custom_dismiss_action", "future-option"]
+        }
+        """)
+
+        let content = NotificationService.notificationContent(for: notification)
+
+        XCTAssertEqual(notification.eventKey, "opaque/notification/17")
+        XCTAssertEqual(content.title, "Card updated")
+        XCTAssertEqual(content.body, "Alice changed an email address")
+        XCTAssertEqual(content.categoryIdentifier, "opaque-category")
+        XCTAssertEqual(
+            NotificationService.deepLinkUri(from: content.userInfo),
+            "vauchi://contact/alice"
+        )
+        XCTAssertEqual(
+            NotificationService.osCategory(for: notification).options,
+            .customDismissAction
+        )
+    }
+
+    func testGenericNotificationWithoutAnIdentifierGetsDistinctRequestIdentifiers() throws {
+        let payload = """
+        {
+          "title": "An update",
+          "body": "Open Vauchi",
+          "category_id": "opaque-category"
+        }
+        """
+        let first = try preparedCommand(payload)
+        let second = try preparedCommand(payload)
+
+        XCTAssertFalse(first.eventKey.isEmpty)
+        XCTAssertNotEqual(first.eventKey, second.eventKey)
+        XCTAssertEqual(first.title, "An update")
+        XCTAssertNil(first.deepLinkUri)
+        XCTAssertEqual(first.osCategoryOptions, [])
+    }
+
+    private func preparedCommand(_ payload: String) throws -> NotificationService.PreparedNotification {
+        let json = """
+        {"commands":[{"PostNotification":{"notification":\(payload)}}]}
+        """
+        let envelope = try JSONDecoder().decode(
+            PresentationCommandEnvelope.self,
+            from: Data(json.utf8)
+        )
+        let command = try XCTUnwrap(envelope.commands.first)
+        guard case let .postNotification(notification) = command else {
+            XCTFail("Core's generic notification must decode as a notification effect")
+            throw CocoaError(.coderReadCorrupt)
+        }
+        return NotificationService.preparedNotification(for: notification)
+    }
+}
