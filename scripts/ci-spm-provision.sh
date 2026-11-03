@@ -239,6 +239,11 @@ else
   git -C "$TMP_MIRROR" -c user.email=ci@vauchi.local -c user.name=ci-mirror \
     commit -q -m "ci-mirror: bundle xcframework v$V ($ZSHA)"
   git -C "$TMP_MIRROR" tag -f "v$V"
+  # Pack once: left loose, the ~1 GB xcframework is recompressed on every
+  # clone, 49 s at full CPU in a guest against 4 s once packed; the repack
+  # itself takes 18 s (ios job 17714812819, private#1042). No delta
+  # search, which finds nothing in fresh binaries.
+  git -C "$TMP_MIRROR" -c pack.window=0 repack -a -d -q
 
   # Sanity: the commit must contain the iOS binary artifact path
   # ($BIN_PATH, defined above the cache-hit guard). If the binary is
