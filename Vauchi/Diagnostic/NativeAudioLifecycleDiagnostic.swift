@@ -10,6 +10,12 @@
             let service = AudioProximityService.shared
             service.stop()
             DiagnosticLogger.logResult(test: name, track: "lifecycle", message: "START silence=true samples_saved=false")
+            if name == "lifecycle_duplex" {
+                let message = duplexReport(service)
+                log(message)
+                DiagnosticLogger.logResult(test: name, track: "lifecycle", message: message)
+                return
+            }
             if name.contains("callback") {
                 let message = callbackReport(name, service: service)
                 log(message)
@@ -32,6 +38,39 @@
             let message = String(describing: result)
             log("\(name) \(message)")
             DiagnosticLogger.logResult(test: name, track: "lifecycle", message: message)
+        }
+
+        private static func duplexReport(_ service: AudioProximityService) -> String {
+            defer { service.stop() }
+            let lock = NSLock()
+            let captured = DispatchSemaphore(value: 0)
+            let emitted = DispatchSemaphore(value: 0)
+            var samples = 0
+            var captureStillActive = false
+            var error = ""
+            service.receiveSignal(timeoutMs: 3000, sampleRate: 44100) { pcm, _ in
+                lock.lock(); samples = pcm.count; lock.unlock()
+                captured.signal()
+            }
+            let deadline = DispatchTime.now().uptimeNanoseconds + 5_000_000_000
+            while !service.isActive(), DispatchTime.now().uptimeNanoseconds < deadline {
+                Thread.sleep(forTimeInterval: 0.005)
+            }
+            let initiallyActive = service.isActive()
+            Thread.sleep(forTimeInterval: 0.25)
+            service.emitSignal(samples: [Float](repeating: 0, count: 44100), sampleRate: 44100) { result in
+                let active = service.isActive()
+                lock.lock(); error = result; captureStillActive = active; lock.unlock()
+                emitted.signal()
+            }
+            let emitReturned = emitted.wait(timeout: .now() + 5) == .success
+            let captureReturned = captured.wait(timeout: .now() + 5) == .success
+            lock.lock()
+            defer { lock.unlock() }
+            let observed = initiallyActive && emitReturned && captureReturned && captureStillActive && error.isEmpty && samples > 0
+            return "duplex_status=\(observed ? "observed" : "inconclusive") initial_capture_active=\(initiallyActive) " +
+                "emit_returned=\(emitReturned) capture_returned=\(captureReturned) " +
+                "capture_active_after_emit=\(captureStillActive) capture_samples=\(samples) error=\(error)"
         }
 
         private static func callbackReport(_ name: String, service: AudioProximityService) -> String {
