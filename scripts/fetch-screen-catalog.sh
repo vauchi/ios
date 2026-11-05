@@ -16,6 +16,6 @@ if ! python3 -c 'import tomllib' 2>/dev/null; then
 fi
 curl --fail-with-body --silent --show-error \
   --header "JOB-TOKEN: ${CI_JOB_TOKEN:-}" \
-  "${CI_API_V4_URL:-https://gitlab.com/api/v4}/projects/vauchi%2Fcontract/repository/files/ci%2Ffetch-screen-catalog.py/raw?ref=5ff7c6fe7240a69c2a5b901f5f62745ee5626b5a" \
+  "${CI_API_V4_URL:-https://gitlab.com/api/v4}/projects/vauchi%2Fcontract/repository/files/ci%2Ffetch-screen-catalog.py/raw?ref=84346ffe3214c5e842aded89081b28bbf5962ed2" \
   -o "$helper"
-"$python" "$helper" "$1" --repo "$repo_dir"
+"$python" "$helper" "$1" --repo "$repo_dir" --assembly

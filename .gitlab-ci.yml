@@ -1665,6 +1665,7 @@ test:screen-catalog:
     paths:
       - build/screen_catalog_v1.json
       - build/screen_catalog_v1.provenance.json
+      - build/screen_catalog_v1.inventory.json
       - build/screen-catalog/
       - build/screen_catalog.xcresult
     expire_in: 1 week
