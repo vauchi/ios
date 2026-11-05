@@ -4,25 +4,56 @@
 import Foundation
 
 final class AudioOperationSlot {
+    final class Request {}
+
     private final class Operation {
         let stop: () -> Void
+        let interrupted = DispatchSemaphore(value: 0)
         init(stop: @escaping () -> Void) {
             self.stop = stop
         }
     }
 
-    private let condition = NSCondition()
+    private let lock = NSRecursiveLock()
     private var current: Operation?
+    private var latest: Request?
 
     var isActive: Bool {
-        condition.lock()
-        defer { condition.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         return current != nil
     }
 
-    func run(for duration: TimeInterval, start: () throws -> Void, stop: @escaping () -> Void) rethrows {
-        condition.lock()
-        defer { condition.unlock() }
+    func reserve() -> Request {
+        lock.lock()
+        defer { lock.unlock() }
+        let request = Request()
+        latest = request
+        current?.interrupted.signal()
+        return request
+    }
+
+    @discardableResult
+    func deliver(_ request: Request, body: () -> Void) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        guard latest === request else { return false }
+        body()
+        return true
+    }
+
+    func run(
+        for duration: TimeInterval,
+        request: Request? = nil,
+        start: () throws -> Void,
+        stop: @escaping () -> Void
+    ) rethrows {
+        lock.lock()
+        let request = request ?? reserve()
+        guard latest === request else {
+            lock.unlock()
+            return
+        }
         cancelCurrent()
         let operation = Operation(stop: stop)
         current = operation
@@ -30,22 +61,22 @@ final class AudioOperationSlot {
             try start()
         } catch {
             cancelCurrent()
+            lock.unlock()
             throw error
         }
-        let deadline = Date(timeIntervalSinceNow: max(0, duration))
-        while current === operation {
-            if !condition.wait(until: deadline) {
-                break
-            }
-        }
+        lock.unlock()
+        _ = operation.interrupted.wait(timeout: .now() + max(0, duration))
+        lock.lock()
+        defer { lock.unlock() }
         if current === operation {
             cancelCurrent()
         }
     }
 
     func stop() {
-        condition.lock()
-        defer { condition.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
+        latest = nil
         cancelCurrent()
     }
 
@@ -53,6 +84,6 @@ final class AudioOperationSlot {
         guard let operation = current else { return }
         current = nil
         operation.stop()
-        condition.broadcast()
+        operation.interrupted.signal()
     }
 }
