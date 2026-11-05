@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+import AppleDisplay
 import SwiftUI
 
 /// Pure layout and accessibility decisions for `CoreBottomTabBar`, kept out
