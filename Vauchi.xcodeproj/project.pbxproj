@@ -149,7 +149,9 @@
 		DE076706E6BC601DB3422EF2 /* BricolageGrotesque[opsz,wdth,wght].ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1090A53B8F5BB603FA5A7F69 /* BricolageGrotesque[opsz,wdth,wght].ttf */; };
 		E15D3E295518C2178E26D1A9 /* NotificationServiceContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37CF81D097BBE672CB4C58D4 /* NotificationServiceContentTests.swift */; };
 		E29B99A31BAD9EA2FC154C0F /* PresentationRowInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF78143E85F40617060C709 /* PresentationRowInfoTests.swift */; };
+		E673718BFB7493576C65FDD9 /* AudioOperationSlotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D45021775B3A101EB4A6125 /* AudioOperationSlotTests.swift */; };
 		E726B863A5776667805A1A63 /* PermissionGrantEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBC9238C6D276EB4863B096 /* PermissionGrantEvent.swift */; };
+		E926BAC4F487E2EAF09507A7 /* AudioOperationSlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD88E24B8DCC0782D6CC590 /* AudioOperationSlot.swift */; };
 		EAA16636F400850E4CF05932 /* BackupExclusionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BE3B422CC80908DA4B20A2B /* BackupExclusionTests.swift */; };
 		EB085A4CE288FB06AD123E38 /* VauchiViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FF1A9F29A5522778264A8F9 /* VauchiViewModelTests.swift */; };
 		EC30F92B5A66058CF9972C27 /* BleExchangeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F950D6541F912A27DA57D /* BleExchangeService.swift */; };
@@ -214,6 +216,7 @@
 		1A5E4BAE84EAF093A5315006 /* ScreenCatalogRenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenCatalogRenderTests.swift; sourceTree = "<group>"; };
 		1B8231B52EB4A5E5CC92917E /* ReloadThemeDispatchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReloadThemeDispatchTests.swift; sourceTree = "<group>"; };
 		1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiViewModel.swift; sourceTree = "<group>"; };
+		1D45021775B3A101EB4A6125 /* AudioOperationSlotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioOperationSlotTests.swift; sourceTree = "<group>"; };
 		1F0996E99C76BFF00B9A7E35 /* SineWaveGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SineWaveGenerator.swift; sourceTree = "<group>"; };
 		1FF78143E85F40617060C709 /* PresentationRowInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationRowInfoTests.swift; sourceTree = "<group>"; };
 		200E59D28296103D0A19BBFD /* BundleVersionContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleVersionContractTests.swift; sourceTree = "<group>"; };
@@ -339,6 +342,7 @@
 		EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleUuidsTests.swift; sourceTree = "<group>"; };
 		EAF456AF714942F67FCD5FA2 /* PresentationInformationOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationInformationOverlayTests.swift; sourceTree = "<group>"; };
 		EB04A9F8F1DEF697349D20A3 /* RenderContextPusherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderContextPusherTests.swift; sourceTree = "<group>"; };
+		ECD88E24B8DCC0782D6CC590 /* AudioOperationSlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioOperationSlot.swift; sourceTree = "<group>"; };
 		EEB2B575C59DEDEFBA323040 /* AccelerometerProximityServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccelerometerProximityServiceTests.swift; sourceTree = "<group>"; };
 		F0726E87F8B0A43ABC11897A /* MultipartCameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartCameraPreview.swift; sourceTree = "<group>"; };
 		F5427C4F253C3A904B25AA98 /* TextRoleStyleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextRoleStyleTests.swift; sourceTree = "<group>"; };
@@ -476,6 +480,7 @@
 				EEB2B575C59DEDEFBA323040 /* AccelerometerProximityServiceTests.swift */,
 				8448F6BE68E3C8A1486DADEB /* AssociatedDomainsContractTests.swift */,
 				7E97D552C7803ADA67E498A4 /* AudioLifecycleProbeTests.swift */,
+				1D45021775B3A101EB4A6125 /* AudioOperationSlotTests.swift */,
 				05246D16BA8DED16E204F751 /* AudioProximityServiceTests.swift */,
 				FC927B851A6B65D69F80E682 /* BackgroundSyncServiceTests.swift */,
 				2BE3B422CC80908DA4B20A2B /* BackupExclusionTests.swift */,
@@ -644,6 +649,7 @@
 			isa = PBXGroup;
 			children = (
 				84D14544B64B5B788B50E9DA /* AccelerometerProximityService.swift */,
+				ECD88E24B8DCC0782D6CC590 /* AudioOperationSlot.swift */,
 				49509AE0DF70B880F977B015 /* AudioProximityService.swift */,
 				44506B768565C7F52A328D17 /* BackgroundSyncService.swift */,
 				036343C21A16BE4560CAAE4B /* BiometricUnlockService.swift */,
@@ -842,6 +848,7 @@
 				577D2B590479C4D0D1F65DA3 /* AccelerometerProximityServiceTests.swift in Sources */,
 				5D342EBF7CDCAE87BFF4D111 /* AssociatedDomainsContractTests.swift in Sources */,
 				BD3B8DBD0B91D95891A2AC15 /* AudioLifecycleProbeTests.swift in Sources */,
+				E673718BFB7493576C65FDD9 /* AudioOperationSlotTests.swift in Sources */,
 				10E60235A5FD647963680956 /* AudioProximityServiceTests.swift in Sources */,
 				7F01B87953EEFE74C498EA48 /* AvatarFallbackSpecTests.swift in Sources */,
 				76F219371E872E3500212C43 /* BackgroundSyncServiceTests.swift in Sources */,
@@ -943,6 +950,7 @@
 				81032739BC0A85591FBA6657 /* AppViewModel+DebugFilePickFixture.swift in Sources */,
 				0FC8C1248458C98DAE402799 /* AppViewModel.swift in Sources */,
 				CD34FEB4FE3CE191B9B41D6B /* AudioLifecycleProbe.swift in Sources */,
+				E926BAC4F487E2EAF09507A7 /* AudioOperationSlot.swift in Sources */,
 				D65905F3E8A6B191F4611470 /* AudioProximityService.swift in Sources */,
 				04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */,
 				C60BC31397F503FD0D2BEFA0 /* BiometricUnlockService.swift in Sources */,

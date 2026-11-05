@@ -32,7 +32,7 @@ class AudioProximityService {
 
     // MARK: - Audio Engine
 
-    /// Playback and capture get an engine each, and a queue each.
+    /// Playback and capture use independent engines and operation owners.
     ///
     /// `emit_proximity_commands` sends `AudioEmitChallenge` and
     /// `AudioListenForResponse` as one batch — the responder is even told to
@@ -49,17 +49,12 @@ class AudioProximityService {
     /// reconfiguration outlives the critical section, and making them take
     /// turns would leave the responder emitting only after its own 5-second
     /// listen expired. Separate engines keep them concurrent and stop either
-    /// one from reconfiguring the other. Each queue then only has to make
-    /// its own engine's start-and-use atomic against `stop()`.
+    /// one from reconfiguring the other. Each owner serializes replacement
+    /// and stop against its engine's start-and-use sequence.
     private let playbackEngine = AVAudioEngine()
     private let captureEngine = AVAudioEngine()
-    private let playbackQueue = DispatchQueue(label: "app.vauchi.audioproximity.playback")
-    private let captureQueue = DispatchQueue(label: "app.vauchi.audioproximity.capture")
-    private var playerNode: AVAudioPlayerNode?
-    private var isRecording = false
-    private var isPlaying = false
-    private var recordedSamples: [Float] = []
-    private let sampleLock = NSLock()
+    private let playback = AudioOperationSlot()
+    private let capture = AudioOperationSlot()
 
     // MARK: - Configuration
 
@@ -147,30 +142,6 @@ class AudioProximityService {
         }
     }
 
-    /// Start `engine`, then run `use` — both while `queue` is held.
-    ///
-    /// `AVAudioPlayerNode.play()` aborts the process when its engine is not
-    /// running, so the readiness check and the call cannot be separated by
-    /// a concurrent `stop()`.
-    private func withEngine(
-        _ engine: AVAudioEngine,
-        on queue: DispatchQueue,
-        prepare: () -> Void,
-        use: () -> Void = {}
-    ) throws {
-        try queue.sync {
-            prepare()
-            if !engine.isRunning {
-                try ensureSessionActive()
-                try engine.start()
-            }
-            guard engine.isRunning else {
-                throw AudioProximityError.engineNotRunning
-            }
-            use()
-        }
-    }
-
     /// Emit ultrasonic signal with given samples.
     func emitSignal(samples: [Float], sampleRate: UInt32) -> String {
         guard !samples.isEmpty else {
@@ -178,8 +149,6 @@ class AudioProximityService {
         }
 
         do {
-            try ensureSessionActive()
-
             guard let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1) else {
                 return "Failed to create audio format"
             }
@@ -197,42 +166,30 @@ class AudioProximityService {
             }
 
             let player = AVAudioPlayerNode()
-
-            // Attach, connect, start and `play()` are one indivisible step:
-            // `play()` aborts the process if the engine stopped since it was
-            // checked, and only holding the queue across both prevents that.
-            try withEngine(playbackEngine, on: playbackQueue) {
-                playbackEngine.attach(player)
-                playbackEngine.connect(player, to: playbackEngine.mainMixerNode, format: format)
-            } use: {
-                isPlaying = true
-                playerNode = player
-
-                player.scheduleBuffer(buffer, at: nil, options: []) { [weak self] in
-                    DispatchQueue.main.async {
-                        self?.isPlaying = false
-                    }
-                }
-                player.play()
-            }
-
-            // Outside the queue: a listen issued alongside this emit must be
-            // able to start while the buffer plays out.
+            var attached = false
             let duration = Double(samples.count) / Double(sampleRate)
-            Thread.sleep(forTimeInterval: duration + 0.1)
-
-            playbackQueue.sync {
-                player.stop()
-                playbackEngine.stop()
-                playbackEngine.detach(player)
-                playerNode = nil
-            }
-            isPlaying = false
+            try playback.run(for: duration + 0.1, start: {
+                try ensureSessionActive()
+                playbackEngine.attach(player)
+                attached = true
+                playbackEngine.connect(player, to: playbackEngine.mainMixerNode, format: format)
+                try playbackEngine.start()
+                guard playbackEngine.isRunning else {
+                    throw AudioProximityError.engineNotRunning
+                }
+                player.scheduleBuffer(buffer, at: nil, options: [])
+                player.play()
+            }, stop: { [self] in
+                if attached {
+                    player.stop()
+                    playbackEngine.stop()
+                    playbackEngine.detach(player)
+                }
+            })
 
             return "" // Success
 
         } catch {
-            isPlaying = false
             return "Emit failed: \(error.localizedDescription)"
         }
     }
@@ -268,44 +225,45 @@ class AudioProximityService {
     }
 
     private func recordSamples(timeoutMs: UInt64) -> (samples: [Float], recordedRate: UInt32) {
+        let sampleLock = NSLock()
+        var recordedSamples: [Float] = []
+        var acceptingSamples = true
+        var recordedRate: UInt32 = 0
+        var inputNode: AVAudioInputNode?
+        var tapInstalled = false
         do {
-            try ensureSessionActive()
-
-            let inputNode = captureEngine.inputNode
-            let inputFormat = inputNode.outputFormat(forBus: 0)
-            let recordedRate = UInt32(inputFormat.sampleRate)
-
-            sampleLock.lock()
-            recordedSamples = []
-            sampleLock.unlock()
-
-            isRecording = true
-
-            try withEngine(captureEngine, on: captureQueue, prepare: {
-                inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
-                    guard let self, isRecording else { return }
-
+            try capture.run(for: Double(timeoutMs) / 1000, start: {
+                try ensureSessionActive()
+                let node = captureEngine.inputNode
+                inputNode = node
+                let inputFormat = node.outputFormat(forBus: 0)
+                recordedRate = UInt32(inputFormat.sampleRate)
+                node.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
+                    guard let self else { return }
                     let samples = extractSamples(from: buffer)
-
                     sampleLock.lock()
-                    recordedSamples.append(contentsOf: samples)
+                    if acceptingSamples {
+                        recordedSamples.append(contentsOf: samples)
+                    }
                     sampleLock.unlock()
                 }
-            })
-
-            // Outside the queue: an emit batched with this listen must not
-            // wait out the whole timeout before it can be heard.
-            Thread.sleep(forTimeInterval: Double(timeoutMs) / 1000.0)
-
-            isRecording = false
-            captureQueue.sync {
-                inputNode.removeTap(onBus: 0)
+                tapInstalled = true
+                try captureEngine.start()
+                guard captureEngine.isRunning else {
+                    throw AudioProximityError.engineNotRunning
+                }
+            }, stop: { [self] in
+                sampleLock.lock()
+                acceptingSamples = false
+                sampleLock.unlock()
+                if tapInstalled {
+                    inputNode?.removeTap(onBus: 0)
+                }
                 captureEngine.stop()
-            }
+            })
 
             sampleLock.lock()
             let result = recordedSamples
-            recordedSamples = []
             sampleLock.unlock()
 
             return (samples: result, recordedRate: recordedRate)
@@ -314,34 +272,19 @@ class AudioProximityService {
             #if DEBUG
                 print("AudioProximityService: Recording failed: \(error)")
             #endif
-            isRecording = false
             return (samples: [], recordedRate: 0)
         }
     }
 
     /// Check if audio is currently active.
     func isActive() -> Bool {
-        isRecording || isPlaying
+        capture.isActive || playback.isActive
     }
 
     /// Stop any ongoing audio operation.
     func stop() {
-        // Flags first, so a tap or an emit already in flight sees the stop
-        // without waiting for the queue.
-        isRecording = false
-        isPlaying = false
-
-        playbackQueue.sync {
-            playerNode?.stop()
-            playerNode = nil
-            playbackEngine.stop()
-        }
-        captureQueue.sync {
-            if captureEngine.isRunning {
-                captureEngine.inputNode.removeTap(onBus: 0)
-                captureEngine.stop()
-            }
-        }
+        playback.stop()
+        capture.stop()
     }
 
     // MARK: - Helper Methods
