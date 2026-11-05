@@ -80,7 +80,17 @@
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 if let test = autoTest {
-                    runAsync { runAutoTest(test) }
+                    if test.hasPrefix("lifecycle_") {
+                        AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                            if granted {
+                                DispatchQueue.main.async { runAsync { runAutoTest(test) } }
+                            } else {
+                                DiagnosticLogger.logError(test: test, track: "lifecycle", error: "microphone permission not granted")
+                            }
+                        }
+                    } else {
+                        runAsync { runAutoTest(test) }
+                    }
                 }
             }
         }
@@ -89,6 +99,8 @@
 
         private func runAutoTest(_ test: String) {
             switch test {
+            case "lifecycle_emit_stop", "lifecycle_record_stop", "lifecycle_emit_replace", "lifecycle_record_replace":
+                NativeAudioLifecycleDiagnostic.run(test, log: log)
             case "loopback": testLoopback()
             case "noise": testNoiseFloor()
             case "sweep": testSweep()
