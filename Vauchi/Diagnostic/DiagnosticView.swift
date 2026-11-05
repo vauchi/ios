@@ -99,7 +99,9 @@
 
         private func runAutoTest(_ test: String) {
             switch test {
-            case "lifecycle_emit_stop", "lifecycle_record_stop", "lifecycle_emit_replace", "lifecycle_record_replace":
+            case "lifecycle_emit_stop", "lifecycle_record_stop", "lifecycle_emit_replace", "lifecycle_record_replace",
+                 "lifecycle_callback_emit_stop", "lifecycle_callback_emit_replace",
+                 "lifecycle_callback_record_stop", "lifecycle_callback_record_replace":
                 NativeAudioLifecycleDiagnostic.run(test, log: log)
             case "loopback": testLoopback()
             case "noise": testNoiseFloor()

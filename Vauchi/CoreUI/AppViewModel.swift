@@ -849,11 +849,7 @@ class AppViewModel: ObservableObject {
     private func handleAudioCommand(_ command: CommandDTO) -> Bool {
         switch command {
         case let .audioEmitChallenge(samples, sampleRate):
-            // `emitSignal` schedules the buffer and blocks for its duration —
-            // never call it on the main thread.
-            DispatchQueue.global(qos: .userInitiated).async {
-                _ = AudioProximityService.shared.emitSignal(samples: samples, sampleRate: sampleRate)
-            }
+            AudioProximityService.shared.emitSignal(samples: samples, sampleRate: sampleRate) { _ in }
         case let .audioListenForResponse(timeoutMs, sampleRate):
             AudioProximityService.shared.receiveSignal(
                 timeoutMs: timeoutMs, sampleRate: sampleRate

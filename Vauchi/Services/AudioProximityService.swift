@@ -143,10 +143,11 @@ class AudioProximityService {
     }
 
     /// Emit ultrasonic signal with given samples.
-    func emitSignal(samples: [Float], sampleRate: UInt32) -> String {
+    func emitSignal(samples: [Float], sampleRate: UInt32, request: AudioOperationSlot.Request? = nil) -> String {
         guard !samples.isEmpty else {
             return "No samples to emit"
         }
+        let request = request ?? playback.reserve()
 
         do {
             guard let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 1) else {
@@ -168,7 +169,7 @@ class AudioProximityService {
             let player = AVAudioPlayerNode()
             var attached = false
             let duration = Double(samples.count) / Double(sampleRate)
-            try playback.run(for: duration + 0.1, start: {
+            try playback.run(for: duration + 0.1, request: request, start: {
                 try ensureSessionActive()
                 playbackEngine.attach(player)
                 attached = true
@@ -194,6 +195,16 @@ class AudioProximityService {
         }
     }
 
+    func emitSignal(samples: [Float], sampleRate: UInt32, completion: @escaping (String) -> Void) {
+        let request = playback.reserve()
+        DispatchQueue.global(qos: .userInitiated).async { [self] in
+            let result = emitSignal(samples: samples, sampleRate: sampleRate, request: request)
+            DispatchQueue.main.async { [self] in
+                playback.deliver(request) { completion(result) }
+            }
+        }
+    }
+
     /// Record audio for `timeoutMs` and report samples + actual rate via callback.
     ///
     /// `sampleRate` is core's suggested rate; the device may record at a different
@@ -205,14 +216,12 @@ class AudioProximityService {
         sampleRate _: UInt32,
         completion: @escaping ([Float], UInt32) -> Void
     ) {
+        let request = capture.reserve()
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self else {
-                DispatchQueue.main.async { completion([], 0) }
-                return
-            }
-            let (samples, recordedRate) = recordSamples(timeoutMs: timeoutMs)
+            guard let service = self else { return }
+            let (samples, recordedRate) = service.recordSamples(timeoutMs: timeoutMs, request: request)
             DispatchQueue.main.async {
-                completion(samples, recordedRate)
+                service.capture.deliver(request) { completion(samples, recordedRate) }
             }
         }
     }
@@ -224,7 +233,10 @@ class AudioProximityService {
         recordSamples(timeoutMs: timeoutMs).samples
     }
 
-    private func recordSamples(timeoutMs: UInt64) -> (samples: [Float], recordedRate: UInt32) {
+    private func recordSamples(
+        timeoutMs: UInt64, request: AudioOperationSlot.Request? = nil
+    ) -> (samples: [Float], recordedRate: UInt32) {
+        let request = request ?? capture.reserve()
         let sampleLock = NSLock()
         var recordedSamples: [Float] = []
         var acceptingSamples = true
@@ -232,7 +244,7 @@ class AudioProximityService {
         var inputNode: AVAudioInputNode?
         var tapInstalled = false
         do {
-            try capture.run(for: Double(timeoutMs) / 1000, start: {
+            try capture.run(for: Double(timeoutMs) / 1000, request: request, start: {
                 try ensureSessionActive()
                 let node = captureEngine.inputNode
                 inputNode = node
