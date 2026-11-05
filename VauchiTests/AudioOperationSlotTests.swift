@@ -5,6 +5,39 @@
 import XCTest
 
 final class AudioOperationSlotTests: XCTestCase {
+    func testStopInvalidatesWorkThatHasNotEnteredItsOwner() {
+        let slot = AudioOperationSlot()
+        let request = slot.reserve()
+        slot.stop()
+        var started = false
+        slot.run(for: 0, request: request, start: { started = true }, stop: {})
+        XCTAssertFalse(started)
+        XCTAssertFalse(slot.isActive)
+    }
+
+    func testAnOlderPendingRequestCannotReplaceANewerOne() {
+        let slot = AudioOperationSlot()
+        let older = slot.reserve()
+        let newer = slot.reserve()
+        var observed: [Int] = []
+        slot.run(for: 0, request: newer, start: { observed.append(2) }, stop: {})
+        slot.run(for: 0, request: older, start: { observed.append(1) }, stop: {})
+        XCTAssertEqual(observed, [2])
+    }
+
+    func testOnlyTheLatestUnstoppedRequestDeliversItsCallback() {
+        let slot = AudioOperationSlot()
+        let older = slot.reserve()
+        let newer = slot.reserve()
+        var delivered: [Int] = []
+        XCTAssertFalse(slot.deliver(older) { delivered.append(1) })
+        slot.run(for: 0, request: newer, start: {}, stop: {})
+        XCTAssertTrue(slot.deliver(newer) { delivered.append(2) })
+        slot.stop()
+        XCTAssertFalse(slot.deliver(newer) { delivered.append(3) })
+        XCTAssertEqual(delivered, [2])
+    }
+
     // Feature: contact_exchange.feature — native audio resource lifetime.
     func testStopReleasesResourceAndWakesWorker() {
         let slot = AudioOperationSlot()
