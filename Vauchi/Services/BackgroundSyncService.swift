@@ -9,6 +9,28 @@ import BackgroundTasks
 import Foundation
 import VauchiPlatform
 
+/// Delivers a background task's outcome once: iOS can expire a task while its
+/// sync is still running, and completing a BGTask twice is an error.
+final class SyncTaskCompletion {
+    private let lock = NSLock()
+    private var isFinished = false
+    private let deliver: (Bool) -> Void
+
+    init(deliver: @escaping (Bool) -> Void) {
+        self.deliver = deliver
+    }
+
+    func finish(success: Bool) {
+        lock.lock()
+        let isFirst = !isFinished
+        isFinished = true
+        lock.unlock()
+        if isFirst {
+            deliver(success)
+        }
+    }
+}
+
 /// Service for managing background sync operations
 final class BackgroundSyncService {
     // MARK: - Singleton
@@ -22,7 +44,7 @@ final class BackgroundSyncService {
 
     // MARK: - Private Properties
 
-    private var syncHandler: (() async -> Void)?
+    private var syncHandler: (() async -> Bool)?
 
     /// Engine used to query the core-owned scheduler interval.
     /// Set by the app at registration time (audit
@@ -61,8 +83,18 @@ final class BackgroundSyncService {
     }
 
     /// Set the sync handler that will be called when background sync runs
-    func setSyncHandler(_ handler: @escaping () async -> Void) {
+    func setSyncHandler(_ handler: @escaping () async -> Bool) {
         syncHandler = handler
+    }
+
+    /// Runs one sync and reports what actually happened to the scheduler.
+    static func run(handler: (() async -> Bool)?, completion: SyncTaskCompletion) async {
+        guard let handler else {
+            completion.finish(success: false)
+            return
+        }
+        let succeeded = await handler()
+        completion.finish(success: succeeded)
     }
 
     /// Schedule the next sync task
@@ -92,19 +124,13 @@ final class BackgroundSyncService {
         // Schedule the next sync task before handling this one
         scheduleSyncTask()
 
-        // Set up expiration handler
+        let completion = SyncTaskCompletion { task.setTaskCompleted(success: $0) }
         task.expirationHandler = {
-            task.setTaskCompleted(success: false)
+            completion.finish(success: false)
         }
 
-        // Run the sync
         Task {
-            if let handler = syncHandler {
-                await handler()
-                task.setTaskCompleted(success: true)
-            } else {
-                task.setTaskCompleted(success: false)
-            }
+            await Self.run(handler: syncHandler, completion: completion)
         }
     }
 }

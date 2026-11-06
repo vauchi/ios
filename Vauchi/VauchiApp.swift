@@ -98,11 +98,18 @@ struct VauchiApp: App {
             guard let repository = try? VauchiRepository.shared.get(orMake: {
                 try VauchiRepository(relayUrl: SettingsService.shared.relayUrl)
             }) else {
-                return
+                NSLog("[Vauchi] [BackgroundSync] Failed: repository unavailable")
+                return false
             }
             // Drive the tick through the engine so policy decisions
             // (15-min interval, retry budget) come from core.
-            _ = try? repository.appEngine.periodicSyncTick()
+            var syncSucceeded = true
+            do {
+                _ = try repository.appEngine.periodicSyncTick()
+            } catch {
+                NSLog("[Vauchi] [BackgroundSync] Failed: \(type(of: error))")
+                syncSucceeded = false
+            }
 
             // Opportunistic content-update cycle (cadence Option 2,
             // `2026-07-03-periodic-mobile-content-update-cadence`):
@@ -120,6 +127,7 @@ struct VauchiApp: App {
 
             // Poll for notifications (E)
             NotificationService.shared.pollAndDisplayNotifications(repository: repository)
+            return syncSucceeded
         }
     }
 
