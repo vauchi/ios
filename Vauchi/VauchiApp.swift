@@ -92,43 +92,48 @@ struct VauchiApp: App {
         // closure constructs a fresh repository when invoked from the
         // BGTask so it is independent of the foreground app lifecycle.
         BackgroundSyncService.shared.setSyncHandler {
-            // The foreground's repository when it exists: a second engine
-            // would go stale when the first moves the data to another key
-            // (vauchi/private#580).
-            guard let repository = try? VauchiRepository.shared.get(orMake: {
-                try VauchiRepository(relayUrl: SettingsService.shared.relayUrl)
-            }) else {
-                NSLog("[Vauchi] [BackgroundSync] Failed: repository unavailable")
-                return false
-            }
-            // Drive the tick through the engine so policy decisions
-            // (15-min interval, retry budget) come from core.
-            var syncSucceeded = true
-            do {
-                _ = try repository.appEngine.periodicSyncTick()
-            } catch {
-                NSLog("[Vauchi] [BackgroundSync] Failed: \(type(of: error))")
-                syncSucceeded = false
-            }
-
-            // Opportunistic content-update cycle (cadence Option 2,
-            // `2026-07-03-periodic-mobile-content-update-cadence`):
-            // piggyback on this existing background wakeup — no new
-            // BGTask. Best-effort; the applied content lands on disk for
-            // the next foreground read, so no UI refresh is needed here.
-            // Core counts an unknown network as metered, so it hears the
-            // cost first (private#733).
-            _ = try? repository.appEngine.dispatchJson(
-                eventJson: hardwareEventJson(
-                    event: .networkCostChanged(cost: NetworkMonitor.shared.currentCost())
-                )
-            )
-            _ = try? repository.appEngine.runContentUpdateCycle()
-
-            // Poll for notifications (E)
-            NotificationService.shared.pollAndDisplayNotifications(repository: repository)
-            return syncSucceeded
+            Self.runBackgroundSync()
         }
+    }
+
+    /// One background sync; false when the sync itself could not run.
+    private static func runBackgroundSync() -> Bool {
+        // The foreground's repository when it exists: a second engine
+        // would go stale when the first moves the data to another key
+        // (vauchi/private#580).
+        guard let repository = try? VauchiRepository.shared.get(orMake: {
+            try VauchiRepository(relayUrl: SettingsService.shared.relayUrl)
+        }) else {
+            NSLog("[Vauchi] [BackgroundSync] Failed: repository unavailable")
+            return false
+        }
+        // Drive the tick through the engine so policy decisions
+        // (15-min interval, retry budget) come from core.
+        var syncSucceeded = true
+        do {
+            _ = try repository.appEngine.periodicSyncTick()
+        } catch {
+            NSLog("[Vauchi] [BackgroundSync] Failed: \(type(of: error))")
+            syncSucceeded = false
+        }
+
+        // Opportunistic content-update cycle (cadence Option 2,
+        // `2026-07-03-periodic-mobile-content-update-cadence`):
+        // piggyback on this existing background wakeup — no new
+        // BGTask. Best-effort; the applied content lands on disk for
+        // the next foreground read, so no UI refresh is needed here.
+        // Core counts an unknown network as metered, so it hears the
+        // cost first (private#733).
+        _ = try? repository.appEngine.dispatchJson(
+            eventJson: hardwareEventJson(
+                event: .networkCostChanged(cost: NetworkMonitor.shared.currentCost())
+            )
+        )
+        _ = try? repository.appEngine.runContentUpdateCycle()
+
+        // Poll for notifications (E)
+        NotificationService.shared.pollAndDisplayNotifications(repository: repository)
+        return syncSucceeded
     }
 
     /// Exclude the app's Documents and Library directories from iCloud/iTunes backup.
