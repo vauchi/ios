@@ -28,6 +28,51 @@ final class BackgroundSyncServiceTests: XCTestCase {
         )
     }
 
+    // MARK: - Task Outcome Tests (private#958)
+
+    func testAFailedSyncReportsFailureToTheScheduler() async {
+        var delivered: [Bool] = []
+        let completion = SyncTaskCompletion { delivered.append($0) }
+
+        await BackgroundSyncService.run(handler: { false }, completion: completion)
+
+        XCTAssertEqual(delivered, [false])
+    }
+
+    func testASuccessfulSyncReportsSuccessToTheScheduler() async {
+        var delivered: [Bool] = []
+        let completion = SyncTaskCompletion { delivered.append($0) }
+
+        await BackgroundSyncService.run(handler: { true }, completion: completion)
+
+        XCTAssertEqual(delivered, [true])
+    }
+
+    func testAMissingHandlerReportsFailure() async {
+        var delivered: [Bool] = []
+        let completion = SyncTaskCompletion { delivered.append($0) }
+
+        await BackgroundSyncService.run(handler: nil, completion: completion)
+
+        XCTAssertEqual(delivered, [false])
+    }
+
+    /// BGTask must be completed once: iOS can expire it while the sync runs.
+    func testExpiryWhileRunningCompletesTheTaskOnlyOnce() async {
+        var delivered: [Bool] = []
+        let completion = SyncTaskCompletion { delivered.append($0) }
+
+        await BackgroundSyncService.run(
+            handler: {
+                completion.finish(success: false)
+                return true
+            },
+            completion: completion
+        )
+
+        XCTAssertEqual(delivered, [false])
+    }
+
     // MARK: - Sync Handler Tests
 
     /// Scenario: Sync handler can be set and is retained
@@ -37,6 +82,7 @@ final class BackgroundSyncServiceTests: XCTestCase {
 
         service.setSyncHandler {
             called = true
+            return true
         }
 
         // Handler is stored — we can't invoke it directly (BGTask triggers it),
