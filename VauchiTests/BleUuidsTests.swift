@@ -56,3 +56,29 @@ final class BleUuidsTests: XCTestCase {
         XCTAssertEqual(BleUuids.tokenFromServiceUUID(uuid), Data([0xAB, 0x00]))
     }
 }
+
+/// The radio replays a pending request on power-on, so a stop that only stopped
+/// the radio would be undone by a toggle (vauchi/private#796).
+final class BleStopForgetsRequestsTests: XCTestCase {
+    private let serviceUuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+
+    func testStopScanningForgetsTheScanToReplay() {
+        let service = BleExchangeService()
+        service.startScanning(serviceUuid: serviceUuid)
+        XCTAssertNotNil(service.targetService)
+
+        service.stopScanning()
+
+        XCTAssertNil(service.targetService)
+    }
+
+    func testStopAdvertisingForgetsTheAdvertisementToReplay() {
+        let service = BleExchangeService()
+        service.startAdvertising(serviceUuid: serviceUuid, payload: Data([1, 2]))
+        XCTAssertNotNil(service.pendingAdvertise)
+
+        service.stopAdvertising()
+
+        XCTAssertNil(service.pendingAdvertise)
+    }
+}

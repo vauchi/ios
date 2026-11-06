@@ -44,7 +44,7 @@ final class BleExchangeService: NSObject {
     // MARK: Central (initiator)
 
     private var centralManager: CBCentralManager?
-    private var targetService: CBUUID?
+    private(set) var targetService: CBUUID?
     private var connectedPeripheral: CBPeripheral?
     private var discoveredCharacteristics: [String: CBCharacteristic] = [:]
     private var discoveredPeripherals: [String: CBPeripheral] = [:]
@@ -79,7 +79,7 @@ final class BleExchangeService: NSObject {
     private var peripheralManager: CBPeripheralManager?
     private var gattCharacteristics: [String: CBMutableCharacteristic] = [:]
     private var subscribedCentrals: Set<UUID> = []
-    private var pendingAdvertise: (service: String, token: Data)?
+    private(set) var pendingAdvertise: (service: String, token: Data)?
     /// Notifies that `updateValue` rejected (BLE transmit queue full). Drained
     /// FIFO on `peripheralManagerIsReady(toUpdateSubscribers:)`. Without this the
     /// responder's chunked card transfer silently drops on a full queue.
@@ -109,7 +109,19 @@ final class BleExchangeService: NSObject {
     }
 
     func stopScanning() {
+        // Both requests are replayed on power-on, so a stop must also forget
+        // them or a radio toggle would undo it.
+        targetService = nil
         centralManager?.stopScan()
+    }
+
+    func stopAdvertising() {
+        pendingAdvertise = nil
+        peripheralManager?.stopAdvertising()
+        peripheralManager?.removeAllServices()
+        gattCharacteristics.removeAll()
+        subscribedCentrals.removeAll()
+        pendingNotifies.removeAll()
     }
 
     func startAdvertising(serviceUuid: String, payload: Data) {

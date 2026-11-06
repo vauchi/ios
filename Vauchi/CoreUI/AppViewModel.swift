@@ -821,6 +821,8 @@ class AppViewModel: ObservableObject {
             bleService.startScanning(serviceUuid: serviceUuid)
         case .bleStopScanning:
             bleService.stopScanning()
+        case .bleStopAdvertising:
+            bleService.stopAdvertising()
         case let .bleConnect(deviceId):
             bleService.connect(deviceId: deviceId)
         case let .bleWriteCharacteristic(uuid, data):
