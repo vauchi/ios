@@ -176,6 +176,7 @@ struct PresentationNodeView: View {
                 )
                 .textFieldStyle(.roundedBorder)
                 .textContentType(textContentType(for: value.inputKind))
+                .keyboardType(value.inputKind.keyboardType)
                 .focused(focusedBinding, equals: value.bindingID)
                 .accessibilityLabel(value.accessibility.label)
             }
@@ -836,5 +837,20 @@ private struct PresentationRowView: View {
                 interactionID: action.interactionID
             )
         )
+    }
+}
+
+extension PresentationInputKind {
+    /// The keyboard a field of this kind opens. A digits-only code such as
+    /// the link code is `number`, which opened the letter keyboard until
+    /// this mapped it (vauchi/private#727).
+    var keyboardType: UIKeyboardType {
+        switch self {
+        case .email: .emailAddress
+        case .phone: .phonePad
+        case .url: .URL
+        case .number: .numberPad
+        case .text, .password, .search, .pin: .default
+        }
     }
 }
