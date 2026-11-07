@@ -492,6 +492,11 @@ extension BleExchangeService: CBPeripheralManagerDelegate {
         // false with no subscribers and only `peripheralManagerIsReady` (queue
         // space) resumes the drain, never a fresh subscription. Resume here.
         drainNotifies()
+        BleLinkReadiness.events(
+            subscribedTo: characteristic.uuid.uuidString,
+            deviceId: id.uuidString,
+            maximumUpdateValueLength: central.maximumUpdateValueLength
+        ).forEach { eventCallback?($0) }
     }
 
     func peripheralManager(
