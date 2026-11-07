@@ -23,6 +23,16 @@ final class PresentationInputLabelTests: XCTestCase {
         XCTAssertGreaterThan(labeled, unlabeled + 10)
     }
 
+    /// The link code is six digits; on the phones test of 2026-11-07 its
+    /// field opened the letter keyboard (vauchi/private#727).
+    func testEachInputKindOpensItsKeyboard() {
+        XCTAssertEqual(PresentationInputKind.number.keyboardType, .numberPad)
+        XCTAssertEqual(PresentationInputKind.phone.keyboardType, .phonePad)
+        XCTAssertEqual(PresentationInputKind.email.keyboardType, .emailAddress)
+        XCTAssertEqual(PresentationInputKind.url.keyboardType, .URL)
+        XCTAssertEqual(PresentationInputKind.text.keyboardType, .default)
+    }
+
     private func inputNode(label: String) throws -> PresentationNode {
         let json = """
         {"Input": {
