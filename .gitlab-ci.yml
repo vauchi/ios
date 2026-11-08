@@ -736,11 +736,17 @@ lint:swiftformat:
 # Source records:
 #   - 2026-05-02-ios-humble-ui-deep-retirement (G3, G5)
 #   - 2026-04-16-frontend-pure-renderer-violations (umbrella)
-check:humble-ui-ratchets: # vci02-ok: complete script-download setup replaces macOS defaults
-  extends: [.tart-guest-quick, .timeout-quick]
+check:humble-ui-ratchets: # vci02-ok: .timeout-quick has no before_script to keep
+  # Text checks (curl, python3, bash scripts) like linux-gtk's; on a macOS VM
+  # each spent ~40 s booting for 2-5 s of work, holding one of nell's two VMs
+  # (vauchi/private#1179).
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/python:3.11-alpine
+  tags: [docker]
+  extends: [.timeout-quick]
   stage: lint
   needs: []
   before_script:
+    - apk add --no-cache bash ripgrep jq git findutils grep curl
     - mkdir -p .ratchet-scripts
     - |
       for script in \
@@ -777,11 +783,17 @@ check:humble-ui-ratchets: # vci02-ok: complete script-download setup replaces ma
 # Humble-UI ratchet: block new domain logic / domain vocabulary leaks
 # into the view layer (ADR-043 Amendment 6). Snapshot counts are
 # tracked in vauchi/scripts; the ratchet may only drop.
-lint:humble: # vci02-ok: complete script-download setup replaces macOS defaults
+lint:humble: # vci02-ok: .timeout-quick has no before_script to keep
+  # Text checks (curl, python3, bash scripts) like linux-gtk's; on a macOS VM
+  # each spent ~40 s booting for 2-5 s of work, holding one of nell's two VMs
+  # (vauchi/private#1179).
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/python:3.11-alpine
+  tags: [docker]
   stage: lint
-  extends: [.tart-guest-quick, .timeout-quick]
+  extends: [.timeout-quick]
   needs: []
   before_script:
+    - apk add --no-cache bash ripgrep jq git findutils grep curl
     - mkdir -p .ratchet-scripts
     - |
       curl --silent --fail \
