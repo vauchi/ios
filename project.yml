@@ -20,7 +20,7 @@ packages:
     revision: "9a25d5ac8b07d8e1a6e4b34ff7cf9a3d22c557db"
   VauchiPlatform:
     url: https://gitlab.com/vauchi/vauchi-platform-swift.git
-    version: "0.102.0"
+    version: "0.102.1"
     # The version line must stay immediately below the URL line because
     # scripts/ci-spm-provision.sh extracts it with sed from the next line.
   SnapshotTesting:
