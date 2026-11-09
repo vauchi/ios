@@ -49,7 +49,7 @@ final class StorageKeyUpgradeTests: XCTestCase {
 
         XCTAssertEqual(try engine.hasIdentity(), true)
         XCTAssertEqual(try contactCount(engine), 1)
-        XCTAssertEqual(store.items.keys.sorted(), ["smk"])
+        XCTAssertEqual(store.items.keys.sorted(), ["brk", "smk"])
     }
 
     func testAKeychainThatNeedsAnUnlockStartsOnCoresUnlockScreen() throws {
@@ -71,7 +71,7 @@ final class StorageKeyUpgradeTests: XCTestCase {
 
         XCTAssertEqual(try engine.hasIdentity(), true)
         XCTAssertEqual(try contactCount(engine), 1)
-        XCTAssertEqual(store.items.keys.sorted(), ["smk"])
+        XCTAssertEqual(store.items.keys.sorted(), ["brk", "smk"])
     }
 
     func testAKeychainThatFailsForAnotherReasonOffersTryAgain() throws {
