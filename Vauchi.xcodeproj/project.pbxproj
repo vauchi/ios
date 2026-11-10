@@ -114,6 +114,7 @@
 		A20441612CDA08A586DADCC0 /* DirectSendService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A701A0C348B6758EED1D949 /* DirectSendService.swift */; };
 		A4CE7EAD9B655B69E21073D9 /* CoreBottomTabBarLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D9E8149A845075065539578 /* CoreBottomTabBarLayoutTests.swift */; };
 		A7C3CA22F9270C3FC6DB0659 /* PresentationInputLabelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 831F6B2536F6DF04422FE73A /* PresentationInputLabelTests.swift */; };
+		A9CB83CE45818D2D285B9C50 /* CelebrationFlashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7CEC71CFCF9FD61B1CDBF58 /* CelebrationFlashView.swift */; };
 		AA3F337ED100BA98F8D5B5E3 /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A96FE811E67752C2D8F9079E /* SettingsService.swift */; };
 		AC9349C352911F4679B8948F /* PresentationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B834D827B063CB9F17CFA86 /* PresentationState.swift */; };
 		ACB1FE30772E1BEAF475FAD3 /* NFCExchangeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D34EC3AF2AE35F80A5354A /* NFCExchangeService.swift */; };
@@ -344,6 +345,7 @@
 		E17FD049E1582776B08D1899 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E2E265CE89A8A40837FD8047 /* MultipartCameraCallbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipartCameraCallbackTests.swift; sourceTree = "<group>"; };
 		E7944347EE6E209E80A5CF30 /* PresentationNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationNodeView.swift; sourceTree = "<group>"; };
+		E7CEC71CFCF9FD61B1CDBF58 /* CelebrationFlashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationFlashView.swift; sourceTree = "<group>"; };
 		EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleUuidsTests.swift; sourceTree = "<group>"; };
 		EAF456AF714942F67FCD5FA2 /* PresentationInformationOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationInformationOverlayTests.swift; sourceTree = "<group>"; };
 		EB04A9F8F1DEF697349D20A3 /* RenderContextPusherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderContextPusherTests.swift; sourceTree = "<group>"; };
@@ -558,6 +560,7 @@
 				80D908420E7769CC3225282C /* AppViewModel.swift */,
 				23F5C7A0037A012F2FDAFA7B /* AppViewModel+DebugFilePickFixture.swift */,
 				75191060DEDFC1C531D132FE /* AVCameraCaptureSheet.swift */,
+				E7CEC71CFCF9FD61B1CDBF58 /* CelebrationFlashView.swift */,
 				830BD2C6362917F9CAB6F480 /* CoreBottomTabBar.swift */,
 				ADDBAB28CCA0714450AC2B99 /* FilePickerModifier.swift */,
 				B79C9104498AB6120226DF33 /* ImagePickerSheet.swift */,
@@ -970,6 +973,7 @@
 				C263EA6A2212E52822EBC291 /* BleLinkReadiness.swift in Sources */,
 				45E1E6E04A9322ECC7C87DFE /* BleUuids.swift in Sources */,
 				9E2BD59979752A9C670AF34A /* CameraService.swift in Sources */,
+				A9CB83CE45818D2D285B9C50 /* CelebrationFlashView.swift in Sources */,
 				5680FAB9C220183B0BB3AC03 /* ContentView.swift in Sources */,
 				C203528C657D885D7A4474FC /* CoreBottomTabBar.swift in Sources */,
 				9FDDCA59B0C30858AD64134E /* DeviceCapabilitiesPusher+Debug.swift in Sources */,
@@ -1385,7 +1389,7 @@
 			repositoryURL = "https://gitlab.com/vauchi/vauchi-platform-swift.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.102.2;
+				version = 0.103.0;
 			};
 		};
 		D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
