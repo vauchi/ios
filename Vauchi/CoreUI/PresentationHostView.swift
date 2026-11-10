@@ -84,6 +84,9 @@ struct PresentationHostView: View {
                     .accessibilityAddTraits(.isStaticText)
             }
         }
+        .overlay {
+            CelebrationFlashView(visible: viewModel.celebrating)
+        }
         .sheet(isPresented: $viewModel.showImagePicker) {
             ImagePickerSheet { data in
                 viewModel.sendImageReceived(data: data)

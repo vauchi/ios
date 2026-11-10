@@ -30,16 +30,10 @@ class AppViewModel: ObservableObject {
     /// `2026-05-03-core-file-picker-command`.
     @Published var pendingFilePick: PendingFilePick?
 
-    /// Non-nil while the exchange-success ceremony animation should play.
-    /// Set when core emits `Command::Celebrate`; consumed by the success
-    /// screen overlay. Cleared automatically after the one-beat animation.
-    @Published var celebrateCommand: CommandDTO?
-
-    /// Aha-moment toast request tied to the exchange-success ceremony. When
-    /// `Command::Celebrate` arrives we also ask core for the
-    /// `firstContactAdded` milestone. If reduce-motion is enabled the view
-    /// surfaces this as a toast instead of the animated checkmark.
-    @Published var ahaMoment: MobileAhaMoment?
+    /// True for the one beat of the exchange-success ceremony's flash. Set
+    /// when core emits `Command::Celebrate` naming `cards_meet` and motion
+    /// is not reduced; the host overlays `CelebrationFlashView` on it.
+    @Published var celebrating = false
 
     /// Active camera selector for a generic QR capture node.
     /// Flips when core's `MultiStageExchangeEngine` emits
@@ -572,11 +566,12 @@ class AppViewModel: ObservableObject {
         }
     }
 
-    /// M2 S5 exchange-success ceremony. Haptic always fires (it is a tiny,
-    /// accessible tap). Animation is skipped when reduce-motion is enabled.
-    /// The first-contact aha moment is stashed for the toast path.
+    /// The exchange-success ceremony (vauchi/private#276). The haptic
+    /// always fires; the flash plays one beat for `cards_meet` unless
+    /// motion is reduced. The first-contact milestone is Core's: it fires
+    /// from the persist seam and arrives as `Command::ShowToast`, so the
+    /// shell never asks for it (ADR-066).
     private func handleCelebrateCommand(
-        command: CommandDTO,
         haptic: String,
         sound: String,
         animation: String
@@ -584,50 +579,18 @@ class AppViewModel: ObservableObject {
         if haptic == "success" {
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         }
-        // Silence unused-but-destructured `sound`; Android also skips the
-        // sound axis because no ceremony sound asset is bundled.
+        // No ceremony sound asset is bundled, on Android either.
         _ = sound
-        // Mark the first-contact milestone as seen and stash the
-        // returned moment. The generic presentation host renders it as a toast
-        // when reduce-motion is enabled; otherwise the celebrate
-        // animation carries the moment and the toast is skipped.
-        requestAhaMoment(.firstContactAdded)
-        if animation != "none", !SettingsService.shared.shouldReduceMotion {
-            celebrateCommand = command
-            // Auto-clear after the ~600 ms beat so the overlay
-            // never outlives the moment.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
-                self?.celebrateCommand = nil
-            }
+        guard animation == "cards_meet", !SettingsService.shared.shouldReduceMotion else { return }
+        celebrating = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.celebrationBeat) { [weak self] in
+            self?.celebrating = false
         }
     }
 
-    /// Ask core to trigger an aha moment and store the localized milestone in
-    /// `ahaMoment` if it should be shown now. Runs on `engineQueue`: it fires
-    /// as an exchange completes, when BLE work may still hold the engine
-    /// mutex (vauchi/private#313). Errors are logged and ignored — a missed
-    /// milestone is non-fatal.
-    private func requestAhaMoment(_ momentType: MobileAhaMomentType) {
-        let engine = appEngine
-        engineQueue.async { [weak self] in
-            let outcome = Result {
-                try engine.dispatchDomainCommand(command: .tryTriggerAhaMoment(momentType: momentType))
-            }
-            DispatchQueue.main.async {
-                switch outcome {
-                case let .success(.ahaMomentOpt(moment)):
-                    self?.ahaMoment = moment
-                case .success:
-                    break
-                case let .failure(error):
-                    #if DEBUG
-                        print("AppViewModel: failed to trigger aha moment \(momentType): \(error)")
-                    #endif
-                    _ = error
-                }
-            }
-        }
-    }
+    /// One beat: long enough to register, short enough never to outlive
+    /// the moment.
+    static let celebrationBeat: TimeInterval = 0.6
 
     // MARK: - Exchange Command Handling
 
@@ -694,7 +657,6 @@ class AppViewModel: ObservableObject {
                 useFrontCamera = useFront
             case let .celebrate(haptic, sound, animation):
                 handleCelebrateCommand(
-                    command: command,
                     haptic: haptic,
                     sound: sound,
                     animation: animation
