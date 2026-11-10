@@ -47,6 +47,7 @@ final class ExchangeCommandBridgeTests: XCTestCase {
     }
 
     override func tearDownWithError() throws {
+        SettingsService.shared.reduceMotion = false
         viewModel = nil
         repo = nil
         try? FileManager.default.removeItem(at: tempDir)
@@ -155,43 +156,56 @@ final class ExchangeCommandBridgeTests: XCTestCase {
     // MARK: - celebrate
 
     /// Scenario: core emits `Command::Celebrate` on exchange success. The
-    /// bridge stores the command for the animation overlay and also asks
-    /// core for the `firstContactAdded` aha moment.
-    func testCelebrateSetsCelebrateCommandAndRequestsAhaMoment() {
-        XCTAssertNil(viewModel.celebrateCommand)
+    /// bridge plays the one-beat flash for `cards_meet`.
+    func testCelebrateWithCardsMeetStartsTheFlash() {
+        SettingsService.shared.reduceMotion = false
+        XCTAssertFalse(viewModel.celebrating)
 
         viewModel.handleExchangeCommands([
-            .celebrate(haptic: "success", sound: "none", animation: "checkmark"),
+            .celebrate(haptic: "success", sound: "none", animation: "cards_meet"),
         ])
 
-        guard case let .celebrate(haptic, sound, animation) = viewModel.celebrateCommand else {
-            XCTFail("celebrateCommand should be set after Celebrate command")
-            return
-        }
-        XCTAssertEqual(haptic, "success")
-        XCTAssertEqual(sound, "none")
-        XCTAssertEqual(animation, "checkmark")
+        XCTAssertTrue(viewModel.celebrating, "cards_meet starts the one-beat flash")
     }
 
-    /// The aha-moment request behind `Celebrate` goes through the engine
-    /// queue: it arrives the moment an exchange completes, when BLE work may
-    /// still hold the engine mutex, and must not block the main thread
-    /// waiting for it (vauchi/private#313).
-    func testCelebrateAsksForTheAhaMomentOnTheEngineQueue() async {
-        await viewModel.drainEngineQueue()
-        let busy = viewModel.blockEngineQueue()
+    /// The flash is one beat: it clears itself after `celebrationBeat`.
+    func testTheFlashClearsAfterOneBeat() {
+        SettingsService.shared.reduceMotion = false
+        viewModel.handleExchangeCommands([
+            .celebrate(haptic: "success", sound: "none", animation: "cards_meet"),
+        ])
+        XCTAssertTrue(viewModel.celebrating)
+
+        let cleared = expectation(description: "flash cleared")
+        DispatchQueue.main.asyncAfter(deadline: .now() + AppViewModel.celebrationBeat + 0.2) {
+            cleared.fulfill()
+        }
+        wait(for: [cleared], timeout: 2)
+
+        XCTAssertFalse(viewModel.celebrating, "the flash never outlives the beat")
+    }
+
+    /// `animation: none` keeps the screen still; the haptic alone carries it.
+    func testCelebrateWithNoAnimationPlaysNothing() {
+        SettingsService.shared.reduceMotion = false
 
         viewModel.handleExchangeCommands([
-            .celebrate(haptic: "success", sound: "none", animation: "checkmark"),
+            .celebrate(haptic: "success", sound: "none", animation: "none"),
         ])
 
-        XCTAssertNil(
-            viewModel.ahaMoment,
-            "the aha moment was fetched on the main thread instead of the engine queue"
-        )
-        busy.signal()
-        await viewModel.drainEngineQueue()
-        XCTAssertEqual(viewModel.ahaMoment?.momentType, .firstContactAdded)
+        XCTAssertFalse(viewModel.celebrating)
+    }
+
+    /// Reduce motion (the app setting here; the OS switch is the other
+    /// half of `shouldReduceMotion`) keeps the flash off.
+    func testCelebrateUnderReducedMotionPlaysNothing() {
+        SettingsService.shared.reduceMotion = true
+
+        viewModel.handleExchangeCommands([
+            .celebrate(haptic: "success", sound: "none", animation: "cards_meet"),
+        ])
+
+        XCTAssertFalse(viewModel.celebrating, "reduce motion keeps the ceremony to the haptic and the toast")
     }
 
     // MARK: - showShareSheet
