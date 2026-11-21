@@ -71,4 +71,33 @@ final class PresentationInformationOverlayTests: XCTestCase {
         XCTAssertNil(fourSlots.info)
         XCTAssertEqual(fourSlots.primary?.label, "Info")
     }
+
+    /// Core pins a few actions under the content for a decision that must
+    /// not scroll away (vauchi/private#1304). A Core that predates the
+    /// slot sends none.
+    func testAContextBarDecodesItsPinnedActionsInOrderAndTheirAbsence() throws {
+        func action(_ index: Int, _ label: String) -> String {
+            """
+            {"interaction_id":"surface.7.context.presentation.pinned.\(index)","label":"\(label)",
+             "accessibility_label":"\(label)","enabled":true}
+            """
+        }
+        let yes = action(0, "Start a new connection")
+        let no = action(1, "Leave it")
+        let pinning = try JSONDecoder().decode(
+            PresentationContextBar.self,
+            from: Data("{\"pinned\":[\(yes),\(no)]}".utf8)
+        )
+        XCTAssertEqual(pinning.pinnedActions.map(\.label), ["Start a new connection", "Leave it"])
+        XCTAssertEqual(
+            pinning.pinnedActions.map(\.interactionID),
+            ["surface.7.context.presentation.pinned.0", "surface.7.context.presentation.pinned.1"]
+        )
+
+        let older = try JSONDecoder().decode(
+            PresentationContextBar.self,
+            from: Data("{\"primary\":\(yes)}".utf8)
+        )
+        XCTAssertEqual(older.pinnedActions, [])
+    }
 }
