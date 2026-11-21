@@ -121,6 +121,9 @@ enum PresentationEvent: Encodable {
         let motion: PresentationMotion
         /// Left out when unknown, so Core paints its dark default.
         let colorScheme: PresentationColorScheme?
+        /// This shell keeps `ContextBar.pinned` in view; Core pins nothing
+        /// for a shell that does not say so (vauchi/private#1304).
+        let pinnedActions = true
 
         private enum CodingKeys: String, CodingKey {
             case availableWidth = "available_width"
@@ -128,6 +131,7 @@ enum PresentationEvent: Encodable {
             case inputModes = "input_modes"
             case motion
             case colorScheme = "color_scheme"
+            case pinnedActions = "pinned_actions"
         }
     }
 

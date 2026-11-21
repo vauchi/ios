@@ -101,6 +101,14 @@ struct PresentationContextBar: Codable, Equatable {
     /// Explains the surface (vauchi/private#479); absent from a Core that
     /// has no text for it or predates the slot.
     let info: PresentationAction?
+    /// A decision Core wants kept in view under the content
+    /// (vauchi/private#1304); absent from a Core that predates the slot.
+    /// A `var`, so the bar can still be built without naming it.
+    var pinned: [PresentationAction]?
+
+    var pinnedActions: [PresentationAction] {
+        pinned ?? []
+    }
 }
 
 enum PresentationOverlayKind: String, Codable {

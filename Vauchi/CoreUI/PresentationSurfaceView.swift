@@ -36,6 +36,7 @@ struct PresentationSurfaceView: View {
                         .frame(maxHeight: .infinity, alignment: .top)
                 }
             }
+            pinnedActions
             if !SurfacePrimaryButtonLayout.scrollsWithContent(
                 scrollsContent: surface.layout.scrollsContent
             ) {
@@ -93,6 +94,25 @@ struct PresentationSurfaceView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Core's pinned group under the content area and outside its scroll:
+    /// a decision that must not scroll away, one action under the other in
+    /// Core's order (vauchi/private#1304).
+    @ViewBuilder private var pinnedActions: some View {
+        if let actions = bar?.pinnedActions, !actions.isEmpty {
+            VStack(spacing: CGFloat(surface.tokens.spacingSmall)) {
+                ForEach(Array(actions.enumerated()), id: \.element.id) { index, action in
+                    SurfacePinnedActionButtonView(
+                        surfaceID: surface.surfaceID,
+                        action: action,
+                        index: index,
+                        minimumTarget: CGFloat(surface.tokens.minimumTargetSize),
+                        onEvent: onEvent
+                    )
+                }
+            }
+        }
     }
 
     /// Core's `primary` slot under the content area, in view on every

@@ -195,3 +195,34 @@ struct SurfacePrimaryActionButtonView: View {
         )
     }
 }
+
+/// One of Core's pinned actions: full width, its label wrapping instead of
+/// being cut, and no filled style, so no answer reads as the suggested one.
+struct SurfacePinnedActionButtonView: View {
+    let surfaceID: String
+    let action: PresentationAction
+    let index: Int
+    let minimumTarget: CGFloat
+    let onEvent: (PresentationEvent) -> Void
+    @Environment(\.presentationPalette) private var palette
+
+    var body: some View {
+        Button {
+            onEvent(
+                .actionActivated(surfaceID: surfaceID, interactionID: action.interactionID)
+            )
+        } label: {
+            Text(action.label)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.large)
+        .tint(action.tone.foregroundColor(in: palette))
+        .frame(minHeight: minimumTarget)
+        .disabled(!action.enabled)
+        .accessibilityLabel(action.accessibilityLabel)
+        .accessibilityIdentifier("command.pinned.\(index)")
+    }
+}
