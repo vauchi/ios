@@ -207,11 +207,7 @@ struct SurfacePinnedActionButtonView: View {
     @Environment(\.presentationPalette) private var palette
 
     var body: some View {
-        Button {
-            onEvent(
-                .actionActivated(surfaceID: surfaceID, interactionID: action.interactionID)
-            )
-        } label: {
+        Button(action: activate) {
             Text(action.label)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -224,5 +220,11 @@ struct SurfacePinnedActionButtonView: View {
         .disabled(!action.enabled)
         .accessibilityLabel(action.accessibilityLabel)
         .accessibilityIdentifier("command.pinned.\(index)")
+    }
+
+    func activate() {
+        onEvent(
+            .actionActivated(surfaceID: surfaceID, interactionID: action.interactionID)
+        )
     }
 }
