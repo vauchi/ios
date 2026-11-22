@@ -100,4 +100,36 @@ final class PresentationInformationOverlayTests: XCTestCase {
         )
         XCTAssertEqual(older.pinnedActions, [])
     }
+
+    @MainActor
+    func testSecondPinnedAnswerTapHandlerEmitsItsOwnInteractionID() throws {
+        let json = """
+        {"pinned":[
+          {"interaction_id":"surface.7.context.presentation.pinned.0",
+           "label":"Yes, reconnect Alex","accessibility_label":"Yes, reconnect Alex","enabled":true},
+          {"interaction_id":"surface.7.context.presentation.pinned.1",
+           "label":"No, stop the exchange","accessibility_label":"No, stop the exchange","enabled":true}
+        ]}
+        """
+        let bar = try JSONDecoder().decode(PresentationContextBar.self, from: Data(json.utf8))
+        var events: [PresentationEvent] = []
+        let buttons = bar.pinnedActions.enumerated().map { index, action in
+            SurfacePinnedActionButtonView(
+                surfaceID: "exchange",
+                action: action,
+                index: index,
+                minimumTarget: 44,
+                onEvent: { events.append($0) }
+            )
+        }
+
+        buttons[1].activate()
+
+        XCTAssertEqual(events.count, 1)
+        guard case let .actionActivated(surfaceID, interactionID) = try XCTUnwrap(events.first) else {
+            return XCTFail("The pinned answer must emit an action activation")
+        }
+        XCTAssertEqual(surfaceID, "exchange")
+        XCTAssertEqual(interactionID, "surface.7.context.presentation.pinned.1")
+    }
 }
