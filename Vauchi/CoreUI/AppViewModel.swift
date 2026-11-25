@@ -9,7 +9,6 @@ import Foundation
 import PhotosUI
 import SwiftUI
 import UIKit
-import VauchiHardware
 import VauchiPlatform
 
 @MainActor
@@ -138,13 +137,16 @@ class AppViewModel: ObservableObject {
     /// `CreateUserPresenceSecret` / `RevealUserPresenceSecret` (#712).
     lazy var userPresenceSecretService = UserPresenceSecretService()
 
-    /// One-shot location capture for the exchange "where we met" annotation
-    /// (ADR-051). Driven by `Command::LocationRequest` in `handleExchangeCommands`.
-    lazy var locationService = LocationService()
-
-    /// True while a `LocationRequest` capture is in flight. Lets tests assert
-    /// the command started a capture without touching the OS modal (CC-23).
-    @Published var locationRequestInFlight = false
+    lazy var locationHardwareBridge = LocationHardwareBridge { [weak self] outcome in
+        DispatchQueue.main.async {
+            switch outcome {
+            case let .success(eventJson):
+                self?.sendHardwareEventJson(eventJson)
+            case let .failure(error):
+                self?.presentError(error)
+            }
+        }
+    }
 
     struct AlertMessage: Identifiable {
         let id = UUID()
@@ -747,19 +749,12 @@ class AppViewModel: ObservableObject {
             || handleLocationCommand(command)
     }
 
-    /// ADR-051 capture-at-exchange: grab a one-shot location fix and report it
-    /// back so the engine records `set_exchange_location`. The service answers
-    /// `permissionDenied`/`hardwareUnavailable` when no fix is possible, which
-    /// clears core's pending capture. Extracted to keep `handleExchangeCommands`
-    /// within SwiftLint's complexity budget.
     private func handleLocationCommand(_ command: CommandDTO) -> Bool {
         guard case let .locationRequest(timeoutMs) = command else { return false }
-        locationRequestInFlight = true
-        locationService.requestOneShot(timeoutMs: timeoutMs) { [weak self] event in
-            DispatchQueue.main.async {
-                self?.locationRequestInFlight = false
-                self?.sendHardwareEvent(event)
-            }
+        do {
+            try locationHardwareBridge.request(timeoutMs: timeoutMs)
+        } catch {
+            presentError(error)
         }
         return true
     }

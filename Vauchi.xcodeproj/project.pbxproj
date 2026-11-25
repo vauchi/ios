@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		041EA6A47AFF5EFB26E7787D /* PresentationErrorAlertTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0715A583D3BB57070852E320 /* PresentationErrorAlertTests.swift */; };
 		04D4B259D0D86ED22FE58248 /* BackgroundSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44506B768565C7F52A328D17 /* BackgroundSyncService.swift */; };
-		07C3465ECF7F6CDACECD1907 /* CoreUIModels in Frameworks */ = {isa = PBXBuildFile; productRef = B2C60C8C920018E8C7CF99BE /* CoreUIModels */; };
+		07C3465ECF7F6CDACECD1907 /* CommandContract in Frameworks */ = {isa = PBXBuildFile; productRef = 685501634670F136F24B8A08 /* CommandContract */; };
 		09BDA3191A35B68A90B2E8A9 /* DebugCapabilityOverrideTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B18A4BEA7DD24A3923BE9A /* DebugCapabilityOverrideTests.swift */; };
 		0D568A3271482CEABA444A7F /* PresentationActionToneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A48EA2C7DE011AEE833EA2 /* PresentationActionToneTests.swift */; };
 		0DDA36A34D79308F42591BA3 /* PlatformEventListenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42E030DC92A2DCF0A0953593 /* PlatformEventListenerTests.swift */; };
@@ -46,9 +46,9 @@
 		3BAB588FBCF22FBE9E770F5C /* NetworkMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5484CED84D0E33E917230C9A /* NetworkMonitorTests.swift */; };
 		3CBCA6653407F8CF9A8D9531 /* PresentationChoiceStyleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B846E20C7A377BE6FC0277 /* PresentationChoiceStyleTests.swift */; };
 		3D1CBC0C00C370BCFAA0D7A8 /* NotificationServiceDeepLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C515EE1804FDB78832CA0D /* NotificationServiceDeepLinkTests.swift */; };
+		3F8ACCB11AE80AF1F6DA525D /* EventContract in Frameworks */ = {isa = PBXBuildFile; productRef = 0F17EA62D7F88FE53BDBC291 /* EventContract */; };
 		3FEEF96814D965F74AD0A42D /* PresentationHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A437D369672857F52C06E24 /* PresentationHostView.swift */; };
 		40181122EB170E9B1E7EC46F /* SystemAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575EB124F9EC167CCD5D47B5 /* SystemAppearance.swift */; };
-		42E8C0D44725B88DB18845CB /* LocationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC20FCD1651B95E823A06410 /* LocationServiceTests.swift */; };
 		4389AD09A1FCCD8661B98FE6 /* DeviceCapabilitiesPusher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A01546D222F8024BB3E0009 /* DeviceCapabilitiesPusher.swift */; };
 		43A02557B62FE7C361CB6A7E /* MultipartCameraCallbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E265CE89A8A40837FD8047 /* MultipartCameraCallbackTests.swift */; };
 		45E1E6E04A9322ECC7C87DFE /* BleUuids.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC2A1B34A8846BEEE089202 /* BleUuids.swift */; };
@@ -70,10 +70,12 @@
 		59741D7F82226CA6FC94F5DD /* PresentationHostContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC86DEE36EE0BDC2B729FF6 /* PresentationHostContent.swift */; };
 		5A4B76FDF9EA59B209DE23C6 /* JetBrainsMono-Italic[wght].ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9E037C4EB031C6A373594095 /* JetBrainsMono-Italic[wght].ttf */; };
 		5B9150F0449AB1B8FC4D6D1C /* WakeupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B339287991D7CFE125A0B554 /* WakeupService.swift */; };
+		5BFF2F0B9DF030CB12AEAF49 /* LocationHardwareBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5D7CE8558F9157953E6E693 /* LocationHardwareBridgeTests.swift */; };
 		5D342EBF7CDCAE87BFF4D111 /* AssociatedDomainsContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8448F6BE68E3C8A1486DADEB /* AssociatedDomainsContractTests.swift */; };
 		5DA017D592A1A9672DC64A91 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E17FD049E1582776B08D1899 /* Assets.xcassets */; };
 		5DB1F56C8F6BC86226B8180F /* VauchiViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BC8F64DAB5D1579448BF725 /* VauchiViewModel.swift */; };
 		5E688F30D19C48A1083D7DBE /* ScreenCatalogEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EA2277D925095A67547D8E9 /* ScreenCatalogEntryTests.swift */; };
+		5FA0B026825352DAAFA2C405 /* LocationHardwareBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8169CC38DB870A368C16BBE3 /* LocationHardwareBridge.swift */; };
 		60E998DA97685A7D68404600 /* SurfaceTitleBarLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498D7F22AC60EF0DA4C1780C /* SurfaceTitleBarLayoutTests.swift */; };
 		61A6ADF2FEA95610D52C9ACD /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C0558C6550E4B58C71798 /* AccessibilityUITests.swift */; };
 		61AFDF005E50ACA601C79A92 /* store-screens.vauchibackup.license in Resources */ = {isa = PBXBuildFile; fileRef = FF6D9F5CDBD0D932C6D60EE7 /* store-screens.vauchibackup.license */; };
@@ -86,7 +88,7 @@
 		6E713428218E42433EB22954 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 108E48F43D27EA5EB6FFB226 /* PrivacyInfo.xcprivacy */; };
 		6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C859B6215BADD6A45480D9F /* LocalizationService.swift */; };
 		6F526CBE173AA74F1C620137 /* BleUuidsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA99346646DEE22D9167CB8A /* BleUuidsTests.swift */; };
-		6FBFE80D49835D23A8DF1034 /* VauchiHardware in Frameworks */ = {isa = PBXBuildFile; productRef = 0AB22D05ABC258D050086FBF /* VauchiHardware */; };
+		6FBFE80D49835D23A8DF1034 /* AppleHw in Frameworks */ = {isa = PBXBuildFile; productRef = 18ACE99DCF7AC13BB1F87FC0 /* AppleHw */; };
 		710222E18DC609F7457EB5C0 /* NfcCommandDispatchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2665E0EEA673F89A405C5D27 /* NfcCommandDispatchTests.swift */; };
 		74B5F4DE542B49AB7039C46A /* ResetApplicationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8D7DDF10973E82533A19AF /* ResetApplicationTests.swift */; };
 		750231F789BE3B2634B7B5FD /* PresentationStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFE40C221022DBDBD034AF3 /* PresentationStateTests.swift */; };
@@ -103,6 +105,7 @@
 		90C0892E44C0FD5E6FEC7AAA /* PermissionGrantEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78EB5463222985799FA9BC47 /* PermissionGrantEventTests.swift */; };
 		98B637198F857654600E968C /* SharedInstanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20464883C60F18E442737B7F /* SharedInstanceTests.swift */; };
 		99D8ED2B60D43F62A79B0317 /* ExchangeCommandBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38FE0127E86CB045D89F88E /* ExchangeCommandBridgeTests.swift */; };
+		9A6F01FE1999496C38A19256 /* CoreUIModels in Frameworks */ = {isa = PBXBuildFile; productRef = B2C60C8C920018E8C7CF99BE /* CoreUIModels */; };
 		9B12926FA62EF78944BBD659 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */; };
 		9D080F452127462F10AB6C97 /* LegacyInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F6D78047B754BD931AC481 /* LegacyInstall.swift */; };
 		9D5D4424B928F2AE4C789950 /* ScreenCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8691393CE57A5898A62A9B08 /* ScreenCatalogTests.swift */; };
@@ -280,6 +283,7 @@
 		80D908420E7769CC3225282C /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
 		812EEE5AF140DB98855AF442 /* LocalizationServiceSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationServiceSettingsTests.swift; sourceTree = "<group>"; };
 		81695D56952C25AF52486D7D /* PresentationCaptureIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationCaptureIdentityTests.swift; sourceTree = "<group>"; };
+		8169CC38DB870A368C16BBE3 /* LocationHardwareBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationHardwareBridge.swift; sourceTree = "<group>"; };
 		830BD2C6362917F9CAB6F480 /* CoreBottomTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBottomTabBar.swift; sourceTree = "<group>"; };
 		831F6B2536F6DF04422FE73A /* PresentationInputLabelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationInputLabelTests.swift; sourceTree = "<group>"; };
 		8448F6BE68E3C8A1486DADEB /* AssociatedDomainsContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssociatedDomainsContractTests.swift; sourceTree = "<group>"; };
@@ -328,6 +332,7 @@
 		C29F68D30073CB316195F936 /* PresentationQrSizeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationQrSizeTests.swift; sourceTree = "<group>"; };
 		C33B31B7AACDDDA13430257D /* BleDiagnosticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleDiagnosticView.swift; sourceTree = "<group>"; };
 		C38FE0127E86CB045D89F88E /* ExchangeCommandBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeCommandBridgeTests.swift; sourceTree = "<group>"; };
+		C5D7CE8558F9157953E6E693 /* LocationHardwareBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationHardwareBridgeTests.swift; sourceTree = "<group>"; };
 		C8B35ECCC9FCA862F3D805EA /* PresentationQrPlacementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationQrPlacementTests.swift; sourceTree = "<group>"; };
 		CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		CA8D7DDF10973E82533A19AF /* ResetApplicationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetApplicationTests.swift; sourceTree = "<group>"; };
@@ -337,7 +342,6 @@
 		D5A795D0FCDE3726CBB528F8 /* OrientationLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationLock.swift; sourceTree = "<group>"; };
 		D97F0E05FC9F51A7F19CEDAE /* DeviceCapabilitiesPusher+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DeviceCapabilitiesPusher+Debug.swift"; sourceTree = "<group>"; };
 		D9DDC142AE1FF7267B32DD39 /* VauchiKeychainBridgeHandoverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VauchiKeychainBridgeHandoverTests.swift; sourceTree = "<group>"; };
-		DC20FCD1651B95E823A06410 /* LocationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationServiceTests.swift; sourceTree = "<group>"; };
 		DE470500913747AD36BDE885 /* CameraServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraServiceTests.swift; sourceTree = "<group>"; };
 		DFFE40C221022DBDBD034AF3 /* PresentationStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresentationStateTests.swift; sourceTree = "<group>"; };
 		E044AD16B5BA923A443ADFC7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -375,8 +379,10 @@
 			files = (
 				C2BF1FC510A65D73DD722C95 /* AppleDisplay in Frameworks */,
 				18DFBC47BE88310909350859 /* VauchiPlatform in Frameworks */,
-				6FBFE80D49835D23A8DF1034 /* VauchiHardware in Frameworks */,
-				07C3465ECF7F6CDACECD1907 /* CoreUIModels in Frameworks */,
+				6FBFE80D49835D23A8DF1034 /* AppleHw in Frameworks */,
+				07C3465ECF7F6CDACECD1907 /* CommandContract in Frameworks */,
+				3F8ACCB11AE80AF1F6DA525D /* EventContract in Frameworks */,
+				9A6F01FE1999496C38A19256 /* CoreUIModels in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -502,7 +508,7 @@
 				A1710F96007D89158A39B53E /* FakeKeychainStore.swift */,
 				423CA30B9710082EFD68C718 /* KeychainServiceTests.swift */,
 				812EEE5AF140DB98855AF442 /* LocalizationServiceSettingsTests.swift */,
-				DC20FCD1651B95E823A06410 /* LocationServiceTests.swift */,
+				C5D7CE8558F9157953E6E693 /* LocationHardwareBridgeTests.swift */,
 				5484CED84D0E33E917230C9A /* NetworkMonitorTests.swift */,
 				0CBA469A3ED4A4660FA45B6A /* NFCExchangeServiceTransceiveShimTests.swift */,
 				219A7195BEAC47A808D8F852 /* NotificationServiceAuthorizationTests.swift */,
@@ -673,6 +679,7 @@
 				7A701A0C348B6758EED1D949 /* DirectSendService.swift */,
 				B31DFE6F23CEA01F0437957B /* KeychainService.swift */,
 				6C859B6215BADD6A45480D9F /* LocalizationService.swift */,
+				8169CC38DB870A368C16BBE3 /* LocationHardwareBridge.swift */,
 				CA4FD36D00535166FBDED9EA /* NetworkMonitor.swift */,
 				B2D34EC3AF2AE35F80A5354A /* NFCExchangeService.swift */,
 				BDB1CEDFBA5AE37F12D5BE39 /* NotificationService.swift */,
@@ -725,7 +732,9 @@
 			packageProductDependencies = (
 				80B9FC6896E010CCDEC5EBDB /* AppleDisplay */,
 				BE415B866BE8E26F05791810 /* VauchiPlatform */,
-				0AB22D05ABC258D050086FBF /* VauchiHardware */,
+				18ACE99DCF7AC13BB1F87FC0 /* AppleHw */,
+				685501634670F136F24B8A08 /* CommandContract */,
+				0F17EA62D7F88FE53BDBC291 /* EventContract */,
 				B2C60C8C920018E8C7CF99BE /* CoreUIModels */,
 			);
 			productName = Vauchi;
@@ -802,6 +811,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				57C2B3EDC052C23E1630E045 /* XCRemoteSwiftPackageReference "apple-display" */,
+				5F0BD4BE1F1D032B9A7F0C64 /* XCRemoteSwiftPackageReference "apple-hw" */,
+				4C3C292CF8D32CE40B7F6BA4 /* XCRemoteSwiftPackageReference "contract" */,
 				D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 				8B834B486889A4518835FD33 /* XCRemoteSwiftPackageReference "vauchi-platform-swift" */,
 			);
@@ -881,7 +892,7 @@
 				2E32911FDD537E5F664BF57C /* KeychainServiceTests.swift in Sources */,
 				9D080F452127462F10AB6C97 /* LegacyInstall.swift in Sources */,
 				78DEE11DBBB312E894650FBF /* LocalizationServiceSettingsTests.swift in Sources */,
-				42E8C0D44725B88DB18845CB /* LocationServiceTests.swift in Sources */,
+				5BFF2F0B9DF030CB12AEAF49 /* LocationHardwareBridgeTests.swift in Sources */,
 				43A02557B62FE7C361CB6A7E /* MultipartCameraCallbackTests.swift in Sources */,
 				23542D8D4771261954AA6A2D /* NFCExchangeServiceTransceiveShimTests.swift in Sources */,
 				1BB5832181399F70969847FB /* NavigationIconMapTests.swift in Sources */,
@@ -987,6 +998,7 @@
 				CE9939C111B3A86EE5259A29 /* ImagePickerSheet.swift in Sources */,
 				8CD4D48FC7E49B0DA82AD497 /* KeychainService.swift in Sources */,
 				6E92A916EC67234553ED4D85 /* LocalizationService.swift in Sources */,
+				5FA0B026825352DAAFA2C405 /* LocationHardwareBridge.swift in Sources */,
 				D560A0B10C2E8ED1A9484D28 /* MultipartCameraPreview.swift in Sources */,
 				ACB1FE30772E1BEAF475FAD3 /* NFCExchangeService.swift in Sources */,
 				B1C5C42A4773B93E98C75334 /* NativeAudioLifecycleDiagnostic.swift in Sources */,
@@ -1376,12 +1388,28 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4C3C292CF8D32CE40B7F6BA4 /* XCRemoteSwiftPackageReference "contract" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://gitlab.com/vauchi/contract.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.101.0;
+			};
+		};
 		57C2B3EDC052C23E1630E045 /* XCRemoteSwiftPackageReference "apple-display" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://gitlab.com/vauchi/apple-display.git";
 			requirement = {
 				kind = revision;
 				revision = 9a25d5ac8b07d8e1a6e4b34ff7cf9a3d22c557db;
+			};
+		};
+		5F0BD4BE1F1D032B9A7F0C64 /* XCRemoteSwiftPackageReference "apple-hw" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://gitlab.com/vauchi/apple-hw.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.1.0;
 			};
 		};
 		8B834B486889A4518835FD33 /* XCRemoteSwiftPackageReference "vauchi-platform-swift" */ = {
@@ -1403,15 +1431,25 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0AB22D05ABC258D050086FBF /* VauchiHardware */ = {
+		0F17EA62D7F88FE53BDBC291 /* EventContract */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8B834B486889A4518835FD33 /* XCRemoteSwiftPackageReference "vauchi-platform-swift" */;
-			productName = VauchiHardware;
+			package = 4C3C292CF8D32CE40B7F6BA4 /* XCRemoteSwiftPackageReference "contract" */;
+			productName = EventContract;
+		};
+		18ACE99DCF7AC13BB1F87FC0 /* AppleHw */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5F0BD4BE1F1D032B9A7F0C64 /* XCRemoteSwiftPackageReference "apple-hw" */;
+			productName = AppleHw;
 		};
 		584E70B43E05BAC9ADA1DC81 /* SnapshotTesting */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D5EA9A2891E57219AC501050 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
 			productName = SnapshotTesting;
+		};
+		685501634670F136F24B8A08 /* CommandContract */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C3C292CF8D32CE40B7F6BA4 /* XCRemoteSwiftPackageReference "contract" */;
+			productName = CommandContract;
 		};
 		80B9FC6896E010CCDEC5EBDB /* AppleDisplay */ = {
 			isa = XCSwiftPackageProductDependency;

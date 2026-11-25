@@ -21,7 +21,13 @@ final class LocationHardwareBridge {
         self.hardware = hardware
         hardware.onEvent = { event in
             report(Result {
-                try String(decoding: JSONEncoder().encode(event), as: UTF8.self)
+                let data = try JSONEncoder().encode(event)
+                guard let json = String(data: data, encoding: .utf8) else {
+                    throw EncodingError.invalidValue(event, .init(
+                        codingPath: [], debugDescription: "Invalid UTF-8 event"
+                    ))
+                }
+                return json
             })
         }
     }
