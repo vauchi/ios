@@ -15,6 +15,12 @@ settings:
   IPHONEOS_DEPLOYMENT_TARGET: "15.0"
 
 packages:
+  AppleHw:
+    url: https://gitlab.com/vauchi/apple-hw.git
+    exactVersion: "0.1.0"
+  Contract:
+    url: https://gitlab.com/vauchi/contract.git
+    exactVersion: "0.101.0"
   AppleDisplay:
     url: https://gitlab.com/vauchi/apple-display.git
     revision: "9a25d5ac8b07d8e1a6e4b34ff7cf9a3d22c557db"
@@ -44,6 +50,12 @@ targets:
         product: AppleDisplay
       - package: VauchiPlatform
         product: VauchiPlatform
+      - package: AppleHw
+        product: AppleHw
+      - package: Contract
+        product: CommandContract
+      - package: Contract
+        product: EventContract
       - package: VauchiPlatform
         product: VauchiHardware
       - package: VauchiPlatform
