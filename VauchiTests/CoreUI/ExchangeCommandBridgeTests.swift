@@ -35,6 +35,7 @@ final class ExchangeCommandBridgeTests: XCTestCase {
     var tempDir: URL!
     var repo: VauchiRepository!
     var viewModel: AppViewModel!
+    private var clock: CelebrationTestClock!
 
     override func setUpWithError() throws {
         tempDir = FileManager.default.temporaryDirectory
@@ -43,7 +44,8 @@ final class ExchangeCommandBridgeTests: XCTestCase {
 
         repo = try VauchiRepository(dataDir: tempDir.path)
         try repo.createIdentity(displayName: "Bridge Test")
-        viewModel = AppViewModel(appEngine: repo.appEngine)
+        clock = CelebrationTestClock()
+        viewModel = AppViewModel(appEngine: repo.appEngine, scheduleCelebration: clock.schedule)
     }
 
     override func tearDownWithError() throws {
@@ -176,13 +178,11 @@ final class ExchangeCommandBridgeTests: XCTestCase {
         ])
         XCTAssertTrue(viewModel.celebrating)
 
-        let cleared = expectation(description: "flash cleared")
-        DispatchQueue.main.asyncAfter(deadline: .now() + AppViewModel.celebrationBeat + 0.2) {
-            cleared.fulfill()
-        }
-        wait(for: [cleared], timeout: 2)
+        clock.advance(to: 0.599)
+        XCTAssertTrue(viewModel.celebrating, "the flash stays visible before one beat")
 
-        XCTAssertFalse(viewModel.celebrating, "the flash never outlives the beat")
+        clock.advance(to: 0.6)
+        XCTAssertFalse(viewModel.celebrating, "the flash clears at one beat")
     }
 
     /// `animation: none` keeps the screen still; the haptic alone carries it.
@@ -242,5 +242,22 @@ final class ExchangeCommandBridgeTests: XCTestCase {
 
         XCTAssertTrue(viewModel.showImagePicker)
         XCTAssertNotNil(viewModel.pendingFilePick)
+    }
+}
+
+@MainActor
+private final class CelebrationTestClock {
+    private var now: TimeInterval = 0
+    private var pending: [(deadline: TimeInterval, action: @MainActor @Sendable () -> Void)] = []
+
+    func schedule(after delay: TimeInterval, action: @escaping @MainActor @Sendable () -> Void) {
+        pending.append((now + delay, action))
+    }
+
+    func advance(to instant: TimeInterval) {
+        now = instant
+        let due = pending.filter { $0.deadline <= now }
+        pending.removeAll { $0.deadline <= now }
+        due.forEach { $0.action() }
     }
 }

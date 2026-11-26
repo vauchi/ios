@@ -154,8 +154,18 @@ class AppViewModel: ObservableObject {
         let message: String
     }
 
-    init(appEngine: PlatformAppEngine) {
+    typealias CelebrationScheduler = (TimeInterval, @escaping @MainActor @Sendable () -> Void) -> Void
+
+    private let scheduleCelebration: CelebrationScheduler
+
+    init(
+        appEngine: PlatformAppEngine,
+        scheduleCelebration: @escaping CelebrationScheduler = { delay, action in
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) { action() }
+        }
+    ) {
         self.appEngine = appEngine
+        self.scheduleCelebration = scheduleCelebration
         loadInitialPresentation()
         attachEventListener()
         WakeupService.shared.setOnWakeup { [weak self] in
@@ -585,7 +595,7 @@ class AppViewModel: ObservableObject {
         _ = sound
         guard animation == "cards_meet", !SettingsService.shared.shouldReduceMotion else { return }
         celebrating = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.celebrationBeat) { [weak self] in
+        scheduleCelebration(Self.celebrationBeat) { [weak self] in
             self?.celebrating = false
         }
     }
